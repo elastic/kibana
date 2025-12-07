@@ -37,6 +37,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
 
   const {
     run,
+    id,
     htmlId,
     label,
     testId,
@@ -99,7 +100,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
   const commonProps = {
     onClick: href ? undefined : handleClick,
     id: htmlId,
-    'data-test-subj': testId,
+    'data-test-subj': testId || `top-nav-menu-action-button-${id}`,
     iconType,
     isDisabled: isDisabled(disableButton),
     href,

@@ -38,6 +38,10 @@ export const TopNavMenuOverflowButton = ({
 }: TopNavMenuShowMoreButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
+  if (items.length === 0) {
+    return null;
+  }
+
   const handleClick = () => {
     onPopoverToggle();
   };
@@ -64,6 +68,7 @@ export const TopNavMenuOverflowButton = ({
       onClick={handleClick}
       isSelected={isPopoverOpen}
       css={buttonCss}
+      data-test-subj="top-nav-menu-overflow-button"
     />
   );
 

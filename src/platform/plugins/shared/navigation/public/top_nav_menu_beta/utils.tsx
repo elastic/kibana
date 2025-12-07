@@ -28,7 +28,7 @@ import { TOP_NAV_MENU_ITEM_LIMIT } from './constants';
 /**
  * Calculate how many items can be displayed based on the presence of action buttons.
  */
-const getDisplayedItemsAllowedAmount = (config: TopNavMenuConfigBeta) => {
+export const getDisplayedItemsAllowedAmount = (config: TopNavMenuConfigBeta) => {
   const actionButtonsAmount = [config.primaryActionItem, config.secondaryActionItem].filter(
     Boolean
   ).length;
@@ -39,7 +39,7 @@ const getDisplayedItemsAllowedAmount = (config: TopNavMenuConfigBeta) => {
 /**
  * Determine if the menu should overflow into a "more" menu.
  */
-const getShouldOverflow = ({
+export const getShouldOverflow = ({
   config,
   displayedItemsAllowedAmount,
 }: {
@@ -106,7 +106,7 @@ export const getTooltip = ({
   };
 };
 
-const mapTopNavItemToPanelItem = (
+export const mapTopNavItemToPanelItem = (
   item: TopNavMenuPopoverItem,
   childPanelId?: number
 ): EuiContextMenuPanelItemDescriptor => {
@@ -147,7 +147,7 @@ const createSeparatorItem = (key: string): EuiContextMenuPanelItemDescriptor => 
 /**
  * Generate action items for the popover menu. This is only used below "m" breakpoint.
  */
-const getPopoverActionItems = ({
+export const getPopoverActionItems = ({
   primaryActionItem,
   secondaryActionItem,
 }: {

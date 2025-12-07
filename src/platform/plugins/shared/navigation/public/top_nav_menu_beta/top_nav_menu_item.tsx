@@ -23,6 +23,7 @@ type TopNavMenuItemBetaProps = TopNavMenuItemType & {
 
 export const TopNavMenuItem = ({
   run,
+  id,
   htmlId,
   label,
   testId,
@@ -73,7 +74,7 @@ export const TopNavMenuItem = ({
       <EuiHeaderLink
         onClick={href ? undefined : handleClick}
         id={htmlId}
-        data-test-subj={testId}
+        data-test-subj={testId || `top-nav-menu-item-${id}`}
         iconType={iconType}
         isDisabled={isDisabled(disableButton)}
         href={href}

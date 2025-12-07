@@ -27,6 +27,7 @@ interface TopNavContextMenuProps {
   primaryActionItem?: TopNavMenuPrimaryActionItem;
   secondaryActionItem?: TopNavMenuSecondaryActionItem;
   anchorPosition?: PopoverAnchorPosition;
+  testId?: string;
   onClose: () => void;
 }
 
@@ -40,12 +41,18 @@ export const TopNavMenuPopover = ({
   primaryActionItem,
   secondaryActionItem,
   anchorPosition,
+  testId,
   onClose,
 }: TopNavContextMenuProps) => {
   const panels = useMemo(
     () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem }),
     [items, primaryActionItem, secondaryActionItem]
   );
+
+  if (panels.length === 0) {
+    return null;
+  }
+
   const { content, title } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
 
@@ -59,6 +66,7 @@ export const TopNavMenuPopover = ({
 
   return (
     <EuiPopover
+      data-test-subj={testId || 'top-nav-menu-popover'}
       button={button}
       isOpen={isOpen}
       closePopover={onClose}

@@ -33,13 +33,13 @@ describe('TopNavMenuActionButton', () => {
     jest.clearAllMocks();
   });
 
-  it('renders basic action button', () => {
+  it('should render basic action button', () => {
     render(<TopNavMenuActionButton {...defaultProps} testId="test-action-button" />);
     expect(screen.getByTestId('test-action-button')).toBeInTheDocument();
     expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
-  it('calls run function when clicked', async () => {
+  it('should call run function when clicked', async () => {
     const user = userEvent.setup();
     render(<TopNavMenuActionButton {...defaultProps} testId="test-action-button" />);
 
@@ -49,13 +49,13 @@ describe('TopNavMenuActionButton', () => {
     expect(defaultProps.run).toHaveBeenCalledWith();
   });
 
-  it('renders as split button', () => {
+  it('should render as split button', () => {
     render(<TopNavMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
     expect(screen.getByText('Save')).toBeInTheDocument();
     expect(screen.getByLabelText('More options')).toBeInTheDocument();
   });
 
-  it('calls main run function when primary button is clicked', async () => {
+  it('should call main run function when primary button is clicked', async () => {
     const user = userEvent.setup();
     render(
       <TopNavMenuActionButton
@@ -71,7 +71,7 @@ describe('TopNavMenuActionButton', () => {
     expect(splitButtonProps.run).not.toHaveBeenCalled();
   });
 
-  it('calls split button run function when secondary button is clicked', async () => {
+  it('should call split button run function when secondary button is clicked', async () => {
     const user = userEvent.setup();
     render(<TopNavMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
 
@@ -81,7 +81,7 @@ describe('TopNavMenuActionButton', () => {
     expect(defaultProps.run).not.toHaveBeenCalled();
   });
 
-  it('does not attach onClick handler when href is present', () => {
+  it('should not attach onClick handler when href is present', () => {
     render(
       <TopNavMenuActionButton
         {...defaultProps}
@@ -94,5 +94,90 @@ describe('TopNavMenuActionButton', () => {
 
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://elastic.co');
+  });
+
+  it('should render disabled button when disableButton is true', () => {
+    render(
+      <TopNavMenuActionButton {...defaultProps} disableButton={true} testId="test-action-button" />
+    );
+
+    expect(screen.getByTestId('test-action-button')).toBeDisabled();
+  });
+
+  it('should not call run when button is disabled', async () => {
+    const user = userEvent.setup();
+    render(
+      <TopNavMenuActionButton {...defaultProps} disableButton={true} testId="test-action-button" />
+    );
+
+    await user.click(screen.getByTestId('test-action-button'));
+
+    expect(defaultProps.run).not.toHaveBeenCalled();
+  });
+
+  it('should toggle popover when button with items is clicked', async () => {
+    const user = userEvent.setup();
+    const secondaryActionProps = {
+      label: 'options',
+      id: 'optionsButton',
+      iconType: 'gear',
+      isPopoverOpen: false,
+      onPopoverToggle: jest.fn(),
+      onPopoverClose: jest.fn(),
+      items: [
+        { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
+        { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
+      ],
+    };
+
+    render(<TopNavMenuActionButton {...secondaryActionProps} testId="test-action-button" />);
+
+    await user.click(screen.getByTestId('test-action-button'));
+
+    expect(secondaryActionProps.onPopoverToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('should toggle popover when split button with items is clicked', async () => {
+    const user = userEvent.setup();
+    const splitButtonPropsWithItems = {
+      ...splitButtonProps,
+      items: [
+        { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
+        { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
+      ],
+      run: undefined as never,
+    };
+
+    render(
+      <TopNavMenuActionButton
+        {...defaultProps}
+        splitButtonProps={splitButtonPropsWithItems}
+        testId="test-split-button"
+      />
+    );
+
+    await user.click(screen.getByLabelText('More options'));
+
+    expect(defaultProps.onPopoverToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call secondary run when split button secondary is disabled', async () => {
+    const user = userEvent.setup();
+    const splitButtonPropsDisabled = {
+      ...splitButtonProps,
+      isSecondaryButtonDisabled: true,
+    };
+
+    render(
+      <TopNavMenuActionButton
+        {...defaultProps}
+        splitButtonProps={splitButtonPropsDisabled}
+        testId="test-split-button"
+      />
+    );
+
+    await user.click(screen.getByLabelText('More options'));
+
+    expect(splitButtonProps.run).not.toHaveBeenCalled();
   });
 });

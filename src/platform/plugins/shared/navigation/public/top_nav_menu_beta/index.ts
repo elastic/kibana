@@ -30,9 +30,13 @@ export {
 } from './constants';
 
 export {
+  getDisplayedItemsAllowedAmount,
+  getShouldOverflow,
   isDisabled,
   getTooltip,
+  mapTopNavItemToPanelItem,
   getTopNavItems,
   getPopoverPanels,
+  getPopoverActionItems,
   getIsSelectedColor,
 } from './utils';

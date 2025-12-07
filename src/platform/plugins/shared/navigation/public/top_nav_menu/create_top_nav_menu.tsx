@@ -27,6 +27,10 @@ const LazyTopNavMenuBeta = lazy(async () => {
 
 export function createTopNav(
   unifiedSearch: UnifiedSearchPublicPluginStart,
+  /**
+   * @deprecated TopNavMenuBeta will not allow for reigstering global menu items, so this parameter
+   * will be removed once TopNavMenuBeta becomes the default.
+   */
   extraConfig: RegisteredTopNavMenuData[],
   isBeta?: boolean
 ) {

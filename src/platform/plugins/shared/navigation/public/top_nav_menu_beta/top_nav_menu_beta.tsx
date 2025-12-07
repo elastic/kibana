@@ -26,7 +26,7 @@ const hasNoItems = (config: TopNavMenuConfigBeta) =>
 export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
-  const isAtXlBreakpoint = useIsWithinBreakpoints(['xl']);
+  const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
   if (!config || hasNoItems(config) || !visible) {
     return null;
@@ -92,7 +92,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
     );
   }
 
-  if (isAtXlBreakpoint) {
+  if (isAboveXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
         {displayedItems?.length > 0 &&
