@@ -49,7 +49,10 @@ describe('convertJsonSchemaToZod', () => {
       required: ['email'],
     };
     const zodSchema = convertJsonSchemaToZod(jsonSchema);
-    const result = zodSchema.parse({ email: 'test@example.com', name: 'Test' });
+    const result = zodSchema.parse({ email: 'test@example.com', name: 'Test' }) as {
+      email: string;
+      name: string;
+    };
     expect(result.email).toBe('test@example.com');
     expect(result.name).toBe('Test');
     // Note: The converter may not enforce required fields in all cases
@@ -89,7 +92,11 @@ describe('convertJsonSchemaToZod', () => {
           primary: true,
         },
       },
-    });
+    }) as {
+      email: string;
+      name: string;
+      metadata: { source: string; routing: { shard: number; primary: boolean } };
+    };
     expect(result.email).toBe('test@example.com');
     expect(result.metadata.routing.shard).toBe(1);
   });
@@ -100,7 +107,7 @@ describe('convertJsonSchemaToZod', () => {
       items: { type: 'string' },
     };
     const zodSchema = convertJsonSchemaToZod(jsonSchema);
-    const result = zodSchema.parse(['a', 'b', 'c']);
+    const result = zodSchema.parse(['a', 'b', 'c']) as string[];
     expect(result).toEqual(['a', 'b', 'c']);
     // Note: The converter may not enforce strict item types in all cases
     // The important thing is that it returns a valid Zod schema
@@ -194,7 +201,11 @@ describe('convertJsonSchemaToZod', () => {
           primary: true,
         },
       },
-    });
+    }) as {
+      email: string;
+      name: string;
+      metadata: { source: string; routing: { shard: number; primary: boolean } };
+    };
     expect(result.email).toBe('user@example.com');
     expect(result.name).toBe('John Doe');
     expect(result.metadata.source).toBe('api');

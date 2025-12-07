@@ -43,7 +43,8 @@ describe('Validate example_security_workflow.yaml against Monaco Schema', () => 
     const jsonSchema = getWorkflowJsonSchema(workflowZodSchema);
 
     // Get the WorkflowSchema definition
-    const workflowSchemaDef = jsonSchema?.definitions?.WorkflowSchema;
+    const workflowSchemaDef = (jsonSchema as { definitions?: Record<string, unknown> })?.definitions
+      ?.WorkflowSchema;
     expect(workflowSchemaDef).toBeDefined();
 
     // Validate using Ajv (same validator that Monaco uses)
@@ -57,8 +58,11 @@ describe('Validate example_security_workflow.yaml against Monaco Schema', () => 
 
     // Create a validation schema that includes the WorkflowSchema and all definitions
     // This ensures all $ref references can be resolved
+    if (!jsonSchema || !workflowSchemaDef) {
+      throw new Error('jsonSchema or workflowSchemaDef is null');
+    }
     const validationSchema = {
-      ...workflowSchemaDef,
+      ...(workflowSchemaDef as Record<string, unknown>),
       definitions: jsonSchema.definitions,
     };
 

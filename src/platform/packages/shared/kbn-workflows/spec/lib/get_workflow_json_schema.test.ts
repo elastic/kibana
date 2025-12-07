@@ -9,11 +9,18 @@
 
 import { z } from '@kbn/zod/v4';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
-import { WorkflowSchema } from '../schema';
 
 describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {
-    const mockWithSchema = WorkflowSchema.extend({
+    // WorkflowSchema has a .transform() which makes it a ZodTransform that doesn't support .extend()
+    // Create a base schema before transform for testing
+    const baseSchema = z.object({
+      version: z.literal('1').default('1'),
+      name: z.string().min(1),
+      description: z.string().optional(),
+      enabled: z.boolean().default(true),
+      tags: z.array(z.string()).optional(),
+      triggers: z.array(z.object({ type: z.string() })),
       steps: z.array(
         z.object({
           type: z.literal('elasticsearch.bulk'),
@@ -23,6 +30,7 @@ describe('getWorkflowJsonSchema', () => {
         })
       ),
     });
+    const mockWithSchema = baseSchema.transform((data) => data);
     const jsonSchema = getWorkflowJsonSchema(mockWithSchema);
     expect(jsonSchema).toBeDefined();
     expect((jsonSchema as any)?.additionalProperties).toBe(false);

@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import { getWorkflowJsonSchema } from '@kbn/workflows/spec/lib/get_workflow_json_schema';
 import { getWorkflowZodSchema } from '../../../../common/schema';
 
 describe('useWorkflowJsonSchema - Version Field', () => {
   it('should make version field optional in generated JSON Schema', () => {
     const zodSchema = getWorkflowZodSchema({});
-    const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
+    const jsonSchema = getWorkflowJsonSchema(zodSchema);
 
     // Check the version field structure - it might be in definitions or at root
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
-      | { properties?: { version?: unknown }; required?: string[] }
-      | undefined;
+    const workflowSchema = (jsonSchema as { definitions?: Record<string, unknown> })?.definitions
+      ?.WorkflowSchema as { properties?: { version?: unknown }; required?: string[] } | undefined;
     const versionSchema = workflowSchema?.properties?.version;
 
     // CRITICAL: Version must NOT be in the required array
@@ -42,11 +41,10 @@ describe('useWorkflowJsonSchema - Version Field', () => {
 
   it('should verify version is not in required array after all processing', () => {
     const zodSchema = getWorkflowZodSchema({});
-    const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
+    const jsonSchema = getWorkflowJsonSchema(zodSchema);
 
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
-      | { required?: string[] }
-      | undefined;
+    const workflowSchema = (jsonSchema as { definitions?: Record<string, unknown> })?.definitions
+      ?.WorkflowSchema as { required?: string[] } | undefined;
 
     // This is the critical check - version must NOT be in required
     const requiredFields = workflowSchema?.required || [];
