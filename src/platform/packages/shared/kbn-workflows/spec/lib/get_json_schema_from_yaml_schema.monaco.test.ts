@@ -8,18 +8,17 @@
  */
 
 import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
-import { getJsonSchemaFromYamlSchema } from './get_json_schema_from_yaml_schema';
+import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 
 describe('Monaco Schema Generation - Inputs Field', () => {
   it('should generate schema without array format for inputs.properties', () => {
     const workflowZodSchema = generateYamlSchemaFromConnectors([]);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowZodSchema);
 
     // The schema might be at root level or in definitions depending on how it was generated
     // Type guard: WorkflowSchema should be an object schema with properties
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
-      | { properties?: { inputs?: unknown } }
-      | undefined;
+    const workflowSchema = (jsonSchema as { definitions?: Record<string, unknown> })?.definitions
+      ?.WorkflowSchema as { properties?: { inputs?: unknown } } | undefined;
     const inputsSchema =
       workflowSchema?.properties?.inputs || (jsonSchema as any)?.properties?.inputs;
 
@@ -86,7 +85,7 @@ describe('Monaco Schema Generation - Inputs Field', () => {
 
   it('should validate a workflow with JSON Schema inputs against the generated Monaco schema', () => {
     const workflowZodSchema = generateYamlSchemaFromConnectors([]);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowZodSchema);
 
     const workflow = {
       version: '1',
@@ -109,9 +108,8 @@ describe('Monaco Schema Generation - Inputs Field', () => {
 
     // The workflow should match the schema structure
     // Type guard: WorkflowSchema should be an object schema with properties
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
-      | { properties?: { inputs?: unknown } }
-      | undefined;
+    const workflowSchema = (jsonSchema as { definitions?: Record<string, unknown> })?.definitions
+      ?.WorkflowSchema as { properties?: { inputs?: unknown } } | undefined;
     const inputsSchema = workflowSchema?.properties?.inputs as
       | { anyOf?: Array<{ type?: string }>; type?: string; properties?: { properties?: unknown } }
       | undefined;
@@ -139,14 +137,13 @@ describe('Monaco Schema Generation - Inputs Field', () => {
 
   it('should validate a workflow WITHOUT inputs (inputs field missing) - regression test', () => {
     const workflowZodSchema = generateYamlSchemaFromConnectors([]);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowZodSchema);
 
     // Get the inputs schema from the generated JSON Schema
     // The schema might be at root level or in definitions depending on how it was generated
     // Type guard: WorkflowSchema should be an object schema with properties
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
-      | { properties?: { inputs?: unknown } }
-      | undefined;
+    const workflowSchema = (jsonSchema as { definitions?: Record<string, unknown> })?.definitions
+      ?.WorkflowSchema as { properties?: { inputs?: unknown } } | undefined;
     const inputsSchema =
       workflowSchema?.properties?.inputs || (jsonSchema as any)?.properties?.inputs;
 
@@ -198,13 +195,12 @@ describe('Monaco Schema Generation - Inputs Field', () => {
 
   it('should have correct schema for steps field - steps should be an array type', () => {
     const workflowZodSchema = generateYamlSchemaFromConnectors([]);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowZodSchema);
 
     // The schema might be at root level or in definitions
     // Type guard: WorkflowSchema should be an object schema with properties
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
-      | { properties?: { steps?: unknown } }
-      | undefined;
+    const workflowSchema = (jsonSchema as { definitions?: Record<string, unknown> })?.definitions
+      ?.WorkflowSchema as { properties?: { steps?: unknown } } | undefined;
     const stepsSchema = workflowSchema?.properties?.steps || (jsonSchema as any)?.properties?.steps;
 
     // Skip this test if schema structure is different (e.g., when using generateYamlSchemaFromConnectors)

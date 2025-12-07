@@ -8,8 +8,8 @@
  */
 
 import type { DynamicWorkflowContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
-import { getSchemaAtPath } from '../../../../common/lib/zod/zod_utils';
 
 describe('getWorkflowContextSchema - Legacy Array Format', () => {
   it('should handle legacy array format inputs for variable validation', () => {
@@ -55,9 +55,14 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
       throw new Error('peopleSchema.schema is null');
     }
     const underlyingSchema =
-      (peopleSchema.schema._def as { typeName?: string; innerType?: typeof peopleSchema.schema })
-        .typeName === 'ZodDefault'
-        ? (peopleSchema.schema._def as { innerType: typeof peopleSchema.schema }).innerType
+      (
+        peopleSchema.schema._def as unknown as {
+          typeName?: string;
+          innerType?: typeof peopleSchema.schema;
+        }
+      ).typeName === 'ZodDefault'
+        ? (peopleSchema.schema._def as unknown as { innerType: typeof peopleSchema.schema })
+            .innerType
         : peopleSchema.schema;
     expect((underlyingSchema._def as { typeName?: string }).typeName).toBe('ZodArray');
 
@@ -70,12 +75,13 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     }
     const underlyingGreetingSchema =
       (
-        greetingSchema.schema._def as {
+        greetingSchema.schema._def as unknown as {
           typeName?: string;
           innerType?: typeof greetingSchema.schema;
         }
       ).typeName === 'ZodDefault'
-        ? (greetingSchema.schema._def as { innerType: typeof greetingSchema.schema }).innerType
+        ? (greetingSchema.schema._def as unknown as { innerType: typeof greetingSchema.schema })
+            .innerType
         : greetingSchema.schema;
     expect((underlyingGreetingSchema._def as { typeName?: string }).typeName).toBe('ZodString');
   });
@@ -122,9 +128,14 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
       throw new Error('peopleSchema.schema is null');
     }
     const underlyingSchema =
-      (peopleSchema.schema._def as { typeName?: string; innerType?: typeof peopleSchema.schema })
-        .typeName === 'ZodDefault'
-        ? (peopleSchema.schema._def as { innerType: typeof peopleSchema.schema }).innerType
+      (
+        peopleSchema.schema._def as unknown as {
+          typeName?: string;
+          innerType?: typeof peopleSchema.schema;
+        }
+      ).typeName === 'ZodDefault'
+        ? (peopleSchema.schema._def as unknown as { innerType: typeof peopleSchema.schema })
+            .innerType
         : peopleSchema.schema;
     expect((underlyingSchema._def as { typeName?: string }).typeName).toBe('ZodArray');
   });

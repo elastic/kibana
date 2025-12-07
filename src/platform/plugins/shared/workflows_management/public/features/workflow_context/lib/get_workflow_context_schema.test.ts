@@ -8,18 +8,21 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
 import {
   getWorkflowContextSchema,
   type WorkflowDefinitionForContext,
 } from './get_workflow_context_schema';
-import { getSchemaAtPath } from '../../../../common/lib/zod/zod_utils';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
   it('should handle nested object inputs for variable validation', () => {
     const workflow: WorkflowYaml = {
       version: '1',
       name: 'Test Workflow',
+      description: undefined,
+      settings: undefined,
       enabled: true,
+      tags: undefined,
       triggers: [{ type: 'manual' }],
       inputs: {
         properties: {
@@ -69,6 +72,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         required: ['threatIndicator', 'analyst'],
         additionalProperties: false,
       },
+      consts: undefined,
       steps: [{ name: 'step1', type: 'console' }],
     };
 
@@ -117,7 +121,10 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
     const workflow: WorkflowYaml = {
       version: '1',
       name: 'Threat Intelligence Enrichment & Incident Response',
+      description: undefined,
+      settings: undefined,
       enabled: true,
+      tags: undefined,
       triggers: [{ type: 'manual' }],
       inputs: {
         properties: {
@@ -179,6 +186,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         required: ['analyst', 'threatIndicator', 'incidentMetadata'],
         additionalProperties: false,
       },
+      consts: undefined,
       steps: [{ name: 'step1', type: 'console' }],
     };
 
@@ -212,7 +220,10 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       const workflow: WorkflowDefinitionForContext = {
         version: '1',
         name: 'Test Workflow',
+        description: undefined,
+        settings: undefined,
         enabled: true,
+        tags: undefined,
         triggers: [{ type: 'manual' }],
         inputs: {
           properties: {
@@ -221,6 +232,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
             age: null,
           },
         } as any,
+        consts: undefined,
         steps: [{ name: 'step1', type: 'console' }],
       };
 
@@ -235,7 +247,10 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       const workflow: WorkflowDefinitionForContext = {
         version: '1',
         name: 'Test Workflow',
+        description: undefined,
+        settings: undefined,
         enabled: true,
+        tags: undefined,
         triggers: [{ type: 'manual' }],
         inputs: {
           properties: {
@@ -243,6 +258,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
             email: { type: 'string', format: 'email' },
           },
         } as any,
+        consts: undefined,
         steps: [{ name: 'step1', type: 'console' }],
       };
 
@@ -257,7 +273,10 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       const workflow: WorkflowDefinitionForContext = {
         version: '1',
         name: 'Test Workflow',
+        description: undefined,
+        settings: undefined,
         enabled: true,
+        tags: undefined,
         triggers: [{ type: 'manual' }],
         inputs: {
           properties: {
@@ -265,6 +284,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
             email: { type: 'string', format: 'email' },
           },
         } as any,
+        consts: undefined,
         steps: [{ name: 'step1', type: 'console' }],
       };
 

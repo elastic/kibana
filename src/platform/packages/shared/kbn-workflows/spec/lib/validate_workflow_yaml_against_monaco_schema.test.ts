@@ -14,7 +14,7 @@ import { join } from 'path'; // eslint-disable-line import/no-nodejs-modules
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
-import { getJsonSchemaFromYamlSchema } from './get_json_schema_from_yaml_schema';
+import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import type { ConnectorContractUnion } from '../..';
 
 describe('Validate example_security_workflow.yaml against Monaco Schema', () => {
@@ -40,7 +40,7 @@ describe('Validate example_security_workflow.yaml against Monaco Schema', () => 
       },
     ];
     const workflowZodSchema = generateYamlSchemaFromConnectors(staticConnectors);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowZodSchema);
 
     // Get the WorkflowSchema definition
     const workflowSchemaDef = jsonSchema?.definitions?.WorkflowSchema;
