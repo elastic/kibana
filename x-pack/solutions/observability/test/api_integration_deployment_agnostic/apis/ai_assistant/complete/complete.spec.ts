@@ -604,12 +604,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             events = getMessageAddedEvents(responseBody);
           });
 
-          it('the first message add event has the tool name and an error', () => {
+          it('includes the tool name and an error in the first message add event', () => {
             expect(events[0].message.message.name).to.be('unknown_tool');
             expect(events[0].message.message.content).to.contain('toolNotFoundError');
           });
 
-          it('the second message add event interact with the LLM to fix the error', () => {
+          it('emits the second message add event that interacts with the LLM to fix the error', () => {
             expect(events[1].message.message.content).to.be('Hello from LLM Proxy');
           });
         });
