@@ -8,6 +8,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import chroma from 'chroma-js';
 import { useEffect } from 'react';
 import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
 
@@ -21,6 +22,18 @@ export function useWorkflowsMonacoTheme() {
     ...rest,
   });
   useEffect(() => {
+    // Inline implementation of transparentize
+    const transparentize = (color: string, alpha: number): string => {
+      // If color is already rgba, just override the alpha channel
+      try {
+        return chroma(color)
+          .alpha(1 - alpha)
+          .css();
+      } catch {
+        return color;
+      }
+    };
+
     monaco.editor.defineTheme(WORKFLOWS_MONACO_EDITOR_THEME, {
       ...themeBase,
       colors: {
@@ -36,8 +49,10 @@ export function useWorkflowsMonacoTheme() {
         'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
         'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
         'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
-        // Disable hover highlight by default - we use custom decorations for template expressions only
-        'editor.hoverHighlightBackground': '#00000000',
+        // Subtle highlight for hover - 0.85 means 15% opacity (1 - 0.85 = 0.15)
+        'editor.hoverHighlightBackground': chroma(
+          transparentize(euiTheme.colors.primary, 0.85)
+        ).hex(),
         'editorLineNumber.foreground': euiTheme.colors.textPrimary,
         'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
         'editorIndentGuide.background1': euiTheme.colors.backgroundLightText,

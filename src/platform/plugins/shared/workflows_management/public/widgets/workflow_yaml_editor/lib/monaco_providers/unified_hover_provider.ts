@@ -43,26 +43,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
   private readonly getYamlDocument: () => YAML.Document | null;
   private readonly getExecutionContext?: () => ExecutionContext | null;
-  private editor: monaco.editor.IStandaloneCodeEditor | null = null;
-  private decorations: string[] = [];
 
   constructor(config: ProviderConfig & { getExecutionContext?: () => ExecutionContext | null }) {
     this.getYamlDocument = config.getYamlDocument;
     this.getExecutionContext = config.getExecutionContext;
-  }
-
-  public setEditor(editor: monaco.editor.IStandaloneCodeEditor) {
-    this.editor = editor;
-    // Clear decorations when mouse leaves
-    editor.onMouseLeave(() => {
-      this.clearDecorations();
-    });
-  }
-
-  private clearDecorations() {
-    if (this.editor && this.decorations.length > 0) {
-      this.decorations = this.editor.deltaDecorations(this.decorations, []);
-    }
   }
 
   async provideHover(
@@ -477,18 +461,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         };
       }
 
-      // Add custom decoration for template expressions
-      if (this.editor) {
-        this.decorations = this.editor.deltaDecorations(this.decorations, [
-          {
-            range: templateInfo.templateRange,
-            options: {
-              className: 'template-expression-hover-highlight',
-            },
-          },
-        ]);
-      }
-
+      // Return hover with range - Monaco will use editor.hoverHighlightBackground from theme
       return {
         range: templateInfo.templateRange,
         contents: [hoverContent],
@@ -534,12 +507,8 @@ export function createUnifiedHoverProvider(
  * Register unified hover provider with Monaco
  */
 export function registerUnifiedHoverProvider(
-  config: ProviderConfig & { getExecutionContext?: () => ExecutionContext | null },
-  editor?: monaco.editor.IStandaloneCodeEditor
+  config: ProviderConfig & { getExecutionContext?: () => ExecutionContext | null }
 ): monaco.IDisposable {
   const hoverProvider = new UnifiedHoverProvider(config);
-  if (editor) {
-    hoverProvider.setEditor(editor);
-  }
   return monaco.languages.registerHoverProvider('yaml', hoverProvider);
 }

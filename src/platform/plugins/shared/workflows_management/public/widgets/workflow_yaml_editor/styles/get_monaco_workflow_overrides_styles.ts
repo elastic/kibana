@@ -17,12 +17,6 @@ import { css } from '@emotion/react';
 export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
   return css`
-    /* Template expression hover highlight - only for {{ }} expressions */
-    .template-expression-hover-highlight {
-      background-color: rgba(0, 119, 204, 0.15) !important;
-      border-radius: 2px;
-    }
-
     /* Enhanced Monaco hover styling for workflow editor */
     .monaco-editor .monaco-editor-hover:not([class*='contrib']):not([class*='glyph']),
     .monaco-hover:not([class*='contrib']):not([class*='glyph']) {

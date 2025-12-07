@@ -359,7 +359,7 @@ export const WorkflowYAMLEditor = ({
         };
 
         // Register the unified hover provider for API documentation and template expressions
-        const hoverDisposable = registerUnifiedHoverProvider(providerConfig, editor);
+        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
       }
     },
