@@ -20,11 +20,9 @@ function installModuleIntercept() {
   Module._load = function (...args: any[]) {
     const request = args[0];
     if (request === 'ink') {
-      // Return your in-memory object instead of loading a file
       return ink;
     }
 
-    // Fallback to original behavior
     return originalLoad.apply(this, args);
   };
 }
