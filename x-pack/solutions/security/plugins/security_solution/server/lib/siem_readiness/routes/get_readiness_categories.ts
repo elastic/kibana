@@ -7,8 +7,6 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mock_agg_result } from '../mock_categories';
 import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from '../../../../common/api/siem_readiness/constants';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
@@ -101,38 +99,33 @@ export const getReadinessCategoriesRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          // Mock data for development (based on instructions document)
-          // TODO: Uncomment the actual ES query below when ready to use real data
-          const mockResult = mock_agg_result;
-
-          // Actual ES query (commented out for now, using mock data above)
-          // const searchResult = await esClient.search<unknown, AggregationResponse>({
-          //   index: '*',
-          //   size: 0,
-          //   body: {
-          //     aggs: {
-          //       by_index: {
-          //         terms: {
-          //           field: '_index',
-          //           size: 1000,
-          //         },
-          //         aggs: {
-          //           by_category: {
-          //             terms: {
-          //               field: 'event.category',
-          //               size: 10,
-          //             },
-          //           },
-          //         },
-          //       },
-          //     },
-          //   },
-          // });
+          const searchResult = await esClient.search<unknown, AggregationResponse>({
+            index: '*',
+            size: 0,
+            body: {
+              aggs: {
+                by_index: {
+                  terms: {
+                    field: '_index',
+                    size: 1000,
+                  },
+                  aggs: {
+                    by_category: {
+                      terms: {
+                        field: 'event.category',
+                        size: 10,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
 
           // Format the ES aggregation response into raw category groups
           const rawCategoryMap: Record<string, IndexInfo[]> = {};
 
-          mockResult.aggregations.by_index?.buckets?.forEach((indexBucket: IndexBucket) => {
+          searchResult.aggregations.by_index?.buckets?.forEach((indexBucket: IndexBucket) => {
             const indexName = indexBucket.key;
 
             indexBucket.by_category?.buckets?.forEach((categoryBucket: CategoryBucket) => {
