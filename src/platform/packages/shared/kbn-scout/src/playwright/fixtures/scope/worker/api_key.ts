@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { coreWorkerFixtures } from './core_fixtures';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
@@ -43,13 +42,11 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
     requestAuth: RequestAuthFixture;
     defaultRoles: DefaultRolesFixture;
     apiClient: ApiClientFixture;
-    esClient: Client;
   }
 >({
   requestAuth: [
-    async ({ log, samlAuth, defaultRoles, apiClient, esClient }, use, workerInfo) => {
+    async ({ log, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
       const generatedApiKeys: ApiKey[] = [];
-      let isCustomRoleCreated = false;
 
       const createApiKeyPayload = (
         apiKeyName: string,
@@ -148,8 +145,6 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       const getApiKeyForCustomRole = async (
         roleDescriptor: KibanaRole | ElasticsearchRoleDescriptor
       ): Promise<RoleApiCredentials> => {
-        isCustomRoleCreated = true;
-
         await samlAuth.setCustomRole(roleDescriptor);
 
         const result = await createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
@@ -166,15 +161,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return invalidateApiKeys(generatedApiKeys);
       });
 
-      if (isCustomRoleCreated) {
-        log.debug(`Deleting custom role with name ${samlAuth.customRoleName}`);
-        try {
-          await esClient.security.deleteRole({ name: samlAuth.customRoleName });
-          log.info(`Deleted ${samlAuth.customRoleName} custom role`);
-        } catch (error: any) {
-          log.error(`Failed to delete custom role ${samlAuth.customRoleName}: ${error.message}`);
-        }
-      }
+      // Note: the custom role will be deleted in the samlAuth fixture cleanup
     },
     { scope: 'worker' },
   ],

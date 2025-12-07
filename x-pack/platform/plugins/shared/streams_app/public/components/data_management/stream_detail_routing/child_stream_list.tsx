@@ -80,6 +80,9 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
   const scrollToSuggestions = useScrollToActive(!!suggestions);
+  const isEditingOrReorderingStreams =
+    routingSnapshot.matches({ ready: 'editingRule' }) ||
+    routingSnapshot.matches({ ready: 'reorderingRules' });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -117,6 +120,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 size="s"
                 onClick={getSuggestionsForStream}
                 isLoading={isLoadingSuggestions}
+                isDisabled={isEditingOrReorderingStreams}
                 aiFeatures={aiFeatures}
               >
                 {i18n.translate(
@@ -225,6 +229,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   isLoadingSuggestions={isLoadingSuggestions}
                   onDismiss={resetForm}
                   onRegenerate={getSuggestionsForStream}
+                  isDisabled={isEditingOrReorderingStreams}
                 />
               ) : (
                 <ReviewSuggestionsForm

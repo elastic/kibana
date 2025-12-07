@@ -2635,6 +2635,22 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [
+              "\nAllows multiple instances of the same system action in a single rule.\nBy default, system actions can only be used once per rule.\nSet to true to allow the same system action connector to be used multiple times.\nOnly applies to system actions (isSystemActionType: true)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionType.getKibanaPrivileges",
             "type": "Function",
             "tags": [],
@@ -2707,6 +2723,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.globalAuthHeaders",
+            "type": "Object",
+            "tags": [],
+            "label": "globalAuthHeaders",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AxiosHeaderValue",
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3052,6 +3084,22 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.globalAuthHeaders",
+            "type": "Object",
+            "tags": [],
+            "label": "globalAuthHeaders",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AxiosHeaderValue",
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionTypeExecutorOptions.taskInfo",
             "type": "Object",
             "tags": [],
@@ -3386,6 +3434,20 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4034,7 +4096,9 @@
           "ActionTypeSecrets",
           ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
-          ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
+          ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; getAxiosInstance: (actionId: string) => Promise<",
+          "AxiosInstance",
+          ">; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
           "[]) => Promise<",
           "ExecutionResponse",
@@ -4202,7 +4266,9 @@
           "label": "getAxiosInstanceWithAuth",
           "description": [],
           "signature": [
-            "(validatedSecrets: Record<string, unknown>) => Promise<",
+            "(opts: ",
+            "GetAxiosInstanceWithAuthFnOpts",
+            ") => Promise<",
             "AxiosInstance",
             ">"
           ],
@@ -4215,10 +4281,10 @@
               "id": "def-server.PluginSetupContract.getAxiosInstanceWithAuth.$1",
               "type": "Object",
               "tags": [],
-              "label": "validatedSecrets",
+              "label": "opts",
               "description": [],
               "signature": [
-                "Record<string, unknown>"
+                "GetAxiosInstanceWithAuthFnOpts"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
@@ -5499,6 +5565,20 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -1,0 +1,33 @@
+# Workflow: Example Notification Workflow
+# ID: example-workflow-001
+# Space: default
+# Created: 2025-11-12T10:00:00.000Z
+# Updated: 2025-11-12T10:00:00.000Z
+# Description: An example workflow that sends notifications
+# Enabled: false
+# Tags: example, notification
+# Created by: admin
+# Valid: true
+
+name: Example Notification Workflow
+description: An example workflow that sends notifications
+enabled: false
+tags:
+  - example
+  - notification
+trigger:
+  type: manual
+steps:
+  - name: fetch_data
+    type: http
+    with:
+      url: "https://api.example.com/data"
+      method: GET
+  
+  - name: send_notification
+    type: email
+    with:
+      to: "admin@example.com"
+      subject: "Workflow completed"
+      body: "Data fetched: {{ steps.fetch_data.output }}"
+

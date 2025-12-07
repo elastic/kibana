@@ -294,7 +294,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/common.yaml
+        path: /home/weaver/source/db/common.yaml
       attributes:
         azure.cosmosdb.consistency.level:
           source_group: registry.azure.cosmosdb
@@ -587,7 +587,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/common.yaml
+        path: /home/weaver/source/db/common.yaml
       attributes:
         db.response.status_code:
           source_group: registry.db
@@ -647,7 +647,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -659,7 +659,7 @@ groups:
           - SET mykey ?
         requirement_level: recommended
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -726,7 +726,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/common.yaml
+        path: /home/weaver/source/db/common.yaml
       attributes:
         db.query.summary:
           source_group: registry.db
@@ -850,7 +850,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -862,7 +862,7 @@ groups:
           - SET mykey ?
         requirement_level: recommended
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -929,7 +929,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/common.yaml
+        path: /home/weaver/source/db/common.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -1304,9 +1304,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -1951,9 +1950,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -2118,6 +2116,7 @@ groups:
           conditionally_required: when applicable and if the request includes an output format.
         note: |
           This attribute SHOULD be set to the output type requested by the client:
+
           - `json` for structured outputs with defined or undefined schema
           - `image` for image output
           - `speech` for speech output
@@ -6154,7 +6153,7 @@ groups:
           - sha256:19c92d0a00d1b66d897bceaa7319bee0dd38a10a851c60bcec9474aa3f01e50f
         requirement_level: recommended
         note: |
-          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Container/operation/ContainerInspect) endpoint.
+          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Container/operation/ContainerInspect) endpoint.
           K8s defines a link to the container registry repository with digest `"imageID": "registry.azurecr.io /namespace/service/dockerfile@sha256:bdeabd40c3a8a492eaf9e8e44d0ebbb84bac7ee25ac0cf8a7159d25f62555625"`.
           The ID is assigned by the container runtime and can vary in different environments. Consider using `oci.manifest.digest` if it is important to identify the same image in different environments/runtimes.
         stability: development
@@ -6175,12 +6174,12 @@ groups:
             - internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578
         requirement_level: recommended
         note: |
-          [Docker](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
+          [Docker](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
         stability: development
       - name: container.image.tags
         type: string[]
         brief: |
-          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
+          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
         examples:
           - - v1.27.1
             - 3.5.7-0
@@ -10531,8 +10530,8 @@ groups:
         note: |
           If one of these values applies, then it MUST be used; otherwise, a custom value MAY be used.
 
-          | Value  | Description | Stability |
-          |---|---|---|
+          | Value | Description | Stability |
+          | --- | --- | --- |
           | `flag_not_found` | The flag could not be found. | ![Release Candidate](https://img.shields.io/badge/-rc-mediumorchid) |
           | `invalid_context` | The evaluation context does not meet provider requirements. | ![Release Candidate](https://img.shields.io/badge/-rc-mediumorchid) |
           | `parse_error` | An error was encountered parsing data, such as a flag configuration. | ![Release Candidate](https://img.shields.io/badge/-rc-mediumorchid) |
@@ -11266,9 +11265,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -17953,7 +17951,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -17968,7 +17967,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -23985,7 +23985,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24027,7 +24027,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24060,7 +24060,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24093,7 +24093,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24126,7 +24126,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24159,7 +24159,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24192,7 +24192,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24225,7 +24225,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24258,7 +24258,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -24297,7 +24297,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24338,7 +24338,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24379,7 +24379,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24420,7 +24420,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24461,7 +24461,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24502,7 +24502,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24561,7 +24561,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24611,7 +24611,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24651,7 +24651,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connections.pool.name:
           source_group: registry.db.metrics.deprecated
@@ -24705,7 +24705,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         server.address:
           source_group: registry.server
@@ -24858,7 +24858,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/metrics-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -25006,7 +25006,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -25018,7 +25018,7 @@ groups:
           - SET mykey ?
         requirement_level: opt_in
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -25294,7 +25294,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -25499,7 +25499,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -25511,7 +25511,7 @@ groups:
           - SET mykey ?
         requirement_level: opt_in
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -25773,7 +25773,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/metrics.yaml
+        path: /home/weaver/source/db/metrics.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -26068,7 +26068,7 @@ groups:
   - id: metric.dotnet.gc.heap.total_allocated
     type: metric
     brief: |
-      The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.
+      The _approximate_ number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.
     note: |
       Meter name: `System.Runtime`; Added in: .NET 9.0.
       This metric reports the same values as calling [`GC.GetTotalAllocatedBytes()`](https://learn.microsoft.com/dotnet/api/system.gc.gettotalallocatedbytes).
@@ -29738,7 +29738,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -29753,7 +29754,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -29987,7 +29989,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -30002,7 +30005,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -30306,7 +30310,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -30321,7 +30326,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -30627,7 +30633,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -30642,7 +30649,8 @@ groups:
         requirement_level: opt_in
         note: |
           See [Setting `server.address` and `server.port` attributes](/docs/http/http-spans.md#setting-serveraddress-and-serverport-attributes).
-          > **Warning**
+
+          > [!WARNING]
           > Since this attribute is based on HTTP headers, opting in to it may allow an attacker
           > to trigger cardinality limits, degrading the usefulness of the metric.
         stability: stable
@@ -41487,7 +41495,7 @@ groups:
           Starting from .NET 9, Kestrel `kestrel.connection.duration` metric reports
           the following errors types when a corresponding error occurs:
 
-          | Value  | Description |
+          | Value | Description |
           | --- | --- |
           | `aborted_by_app` | The HTTP/1.1 connection was aborted when app code aborted an HTTP request with `HttpContext.Abort()`. |
           | `app_shutdown_timeout` | The connection was aborted during app shutdown. During shutdown, the server stops accepting new connections and HTTP requests, and it is given time for active requests to complete. If the app shutdown timeout is exceeded, all remaining connections are aborted. |
@@ -60430,7 +60438,7 @@ groups:
           - sha256:19c92d0a00d1b66d897bceaa7319bee0dd38a10a851c60bcec9474aa3f01e50f
         requirement_level: recommended
         note: |
-          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Container/operation/ContainerInspect) endpoint.
+          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Container/operation/ContainerInspect) endpoint.
           K8s defines a link to the container registry repository with digest `"imageID": "registry.azurecr.io /namespace/service/dockerfile@sha256:bdeabd40c3a8a492eaf9e8e44d0ebbb84bac7ee25ac0cf8a7159d25f62555625"`.
           The ID is assigned by the container runtime and can vary in different environments. Consider using `oci.manifest.digest` if it is important to identify the same image in different environments/runtimes.
         stability: development
@@ -60451,12 +60459,12 @@ groups:
             - internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578
         requirement_level: recommended
         note: |
-          [Docker](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
+          [Docker](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
         stability: development
       - name: container.image.tags
         type: string[]
         brief: |
-          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
+          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
         examples:
           - - v1.27.1
             - 3.5.7-0
@@ -60812,7 +60820,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -60824,7 +60832,7 @@ groups:
           - SET mykey ?
         requirement_level: recommended
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -61038,7 +61046,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/registry.yaml
+        path: /home/weaver/source/db/registry.yaml
     display_name: General Database Attributes
   - id: registry.db.deprecated
     type: attribute_group
@@ -61737,7 +61745,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/registry-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/registry-deprecated.yaml
     display_name: Deprecated Database Attributes
   - id: registry.db.metrics.deprecated
     type: attribute_group
@@ -61806,7 +61814,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/deprecated/registry-deprecated.yaml
+        path: /home/weaver/source/db/deprecated/registry-deprecated.yaml
     display_name: Deprecated Database Metrics
   - id: registry.deployment
     type: attribute_group
@@ -70072,7 +70080,7 @@ groups:
 
           Examples of where the value can be extracted from:
 
-          | Language or platform  | Source |
+          | Language or platform | Source |
           | --- | --- |
           | JVM | `Thread.currentThread().threadId()` |
           | .NET | `Thread.CurrentThread.ManagedThreadId` |
@@ -70091,7 +70099,7 @@ groups:
 
           Examples of where the value can be extracted from:
 
-          | Language or platform  | Source |
+          | Language or platform | Source |
           | --- | --- |
           | JVM | `Thread.currentThread().getName()` |
           | .NET | `Thread.CurrentThread.Name` |
@@ -72479,9 +72487,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -73772,9 +73779,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -73939,6 +73945,7 @@ groups:
           conditionally_required: when applicable and if the request includes an output format.
         note: |
           This attribute SHOULD be set to the output type requested by the client:
+
           - `json` for structured outputs with defined or undefined schema
           - `image` for image output
           - `speech` for speech output
@@ -74404,14 +74411,14 @@ groups:
   - id: span.azure.cosmosdb.client
     type: span
     brief: |
-      Cosmos DB instrumentations include call-level spans that represent logical database calls and adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/database-spans.md).
+      Cosmos DB instrumentations include call-level spans that represent logical database calls and adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/database-spans.md).
     note: |
       Additional spans representing network calls may also be created depending on the connection mode (Gateway or Direct).
       Semantic conventions described in this document apply to the call-level spans only.
 
       `db.system.name` MUST be set to `"azure.cosmosdb"` and SHOULD be provided **at span creation time**.
 
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
     stability: development
     attributes:
       - name: azure.client.id
@@ -74724,7 +74731,7 @@ groups:
           - SET mykey ?
         requirement_level: recommended
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -74827,7 +74834,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         azure.client.id:
           source_group: registry.azure.client.sdk
@@ -75633,11 +75640,11 @@ groups:
   - id: span.db.cassandra.client
     type: span
     brief: |
-      Spans representing calls to a Cassandra database adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/database-spans.md).
+      Spans representing calls to a Cassandra database adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/database-spans.md).
     note: |
       `db.system.name` MUST be set to `"cassandra"` and SHOULD be provided **at span creation time**.
 
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
     stability: development
     attributes:
       - name: cassandra.consistency.level
@@ -75844,7 +75851,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -75856,11 +75863,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -75955,7 +75962,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         cassandra.consistency.level:
           source_group: registry.cassandra
@@ -76149,7 +76156,7 @@ groups:
       These often allow setting `db.operation.*` attributes, which usually are not
       readily available at the generic query level.
 
-      **Span name** is covered in the [Name](/docs/database/database-spans.md#name) section.
+      **Span name** is covered in the [Name](/docs/db/database-spans.md#name) section.
 
       **Span kind** SHOULD be `CLIENT`. It MAY be set to `INTERNAL` on spans representing
       in-memory database calls.
@@ -76284,7 +76291,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -76296,11 +76303,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -76586,7 +76593,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -76741,11 +76748,11 @@ groups:
   - id: span.db.couchdb.client
     type: span
     brief: |
-      Spans representing calls to CouchDB adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/database-spans.md).
+      Spans representing calls to CouchDB adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/database-spans.md).
     note: |
       `db.system.name` MUST be set to `"couchdb"` and SHOULD be provided **at span creation time**.
 
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
     stability: development
     attributes:
       - name: db.namespace
@@ -76847,7 +76854,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.namespace:
           source_group: registry.db
@@ -76918,11 +76925,11 @@ groups:
   - id: span.db.elasticsearch.client
     type: span
     brief: |
-      Spans representing calls to Elasticsearch adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/database-spans.md).
+      Spans representing calls to Elasticsearch adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/database-spans.md).
     note: |
       `db.system.name` MUST be set to `"elasticsearch"` and SHOULD be provided **at span creation time**.
 
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
       with the endpoint identifier stored in `db.operation.name`, and the index stored in `db.collection.name`.
     stability: development
     attributes:
@@ -76995,7 +77002,7 @@ groups:
             Should be collected by default for search-type queries and only if there is sanitization that excludes sensitive information.
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -77177,7 +77184,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -77305,11 +77312,11 @@ groups:
   - id: span.db.hbase.client
     type: span
     brief: |
-      Spans representing calls to an HBase database adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/database-spans.md).
+      Spans representing calls to an HBase database adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/database-spans.md).
     note: |
       `db.system.name` MUST be set to `"hbase"` and SHOULD be provided **at span creation time**.
 
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
     stability: development
     attributes:
       - name: db.collection.name
@@ -77432,7 +77439,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -77513,7 +77520,7 @@ groups:
   - id: span.db.mariadb.client
     type: span
     brief: |
-      Spans representing calls to MariaDB adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/README.md).
+      Spans representing calls to MariaDB adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/README.md).
     note: |
       `db.system.name` MUST be set to `"mariadb"` and SHOULD be provided **at span creation time**.
     stability: stable
@@ -77619,7 +77626,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -77631,11 +77638,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -77728,7 +77735,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -77854,10 +77861,10 @@ groups:
   - id: span.db.mongodb.client
     type: span
     brief: |
-      Spans representing calls to MongoDB adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/database-spans.md).
+      Spans representing calls to MongoDB adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/database-spans.md).
     note: |
       `db.system.name` MUST be set to `"mongodb"` and SHOULD be provided **at span creation time**.
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
     stability: development
     attributes:
       - name: db.collection.name
@@ -77969,7 +77976,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -78156,7 +78163,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -78168,11 +78175,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -78263,7 +78270,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -78494,7 +78501,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -78505,10 +78512,10 @@ groups:
           - SELECT * FROM wuser_table where username = :mykey
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless explicitly configured and sanitized to exclude sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](../database/database-spans.md#sanitization-of-dbquerytext). Parameterized query text MUST also NOT be collected by default unless explicitly configured. The query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](../registry/attributes/db.md)).
+            Non-parameterized query text SHOULD NOT be collected by default unless explicitly configured and sanitized to exclude sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext). Parameterized query text MUST also NOT be collected by default unless explicitly configured. The query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](../registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](../database/database-spans.md#sanitization-of-dbquerytext). For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext). For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
         stability: stable
       - name: db.response.returned_rows
         type: int
@@ -78597,7 +78604,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -78838,7 +78845,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -78850,11 +78857,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -78945,7 +78952,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -79071,11 +79078,11 @@ groups:
   - id: span.db.redis.client
     type: span
     brief: |
-      Spans representing calls to Redis adhere to the general [Semantic Conventions for Database Client Spans](/docs/database/database-spans.md).
+      Spans representing calls to Redis adhere to the general [Semantic Conventions for Database Client Spans](/docs/db/database-spans.md).
     note: |
       `db.system.name` MUST be set to `"redis"` and SHOULD be provided **at span creation time**.
 
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
       except that `db.namespace` SHOULD NOT be used in the span name since it is a numeric value that ends up
       looking confusing.
     stability: development
@@ -79135,7 +79142,7 @@ groups:
         sampling_relevant: true
         note: |
           Query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text.
-          See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           The value provided for `db.query.text` SHOULD correspond to the syntax of the Redis CLI. If, for example, the [`HMSET` command](https://redis.io/docs/latest/commands/hmset) is invoked, `"HMSET myhash field1 ? field2 ?"` would be a suitable value for `db.query.text`.
         stability: stable
       - name: db.response.status_code
@@ -79232,7 +79239,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.namespace:
           source_group: registry.db
@@ -79451,7 +79458,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -79463,11 +79470,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -79559,7 +79566,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -79685,10 +79692,10 @@ groups:
   - id: span.db.sql.client
     type: span
     brief: |
-      The SQL databases Semantic Conventions describes how common [Database Semantic Conventions](/docs/database/database-spans.md) apply to SQL databases.
+      The SQL databases Semantic Conventions describes how common [Database Semantic Conventions](/docs/db/database-spans.md) apply to SQL databases.
     note: |
       The following database systems (defined in the
-      [`db.system.name`](/docs/database/database-spans.md#notes-and-well-known-identifiers-for-dbsystemname) set)
+      [`db.system.name`](/docs/db/database-spans.md#notes-and-well-known-identifiers-for-dbsystemname) set)
       are known to use SQL as their primary query language:
 
       - `actian.ingres`
@@ -79711,7 +79718,7 @@ groups:
       Many other database systems support SQL and can be accessed via generic database driver such as JDBC or ODBC.
       Instrumentations applied to generic SQL drivers SHOULD adhere to SQL semantic conventions.
 
-      **Span name** SHOULD follow the general [database span name convention](/docs/database/database-spans.md#name)
+      **Span name** SHOULD follow the general [database span name convention](/docs/db/database-spans.md#name)
     stability: stable
     attributes:
       - name: db.collection.name
@@ -79823,7 +79830,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -79835,11 +79842,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -79965,7 +79972,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -84578,9 +84585,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -85320,6 +85326,7 @@ groups:
       instrumented protocol such as HTTP.
 
       Examples of span kinds for different agent scenarios:
+
       - `CLIENT`: Remote agent services (e.g., OpenAI Assistants API, AWS Bedrock Agents)
       - `INTERNAL`: In-process agents (e.g., LangChain agents, CrewAI agents)
     stability: development
@@ -85383,9 +85390,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -86147,7 +86153,7 @@ groups:
       `graphql.operation.type` is available. If `graphql.operation.type` is not available,
       the span SHOULD be named `GraphQL Operation`.
 
-      > **Warning**
+      > [!WARNING]
       > The `graphql.operation.name` value is provided by the client and can have high
       > cardinality. Using it in the GraphQL server span name (by default) is
       > NOT RECOMMENDED.
@@ -87607,9 +87613,8 @@ groups:
           Instrumentations SHOULD populate conversation id when they have it readily available
           for a given operation, for example:
 
-          -  when client framework being instrumented manages conversation history
+          - when client framework being instrumented manages conversation history
           (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
-
           - when instrumenting GenAI client libraries that maintain conversation on the backend side
           (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
           [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
@@ -87774,6 +87779,7 @@ groups:
           conditionally_required: when applicable and if the request includes an output format.
         note: |
           This attribute SHOULD be set to the output type requested by the client:
+
           - `json` for structured outputs with defined or undefined schema
           - `image` for image output
           - `speech` for speech output
@@ -91160,7 +91166,7 @@ groups:
 
           Examples of where the value can be extracted from:
 
-          | Language or platform  | Source |
+          | Language or platform | Source |
           | --- | --- |
           | JVM | `Thread.currentThread().threadId()` |
           | .NET | `Thread.CurrentThread.ManagedThreadId` |
@@ -91179,7 +91185,7 @@ groups:
 
           Examples of where the value can be extracted from:
 
-          | Language or platform  | Source |
+          | Language or platform | Source |
           | --- | --- |
           | JVM | `Thread.currentThread().getName()` |
           | .NET | `Thread.CurrentThread.Name` |
@@ -91334,7 +91340,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -91346,11 +91352,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -91635,7 +91641,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db
@@ -91894,7 +91900,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.operation.batch.size:
           source_group: registry.db
@@ -92014,7 +92020,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -92026,11 +92032,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -92108,7 +92114,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.operation.batch.size:
           source_group: registry.db
@@ -92304,7 +92310,7 @@ groups:
           Summary may be available to the instrumentation through
           instrumentation hooks or other means. If it is not available, instrumentations
           that support query parsing SHOULD generate a summary following
-          [Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)
+          [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
         stability: stable
       - name: db.query.text
@@ -92316,11 +92322,11 @@ groups:
           - SET mykey ?
         requirement_level:
           recommended: |
-            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+            Non-parameterized query text SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data, e.g. by redacting all literal values present in the query text. See [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
             Parameterized query text SHOULD be collected by default (the query parameter values themselves are opt-in, see [`db.query.parameter.<key>`](/docs/registry/attributes/db.md)).
         sampling_relevant: true
         note: |
-          For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).
+          For sanitization see [Sanitization of `db.query.text`](/docs/db/database-spans.md#sanitization-of-dbquerytext).
           For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.
           Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.
         stability: stable
@@ -92398,7 +92404,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/database/spans.yaml
+        path: /home/weaver/source/db/spans.yaml
       attributes:
         db.collection.name:
           source_group: registry.db

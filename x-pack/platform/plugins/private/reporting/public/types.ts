@@ -96,6 +96,22 @@ export interface ScheduledReport {
    * List of email addresses to send the report to (`to` field in the email)
    */
   emailRecipients: string[];
+  /**
+   * List of email addresses to send the report in copy to (`cc` field in the email)
+   */
+  emailCcRecipients: string[];
+  /**
+   * List of email addresses to send the report in blind copy to (`bcc` field in the email)
+   */
+  emailBccRecipients: string[];
+  /**
+   * Email subject
+   */
+  emailSubject: string;
+  /**
+   * Email message
+   */
+  emailMessage: string;
 }
 
 export interface ReportTypeData {

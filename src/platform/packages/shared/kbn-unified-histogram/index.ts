@@ -12,6 +12,7 @@ export type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
+  UnifiedHistogramFetchParamsExternal,
   ChartSectionConfiguration,
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
@@ -25,7 +26,6 @@ export {
   type UnifiedHistogramChartProps,
   ChartSectionTemplate,
   type ChartSectionTemplateProps,
-  useFetch,
 } from './components/chart';
 export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './components/layout';
 

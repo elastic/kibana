@@ -1,0 +1,38 @@
+# Workflow: Web Search
+# ID: workflow-aa676677-0cf3-44ff-a42e-24f9ac7319b8
+# Space: default
+# Created: 2025-11-03T12:18:53.813Z
+# Updated: 2025-11-03T12:18:53.813Z
+# Enabled: true
+# Created by: elastic
+# Valid: truename: Web Search
+enabled: true
+triggers:
+  - type: manual
+consts:
+  apitoken: "c5aa6a71492fa6a237db15c69a7ccf43f7e247146049ca85c6a507eea9b8db11"
+  numberOfResults: 1
+inputs:
+  - name: searchString
+    type: string
+steps:
+  - name: searchInSerpApi
+    type: http
+    with:
+      url: "https://serpapi.com/search.json?engine=google&q={{inputs.searchString}}&api_key={{consts.apitoken}}"
+      method: GET
+      headers:
+        Accept: application/json
+  - name: print
+    type: console
+    with:
+      message: |
+        {% for r in steps.searchInSerpApi.output.data.organic_results limit: consts.numberOfResults  %}
+        • [{{ r.title | default: 'Untitled' }}]({{ r.link | default: r.displayed_link }})
+          {% if r.displayed_link %}_{{ r.displayed_link }}_{% endif %}
+          {% if r.snippet %}→ {{ r.snippet | replace: '\n', ' ' | slice: 0, 180 }}{% if r.snippet.size > 180 %}…{% endif %}{% endif %}
+        {% endfor %}
+
+
+
+    

@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDetailsPanelPaths } from '.';
 import { OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID, JSON_TAB_TEST_ID } from './constants/test_ids';
 import { TableTab } from './tabs/table_tab';
+import { JsonTab } from './tabs/json_tab';
 
 export interface AttackDetailsPanelTabType {
   id: AttackDetailsPanelPaths;
@@ -52,5 +53,5 @@ export const jsonTab: AttackDetailsPanelTabType = {
       defaultMessage="JSON"
     />
   ),
-  content: <div>{`${JSON_TAB_TEST_ID}`}</div>,
+  content: <JsonTab />,
 };

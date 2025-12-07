@@ -1,0 +1,87 @@
+# Workflow: Laptop Refresh
+# ID: workflow-ee66a996-cb63-46cb-a00c-4ec8f34269e5
+# Space: default
+# Created: 2025-11-11T16:33:37.488Z
+# Updated: 2025-11-11T16:57:22.624Z
+# Enabled: true
+# Created by: elastic
+# Valid: truename: Laptop Refresh
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: laptoprefreshrecord
+    type: string
+    default: "{\"Timestamp\": \"1/19/2022 15:57:42\", \"FirstName\": \"RENARD\", \"LastName\": \"Yilmaz\", \"PersonalEmailAddress\": \"yilmazulas.98@gmail.com\", \"PositionJobTitle\": \"Sales Development Representative\", \"StartDate\": \"3/1/2022\", \"AddressLine1\": \"Lyoner Strasse 30\", \"AddressLine2\": \"Level 5 Apartment No. 2 (05.02)\", \"City\": \"Frankfurt am Main\", \"StateProvinceRegion\": \"-- Select From List --\", \"ZipPostalCode\": \"60528\", \"Country\": \"Germany\", \"PhoneNumber\": \"1623033059\", \"Whichdepartmentwillyoubeworkingin?\": \"All Other Departments - PLEASE CLICK HERE IF YOU ARE NONE OF THE ABOVE: ALL OTHER DEPARTMENTS: Sales, Customer Success, Partners, Marketing, Operations, Legal, HR, Services: training and Operations, etc, please select last option on the dropdown list (ALL OTHER DEPARTMENTS)\", \"ChooseyourOSType\": \"\", \"ChooseyourLaptop\": \"\", \"KeyboardLocale\": \"German - (D)\", \"Checktheaccessorythatyouwillneed\": \"\", \"AdditionalITAccessories\": \"\", \"WillX-SchoolbeyourfirstweekatElastic?\": \"\", \"Where should IT deliver your computer assets?\": \"\", \"PleaseprovideyourHomeAddress\": \"\", \"PleaseselecttheUSofficespacethatyouwillstartin\": \"\", \"PleaseselecttheAPJofficespacethatyouwillstartin\": \"\", \"14-inchM3AppleMacbook\": \"Apple M1 Macbook Pro 13-Inch Space Gray\", \"DoyouneedVisualStudio?OnlyselectVISUALSTUDIOifMicrosoftSoftwareDeveloperNetworkisrequiredforyourrole  \": \"\", \"EnterManagersname\": \"\", \"LaptopPreference(subjecttochange)\": \"\", \"Ihavecompletelyreadthroughthedocument&understoodthe[important]section\": \"Yes\", \"BecausetherearesomanyflavorsofLinux,youwillmostlikelyreceivealaptopthatispreinstalledwithWindowshoweveryoumayinstallyourfavoriteLinuxdistribution\": \"\", \"Incaseyourlaptopdoesnotcomebyyourstartdate,wouldyoulikealoanerlaptop?\": \"\", \"Whatregion?\": \"\", \"Email Address\": \"\", \"Manager's Email Address (elastic.co)\": \"\", \"LaptopEnrollment\": \"\", \"AdditionalITAccessories[Row2]\": \"\", \"USAOffice\": \"\", \"PleaseselecttheCanadaofficespacethatyouwillstartin\": \"\", \"Enteryourhomeaddress\": \"\", \"OrderNumber\": \"1016198005\", \"LaptopCost(ExcludeTax,ACE,andPeripherals)  \": \"\", \"LoanerTrackingInfo\": \"\", \"TimestampforLoanerTrackingNumber\": \"\", \"Notes \": \"\"}"
+steps:
+  - name: log_results_one
+    type: console
+    with:
+      message: |-
+        CONSOLE LOG {{ inputs.laptoprefreshrecord }}
+  - name: log_results
+    type: console
+    with:
+      message: ${{ inputs.laptoprefreshrecord | json_parse }}
+  - name: print_timestamp
+    type: console
+    with:
+      message: "{{steps.log_results.output.Timestamp}}"
+  - name: index-two-record-creation
+    type: elasticsearch.index
+    with:
+      index: .lol-loly
+      id: bla
+      document:
+        ${{ steps.log_results.output }}
+  - name: inference_unified_completion_step
+    type: inference.unified_completion
+    connector-id: "openai"
+    with:
+      body:
+        messages:
+          - role: "user"
+            content: |- 
+              Extract and summarize the key information from this laptop request: {{ inputs.laptoprefreshrecord | json_parse | json }}
+  - name: test_console_log
+    type: console
+    with: 
+      message: |- 
+        "New laptop refresh request submitted:\n- Employee: {{ steps.log_results.output.FirstName }} {{ steps.log_results.output.LastName }}\n- Position: {{ steps.log_results.output.PositionJobTitle }}\n- Department: {{ steps.log_results.output.Whichdepartmentwillyoubeworkingin? }}\n- Email: {{ steps.log_results.output.PersonalEmailAddress }}\n- Manager: {{ steps.log_results.output.EnterManagersname }}\n- Requested Laptop: {{ steps.log_results.output.14-inchM3AppleMacbook }}\n- Keyboard: {{ steps.log_results.output.KeyboardLocale }}\n- Current Laptop: Not specified\n- Acquisition Date: Not specified\n- EGS: Not specified\n- Shipping Address: {{ steps.log_results.output.AddressLine1 }}, {{ steps.log_results.output.AddressLine2 }}, {{ steps.log_results.output.City }}, {{ steps.log_results.output.StateProvinceRegion }} {{ steps.log_results.output.ZipPostalCode }}, {{ steps.log_results.output.Country }}\n- Phone: {{ steps.log_results.output.PhoneNumber }}\n- Request ID: {{ steps.log_results.output.OrderNumber }}\n- Submitted: {{ steps.log_results.output.Timestamp }}"
+  - name: snow
+    type: http
+    with:
+      url: "https://elasticdev.service-now.com/api/now/table/incident"
+      method: "POST"
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Authorization: "Basic bGFwdG9wX3JlZnJlc2hfdXNlcjowUEEhVXdHekRBdys7Zig0S15CeiFfbXJ9d0doa1Y="
+      body: |
+        {
+          "short_description": "Laptop Refresh Request - {{ steps.log_results.output.FirstName }} {{ steps.log_results.output.LastName }}",
+          "description": "New laptop refresh request submitted:\n- Employee: {{ steps.log_results.output.FirstName }} {{ steps.log_results.output.LastName }}\n- Position: {{ steps.log_results.output.PositionJobTitle }}\n- Department: {{ steps.log_results.output.Whichdepartmentwillyoubeworkingin? }}\n- Email: {{ steps.log_results.output.PersonalEmailAddress }}\n- Manager: {{ steps.log_results.output.EnterManagersname }}\n- Requested Laptop: {{ steps.log_results.output.14-inchM3AppleMacbook }}\n- Keyboard: {{ steps.log_results.output.KeyboardLocale }}\n- Current Laptop: Not specified\n- Acquisition Date: Not specified\n- EGS: Not specified\n- Shipping Address: {{ steps.log_results.output.AddressLine1 }}, {{ steps.log_results.output.AddressLine2 }}, {{ steps.log_results.output.City }}, {{ steps.log_results.output.StateProvinceRegion }} {{ steps.log_results.output.ZipPostalCode }}, {{ steps.log_results.output.Country }}\n- Phone: {{ steps.log_results.output.PhoneNumber }}\n- Request ID: {{ steps.log_results.output.OrderNumber }}\n- Submitted: {{ steps.log_results.output.Timestamp }}",
+          "caller_id": "{{ steps.log_results.output.PersonalEmailAddress }}",
+          "urgency": "3",
+          "impact": "3",
+          "priority": "5",
+          "category": "hardware",
+          "subcategory": "laptop",
+          "assignment_group": "it",
+          "contact_type": "Self Service",
+          "u_region": "{{ steps.log_results.output.Whatregion? }}",
+          "company": "ea81aefa1b6730502f14ed34b24bcb1d"
+        }
+  - name: inference_unified_completion_step_2
+    type: inference.unified_completion
+    connector-id: "openai"
+    with:
+      body:
+        messages:
+          - role: "user"
+            content: "Summarize this ServiceNow incident creation result: {{ steps.snow.output.data | json }}"
+  - name: log_results_last
+    type: console
+    with:
+      message: |-
+        FINAL CONSOLE LOG {{ steps.inference_unified_completion_step_2.output | json }}

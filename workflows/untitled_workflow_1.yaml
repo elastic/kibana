@@ -1,0 +1,27 @@
+# Workflow: Untitled workflow
+# ID: workflow-04ccea69-dc53-45c7-b549-5539cf120cd6
+# Space: default
+# Created: 2025-11-09T13:44:30.219Z
+# Updated: 2025-11-11T16:33:16.569Z
+# Enabled: false
+# Created by: elastic
+# Valid: falsename: Test SetVar Step
+triggers:
+  - type: manual
+enabled: true
+steps:
+  - name: setVarStep
+    type: setvar
+    with:
+      variables:
+        x: 10
+        userName: "Alice"
+        
+  - name: useVariable
+    type: http
+    with:
+      url: "https://httpbin.org/post"
+      method: POST
+      body:
+        count: "{{ variables.x }}"
+        name: "{{ variables.userName }}"

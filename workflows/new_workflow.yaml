@@ -1,0 +1,16 @@
+# Workflow: New workflow
+# ID: workflow-fc0a5a5a-8781-4bb4-b862-ad791bfdc3bc
+# Space: default
+# Created: 2025-10-30T08:46:40.702Z
+# Updated: 2025-10-30T08:46:40.702Z
+# Enabled: false
+# Created by: elastic
+# Valid: truename: New workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: first-step
+    type: console
+    with:
+      message: First step executed

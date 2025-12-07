@@ -36,6 +36,8 @@ const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): stri
       return `/app/management/data/transform?_a=(transform:(queryText:${id}))`;
     case 'ml_model':
       return `/app/management/ml/trained_models?_a=(trained_models:(queryText:'model_id:(${id})'))`;
+    case 'esql_view':
+    // TODO Update when feature flag is turned on https://github.com/elastic/kibana/issues/244655
     default:
       return '';
   }

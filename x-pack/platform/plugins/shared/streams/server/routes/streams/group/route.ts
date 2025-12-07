@@ -116,7 +116,7 @@ const upsertGroupRoute = createServerRoute({
       .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
       .map((asset) => asset.query);
 
-    const { name: _name, ...stream } = definition;
+    const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
     const upsertRequest: Streams.GroupStream.UpsertRequest = {
       dashboards,

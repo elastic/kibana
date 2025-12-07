@@ -1,0 +1,16 @@
+# Workflow: hey Copy
+# ID: workflow-2643aa68-ac82-48d6-b0a8-bc3ef03055fc
+# Space: default
+# Created: 2025-10-30T09:35:45.619Z
+# Updated: 2025-10-30T09:35:55.004Z
+# Enabled: false
+# Created by: elastic
+# Valid: trueenabled: false
+name: hey Copy
+triggers:
+  - type: manual
+steps:
+  - name: first-step
+    type: console
+    with:
+      message: First step executed

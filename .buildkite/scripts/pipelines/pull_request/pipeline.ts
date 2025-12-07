@@ -101,7 +101,7 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
+        /^src\/platform\/packages\/shared\/kbn-synthtrace/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -191,6 +191,12 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
 
     if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:entity-store-performance')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/trigger_entity_store_performance.yml')
+      );
     }
 
     if (

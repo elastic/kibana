@@ -1,0 +1,133 @@
+# Workflow: 🚨 Check if IP address is malicious
+# ID: workflow-13f49c81-436c-4614-a7c0-96fa3422ddb1
+# Space: default
+# Created: 2025-11-03T12:24:30.374Z
+# Updated: 2025-11-03T12:36:08.604Z
+# Description: Checks if an alert is really malicious and closes it automatically if it's not
+# Enabled: true
+# Created by: elasticname: 🚨 Check if IP address is malicious
+description: Checks if an alert is really malicious and closes it automatically if it's not
+enabled: true
+triggers:
+  - type: alert
+steps:
+  - name: new_alert_slack
+    type: slack
+    connector-id: slacky
+    with:
+      message: |
+        A new alert occured! 🚨
+
+        ```
+        {{ event | json }}
+        ```
+  - name: check_ip
+    type: http
+    with:
+      url: https://api.abuseipdb.com/api/v2/check?ipAddress={{event.alerts[0].ipAddress}}
+      method: GET
+      timeout: '30s'
+      headers: 
+        Key: "{{ consts.abusedb_key }}"
+  - name: analysis_check_if_malicious
+    type: inference.completion
+    connector-id: openai
+    with:
+      input: >
+        You are an AI assistant tasked with analyzing and summarizing security alerts for a security analyst. 
+        Your goal is to provide a concise analysis of the alert, determining if the alert is malicious or not with the context you have.
+
+        INSTRUCTIONS:
+          - Output boolean value that is either true/false - true if the alert looks malicious, false otherwise.
+          - It MUST!!! be just raw binary string, no formatting, no anything else, JUST true/false - DO NOT OUTPUT ANYTHING ELSE!
+        >
+        Here is the alert JSON data:
+        <alert_json>
+        {{event.alerts|json}}
+        </alert_json>
+
+        Here is the check IP address data:
+        <check_ip_json>
+        {{steps.check_ip.output|json}}
+        </check_ip_json>
+  - name: summarize_with_ai
+    type: inference.completion
+    connector-id: openai
+    with:
+      input: |
+        You are an AI assistant tasked with analyzing and summarizing security alerts for a security analyst. Your goal is to provide a concise summary of the alert, highlighting the most important information for the analyst to review.
+
+        Here is the alert JSON data:
+        <alert_json>
+        {{event.alerts|json}}
+        </alert_json>
+
+        Here is the check IP address data:
+        <check_ip_json>
+        {{steps.check_ip.output|json}}
+        </check_ip_json>
+
+        Follow these steps to analyze and summarize the alert:
+
+        1. Parse the JSON data provided in the alert_json tags and the JSON data from the IP check in check_ip_json tag.
+
+        2. Extract the following key information from the parsed data (if available):
+           - Alert name or type
+           - Severity level
+           - Timestamp or date of the alert
+           - Source and destination IP addresses
+           - Any specific threat indicators or malicious activities detected
+           - Affected systems or users
+           - Any recommended actions or next steps
+
+        3. Synthesize the extracted information into a concise summary paragraph. Focus on the most critical details that the security analyst should pay attention to.
+
+        4. Your summary should be clear, informative, and highlight the potential security implications of the alert.
+
+        5. You may use emojis where appropriate to enhance readability or emphasize important points. Use line breaks to separate distinct pieces of information.
+
+        6. Everything should be prettified using the plain markdown format. DO NOT INCLUDE THE ```markdown ``` PART, JUST MARKDOWN AS PLAIN TEXT.
+
+        7. Do not include any additional commentary, introductions, or conclusions. Provide only the summary of the alert.
+  - name: addNoteInternal
+    type: kibana.PersistNoteRoute
+    with:
+      fetcher:
+        skip_ssl_verification: true
+      note:
+        timelineId: ""
+        eventId: "{{event.alerts[0]._id}}"
+        note: "{{steps.summarize_with_ai.output[0].result}}"
+  - name: if_false_positive
+    type: if
+    condition: 'steps.analysis_check_if_malicious.output.0.result: false'
+    steps:
+    - name: tagFalsePositiveInternal
+      type: kibana.SetAlertTags
+      with:
+        fetcher:
+          skip_ssl_verification: true
+        tags:
+            tags_to_add: ["False Positive"]
+            tags_to_remove: []
+        ids: 
+          - "{{event.alerts[0]._id}}"
+    - name: closeAlertInternal
+      type: kibana.SetAlertsStatus
+      with:
+        fetcher:
+          skip_ssl_verification: true
+        status: closed
+        signal_ids:
+          - "{{event.alerts[0]._id}}"
+    - name: addCloseNote
+      type: kibana.PersistNoteRoute
+      with:
+        fetcher:
+          skip_ssl_verification: true
+        note:
+            timelineId: ""
+            eventId: "{{event.alerts[0]._id}}"
+            note: "The alert was automatically closed and marked as false positive by the `Check if alert is malicious` workflow"
+consts:
+  abusedb_key: 1f8a75facabe201fce55d2ba9f655b86fcbafe5923d6d75006463a616db6eca035496555c6bddd8d

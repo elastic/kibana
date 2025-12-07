@@ -168,7 +168,14 @@ describe('getRuleIdsWithGaps', () => {
           filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'rule.id',
+                size: 10000,
+                order: { oldest_gap_timestamp: 'asc' },
+              }),
+              aggs: { oldest_gap_timestamp: { min: { field: '@timestamp' } } },
+            }),
           },
         })
       );
@@ -203,7 +210,14 @@ describe('getRuleIdsWithGaps', () => {
           ),
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'rule.id',
+                size: 10000,
+                order: { oldest_gap_timestamp: 'asc' },
+              }),
+              aggs: { oldest_gap_timestamp: { min: { field: '@timestamp' } } },
+            }),
           },
         })
       );
@@ -230,8 +244,107 @@ describe('getRuleIdsWithGaps', () => {
           filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'rule.id',
+                size: 10000,
+                order: { oldest_gap_timestamp: 'asc' },
+              }),
+              aggs: { oldest_gap_timestamp: { min: { field: '@timestamp' } } },
+            }),
           },
+        })
+      );
+    });
+
+    it('should use the default maxRulesToFetch limit when param not provided', async () => {
+      await rulesClient.getRuleIdsWithGaps(params);
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          aggs: expect.objectContaining({
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                size: 10000,
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should respect custom maxRulesToFetch value', async () => {
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        maxRulesToFetch: 123,
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          aggs: expect.objectContaining({
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                size: 123,
+              }),
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('ruleTypes filter', () => {
+    it('should include ruleTypes filter for a single rule type/consumer pair', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        ruleTypes: [{ type: 'my.rule.type', consumer: 'my-consumer' }],
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'AND ((kibana.alert.rule.rule_type_id: "my.rule.type" AND kibana.alert.rule.consumer: "my-consumer"))'
+          ),
+        })
+      );
+    });
+
+    it('should include ruleTypes filter joined with OR for multiple pairs', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        ruleTypes: [
+          { type: 'type.a', consumer: 'cons-a' },
+          { type: 'type.b', consumer: 'cons-b' },
+        ],
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'AND ((kibana.alert.rule.rule_type_id: "type.a" AND kibana.alert.rule.consumer: "cons-a") OR (kibana.alert.rule.rule_type_id: "type.b" AND kibana.alert.rule.consumer: "cons-b"))'
+          ),
         })
       );
     });
