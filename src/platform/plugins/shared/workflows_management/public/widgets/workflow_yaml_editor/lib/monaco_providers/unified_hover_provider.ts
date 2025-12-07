@@ -465,7 +465,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         const content = [
           `**Value at \`${evaluatedPath}\`** _(${valueType})_`,
           '',
-          '```json',
+          '```html',
           jsonValue || '(empty)', // Ensure there's always some content
           '```',
         ].join('\n');
