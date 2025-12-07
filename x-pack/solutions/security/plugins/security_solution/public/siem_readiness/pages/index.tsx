@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
-import { useReadinessTasks } from '@kbn/siem-readiness';
 import { SIEM_READINESS_PATH } from '../../../common/constants';
 import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
 import { VisibilitySectionTabs } from './visibility_section_tabs';
@@ -18,7 +17,6 @@ const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'ret
 const DEFAULT_TAB: VisibilityTabId = 'coverage';
 
 const SiemReadinessDashboard = () => {
-  const { getReadinessCategories, getInstalledIntegrations } = useReadinessTasks();
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
 
@@ -36,22 +34,6 @@ const SiemReadinessDashboard = () => {
     },
     [history]
   );
-
-  useEffect(() => {
-    if (getReadinessCategories.data) {
-      // eslint-disable-next-line no-console
-      console.log('Raw Categories Map:', getReadinessCategories.data.rawCategoriesMap);
-      // eslint-disable-next-line no-console
-      console.log('Main Categories Map:', getReadinessCategories.data.mainCategoriesMap);
-    }
-  }, [getReadinessCategories.data]);
-
-  useEffect(() => {
-    if (getInstalledIntegrations.data) {
-      // eslint-disable-next-line no-console
-      console.log('Installed Integrations:', getInstalledIntegrations.data);
-    }
-  }, [getInstalledIntegrations.data]);
 
   return (
     <div>
