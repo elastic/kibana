@@ -59,7 +59,7 @@ function getMetricAggregation({ field, type }: { field?: string; type: MetricTyp
     throw new Error(`Metric type ${type} needs a field to aggregate over`);
   }
 
-  if (type === 'min' || 'max' || 'sum' || 'avg') {
+  if (['min', 'max', 'sum', 'avg'].includes(type)) {
     return {
       agg: {
         [type]: {
@@ -144,7 +144,7 @@ async function getMetricChangePoints({
         value: {
           bucket_script: {
             buckets_path: {
-              metric: `metric${metricBucketsPath ? `>${metricBucketsPath}` : ''}`,
+              metric: bucketsPathMetric,
             },
             script: 'params.metric',
           },
@@ -175,7 +175,7 @@ async function getMetricChangePoints({
     aggregations,
   });
 
-  const buckets = (response.aggregations as AggregationsResponse | undefined)?.groups?.buckets;
+  const buckets = response.aggregations?.groups?.buckets;
   if (!buckets) {
     return [];
   }
@@ -266,8 +266,8 @@ export function createObservabilityGetMetricChangePointsTool({
           })
         );
 
-        const allMetricChangePoints = orderBy(metricChangePoints.flat(), [
-          (item) => item.changes.p_value ?? Number.POSITIVE_INFINITY,
+        const topMetricChangePoints = orderBy(metricChangePoints.flat(), [
+          (item) => item.changes.p_value,
         ]).slice(0, 25);
 
         return {

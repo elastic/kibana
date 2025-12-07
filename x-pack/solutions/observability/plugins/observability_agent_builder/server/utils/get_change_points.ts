@@ -96,7 +96,7 @@ export async function getChangePoints({
       (bucket) => bucket.changes && !bucket.changes.type?.indeterminable
     )
     .map((bucket) => {
-      const changes = bucket.changes as ChangePointResult;
+      const changes = bucket.changes!;
       const [changeType, value] = Object.entries(changes.type)[0];
       return {
         name,
