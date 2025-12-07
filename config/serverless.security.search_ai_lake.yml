@@ -96,7 +96,7 @@ xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
-  Anthropic-Claude-Sonnet-3.7:
+  Anthropic-Claude-Sonnet-3-7:
     name: Anthropic Claude Sonnet 3.7
     actionTypeId: .inference
     exposeConfig: true
@@ -106,7 +106,7 @@ xpack.actions.preconfigured:
       inferenceId: ".rainbow-sprinkles-elastic"
       providerConfig:
         model_id: "rainbow-sprinkles"
-  Anthropic-Claude-Sonnet-4.5:
+  Anthropic-Claude-Sonnet-4-5:
     name: Anthropic Claude Sonnet 4.5
     actionTypeId: .inference
     exposeConfig: true
