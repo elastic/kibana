@@ -20,10 +20,10 @@ import { getPathAtOffset } from '../../../../../common/lib/yaml';
 import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
+import { getInterceptedHover } from '../hover/get_intercepted_hover';
 import { evaluateExpression } from '../template_expression/evaluate_expression';
 import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
 import { formatValueAsJson } from '../template_expression/resolve_path_value';
-import { getInterceptedHover } from '../hover/get_intercepted_hover';
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonObject | JsonArray;

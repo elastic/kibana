@@ -81,15 +81,19 @@ steps:
     await expect(page.getByText('Test Workflow')).toBeVisible();
 
     // Click the Run button
-    const runButton = page.getByTestId('workflowRunButton').or(page.getByRole('button', { name: /run/i }));
+    const runButton = page
+      .getByTestId('workflowRunButton')
+      .or(page.getByRole('button', { name: /run/i }));
     await runButton.click();
 
     // Wait for execution to start
     await page.waitForTimeout(1000);
 
     // Navigate to executions tab or wait for execution status
-    const executionsTab = page.getByTestId('workflowExecutionsTab').or(page.getByRole('tab', { name: /executions/i }));
-    
+    const executionsTab = page
+      .getByTestId('workflowExecutionsTab')
+      .or(page.getByRole('tab', { name: /executions/i }));
+
     if (await executionsTab.isVisible().catch(() => false)) {
       await executionsTab.click();
       await page.waitForLoadState('networkidle');
@@ -118,4 +122,3 @@ steps:
     await expect(page.getByText('Test Workflow')).toBeVisible();
   });
 });
-

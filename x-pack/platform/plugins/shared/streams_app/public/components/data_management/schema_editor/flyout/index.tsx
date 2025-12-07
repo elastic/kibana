@@ -116,6 +116,7 @@ export const SchemaEditorFlyout = ({
 
       {isIgnoredField && (
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={i18n.translate('xpack.streams.samplePreviewTable.ignoredFieldsCallOutTitle', {
@@ -132,6 +133,7 @@ export const SchemaEditorFlyout = ({
       {geoPointSuggestion && !geoPointSuggestionApplied && (
         <>
           <EuiCallOut
+            announceOnMount
             color="primary"
             iconType="visMapCoordinate"
             title={i18n.translate('xpack.streams.schemaEditorFlyout.geoPointSuggestionTitle', {

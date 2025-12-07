@@ -10,13 +10,9 @@
 import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest } from '@kbn/scout';
 
-export interface WorkflowsManagementTestFixtures extends ScoutTestFixtures {
-  // Add custom test-scoped fixtures here if needed
-}
+export type WorkflowsManagementTestFixtures = ScoutTestFixtures;
 
-export interface WorkflowsManagementWorkerFixtures extends ScoutWorkerFixtures {
-  // Add custom worker-scoped fixtures here if needed
-}
+export type WorkflowsManagementWorkerFixtures = ScoutWorkerFixtures;
 
 export const test = baseTest.extend<
   WorkflowsManagementTestFixtures,
@@ -26,4 +22,3 @@ export const test = baseTest.extend<
 });
 
 export { expect } from '@kbn/scout';
-

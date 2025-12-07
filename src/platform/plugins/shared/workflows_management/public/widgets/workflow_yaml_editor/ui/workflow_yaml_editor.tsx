@@ -45,6 +45,7 @@ import {
 } from '../../../entities/workflows/store';
 import {
   selectEditorYaml,
+  selectExecution,
   selectHasChanges,
   selectIsExecutionsTab,
   selectIsSavingYaml,

@@ -10,8 +10,9 @@ import {
   saveILMMigrationChanges,
 } from '../../../elasticsearch/template/default_settings';
 
-import { stepInstallPrecheck } from './step_install_precheck';
 import { ensureFleetGlobalEsAssets } from '../../../../setup/ensure_fleet_global_es_assets';
+
+import { stepInstallPrecheck } from './step_install_precheck';
 
 jest.mock('../../../..');
 jest.mock('../../../../setup/ensure_fleet_global_es_assets');

@@ -53,9 +53,8 @@ test.describe('Workflows Navigation', { tag: ['@ess', '@svlSecurity'] }, () => {
     // Verify "Get Started with Workflows" or workflow list is present
     const getStartedHeading = page.getByRole('heading', { name: /get started with workflows/i });
     const workflowsHeading = page.getByRole('heading', { name: /workflows/i, level: 1 });
-    
+
     // At least one should be visible
     await expect(getStartedHeading.or(workflowsHeading)).toBeVisible();
   });
 });
-
