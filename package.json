@@ -1970,7 +1970,7 @@
     "http2-proxy": "^5.0.53",
     "http2-wrapper": "^2.2.1",
     "ignore": "^7.0.5",
-    "ink": "^5.2.1",
+    "ink": "^6.5.1",
     "jest": "^29.7.0",
     "jest-canvas-mock": "^2.5.2",
     "jest-cli": "^29.7.0",
