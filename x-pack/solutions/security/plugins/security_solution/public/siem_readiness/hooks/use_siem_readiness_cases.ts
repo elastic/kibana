@@ -11,22 +11,27 @@ import { useState, useEffect } from 'react';
 interface CaseFlyoutParams {
   title: string;
   description: string;
+  tags: string[];
 }
 
 export const useSiemReadinessCases = () => {
   const { services } = useKibana();
   const { useCasesAddToNewCaseFlyout } = services.cases.hooks;
 
-  const [formParams, setFormParams] = useState({
-    title: '',
-    description: '',
-  });
+  const [formParams, setFormParams] = useState({});
 
   const genericCase = useCasesAddToNewCaseFlyout({
     initialValue: formParams,
   });
 
-  const openFlyout = (flyoutParams: { title: string; description: string }) => {
+  const openNewCaseFlyout = (flyoutParams: CaseFlyoutParams) => {
+    // TODO: siem-readiness, fix this workaround
+    if (flyoutParams.description) {
+      sessionStorage.setItem(
+        'cases.securitySolution.createCase.description.markdownEditor',
+        flyoutParams.description
+      );
+    }
     setFormParams(flyoutParams);
   };
 
@@ -34,10 +39,11 @@ export const useSiemReadinessCases = () => {
     if (formParams.title || formParams.description) {
       genericCase.open();
     }
-    // @ts-ignore
+    // ignoring other changes to prevent the flyout from reopening
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formParams]);
 
   return {
-    openFlyout,
+    openNewCaseFlyout,
   };
 };
