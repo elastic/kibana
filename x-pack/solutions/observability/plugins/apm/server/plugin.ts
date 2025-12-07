@@ -51,7 +51,7 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
-import { registerAgentTools } from './agent_builder/tools';
+import { registerTools } from './agent_builder/tools';
 import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
 
 export class APMPlugin
@@ -251,7 +251,7 @@ export class APMPlugin
     );
 
     if (plugins.onechat) {
-      registerAgentTools({
+      registerTools({
         core,
         plugins,
         logger: this.logger!.get('observabilityAgentBuilder'),
