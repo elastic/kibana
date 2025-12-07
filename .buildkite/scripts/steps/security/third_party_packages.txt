@@ -22,3 +22,6 @@ magic-bytes.js
 @axe-core/playwright
 @opentelemetry/exporter-trace-otlp-grpc
 ink
+@hey-api/openapi-ts
+vscode-languageserver-textdocument
+yaml-language-server

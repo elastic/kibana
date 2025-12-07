@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
@@ -61,6 +61,7 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
+import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -138,7 +139,7 @@ export const WorkflowYAMLEditor = ({
   onStepRun,
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications } = useKibana().services;
+  const { notifications, http } = useKibana().services;
 
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
@@ -199,6 +200,7 @@ export const WorkflowYAMLEditor = ({
   // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
   useEffect(() => {
     interceptMonacoYamlProvider();
+    interceptMonacoYamlHoverProvider();
   }, []);
 
   // Validation
@@ -325,9 +327,6 @@ export const WorkflowYAMLEditor = ({
 
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
-
-        // Monaco YAML hover is now disabled via configuration (hover: false)
-        // The unified hover provider will handle all hover content including validation errors
 
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
@@ -531,11 +530,12 @@ export const WorkflowYAMLEditor = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 css={styles.downloadSchemaButton}
-                iconType="download"
+                iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
                 size="xs"
                 aria-label="Download JSON schema for debugging"
                 onClick={downloadSchema}
                 tabIndex={0}
+                disabled={workflowJsonSchemaStrict === null}
                 onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.currentTarget.click();
