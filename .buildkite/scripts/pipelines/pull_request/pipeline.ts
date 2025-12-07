@@ -49,12 +49,8 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
       return;
     }
 
-    // TODO: Temporary workaround to only have Storybook builds in the PR pipeline
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', false));
-    emitPipeline(pipeline);
-    return;
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
