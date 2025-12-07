@@ -10,8 +10,10 @@ export interface IndexInfo {
   docs: number;
 }
 
+type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+
 export interface CategoryGroup {
-  category: 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+  category: MainCategories | string;
   indices: IndexInfo[];
 }
 

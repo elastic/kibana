@@ -14,7 +14,7 @@ import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
 const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'];
 const GET_INSTALLED_INTEGRATIONS_QUERY_KEY = ['installed-integrations'];
 
-export const useReadinessTasks = () => {
+export const useSiemReadinessApi = () => {
   const { http } = useKibana<CoreStart>().services;
 
   const getReadinessCategories = useQuery({
