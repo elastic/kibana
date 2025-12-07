@@ -37,7 +37,7 @@ export interface NavigationPublicStart {
       visible,
     }: {
       config: TopNavMenuConfigBeta;
-      visible: boolean;
+      visible?: boolean;
     }) => React.ReactElement;
     createTopNavWithCustomContext: (
       customUnifiedSearch?: UnifiedSearchPublicPluginStart,

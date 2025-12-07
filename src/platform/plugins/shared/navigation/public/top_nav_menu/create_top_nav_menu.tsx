@@ -25,36 +25,42 @@ const LazyTopNavMenuBeta = lazy(async () => {
   return { default: TopNavMenuBeta };
 });
 
+export function createTopNavBeta() {
+  return ({ config, visible }: { config: TopNavMenuConfigBeta; visible?: boolean }) => {
+    return (
+      <I18nProvider>
+        <Suspense>
+          <LazyTopNavMenuBeta visible={visible} config={config} />
+        </Suspense>
+      </I18nProvider>
+    );
+  };
+}
+
 export function createTopNav(
+  /**
+   * @deprecated TopNavMenuBeta will decouple from UnifiedSearch, so this parameter
+   * will be removed once TopNavMenuBeta becomes the default.
+   */
   unifiedSearch: UnifiedSearchPublicPluginStart,
   /**
    * @deprecated TopNavMenuBeta will not allow for reigstering global menu items, so this parameter
    * will be removed once TopNavMenuBeta becomes the default.
    */
-  extraConfig: RegisteredTopNavMenuData[],
-  isBeta?: boolean
+  extraConfig: RegisteredTopNavMenuData[]
 ) {
   return <QT extends AggregateQuery | Query = Query>(props: TopNavMenuProps<QT>) => {
     const relevantConfig = extraConfig.filter(
       (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
     );
+    const config = (props.config || []).concat(relevantConfig);
 
-    const TopNavMenuComponent = isBeta ? (
-      <Suspense>
-        <LazyTopNavMenuBeta visible={props.visible} config={props.config as TopNavMenuConfigBeta} />
-      </Suspense>
-    ) : (
-      <Suspense>
-        <LazyTopNavMenu
-          {...(props as any)}
-          unifiedSearch={unifiedSearch}
-          config={((props.config as TopNavMenuProps<QT>['config']) || []).concat(
-            relevantConfig as RegisteredTopNavMenuData[]
-          )}
-        />
-      </Suspense>
+    return (
+      <I18nProvider>
+        <Suspense>
+          <LazyTopNavMenu {...(props as any)} unifiedSearch={unifiedSearch} config={config} />
+        </Suspense>
+      </I18nProvider>
     );
-
-    return <I18nProvider>{TopNavMenuComponent}</I18nProvider>;
   };
 }
