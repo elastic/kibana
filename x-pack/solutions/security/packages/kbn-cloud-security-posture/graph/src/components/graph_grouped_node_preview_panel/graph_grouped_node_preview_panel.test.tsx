@@ -23,6 +23,7 @@ import {
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
 
 // Mock the hook
 jest.mock('./use_fetch_document_details');
@@ -275,6 +276,53 @@ describe('GraphGroupedNodePreviewPanel', () => {
         await waitFor(() => {
           expect(screen.getByLabelText(/Page 2/)).toBeInTheDocument();
         });
+      });
+    });
+
+    describe('Remount Behavior', () => {
+      it('should always reset to page 1 on mount, even with valid pageIndex in localStorage (grouped-entities)', () => {
+        const entityItems = Array.from({ length: 50 }, (_, i) =>
+          createEntityItem({ id: `entity-${i}` })
+        );
+
+        // Simulate localStorage with valid pageIndex=1 (within bounds for 50 items with pageSize=20)
+        // Before fix: would load pageIndex=1 from localStorage
+        // After fix: always resets to pageIndex=0 on mount
+        localStorage.setItem(
+          GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY,
+          JSON.stringify({ pageIndex: 1, pageSize: 20 })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+
+        // Should ALWAYS start at page 1 (pageIndex=0), regardless of localStorage
+        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
+        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 20');
+      });
+
+      it('should always reset to page 1 on mount with stale pageIndex in localStorage (grouped-events)', () => {
+        // Simulate stale localStorage with high pageIndex
+        localStorage.setItem(
+          GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY,
+          JSON.stringify({ pageIndex: 10, pageSize: 10 })
+        );
+
+        const mockData = {
+          page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }],
+          total: 5,
+        };
+        mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult({ data: mockData }));
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        // Should show content and call hook with pageIndex=0 (server-side pagination)
+        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            options: expect.objectContaining({ pageIndex: 0 }),
+          })
+        );
       });
     });
 

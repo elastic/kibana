@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-const GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY =
+export const GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY =
   'securitySolution.graphGroupedNodePreview.pagination';
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -47,12 +47,20 @@ export const usePagination = (nonFetchedDocumentsCount: number): Pagination => {
     }
   );
 
-  const [pagination, setPaginationState] = useState<PaginationState>(
-    storedPagination || {
+  // Always start from the first page when component mounts, but preserve pageSize from localStorage
+  const [pagination, setPaginationState] = useState<PaginationState>({
+    pageIndex: STARTING_PAGE_INDEX,
+    pageSize: storedPagination?.pageSize || DEFAULT_PAGE_SIZE,
+  });
+
+  // Persist the initial page reset to localStorage on mount
+  useEffect(() => {
+    setStoredPagination({
       pageIndex: STARTING_PAGE_INDEX,
-      pageSize: DEFAULT_PAGE_SIZE,
-    }
-  );
+      pageSize: pagination.pageSize,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Validate and reset pagination for client-side paginated documents (entities)
   // This only runs when nonFetchedDocumentsCount > 0, which means we have documents in memory.
