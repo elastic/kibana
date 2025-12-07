@@ -8,7 +8,7 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type {
   WorkflowInputArraySchema,
   WorkflowInputBooleanSchema,

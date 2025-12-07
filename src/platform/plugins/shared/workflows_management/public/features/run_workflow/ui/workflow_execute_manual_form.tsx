@@ -18,7 +18,7 @@ import {
   normalizeInputsToJsonSchema,
   resolveRef,
 } from '@kbn/workflows/spec/lib/input_conversion';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 

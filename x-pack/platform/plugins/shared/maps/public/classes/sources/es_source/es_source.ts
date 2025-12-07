@@ -220,6 +220,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (requestMeta.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
       searchSource.setField('query', requestMeta.query);
     }
+    if (requestMeta.projectRouting) {
+      searchSource.setField('projectRouting', requestMeta.projectRouting);
+    }
 
     const parents = [];
     if (requestMeta.sourceQuery && !isFeatureEditorOpenForLayer) {

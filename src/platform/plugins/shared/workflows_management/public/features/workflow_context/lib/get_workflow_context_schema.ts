@@ -12,7 +12,7 @@ import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { inferZodType } from '../../../../common/lib/zod';
 

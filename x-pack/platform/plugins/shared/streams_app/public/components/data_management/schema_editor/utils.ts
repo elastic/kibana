@@ -7,8 +7,44 @@
 
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { MappedSchemaField, SchemaEditorField, SchemaField } from './types';
+
+export const getGeoPointSuggestion = ({
+  fieldName,
+  fields,
+  streamType,
+}: {
+  fieldName: string;
+  fields?: SchemaEditorField[];
+  streamType: 'classic' | 'wired';
+}) => {
+  if (streamType !== 'classic' || !fields) {
+    return null;
+  }
+
+  const match = fieldName.match(/^(.*)\.(lat|lon)$/);
+  if (!match) {
+    return null;
+  }
+
+  const baseName = match[1];
+  const suffix = match[2];
+  const siblingSuffix = suffix === 'lat' ? 'lon' : 'lat';
+  const siblingName = `${baseName}.${siblingSuffix}`;
+
+  const siblingExists = fields.some((f) => f.name === siblingName && f.status === 'unmapped');
+  const baseExistsAsGeoPoint = fields.some(
+    (f) => f.name === baseName && f.type === 'geo_point' && f.status === 'mapped'
+  );
+
+  if (siblingExists && !baseExistsAsGeoPoint) {
+    return { base: baseName };
+  }
+
+  return null;
+};
 
 export const convertToFieldDefinitionConfig = (
   field: MappedSchemaField
@@ -52,7 +88,7 @@ export function isFieldUncommitted(field: SchemaEditorField, storedFields: Schem
 export const buildSchemaSavePayload = (
   definition: Streams.ingest.all.GetResponse,
   fields: SchemaField[]
-): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
+): { ingest: IngestUpsertRequest } => {
   const mappedFields = fields
     .filter((field) => field.status === 'mapped')
     .reduce((acc, field) => {
@@ -63,6 +99,7 @@ export const buildSchemaSavePayload = (
   return {
     ingest: {
       ...definition.stream.ingest,
+      processing: omit(definition.stream.ingest.processing, 'updated_at'),
       ...(Streams.WiredStream.GetResponse.is(definition)
         ? {
             wired: {

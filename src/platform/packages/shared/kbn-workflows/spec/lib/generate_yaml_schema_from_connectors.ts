@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './input_conversion';
-import type { ConnectorContractUnion } from '../..';
+import { type ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -27,52 +27,10 @@ import {
   WorkflowSchemaForAutocomplete,
 } from '../schema';
 
-function generateStepSchemaForConnector(
-  connector: ConnectorContractUnion,
-  stepSchema: z.ZodType,
-  loose: boolean = false
-) {
-  return BaseConnectorStepSchema.extend({
-    type: z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
-    with: connector.paramsSchema,
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
-  });
-}
-
-function createRecursiveStepSchema(
-  connectors: ConnectorContractUnion[],
-  loose: boolean = false
-): z.ZodType {
-  // Use a simpler approach to avoid infinite recursion during validation
-  // Create the step schema with limited recursion depth
-  const stepSchema: z.ZodType = z.lazy(() => {
-    // Create step schemas with the recursive reference
-    // Use the same stepSchema reference to maintain consistency
-    const forEachSchema = getForEachStepSchema(stepSchema, loose);
-    const ifSchema = getIfStepSchema(stepSchema, loose);
-    const parallelSchema = getParallelStepSchema(stepSchema, loose);
-    const mergeSchema = getMergeStepSchema(stepSchema, loose);
-    const httpSchema = getHttpStepSchema(stepSchema, loose);
-
-    const connectorSchemas = connectors.map((c) =>
-      generateStepSchemaForConnector(c, stepSchema, loose)
-    );
-
-    // Return discriminated union with all step types
-    // This creates proper JSON schema validation that Monaco YAML can handle
-    return z.discriminatedUnion('type', [
-      forEachSchema,
-      ifSchema,
-      parallelSchema,
-      mergeSchema,
-      WaitStepSchema,
-      httpSchema,
-      ...connectorSchemas,
-    ]);
-  });
-
-  return stepSchema;
+export function getStepId(stepName: string): string {
+  // Using step name as is, don't do any escaping to match the workflow engine behavior
+  // Leaving this function in case we'd to change behaviour in future.
+  return stepName;
 }
 
 export function generateYamlSchemaFromConnectors(
@@ -120,24 +78,78 @@ export function generateYamlSchemaFromConnectors(
     steps: z.array(recursiveStepSchema),
   });
 
-  return baseWorkflowSchema.pipe(
-    z.object({
-      version: z.literal('1'),
-      name: z.string(),
-      description: z.string().optional(),
-      settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-      enabled: z.boolean(),
-      tags: z.array(z.string()).optional(),
-      triggers: z.array(TriggerSchema),
-      inputs: WorkflowInputsJsonSchema.optional(),
-      consts: WorkflowConstsSchema.optional(),
-      steps: z.array(recursiveStepSchema),
-    })
-  );
+  return baseWorkflowSchema.transform((data) => {
+    // Transform inputs from legacy array format to JSON Schema format
+    let normalizedInputs: z.infer<typeof WorkflowInputsJsonSchema> | undefined;
+    if (data.inputs) {
+      if ('properties' in data.inputs && typeof data.inputs === 'object' && !Array.isArray(data.inputs)) {
+        normalizedInputs = data.inputs as z.infer<typeof WorkflowInputsJsonSchema>;
+      } else if (Array.isArray(data.inputs)) {
+        normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+      }
+    }
+
+    return {
+      version: '1' as const,
+      name: data.name,
+      description: data.description,
+      settings: data.settings,
+      enabled: data.enabled,
+      tags: data.tags,
+      triggers: data.triggers,
+      inputs: normalizedInputs,
+      consts: data.consts,
+      steps: data.steps,
+    };
+  });
 }
 
-export function getStepId(stepName: string): string {
-  // Using step name as is, don't do any escaping to match the workflow engine behavior
-  // Leaving this function in case we'd to change behaviour in future.
-  return stepName;
+function createRecursiveStepSchema(
+  connectors: ConnectorContractUnion[],
+  loose: boolean = false
+): z.ZodType {
+  // Use a simpler approach to avoid infinite recursion during validation
+  // Create the step schema with limited recursion depth
+  const stepSchema: z.ZodType = z.lazy(() => {
+    // Create step schemas with the recursive reference
+    // Use the same stepSchema reference to maintain consistency
+    const forEachSchema = getForEachStepSchema(stepSchema, loose);
+    const ifSchema = getIfStepSchema(stepSchema, loose);
+    const parallelSchema = getParallelStepSchema(stepSchema, loose);
+    const mergeSchema = getMergeStepSchema(stepSchema, loose);
+    const httpSchema = getHttpStepSchema(stepSchema, loose);
+
+    const connectorSchemas = connectors.map((c) =>
+      generateStepSchemaForConnector(c, stepSchema, loose)
+    );
+
+    // Return discriminated union with all step types
+    // This creates proper JSON schema validation that Monaco YAML can handle
+    return z.discriminatedUnion('type', [
+      forEachSchema,
+      ifSchema,
+      parallelSchema,
+      mergeSchema,
+      WaitStepSchema,
+      httpSchema,
+      ...connectorSchemas,
+    ]);
+  });
+
+  return stepSchema;
+}
+
+function generateStepSchemaForConnector(
+  connector: ConnectorContractUnion,
+  stepSchema: z.ZodType,
+  loose: boolean = false
+) {
+  return BaseConnectorStepSchema.extend({
+    type: connector.description
+      ? z.literal(connector.type).describe(connector.description)
+      : z.literal(connector.type),
+    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
+    with: connector.paramsSchema,
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
 }

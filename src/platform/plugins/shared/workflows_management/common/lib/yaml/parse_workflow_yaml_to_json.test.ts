@@ -9,8 +9,8 @@
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-import type { SafeParseReturnType } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import type { SafeParseReturnType } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
 
 describe('parseWorkflowYamlToJSON', () => {

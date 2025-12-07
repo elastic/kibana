@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
 import { isValidJsonSchema } from './lib/validate_json_schema';
 
@@ -98,7 +98,7 @@ export const ScheduledTriggerSchema = z.object({
       rrule: z.object({
         freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
         interval: z.number().int().positive(),
-        tzid: z.enum(moment.tz.names() as [string, ...string[]]).default('UTC'),
+        tzid: z.enum(moment.tz.names() as [string, ...string[]]).optional().default('UTC'),
         dtstart: z.string().optional(),
         byhour: z.array(z.number().int().min(0).max(23)).optional(),
         byminute: z.array(z.number().int().min(0).max(59)).optional(),
@@ -520,39 +520,34 @@ export const WorkflowSchema = z
         // Legacy array format (for backward compatibility)
         z.array(WorkflowInputSchema),
       ])
-      .optional()
-      .transform((inputs) => {
-        // Transform legacy array format to new JSON Schema format
-        if (!inputs) {
-          return undefined;
-        }
-        // If it's already in the new format (has properties), return as-is
-        if ('properties' in inputs && typeof inputs === 'object' && !Array.isArray(inputs)) {
-          return inputs as z.infer<typeof WorkflowInputsJsonSchema>;
-        }
-        // If it's an array (legacy format), convert it
-        if (Array.isArray(inputs)) {
-          return convertLegacyInputsToJsonSchema(inputs);
-        }
-        return undefined;
-      }),
+      .optional(),
     consts: WorkflowConstsSchema.optional(),
     steps: z.array(StepSchema).min(1),
   })
-  .pipe(
-    z.object({
-      version: z.literal('1'),
-      name: z.string(),
-      description: z.string().optional(),
-      settings: WorkflowSettingsSchema.optional(),
-      enabled: z.boolean(),
-      tags: z.array(z.string()).optional(),
-      triggers: z.array(TriggerSchema),
-      inputs: WorkflowInputsJsonSchema.optional(),
-      consts: WorkflowConstsSchema.optional(),
-      steps: z.array(StepSchema),
-    })
-  );
+  .transform((data) => {
+    // Transform inputs from legacy array format to JSON Schema format
+    let normalizedInputs: z.infer<typeof WorkflowInputsJsonSchema> | undefined;
+    if (data.inputs) {
+      if ('properties' in data.inputs && typeof data.inputs === 'object' && !Array.isArray(data.inputs)) {
+        normalizedInputs = data.inputs as z.infer<typeof WorkflowInputsJsonSchema>;
+      } else if (Array.isArray(data.inputs)) {
+        normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+      }
+    }
+
+    return {
+      version: '1' as const,
+      name: data.name,
+      description: data.description,
+      settings: data.settings,
+      enabled: data.enabled,
+      tags: data.tags,
+      triggers: data.triggers,
+      inputs: normalizedInputs,
+      consts: data.consts,
+      steps: data.steps,
+    };
+  });
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 

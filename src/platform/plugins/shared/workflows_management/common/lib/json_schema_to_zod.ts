@@ -9,7 +9,7 @@
 
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { JSONSchema7 } from 'json-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Converts a JSON Schema string type to a Zod string schema
