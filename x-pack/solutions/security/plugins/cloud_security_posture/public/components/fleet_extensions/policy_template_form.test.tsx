@@ -1726,7 +1726,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in ess gcp environment', async () => {
+    it('should render setup technology selector for AWS and showcloud connectors in ess gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1768,15 +1768,14 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in ess azure environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in ess azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1818,11 +1817,10 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1878,7 +1876,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and should hide cloud connectors in serverless gcp environment', async () => {
+    it('should render setup technology selector for AWS and should show cloud connectors in serverless gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1923,15 +1921,14 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
-    it('should render setup technology selector for AWS and should hide cloud connectors in serverless azure environment', async () => {
+    it('should render setup technology selector for AWS and should show cloud connectors in serverless azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1976,11 +1973,10 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 

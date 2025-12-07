@@ -78,7 +78,7 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/utility-types'
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/synthtrace-client'
   - '@kbn/streamlang'
   - '@kbn/failure-store-modal'
   - '@kbn/data-quality'
@@ -95,6 +95,8 @@ dependsOn:
   - '@kbn/discover-contextual-components'
   - '@kbn/es-types'
   - '@kbn/esql-utils'
+  - '@kbn/tooling-log'
+  - '@kbn/inference-common'
   - '@kbn/core-chrome-navigation'
 tags:
   - plugin

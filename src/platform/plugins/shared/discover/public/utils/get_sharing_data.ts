@@ -22,8 +22,8 @@ import {
   isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import { isEqualFilters } from '../application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
+import { isEqualFilters } from '../application/main/state_management/utils/state_comparators';
 
 /**
  * Preparing data to share the current state as link or CSV/Report

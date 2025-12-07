@@ -1211,6 +1211,59 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should throw a HostedAgentPolicyRestrictionRelatedError if user tries to update namespace for a managed policy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { is_managed: true },
+            id: 'mocked',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          namespace: 'test-namespace',
+        })
+      ).rejects.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
+      );
+    });
+    it('should not throw if user tries to update namespace for a managed policy with option force', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { is_managed: true },
+            id: 'mocked',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(
+          soClient,
+          esClient,
+          'test-id',
+          {
+            namespace: 'test-namespace',
+          },
+          { force: true }
+        )
+      ).resolves.not.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
+      );
+    });
+
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

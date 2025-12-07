@@ -31,6 +31,7 @@ export const DragBoxAnnotation: FC<Props> = ({ transformMatrix, width, height })
 );
 
 DragBoxAnnotation.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,

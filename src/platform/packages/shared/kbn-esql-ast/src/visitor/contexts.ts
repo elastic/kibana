@@ -37,7 +37,6 @@ import type {
   ESQLOrderExpression,
   ESQLParens,
   ESQLSource,
-  ESQLStringLiteral,
 } from '../types';
 import type {
   CommandVisitorInput,
@@ -107,7 +106,7 @@ export class VisitorContext<
     const args: ESQLAstExpressionNode[] = [];
 
     for (const arg of children(node)) {
-      args.push(arg);
+      args.push(arg as ESQLAstExpression);
     }
 
     return args;
@@ -702,7 +701,7 @@ export class MapEntryExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLMapEntry> {
-  public key(): ESQLStringLiteral {
+  public key(): ESQLAstExpression {
     return this.node.key;
   }
 

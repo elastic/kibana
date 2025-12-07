@@ -7,7 +7,7 @@
 
 import type { UrlObject } from 'url';
 import { format } from 'url';
-import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProviderContext) {

@@ -31,14 +31,9 @@ export const GreyNoiseConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  authTypes: [
-    {
-      type: 'api_key_header',
-      defaults: {
-        headerField: 'key',
-      },
-    },
-  ],
+  auth: {
+    types: [{ type: 'api_key_header', defaults: { headerField: 'key' } }],
+  },
 
   actions: {
     getIpContext: {

@@ -30,7 +30,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ButtonGroupField, ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { failureStorePeriodOptions } from '../constants';
+import { getFailureStorePeriodOptions } from '../constants';
 import { splitSizeAndUnits } from '../utils';
 import { RetentionPeriodField } from '../retention_period_field/retention_period_field';
 import { editFailureStoreFormSchema } from './schema';
@@ -65,6 +65,7 @@ interface Props {
   };
   showIlmDescription?: boolean;
   canShowDisableLifecycle?: boolean;
+  disableButtonLabel?: string;
 }
 
 export const FailureStoreModal: FunctionComponent<Props> = ({
@@ -74,6 +75,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
   showIlmDescription = true,
   inheritOptions,
   canShowDisableLifecycle = false,
+  disableButtonLabel,
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -163,6 +165,11 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
 
   const isCustomPeriod = periodType === PERIOD_TYPE.CUSTOM;
   const prevPeriodTypeRef = useRef(periodType);
+
+  const periodOptions = getFailureStorePeriodOptions(disableButtonLabel);
+  const filteredPeriodOptions = canShowDisableLifecycle
+    ? periodOptions
+    : periodOptions.filter((option) => option.id !== PERIOD_TYPE.DISABLED_LIFECYCLE);
 
   // Synchronize form values when period type changes
   useEffect(() => {
@@ -273,11 +280,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                   defaultMessage: 'Failure store retention',
                 })}
                 euiFieldProps={{
-                  options: canShowDisableLifecycle
-                    ? failureStorePeriodOptions
-                    : failureStorePeriodOptions.filter(
-                        (option) => option.id !== PERIOD_TYPE.DISABLED_LIFECYCLE
-                      ),
+                  options: filteredPeriodOptions,
                   'data-test-subj': 'selectFailureStorePeriodType',
                   isDisabled: inherit,
                 }}
