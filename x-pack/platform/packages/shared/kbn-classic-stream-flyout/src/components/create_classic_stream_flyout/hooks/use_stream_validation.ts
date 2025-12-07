@@ -34,24 +34,23 @@ export const useStreamValidation = ({
   onValidate,
   debounceMs = DEFAULT_VALIDATION_DEBOUNCE_MS,
 }: UseStreamValidationParams): UseStreamValidationReturn => {
-  const { streamName, validationMode } = formState;
+  const { streamName, validation } = formState;
 
-  const lastStreamNameRef = useRef<string>(streamName); // Initialize from state
+  const lastStreamNameRef = useRef<string>(streamName);
   const onValidateRef = useRef(onValidate);
   onValidateRef.current = onValidate;
 
   const {
-    getAbortController: getCreateAbortController,
-    isAborted: isCreateAborted,
-    abort: abortCreate,
+    getAbortController: getCreateValidationAbortController,
+    isAborted: isCreateValidationAborted,
+    abort: abortCreateValidation,
   } = useAbortController();
   const {
-    getAbortController: getDebouncedAbortController,
-    isAborted: isDebouncedAborted,
-    abort: abortDebounced,
+    getAbortController: getDebouncedValidationAbortController,
+    isAborted: isDebouncedValidationAborted,
+    abort: abortDebouncedValidation,
   } = useAbortController();
 
-  // Core validation runner - handles the actual validation API call and state updates
   const runValidation = useCallback(
     async (
       name: string,
@@ -65,8 +64,9 @@ export const useStreamValidation = ({
           abortController.signal
         );
 
+        // Race condition: abort might have been called while validation was in progress.
+        // Don't update state if aborted - the component may have started a new validation.
         if (isAbortedFn(abortController)) {
-          // Aborted - don't dispatch anything, caller will handle state
           return false;
         }
 
@@ -80,36 +80,29 @@ export const useStreamValidation = ({
 
         return result.errorType === null;
       } catch (error) {
+        // Network/validation error occurred. Only dispatch if NOT aborted
         if (!isAbortedFn(abortController)) {
-          // Real error (not abort) - clear validation state
           dispatch({ type: 'ABORT_VALIDATION' });
         }
-        // If aborted, don't dispatch anything - let the new validation manage state
+        // if aborted, the newer validation should handle state, not this stale one.
         return false;
       }
     },
     [dispatch]
   );
 
-  // Debounced validation flow - only triggered in Live Validation Mode (when there's an active error)
-  const { trigger: triggerDebouncedValidation, cancel: cancelDebounced } = useDebouncedCallback(
-    async (name: string) => {
-      // Skip if name changed since this was scheduled
+  // Debounce validation calls to avoid excessive requests while user is typing
+  const { trigger: triggerDebouncedValidation, cancel: cancelDebouncedValidationTimer } =
+    useDebouncedCallback(async (name: string) => {
+      // Ensure we validate the current stream name, not a stale one
       if (lastStreamNameRef.current !== name) {
         return;
       }
 
-      // Debounced validation flow - triggered in LIVE mode
-      const controller = getDebouncedAbortController();
-      await runValidation(name, controller, isDebouncedAborted);
+      const controller = getDebouncedValidationAbortController();
+      await runValidation(name, controller, isDebouncedValidationAborted);
+    }, debounceMs);
 
-      // If validation succeeds, we'll transition back to IDLE via COMPLETE_VALIDATION
-      // (no special handling needed here)
-    },
-    debounceMs
-  );
-
-  // Input change handler - state machine logic
   const handleStreamNameChange = useCallback(
     (newStreamName: string) => {
       // Skip if name hasn't changed
@@ -121,30 +114,29 @@ export const useStreamValidation = ({
         lastStreamNameRef.current !== '' && newStreamName !== lastStreamNameRef.current;
       lastStreamNameRef.current = newStreamName;
 
-      // Update form state
       dispatch({ type: 'SET_STREAM_NAME', payload: newStreamName });
 
-      // State machine: determine if we should validate based on current mode
+      // Skip validation when transitioning from initial empty state
       if (!hasNameChanged) {
         return;
       }
 
-      switch (validationMode) {
+      switch (validation.mode) {
         case 'idle':
           // IDLE mode: don't validate on typing
           break;
 
-        case 'submitting':
-          // SUBMITTING mode: user typed during Create validation
+        case 'create':
+          // CREATE mode: user typed during Create validation
           // Abort Create and return to IDLE (stop loader, no validation)
-          abortCreate();
+          abortCreateValidation();
           dispatch({ type: 'ABORT_VALIDATION' });
           break;
 
         case 'live':
           // LIVE mode: validate on every keystroke (with debounce)
-          abortDebounced();
-          cancelDebounced();
+          abortDebouncedValidation();
+          cancelDebouncedValidationTimer();
           dispatch({ type: 'START_DEBOUNCED_VALIDATION' });
           triggerDebouncedValidation(newStreamName);
           break;
@@ -152,43 +144,42 @@ export const useStreamValidation = ({
     },
     [
       dispatch,
-      validationMode,
-      abortCreate,
-      abortDebounced,
-      cancelDebounced,
+      validation.mode,
+      abortCreateValidation,
+      abortDebouncedValidation,
+      cancelDebouncedValidationTimer,
       triggerDebouncedValidation,
     ]
   );
 
   // Create handler - immediate validation triggered by create button
   const handleCreate = useCallback(async () => {
-    cancelDebounced();
-    abortDebounced();
+    cancelDebouncedValidationTimer();
+    abortDebouncedValidation();
 
     dispatch({ type: 'START_CREATE_VALIDATION' });
-    const controller = getCreateAbortController();
-    const isValid = await runValidation(streamName, controller, isCreateAborted);
+    const controller = getCreateValidationAbortController();
+    const isValid = await runValidation(streamName, controller, isCreateValidationAborted);
 
-    // Only call onCreate if validation succeeded AND wasn't aborted
-    if (isValid && !isCreateAborted(controller)) {
+    if (isValid && !isCreateValidationAborted(controller)) {
       onCreate(streamName);
     }
   }, [
-    cancelDebounced,
-    abortDebounced,
+    cancelDebouncedValidationTimer,
+    abortDebouncedValidation,
     dispatch,
-    getCreateAbortController,
+    getCreateValidationAbortController,
     runValidation,
-    isCreateAborted,
+    isCreateValidationAborted,
     streamName,
     onCreate,
   ]);
 
   const resetValidation = useCallback(() => {
-    abortCreate();
-    abortDebounced();
-    cancelDebounced();
-  }, [abortCreate, abortDebounced, cancelDebounced]);
+    abortCreateValidation();
+    abortDebouncedValidation();
+    cancelDebouncedValidationTimer();
+  }, [abortCreateValidation, abortDebouncedValidation, cancelDebouncedValidationTimer]);
 
   return {
     handleStreamNameChange,

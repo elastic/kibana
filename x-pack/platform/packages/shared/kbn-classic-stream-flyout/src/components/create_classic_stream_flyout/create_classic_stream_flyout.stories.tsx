@@ -341,7 +341,7 @@ export const WithValidation: Story = {
 };
 
 /**
- * Tests race condition scenarios with very slow network (5000ms delay).
+ * Tests race condition scenarios with very slow network (2500ms delay).
  *
  * To test the debounce bug:
  * 1. Select "multi-pattern-template" template and go to name step
@@ -354,7 +354,7 @@ export const WithValidation: Story = {
  */
 export const WithSlowValidation: Story = {
   render: () => {
-    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 5000);
+    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 2500);
     return (
       <CreateClassicStreamFlyout
         onClose={action('onClose')}

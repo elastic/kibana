@@ -58,10 +58,12 @@ describe('useStreamValidation', () => {
     it('SHOULD return initial state', () => {
       const { result } = setupHook();
 
-      expect(result.current.formState.validationError).toBe(null);
-      expect(result.current.formState.conflictingIndexPattern).toBeUndefined();
-      expect(result.current.formState.validationMode).toBe('idle');
-      expect(result.current.formState.isValidating).toBe(false);
+      expect(result.current.formState.validation).toEqual({
+        mode: 'idle',
+        isValidating: false,
+        validationError: null,
+        conflictingIndexPattern: undefined,
+      });
     });
   });
 
@@ -78,7 +80,7 @@ describe('useStreamValidation', () => {
       });
 
       expect(mockOnValidate).not.toHaveBeenCalled();
-      expect(result.current.formState.isValidating).toBe(false);
+      expect(result.current.formState.validation.isValidating).toBe(false);
     });
 
     it('SHOULD NOT trigger validation after Create completes (returns to IDLE)', async () => {
@@ -92,7 +94,7 @@ describe('useStreamValidation', () => {
       });
 
       // Should be in IDLE mode now
-      expect(result.current.formState.validationMode).toBe('idle');
+      expect(result.current.formState.validation.mode).toBe('idle');
 
       // Change name after Create - should NOT trigger validation (IDLE mode)
       act(() => {
@@ -100,7 +102,7 @@ describe('useStreamValidation', () => {
       });
 
       // Should not be validating
-      expect(result.current.formState.isValidating).toBe(false);
+      expect(result.current.formState.validation.isValidating).toBe(false);
 
       await act(async () => {
         await jest.advanceTimersByTimeAsync(300);
@@ -126,7 +128,7 @@ describe('useStreamValidation', () => {
       });
 
       // Validation error should be set immediately after awaiting
-      expect(result.current.formState.validationError).toBe('duplicate');
+      expect(result.current.formState.validation.validationError).toBe('duplicate');
 
       // Change name in Live Validation Mode
       act(() => {
@@ -159,7 +161,7 @@ describe('useStreamValidation', () => {
 
       // Wait for validation to complete and error to be set
       await waitFor(() => {
-        expect(result.current.formState.validationError).toBe('duplicate');
+        expect(result.current.formState.validation.validationError).toBe('duplicate');
       });
 
       // Change name in Live Validation Mode
@@ -168,8 +170,8 @@ describe('useStreamValidation', () => {
       });
 
       // Validation error should stay visible (not cleared) while validating
-      expect(result.current.formState.validationError).toBe('duplicate');
-      expect(result.current.formState.isValidating).toBe(true);
+      expect(result.current.formState.validation.validationError).toBe('duplicate');
+      expect(result.current.formState.validation.isValidating).toBe(true);
 
       // Advance timers to trigger debounced validation
       await act(async () => {
@@ -218,9 +220,9 @@ describe('useStreamValidation', () => {
         createPromise = result.current.handleCreate();
       });
 
-      // Verify we're in submitting mode
-      expect(result.current.formState.validationMode).toBe('submitting');
-      expect(result.current.formState.isValidating).toBe(true);
+      // Verify we're in CREATE mode
+      expect(result.current.formState.validation.mode).toBe('create');
+      expect(result.current.formState.validation.isValidating).toBe(true);
 
       // Change name to abort Create
       act(() => {
@@ -228,8 +230,8 @@ describe('useStreamValidation', () => {
       });
 
       // After changing name: should return to IDLE (no loader, no validation)
-      expect(result.current.formState.validationMode).toBe('idle');
-      expect(result.current.formState.isValidating).toBe(false);
+      expect(result.current.formState.validation.mode).toBe('idle');
+      expect(result.current.formState.validation.isValidating).toBe(false);
 
       // Advance timers to let the aborted Create validation complete
       await act(async () => {
@@ -253,8 +255,8 @@ describe('useStreamValidation', () => {
       expect(slowValidator).toHaveBeenCalledWith('test-stream', expect.any(AbortSignal));
 
       // Should still be in IDLE mode with no validation
-      expect(result.current.formState.validationMode).toBe('idle');
-      expect(result.current.formState.isValidating).toBe(false);
+      expect(result.current.formState.validation.mode).toBe('idle');
+      expect(result.current.formState.validation.isValidating).toBe(false);
     });
   });
 
@@ -270,8 +272,8 @@ describe('useStreamValidation', () => {
 
       expect(mockOnValidate).toHaveBeenCalledWith('test-stream', expect.any(AbortSignal));
       expect(mockOnCreate).toHaveBeenCalledWith('test-stream');
-      expect(result.current.formState.validationMode).toBe('idle'); // Success returns to IDLE
-      expect(result.current.formState.isValidating).toBe(false);
+      expect(result.current.formState.validation.mode).toBe('idle'); // Success returns to IDLE
+      expect(result.current.formState.validation.isValidating).toBe(false);
     });
 
     it('SHOULD set validation error and not call onCreate on validation failure', async () => {
@@ -287,7 +289,7 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      expect(result.current.formState.validationError).toBe('duplicate');
+      expect(result.current.formState.validation.validationError).toBe('duplicate');
       expect(mockOnCreate).not.toHaveBeenCalled();
     });
 
@@ -316,7 +318,7 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      expect(result.current.formState.validationError).toBe('empty');
+      expect(result.current.formState.validation.validationError).toBe('empty');
       expect(mockOnCreate).not.toHaveBeenCalled();
     });
 
@@ -334,8 +336,8 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      expect(result.current.formState.validationError).toBe('higherPriority');
-      expect(result.current.formState.conflictingIndexPattern).toBe('logs-*');
+      expect(result.current.formState.validation.validationError).toBe('higherPriority');
+      expect(result.current.formState.validation.conflictingIndexPattern).toBe('logs-*');
       expect(mockOnCreate).not.toHaveBeenCalled();
     });
 
@@ -355,7 +357,7 @@ describe('useStreamValidation', () => {
 
       // Wait for error to be set
       await waitFor(() => {
-        expect(result.current.formState.validationError).toBe('duplicate');
+        expect(result.current.formState.validation.validationError).toBe('duplicate');
       });
 
       // Change name to schedule debounced validation (Live Validation Mode)
@@ -364,7 +366,7 @@ describe('useStreamValidation', () => {
       });
 
       // Verify isValidating is true (debounced validation scheduled)
-      expect(result.current.formState.isValidating).toBe(true);
+      expect(result.current.formState.validation.isValidating).toBe(true);
 
       // Immediately call Create to cancel debounced validation before it executes
       await act(async () => {
@@ -395,7 +397,7 @@ describe('useStreamValidation', () => {
       });
 
       // Should abort validation and not call onCreate
-      expect(result.current.formState.isValidating).toBe(false);
+      expect(result.current.formState.validation.isValidating).toBe(false);
       expect(mockOnCreate).not.toHaveBeenCalled();
     });
 
@@ -454,7 +456,7 @@ describe('useStreamValidation', () => {
       });
 
       // Validation error should be set
-      expect(result.current.formState.validationError).toBe('duplicate');
+      expect(result.current.formState.validation.validationError).toBe('duplicate');
 
       // Clear previous calls
       jest.mocked(mockOnValidateWithError).mockClear();
@@ -498,8 +500,8 @@ describe('useStreamValidation', () => {
       });
 
       // Validation error should be set and mode should be LIVE
-      expect(result.current.formState.validationError).toBe('duplicate');
-      expect(result.current.formState.validationMode).toBe('live');
+      expect(result.current.formState.validation.validationError).toBe('duplicate');
+      expect(result.current.formState.validation.mode).toBe('live');
 
       // Change name
       act(() => {
@@ -561,7 +563,7 @@ describe('useStreamValidation', () => {
       });
 
       // Validation error should be set
-      expect(result.current.formState.validationError).toBe('duplicate');
+      expect(result.current.formState.validation.validationError).toBe('duplicate');
 
       // Clear mock calls
       jest.mocked(mockOnValidateWithError).mockClear();

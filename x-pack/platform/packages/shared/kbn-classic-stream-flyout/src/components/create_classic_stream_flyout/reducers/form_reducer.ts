@@ -8,22 +8,43 @@
 import type { ValidationErrorType } from '../../../utils';
 
 /**
- * Validation mode state machine:
+ * Validation state discriminated union - makes illegal states unrepresentable.
  *
- * IDLE (initial state)
- *   → User clicks Create → SUBMITTING
+ * State transitions:
  *
- * SUBMITTING (Create button validation in progress)
- *   → User types → LIVE (abort Create, start debounced validation, stay in validating state)
+ * IDLE (initial state - no validation on typing)
+ *   → User types → IDLE (no validation)
+ *   → User clicks Create → CREATE
+ *
+ * CREATE (Create button validation in progress - abort on typing)
+ *   → User types → IDLE (abort Create validation, don't start new validation)
  *   → Validation completes with error → LIVE
  *   → Validation completes without error → IDLE
  *
- * LIVE (validate on every keystroke - either because of error OR because user interrupted Create)
- *   → User types → LIVE (stays in LIVE, validates again with debounce)
+ * LIVE (validate on every keystroke - has validation errors)
+ *   → User types → LIVE (debounced validation)
  *   → Validation completes without error → IDLE
  *   → User changes pattern/template → IDLE (reset)
  */
-export type ValidationMode = 'idle' | 'submitting' | 'live';
+export type ValidationState =
+  | {
+      mode: 'idle';
+      isValidating: false;
+      validationError: null;
+      conflictingIndexPattern: undefined;
+    }
+  | {
+      mode: 'create';
+      isValidating: true;
+      validationError: null;
+      conflictingIndexPattern: undefined;
+    }
+  | {
+      mode: 'live';
+      isValidating: boolean; // Can be true (validating) or false (error visible, not currently validating)
+      validationError: ValidationErrorType; // Must have an error in live mode
+      conflictingIndexPattern: string | undefined;
+    };
 
 export interface FormState {
   // User inputs
@@ -32,13 +53,8 @@ export interface FormState {
   selectedIndexPattern: string;
   streamNameParts: string[]; // Wildcard replacement values
 
-  // Validation state machine
-  validationMode: ValidationMode;
-  isValidating: boolean; // True when async validation is in progress
-
-  // Validation results
-  validationError: ValidationErrorType;
-  conflictingIndexPattern: string | undefined;
+  // Validation state
+  validation: ValidationState;
 }
 
 export type FormAction =
@@ -84,63 +100,100 @@ export const formReducer = (state: FormState, action: FormAction): FormState => 
         ...state,
         selectedIndexPattern: action.payload,
         streamNameParts: [],
-        validationMode: 'idle',
-        isValidating: false,
-        validationError: null,
-        conflictingIndexPattern: undefined,
+        validation: {
+          mode: 'idle',
+          isValidating: false,
+          validationError: null,
+          conflictingIndexPattern: undefined,
+        },
       };
 
     case 'START_CREATE_VALIDATION':
       // User clicked Create button
       return {
         ...state,
-        validationMode: 'submitting',
-        isValidating: true,
+        validation: {
+          mode: 'create',
+          isValidating: true,
+          validationError: null,
+          conflictingIndexPattern: undefined,
+        },
       };
 
     case 'START_DEBOUNCED_VALIDATION':
-      // User typed during/after validation - enter LIVE mode (keeps validating on typing)
+      // User typed in LIVE mode - keep validating with debounce
+      // Type system ensures we're already in live mode
+      if (state.validation.mode !== 'live') {
+        return state;
+      }
       return {
         ...state,
-        validationMode: 'live',
-        isValidating: true,
+        validation: {
+          ...state.validation,
+          isValidating: true,
+        },
       };
 
     case 'COMPLETE_VALIDATION': {
       const { errorType, conflictingIndexPattern } = action.payload;
-      return {
-        ...state,
-        validationError: errorType,
-        conflictingIndexPattern,
-        isValidating: false,
-        // Stay in LIVE if error, return to IDLE if no error
-        validationMode: errorType !== null ? 'live' : 'idle',
-      };
+
+      if (errorType !== null) {
+        // Has error - enter LIVE mode
+        return {
+          ...state,
+          validation: {
+            mode: 'live',
+            isValidating: false,
+            validationError: errorType,
+            conflictingIndexPattern,
+          },
+        };
+      } else {
+        // No error - return to IDLE
+        return {
+          ...state,
+          validation: {
+            mode: 'idle',
+            isValidating: false,
+            validationError: null,
+            conflictingIndexPattern: undefined,
+          },
+        };
+      }
     }
 
     case 'ABORT_VALIDATION':
-      // Aborted due to template/pattern change - return to IDLE
+      // Aborted (e.g., user typed during Create) - return to IDLE
       return {
         ...state,
-        validationMode: 'idle',
-        isValidating: false,
+        validation: {
+          mode: 'idle',
+          isValidating: false,
+          validationError: null,
+          conflictingIndexPattern: undefined,
+        },
       };
 
     case 'CLEAR_VALIDATION_ERROR':
       return {
         ...state,
-        validationError: null,
-        conflictingIndexPattern: undefined,
+        validation: {
+          mode: 'idle',
+          isValidating: false,
+          validationError: null,
+          conflictingIndexPattern: undefined,
+        },
       };
 
     case 'RESET_VALIDATION':
-      // Manually reset to idle (e.g., when changing template/pattern)
       return {
         ...state,
-        validationMode: 'idle',
-        isValidating: false,
-        validationError: null,
-        conflictingIndexPattern: undefined,
+        validation: {
+          mode: 'idle',
+          isValidating: false,
+          validationError: null,
+          conflictingIndexPattern: undefined,
+        },
       };
 
     case 'RESET_FORM':
@@ -158,11 +211,11 @@ export const initialFormState: FormState = {
   selectedIndexPattern: '',
   streamNameParts: [],
 
-  // Validation state machine
-  validationMode: 'idle',
-  isValidating: false,
-
-  // Validation results
-  validationError: null,
-  conflictingIndexPattern: undefined,
+  // Validation state
+  validation: {
+    mode: 'idle',
+    isValidating: false,
+    validationError: null,
+    conflictingIndexPattern: undefined,
+  },
 };

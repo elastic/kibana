@@ -86,18 +86,13 @@ export const CreateClassicStreamFlyout = ({
   );
 
   const [formState, dispatch] = useReducer(formReducer, initialFormState);
-  const {
-    selectedTemplate,
-    selectedIndexPattern,
-    streamNameParts,
-    validationError,
-    conflictingIndexPattern,
-    isValidating,
-    validationMode,
-  } = formState;
+  const { selectedTemplate, selectedIndexPattern, streamNameParts, validation } = formState;
 
-  // Derive isSubmitting from validationMode for button state
-  const isSubmitting = validationMode === 'submitting';
+  // Derive props from validation state
+  const validationError = validation.validationError;
+  const conflictingIndexPattern = validation.conflictingIndexPattern;
+  const isValidating = validation.isValidating;
+  const isSubmitting = validation.mode === 'create';
 
   const { handleStreamNameChange, handleCreate, resetValidation } = useStreamValidation({
     formState,
@@ -108,46 +103,45 @@ export const CreateClassicStreamFlyout = ({
 
   const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 
+  const updateIndexPattern = useCallback(
+    (pattern: string) => {
+      dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern });
+      const wildcardCount = countWildcards(pattern);
+      const emptyParts = Array(wildcardCount).fill('');
+      dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: emptyParts });
+      const newStreamName = buildStreamName(pattern, emptyParts);
+      handleStreamNameChange(newStreamName);
+    },
+    [handleStreamNameChange]
+  );
+
   const handleTemplateSelect = useCallback(
     (templateName: string | null) => {
       resetValidation();
       dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: templateName });
 
-      // Initialize index pattern and parts for the selected template
       if (templateName) {
         const template = templates.find((t) => t.name === templateName);
         const firstPattern = template?.indexPatterns?.[0] || '';
         if (firstPattern) {
-          dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: firstPattern });
-          const wildcardCount = countWildcards(firstPattern);
-          dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: Array(wildcardCount).fill('') });
-          // Trigger validation with the new derived stream name
-          const newStreamName = buildStreamName(firstPattern, Array(wildcardCount).fill(''));
-          handleStreamNameChange(newStreamName);
+          updateIndexPattern(firstPattern);
         }
       }
     },
-    [resetValidation, templates, handleStreamNameChange]
+    [resetValidation, templates, updateIndexPattern]
   );
 
   const handleIndexPatternChange = useCallback(
     (pattern: string) => {
       resetValidation();
-      dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern });
-      // Reset parts to match new pattern wildcard count
-      const wildcardCount = countWildcards(pattern);
-      dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: Array(wildcardCount).fill('') });
-      // Trigger validation with the new derived stream name
-      const newStreamName = buildStreamName(pattern, Array(wildcardCount).fill(''));
-      handleStreamNameChange(newStreamName);
+      updateIndexPattern(pattern);
     },
-    [resetValidation, handleStreamNameChange]
+    [resetValidation, updateIndexPattern]
   );
 
   const handleStreamNamePartsChange = useCallback(
     (parts: string[]) => {
       dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: parts });
-      // Trigger validation with the new derived stream name
       if (selectedIndexPattern) {
         const newStreamName = buildStreamName(selectedIndexPattern, parts);
         handleStreamNameChange(newStreamName);
