@@ -10,12 +10,12 @@
 import type { JSONSchema7 } from 'json-schema';
 import type { z } from '@kbn/zod/v4';
 import type {
+  JsonModelSchema,
   WorkflowInputArraySchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
   WorkflowInputNumberSchema,
   WorkflowInputSchema,
-  WorkflowInputsJsonSchema,
   WorkflowInputStringSchema,
 } from '../schema';
 
@@ -26,7 +26,7 @@ type LegacyWorkflowInput =
   | z.infer<typeof WorkflowInputChoiceSchema>
   | z.infer<typeof WorkflowInputArraySchema>;
 
-type WorkflowInputsJsonSchemaType = z.infer<typeof WorkflowInputsJsonSchema>;
+type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;
 
 /**
  * Converts a legacy workflow input definition to a JSON Schema property
@@ -77,7 +77,7 @@ function convertLegacyInputToJsonSchemaProperty(input: LegacyWorkflowInput): JSO
  */
 export function convertLegacyInputsToJsonSchema(
   legacyInputs: Array<z.infer<typeof WorkflowInputSchema>>
-): WorkflowInputsJsonSchemaType {
+): JsonModelSchemaType {
   const properties: Record<string, JSONSchema7> = {};
   const required: string[] = [];
 
@@ -107,8 +107,8 @@ export function convertLegacyInputsToJsonSchema(
  * @returns The inputs in the new JSON Schema object format, or undefined if no inputs
  */
 export function normalizeInputsToJsonSchema(
-  inputs?: WorkflowInputsJsonSchemaType | Array<z.infer<typeof WorkflowInputSchema>>
-): WorkflowInputsJsonSchemaType | undefined {
+  inputs?: JsonModelSchemaType | Array<z.infer<typeof WorkflowInputSchema>>
+): JsonModelSchemaType | undefined {
   if (!inputs) {
     return undefined;
   }
@@ -127,7 +127,7 @@ export function normalizeInputsToJsonSchema(
       inputsWithProperties.properties !== null &&
       !Array.isArray(inputsWithProperties.properties)
     ) {
-      return inputs as WorkflowInputsJsonSchemaType;
+      return inputs as JsonModelSchemaType;
     }
   }
 

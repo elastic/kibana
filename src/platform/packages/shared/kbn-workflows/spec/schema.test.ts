@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowInputsJsonSchema, WorkflowSchema, WorkflowSchemaForAutocomplete } from './schema';
+import { JsonModelSchema, WorkflowSchema, WorkflowSchemaForAutocomplete } from './schema';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -134,7 +134,7 @@ describe('WorkflowSchemaForAutocomplete', () => {
   });
 });
 
-describe('WorkflowInputsJsonSchema', () => {
+describe('JsonModelSchema', () => {
   it('should validate a simple JSON Schema inputs object', () => {
     const inputs = {
       properties: {
@@ -151,7 +151,7 @@ describe('WorkflowInputsJsonSchema', () => {
       required: ['username'],
       additionalProperties: false,
     };
-    const result = WorkflowInputsJsonSchema.safeParse(inputs);
+    const result = JsonModelSchema.safeParse(inputs);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.properties?.username).toEqual({
@@ -189,7 +189,7 @@ describe('WorkflowInputsJsonSchema', () => {
       required: ['customer'],
       additionalProperties: false,
     };
-    const result = WorkflowInputsJsonSchema.safeParse(inputs);
+    const result = JsonModelSchema.safeParse(inputs);
     expect(result.success).toBe(true);
   });
 
@@ -201,7 +201,7 @@ describe('WorkflowInputsJsonSchema', () => {
         },
       },
     };
-    const result = WorkflowInputsJsonSchema.safeParse(inputs);
+    const result = JsonModelSchema.safeParse(inputs);
     expect(result.success).toBe(false);
   });
 
@@ -212,7 +212,7 @@ describe('WorkflowInputsJsonSchema', () => {
       },
       required: ['username', 'nonexistent'],
     };
-    const result = WorkflowInputsJsonSchema.safeParse(inputs);
+    const result = JsonModelSchema.safeParse(inputs);
     expect(result.success).toBe(false);
   });
 

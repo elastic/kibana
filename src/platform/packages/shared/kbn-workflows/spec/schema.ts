@@ -98,7 +98,10 @@ export const ScheduledTriggerSchema = z.object({
       rrule: z.object({
         freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
         interval: z.number().int().positive(),
-        tzid: z.enum(moment.tz.names() as [string, ...string[]]).optional().default('UTC'),
+        tzid: z
+          .enum(moment.tz.names() as [string, ...string[]])
+          .optional()
+          .default('UTC'),
         dtstart: z.string().optional(),
         byhour: z.array(z.number().int().min(0).max(23)).optional(),
         byminute: z.array(z.number().int().min(0).max(59)).optional(),
@@ -120,9 +123,9 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 ]);
 
 export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type._def.value,
-  ScheduledTriggerSchema.shape.type._def.value,
-  ManualTriggerSchema.shape.type._def.value,
+  AlertRuleTriggerSchema.shape.type.value,
+  ScheduledTriggerSchema.shape.type.value,
+  ManualTriggerSchema.shape.type.value,
 ];
 export type TriggerType = (typeof TriggerTypes)[number];
 
@@ -418,9 +421,11 @@ export const WorkflowInputSchema = z.union([
   WorkflowInputArraySchema,
 ]);
 
-// New JSON Schema-based inputs structure
-// This represents a JSON Schema object with properties, required, additionalProperties, and definitions
-export const WorkflowInputsJsonSchema = z
+// JSON Schema model structure
+// This represents a JSON Schema object with properties, required, additionalProperties, and definitions.
+// While currently used for workflow inputs, this schema is general-purpose and can be reused for other
+// structured data models.
+export const JsonModelSchema = z
   .object({
     properties: z.record(z.string(), z.any()).optional(),
     required: z.array(z.string()).optional(),
@@ -494,12 +499,12 @@ const StepSchema = z.lazy(() =>
 export type Step = z.infer<typeof StepSchema>;
 
 export const BuiltInStepTypes = [
-  ForEachStepSchema.shape.type._def.value,
-  IfStepSchema.shape.type._def.value,
-  ParallelStepSchema.shape.type._def.value,
-  MergeStepSchema.shape.type._def.value,
-  WaitStepSchema.shape.type._def.value,
-  HttpStepSchema.shape.type._def.value,
+  ForEachStepSchema.shape.type.value,
+  IfStepSchema.shape.type.value,
+  ParallelStepSchema.shape.type.value,
+  MergeStepSchema.shape.type.value,
+  WaitStepSchema.shape.type.value,
+  HttpStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -516,7 +521,7 @@ export const WorkflowSchema = z
     inputs: z
       .union([
         // New JSON Schema format
-        WorkflowInputsJsonSchema,
+        JsonModelSchema,
         // Legacy array format (for backward compatibility)
         z.array(WorkflowInputSchema),
       ])
@@ -526,10 +531,14 @@ export const WorkflowSchema = z
   })
   .transform((data) => {
     // Transform inputs from legacy array format to JSON Schema format
-    let normalizedInputs: z.infer<typeof WorkflowInputsJsonSchema> | undefined;
+    let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
     if (data.inputs) {
-      if ('properties' in data.inputs && typeof data.inputs === 'object' && !Array.isArray(data.inputs)) {
-        normalizedInputs = data.inputs as z.infer<typeof WorkflowInputsJsonSchema>;
+      if (
+        'properties' in data.inputs &&
+        typeof data.inputs === 'object' &&
+        !Array.isArray(data.inputs)
+      ) {
+        normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
       } else if (Array.isArray(data.inputs)) {
         normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
       }
@@ -569,7 +578,7 @@ export const WorkflowSchemaForAutocomplete = z
     inputs: z
       .union([
         // New JSON Schema format
-        WorkflowInputsJsonSchema,
+        JsonModelSchema,
         // Legacy array format (for backward compatibility during parsing)
         z.array(
           z

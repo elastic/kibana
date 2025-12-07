@@ -19,11 +19,11 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getWorkflowSettingsSchema,
+  JsonModelSchema,
   TriggerSchema,
   WaitStepSchema,
   WorkflowConstsSchema,
   WorkflowInputSchema,
-  WorkflowInputsJsonSchema,
   WorkflowSchemaForAutocomplete,
 } from '../schema';
 
@@ -60,14 +60,14 @@ export function generateYamlSchemaFromConnectors(
     tags: z.array(z.string()).optional(),
     triggers: z.array(TriggerSchema).min(1),
     inputs: z
-      .union([WorkflowInputsJsonSchema, z.array(WorkflowInputSchema)])
+      .union([JsonModelSchema, z.array(WorkflowInputSchema)])
       .optional()
       .transform((inputs) => {
         if (!inputs) {
           return undefined;
         }
         if ('properties' in inputs && typeof inputs === 'object' && !Array.isArray(inputs)) {
-          return inputs as z.infer<typeof WorkflowInputsJsonSchema>;
+          return inputs as z.infer<typeof JsonModelSchema>;
         }
         if (Array.isArray(inputs)) {
           return convertLegacyInputsToJsonSchema(inputs);
@@ -80,10 +80,14 @@ export function generateYamlSchemaFromConnectors(
 
   return baseWorkflowSchema.transform((data) => {
     // Transform inputs from legacy array format to JSON Schema format
-    let normalizedInputs: z.infer<typeof WorkflowInputsJsonSchema> | undefined;
+    let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
     if (data.inputs) {
-      if ('properties' in data.inputs && typeof data.inputs === 'object' && !Array.isArray(data.inputs)) {
-        normalizedInputs = data.inputs as z.infer<typeof WorkflowInputsJsonSchema>;
+      if (
+        'properties' in data.inputs &&
+        typeof data.inputs === 'object' &&
+        !Array.isArray(data.inputs)
+      ) {
+        normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
       } else if (Array.isArray(data.inputs)) {
         normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
       }
