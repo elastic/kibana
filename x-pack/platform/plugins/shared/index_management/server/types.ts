@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
@@ -21,6 +21,7 @@ export interface Dependencies {
 
 export interface RouteDependencies {
   router: IRouter;
+  logger: Logger;
   config: {
     isSecurityEnabled: () => boolean;
     isLegacyTemplatesEnabled: boolean;

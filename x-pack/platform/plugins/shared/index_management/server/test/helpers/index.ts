@@ -8,7 +8,7 @@
 export type { RequestMock } from './router_mock';
 export { RouterMock } from './router_mock';
 
-export { routeDependencies } from './route_dependencies';
+export { routeDependencies, mockLogger } from './route_dependencies';
 
 export { createTestESEnrichPolicy } from './policies_fixtures';
 

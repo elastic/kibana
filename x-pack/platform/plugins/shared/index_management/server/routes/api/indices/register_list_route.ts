@@ -14,6 +14,7 @@ export function registerListRoute({
   indexDataEnricher,
   lib: { handleEsError },
   config,
+  logger,
 }: RouteDependencies) {
   router.get(
     {
@@ -29,7 +30,7 @@ export function registerListRoute({
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices({ client, indexDataEnricher, config });
+        const indices = await fetchIndices({ client, indexDataEnricher, config, logger });
         return response.ok({ body: indices });
       } catch (error) {
         return handleEsError({ error, response });

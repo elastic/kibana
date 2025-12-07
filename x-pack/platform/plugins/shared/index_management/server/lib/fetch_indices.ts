@@ -6,7 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { IndexDataEnricher } from '../services';
 import type { Index } from '..';
 import type { RouteDependencies } from '../types';
@@ -19,7 +19,8 @@ interface MeteringStatsResponse {
 async function fetchIndicesCall(
   client: IScopedClusterClient,
   config: RouteDependencies['config'],
-  indexNames?: string[]
+  indexNames?: string[],
+  logger?: Logger
 ): Promise<Index[]> {
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
@@ -63,7 +64,10 @@ async function fetchIndicesCall(
           .count({
             index: indexName,
           })
-          .catch(() => ({ count: 0 }));
+          .catch((error) => {
+            logger?.warn(`_count API failed for index "${indexName}": ${error.message}`);
+            return { count: 0 };
+          });
 
         const indexData = indices[indexName];
         const aliases = Object.keys(indexData.aliases!);
@@ -117,7 +121,10 @@ async function fetchIndicesCall(
           .count({
             index: indexName,
           })
-          .catch(() => ({ count: 0 }));
+          .catch((error) => {
+            logger?.warn(`_count API failed for index "${indexName}": ${error.message}`);
+            return { count: 0 };
+          });
 
         const indexData = indices[indexName];
         const aliases = Object.keys(indexData.aliases!);
@@ -170,12 +177,14 @@ export const fetchIndices = async ({
   indexDataEnricher,
   config,
   indexNames,
+  logger,
 }: {
   client: IScopedClusterClient;
   indexDataEnricher: IndexDataEnricher;
   config: RouteDependencies['config'];
   indexNames?: string[];
+  logger?: Logger;
 }) => {
-  const indices = await fetchIndicesCall(client, config, indexNames);
+  const indices = await fetchIndicesCall(client, config, indexNames, logger);
   return await indexDataEnricher.enrichIndices(indices, client);
 };
