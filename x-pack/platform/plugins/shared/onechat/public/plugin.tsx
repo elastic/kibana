@@ -16,6 +16,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
@@ -220,6 +221,14 @@ export class OnechatPlugin
           `Skipping Onechat nav control registration: feature flag read failed (${String(error)})`
         );
       });
+
+    // open Agent Builder flyout when AI Agent is selected in modal
+    startDependencies.aiAssistantManagementSelection.openChat$.subscribe((event) => {
+      if (event.chatExperience === AIChatExperience.Agents) {
+        onechatService.openConversationFlyout();
+        startDependencies.aiAssistantManagementSelection.completeOpenChat();
+      }
+    });
 
     return onechatService;
   }
