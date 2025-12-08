@@ -816,7 +816,7 @@ module.exports = {
             /* Files that ARE allowed to use devDependencies */
             devDependencies: [...DEV_PATTERNS],
             peerDependencies: true,
-            packageDir: '.',
+            packageDir: __dirname,
           },
         ],
       },
@@ -2067,7 +2067,7 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            packageDir: '.',
+            packageDir: __dirname,
           },
         ],
       },
