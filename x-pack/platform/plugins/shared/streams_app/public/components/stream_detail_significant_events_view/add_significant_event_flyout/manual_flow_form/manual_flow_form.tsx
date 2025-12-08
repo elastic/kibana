@@ -152,10 +152,7 @@ export function ManualFlowForm({
               onChange={(value) => {
                 setQuery({
                   ...query,
-                  feature: {
-                    name: value.name,
-                    filter: value.filter,
-                  },
+                  feature: value,
                 });
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
