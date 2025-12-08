@@ -1,0 +1,1 @@
+| IoTsUnboundedArrayInRoute/test.js:43:11:48:5 | t.array ... )\\n    ) | This io-ts t.array() call does not have size constraints, which could allow unbounded input leading to DoS. Consider using t.refinement() to add a maximum size check or using a custom branded type. |

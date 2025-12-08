@@ -1,0 +1,1 @@
+| ZodUnboundedArrayInRoute/test.js:55:11:60:5 | z.array ... )\\n    ) | This Zod z.array() call does not have a .max() constraint, which could allow unbounded input leading to DoS. Consider adding .max(N) to limit the array size. |

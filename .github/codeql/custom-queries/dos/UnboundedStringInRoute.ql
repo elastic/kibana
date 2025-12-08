@@ -89,26 +89,25 @@ predicate isInRouteBodyContext(Expr e) {
   exists(ObjectExpr validateObj, Property bodyProp |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
+    validateObj.getAProperty() = bodyProp and
     exists(Property validateProp |
       validateProp.getName() = "validate" and
-      validateProp.getInit() = validateObj and
-      bodyProp = validateObj.getAProperty()
+      validateProp.getInit() = validateObj
     )
   )
   or
   // Server route repository pattern with t.type/z.object for params
-  exists(Property bodyProp |
+  exists(Property bodyProp, ObjectExpr paramsObj, Property paramsProp, ObjectExpr routeObj |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
-    exists(Property paramsProp, ObjectExpr routeObj |
-      paramsProp.getName() = "params" and
-      paramsProp.getInit().getAChildExpr*() = bodyProp and
-      routeObj.getAProperty() = paramsProp and
-      // Ensure it's a route definition (has endpoint property)
-      exists(Property endpointProp |
-        endpointProp = routeObj.getAProperty() and
-        endpointProp.getName() = "endpoint"
-      )
+    paramsObj.getAProperty() = bodyProp and
+    paramsProp.getName() = "params" and
+    paramsProp.getInit().getAChildExpr*() = paramsObj and
+    routeObj.getAProperty() = paramsProp and
+    // Ensure it's a route definition (has endpoint property)
+    exists(Property endpointProp |
+      endpointProp = routeObj.getAProperty() and
+      endpointProp.getName() = "endpoint"
     )
   )
 }

@@ -31,21 +31,11 @@ class SchemaAnyCall extends CallExpr {
  * Holds if the expression is within a route body validation context
  */
 predicate isInRouteBodyContext(Expr e) {
-  // Check if it's the body schema itself
-  exists(Property bodyProp |
-    bodyProp.getName() = "body" and
-    bodyProp.getInit().getAChildExpr*() = e and
-    exists(Property validateProp |
-      validateProp.getName() = "validate" and
-      validateProp.getInit().getAChildExpr*() = bodyProp
-    )
-  )
-  or
-  // Check if it's inside a body object schema
+  // Check if it's inside a body object schema within a validate object
   exists(Property bodyProp, ObjectExpr validateObj |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
-    bodyProp = validateObj.getAProperty() and
+    validateObj.getAProperty() = bodyProp and
     exists(Property validateProp |
       validateProp.getName() = "validate" and
       validateProp.getInit() = validateObj
@@ -53,11 +43,16 @@ predicate isInRouteBodyContext(Expr e) {
   )
   or
   // Check if it's part of an array in body (e.g., schema.arrayOf(schema.any()))
-  exists(CallExpr arrayOf, Property bodyProp |
+  exists(CallExpr arrayOf, Property bodyProp, ObjectExpr validateObj |
     arrayOf.getCallee().(PropAccess).getPropertyName() = "arrayOf" and
     arrayOf.getAnArgument().getAChildExpr*() = e and
     bodyProp.getName() = "body" and
-    bodyProp.getInit().getAChildExpr*() = arrayOf
+    bodyProp.getInit().getAChildExpr*() = arrayOf and
+    validateObj.getAProperty() = bodyProp and
+    exists(Property validateProp |
+      validateProp.getName() = "validate" and
+      validateProp.getInit() = validateObj
+    )
   )
 }
 
@@ -65,14 +60,13 @@ predicate isInRouteBodyContext(Expr e) {
  * Holds if the expression is within a route params context in server-route-repository
  */
 predicate isInRouteRepositoryBodyContext(Expr e) {
-  exists(Property bodyProp, CallExpr typeCall |
+  exists(Property bodyProp, CallExpr typeCall, ObjectExpr typeObj |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
+    typeObj.getAProperty() = bodyProp and
     // Inside t.type({body: ...}) or z.object({body: ...}) pattern
-    (
-      typeCall.getCallee().(PropAccess).getPropertyName() = ["type", "object"] and
-      typeCall.getArgument(0).getAChildExpr*() = bodyProp
-    )
+    typeCall.getCallee().(PropAccess).getPropertyName() = ["type", "object"] and
+    typeCall.getArgument(0) = typeObj
   )
 }
 

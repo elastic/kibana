@@ -54,19 +54,10 @@ class IoTsUnknownAccess extends PropAccess {
  * Holds if the expression is within a route body validation context
  */
 predicate isInRouteBodyContext(Expr e) {
-  exists(Property bodyProp |
-    bodyProp.getName() = "body" and
-    bodyProp.getInit().getAChildExpr*() = e and
-    exists(Property validateProp |
-      validateProp.getName() = "validate" and
-      validateProp.getInit().getAChildExpr*() = bodyProp
-    )
-  )
-  or
   exists(Property bodyProp, ObjectExpr validateObj |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
-    bodyProp = validateObj.getAProperty() and
+    validateObj.getAProperty() = bodyProp and
     exists(Property validateProp |
       validateProp.getName() = "validate" and
       validateProp.getInit() = validateObj
@@ -78,13 +69,12 @@ predicate isInRouteBodyContext(Expr e) {
  * Holds if the expression is within a route repository body context
  */
 predicate isInRouteRepositoryBodyContext(Expr e) {
-  exists(Property bodyProp, CallExpr typeCall |
+  exists(Property bodyProp, CallExpr typeCall, ObjectExpr typeObj |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
-    (
-      typeCall.getCallee().(PropAccess).getPropertyName() = ["type", "object"] and
-      typeCall.getArgument(0).getAChildExpr*() = bodyProp
-    )
+    typeObj.getAProperty() = bodyProp and
+    typeCall.getCallee().(PropAccess).getPropertyName() = ["type", "object"] and
+    typeCall.getArgument(0) = typeObj
   )
   or
   exists(Property p, ObjectExpr routeObj |

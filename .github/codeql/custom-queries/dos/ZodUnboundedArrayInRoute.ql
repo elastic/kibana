@@ -85,12 +85,13 @@ predicate isInRouteRepositoryContext(Expr e) {
   )
   or
   // Check for versioned router validation patterns
-  exists(Property p |
-    p.getName() = "body" and
-    p.getInit().getAChildExpr*() = e and
+  exists(Property bodyProp, ObjectExpr validateObj |
+    bodyProp.getName() = "body" and
+    bodyProp.getInit().getAChildExpr*() = e and
+    validateObj.getAProperty() = bodyProp and
     exists(Property validateProp |
       validateProp.getName() = "validate" and
-      validateProp.getInit().getAChildExpr*() = p
+      validateProp.getInit() = validateObj
     )
   )
 }
