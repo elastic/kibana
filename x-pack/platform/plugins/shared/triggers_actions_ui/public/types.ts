@@ -173,7 +173,6 @@ export type {
   RuleTagBadgeProps,
   RuleTagFilterProps,
   RuleTaskState,
-  RuleTemplate,
   RuleType,
   RuleTypeIndex,
   RuleTypeMetaData,
