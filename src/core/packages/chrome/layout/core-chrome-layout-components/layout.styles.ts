@@ -23,6 +23,8 @@ const cssProp = css`
 
   display: grid;
 
+  column-gap: 8px;
+
   grid-template-areas:
     'banner banner banner'
     'header header header'
