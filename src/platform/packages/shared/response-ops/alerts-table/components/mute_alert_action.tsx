@@ -9,7 +9,6 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useMuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance';
 import { useUnmuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance';
@@ -31,7 +30,7 @@ export const MuteAlertAction = typedMemo(
     const {
       services: { http, notifications },
     } = useAlertsTableContext();
-    const { isMuted, ruleId, rule, alertInstanceId } = useAlertMutedState(alert);
+    const { isMuted, ruleId, alertInstanceId } = useAlertMutedState(alert);
     const { mutateAsync: muteAlert } = useMuteAlertInstance({ http, notifications });
     const { mutateAsync: unmuteAlert } = useUnmuteAlertInstance({ http, notifications });
     const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
@@ -54,19 +53,8 @@ export const MuteAlertAction = typedMemo(
     }
 
     return (
-      <EuiContextMenuItem
-        data-test-subj="toggle-alert"
-        onClick={toggleAlert}
-        size="s"
-        disabled={!rule}
-      >
-        {!rule
-          ? i18n.translate('xpack.triggersActionsUI.alertsTable.loadingMutedState', {
-              defaultMessage: 'Loading muted state',
-            })
-          : isMuted
-          ? UNMUTE
-          : MUTE}
+      <EuiContextMenuItem data-test-subj="toggle-alert" onClick={toggleAlert} size="s">
+        {isMuted ? UNMUTE : MUTE}
       </EuiContextMenuItem>
     );
   }
