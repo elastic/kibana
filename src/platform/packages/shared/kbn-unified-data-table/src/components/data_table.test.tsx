@@ -1366,37 +1366,56 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
-    it(
-      'should show the reset width button only for absolute width columns, and allow resetting to default width',
-      async () => {
-        await renderDataTable({
-          columns: ['message', 'extension'],
-          settings: {
-            columns: {
-              '@timestamp': { width: 50 },
-              extension: { width: 50 },
+    describe('given a column with absolute width', () => {
+      describe('when it is the time column', () => {
+        it('should use default time column width when resetting', async () => {
+          await renderDataTable({
+            columns: [],
+            settings: {
+              columns: {
+                '@timestamp': { width: 50 },
+              },
             },
-          },
-        });
-        expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
+          });
 
-        await openColumnActions('@timestamp');
-        await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
-        expect(getColumnHeader('@timestamp')).toHaveStyle({
-          width: `${defaultTimeColumnWidth}px`,
+          expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
+          await openColumnActions('@timestamp');
+          await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
+          expect(getColumnHeader('@timestamp')).toHaveStyle({
+            width: `${defaultTimeColumnWidth}px`,
+          });
         });
+      });
 
+      describe('when it is not the time column', () => {
+        it('should use EUI default column width when resetting', async () => {
+          await renderDataTable({
+            columns: ['extension'],
+            settings: {
+              columns: {
+                extension: { width: 50 },
+              },
+            },
+          });
+
+          expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+          await openColumnActions('extension');
+          await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
+          expect(getColumnHeader('extension')).toHaveStyle({
+            width: EUI_DEFAULT_COLUMN_WIDTH,
+          });
+        });
+      });
+    });
+
+    describe('given a column without absolute width', () => {
+      it('should not show the reset width button', async () => {
+        await renderDataTable({ columns: ['message'] });
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         await openColumnActions('message');
         expect(screen.queryByTestId('unifiedDataTableResetColumnWidth')).not.toBeInTheDocument();
-
-        expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
-        await openColumnActions('extension');
-        await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
-        expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
+      });
+    });
 
     it(
       'should have columnVisibility configuration',

@@ -26,9 +26,7 @@ export const getCalculatedStats = ({
     return { bytesPerDoc: 0, bytesPerDay: 0 };
   }
 
-  const effectiveStart = stats.creationDate
-    ? moment.max(moment(timeState.start), moment(stats.creationDate))
-    : moment(timeState.start);
+  const effectiveStart = getEffectiveStart(timeState, stats.creationDate);
   const rangeInDays = moment(timeState.end).diff(effectiveStart, 'days', true);
   const countRange = buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
 
@@ -37,4 +35,14 @@ export const getCalculatedStats = ({
   const bytesPerDay = bytesPerDoc * perDayDocs;
 
   return { bytesPerDoc, bytesPerDay };
+};
+
+const getEffectiveStart = (timeState: TimeState, creationDate?: number) => {
+  if (creationDate) {
+    if (creationDate > timeState.start && creationDate < timeState.end) {
+      return creationDate;
+    }
+  }
+
+  return timeState.start;
 };
