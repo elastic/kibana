@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../types';
 import { defaultConfig } from './serverless.base.config';
+import type { ScoutServerConfig } from '../../../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -26,6 +26,9 @@ export const servers: ScoutServerConfig = {
       '--serverless=security',
       '--coreApp.allowDynamicConfigOverrides=true',
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+      `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+        { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
+      ])}`,
     ],
   },
 };
