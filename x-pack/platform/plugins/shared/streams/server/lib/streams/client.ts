@@ -330,6 +330,7 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
+    const now = new Date().toISOString();
     await State.attemptChanges(
       [
         {
