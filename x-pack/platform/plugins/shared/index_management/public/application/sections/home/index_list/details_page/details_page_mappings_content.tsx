@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiButtonProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
@@ -15,16 +14,12 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useGeneratedHtmlId,
   useEuiBreakpoint,
-  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +28,6 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ILicense } from '@kbn/licensing-types';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { EisPromotionalCallout } from '@kbn/search-api-panels';
 import {
   getStateWithCopyToFields,
   isSemanticTextField,
@@ -60,13 +54,14 @@ import type { NormalizedFields, State } from '../../../../components/mappings_ed
 import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
-import { documentationService } from '../../../../services';
 import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
 import { EmptyMappingsContent } from './details_page_empty_mappings';
+import { AddFieldButton } from './details_page_mappings_content/add_field_button';
+import { MappingsInformationPanels } from './details_page_mappings_content/mappings_information_panels';
 
 const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
 
@@ -83,7 +78,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       application: { capabilities, navigateToUrl },
       http,
     },
-    plugins: { ml, licensing, cloud },
+    plugins: { ml, licensing },
     config,
     overlays,
     history,
@@ -362,19 +357,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       isAddingFields={isAddingFields}
     />
   );
-  const fieldSearchComponent = isAddingFields ? (
-    <DocumentFieldsSearch
-      searchValue={previousState.search.term}
-      onSearchChange={onSearchChange}
-      disabled={isJSONVisible}
-    />
-  ) : (
-    <DocumentFieldsSearch
-      searchValue={state.search.term}
-      onSearchChange={onSearchChange}
-      disabled={isJSONVisible}
-    />
-  );
+
   const treeViewBlock = (
     <>
       {multipleMappingsDeclared ? (
@@ -410,12 +393,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </EuiFlexItem>
   );
 
-  const showAboutMappingsStyles = css`
-    ${useEuiBreakpoint(['xl'])} {
-      max-width: 480px;
-    }
-  `;
-
   const mappingsWrapperStyles = css`
     height: 100%;
     ${useEuiBreakpoint(['xl'])} {
@@ -438,134 +415,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </EuiButton>
   );
 
-  const AddFieldButton: React.FC<EuiButtonProps> = ({ color }) => {
-    const isDisabled = hasUpdateMappingsPrivilege === false;
-    return (
-      <EuiToolTip
-        position="bottom"
-        data-test-subj="indexDetailsMappingsAddFieldTooltip"
-        content={
-          isDisabled
-            ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
-                defaultMessage: 'You do not have permission to add fields in an Index',
-              })
-            : undefined
-        }
-      >
-        <EuiButton
-          onClick={addFieldButtonOnClick}
-          iconType="plusInCircle"
-          color={color}
-          size="m"
-          data-test-subj="indexDetailsMappingsAddField"
-          isDisabled={isDisabled}
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.indexDetails.mappings.addNewField"
-            defaultMessage="Add field"
-          />
-        </EuiButton>
-      </EuiToolTip>
-    );
-  };
-
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
       <EuiFlexGroup wrap direction="rowReverse" css={mappingsWrapperStyles}>
-        {showAboutMappings && hasMappings && (
-          <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
-            <EuiFlexGroup direction="column" gutterSize="l">
-              <EisPromotionalCallout
-                promoId="indexDetailsMappings"
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
-                ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
-                direction="column"
-              />
-              <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="info" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.idxMgmt.indexDetails.mappings.docsCardTitle"
-                          defaultMessage="About index mappings"
-                        />
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
-                      defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
-                      (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
-                      available in your relevance tuning and search experience."
-                    />
-                  </p>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <EuiLink
-                  data-test-subj="indexDetailsMappingsDocsLink"
-                  href={documentationService.getMappingDocumentationLink()}
-                  target="_blank"
-                  external
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
-                    defaultMessage="Learn more about mappings"
-                  />
-                </EuiLink>
-              </EuiPanel>
-              <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="info" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <h3>
-                        <FormattedMessage
-                          id="xpack.idxMgmt.indexDetails.mappings.transform.title"
-                          defaultMessage="Transform your searchable content"
-                        />
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="s" />
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexDetails.mappings.transform.description"
-                      defaultMessage="Want to add custom fields, or use trained ML models 
-            to analyze and enrich your indexed documents? Use index-specific ingest pipelines 
-            to customize documents to your needs."
-                    />
-                  </p>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiLink
-                  data-test-subj="indexDetailsMappingsLearnMoreLink"
-                  href={documentationService.docLinks.enterpriseSearch.ingestPipelines}
-                  target="_blank"
-                  external
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.transform.docLink"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              </EuiPanel>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
+        {showAboutMappings && hasMappings && <MappingsInformationPanels />}
         <EuiFlexGroup direction="column" gutterSize="s">
           {hasMLPermissions && !hasSemanticText && (
             <EuiFlexItem grow={false}>
@@ -578,7 +432,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           {!hasMappings &&
             (!isAddingFields ? (
               <EuiFlexItem grow={false}>
-                <EmptyMappingsContent addFieldButton={AddFieldButton} />
+                <EmptyMappingsContent
+                  addFieldButton={
+                    <AddFieldButton
+                      hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+                      addFieldButtonOnClick={addFieldButtonOnClick}
+                    />
+                  }
+                />
               </EuiFlexItem>
             ) : (
               <EuiFlexItem grow={false}>
@@ -596,10 +457,24 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   state={state}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
+              <EuiFlexItem>
+                <DocumentFieldsSearch
+                  searchValue={isAddingFields ? previousState.search.term : state.search.term}
+                  onSearchChange={onSearchChange}
+                  disabled={isJSONVisible}
+                />
+              </EuiFlexItem>
               {!index.hidden && (
                 <EuiFlexItem grow={false}>
-                  {!isAddingFields ? <AddFieldButton color={'text'} /> : saveMappingsButton}
+                  {!isAddingFields ? (
+                    <AddFieldButton
+                      color={'text'}
+                      hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+                      addFieldButtonOnClick={addFieldButtonOnClick}
+                    />
+                  ) : (
+                    saveMappingsButton
+                  )}
                 </EuiFlexItem>
               )}
 
@@ -674,20 +549,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   }
                 >
                   <EuiPanel hasShadow={false} paddingSize="s">
-                    {newFieldsLength <= 0 ? (
-                      <DocumentFields
-                        onCancelAddingNewFields={onCancelAddingNewFields}
-                        isAddingFields={isAddingFields}
-                        semanticTextInfo={semanticTextInfo}
-                        pendingFieldsRef={pendingFieldsRef}
-                      />
-                    ) : (
-                      <DocumentFields
-                        isAddingFields={isAddingFields}
-                        semanticTextInfo={semanticTextInfo}
-                        pendingFieldsRef={pendingFieldsRef}
-                      />
-                    )}
+                    <DocumentFields
+                      onCancelAddingNewFields={
+                        newFieldsLength <= 0 ? onCancelAddingNewFields : undefined
+                      }
+                      isAddingFields={isAddingFields}
+                      semanticTextInfo={semanticTextInfo}
+                      pendingFieldsRef={pendingFieldsRef}
+                    />
                   </EuiPanel>
                 </EuiAccordion>
               </EuiPanel>
