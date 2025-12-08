@@ -6,7 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiHighlight, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiHighlight, EuiPanel, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -38,12 +38,14 @@ const AgentOption: React.FC<AgentOptionProps> = ({ agent, searchValue }) => {
     return null;
   }
   return (
-    <EuiText size="s" color="subdued">
+    <EuiText size="s">
       <h4>
         <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
       </h4>
       <p>
-        <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
+        <EuiTextColor color="subdued">
+          <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
+        </EuiTextColor>
       </p>
     </EuiText>
   );

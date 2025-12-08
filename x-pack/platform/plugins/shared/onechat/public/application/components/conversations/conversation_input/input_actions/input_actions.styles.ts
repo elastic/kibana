@@ -5,12 +5,30 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const selectorListStyles = ({ listId }: { listId: string }) => css`
-  /* Override list item styles */
-  &#${listId} .euiSelectableListItem {
-    border-style: none;
-    background-color: transparent;
-  }
-`;
+export const useSelectorListStyles = ({ listId }: { listId: string }) => {
+  const { euiTheme } = useEuiTheme();
+  return css`
+    /* Override list item styles */
+    /* Styles for all items */
+    &#${listId} .euiSelectableListItem {
+      border-style: none;
+      color: unset;
+      :hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
+      }
+      & .euiSelectableListItem__text {
+        text-decoration: none;
+      }
+    }
+
+    /* Styles for selected item */
+    &#${listId} .euiSelectableListItem-isFocused {
+      :not(:hover) {
+        background-color: unset;
+      }
+    }
+  `;
+};

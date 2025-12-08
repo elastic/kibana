@@ -23,7 +23,7 @@ import { useHasActiveConversation } from '../../../../../hooks/use_conversation'
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { RobotIcon } from '../../../../common/icons/robot';
-import { selectorListStyles } from '../input_actions.styles';
+import { useSelectorListStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
 
@@ -127,6 +127,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     agents,
     selectedAgentId: selectedAgent?.id,
   });
+  const selectorListStyles = useSelectorListStyles({ listId: agentListId });
 
   return (
     <EuiPopover
@@ -165,7 +166,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
           id: agentListId,
           isVirtualized: true,
           rowHeight: AGENT_OPTION_ROW_HEIGHT,
-          css: selectorListStyles({ listId: agentListId }),
+          css: selectorListStyles,
         }}
       >
         {(list, search) => (

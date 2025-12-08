@@ -28,7 +28,7 @@ import { useSendMessage } from '../../../../../context/send_message/send_message
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { selectorListStyles } from '../input_actions.styles';
+import { useSelectorListStyles } from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
 
 const selectableAriaLabel = i18n.translate(
@@ -192,6 +192,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
     }
   }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
 
+  const selectorListStyles = useSelectorListStyles({ listId: connectorListId });
+
   return (
     <EuiPopover
       panelProps={{ css: panelStyles }}
@@ -234,7 +236,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
             />
           );
         }}
-        listProps={{ id: connectorListId, css: selectorListStyles({ listId: connectorListId }) }}
+        listProps={{ id: connectorListId, css: selectorListStyles }}
       >
         {(list, search) => (
           <>
