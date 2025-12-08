@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/core-analytics-browser'
+  - '@kbn/logging'
 tags:
   - plugin
   - prod
