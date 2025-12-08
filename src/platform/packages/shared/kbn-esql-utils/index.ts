@@ -52,6 +52,13 @@ export {
   constructCascadeQuery,
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
+  getESQLSources,
+  getEsqlColumns,
+  getEsqlPolicies,
+  getJoinIndices,
+  getTimeseriesIndices,
+  getInferenceEndpoints,
+  getEditorExtensions,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';
