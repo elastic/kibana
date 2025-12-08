@@ -38,8 +38,8 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
 
-    specPattern: './e2e/space_awareness/**/*.cy.ts',
-    supportFile: './support/e2e.ts',
+    specPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
+    supportFile: './cypress/support/e2e.ts',
 
     setupNodeEvents(on, config) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
