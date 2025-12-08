@@ -226,7 +226,9 @@ const getMetricChangePointsSchema = z.object({
           .optional(),
         groupBy: z
           .array(z.string())
-          .describe('Optional keyword fields to group metrics by.')
+          .describe(
+            'Optional keyword fields to group metrics by. eg: ["host.name", "service.name", "service.environment", "service.version", "event.outcome", "log.level", "event.dataset"]'
+          )
           .optional(),
       })
     )
