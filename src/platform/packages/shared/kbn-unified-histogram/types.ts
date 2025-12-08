@@ -277,15 +277,6 @@ export interface UnifiedHistogramFetch$Arguments {
 
 export type UnifiedHistogramFetch$ = ReplaySubject<UnifiedHistogramFetch$Arguments>;
 
-// define the actions for the chart section supported by the Discover app
-interface ChartSectionActions {
-  openInNewTab?: (params: {
-    query?: Query | AggregateQuery;
-    tabLabel?: string;
-    timeRange?: TimeRange;
-  }) => void;
-  updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
-}
 // A shared interface for communication between Discover and custom components.
 export interface ChartSectionProps {
   /**
@@ -329,6 +320,4 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
-
-  actions: ChartSectionActions;
 }

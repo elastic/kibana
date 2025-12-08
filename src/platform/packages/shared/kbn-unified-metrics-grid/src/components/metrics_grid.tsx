@@ -16,7 +16,6 @@ import type {
   Dimension,
   DimensionFilters,
 } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { css } from '@emotion/react';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
@@ -26,16 +25,17 @@ import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export type MetricsGridProps = Pick<
-  ChartSectionProps,
+  UnifiedMetricsGridProps,
   'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
   filters?: DimensionFilters;
   dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
 };
 
@@ -194,7 +194,7 @@ export const MetricsGrid = ({
 
 interface ChartItemProps
   extends Pick<
-    ChartSectionProps,
+    UnifiedMetricsGridProps,
     'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
   > {
   id: string;
@@ -203,7 +203,7 @@ interface ChartItemProps
   size: ChartSize;
   dimensions: Dimension[];
   filters: DimensionFilters;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;

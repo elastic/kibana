@@ -9,25 +9,25 @@
 import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import { ChartTitle } from './chart_title';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
   titleHighlight?: string;
   onViewDetails?: () => void;
   onCopyToDashboard?: () => void;
-  onExploreInDiscoverTab?: ChartSectionProps['actions']['openInNewTab'];
+  onExploreInDiscoverTab?: UnifiedMetricsGridProps['actions']['openInNewTab'];
   syncTooltips?: boolean;
   syncCursor?: boolean;
   abortController: AbortController | undefined;
   disabledActions?: string[];
   extraDisabledActions?: string[];
-} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter'>;
+} & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 export function LensWrapper({
