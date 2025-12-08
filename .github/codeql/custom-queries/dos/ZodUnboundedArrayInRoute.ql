@@ -26,28 +26,32 @@ class ZodArrayCall extends CallExpr {
       pa.getBase().(VarAccess).getName() = "z"
     )
   }
-
-  /**
-   * Gets the expression that this array call flows into
-   * (to check for chained .max() calls)
-   */
-  Expr getResultExpr() { result = this }
 }
 
 /**
- * Checks if a Zod array has a .max() or .length() constraint chained
+ * Gets the root receiver of a method chain.
+ * For `z.array(z.string()).min(1).max(100)`, returns `z.array(z.string())`.
+ */
+Expr getChainRoot(Expr e) {
+  if e instanceof MethodCallExpr
+  then result = getChainRoot(e.(MethodCallExpr).getReceiver())
+  else result = e
+}
+
+/**
+ * Checks if the array call has a bounding method somewhere in its method chain.
+ * Handles patterns like:
+ *   - z.array(z.string()).max(100)
+ *   - z.array(z.string()).min(1).max(100)
+ *   - z.array(z.string()).length(5)
+ *   - z.array(z.string()).refine(...)
  */
 predicate hasMaxConstraint(ZodArrayCall arrayCall) {
-  exists(MethodCallExpr maxCall |
-    maxCall.getMethodName() = ["max", "length", "nonempty"] and
-    // The array call flows into the max call receiver
-    arrayCall.getASuccessor*() = maxCall.getReceiver()
-  )
-  or
-  // Check if it's within a .refine() call that might check length
-  exists(MethodCallExpr refineCall |
-    refineCall.getMethodName() = "refine" and
-    arrayCall.getASuccessor*() = refineCall.getReceiver()
+  exists(MethodCallExpr chainedCall |
+    // The chained call has a bounding method name
+    chainedCall.getMethodName() = ["max", "length", "nonempty", "refine"] and
+    // The array call is the root of the method chain
+    getChainRoot(chainedCall) = arrayCall
   )
 }
 

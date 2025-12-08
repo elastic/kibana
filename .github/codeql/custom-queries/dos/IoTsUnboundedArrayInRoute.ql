@@ -29,16 +29,30 @@ class IoTsArrayCall extends CallExpr {
 }
 
 /**
- * Checks if an expression is wrapped with a size-limiting refinement
- * e.g., t.refinement, or custom size validation
+ * Checks if an expression is directly passed as an argument to a refinement/brand call.
+ * Handles patterns like:
+ *   - t.refinement(t.array(t.string), predicate)
+ *   - t.brand(t.array(t.string), predicate, name)
  */
-predicate hasRefinementWrapper(Expr e) {
-  exists(CallExpr refine |
+predicate isArgumentToRefinement(Expr e) {
+  exists(CallExpr refineCall |
     (
-      refine.getCallee().(PropAccess).getPropertyName() = "refinement" or
-      refine.getCallee().(PropAccess).getPropertyName() = "brand"
+      refineCall.getCallee().(PropAccess).getPropertyName() = "refinement" or
+      refineCall.getCallee().(PropAccess).getPropertyName() = "brand"
     ) and
-    refine.getAnArgument().getAChildExpr*() = e
+    refineCall.getCallee().(PropAccess).getBase().(VarAccess).getName() = "t" and
+    refineCall.getArgument(0) = e
+  )
+}
+
+/**
+ * Checks if the array call is assigned to a variable with "bounded" or size-related name,
+ * suggesting it has been wrapped with constraints elsewhere.
+ */
+predicate isAssignedToBoundedVariable(IoTsArrayCall arrayCall) {
+  exists(VariableDeclarator vd |
+    vd.getInit().getAChildExpr*() = arrayCall and
+    vd.getBindingPattern().(VarDecl).getName().regexpMatch("(?i).*(bounded|limited|max|sized).*")
   )
 }
 
@@ -46,14 +60,11 @@ predicate hasRefinementWrapper(Expr e) {
  * Checks if the array is used with a custom runtime type that limits size
  */
 predicate hasArraySizeLimit(IoTsArrayCall arrayCall) {
-  // Check if it's passed to a refinement or brand
-  hasRefinementWrapper(arrayCall)
+  // Check if it's directly passed to t.refinement or t.brand
+  isArgumentToRefinement(arrayCall)
   or
-  // Check if it's part of a NonEmptyArray type
-  exists(VarAccess va |
-    va.getName().matches("%NonEmpty%") and
-    va.getASuccessor*() = arrayCall
-  )
+  // Check if assigned to a variable suggesting it's bounded
+  isAssignedToBoundedVariable(arrayCall)
 }
 
 /**

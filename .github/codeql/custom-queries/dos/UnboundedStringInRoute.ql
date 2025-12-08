@@ -1,11 +1,12 @@
 /**
  * @name Unbounded string in API route validation
- * @description Detects schema.string() calls without maxLength constraint in API route validation,
- *              which could lead to Denial of Service (DoS) vulnerabilities.
+ * @description Detects schema.string() calls without maxLength constraint in API route request body
+ *              validation, which could lead to Denial of Service (DoS) vulnerabilities.
+ *              All strings in request bodies should have explicit length limits.
  * @kind problem
  * @problem.severity warning
- * @security-severity 5.5
- * @precision medium
+ * @security-severity 6.0
+ * @precision high
  * @id js/kibana/unbounded-string-in-route
  * @tags security
  *       dos
@@ -40,20 +41,23 @@ class SchemaStringCall extends CallExpr {
   }
 
   /**
-   * Checks if the string has a hostname validation (implicitly bounded)
+   * Checks if the string has a hostname validation (implicitly bounded by RFC 1123)
    */
   predicate hasHostname() {
     exists(ObjectExpr opts |
       opts = this.getArgument(0) and
       exists(Property p |
         p = opts.getAProperty() and
-        p.getName() = "hostname"
+        p.getName() = "hostname" and
+        p.getInit().(BooleanLiteral).getValue() = "true"
       )
     )
   }
 
   /**
-   * Checks if string has custom validate function (may have bounds)
+   * Checks if string has custom validate function that may enforce length limits.
+   * Note: Custom validators should still ideally specify maxLength for clarity,
+   * but we assume the validator handles bounds checking.
    */
   predicate hasCustomValidate() {
     exists(ObjectExpr opts |
@@ -64,14 +68,24 @@ class SchemaStringCall extends CallExpr {
       )
     )
   }
+
+  /**
+   * Gets the property name this string schema is assigned to, if any
+   */
+  string getPropertyName() {
+    exists(Property p |
+      p.getInit() = this and
+      result = p.getName()
+    )
+  }
 }
 
 /**
- * Holds if the expression is within a route request body validation context
- * We focus on body since strings in query/path are typically bounded by URL limits
+ * Holds if the expression is within a route request body validation context.
+ * We focus on body since strings in query/path are typically bounded by URL limits.
  */
 predicate isInRouteBodyContext(Expr e) {
-  // Check if it's part of a body schema in validate object
+  // Direct router pattern: router.post({ validate: { body: ... } })
   exists(ObjectExpr validateObj, Property bodyProp |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
@@ -82,14 +96,19 @@ predicate isInRouteBodyContext(Expr e) {
     )
   )
   or
-  // Check if it's part of a route repository params body
-  exists(Property bodyProp, ObjectExpr paramsObj |
+  // Server route repository pattern with t.type/z.object for params
+  exists(Property bodyProp |
     bodyProp.getName() = "body" and
     bodyProp.getInit().getAChildExpr*() = e and
-    paramsObj.getAProperty() = bodyProp and
-    exists(Property paramsProp |
+    exists(Property paramsProp, ObjectExpr routeObj |
       paramsProp.getName() = "params" and
-      paramsProp.getInit() = paramsObj
+      paramsProp.getInit().getAChildExpr*() = bodyProp and
+      routeObj.getAProperty() = paramsProp and
+      // Ensure it's a route definition (has endpoint property)
+      exists(Property endpointProp |
+        endpointProp = routeObj.getAProperty() and
+        endpointProp.getName() = "endpoint"
+      )
     )
   )
 }
@@ -104,25 +123,19 @@ predicate isInResponseContext(Expr e) {
   )
 }
 
-/**
- * Checks if the string is likely an identifier (short by nature)
- * based on the property name it's assigned to
- */
-predicate isLikelyIdentifier(SchemaStringCall call) {
-  exists(Property p |
-    p.getInit() = call and
-    p.getName().regexpMatch("(?i).*(id|uuid|guid|key|name|type|status|state|code)$")
-  )
-}
-
 from SchemaStringCall stringCall
 where
-  not stringCall.hasMaxLength() and
-  not stringCall.hasHostname() and
-  not stringCall.hasCustomValidate() and
+  // Must be in a route body context
   isInRouteBodyContext(stringCall) and
+  // Must not be in a response schema
   not isInResponseContext(stringCall) and
-  not isLikelyIdentifier(stringCall)
+  // Must not have explicit maxLength
+  not stringCall.hasMaxLength() and
+  // Must not have hostname validation (implicitly bounded)
+  not stringCall.hasHostname() and
+  // Must not have custom validate function (assumed to handle bounds)
+  not stringCall.hasCustomValidate()
 select stringCall,
-  "This schema.string() call in a request body does not specify a maxLength, which could allow unbounded input leading to DoS. Consider adding { maxLength: N }."
+  "schema.string() in request body for field '" + stringCall.getPropertyName() +
+    "' does not specify maxLength. All strings in request bodies should have explicit length limits to prevent DoS. Add { maxLength: N } or use a custom validate function."
 
