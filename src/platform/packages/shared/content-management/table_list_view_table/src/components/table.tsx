@@ -291,7 +291,9 @@ export function Table<T extends UserContentCommonSchema>({
     searchQuery.query,
     searchQuery.error,
   ]);
-
+  const hasQueryOrFilters = Boolean(
+    searchQuery.text || tableFilter.favorites || tableFilter.createdBy.length > 0
+  );
   const emptyPromptTitle = useMemo(
     () => (
       <FormattedMessage
@@ -313,13 +315,9 @@ export function Table<T extends UserContentCommonSchema>({
     );
   }, [entityNamePlural]);
 
-  // Check if we have active filters or search query
-  const hasActiveFilters =
-    Boolean(searchQuery.text) || tableFilter.favorites || tableFilter?.createdBy?.length > 0;
-
   const emptyPromptActions = useMemo(() => {
-    return renderCreateButton({ fill: !hasActiveFilters });
-  }, [renderCreateButton, hasActiveFilters]);
+    return renderCreateButton({ fill: !hasQueryOrFilters });
+  }, [renderCreateButton, hasQueryOrFilters]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
@@ -396,15 +394,11 @@ export function Table<T extends UserContentCommonSchema>({
           noItemsMessage={
             isFetchingItems ? (
               <></>
-            ) : noItemsMessage && items.length === 0 && !hasActiveFilters ? (
+            ) : noItemsMessage && items.length === 0 && !hasQueryOrFilters ? (
               noItemsMessage
             ) : tableFilter.favorites ? (
               <FavoritesEmptyState
-                emptyStateType={
-                  Boolean(searchQuery.text) || tableFilter?.createdBy?.length > 0
-                    ? 'noMatchingItems'
-                    : 'noItems'
-                }
+                emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
                 entityName={entityName}
                 entityNamePlural={entityNamePlural}
               />
