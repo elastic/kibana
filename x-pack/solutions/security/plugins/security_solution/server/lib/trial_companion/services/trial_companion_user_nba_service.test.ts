@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { TrialCompanionUserNBAService } from './trial_companion_user_nba_service.types';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { TrialCompanionUserNBAServiceImpl } from './trial_companion_user_nba_service';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { Milestone } from '../../../../common/trial_companion/types';
+import { NBA_SAVED_OBJECT_TYPE, NBA_USER_SEEN_SAVED_OBJECT_TYPE } from '../saved_objects';
+
+describe('TrialCompanionUserNBAServiceImpl', () => {
+  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let sut: TrialCompanionUserNBAService;
+  beforeEach(() => {
+    soClient = savedObjectsClientMock.create();
+    sut = new TrialCompanionUserNBAServiceImpl(loggingSystemMock.createLogger(), soClient);
+    jest.clearAllMocks();
+  });
+
+  describe('nextNBA', () => {
+    it.each([
+      [
+        'first milestone',
+        {
+          saved_objects: [{ id: 'abc', attributes: { milestoneId: 1 } }],
+          total: 1,
+        },
+        { saved_objects: [], total: 0 },
+        Milestone.M1,
+      ],
+      [
+        'no data',
+        {
+          saved_objects: [],
+          total: 0,
+        },
+        { saved_objects: [], total: 0 },
+        undefined,
+      ],
+      [
+        'first milestone seen',
+        {
+          saved_objects: [{ id: 'abc', attributes: { milestoneId: 1 } }],
+          total: 1,
+        },
+        { saved_objects: [{ attributes: { milestoneIds: [1] } }], total: 1 },
+        undefined,
+      ],
+      [
+        'M6 milestone',
+        {
+          saved_objects: [{ id: 'abc', attributes: { milestoneId: 6 } }],
+          total: 1,
+        },
+        { saved_objects: [{ attributes: { milestoneIds: [1, 2, 3, 4, 5] } }], total: 1 },
+        Milestone.M6,
+      ],
+      [
+        'M6 seen',
+        {
+          saved_objects: [{ id: 'abc', attributes: { milestoneId: 6 } }],
+          total: 1,
+        },
+        { saved_objects: [{ attributes: { milestoneIds: [1, 2, 3, 4, 5, 6] } }], total: 1 },
+        undefined,
+      ],
+      [
+        'no current milestone',
+        {
+          saved_objects: [],
+          total: 0,
+        },
+        { saved_objects: [{ attributes: { milestoneIds: [1, 2, 3, 4, 5] } }], total: 1 },
+        undefined,
+      ],
+    ])('should return correct next NBA milestone: %s', async (_title, nbaSO, userSO, expected) => {
+      soClient.find.mockResolvedValueOnce(nbaSO);
+      soClient.find.mockResolvedValueOnce(userSO);
+      const userId = 'user-id';
+      await expect(sut.nextNBA(userId)).resolves.toEqual(expected);
+      expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
+      expect(soClient.find).toHaveBeenCalledWith({
+        type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+        search: userId,
+        searchFields: ['userId'],
+      });
+    });
+
+    it('should propagate error from nba so', async () => {
+      soClient.find.mockRejectedValueOnce(new Error('test error'));
+      await expect(sut.nextNBA('user-id')).rejects.toThrow('test error');
+      expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
+    });
+
+    it('should propagate error from user nba so', async () => {
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [{ id: 'abc', attributes: { milestoneId: 6 } }],
+        total: 1,
+      });
+      soClient.find.mockRejectedValueOnce(new Error('test error'));
+      const userId = 'user-id';
+      await expect(sut.nextNBA(userId)).rejects.toThrow('test error');
+      expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
+      expect(soClient.find).toHaveBeenCalledWith({
+        type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+        search: userId,
+        searchFields: ['userId'],
+      });
+    });
+  });
+
+  describe('markAsSeen', () => {
+    it('should create new user so', async () => {
+      const userId = 'user-id';
+      soClient.find.mockResolvedValueOnce({ saved_objects: [], total: 0 });
+      const actual = await sut.markAsSeen(Milestone.M2, userId);
+      expect(soClient.create).toHaveBeenCalledWith(NBA_USER_SEEN_SAVED_OBJECT_TYPE, {
+        userId,
+        milestoneIds: [Milestone.M2],
+      });
+      expect(actual).toBeUndefined();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should update existing user so', async () => {
+      const userId = 'user-id';
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [{ id: '123', attributes: { milestoneIds: [1], userId } }],
+        total: 1,
+      });
+      const actual = await sut.markAsSeen(Milestone.M2, userId);
+      expect(soClient.update).toHaveBeenCalledWith(NBA_USER_SEEN_SAVED_OBJECT_TYPE, '123', {
+        userId,
+        milestoneIds: [Milestone.M1, Milestone.M2],
+      });
+      expect(actual).toBeUndefined();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('should not update so if milestone already seen', async () => {
+      const userId = 'user-id';
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [{ id: '123', attributes: { milestoneIds: [1, 2], userId } }],
+        total: 1,
+      });
+      const actual = await sut.markAsSeen(Milestone.M2, userId);
+      expect(actual).toBeUndefined();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('should propagate error if find fails', async () => {
+      const userId = 'user-id';
+      soClient.find.mockRejectedValue(new Error('test error'));
+      await expect(sut.markAsSeen(Milestone.M2, userId)).rejects.toThrow('test error');
+    });
+
+    it('should propagate error if update fails', async () => {
+      const userId = 'user-id';
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [{ id: '123', attributes: { milestoneIds: [1], userId } }],
+        total: 1,
+      });
+      soClient.update.mockRejectedValue(new Error('test error'));
+      await expect(sut.markAsSeen(Milestone.M2, userId)).rejects.toThrow('test error');
+    });
+
+    it('should propagate error if create fails', async () => {
+      const userId = 'user-id';
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+      });
+      soClient.create.mockRejectedValue(new Error('test error'));
+      await expect(sut.markAsSeen(Milestone.M2, userId)).rejects.toThrow('test error');
+    });
+  });
+});

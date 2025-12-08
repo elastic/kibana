@@ -11,6 +11,8 @@ import type {
   CollectorFetchContext,
   UsageCollectionSetup,
 } from '@kbn/usage-collection-plugin/server';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
+import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DetectorF } from '../types';
 import { Milestone } from '../../../../common/trial_companion/types';
 
@@ -113,7 +115,7 @@ export const casesM7 = (deps: UsageCollectorDeps): DetectorF => {
       'saved_objects_counts',
       deps
     );
-    const count = result?.by_type?.find((item) => item.type === 'cases')?.count ?? 0;
+    const count = result?.by_type?.find((item) => item.type === CASE_SAVED_OBJECT)?.count ?? 0;
     return count > 0 ? undefined : Milestone.M6;
   };
 };
@@ -121,7 +123,7 @@ export const casesM7 = (deps: UsageCollectorDeps): DetectorF => {
 export const savedDiscoverySessionsM2 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
     const { total } = await deps.collectorContext.soClient.find({
-      type: 'search',
+      type: SavedSearchType,
       perPage: 0,
       page: 0,
       filter: `search.managed:(false)`,

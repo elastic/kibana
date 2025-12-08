@@ -29,14 +29,18 @@ export class TrialCompanionUserNBAServiceImpl implements TrialCompanionUserNBASe
     const currentSO = await this.getUserNBAStatus(userId);
     const current = currentSO?.attributes;
 
-    if (currentSO && current && !current.milestoneIds.includes(milestoneId)) {
-      current.milestoneIds.push(milestoneId);
-      const response = await this.soClient.update<NBAUserSeenSavedObjectAttributes>(
-        NBA_USER_SEEN_SAVED_OBJECT_TYPE,
-        currentSO.id,
-        current
-      );
-      this.logger.info(`Updated user milestone seen SO: ${JSON.stringify(response)}`);
+    if (currentSO && current) {
+      if (!current.milestoneIds.includes(milestoneId)) {
+        current.milestoneIds.push(milestoneId);
+        const response = await this.soClient.update<NBAUserSeenSavedObjectAttributes>(
+          NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+          currentSO.id,
+          current
+        );
+        this.logger.info(`Updated user milestone seen SO: ${JSON.stringify(response)}`);
+      } else {
+        this.logger.info(`User milestone seen SO already exists for user ${userId}`);
+      }
     } else {
       const response = await this.soClient.create<NBAUserSeenSavedObjectAttributes>(
         NBA_USER_SEEN_SAVED_OBJECT_TYPE,
