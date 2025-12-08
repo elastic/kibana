@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, MetricField } from '../../../types';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';

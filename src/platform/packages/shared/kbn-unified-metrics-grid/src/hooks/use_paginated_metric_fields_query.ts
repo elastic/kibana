@@ -10,7 +10,7 @@
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useInfiniteQuery } from '@kbn/react-query';
 import { useEffect, useMemo } from 'react';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField } from '../types';
 import { PAGE_SIZE } from '../common/constants';
 
 export function filterFieldsWithData(fields: MetricField[]) {

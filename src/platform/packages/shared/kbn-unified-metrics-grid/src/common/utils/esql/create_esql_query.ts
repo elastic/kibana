@@ -9,20 +9,16 @@
 
 import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
-import type {
-  MetricField,
-  Dimension,
-  DimensionFilters,
-} from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
+import type { MetricField, Dimension, DimensionValueFilters } from '../../../types';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
 interface CreateESQLQueryParams {
   metric: MetricField;
   dimensions?: Dimension[];
-  filters?: DimensionFilters;
+  filters?: DimensionValueFilters;
 }
 
 const separator = '\u203A'.normalize('NFC');
