@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
+import {
+  createRepositoryClient,
+  type DefaultClientOptions,
+} from '@kbn/server-route-repository-client';
 import { useConnectorSelection } from '@kbn/onechat-plugin/public';
+import type { ObservabilityAgentBuilderServerRouteRepository } from '@kbn/observability-agent-builder-plugin/server';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
@@ -26,6 +31,11 @@ export function ErrorSampleAgentBuilderAiInsight({
 }: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>) {
   const { onechat, core } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
+
+  const observabilityAgentBuilderApiClient = createRepositoryClient<
+    ObservabilityAgentBuilderServerRouteRepository,
+    DefaultClientOptions
+  >(core);
 
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
@@ -47,18 +57,21 @@ export function ErrorSampleAgentBuilderAiInsight({
   const fetchAiInsights = async () => {
     setIsLoading(true);
     try {
-      const response = await core.http.post<{ summary: string; context: string }>(
-        '/internal/observability_agent_builder/ai_insights/error',
+      const response = await observabilityAgentBuilderApiClient.fetch(
+        'POST /internal/observability_agent_builder/ai_insights/error',
         {
-          body: JSON.stringify({
-            serviceName: error.service.name,
-            errorId: error.error.id,
-            start,
-            end,
-            environment,
-            kuery,
-            connectorId: selectedConnector ?? defaultConnectorId ?? '',
-          }),
+          signal: null,
+          params: {
+            body: {
+              serviceName: error.service.name,
+              errorId: error.error.id,
+              start,
+              end,
+              environment,
+              kuery,
+              connectorId: selectedConnector ?? defaultConnectorId ?? '',
+            },
+          },
         }
       );
 

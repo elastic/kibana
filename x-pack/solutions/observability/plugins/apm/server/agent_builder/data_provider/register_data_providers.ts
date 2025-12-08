@@ -117,23 +117,6 @@ export function registerDataProviders({
   );
 
   observabilityAgentBuilder.registerDataProvider(
-    'apmErrorDetails',
-    async ({ request, errorId, serviceName, serviceEnvironment, start, end, kuery = '' }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-
-      return getErrorSampleDetails({
-        apmEventClient,
-        errorId,
-        serviceName,
-        start: parseDatemath(start),
-        end: parseDatemath(end),
-        environment: serviceEnvironment ?? '',
-        kuery,
-      });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
     'apmExitSpanChangePoints',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
@@ -169,6 +152,23 @@ export function registerDataProviders({
         transactionName,
         start,
         end,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmErrorDetails',
+    async ({ request, errorId, serviceName, serviceEnvironment, start, end, kuery = '' }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+
+      return getErrorSampleDetails({
+        apmEventClient,
+        errorId,
+        serviceName,
+        start: parseDatemath(start),
+        end: parseDatemath(end),
+        environment: serviceEnvironment ?? '',
+        kuery,
       });
     }
   );

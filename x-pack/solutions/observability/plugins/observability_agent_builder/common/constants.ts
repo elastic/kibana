@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+// Feature flag for the observability agent
 export const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
 export const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
 // Tool IDs for tools defined in the APM plugin
-// Re-defined here to avoid cross-plugin dependency cycles
 export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
   'observability.get_downstream_dependencies';
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
