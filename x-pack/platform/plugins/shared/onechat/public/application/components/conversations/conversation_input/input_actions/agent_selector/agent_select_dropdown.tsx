@@ -28,6 +28,7 @@ import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
+const AGENT_SELECT_POPOVER_MAX_HEIGHT = 243;
 
 const selectAgentAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.agentSelector.selectAgent.ariaLabel',
@@ -120,7 +121,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const panelStyles = css`
-    inline-size: calc(${euiTheme.size.xxxl} * 10);
+    inline-size: calc(${euiTheme.size.xxl} * 11);
   `;
 
   const { agentOptions, renderAgentOption } = useAgentOptions({
@@ -168,6 +169,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
           rowHeight: AGENT_OPTION_ROW_HEIGHT,
           css: selectorListStyles,
         }}
+        height={AGENT_SELECT_POPOVER_MAX_HEIGHT}
       >
         {(list, search) => (
           <div>
