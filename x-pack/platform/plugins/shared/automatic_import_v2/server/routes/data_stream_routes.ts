@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
+import { buildAutomaticImportResponse } from './utils';
+import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
+import {
+  UploadSamplesToDataStreamRequestBody,
+  UploadSamplesToDataStreamRequestParams,
+} from '../../common';
+
+export const registerDataStreamRoutes = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) => {
+  uploadSamplesRoute(router, logger);
+};
+
+const uploadSamplesRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .post({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/data_streams/{data_stream_id}/upload',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(UploadSamplesToDataStreamRequestParams),
+            body: buildRouteValidationWithZod(UploadSamplesToDataStreamRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const currentUser = await automaticImportv2.getCurrentUser();
+          const esClient = automaticImportv2.esClient;
+          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
+          const { samples, originalSource } = request.body;
+          const result = await automaticImportService.addSamplesToDataStream({
+            integrationId,
+            dataStreamId,
+            rawSamples: samples,
+            originalSource,
+            authenticatedUser: currentUser,
+            esClient,
+          });
+          return response.ok({ body: result });
+        } catch (err) {
+          logger.error(`registerDataStreamRoutes: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
