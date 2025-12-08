@@ -45,6 +45,7 @@ export interface GroupingProps<T> {
   getGroupStats?: GetGroupStats<T>;
   groupingId: string;
   groupingLevel?: number;
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
   additionalToolbarControls?: JSX.Element[];
   isLoading: boolean;
   itemsPerPage: number;
