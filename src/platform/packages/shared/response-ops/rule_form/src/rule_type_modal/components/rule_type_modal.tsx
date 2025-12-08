@@ -23,18 +23,35 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { RuleTypeList } from './rule_type_list';
+import { TemplateList } from './template_list';
 import type { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 export interface RuleTypeModalProps {
   onClose: () => void;
   onSelectRuleType: (ruleTypeId: string) => void;
+  onSelectTemplate: (templateId: string) => void;
   onFilterByProducer: (producer: string | null) => void;
   onChangeSearch: (search: string) => void;
+  onChangeMode: (mode: 'ruleType' | 'template') => void;
   searchString: string;
   selectedProducer: string | null;
+  selectedMode: 'ruleType' | 'template';
   showCategories: boolean;
+  templates: Array<{
+    id: string;
+    name: string;
+    tags: string[];
+    ruleTypeId: string;
+    ruleTypeName?: string;
+    producer?: string;
+  }>;
+  templatesLoading: boolean;
+  loadingMore: boolean;
+  hasMoreTemplates: boolean;
+  onLoadMoreTemplates: () => void;
 }
 
 export interface RuleTypeModalState {
@@ -57,24 +74,56 @@ const loadingPrompt = (
 );
 
 const ruleTypeModalTitle = i18n.translate('responseOpsRuleForm.components.ruleTypeModal.title', {
-  defaultMessage: 'Select rule type',
+  defaultMessage: 'Create new rule',
 });
 
 export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
   onClose,
   onSelectRuleType,
+  onSelectTemplate,
   onFilterByProducer,
   onChangeSearch,
+  onChangeMode,
   ruleTypes,
   ruleTypesLoading,
   ruleTypeCountsByProducer,
   searchString,
   selectedProducer,
+  selectedMode,
   showCategories,
+  templates,
+  templatesLoading,
+  loadingMore,
+  hasMoreTemplates,
+  onLoadMoreTemplates,
 }) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
   const isFullscreenPortrait = ['s', 'xs'].includes(currentBreakpoint);
+
+  const modeOptions = [
+    {
+      id: 'ruleType',
+      label: i18n.translate('responseOpsRuleForm.components.ruleTypeModal.ruleTypeOption', {
+        defaultMessage: 'Rule type',
+      }),
+    },
+    {
+      id: 'template',
+      label: i18n.translate('responseOpsRuleForm.components.ruleTypeModal.templateOption', {
+        defaultMessage: 'Template',
+      }),
+    },
+  ];
+
+  const searchPlaceholder =
+    selectedMode === 'ruleType'
+      ? i18n.translate('responseOpsRuleForm.components.ruleTypeModal.searchRuleTypesPlaceholder', {
+          defaultMessage: 'Search rule types...',
+        })
+      : i18n.translate('responseOpsRuleForm.components.ruleTypeModal.searchTemplatesPlaceholder', {
+          defaultMessage: 'Search templates...',
+        });
 
   const onClearFilters = useCallback(() => {
     onFilterByProducer(null);
@@ -103,19 +152,30 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                   <h1>{ruleTypeModalTitle}</h1>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <EuiPageHeaderSection style={{ width: isFullscreenPortrait ? '100%' : '50%' }}>
-                  <EuiFieldSearch
-                    placeholder={i18n.translate(
-                      'responseOpsRuleForm.components.ruleTypeModal.searchPlaceholder',
-                      {
-                        defaultMessage: 'Search',
-                      }
-                    )}
-                    value={searchString}
-                    onChange={({ target: { value } }) => onChangeSearch(value)}
-                    fullWidth
-                  />
-                </EuiPageHeaderSection>
+                <EuiFlexGroup gutterSize="m" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend={i18n.translate(
+                        'responseOpsRuleForm.components.ruleTypeModal.modeSelectionLegend',
+                        {
+                          defaultMessage: 'Select creation mode',
+                        }
+                      )}
+                      options={modeOptions}
+                      idSelected={selectedMode}
+                      onChange={(id) => onChangeMode(id as 'ruleType' | 'template')}
+                      buttonSize="compressed"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFieldSearch
+                      placeholder={searchPlaceholder}
+                      value={searchString}
+                      onChange={({ target: { value } }) => onChangeSearch(value)}
+                      fullWidth
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPageHeaderSection>
             </EuiPageHeader>
           </EuiFlexItem>
@@ -125,9 +185,9 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
               marginTop: `-${euiTheme.size.base}`,
             }}
           >
-            {ruleTypesLoading ? (
+            {selectedMode === 'ruleType' && ruleTypesLoading ? (
               loadingPrompt
-            ) : (
+            ) : selectedMode === 'ruleType' ? (
               <RuleTypeList
                 ruleTypes={ruleTypes}
                 ruleTypeCountsByProducer={ruleTypeCountsByProducer}
@@ -136,6 +196,16 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 selectedProducer={selectedProducer}
                 onClearFilters={onClearFilters}
                 showCategories={showCategories}
+              />
+            ) : templatesLoading ? (
+              loadingPrompt
+            ) : (
+              <TemplateList
+                templates={templates}
+                onSelectTemplate={onSelectTemplate}
+                hasMore={hasMoreTemplates}
+                onLoadMore={onLoadMoreTemplates}
+                isLoading={loadingMore}
               />
             )}
           </EuiFlexItem>

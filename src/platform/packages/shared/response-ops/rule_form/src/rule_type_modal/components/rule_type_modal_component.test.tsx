@@ -185,7 +185,7 @@ describe('RuleTypeModalComponent', () => {
       />
     );
 
-    expect(screen.getByText('Select rule type')).toBeInTheDocument();
+    expect(screen.getByText('Create new rule')).toBeInTheDocument();
     // all rules that do not require app context should be present
     ruleTypes.forEach((ruleType) => {
       if (ruleType.requiresAppContext) {
