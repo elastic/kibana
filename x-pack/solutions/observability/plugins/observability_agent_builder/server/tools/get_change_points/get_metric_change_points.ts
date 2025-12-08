@@ -19,18 +19,15 @@ import type {
 } from '../../types';
 import { dateHistogram } from './common';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
-import { getChangePoints, searchChangePoints, type Bucket } from '../../utils/get_change_points';
+import { type Bucket, getChangePoints } from '../../utils/get_change_points';
+import { parseDatemath } from '../../utils/time';
+import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
+import { getTypedSearch } from '../../utils/get_typed_search';
 
 export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
   'observability.get_metric_change_points';
 
 type MetricType = 'min' | 'max' | 'sum' | 'count' | 'avg' | 'p95' | 'p99';
-
-interface AggregationsResponse {
-  groups?: {
-    buckets?: Bucket[];
-  };
-}
 
 function getMetricAggregation({ field, type }: { field?: string; type: MetricType }): {
   agg: AggregationsAggregationContainer;
@@ -113,7 +110,7 @@ async function getMetricChangePoints({
   index,
   start,
   end,
-  kqlFilter,
+  kqlFilter: kuery,
   groupBy,
   field,
   type,
@@ -129,7 +126,7 @@ async function getMetricChangePoints({
   type: MetricType;
   esClient: IScopedClusterClient;
 }) {
-  const { agg: metricAgg, buckets_path: metricBucketsPath } = getMetricAggregation({
+  const { agg: metricAgg, buckets_path: bucketsPathMetric } = getMetricAggregation({
     type,
     field,
   });
@@ -166,16 +163,27 @@ async function getMetricChangePoints({
     },
   };
 
-  const response = await searchChangePoints({
-    esClient,
+  const search = getTypedSearch(esClient.asCurrentUser);
+
+  const response = await search({
     index,
-    start,
-    end,
-    kqlFilter,
-    aggregations,
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', {
+            start: parseDatemath(start),
+            end: parseDatemath(end),
+          }),
+          ...kqlFilter(kuery),
+        ],
+      },
+    },
+    aggs: aggregations as Record<string, AggregationsAggregationContainer>,
   });
 
-  const buckets = response.aggregations?.groups?.buckets;
+  const buckets = (response.aggregations as { groups?: { buckets?: Bucket[] } })?.groups?.buckets;
   if (!buckets) {
     return [];
   }
@@ -276,7 +284,7 @@ export function createObservabilityGetMetricChangePointsTool({
               type: ToolResultType.other,
               data: {
                 changes: {
-                  metrics: allMetricChangePoints,
+                  metrics: topMetricChangePoints,
                 },
               },
             },

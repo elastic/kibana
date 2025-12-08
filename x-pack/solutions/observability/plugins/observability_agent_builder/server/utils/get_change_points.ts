@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import { getTypedSearch } from './get_typed_search';
-import { timeRangeFilter, kqlFilter } from './dsl_filters';
 
 interface ChangePointDetails {
   change_point?: number;
@@ -50,39 +46,6 @@ export interface ChangePoint {
   };
 }
 
-export async function searchChangePoints({
-  esClient,
-  index,
-  start,
-  end,
-  kqlFilter: kuery,
-  aggregations,
-}: {
-  esClient: IScopedClusterClient;
-  index: string;
-  start: string;
-  end: string;
-  kqlFilter?: string;
-  aggregations: Record<string, AggregationsAggregationContainer>;
-}) {
-  const rangeFilters = timeRangeFilter('@timestamp', { start, end });
-  const kqlFilters = kqlFilter(kuery);
-
-  const search = getTypedSearch(esClient.asCurrentUser);
-
-  return await search({
-    index,
-    size: 0,
-    track_total_hits: false,
-    query: {
-      bool: {
-        filter: [...rangeFilters, ...kqlFilters],
-      },
-    },
-    aggs: aggregations,
-  });
-}
-
 export async function getChangePoints({
   name,
   buckets,
@@ -107,8 +70,8 @@ export async function getChangePoints({
           y: group.doc_count,
         })),
         changes: {
-          time: changes.bucket?.key ? new Date(changes.bucket.key).toISOString() : undefined,
-          type: changeType,
+          time: changes.bucket?.key ? new Date(changes.bucket.key).toISOString() : '',
+          type: changeType as ChangePointType,
           ...value,
         },
       };
