@@ -51,15 +51,26 @@ import {
 } from '../_dashboard_listing_strings';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
-import type { DashboardSavedObjectUserContent, DashboardListingUserContent } from '../types';
+import type {
+  DashboardSavedObjectUserContent,
+  DashboardVisualizationUserContent,
+  DashboardListingUserContent,
+} from '../types';
 import {
   checkForDuplicateDashboardTitle,
   dashboardClient,
   findService,
 } from '../../dashboard_client';
 
-type GetDetailViewLink =
-  TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
+type GetDetailViewLink = TableListViewTableProps<DashboardListingUserContent>['getDetailViewLink'];
+
+const isVisualizationItem = (
+  item: DashboardListingUserContent
+): item is DashboardVisualizationUserContent => item.type === 'visualization';
+
+const isDashboardItem = (
+  item: DashboardListingUserContent
+): item is DashboardSavedObjectUserContent => item.type === 'dashboard';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -409,16 +420,10 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    async ({
-      id,
-      type,
-      editor,
-    }: {
-      id: string | undefined;
-      type?: string;
-      editor?: DashboardSavedObjectUserContent['editor'];
-    }) => {
-      if (type === 'dashboard') {
+    async (item: DashboardListingUserContent) => {
+      const { id, type } = item;
+
+      if (isDashboardItem(item)) {
         goToDashboard(id, 'edit');
         return;
       }
@@ -430,7 +435,9 @@ export const useDashboardListingTable = ({
       }
 
       // Handle visualizations with custom editor (e.g., Maps with editor.editApp)
-      if (editor) {
+      if (isVisualizationItem(item) && item.editor) {
+        const editor = item.editor;
+
         // Custom onEdit handler (e.g., some embeddables)
         if ('onEdit' in editor && editor.onEdit) {
           await editor.onEdit(id!);
@@ -473,21 +480,18 @@ export const useDashboardListingTable = ({
   }, [hasInitialFetchReturned]);
 
   const getDetailViewLink = useCallback<NonNullable<GetDetailViewLink>>(
-    ({ id, attributes: { timeRestore, readOnly }, type }) => {
-      // For maps, visualizations and annotation groups, don't provide a link - use onClick instead
-      if (type === 'map' || type === 'visualization' || type === 'event-annotation-group') {
+    (entity: DashboardListingUserContent) => {
+      if (!isDashboardItem(entity)) {
         return undefined;
       }
 
-      // Default: dashboard URL
-      return getDashboardUrl(id, timeRestore);
+      return getDashboardUrl(entity.id, entity.attributes.timeRestore);
     },
     [getDashboardUrl]
   );
 
-  const getOnClickTitle = useCallback((item: DashboardSavedObjectUserContent) => {
-    const { id, type, attributes } = item;
-    const isReadOnly = attributes.readOnly;
+  const getOnClickTitle = useCallback((item: DashboardListingUserContent) => {
+    const { id, type } = item;
 
     // Handle maps with state transfer
     if (type === 'map') {
@@ -502,10 +506,11 @@ export const useDashboardListingTable = ({
       };
     }
 
-    // Don't allow clicking on read-only visualizations
-    if (type === 'visualization') {
+    if (isVisualizationItem(item)) {
+      const isReadOnly = item.attributes.readOnly;
+
+      // Don't allow clicking on read-only visualizations
       if (isReadOnly) {
-        // Return undefined to prevent navigation
         return undefined;
       }
 
@@ -530,19 +535,19 @@ export const useDashboardListingTable = ({
     return undefined;
   }, []);
 
-  const rowItemActions = useCallback((item: DashboardSavedObjectUserContent) => {
+  const rowItemActions = useCallback((item: DashboardListingUserContent) => {
     const { showWriteControls } = getDashboardCapabilities();
-    const { managed, attributes } = item;
-    const isReadOnly = attributes.readOnly;
+    const { managed } = item;
+    const isReadOnlyVisualization = isVisualizationItem(item) && item.attributes.readOnly;
 
     // Disable edit for managed items or read-only visualizations
-    if (!showWriteControls || managed || isReadOnly) {
+    if (!showWriteControls || managed || isReadOnlyVisualization) {
       return {
         edit: {
           enabled: false,
           reason: managed
             ? dashboardListingTableStrings.getManagementItemDisabledEditMessage()
-            : isReadOnly
+            : isReadOnlyVisualization
             ? dashboardListingTableStrings.getReadOnlyVisualizationMessage()
             : undefined,
         },
