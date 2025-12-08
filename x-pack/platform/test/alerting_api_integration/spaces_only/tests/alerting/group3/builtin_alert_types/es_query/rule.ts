@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -30,7 +31,7 @@ import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const log = getService('log');
+  const retry = getService('retry');
   const indexPatterns = getService('indexPatterns');
   const {
     es,
@@ -43,10 +44,26 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  describe('rule', () => {
+  describe('testtest rule', () => {
     let endDate: string;
     let connectorId: string;
+    let esTestDataViewDate: DataViewSpec;
+    let esTestDataViewDateEpochMillis: DataViewSpec;
     const objectRemover = new ObjectRemover(supertest);
+
+    before(async () => {
+      esTestDataViewDate = await indexPatterns.create(
+        { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+        { override: true },
+        getUrlPrefix(Spaces.space1.id)
+      );
+
+      esTestDataViewDateEpochMillis = await indexPatterns.create(
+        { title: ES_TEST_INDEX_NAME, timeFieldName: 'date_epoch_millis' },
+        { override: true },
+        getUrlPrefix(Spaces.space1.id)
+      );
+    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -65,6 +82,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
+      await deleteDocs();
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
@@ -76,71 +94,67 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
+          const rule1Id = await createDSLRule({
             name: 'never fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '<',
             threshold: [0],
           });
-          await createRule({
+          const rule2Id = await createDSLRule({
             name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '>',
-            threshold: [-1],
+            threshold: [0],
           });
+          return [rule1Id, rule2Id];
         },
       ] as const,
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
+          const rule1Id = await createSearchSourceRule(
+            {
+              name: 'never fire',
+              thresholdComparator: '<',
+              threshold: [0],
+            },
+            esTestDataViewDate.id
           );
-          await createRule({
-            name: 'never fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [0],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          const rule2Id = await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [0],
             },
-          });
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-          });
+            esTestDataViewDate.id
+          );
+          return [rule1Id, rule2Id];
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on ungrouped hit count < > for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-        await initData();
+        // this test runs the rules twice, injecting data between each run
+        // the always firing rule should fire each time, triggering an index action each time
+        // the never firing rule should not fire or trigger any actions
 
-        const docs = await waitForDocs(2);
+        // Run 1:
+        // 1 - write source documents, dated 30 minutes in the past
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(-(30 * 60 * 1000)));
+        const [neverFireRuleId, alwaysFireRuleId] = await initData();
+        let docs = await waitForDocs(1);
+
+        // Run 2:
+        // 1 - write source documents, dated now
+        // 2 - manually run the rules with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, new Date(Date.now()).toISOString());
+        await Promise.all([runSoon(neverFireRuleId), runSoon(alwaysFireRuleId)]);
+
+        // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
+        docs = await waitForDocs(2);
+
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
 
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
@@ -167,9 +181,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
         expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
         expect(alertDoc['kibana.alert.evaluation.conditions']).to.be(
-          'Number of matching documents is greater than -1'
+          'Number of matching documents is greater than 0'
         );
-        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(-1);
+        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
@@ -183,81 +197,76 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
+          const rule1Id = await createDSLRule({
             name: 'never fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '<',
             threshold: [0],
             aggType: 'avg',
             aggField: 'testedValue',
           });
-          await createRule({
+          const rule2Id = await createDSLRule({
             name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '>',
-            threshold: [-1],
+            threshold: [0],
             aggType: 'avg',
             aggField: 'testedValue',
           });
+          return [rule1Id, rule2Id];
         },
       ] as const,
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
+          const rule1Id = await createSearchSourceRule(
+            {
+              name: 'never fire',
+              thresholdComparator: '<',
+              threshold: [0],
+              aggType: 'avg',
+              aggField: 'testedValue',
+            },
+            esTestDataViewDate.id
           );
-          await createRule({
-            name: 'never fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [0],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          const rule2Id = await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [0],
+              aggType: 'avg',
+              aggField: 'testedValue',
             },
-            aggType: 'avg',
-            aggField: 'testedValue',
-          });
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-            aggType: 'avg',
-            aggField: 'testedValue',
-          });
+            esTestDataViewDate.id
+          );
+          return [rule1Id, rule2Id];
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on ungrouped agg metric < > for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-        await initData();
+        // this test runs the rules twice, injecting data between each run
+        // the always firing rule should fire each time, triggering an index action each time
+        // the never firing rule should not fire or trigger any actions
+
+        // Run 1:
+        // 1 - write source documents, dated 30 minutes in the past
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(-(30 * 60 * 1000)));
+        const [neverFireRuleId, alwaysFireRuleId] = await initData();
+        let docs = await waitForDocs(1);
+
+        // Run 2:
+        // 1 - write source documents, dated now
+        // 2 - manually run the rules with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, new Date(Date.now()).toISOString());
+        await Promise.all([runSoon(neverFireRuleId), runSoon(alwaysFireRuleId)]);
+
+        // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
+        docs = await waitForDocs(2);
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
 
-        const docs = await waitForDocs(2);
-        log.info(`Docs ${JSON.stringify(docs)}`);
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -283,7 +292,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
         expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
         expect(alertDoc['kibana.alert.evaluation.conditions']).to.be(
-          'Number of matching documents where avg of testedValue is greater than -1'
+          'Number of matching documents where avg of testedValue is greater than 0'
         );
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value >= 0).to.be(true);
@@ -298,87 +307,71 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
+          await createDSLRule({
             name: 'never fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '<',
             threshold: [0],
             groupBy: 'top',
             termField: 'group',
-            termSize: 2,
+            termSize: ES_GROUPS_TO_WRITE,
           });
-          await createRule({
+          await createDSLRule({
             name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '>',
-            threshold: [-1],
+            threshold: [0],
             groupBy: 'top',
             termField: 'group',
-            termSize: 2,
+            termSize: ES_GROUPS_TO_WRITE,
           });
         },
       ] as const,
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
+          await createSearchSourceRule(
+            {
+              name: 'never fire',
+              thresholdComparator: '<',
+              threshold: [0],
+              groupBy: 'top',
+              termField: 'group',
+              termSize: ES_GROUPS_TO_WRITE,
+            },
+            esTestDataViewDate.id
           );
-          await createRule({
-            name: 'never fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [0],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [0],
+              groupBy: 'top',
+              termField: 'group',
+              termSize: ES_GROUPS_TO_WRITE,
             },
-            groupBy: 'top',
-            termField: 'group',
-            termSize: 2,
-          });
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-            groupBy: 'top',
-            termField: 'group',
-            termSize: 2,
-          });
+            esTestDataViewDate.id
+          );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on grouped hit count < > for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+        // this test runs the rules once, injecting data between each run
+        // the always firing rule should fire each time, triggering an index action each time for each group
+        // the never firing rule should not fire or trigger any actions
+
+        // Run 1:
+        // 1 - write source documents, dated now
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output docs to be written, indicating rule is done running
+        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
         await initData();
+        const docs = await waitForDocs(ES_GROUPS_TO_WRITE);
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s for group-\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 1h for group-\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         const titlePattern = /rule 'always fire' matched query for group group-\d/;
         const conditionPattern =
-          /Number of matching documents for group "group-\d" is greater than -1/;
+          /Number of matching documents for group "group-\d" is greater than 0/;
 
-        const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -392,18 +385,20 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(previousTimestamp).to.be.empty();
         }
 
-        const aadDocs = await getAllAADDocs(1);
+        const aadDocs = await getAllAADDocs(ES_GROUPS_TO_WRITE);
 
-        const alertDoc = aadDocs.body.hits.hits[0]._source;
-        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
-        expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
-        expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
-        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
-        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        expect(alertDoc['host.name'][0]).to.be('host-1');
-        expect(alertDoc['host.hostname'][0]).to.be('host-1');
-        expect(alertDoc['host.id'][0]).to.be('1');
+        for (let i = 0; i < aadDocs.length; i++) {
+          const alertDoc = aadDocs.body.hits.hits[i]._source;
+          expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+          expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
+          expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
+          const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+          expect(value).greaterThan(0);
+          expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+          expect(alertDoc['host.name'][0]).to.be('host-1');
+          expect(alertDoc['host.hostname'][0]).to.be('host-1');
+          expect(alertDoc['host.id'][0]).to.be('1');
+        }
       })
     );
 
@@ -411,59 +406,52 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
+          await createDSLRule({
             name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '>',
-            threshold: [-1],
+            threshold: [0],
             groupBy: 'top',
             termField: ['group', 'testedValue'],
-            termSize: 2,
+            termSize: ES_GROUPS_TO_WRITE,
           });
         },
       ] as const,
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
-          );
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [0],
+              groupBy: 'top',
+              termField: ['group', 'testedValue'],
+              termSize: ES_GROUPS_TO_WRITE,
             },
-            groupBy: 'top',
-            termField: ['group', 'testedValue'],
-            termSize: 2,
-          });
+            esTestDataViewDate.id
+          );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on grouped with multi term hit count < > for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+        // this test runs the rules once, injecting data between each run
+        // the always firing rule should fire each time, triggering an index action each time for each group
+        // the never firing rule should not fire or trigger any actions
+
+        // Run 1:
+        // 1 - write source documents, dated now
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output docs to be written, indicating rule is done running
+        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
         await initData();
+        const docs = await waitForDocs(ES_GROUPS_TO_WRITE);
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s for group-\d+,\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 1h for group-\d+,\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         const titlePattern = /rule 'always fire' matched query for group group-\d+,\d+/;
         const conditionPattern =
-          /Number of matching documents for group "group-\d+,\d+" is greater than -1/;
+          /Number of matching documents for group "group-\d+,\d+" is greater than 0/;
 
-        const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -477,18 +465,20 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(previousTimestamp).to.be.empty();
         }
 
-        const aadDocs = await getAllAADDocs(1);
+        const aadDocs = await getAllAADDocs(ES_GROUPS_TO_WRITE);
 
-        const alertDoc = aadDocs.body.hits.hits[0]._source;
-        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
-        expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
-        expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
-        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
-        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        expect(alertDoc['host.name'][0]).to.be('host-1');
-        expect(alertDoc['host.hostname'][0]).to.be('host-1');
-        expect(alertDoc['host.id'][0]).to.be('1');
+        for (let i = 0; i < aadDocs.length; i++) {
+          const alertDoc = aadDocs.body.hits.hits[i]._source;
+          expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+          expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
+          expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
+          const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+          expect(value).greaterThan(0);
+          expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+          expect(alertDoc['host.name'][0]).to.be('host-1');
+          expect(alertDoc['host.hostname'][0]).to.be('host-1');
+          expect(alertDoc['host.id'][0]).to.be('1');
+        }
       })
     );
 
@@ -496,27 +486,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
-            name: 'never fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
-            thresholdComparator: '<',
+          await createDSLRule({
+            name: 'always fire',
+            thresholdComparator: '>',
             threshold: [0],
             groupBy: 'top',
             termField: 'group',
-            termSize: 2,
-            aggType: 'avg',
-            aggField: 'testedValue',
-          });
-          await createRule({
-            name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            groupBy: 'top',
-            termField: 'group',
-            termSize: 2,
+            termSize: ES_GROUPS_TO_WRITE,
             aggType: 'avg',
             aggField: 'testedValue',
           });
@@ -525,60 +501,36 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
+          await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [0],
+              searchType: 'searchSource',
+              groupBy: 'top',
+              termField: 'group',
+              termSize: ES_GROUPS_TO_WRITE,
+              aggType: 'avg',
+              aggField: 'testedValue',
+            },
+            esTestDataViewDate.id
           );
-          await createRule({
-            name: 'never fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [0],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-            groupBy: 'top',
-            termField: 'group',
-            termSize: 2,
-            aggType: 'avg',
-            aggField: 'testedValue',
-          });
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-            groupBy: 'top',
-            termField: 'group',
-            termSize: 2,
-            aggType: 'avg',
-            aggField: 'testedValue',
-          });
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on grouped agg metric < > for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-        await initData();
+        // this test runs the rules once, injecting data between each run
+        // the always firing rule should fire each time, triggering an index action each time for each group
+        // the never firing rule should not fire or trigger any actions
 
-        const docs = await waitForDocs(2);
+        // Run 1:
+        // 1 - write source documents, dated now
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output docs to be written, indicating rule is done running
+        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+        await initData();
+        const docs = await waitForDocs(ES_GROUPS_TO_WRITE);
+
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -588,7 +540,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           const titlePattern = /rule 'always fire' matched query for group group-\d/;
           expect(title).to.match(titlePattern);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s for group-\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+            /Document count is \d+.?\d* in the last 1h for group-\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -601,73 +553,67 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
+          const rule1Id = await createDSLRule({
             name: 'never fire',
-            size: 100,
             thresholdComparator: '<',
             threshold: [0],
             timeField: 'date_epoch_millis',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
           });
-          await createRule({
+          const rule2Id = await createDSLRule({
             name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '>',
-            threshold: [-1],
+            threshold: [0],
             timeField: 'date_epoch_millis',
           });
+          return [rule1Id, rule2Id];
         },
       ] as const,
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date_epoch_millis' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
+          const rule1Id = await createSearchSourceRule(
+            {
+              name: 'never fire',
+              thresholdComparator: '<',
+              threshold: [0],
+            },
+            esTestDataViewDateEpochMillis.id
           );
-          await createRule({
-            name: 'never fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [0],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          const rule2Id = await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [0],
             },
-          });
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-          });
+            esTestDataViewDateEpochMillis.id
+          );
+          return [rule1Id, rule2Id];
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: use epoch millis - threshold on hit count < > for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
-        endDate = new Date(endDateMillis).toISOString();
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-        await initData();
+        // this test runs the rules twice, injecting data between each run
+        // the always firing rule should fire each time, triggering an index action each time
+        // the never firing rule should not fire or trigger any actions
 
-        const docs = await waitForDocs(2);
+        // Run 1:
+        // 1 - write source documents, dated 30 minutes in the past
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(-(30 * 60 * 1000)));
+        const [neverFireRuleId, alwaysFireRuleId] = await initData();
+        let docs = await waitForDocs(1);
+
+        // Run 2:
+        // 1 - write source documents, dated now
+        // 2 - manually run the rules with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, new Date(Date.now()).toISOString());
+        await Promise.all([runSoon(neverFireRuleId), runSoon(alwaysFireRuleId)]);
+
+        // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
+        docs = await waitForDocs(2);
+
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -676,7 +622,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). ./;
+            /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). ./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -712,19 +658,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               },
             };
           };
-          await createRule({
+          await createDSLRule({
             name: 'never fire',
             esQuery: JSON.stringify(rangeQuery(ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE + 1)),
-            size: 100,
             thresholdComparator: '<',
-            threshold: [-1],
+            threshold: [0],
           });
-          await createRule({
+          await createDSLRule({
             name: 'fires once',
             esQuery: JSON.stringify(
               rangeQuery(Math.floor((ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE) / 2))
             ),
-            size: 100,
             thresholdComparator: '>=',
             threshold: [0],
           });
@@ -733,43 +677,24 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
+          await createSearchSourceRule(
+            {
+              name: 'never fire',
+              thresholdComparator: '<',
+              threshold: [0],
+            },
+            esTestDataViewDate.id,
+            `testedValue > ${ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE + 1}`
           );
-          await createRule({
-            name: 'never fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: `testedValue > ${ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE + 1}`,
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          await createSearchSourceRule(
+            {
+              name: 'fires once',
+              thresholdComparator: '>=',
+              threshold: [0],
             },
-          });
-          await createRule({
-            name: 'fires once',
-            size: 100,
-            thresholdComparator: '>=',
-            threshold: [0],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: `testedValue > ${Math.floor(
-                  (ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE) / 2
-                )}`,
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-          });
+            esTestDataViewDate.id,
+            `testedValue > ${Math.floor((ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE) / 2)}`
+          );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
@@ -798,10 +723,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
+          await createDSLRule({
             name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '<',
             threshold: [1],
           });
@@ -810,27 +733,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
-          );
-
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '<',
+              threshold: [1],
             },
-          });
+            esTestDataViewDate.id
+          );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
@@ -867,10 +777,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         async () => {
           // This rule should be active initially when the number of documents is below the threshold
           // and then recover when we add more documents.
-          await createRule({
+          await createDSLRule({
             name: 'fire then recovers',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '<',
             threshold: [1],
             notifyWhen: 'onActionGroupChange',
@@ -881,30 +789,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
-          );
           // This rule should be active initially when the number of documents is below the threshold
           // and then recover when we add more documents.
-          await createRule({
-            name: 'fire then recovers',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          await createSearchSourceRule(
+            {
+              name: 'fire then recovers',
+              thresholdComparator: '<',
+              threshold: [1],
+              notifyWhen: 'onActionGroupChange',
+              timeWindowSize: RULE_INTERVAL_SECONDS,
             },
-            notifyWhen: 'onActionGroupChange',
-            timeWindowSize: RULE_INTERVAL_SECONDS,
-          });
+            esTestDataViewDate.id
+          );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
@@ -948,19 +844,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createRule({
+          await createDSLRule({
             name: 'never fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '<',
             threshold: [0],
             indexName: ES_TEST_DATA_STREAM_NAME,
             timeField: '@timestamp',
           });
-          await createRule({
+          await createDSLRule({
             name: 'always fire',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            size: 100,
             thresholdComparator: '>',
             threshold: [-1],
             indexName: ES_TEST_DATA_STREAM_NAME,
@@ -971,41 +863,22 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
-          const esTestDataView = await indexPatterns.create(
-            { title: ES_TEST_DATA_STREAM_NAME, timeFieldName: 'date' },
-            { override: true },
-            getUrlPrefix(Spaces.space1.id)
+          await createSearchSourceRule(
+            {
+              name: 'never fire',
+              thresholdComparator: '<',
+              threshold: [0],
+            },
+            esTestDataViewDate.id
           );
-          await createRule({
-            name: 'never fire',
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [0],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
+          await createSearchSourceRule(
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [0],
             },
-          });
-          await createRule({
-            name: 'always fire',
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            searchType: 'searchSource',
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: esTestDataView.id,
-              filter: [],
-            },
-          });
+            esTestDataViewDate.id
+          );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
@@ -1065,10 +938,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
 
-        await createRule({
+        await createDSLRule({
           name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
           thresholdComparator: '>',
           threshold: [0],
           timeWindowSize: 300,
@@ -1090,10 +961,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
 
-        await createRule({
+        await createDSLRule({
           name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
           thresholdComparator: '>',
           threshold: [0],
           timeWindowSize: 300,
@@ -1114,10 +983,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
 
-        await createRule({
+        await createDSLRule({
           name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
           thresholdComparator: '>',
           threshold: [0],
           timeWindowSize: 300,
@@ -1141,10 +1008,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
 
-        await createRule({
+        await createDSLRule({
           name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
           thresholdComparator: '>',
           threshold: [0],
           aggType: undefined,
@@ -1171,9 +1036,31 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
     }
 
+    async function runSoon(ruleId: string) {
+      await retry.try(async () => {
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        const runSoonResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(runSoonResponse.status).to.eql(204);
+      });
+    }
+
+    async function deleteDocs() {
+      await es.deleteByQuery({
+        index: ES_TEST_INDEX_NAME,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
+    }
+
+    function getEndDate(millisOffset: number) {
+      const endDateMillis = Date.now() + millisOffset;
+      return new Date(endDateMillis).toISOString();
+    }
+
     interface CreateRuleParams {
       name: string;
-      size: number;
       thresholdComparator: string;
       threshold: number[];
       timeWindowSize?: number;
@@ -1191,7 +1078,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       termSize?: number;
     }
 
-    async function createRule(params: CreateRuleParams): Promise<string> {
+    async function createRule(
+      params: CreateRuleParams,
+      ruleParams: Partial<CreateRuleParams>
+    ): Promise<string> {
       const action = {
         id: connectorId,
         group: 'query matched',
@@ -1235,17 +1125,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         },
       };
 
-      const ruleParams =
-        params.searchType === 'searchSource'
-          ? {
-              searchConfiguration: params.searchConfiguration,
-            }
-          : {
-              index: [params.indexName || ES_TEST_INDEX_NAME],
-              timeField: params.timeField || 'date',
-              esQuery: params.esQuery,
-            };
-
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -1254,13 +1133,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           consumer: 'alerts',
           enabled: true,
           rule_type_id: RULE_TYPE_ID,
-          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          schedule: { interval: '1d' },
           actions: [action, recoveryAction],
           notify_when: params.notifyWhen || 'onActiveAlert',
           params: {
-            size: params.size,
-            timeWindowSize: params.timeWindowSize || RULE_INTERVAL_SECONDS * 5,
-            timeWindowUnit: 's',
+            size: 100,
+            timeWindowSize: 1,
+            timeWindowUnit: 'h',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
@@ -1282,6 +1161,39 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       return ruleId;
+    }
+
+    async function createDSLRule(params: CreateRuleParams): Promise<string> {
+      const ruleParams = {
+        index: [params.indexName || ES_TEST_INDEX_NAME],
+        timeField: params.timeField || 'date',
+        esQuery: params.esQuery,
+      };
+
+      if (params.esQuery === undefined) {
+        params.esQuery = `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`;
+      }
+
+      return await createRule(params, ruleParams);
+    }
+
+    async function createSearchSourceRule(
+      params: CreateRuleParams,
+      dataViewId?: string,
+      query: string = ''
+    ): Promise<string> {
+      const ruleParams = {
+        searchConfiguration: {
+          query: {
+            query,
+            language: 'kuery',
+          },
+          index: dataViewId,
+          filter: [],
+        },
+      };
+
+      return await createRule(params, ruleParams);
     }
   });
 }
