@@ -37,6 +37,9 @@ export function createTopNavBeta() {
   };
 }
 
+/**
+ * @deprecated
+ */
 export function createTopNav(
   /**
    * @deprecated TopNavMenuBeta will decouple from UnifiedSearch, so this parameter
@@ -58,7 +61,11 @@ export function createTopNav(
     return (
       <I18nProvider>
         <Suspense>
-          <LazyTopNavMenu {...(props as any)} unifiedSearch={unifiedSearch} config={config} />
+          <LazyTopNavMenu
+            {...(props as TopNavMenuProps<Query | AggregateQuery>)}
+            unifiedSearch={unifiedSearch}
+            config={config}
+          />
         </Suspense>
       </I18nProvider>
     );

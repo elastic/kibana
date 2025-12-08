@@ -247,6 +247,10 @@ export const getPopoverPanels = ({
 
   processItems(items, startPanelId);
 
+  /**
+   * Action items are only added to the main panel and only in lower breakpoints (below "m").
+   * They should not be available to be added via config.
+   */
   if (hasActionItems) {
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
@@ -277,7 +281,9 @@ export const getIsSelectedColor = ({
   euiTheme: EuiThemeComputed;
   isFilled: boolean;
 }) => {
-  // Construct the color key based on whether the button is filled or empty e.g. backgroundFilledPrimaryHover.
+  /**
+   * Construct the color key based on whether the button is filled or empty e.g. backgroundFilledPrimaryHover.
+   */
   const colorKey = `background${isFilled ? 'Filled' : 'Empty'}${upperFirst(
     color
   )}Hover` as keyof typeof euiTheme.components.buttons;

@@ -73,6 +73,9 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
  *
  **/
 
+/**
+ * @deprecated
+ */
 export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   props: TopNavMenuProps<QT>
 ): ReactElement | null {

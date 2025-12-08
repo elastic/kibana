@@ -31,7 +31,9 @@ type BaseSplitProps = Pick<
  * Subset of SplitButtonWithNotificationProps.
  */
 export type TopNavMenuSplitButtonProps =
-  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
+  /**
+   * If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
+   */
   | (BaseSplitProps & {
       /**
        * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
@@ -105,7 +107,9 @@ interface TopNavItemBase {
 }
 
 export type TopNavMenuItemCommon =
-  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
+  /**
+   * If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
+   */
   | (TopNavItemBase & {
       /**
        * Function to run when the item is clicked. Only used if `items` is not provided.
@@ -135,6 +139,9 @@ export type TopNavMenuItemCommon =
       popoverWidth?: number;
     });
 
+/**
+ * Full item type for use in `config.items` arrays.
+ */
 export type TopNavMenuItemType = TopNavMenuItemCommon & {
   /**
    * Order of the item in the menu. Lower numbers appear first.
@@ -142,6 +149,9 @@ export type TopNavMenuItemType = TopNavMenuItemCommon & {
   order: number;
 };
 
+/**
+ * Popover item type for use in `items` arrays.
+ */
 export type TopNavMenuPopoverItem = Omit<
   TopNavMenuItemType,
   'iconType' | 'hidden' | 'popoverWidth'
@@ -156,6 +166,9 @@ export type TopNavMenuPopoverItem = Omit<
   seperator?: 'above' | 'below';
 };
 
+/**
+ * Secondary action button type. Can only be a simple button.
+ */
 export type TopNavMenuSecondaryActionItem = TopNavMenuItemCommon & {
   /**
    * The color of the button.
@@ -171,13 +184,23 @@ export type TopNavMenuSecondaryActionItem = TopNavMenuItemCommon & {
   minWidth?: EuiButtonProps['minWidth'];
 };
 
-export type TopNavMenuPrimaryActionItem = Omit<TopNavMenuItemCommon, 'items'> & {
+/**
+ * Primary action button type. Can be either a simple button or a split button.
+ */
+export type TopNavMenuPrimaryActionItem =
   /**
-   * Subset of SplitButtonWithNotificationProps.
+   * The main part of the button should never open a popover.
    */
-  splitButtonProps?: TopNavMenuSplitButtonProps;
-};
+  Omit<TopNavMenuItemCommon, 'items'> & {
+    /**
+     * Subset of SplitButtonWithNotificationProps.
+     */
+    splitButtonProps?: TopNavMenuSplitButtonProps;
+  };
 
+/**
+ * Configuration object for the TopNavMenuBeta component.
+ */
 export interface TopNavMenuConfigBeta {
   /**
    * List of menu items to display in the top navigation menu.
