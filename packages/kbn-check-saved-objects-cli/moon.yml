@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/migrator-test-kit'
   - '@kbn/config-schema'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package

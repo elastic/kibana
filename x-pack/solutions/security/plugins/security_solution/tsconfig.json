@@ -266,6 +266,7 @@
     "@kbn/shared-ux-file-types",
     "@kbn/onechat-common",
     "@kbn/onechat-plugin",
-    "@kbn/core-ui-settings-server-mocks"
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/siem-readiness"
   ]
 }
