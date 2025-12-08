@@ -10,7 +10,7 @@
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from '../../../../common/schema';
 

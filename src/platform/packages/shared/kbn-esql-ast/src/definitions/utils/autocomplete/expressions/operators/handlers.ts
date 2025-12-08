@@ -12,14 +12,20 @@ import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import {
   listCompleteItem,
   commaCompleteItem,
+  likePatternItems,
+  rlikePatternItems,
 } from '../../../../../commands_registry/complete_items';
-import type { ESQLColumn, ESQLFunction } from '../../../../../types';
+import type { ESQLColumn, ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
 import type { ExpressionContext } from '../types';
-import { getLogicalContinuationSuggestions, shouldSuggestOpenListForOperand } from './utils';
+import {
+  getLogicalContinuationSuggestions,
+  isOperandMissing,
+  shouldSuggestOpenListForOperand,
+} from './utils';
 import { shouldSuggestComma } from '../comma_decision_engine';
-import { buildConstantsDefinitions } from '../../../literals';
 import { SuggestionBuilder } from '../suggestion_builder';
+import { withAutoSuggest } from '../../helpers';
 
 // ============================================================================
 // eg. IN / NOT IN Operators
@@ -30,8 +36,11 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
   const { expressionRoot, innerText } = ctx;
 
   const fn = expressionRoot as ESQLFunction;
-  const list = getBinaryExpressionOperand(fn, 'right');
-  const leftOperand = getBinaryExpressionOperand(fn, 'left');
+
+  // For IN/NOT IN, args are never arrays because the parser builds a single ESQLList node
+  // containing the values, not a JS array of values.
+  const list = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
+  const leftOperand = getBinaryExpressionOperand(fn, 'left') as ESQLSingleAstItem | undefined;
 
   // No list yet: suggest opening parenthesis
   if (shouldSuggestOpenListForOperand(list)) {
@@ -59,60 +68,53 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
       }
     }
 
-    if (columnForType) {
-      // After a value but not after comma: suggest comma
-      if (
-        shouldSuggestComma({
-          position: 'inside_list',
-          innerText,
-          listHasValues: list.values && list.values.length > 0,
-        })
-      ) {
-        return [{ ...commaCompleteItem, text: ', ' }];
-      }
-
-      // After comma or empty list: suggest values
-      // For empty lists, don't ignore the left column - we want to suggest fields of the same type
-      const isEmptyList = !list.values || list.values.length === 0;
-      const ignoredColumns = isEmptyList
-        ? []
-        : [
-            columnForType.parts.join('.'),
-            ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
-          ].filter(Boolean);
-
-      return getSuggestionsForColumn(columnForType, ctx, ignoredColumns);
+    // After a value but not after comma: suggest comma
+    if (
+      shouldSuggestComma({
+        position: 'inside_list',
+        innerText,
+        listHasValues: list.values && list.values.length > 0,
+      })
+    ) {
+      return [withAutoSuggest({ ...commaCompleteItem, text: ',' })];
     }
+
+    // After comma or empty list: suggest values
+    const isEmptyList = !list.values || list.values.length === 0;
+    const ignoredColumns = isEmptyList
+      ? []
+      : [
+          ...(columnForType ? [columnForType.parts.join('.')] : []),
+          ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
+        ].filter(Boolean);
+
+    return getListValueSuggestions(ctx, columnForType, ignoredColumns);
   }
 
   return [];
 }
 
-async function getSuggestionsForColumn(
-  column: ESQLColumn,
+async function getListValueSuggestions(
   ctx: ExpressionContext,
+  column: ESQLColumn | undefined,
   ignoredColumns: string[]
 ): Promise<ISuggestionItem[]> {
-  const argType = getExpressionType(column, ctx.context?.columns);
-
-  if (!argType) {
-    return [];
-  }
-
-  // Use SuggestionBuilder to eliminate duplicated suggestion patterns
+  const argType = column ? getExpressionType(column, ctx.context?.columns) : undefined;
   const builder = new SuggestionBuilder(ctx);
 
   await builder.addFields({
-    types: [argType],
+    types: argType ? [argType] : undefined,
     ignoredColumns,
+    addSpaceAfterField: true,
+    openSuggestions: true,
   });
 
   builder
     .addFunctions({
-      types: [argType],
+      types: argType ? [argType] : undefined,
     })
     .addLiterals({
-      types: [argType],
+      types: argType ? [argType] : undefined,
       includeDateLiterals: true,
       includeCompatibleLiterals: true,
     });
@@ -151,34 +153,10 @@ export async function handleStringListOperator(
   }
 
   const operator = fn.name.toLowerCase();
-  const rightOperand = getBinaryExpressionOperand(fn, 'right');
-  const leftOperand = getBinaryExpressionOperand(fn, 'left');
+  const rightOperand = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
 
-  // No list yet: suggest any string expressions (LIKE pattern can be any string expression)
-  if (shouldSuggestOpenListForOperand(rightOperand)) {
-    // LIKE/RLIKE accepts any string pattern, so suggest all string-compatible expressions
-    const builder = new SuggestionBuilder(context);
-
-    const ignoredColumns = isColumn(leftOperand)
-      ? [leftOperand.parts.join('.')].filter(Boolean)
-      : [];
-
-    await builder.addFields({
-      types: ['any'],
-      ignoredColumns,
-    });
-
-    builder
-      .addFunctions({
-        types: ['any'],
-      })
-      .addLiterals({
-        types: ['any'],
-        includeDateLiterals: false,
-        includeCompatibleLiterals: true,
-      });
-
-    return builder.build();
+  if (isOperandMissing(rightOperand)) {
+    return getStringPatternSuggestions(operator);
   }
 
   // Only handle list form; otherwise, delegate by returning null
@@ -199,7 +177,6 @@ export async function handleStringListOperator(
     shouldSuggestComma({
       position: 'inside_list',
       innerText: context.innerText,
-      listHasValues: list.values && list.values.length > 0,
     })
   ) {
     return [{ ...commaCompleteItem, text: ', ' }];
@@ -209,13 +186,7 @@ export async function handleStringListOperator(
   return getStringPatternSuggestions(operator);
 }
 
-/** Returns basic pattern suggestions for LIKE/RLIKE operators */
+/** Returns pattern suggestions for LIKE/RLIKE operators */
 function getStringPatternSuggestions(operator: string): ISuggestionItem[] {
-  const isRlike = operator.includes('rlike');
-
-  // RLIKE: empty string, match anything, match from start to end
-  // LIKE: empty string, wildcard for any characters
-  const patterns = isRlike ? ['""', '".*"', '"^.*$"'] : ['""', '"*"'];
-
-  return buildConstantsDefinitions(patterns, undefined, 'A');
+  return operator.includes('rlike') ? rlikePatternItems : likePatternItems;
 }
