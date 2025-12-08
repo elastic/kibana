@@ -84,6 +84,28 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+    async enable({ sloId }: { sloId: string }, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/{id}/enable`.replace('{id}', sloId))
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(204);
+
+      return body;
+    },
+
+    async disable({ sloId }: { sloId: string }, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/{id}/disable`.replace('{id}', sloId))
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(204);
+
+      return body;
+    },
+
     async delete(id: string, roleAuthc: RoleCredentials) {
       return await supertestWithoutAuth
         .delete(`/api/observability/slos/${id}`)
@@ -204,6 +226,15 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .expect(expectedStatus);
 
       return body;
+    },
+
+    async repair(list: string[], roleAuthc: RoleCredentials) {
+      await supertestWithoutAuth
+        .post(`/api/observability/slos/_repair`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ list })
+        .expect(207);
     },
 
     async purgeInstances(

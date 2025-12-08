@@ -29,6 +29,7 @@ import { getSLOSuggestionsRoute } from './get_suggestions';
 import { inspectSLORoute } from './inspect_slo';
 import { putSloSettings } from './put_slo_settings';
 import { resetSLORoute } from './reset_slo';
+import { repairSLORoute } from './repair_slo';
 import { updateSLORoute } from './update_slo';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
@@ -58,6 +59,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getSLOStatsOverview,
     ...bulkDeleteSLORoute,
     ...getBulkDeleteStatusRoute,
+    ...repairSLORoute,
     ...purgeInstancesRoute,
     ...getPurgeInstancesStatusRoute,
   };
