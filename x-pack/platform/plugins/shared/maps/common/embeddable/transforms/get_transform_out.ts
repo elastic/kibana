@@ -19,21 +19,12 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
     panelReferences?: Reference[],
     containerReferences?: Reference[]
   ) {
-    function getReferences() {
-      if (panelReferences?.length) {
-        return panelReferences;
-      }
-
-      return containerReferences ?? [];
-    }
-
-    const references = getReferences();
     const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
+      ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
       : undefined;
 
     // by ref
-    const savedObjectRef = (references ?? []).find(
+    const savedObjectRef = (panelReferences ?? []).find(
       (ref) => MAP_SAVED_OBJECT_TYPE === ref.type && ref.name === MAP_SAVED_OBJECT_REF_NAME
     );
     if (savedObjectRef) {
@@ -49,10 +40,10 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       return {
         ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        attributes: transformMapAttributesOut(
-          (state as MapByValueState).attributes,
-          references ?? []
-        ),
+        attributes: transformMapAttributesOut((state as MapByValueState).attributes, [
+          ...(panelReferences ?? []),
+          ...(containerReferences ?? []),
+        ]),
       };
     }
 

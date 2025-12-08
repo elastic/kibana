@@ -25,8 +25,8 @@ export type EmbeddableTransforms<
    * @param storedState
    * @param panelReferences Panel references
    * @param containerReferences Container references - Panel references where not prefixed with panel ids until 7.13
-   *                                                   This creates a BWC issue where panel references can not be extracted from container references
-   *                                                   Container references provided to allow embeddables to extract panel references from container references for BWC
+   *                                                   This creates a BWC issue where by-value panel references can not be extracted from container references
+   *                                                   Parameter provided to allow embeddables to extract by-value panel references from container references for BWC
    * @returns EmbeddableState
    */
   transformOut?: (storedState: StoredEmbeddableState, references?: Reference[]) => EmbeddableState;
