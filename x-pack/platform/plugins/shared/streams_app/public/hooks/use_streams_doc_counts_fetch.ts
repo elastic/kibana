@@ -94,10 +94,10 @@ export function useStreamDocCountsFetch({
       });
 
       const failedCountPromise = canReadFailureStore
-        ? streamsRepositoryClient.fetch('POST /internal/streams/doc_counts/failed', {
+        ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {
             signal: abortController.signal,
             params: {
-              body: {
+              query: {
                 start: timeState.start,
                 end: timeState.end,
               },

@@ -357,6 +357,48 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('GET /internal/streams/doc_counts/failed', () => {
+      it('returns failed document counts from failure store', async () => {
+        await putStream(apiClient, 'logs.test-stream-1', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                fields: {},
+                routing: [],
+              },
+              failure_store: { disabled: {} },
+            },
+          },
+        });
+
+        const now = Date.now();
+        const start = now - 3600000;
+        const end = now + 60000;
+
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/failed', {
+          params: {
+            query: {
+              start,
+              end,
+            },
+          },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body).to.be.an('array');
+        if (response.body.length > 0) {
+          expect(response.body[0]).to.have.property('stream');
+          expect(response.body[0]).to.have.property('count');
+          expect(response.body[0].stream).to.not.contain('::failures');
+        }
+      });
+    });
+
     describe('Authorization', () => {
       it('allows viewer role to access doc counts endpoints', async () => {
         const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/total');

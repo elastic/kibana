@@ -65,7 +65,7 @@ const totalDocCountsRoute = createServerRoute({
 });
 
 const failedDocCountsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/doc_counts/failed',
+  endpoint: 'GET /internal/streams/doc_counts/failed',
   options: {
     access: 'internal',
   },
@@ -75,15 +75,15 @@ const failedDocCountsRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.object({
-      start: z.number(),
-      end: z.number(),
+    query: z.object({
+      start: z.coerce.number(),
+      end: z.coerce.number(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
-    const { start, end } = params.body;
+    const { start, end } = params.query;
 
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
