@@ -8079,6 +8079,19 @@ export const security_endpoint_management_api_agent_types = z.enum([
     description: 'List of agent types to retrieve. Defaults to `endpoint`.'
 });
 
+/**
+ * Determines which field is used to sort the results.
+ */
+export const security_endpoint_management_api_api_sort_field = z.enum([
+    'name',
+    'createdAt',
+    'createdBy',
+    'updatedAt',
+    'updatedBy'
+]).register(z.globalRegistry, {
+    description: 'Determines which field is used to sort the results.'
+});
+
 export const security_endpoint_management_api_cloud_file_script_parameters = z.object({
     cloudFile: z.string().min(1).register(z.globalRegistry, {
         description: 'Script name in cloud storage.'
@@ -8145,6 +8158,37 @@ export const security_endpoint_management_api_endpoint_ids = z.array(z.string().
 });
 
 export const security_endpoint_management_api_endpoint_metadata_response = z.record(z.string(), z.unknown());
+
+export const security_endpoint_management_api_endpoint_script_platform = z.enum([
+    'linux',
+    'macos',
+    'windows'
+]);
+
+export const security_endpoint_management_api_endpoint_script = z.object({
+    createdAt: z.optional(z.iso.datetime()),
+    createdBy: z.optional(z.string()),
+    description: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Description of the script and its purpose/functionality'
+    })),
+    downloadUri: z.optional(z.string().register(z.globalRegistry, {
+        description: 'URI to download the script file. Note that this is the relative path and does not include the space (if applicable)'
+    })),
+    example: z.optional(z.string()),
+    id: z.optional(z.uuid()),
+    instructions: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Instructions for using the script, including details around its supported input arguments'
+    })),
+    name: z.optional(z.string()),
+    pathToExecutable: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The relative path to the file included in the archive that should be executed once its contents are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).\n'
+    })),
+    platform: z.optional(z.array(security_endpoint_management_api_endpoint_script_platform)),
+    requiresInput: z.optional(z.boolean()),
+    updatedAt: z.optional(z.iso.datetime()),
+    updatedBy: z.optional(z.string()),
+    version: z.optional(z.string())
+});
 
 export const security_endpoint_management_api_execute_route_response = z.record(z.string(), z.unknown());
 
@@ -8221,6 +8265,8 @@ export const security_endpoint_management_api_page = z.int().gte(1).register(z.g
 export const security_endpoint_management_api_page_size = z.int().gte(1).lte(100).register(z.globalRegistry, {
     description: 'Number of items per page'
 }).default(10);
+
+export const security_endpoint_management_api_api_page_size = security_endpoint_management_api_page_size.and(z.unknown());
 
 /**
  * Optional parameters object
@@ -15526,6 +15572,9 @@ export const get_actions_connector_types_request = z.object({
  * Indicates a successful call.
  */
 export const get_actions_connector_types_response = z.array(z.object({
+    allow_multiple_system_actions: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether multiple instances of the same system action connector can be used in a single rule.'
+    })),
     enabled: z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether the connector is enabled.'
     }),
@@ -22269,6 +22318,34 @@ export const create_update_protection_updates_note_request = z.object({
  */
 export const create_update_protection_updates_note_response = security_endpoint_management_api_protection_updates_note_response;
 
+export const endpoint_script_library_list_scripts_request = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        page: z.optional(security_endpoint_management_api_page),
+        pageSize: z.optional(security_endpoint_management_api_api_page_size),
+        sortField: z.optional(security_endpoint_management_api_api_sort_field),
+        sortDirection: z.optional(security_endpoint_management_api_sort_direction),
+        kuery: z.optional(security_endpoint_management_api_kuery.and(z.unknown()))
+    }))
+});
+
+/**
+ * List of scripts response
+ */
+export const endpoint_script_library_list_scripts_response = z.object({
+    data: z.optional(z.array(security_endpoint_management_api_endpoint_script)),
+    page: z.optional(security_endpoint_management_api_page),
+    pageSize: z.optional(security_endpoint_management_api_api_page_size),
+    sortDirection: z.optional(security_endpoint_management_api_sort_direction),
+    sortField: z.optional(security_endpoint_management_api_api_sort_field),
+    total: z.optional(z.int().register(z.globalRegistry, {
+        description: 'The total number of scripts matching the query'
+    }))
+}).register(z.globalRegistry, {
+    description: 'List of scripts response'
+});
+
 export const delete_monitoring_engine_request = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
@@ -28276,6 +28353,46 @@ export const put_fleet_cloud_connectors_cloudconnectorid_response = z.object({
         updated_at: z.string(),
         vars: z.record(z.string(), z.unknown())
     })
+}).register(z.globalRegistry, {
+    description: 'OK: A successful request.'
+});
+
+export const get_fleet_cloud_connectors_cloudconnectorid_usage_request = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        cloudConnectorId: z.string().register(z.globalRegistry, {
+            description: 'The unique identifier of the cloud connector.'
+        })
+    }),
+    query: z.optional(z.object({
+        page: z.optional(z.number().gte(1).register(z.globalRegistry, {
+            description: 'The page number for pagination.'
+        })),
+        perPage: z.optional(z.number().gte(1).register(z.globalRegistry, {
+            description: 'The number of items per page.'
+        }))
+    }))
+});
+
+/**
+ * OK: A successful request.
+ */
+export const get_fleet_cloud_connectors_cloudconnectorid_usage_response = z.object({
+    items: z.array(z.object({
+        created_at: z.string(),
+        id: z.string(),
+        name: z.string(),
+        package: z.optional(z.object({
+            name: z.string(),
+            title: z.string(),
+            version: z.string()
+        })),
+        policy_ids: z.array(z.string()),
+        updated_at: z.string()
+    })),
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number()
 }).register(z.globalRegistry, {
     description: 'OK: A successful request.'
 });
