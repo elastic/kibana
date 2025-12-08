@@ -317,7 +317,60 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   expect(body.data[0].item_id).to.eql('good-item');
                 });
 
-                it('should not import global artifacts when importing without global artifact privilege', async () => {});
+                it('should not import global artifacts when importing without global artifact privilege', async () => {
+                  await supertest[artifact.listId].all
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        {
+                          item_id: 'wrong-item',
+                          tags: [DEFAULT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                        },
+                        {
+                          item_id: 'good-item',
+                          tags: [DEFAULT_SPACE_OWNER_ID],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [
+                        {
+                          error: {
+                            message:
+                              'EndpointArtifactError: Endpoint authorization failure. Management of global artifacts requires additional privilege (global artifact management)',
+                            status_code: 403,
+                          },
+                          item_id: 'wrong-item',
+                          list_id: artifact.listId,
+                        },
+                      ],
+                      success: false,
+                      success_count: 2,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: false,
+                      success_count_exception_list_items: 1,
+                    } as ImportExceptionsResponseSchema);
+
+                  const { body } = await endpointOpsAnalystSupertest
+                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .query({
+                      list_id: artifact.listId,
+                      namespace_type: 'agnostic',
+                    })
+                    .send()
+                    .expect(200);
+
+                  expect(body.data.length).to.eql(1);
+                  expect(body.data[0].item_id).to.eql('good-item');
+                });
               });
 
               describe('when with global artifact privilege', () => {
@@ -359,8 +412,11 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   expect(body.data.length).to.eql(3);
                 });
+
                 it('should import per-policy artifacts to other space if assigned to policy in current space', async () => {});
+
                 it('should not import per-policy artifacts to other space if not visible in current space', async () => {});
+
                 it('should not import per-policy artifacts with invalid space id', async () => {});
               });
 
