@@ -144,4 +144,78 @@ describe('TimeTypeSection', () => {
 
     expect(timeRangeSwitch).not.toBeInTheDocument();
   });
+
+  it('renders with mixed time range (absolute from, relative to)', () => {
+    const timeRange = { from: '2022-01-01T00:00:00.000Z', to: 'now' };
+    const changeTimeType = jest.fn();
+
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
+
+    const timeRangeSwitch = screen.getByRole('switch');
+
+    expect(timeRangeSwitch).not.toBeChecked();
+
+    const mixedTimeInfoText = screen.getByTestId('relativeTimeInfoTextMixedAbsoluteFrom');
+
+    expect(mixedTimeInfoText).toBeInTheDocument();
+  });
+
+  it('renders with mixed time range (relative from, absolute to)', () => {
+    const timeRange = { from: 'now-30m', to: '2022-01-01T00:00:00.000Z' };
+    const changeTimeType = jest.fn();
+
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
+
+    const timeRangeSwitch = screen.getByRole('switch');
+
+    expect(timeRangeSwitch).not.toBeChecked();
+
+    const mixedTimeInfoText = screen.getByTestId('relativeTimeInfoTextMixedAbsoluteTo');
+
+    expect(mixedTimeInfoText).toBeInTheDocument();
+  });
+
+  it('renders "now" correctly without showing "in 0 seconds"', () => {
+    const timeRange = { from: 'now-30m', to: 'now' };
+    const changeTimeType = jest.fn();
+
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
+
+    const relativeTimeToNowInfoText = screen.getByTestId('relativeTimeInfoTextToNow');
+
+    expect(relativeTimeToNowInfoText).toBeInTheDocument();
+    // Should contain "now" but not "0 seconds"
+    expect(relativeTimeToNowInfoText.textContent).toContain('now');
+    expect(relativeTimeToNowInfoText.textContent).not.toContain('0 seconds');
+  });
+
+  it('handles plain "now" values correctly in mixed ranges', () => {
+    const timeRange = { from: '2025-11-10T14:17:51.794Z', to: 'now' };
+    const changeTimeType = jest.fn();
+
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
+
+    const mixedTimeInfoText = screen.getByTestId('relativeTimeInfoTextMixedAbsoluteFrom');
+
+    expect(mixedTimeInfoText).toBeInTheDocument();
+    // Should show absolute date and "now", not "0 seconds"
+    expect(mixedTimeInfoText.textContent).toContain('now');
+    expect(mixedTimeInfoText.textContent).not.toContain('0 seconds');
+  });
 });
