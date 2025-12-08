@@ -8,6 +8,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { AssetClient } from '../assets/asset_client';
 import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../storage/streams_storage_client';
@@ -39,4 +40,5 @@ export interface StateDependencies {
   queryClient: QueryClient;
   isServerless: boolean;
   isDev: boolean;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }

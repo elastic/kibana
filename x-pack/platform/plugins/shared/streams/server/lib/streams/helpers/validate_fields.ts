@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { isRoot, keepFields, namespacePrefixes } from '@kbn/streams-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { Script } from '@elastic/elasticsearch/lib/api/types';
-import { MalformedFieldsError } from '../errors/malformed_fields_error';
+import { simulateProcessing } from '../../../routes/internal/streams/processing/simulation_handler';
+import type { StreamsClient } from '../client';
 import { baseMappings } from '../component_templates/logs_layer';
+import { MalformedFieldsError } from '../errors/malformed_fields_error';
 
 export function validateAncestorFields({
   ancestors,
@@ -88,27 +90,26 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
   }
 }
 
-// TODO - potential issue with script here - ctx is not available in the script
-export async function validateManualIngestPipelineScripts(
+export async function validateSimulation(
   definition: Streams.ClassicStream.Definition,
-  client: IScopedClusterClient
+  scopedClusterClient: IScopedClusterClient,
+  streamsClient: StreamsClient,
+  fieldsMetadataClient: IFieldsMetadataClient
 ) {
-  const ingestPipelineSteps = definition.ingest.processing?.steps ?? [];
-  for (const step of ingestPipelineSteps) {
-    if ('action' in step && step.action === 'manual_ingest_pipeline') {
-      for (const processor of step.processors) {
-        if ('script' in processor) {
-          const script = processor.script as Script;
-          try {
-            await client.asCurrentUser.scriptsPainlessExecute({
-              script,
-            });
-          } catch (error) {
-            throw new MalformedFieldsError(`${error.message}`);
-          }
-        }
-      }
-    }
+  const result = await simulateProcessing({
+    params: {
+      path: { name: definition.name },
+      body: {
+        processing: definition.ingest.processing,
+        documents: [],
+      },
+    },
+    scopedClusterClient,
+    streamsClient,
+    fieldsMetadataClient,
+  });
+  if (result.definition_error) {
+    throw new MalformedFieldsError(result.definition_error.message);
   }
 }
 
