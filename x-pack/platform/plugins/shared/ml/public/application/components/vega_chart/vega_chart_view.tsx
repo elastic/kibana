@@ -8,13 +8,8 @@
 import type { FC } from 'react';
 import React, { useMemo, useEffect } from 'react';
 
-// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
-
-// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import { compile } from 'vega-lite/build/vega-lite';
+import type { TopLevelSpec } from 'vega-lite';
+import { compile } from 'vega-lite';
 import { parse, View, Warn } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { Handler } from 'vega-tooltip';
