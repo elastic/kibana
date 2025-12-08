@@ -241,8 +241,8 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
       value: 'different',
     });
 
-    await pageObjects.streams.confirmSaveRoutingRuleDisabled();
-    await pageObjects.streams.confirmDuplicateNameErrorVisible();
+    await expect(pageObjects.streams.saveRoutingRuleButton).toBeDisabled();
+    await expect(page.getByText('A stream with this name already exists')).toBeVisible();
 
     // Should stay in creating state due to error
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
