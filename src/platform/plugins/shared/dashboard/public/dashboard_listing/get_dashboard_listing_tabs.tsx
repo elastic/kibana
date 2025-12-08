@@ -29,7 +29,7 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardSavedObjectUserContent } from './types';
+import type { DashboardListingUserContent } from './types';
 import type { DashboardListingViewRegistry } from '../plugin';
 
 interface GetDashboardListingTabsParams {
@@ -46,12 +46,12 @@ export const getDashboardListingTabs = ({
   useSessionStorageIntegration,
   initialFilter,
   listingViewRegistry,
-}: GetDashboardListingTabsParams): TableListTab<DashboardSavedObjectUserContent>[] => {
+}: GetDashboardListingTabsParams): TableListTab<DashboardListingUserContent>[] => {
   // Dashboards tab
-  const dashboardsTab: TableListTab<DashboardSavedObjectUserContent> = {
+  const dashboardsTab: TableListTab<DashboardListingUserContent> = {
     title: 'Dashboards',
     id: 'dashboards',
-    getTableList: (parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>) => {
+    getTableList: (parentProps: TableListTabParentProps<DashboardListingUserContent>) => {
       const DashboardsTabContent = () => {
         const {
           unsavedDashboardIds,
@@ -91,7 +91,7 @@ export const getDashboardListingTabs = ({
               unsavedDashboardIds={unsavedDashboardIds}
               refreshUnsavedDashboards={refreshUnsavedDashboards}
             />
-            <TableListViewTable<DashboardSavedObjectUserContent>
+            <TableListViewTable<DashboardListingUserContent>
               tableCaption={tableListViewTableProps.title}
               {...tableListViewTableProps}
               {...parentProps}
@@ -105,10 +105,10 @@ export const getDashboardListingTabs = ({
   };
 
   // Visualizations tab
-  const visualizationsTab: TableListTab<DashboardSavedObjectUserContent> = {
+  const visualizationsTab: TableListTab<DashboardListingUserContent> = {
     title: 'Visualizations',
     id: 'visualizations',
-    getTableList: (parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>) => {
+    getTableList: (parentProps: TableListTabParentProps<DashboardListingUserContent>) => {
       const VisualizationsTabContent = () => {
         const { tableListViewTableProps, contentInsightsClient } = useDashboardListingTable({
           goToDashboard,
@@ -138,7 +138,7 @@ export const getDashboardListingTabs = ({
               isKibanaVersioningEnabled: !serverlessService,
             }}
           >
-            <TableListViewTable<DashboardSavedObjectUserContent>
+            <TableListViewTable<DashboardListingUserContent>
               tableCaption={tableListViewTableProps.title}
               {...tableListViewTableProps}
               {...parentProps}

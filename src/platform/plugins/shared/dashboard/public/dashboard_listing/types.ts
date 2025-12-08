@@ -23,26 +23,27 @@ export type DashboardListingProps = PropsWithChildren<{
   listingViewRegistry: DashboardListingViewRegistry;
 }>;
 
-export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+// Base interface with common fields
+interface DashboardListingItemBase extends UserContentCommonSchema {
   managed?: boolean;
+  attributes: {
+    title: string;
+    description?: string;
+  };
+}
+
+export interface DashboardSavedObjectUserContent extends DashboardListingItemBase {
+  attributes: DashboardListingItemBase['attributes'] & {
+    timeRestore: boolean;
+  };
+}
+
+export interface DashboardVisualizationUserContent extends DashboardListingItemBase {
   editor?: {
     editUrl?: string;
     editApp?: string;
     onEdit?: (id: string) => Promise<void>;
-  }; // Editor info for proper navigation (Maps, Lens, etc.)
-  attributes: {
-    title: string;
-    description?: string;
-    timeRestore: boolean;
-    visType?: string; // For visualizations only
-    readOnly?: boolean; // For deprecated visualizations
-    indexPatternId?: string; // For annotation groups - references existing data view
-    dataViewSpec?: { id?: string; name?: string }; // For annotation groups - ad-hoc data view (optional)
   };
-}
-
-// Extended type for visualization items in dashboard listing (includes VisualizationListItem fields)
-export interface DashboardVisualizationUserContent extends DashboardSavedObjectUserContent {
   icon: string;
   savedObjectType: string;
   title: string;
@@ -50,9 +51,20 @@ export interface DashboardVisualizationUserContent extends DashboardSavedObjectU
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
   error?: string;
+  attributes: DashboardListingItemBase['attributes'] & {
+    visType?: string;
+    readOnly?: boolean;
+  };
 }
 
-// Union type for items that can be either dashboards, visualizations, or annotation groups
+export interface DashboardAnnotationGroupUserContent extends DashboardListingItemBase {
+  attributes: DashboardListingItemBase['attributes'] & {
+    indexPatternId?: string;
+    dataViewSpec?: { id?: string; name?: string };
+  };
+}
+
 export type DashboardListingUserContent =
   | DashboardSavedObjectUserContent
-  | DashboardVisualizationUserContent;
+  | DashboardVisualizationUserContent
+  | DashboardAnnotationGroupUserContent;
