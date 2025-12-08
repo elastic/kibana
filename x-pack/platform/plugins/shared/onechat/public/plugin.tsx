@@ -14,10 +14,10 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-
+import {
+  AIChatExperience,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '@kbn/ai-assistant-management-plugin/public';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
@@ -73,10 +73,11 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
+    const chatExperience = core.settings.client.get<AIChatExperience>(
+      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+      AIChatExperience.Classic
     );
+    const isAgentBuilderEnabled = chatExperience === AIChatExperience.Agents;
 
     const navigationService = new NavigationService({
       management: deps.management.locator,
@@ -145,6 +146,12 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
+    const chatExperience = core.settings.client.get<AIChatExperience>(
+      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+      AIChatExperience.Classic
+    );
+    const isAgentBuilderEnabled = chatExperience === AIChatExperience.Agents;
+
     const onechatService: OnechatPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
@@ -189,40 +196,27 @@ export class OnechatPlugin
       },
     };
 
-    getIsAiAgentsEnabled(core)
-      .then((flagEnabled) => {
-        if (!flagEnabled) {
-          this.logger.debug(
-            `Skipping Onechat nav control registration: feature flag AI_AGENTS_FEATURE_FLAG disabled`
+    if (isAgentBuilderEnabled) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <OnechatNavControlInitiator
+              coreStart={core}
+              pluginsStart={startDependencies}
+              onechatService={onechatService}
+            />,
+            element,
+            () => {}
           );
-          return;
-        }
 
-        core.chrome.navControls.registerRight({
-          mount: (element) => {
-            ReactDOM.render(
-              <OnechatNavControlInitiator
-                coreStart={core}
-                pluginsStart={startDependencies}
-                onechatService={onechatService}
-              />,
-              element,
-              () => {}
-            );
-
-            return () => {
-              ReactDOM.unmountComponentAtNode(element);
-            };
-          },
-          // right before the user profile
-          order: 1001,
-        });
-      })
-      .catch((error) => {
-        this.logger.debug(
-          `Skipping Onechat nav control registration: feature flag read failed (${String(error)})`
-        );
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        // right before the user profile
+        order: 1001,
       });
+    }
 
     // open Agent Builder flyout when AI Agent is selected in modal
     startDependencies.aiAssistantManagementSelection.openChat$.subscribe((event) => {
