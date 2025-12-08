@@ -26,10 +26,25 @@ export interface ScoutTestConfig {
 
 export const testConfig = {
   fromPath(configPath: string): ScoutTestConfig {
+    // Make sure we're working with a path relative to the repo root
+    if (path.isAbsolute(configPath)) {
+      configPath = path.relative(REPO_ROOT, configPath);
+    }
+
+    if (configPath.startsWith('..')) {
+      throw new Error(
+        `Failed to create Scout config from path '${configPath}': ` +
+          `path ${path.resolve(configPath)} is not part of the Kibana repository at ${REPO_ROOT}`
+      );
+    }
+
     const match = configPath.match(SCOUT_CONFIG_PATH_REGEX);
 
     if (match == null) {
-      throw new Error(`Scout config path ${configPath} did not match the expected regex pattern`);
+      throw new Error(
+        `Failed to create Scout config from path '${configPath}': ` +
+          'path did not match the expected regex pattern'
+      );
     }
 
     const [
@@ -55,12 +70,13 @@ export const testConfig = {
       testCategory,
       `${testConfigType || 'standard'}.json`
     );
-    const manifestExists = existsSync(manifestPath);
+    const absoluteManifestPath = path.join(REPO_ROOT, manifestPath);
+    const manifestExists = existsSync(absoluteManifestPath);
     let manifestFileData;
 
     if (manifestExists) {
       try {
-        manifestFileData = JSON.parse(readFileSync(manifestPath, 'utf8'));
+        manifestFileData = JSON.parse(readFileSync(absoluteManifestPath, 'utf8'));
       } catch (e) {
         e.message = `Failed while trying to load manifest file at '${manifestPath}': ${e.message}`;
         throw e;

@@ -149,9 +149,22 @@ describe('test_config module', () => {
       });
     });
 
+    it('throws if the given path is not part of the kibana repo', () => {
+      const configPath =
+        '/not/the/kibana/repo/src/platform/packages/shared/foo/test/scout/api/playwright.config.ts';
+
+      expect(() => testConfig.fromPath(configPath)).toThrow(
+        new RegExp(
+          `Failed to create Scout config from path '.*${configPath}': ` +
+            `path .*${configPath} is not part of the Kibana repository at ${REPO_ROOT}`
+        )
+      );
+    });
+
     it("throws if the given path doesn't match the expected pattern", () => {
-      expect(() => testConfig.fromPath('/this/path/definitely/will/not/match')).toThrow(
-        'Scout config path /this/path/definitely/will/not/match did not match the expected regex pattern'
+      const configPath = 'this/path/definitely/will/not/match';
+      expect(() => testConfig.fromPath(configPath)).toThrow(
+        `Failed to create Scout config from path '${configPath}': path did not match the expected regex pattern`
       );
     });
 
