@@ -59,24 +59,23 @@ export const getExceptionsPreImportHandler = (
     }
 
     const importedListId = Array.from(importedListIds)[0];
-    let validatedItem = data;
 
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp({ listId: importedListId })) {
       const trustedAppValidator = new TrustedAppValidator(endpointAppContext, request);
-      validatedItem = await trustedAppValidator.validatePreImport(data);
+      await trustedAppValidator.validatePreImport(data);
     }
 
     // Validate trusted devices
     if (TrustedDeviceValidator.isTrustedDevice({ listId: importedListId })) {
       const trustedDeviceValidator = new TrustedDeviceValidator(endpointAppContext, request);
-      validatedItem = await trustedDeviceValidator.validatePreImport(data);
+      await trustedDeviceValidator.validatePreImport(data);
     }
 
     // Validate event filter
     if (EventFilterValidator.isEventFilter({ listId: importedListId })) {
       const eventFilterValidator = new EventFilterValidator(endpointAppContext, request);
-      validatedItem = await eventFilterValidator.validatePreImport(data);
+      await eventFilterValidator.validatePreImport(data);
     }
 
     // Validate host isolation
@@ -85,13 +84,13 @@ export const getExceptionsPreImportHandler = (
         endpointAppContext,
         request
       );
-      validatedItem = await hostIsolationExceptionsValidator.validatePreImport(data);
+      await hostIsolationExceptionsValidator.validatePreImport(data);
     }
 
     // Validate blocklists
     if (BlocklistValidator.isBlocklist({ listId: importedListId })) {
       const blocklistValidator = new BlocklistValidator(endpointAppContext, request);
-      validatedItem = await blocklistValidator.validatePreImport(data);
+      await blocklistValidator.validatePreImport(data);
     }
 
     // validate endpoint exceptions
@@ -100,10 +99,10 @@ export const getExceptionsPreImportHandler = (
         endpointAppContext,
         request
       );
-      validatedItem = await endpointExceptionValidator.validatePreImport(data);
+      await endpointExceptionValidator.validatePreImport(data);
     }
 
-    return validatedItem;
+    return data;
   };
 };
 
