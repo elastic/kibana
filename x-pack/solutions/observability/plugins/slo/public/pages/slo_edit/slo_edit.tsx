@@ -77,7 +77,7 @@ export function SloEditPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: slo
+        pageTitle: isEditMode
           ? i18n.translate('xpack.slo.sloEditPageTitle', {
               defaultMessage: 'Edit SLO',
             })
