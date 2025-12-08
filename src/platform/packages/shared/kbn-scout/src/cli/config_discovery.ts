@@ -8,25 +8,47 @@
  */
 
 import fs from 'fs';
-import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
-import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import path from 'path';
+import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
+import { SCOUT_OUTPUT_ROOT, SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
 import { measurePerformance } from '../common';
+import { DEFAULT_TEST_PATH_PATTERNS, getScoutPlaywrightConfigs } from '../config';
 import { validateWithScoutCiConfig } from '../config/discovery';
+import { filterConfigsWithTests } from './test_filtering';
+
+const SCOUT_CLOUD_RUN_CONFIG_PATH = path.resolve(SCOUT_OUTPUT_ROOT, 'scout_cloud_run_config.json');
 
 const getCountByType = (configs: Map<string, any>, type: 'plugin' | 'package'): number => {
   return Array.from(configs.values()).filter((config) => config.type === type).length;
 };
 
-export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: ToolingLog) => {
+export const runDiscoverPlaywrightConfigs = async (flagsReader: FlagsReader, log: ToolingLog) => {
   const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
+  const target = flagsReader.enum('target', ['local', 'cloud']) || 'local';
 
   const scoutConfigs = measurePerformance(log, 'Discovering Playwright config files', () =>
     getScoutPlaywrightConfigs(searchPaths, log)
   );
 
+  // Cloud / MKI / ECH run Configuration
+  if (target === 'cloud') {
+    // Filter configs with tests matching cloud tags
+    const filteredConfigs = filterConfigsWithTests(scoutConfigs, log);
+
+    // Save the filtered configs to JSON file
+    const dirPath = path.dirname(SCOUT_CLOUD_RUN_CONFIG_PATH);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    fs.writeFileSync(SCOUT_CLOUD_RUN_CONFIG_PATH, JSON.stringify(filteredConfigs, null, 2));
+
+    log.info(`Saved filtered cloud configs to '${SCOUT_CLOUD_RUN_CONFIG_PATH}'`);
+    return;
+  }
+
+  // Local / Kibana CI run configuration
   const pluginCount = getCountByType(scoutConfigs, 'plugin');
   const packageCount = getCountByType(scoutConfigs, 'package');
 
@@ -84,15 +106,26 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   Discover Playwright configuration files with Scout tests.
 
   Common usage:
-    node scripts/scout discover-playwright-configs --searchPaths <search_paths>
-    node scripts/scout discover-playwright-configs --validate // validate if all items are registered in the Scout CI config
-    node scripts/scout discover-playwright-configs --save // validate and save enabled items with their config files to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
+    # Local / Kibana CI (default)
+    node scripts/scout discover-playwright-configs --target local
+    node scripts/scout discover-playwright-configs --target local --validate // validate if all items are registered in the Scout CI config
+    node scripts/scout discover-playwright-configs --target local --save // validate and save enabled items with their config files to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
+    
+    # Elastic Cloud (MKI / ECH)
+    node scripts/scout discover-playwright-configs --target cloud // filter configs with tests matching cloud tags (ess, svlSecurity, svlOblt, svlSearch) and save to '${SCOUT_CLOUD_RUN_CONFIG_PATH}'
+    
+    # Default (local)
     node scripts/scout discover-playwright-configs
   `,
   flags: {
-    string: ['searchPaths'],
+    string: ['searchPaths', 'target'],
     boolean: ['save', 'validate'],
-    default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS, save: false, validate: false },
+    default: {
+      searchPaths: DEFAULT_TEST_PATH_PATTERNS,
+      target: 'local',
+      save: false,
+      validate: false,
+    },
   },
   run: ({ flagsReader, log }) => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
