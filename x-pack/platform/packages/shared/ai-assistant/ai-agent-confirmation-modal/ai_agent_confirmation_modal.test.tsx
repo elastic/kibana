@@ -39,7 +39,11 @@ describe('AIAgentConfirmationModal', () => {
     it('displays warning about space-wide impact', () => {
       renderComponent();
 
-      expect(screen.getByText('all users in this space will be affected')).toBeInTheDocument();
+      expect(
+        screen.getByText((content) =>
+          content.includes('Switching to AI Agent will affect all users in this space')
+        )
+      ).toBeInTheDocument();
     });
 
     it('renders confirm and cancel buttons', () => {
