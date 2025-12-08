@@ -19,7 +19,7 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { camelCase, get } from 'lodash';
+import { camelCase } from 'lodash';
 import fs from 'fs';
 
 export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
