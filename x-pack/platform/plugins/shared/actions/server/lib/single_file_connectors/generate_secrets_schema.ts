@@ -11,9 +11,9 @@ import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 import type { ActionTypeSecrets, ValidatorType } from '../../types';
 
 export const generateSecretsSchema = (
-  authTypes: ConnectorSpec['authTypes']
+  authSpec: ConnectorSpec['auth']
 ): ValidatorType<ActionTypeSecrets> => {
   return {
-    schema: generateSecretsSchemaFromSpec(authTypes),
+    schema: generateSecretsSchemaFromSpec(authSpec),
   };
 };

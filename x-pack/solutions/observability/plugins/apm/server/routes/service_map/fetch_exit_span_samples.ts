@@ -8,7 +8,7 @@
 import { existsQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { EventOutcome } from '../../../common/event_outcome';
 import type { ServiceMapService, ServiceMapSpan } from '../../../common/service_map/types';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
@@ -416,18 +416,18 @@ async function fetchTransactionsFromExitSpans({
   const destinationsBySpanId = new Map(exitSpansSample);
 
   servicesResponse.hits.hits.forEach((hit) => {
-    const transaction = unflattenKnownApmEventFields(hit.fields, [...requiredFields]);
+    const transaction = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
 
-    const spanId = transaction.parent.id;
+    const spanId = transaction[PARENT_ID];
 
     const destination = destinationsBySpanId.get(spanId);
     if (destination) {
       destinationsBySpanId.set(spanId, {
         ...destination,
         destinationService: {
-          agentName: transaction.agent.name,
-          serviceEnvironment: transaction.service.environment,
-          serviceName: transaction.service.name,
+          agentName: transaction[AGENT_NAME],
+          serviceEnvironment: transaction[SERVICE_ENVIRONMENT],
+          serviceName: transaction[SERVICE_NAME],
         },
       });
     }
