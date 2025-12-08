@@ -164,6 +164,6 @@ codeql database analyze kibana-db \
 
 ## References
 
-- [@kbn/config-schema README](../../src/platform/packages/shared/kbn-config-schema/README.md)
+- [@kbn/config-schema README](../../../packages/kbn-config-schema/README.md)
 - [CodeQL for JavaScript](https://codeql.github.com/docs/codeql-language-guides/codeql-for-javascript/)
 
