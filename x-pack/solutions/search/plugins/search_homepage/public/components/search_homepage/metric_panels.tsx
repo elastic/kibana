@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -43,8 +42,8 @@ export type MetricPanelType =
   | 'discover'
   | 'agents'
   | 'dashboards'
-  | 'queryRules'
-  | 'synonyms'
+  | 'dataFrameAnalytics'
+  | 'alerts'
   | 'anomalies';
 
 const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
@@ -56,41 +55,36 @@ const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
     {
       imageUrl: string;
       metricDescription: string;
-      createText: string;
       metricTitle: string;
       createAction: () => void;
       color: string;
     }
   > = {
     discover: {
-      imageUrl: `${assetBasePath}/search_indexing_folder.svg`,
+      imageUrl: `${assetBasePath}/search_lake.svg`,
       metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.discover.desc', {
         defaultMessage:
           'Use ES|QL, data analysis tools and intuitive workflows to quickly explore your dataset.',
       }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.discover.create', {
-        defaultMessage: 'Open Discover',
-      }),
+
       metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.discover.title', {
-        defaultMessage: 'Explore your data',
+        defaultMessage: 'Discover',
       }),
       createAction: () => {},
-      color: euiTheme.colors.backgroundBasePrimary,
+      color: euiTheme.colors.backgroundBaseSubdued,
     },
     dashboards: {
-      imageUrl: `${assetBasePath}/search_observe.svg`,
+      imageUrl: `${assetBasePath}/search_data_vis.svg`,
       metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.desc', {
         defaultMessage:
           'Mix visualizations into robust dashboards that provide views for any situational need.',
       }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.create', {
-        defaultMessage: 'Create a dashboard',
-      }),
+
       metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.title', {
-        defaultMessage: 'Create operational dashboards',
+        defaultMessage: 'Dashboards',
       }),
       createAction: () => {},
-      color: euiTheme.colors.backgroundBaseSuccess,
+      color: euiTheme.colors.backgroundBaseSubdued,
     },
     agents: {
       imageUrl: `${assetBasePath}/search_agents.svg`,
@@ -98,80 +92,84 @@ const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
         defaultMessage:
           'Using customizable workflows and agents, insights into your data are easily available.',
       }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.create', {
-        defaultMessage: 'Open Agent builder',
-      }),
+
       metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.title', {
-        defaultMessage: 'Intuitively get answers from your data',
+        defaultMessage: 'Agent Builder',
       }),
       createAction: () => {},
-      color: euiTheme.colors.backgroundBasePrimary,
-    },
-    queryRules: {
-      imageUrl: `${assetBasePath}/semantic_search.svg`,
-      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.queryRules.desc', {
-        defaultMessage:
-          'Enhance search experiences with custom rules to filter and prioritize results based on your business logic.',
-      }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.queryRules.create', {
-        defaultMessage: 'Get started',
-      }),
-      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.queryRules.title', {
-        defaultMessage: 'Query Rules',
-      }),
-      createAction: () => {},
-      color: euiTheme.colors.backgroundBaseNeutral,
-    },
-    synonyms: {
-      imageUrl: `${assetBasePath}/search_relevance.svg`,
-      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.synonyms.desc', {
-        defaultMessage: 'Improve the accuracy and comprehensiveness of your search application.',
-      }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.synonyms.create', {
-        defaultMessage: 'Get started',
-      }),
-      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.synonyms.title', {
-        defaultMessage: 'Synonyms',
-      }),
-      createAction: () => {},
-      color: euiTheme.colors.backgroundBaseNeutral,
+      color: euiTheme.colors.backgroundBaseSubdued,
     },
     anomalies: {
       imageUrl: `${assetBasePath}/search_machinelearning.svg`,
 
       metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.anomalies.desc', {
         defaultMessage:
-          'Start automatically spotting anomalies hiding in your time series data and resolve issues faster.',
+          'Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.',
       }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.anomalies.create', {
-        defaultMessage: 'Get started',
-      }),
+
       metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.anomalies.title', {
-        defaultMessage: 'Spot anomalies faster',
+        defaultMessage: 'Anomaly Detection',
       }),
       createAction: () => {},
-      color: euiTheme.colors.backgroundBasePrimary,
+      color: euiTheme.colors.backgroundBaseSubdued,
+    },
+    dataFrameAnalytics: {
+      imageUrl: `${assetBasePath}/search_behavioral_analysis.svg`,
+      metricDescription: i18n.translate(
+        'xpack.searchHomepage.metricPanels.empty.dataFrameAnalytics.desc',
+        {
+          defaultMessage:
+            'Train outlier detection, regression, or classification machine learning models using data frame analytics.',
+        }
+      ),
+
+      metricTitle: i18n.translate(
+        'xpack.searchHomepage.metricPanels.empty.dataFrameAnalytics.title',
+        {
+          defaultMessage: 'Data Frame Analytics',
+        }
+      ),
+      createAction: () => {},
+      color: euiTheme.colors.backgroundBaseSubdued,
+    },
+    alerts: {
+      imageUrl: `${assetBasePath}/search_connect_visibility.svg`,
+      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.alerts.desc', {
+        defaultMessage:
+          'Monitor data and get notified about significant changes or events in real time.',
+      }),
+
+      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.alerts.title', {
+        defaultMessage: 'Alerts',
+      }),
+      createAction: () => {},
+      color: euiTheme.colors.backgroundBaseSubdued,
     },
   };
 
-  const { imageUrl, metricTitle, metricDescription, createText, color, createAction } =
+  const { imageUrl, metricTitle, metricDescription, color, createAction } =
     METRIC_PANEL_ITEMS[type];
   return (
-    <EuiSplitPanel.Outer hasShadow>
+    <EuiSplitPanel.Outer hasBorder>
       <EuiSplitPanel.Inner
         css={css({
           backgroundColor: color,
+          minHeight: `${euiTheme.base * 7}px`,
         })}
       >
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <div>
-              <EuiImage size={120} src={imageUrl} alt="" />
+              <EuiImage size={euiTheme.size.xxxxl} src={imageUrl} alt="" />
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner
+        css={css({
+          minHeight: `${euiTheme.base * 8}px`,
+        })}
+      >
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
@@ -183,16 +181,6 @@ const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
             <EuiText color="subdued" size="s">
               <p>{metricDescription}</p>
             </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false} css={css({ padding: euiTheme.size.s })}>
-            <EuiButton
-              data-test-subj="searchHomepageMetricPanelEmptyButton"
-              onClick={createAction}
-              color="text"
-            >
-              {createText}
-            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
@@ -347,16 +335,16 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       type: 'agents',
     },
     {
-      id: 'queryRules',
-      type: 'queryRules',
-    },
-    {
-      id: 'synonyms',
-      type: 'synonyms',
+      id: 'dataFrameAnalytics',
+      type: 'dataFrameAnalytics',
     },
     {
       id: 'anomalies',
       type: 'anomalies',
+    },
+    {
+      id: 'alerts',
+      type: 'alerts',
     },
   ];
 

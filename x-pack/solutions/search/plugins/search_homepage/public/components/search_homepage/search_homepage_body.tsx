@@ -22,9 +22,14 @@ export const SearchHomepageBody = () => {
 
   return (
     <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow paddingSize="none">
-      <MetricPanels />
-
       <EuiFlexGroup gutterSize="l" direction="column">
+        <EuiFlexItem>
+          <MetricPanels />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSpacer size="l" />
+          <MetricPanels panelType="complex" />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="l" />
           <CloudResources />
