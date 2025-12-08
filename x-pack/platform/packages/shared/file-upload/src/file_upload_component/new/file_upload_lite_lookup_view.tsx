@@ -9,7 +9,7 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiButton, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import type { GetAdditionalLinks, ResultLinks } from '@kbn/file-upload-common';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
@@ -83,6 +83,25 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     setStep('mapping', STATUS.COMPLETED);
     setStep('upload', STATUS.STARTED);
   }, [onImportClick, setStep]);
+
+  const finalStatement = useMemo(() => {
+    const { totalDocs, totalFailedDocs } = uploadStatus;
+    if (totalFailedDocs === totalDocs) {
+      return i18n.translate('xpack.fileUpload.lookupJoinUpload.allDocumentsFailed', {
+        defaultMessage: 'Index created, but all documents failed to upload.',
+      });
+    } else if (totalFailedDocs > 0) {
+      return i18n.translate('xpack.fileUpload.lookupJoinUpload.someDocumentsFailed', {
+        defaultMessage:
+          'Index created, but {totalFailedDocs} out of {totalDocs} documents failed to upload.',
+        values: { totalFailedDocs, totalDocs },
+      });
+    } else {
+      return i18n.translate('xpack.fileUpload.lookupJoinUpload.allDocumentsUploaded', {
+        defaultMessage: 'All files uploaded successfully.',
+      });
+    }
+  }, [uploadStatus]);
 
   if (indexName === null) {
     return null;
@@ -169,12 +188,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
       children:
         stepsStatus.finish === STATUS.COMPLETED ? (
           <>
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.fileUpload.lookupJoinUpload.finishMessage"
-                defaultMessage="Your files have been successfully uploaded."
-              />
-            </EuiText>
+            <EuiText size="s">{finalStatement}</EuiText>
 
             <EuiSpacer />
 

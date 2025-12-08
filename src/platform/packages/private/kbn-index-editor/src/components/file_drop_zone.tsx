@@ -9,8 +9,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import { FileUploadLiteLookUpView } from '@kbn/file-upload/src/file_upload_component/new/file_upload_lite_lookup_view';
+import { STATUS, useFileUploadContext, FileUploadLiteLookUpView } from '@kbn/file-upload';
 import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback, useEffect, useState } from 'react';
 import type { FileRejection } from 'react-dropzone';

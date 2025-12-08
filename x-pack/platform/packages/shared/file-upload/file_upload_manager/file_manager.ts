@@ -90,6 +90,8 @@ export interface UploadStatus {
   indexSearchable: boolean;
   allDocsSearchable: boolean;
   errors: Array<{ title: string; error: any }>;
+  totalDocs: number;
+  totalFailedDocs: number;
 }
 
 export class FileUploadManager {
@@ -157,6 +159,8 @@ export class FileUploadManager {
     allDocsSearchable: false,
     errors: [],
     overallImportProgress: 0,
+    totalDocs: 0,
+    totalFailedDocs: 0,
   });
   public readonly uploadStatus$ = this._uploadStatus$.asObservable();
 
@@ -754,16 +758,29 @@ export class FileUploadManager {
 
     checkImportAborted();
 
-    const totalDocCount = files.reduce((acc, file) => {
-      const { docCount, failures } = file.getStatus();
-      const count = docCount - failures.length;
-      return acc + count;
-    }, 0);
+    // Calculate document counts across all imported files
+    const documentCounts = files.reduce(
+      (totals, file) => {
+        const { docCount, failures } = file.getStatus();
+        totals.totalDocs += docCount;
+        totals.totalDocFailures += failures.length;
+        return totals;
+      },
+      {
+        totalDocs: 0,
+        totalDocFailures: 0,
+      }
+    );
 
-    this.docCountService.startAllDocsSearchableCheck(indexName, totalDocCount);
+    this.docCountService.startAllDocsSearchableCheck(
+      indexName,
+      documentCounts.totalDocs - documentCounts.totalDocFailures
+    );
 
     this.setStatus({
       fileImport: STATUS.COMPLETED,
+      totalDocs: documentCounts.totalDocs,
+      totalFailedDocs: documentCounts.totalDocFailures,
     });
 
     if (this.removePipelinesAfterImport) {
