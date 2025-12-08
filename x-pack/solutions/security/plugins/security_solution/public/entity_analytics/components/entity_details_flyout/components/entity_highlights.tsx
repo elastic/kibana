@@ -11,12 +11,10 @@ import {
   EuiButton,
   EuiHorizontalRule,
   EuiIcon,
-  EuiMarkdownFormat,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import {
   useAssistantContext,
@@ -24,8 +22,6 @@ import {
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { EntityType } from '../../../../../common/search_strategy';
@@ -33,6 +29,8 @@ import { useStoredAssistantConnectorId } from '../../../../onboarding/components
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
+import { EntityHighlightsResult } from './entity_highlights_result';
+import { useGradientStyles } from './entity_highlights_gradients';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
@@ -41,17 +39,18 @@ export const EntityHighlightsAccordion: React.FC<{
   const { data: anonymizationFields, isLoading: isAnonymizationFieldsLoading } =
     useFetchAnonymizationFields();
   const { http, settings } = useAssistantContext();
-
   const { data: aiConnectors } = useLoadConnectors({
     http,
     settings,
   });
-  const spaceId = useSpaceId();
-  const { euiTheme } = useEuiTheme();
   const firstConnector = aiConnectors?.[0];
+  const spaceId = useSpaceId();
   const [selectedConnectorId, setConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
+  const connectorId = selectedConnectorId ?? firstConnector?.id ?? '';
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
     useAssistantAvailability();
+  const { gradientPanelStyle, buttonGradientStyle, iconGradientStyle, gradientSVG } =
+    useGradientStyles();
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState(false);
   const onChangeShowAnonymizedValues = useCallback(
@@ -60,8 +59,6 @@ export const EntityHighlightsAccordion: React.FC<{
     },
     [setShowAnonymizedValues]
   );
-
-  const connectorId = selectedConnectorId ?? firstConnector?.id ?? '';
 
   const {
     fetchEntityHighlights,
@@ -92,6 +89,7 @@ export const EntityHighlightsAccordion: React.FC<{
 
   return (
     <>
+      {gradientSVG}
       <EuiAccordion
         initialIsOpen
         id="entity-highlights"
@@ -100,16 +98,15 @@ export const EntityHighlightsAccordion: React.FC<{
             <h3>
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.highlights.title"
-                defaultMessage="Entity highlights"
+                defaultMessage="Entity summary"
               />{' '}
-              <EuiIcon type="sparkles" />
+              <EuiIcon type="sparkles" css={iconGradientStyle} />
             </h3>
           </EuiTitle>
         }
         data-test-subj="asset-criticality-selector"
         extraAction={
           <EntityHighlightsSettings
-            onRegenerate={fetchEntityHighlights}
             assistantResult={assistantResult}
             showAnonymizedValues={showAnonymizedValues}
             onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
@@ -119,36 +116,21 @@ export const EntityHighlightsAccordion: React.FC<{
             openPopover={onButtonClick}
             isLoading={isLoading}
             isPopoverOpen={isPopoverOpen}
-            entityType={entityType}
-            entityIdentifier={entityIdentifier}
           />
         }
       >
         <EuiSpacer size="m" />
         {assistantResult && !isLoading && (
-          <div>
-            <EuiText size="s">
-              <EuiMarkdownFormat
-                textSize="s"
-                css={css`
-                  li {
-                    margin-bottom: ${euiTheme.size.xs};
-                  }
-                `}
-              >
-                {showAnonymizedValues
-                  ? assistantResult?.aiResponse
-                  : replaceAnonymizedValuesWithOriginalValues({
-                      messageContent: assistantResult?.aiResponse,
-                      replacements: assistantResult.replacements,
-                    })}
-              </EuiMarkdownFormat>
-            </EuiText>
-          </div>
+          <EntityHighlightsResult
+            assistantResult={assistantResult}
+            showAnonymizedValues={showAnonymizedValues}
+            generatedAt={assistantResult?.generatedAt ?? null}
+            onRefresh={fetchEntityHighlights}
+          />
         )}
 
         {isChatLoading && (
-          <div>
+          <div css={gradientPanelStyle}>
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.highlights.loadingMessage"
@@ -161,18 +143,37 @@ export const EntityHighlightsAccordion: React.FC<{
         )}
 
         {!assistantResult && !isLoading && (
-          <EuiButton
-            iconType="sparkles"
-            size="s"
-            iconSide="left"
-            onClick={fetchEntityHighlights}
-            isDisabled={!connectorId}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
-              defaultMessage="Generate AI highlights"
-            />
-          </EuiButton>
+          <div css={gradientPanelStyle}>
+            <EuiTitle size="xs">
+              <h4>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.cardTitle"
+                  defaultMessage="Generate entity summary"
+                />
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="xs" textAlign="left">
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription"
+                defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
+              />
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiButton
+              iconType="sparkles"
+              color="primary"
+              onClick={fetchEntityHighlights}
+              isDisabled={!connectorId}
+              fill
+              css={buttonGradientStyle}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
+                defaultMessage="Generate"
+              />
+            </EuiButton>
+          </div>
         )}
       </EuiAccordion>
       <EuiHorizontalRule />
