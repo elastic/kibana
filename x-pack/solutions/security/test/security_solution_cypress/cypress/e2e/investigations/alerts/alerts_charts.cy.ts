@@ -42,8 +42,7 @@ import {
 } from '../../../screens/search_bar';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 
-// Failing: See https://github.com/elastic/kibana/issues/237743
-describe.skip('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
+describe('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
   const ruleConfigs = getNewRule();
   beforeEach(() => {
     deleteAlertsAndRules();

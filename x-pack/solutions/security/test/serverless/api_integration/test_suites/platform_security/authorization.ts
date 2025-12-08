@@ -21,8 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
         adminCredentials = await svlUserManager.getM2MApiCookieCredentialsWithRoleScope('admin');
       });
 
-      // TODO: see https://github.com/elastic/kibana/pull/243499
-      it.skip('composite features', async () => {
+      it('composite features', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges?includeActions=true')
           .set(svlCommonApi.getInternalRequestHeader())
@@ -6907,6 +6906,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:visualize_v2/save",
                 "ui:visualize_v2/createShortUrl",
                 "ui:visualize_v2/generateScreenshot",
+                "ui:navLinks/cloudDefend",
                 "ui:siemV5/show",
                 "ui:siemV5/crud",
                 "ui:siemV5/entity-analytics",
@@ -7938,6 +7938,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:visualize_v2/save",
                 "ui:visualize_v2/createShortUrl",
                 "ui:visualize_v2/generateScreenshot",
+                "ui:navLinks/cloudDefend",
                 "ui:siemV5/show",
                 "ui:siemV5/crud",
                 "ui:siemV5/entity-analytics",
@@ -8343,6 +8344,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:navLinks/lens",
                 "ui:visualize_v2/show",
                 "ui:visualize_v2/createShortUrl",
+                "ui:navLinks/cloudDefend",
                 "ui:siemV5/show",
                 "ui:siemV5/entity-analytics",
                 "ui:siemV5/detections",
@@ -8787,6 +8789,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:navLinks/lens",
                 "ui:visualize_v2/show",
                 "ui:visualize_v2/createShortUrl",
+                "ui:navLinks/cloudDefend",
                 "ui:siemV5/show",
                 "ui:siemV5/entity-analytics",
                 "ui:siemV5/detections",
@@ -11758,10 +11761,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:securitySolution-threat-intelligence",
                 "app:securitySolution",
                 "app:csp",
+                "app:cloudDefend",
                 "app:kibana",
                 "ui:catalogue/securitySolution",
                 "ui:navLinks/securitySolution",
                 "ui:navLinks/csp",
+                "ui:navLinks/cloudDefend",
                 "ui:navLinks/kibana",
                 "saved_object:alert/bulk_get",
                 "saved_object:alert/get",
@@ -12342,10 +12347,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:securitySolution-threat-intelligence",
                 "app:securitySolution",
                 "app:csp",
+                "app:cloudDefend",
                 "app:kibana",
                 "ui:catalogue/securitySolution",
                 "ui:navLinks/securitySolution",
                 "ui:navLinks/csp",
+                "ui:navLinks/cloudDefend",
                 "ui:navLinks/kibana",
                 "saved_object:alert/bulk_get",
                 "saved_object:alert/get",
@@ -12767,10 +12774,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:securitySolution-threat-intelligence",
                 "app:securitySolution",
                 "app:csp",
+                "app:cloudDefend",
                 "app:kibana",
                 "ui:catalogue/securitySolution",
                 "ui:navLinks/securitySolution",
                 "ui:navLinks/csp",
+                "ui:navLinks/cloudDefend",
                 "ui:navLinks/kibana",
                 "saved_object:index-pattern/bulk_get",
                 "saved_object:index-pattern/get",
@@ -13010,10 +13019,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:securitySolution-threat-intelligence",
                 "app:securitySolution",
                 "app:csp",
+                "app:cloudDefend",
                 "app:kibana",
                 "ui:catalogue/securitySolution",
                 "ui:navLinks/securitySolution",
                 "ui:navLinks/csp",
+                "ui:navLinks/cloudDefend",
                 "ui:navLinks/kibana",
                 "saved_object:index-pattern/bulk_get",
                 "saved_object:index-pattern/get",
