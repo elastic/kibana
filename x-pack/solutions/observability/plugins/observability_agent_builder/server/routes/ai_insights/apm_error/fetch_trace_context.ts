@@ -198,7 +198,6 @@ export async function fetchTraceContext({
     sort: [{ '@timestamp': 'asc' }],
   });
 
-  // Process errors in the trace
   const traceErrors: TraceError[] = errorResponse.hits.hits.map((hit) => {
     const fields = (hit.fields || {}) as Record<string, any[]>;
 

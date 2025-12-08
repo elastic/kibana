@@ -17,6 +17,7 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
+
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
 
 const errorDataSchema = z.object({

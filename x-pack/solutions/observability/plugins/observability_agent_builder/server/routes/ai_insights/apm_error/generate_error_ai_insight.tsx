@@ -39,7 +39,7 @@ const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   Available context tags:
   - <ErrorDetails>: Full error document (exception, message, stacktrace, labels)
   - <TransactionDetails>: Transaction linked to the error (if present)
-  - <APMDownstreamDependencies>: Downstream dependencies for the erroring service
+  - <DownstreamDependencies>: Downstream dependencies for the erroring service
   - <TraceItems>: Span/transaction samples with service, name, type, eventOutcome, statusCode, duration, httpUrl, downstreamServiceResource
   - <TraceErrors>: Related errors within the trace (type, message, culprit, spanId, timestampUs)
   - <TraceServices>: Service aggregates for the trace (serviceName, count, errorCount)

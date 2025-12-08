@@ -84,11 +84,11 @@ export async function fetchApmErrorContext({
 
     if (apmDownstreamDependencies?.length) {
       contextParts.push(
-        `<APMDownstreamDependencies>\n${JSON.stringify(
+        `<DownstreamDependencies>\n${JSON.stringify(
           apmDownstreamDependencies,
           null,
           2
-        )}\n</APMDownstreamDependencies>`
+        )}\n</DownstreamDependencies>`
       );
     }
   } catch (error) {
