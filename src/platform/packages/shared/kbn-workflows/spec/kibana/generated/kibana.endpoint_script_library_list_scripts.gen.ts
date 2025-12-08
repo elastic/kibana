@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: /oas_docs/output/kibana.yaml, operations: EndpointScanAction
+ * Source: /oas_docs/output/kibana.yaml, operations: EndpointScriptLibraryListScripts
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -18,8 +18,8 @@
 import { z } from '@kbn/zod/v4';
 
 import {
-  endpoint_scan_action_request,
-  endpoint_scan_action_response,
+  endpoint_script_library_list_scripts_request,
+  endpoint_script_library_list_scripts_response,
 } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -29,31 +29,31 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINT_SCAN_ACTION_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.EndpointScanAction',
-  summary: `Scan a file or directory`,
+export const ENDPOINT_SCRIPT_LIBRARY_LIST_SCRIPTS_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.EndpointScriptLibraryListScripts',
+  summary: `Get a list of scripts`,
   description: `**Spaces method and path for this operation:**
 
-<div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/scan</span></div>
+<div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Scan a specific file or directory on an endpoint for malware.`,
-  methods: ['POST'],
-  patterns: ['/api/endpoint/action/scan'],
+Retrieve a list of scripts`,
+  methods: ['GET'],
+  patterns: ['/api/endpoint/scripts_library'],
   documentation:
-    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-endpointscanaction',
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-endpointscriptlibrarylistscripts',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
-    urlParams: [],
-    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
+    urlParams: ['page', 'pageSize', 'sortField', 'sortDirection', 'kuery'],
+    bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(endpoint_scan_action_request, 'body'),
-    ...getShapeAt(endpoint_scan_action_request, 'path'),
-    ...getShapeAt(endpoint_scan_action_request, 'query'),
+    ...getShapeAt(endpoint_script_library_list_scripts_request, 'body'),
+    ...getShapeAt(endpoint_script_library_list_scripts_request, 'path'),
+    ...getShapeAt(endpoint_script_library_list_scripts_request, 'query'),
     fetcher: FetcherConfigSchema,
   }),
-  outputSchema: endpoint_scan_action_response,
+  outputSchema: endpoint_script_library_list_scripts_response,
 };
