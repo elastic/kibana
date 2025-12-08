@@ -133,7 +133,8 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
       dependencies,
       cancellationToken,
       this.logger,
-      stream
+      stream,
+      _jobId
     );
     const result = await csv.generateData();
 
