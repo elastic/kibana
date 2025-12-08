@@ -30,6 +30,7 @@ export function getFocusedYamlPair(
     .map(([, stepPropInfo]) => stepPropInfo)
     .find(
       (stepPropInfo) =>
+        stepPropInfo.valueNode &&
         stepPropInfo.valueNode.range &&
         stepPropInfo.valueNode.range[0] <= absolutePosition &&
         absolutePosition <= stepPropInfo.valueNode.range[2]
