@@ -37,5 +37,60 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
       });
       expect(soClient.create).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, { milestoneId: id });
     });
+
+    it('should propagate errors', async () => {
+      soClient.create.mockRejectedValue(new Error('test error'));
+      await expect(repository.create(Milestone.M2)).rejects.toThrow('test error');
+    });
+  });
+
+  describe('getCurrent', () => {
+    it('should return undefined if no saved objects', async () => {
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 });
+      const result = await repository.getCurrent();
+      expect(result).toBeUndefined();
+      expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
+    });
+
+    it('should propagate errors', async () => {
+      soClient.find.mockRejectedValue(new Error('test error'));
+      await expect(repository.getCurrent()).rejects.toThrow('test error');
+      expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
+    });
+
+    it('should return first so id', async () => {
+      const savedObjectId = 'abc';
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          { id: savedObjectId, attributes: { milestoneId: 2 } },
+          { id: '123', attributes: { milestoneId: 3 } },
+        ],
+        total: 2,
+      });
+      const result = await repository.getCurrent();
+      expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
+      expect(result).toEqual({ milestoneId: Milestone.M2, savedObjectId });
+    });
+  });
+
+  describe('update', () => {
+    it('should update milestoneId', async () => {
+      const milestoneId = Milestone.M2;
+      const savedObjectId = 'abc';
+      soClient.update.mockResolvedValue({ id: savedObjectId, attributes: { milestoneId } });
+      await repository.update({ milestoneId, savedObjectId });
+      expect(soClient.update).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, savedObjectId, {
+        milestoneId,
+      });
+    });
+    it('should propagate errors', async () => {
+      const milestoneId = Milestone.M2;
+      const savedObjectId = 'abc';
+      soClient.update.mockRejectedValue(new Error('test error'));
+      await expect(repository.update({ milestoneId, savedObjectId })).rejects.toThrow('test error');
+      expect(soClient.update).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, savedObjectId, {
+        milestoneId,
+      });
+    });
   });
 });
