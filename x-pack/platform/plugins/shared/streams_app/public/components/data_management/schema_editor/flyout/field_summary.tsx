@@ -59,10 +59,11 @@ interface FieldSummaryProps {
   toggleEditMode: () => void;
   stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
+  enableGeoPointSuggestions?: boolean;
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream } = props;
+  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions } = props;
 
   const router = useStreamsAppRouter();
 
@@ -163,6 +164,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               isEditing={isEditing}
               onTypeChange={(type) => onChange({ type })}
               streamType={streamType}
+              enableGeoPointSuggestions={enableGeoPointSuggestions}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -210,8 +212,8 @@ export const FieldSummary = (props: FieldSummaryProps) => {
         <EuiHorizontalRule margin="xs" />
       </EuiFlexGroup>
       {isEditing &&
-      Streams.WiredStream.Definition.is(stream) &&
-      stream.ingest.wired.routing.length > 0 ? (
+        Streams.WiredStream.Definition.is(stream) &&
+        stream.ingest.wired.routing.length > 0 ? (
         <EuiFlexItem grow={false}>
           <ChildrenAffectedCallout childStreams={stream.ingest.wired.routing} />
         </EuiFlexItem>
