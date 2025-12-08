@@ -10,6 +10,7 @@ import { combineLatest } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/common';
+import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
 function getVisibility(
@@ -50,6 +51,7 @@ function getVisibility(
 export function useIsNavControlVisible(isServerless?: boolean) {
   const {
     application: { currentAppId$, applications$ },
+    settings,
     aiAssistantManagementSelection,
     spaces,
   } = useKibana().services;
@@ -58,11 +60,16 @@ export function useIsNavControlVisible(isServerless?: boolean) {
   const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
+    const chatExperience$ = settings.client.get$<AIChatExperience>(
+      AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
-      aiAssistantManagementSelection.chatExperience$,
+      chatExperience$,
       space$,
     ]).subscribe({
       next: ([appId, applications, preferredAssistantType, chatExperience, space]) => {
@@ -84,7 +91,7 @@ export function useIsNavControlVisible(isServerless?: boolean) {
     currentAppId$,
     applications$,
     aiAssistantManagementSelection.aiAssistantType$,
-    aiAssistantManagementSelection.chatExperience$,
+    settings.client,
     space$,
     isServerless,
   ]);

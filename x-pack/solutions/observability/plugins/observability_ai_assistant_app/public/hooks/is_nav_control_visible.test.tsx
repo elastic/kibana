@@ -11,8 +11,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { of } from 'rxjs';
 import { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 describe('isNavControlVisible', () => {
+  const settings = { client: uiSettingsServiceMock.createStartContract() };
+
+  beforeEach(() => {
+    settings.client.get$.mockReturnValue(of(AIChatExperience.Classic));
+  });
   describe('with solution:es', () => {
     it('always returns true for ES solution spaces', () => {
       const coreStart = {
@@ -22,6 +28,7 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -48,6 +55,7 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -74,6 +82,7 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -102,6 +111,7 @@ describe('isNavControlVisible', () => {
             new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -127,6 +137,7 @@ describe('isNavControlVisible', () => {
             new Map([['security', { id: 'security', category: { id: 'securitySolution' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -152,6 +163,7 @@ describe('isNavControlVisible', () => {
             new Map([['search', { id: 'search', category: { id: 'enterpriseSearch' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -177,6 +189,7 @@ describe('isNavControlVisible', () => {
             new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -202,6 +215,7 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -227,6 +241,7 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -252,6 +267,7 @@ describe('isNavControlVisible', () => {
             new Map([['discover', { id: 'discover', category: { id: 'kibana' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {
@@ -270,6 +286,8 @@ describe('isNavControlVisible', () => {
     });
 
     it('returns false when chatExperience is Agents regardless of other settings', () => {
+      settings.client.get$.mockReturnValue(of(AIChatExperience.Agents));
+
       const coreStart = {
         application: {
           currentAppId$: of('observability'),
@@ -277,6 +295,7 @@ describe('isNavControlVisible', () => {
             new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
           ),
         },
+        settings,
       } as unknown as CoreStart;
 
       const pluginsStart = {

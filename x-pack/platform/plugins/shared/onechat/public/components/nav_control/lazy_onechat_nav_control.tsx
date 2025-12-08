@@ -9,6 +9,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import React, { useEffect, useState } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
+import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { OnechatStartDependencies } from '../../types';
 import type { OnechatPluginStart } from '../../types';
 
@@ -31,19 +32,19 @@ export const OnechatNavControlInitiator = ({
 }: OnechatNavControlInitiatorProps) => {
   const [isAgentsExperience, setIsAgentsExperience] = useState(false);
 
-  // Subscribe to the shared chatExperience$ observable from aiAssistantManagementSelection
+  // Subscribe to chat experience setting from core settings
   // This keeps all nav controls in sync when the chat experience changes
   useEffect(() => {
-    const sub = pluginsStart.aiAssistantManagementSelection.chatExperience$.subscribe(
-      (chatExperience) => {
+    const sub = coreStart.settings.client
+      .get$<AIChatExperience>(AI_ASSISTANT_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
+      .subscribe((chatExperience) => {
         setIsAgentsExperience(chatExperience === AIChatExperience.Agents);
-      }
-    );
+      });
 
     return () => {
       sub.unsubscribe();
     };
-  }, [pluginsStart.aiAssistantManagementSelection.chatExperience$]);
+  }, [coreStart.settings.client]);
 
   if (!isAgentsExperience) {
     return null;

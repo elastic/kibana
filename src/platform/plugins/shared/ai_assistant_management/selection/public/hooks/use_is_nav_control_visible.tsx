@@ -12,9 +12,11 @@ import { combineLatest, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { Observable } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../../common/ui_setting_keys';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '../../common/ui_setting_keys';
 import { AIAssistantType } from '../../common/ai_assistant_type';
 
 function getVisibility(
@@ -49,11 +51,7 @@ function getVisibility(
  *
  * @returns boolean
  */
-export function useIsNavControlVisible(
-  coreStart: CoreStart,
-  chatExperience$: Observable<AIChatExperience>,
-  spaces?: SpacesPluginStart
-) {
+export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPluginStart) {
   const [isVisible, setIsVisible] = useState(false);
 
   const { currentAppId$, applications$ } = coreStart.application;
@@ -61,6 +59,11 @@ export function useIsNavControlVisible(
   const uiSetting$ = coreStart.settings.client.get$<AIAssistantType>(
     PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
     AIAssistantType.Default
+  );
+
+  const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
+    PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+    AIChatExperience.Classic
   );
 
   const activeSpace$ = useMemo(

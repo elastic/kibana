@@ -14,10 +14,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  AIChatExperience,
-  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-} from '@kbn/ai-assistant-management-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
@@ -73,12 +70,6 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const chatExperience = core.settings.client.get<AIChatExperience>(
-      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-      AIChatExperience.Classic
-    );
-    const isAgentBuilderEnabled = chatExperience === AIChatExperience.Agents;
-
     const navigationService = new NavigationService({
       management: deps.management.locator,
       licenseManagement: deps.licenseManagement?.locator,
@@ -86,20 +77,18 @@ export class OnechatPlugin
 
     this.setupServices = { navigationService };
 
-    if (isAgentBuilderEnabled) {
-      registerApp({
-        core,
-        getServices: () => {
-          if (!this.internalServices) {
-            throw new Error('getServices called before plugin start');
-          }
-          return this.internalServices;
-        },
-      });
+    registerApp({
+      core,
+      getServices: () => {
+        if (!this.internalServices) {
+          throw new Error('getServices called before plugin start');
+        }
+        return this.internalServices;
+      },
+    });
 
-      registerAnalytics({ analytics: core.analytics });
-      registerLocators(deps.share);
-    }
+    registerAnalytics({ analytics: core.analytics });
+    registerLocators(deps.share);
 
     try {
       core.getStartServices().then(([coreStart]) => {
@@ -146,12 +135,6 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
-    const chatExperience = core.settings.client.get<AIChatExperience>(
-      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-      AIChatExperience.Classic
-    );
-    const isAgentBuilderEnabled = chatExperience === AIChatExperience.Agents;
-
     const onechatService: OnechatPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
@@ -196,27 +179,25 @@ export class OnechatPlugin
       },
     };
 
-    if (isAgentBuilderEnabled) {
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <OnechatNavControlInitiator
-              coreStart={core}
-              pluginsStart={startDependencies}
-              onechatService={onechatService}
-            />,
-            element,
-            () => {}
-          );
+    core.chrome.navControls.registerRight({
+      mount: (element) => {
+        ReactDOM.render(
+          <OnechatNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            onechatService={onechatService}
+          />,
+          element,
+          () => {}
+        );
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
-        order: 1001,
-      });
-    }
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+      // right before the user profile
+      order: 1001,
+    });
 
     // open Agent Builder flyout when AI Agent is selected in modal
     startDependencies.aiAssistantManagementSelection.openChat$.subscribe((event) => {

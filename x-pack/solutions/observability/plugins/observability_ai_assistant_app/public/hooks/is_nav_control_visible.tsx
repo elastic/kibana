@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/common';
+import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface UseIsNavControlVisibleProps {
@@ -68,11 +69,16 @@ export function useIsNavControlVisible({
   const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
+    const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
+      AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
-      aiAssistantManagementSelection.chatExperience$,
+      chatExperience$,
       space$,
     ]).subscribe({
       next: ([appId, applications, preferredAssistantType, chatExperience, space]) => {
@@ -94,7 +100,7 @@ export function useIsNavControlVisible({
     currentAppId$,
     applications$,
     aiAssistantManagementSelection.aiAssistantType$,
-    aiAssistantManagementSelection.chatExperience$,
+    coreStart.settings.client,
     space$,
     isServerless,
   ]);
