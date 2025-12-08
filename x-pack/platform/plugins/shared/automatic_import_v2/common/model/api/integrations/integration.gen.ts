@@ -17,13 +17,22 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
-import { InputType, Integration } from '../../common_attributes.gen';
+import {
+  DataStream,
+  AllIntegrationsResponseIntegration,
+  InputType,
+  IntegrationResponse,
+} from '../../common_attributes.gen';
 
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
 >;
 export const CreateAutoImportIntegrationRequestBody = z
   .object({
+    /**
+     * The integration id
+     */
+    integrationId: NonEmptyString,
     /**
      * The title of the integration
      */
@@ -39,30 +48,7 @@ export const CreateAutoImportIntegrationRequestBody = z
     /**
      * The data streams of the integration
      */
-    dataStreams: z
-      .array(
-        z
-          .object({
-            /**
-             * The title of the data stream
-             */
-            title: NonEmptyString,
-            /**
-             * The description of the data stream
-             */
-            description: NonEmptyString,
-            /**
-             * The input types of the data stream
-             */
-            inputTypes: z.array(InputType).min(1),
-            /**
-             * The raw samples of the data stream
-             */
-            rawSamples: z.array(NonEmptyString).min(1),
-          })
-          .strict()
-      )
-      .min(1),
+    dataStreams: z.array(DataStream).optional(),
   })
   .strict();
 export type CreateAutoImportIntegrationRequestBodyInput = z.input<
@@ -94,6 +80,11 @@ export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
 >;
 
+export type GetAllAutoImportIntegrationsResponse = z.infer<
+  typeof GetAllAutoImportIntegrationsResponse
+>;
+export const GetAllAutoImportIntegrationsResponse = z.array(AllIntegrationsResponseIntegration);
+
 export type GetAutoImportIntegrationRequestParams = z.infer<
   typeof GetAutoImportIntegrationRequestParams
 >;
@@ -108,12 +99,11 @@ export type GetAutoImportIntegrationRequestParamsInput = z.input<
 >;
 
 export type GetAutoImportIntegrationResponse = z.infer<typeof GetAutoImportIntegrationResponse>;
-export const GetAutoImportIntegrationResponse = z.object({
-  integration: Integration,
-});
-
-export type GetAutoImportIntegrationsResponse = z.infer<typeof GetAutoImportIntegrationsResponse>;
-export const GetAutoImportIntegrationsResponse = z.array(Integration);
+export const GetAutoImportIntegrationResponse = z
+  .object({
+    integrationResponse: IntegrationResponse,
+  })
+  .strict();
 
 export type UpdateAutoImportIntegrationRequestParams = z.infer<
   typeof UpdateAutoImportIntegrationRequestParams
