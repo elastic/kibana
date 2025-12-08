@@ -133,8 +133,8 @@ export const registerAuthenticateRoute = ({
         // Step 2: Onboard the cluster based on the key type
         let onboardingResponse: OnboardClusterResponse;
 
-        // Happy path: the API key is already scoped to a cluster
-        if (validationResult.isHappyPath) {
+        // Cluster-scoped key: use existing key directly
+        if (validationResult.isClusterScoped) {
           const clusterDetails = await cloudConnectClient.getClusterDetails(
             apiKey,
             validationResult.clusterId!

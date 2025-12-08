@@ -61,19 +61,19 @@ export class CloudConnectClient {
         };
       }
 
-      // Check if this is a "happy path" key (cluster-scoped)
+      // Check if this is a cluster-scoped key
       if (roleAssignments.length === 1) {
         const assignment = roleAssignments[0];
-        const isHappyPath =
+        const isClusterScoped =
           assignment.role_id === 'cloud-connected-admin' &&
           assignment.all === false &&
           assignment.resource_ids.length === 1;
 
-        if (isHappyPath) {
+        if (isClusterScoped) {
           const clusterId = assignment.resource_ids[0];
-          this.logger.debug('API key is a happy path key (cluster-scoped)');
+          this.logger.debug('API key is cluster-scoped');
           return {
-            isHappyPath: true,
+            isClusterScoped: true,
             hasValidScope: true,
             clusterId,
           };
@@ -83,7 +83,7 @@ export class CloudConnectClient {
       // If we get here, it's an admin key with broader permissions
       this.logger.debug('API key is an admin key with broader permissions');
       return {
-        isHappyPath: false,
+        isClusterScoped: false,
         hasValidScope: true,
       };
     } catch (error) {

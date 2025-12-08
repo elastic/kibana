@@ -74,7 +74,7 @@ export interface OnboardClusterResponse {
 }
 
 export interface ApiKeyValidationResult {
-  isHappyPath: boolean;
+  isClusterScoped: boolean;
   hasValidScope: boolean;
   errorMessage?: string;
   clusterId?: string;

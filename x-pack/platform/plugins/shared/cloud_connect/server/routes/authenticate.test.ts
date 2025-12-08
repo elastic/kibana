@@ -195,7 +195,7 @@ describe('Authentication Routes', () => {
 
     it('should authenticate with cluster-scoped key (happy path)', async () => {
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
-        isHappyPath: true,
+        isClusterScoped: true,
         hasValidScope: true,
         clusterId: 'cluster-uuid-456',
       });
@@ -276,7 +276,7 @@ describe('Authentication Routes', () => {
       const { getCurrentClusterData } = require('../lib/cluster_info');
 
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
-        isHappyPath: false,
+        isClusterScoped: false,
         hasValidScope: true,
       });
 
@@ -338,7 +338,7 @@ describe('Authentication Routes', () => {
 
     it('should return 400 for invalid API key scope', async () => {
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
-        isHappyPath: false,
+        isClusterScoped: false,
         hasValidScope: false,
       });
 
