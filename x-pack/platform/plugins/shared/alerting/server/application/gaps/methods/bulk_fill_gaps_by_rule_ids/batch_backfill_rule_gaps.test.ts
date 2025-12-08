@@ -110,7 +110,7 @@ describe('batchBackfillRuleGaps', () => {
       gapsBatches.forEach((batch, idx) => {
         const callOrder = idx + 1;
         expect(processGapsBatchMock).toHaveBeenNthCalledWith(callOrder, context, {
-          rule,
+          initiator: 'user',
           range: backfillingDateRange,
           gapsBatch: batch,
           maxGapsCountToProcess: 1000,

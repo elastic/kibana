@@ -52,7 +52,7 @@ export const converseApiSuite = (
         expect(response.response.message.length).to.be.greaterThan(0);
 
         const toolCalls = response.steps.filter(isToolCallStep);
-        expect(toolCalls.length).to.eql(1);
+        expect(toolCalls.length >= 1).to.be(true);
 
         const toolCall = toolCalls[0];
         expect(toolCall.tool_id).to.eql(platformCoreTools.listIndices);

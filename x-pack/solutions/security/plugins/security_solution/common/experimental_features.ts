@@ -71,6 +71,11 @@ export const allowedExperimentalValues = Object.freeze({
   enableRiskScoreResetToZero: true,
 
   /**
+   * Enable privmon modifier in risk scoring calculation
+   */
+  enableRiskScorePrivmonModifier: false,
+
+  /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
@@ -193,6 +198,15 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Kubernetes Dashboard in Security Solution
    */
   kubernetesEnabled: false,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: false,
+  /**
+   * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
+   */
+  agentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

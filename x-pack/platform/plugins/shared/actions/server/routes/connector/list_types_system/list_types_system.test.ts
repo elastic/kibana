@@ -54,6 +54,7 @@ describe('listTypesWithSystemRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
@@ -124,6 +125,7 @@ describe('listTypesWithSystemRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,

@@ -61,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'dateFormat:tz': 'UTC',
         defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}" }`,
+        hideAnnouncements: true,
       });
     });
 
@@ -116,22 +117,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           keepOpen: true,
         });
 
-        // now check that operations won't show the incompatibility tooltip
         for (const operation of allOperations) {
+          // now check that operations won't show the incompatibility tooltip
           expect(
             testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`, {
               timeout: 500,
             })
           ).to.eql(false);
-        }
-
-        for (const operation of allOperations) {
           // try to change to the provided function and check all is ok
           await lens.selectOperation(operation);
 
           expect(
             await find.existsByCssSelector(
-              '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
+              '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
+              500
             )
           ).to.be(false);
         }
@@ -225,8 +224,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           runTestsForEachScenario(streamConvertedToLogsDBIndex, 'logsdb', (indexes) => {
             it(`should visualize a date histogram chart`, async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -253,8 +250,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it(`should visualize a date histogram chart using a different date field`, async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -281,8 +276,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream', async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -320,8 +313,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -429,8 +420,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           runTestsForEachScenario(logsdbConvertedToStream, 'logsdb', (indexes) => {
             it(`should visualize a date histogram chart`, async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -457,8 +446,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it(`should visualize a date histogram chart using a different date field`, async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -485,8 +472,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream', async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -524,8 +509,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
-              await lens.ensureLayerTabIsActive();
-
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',

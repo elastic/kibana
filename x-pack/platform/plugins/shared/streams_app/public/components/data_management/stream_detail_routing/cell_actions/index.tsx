@@ -69,6 +69,8 @@ const FilterBtn = ({
     },
   });
 
+  const testSubj = mode === '+' ? 'streamsAppCellActionFilterFor' : 'streamsAppCellActionFilterOut';
+
   return (
     <Component
       onClick={() => {
@@ -86,7 +88,7 @@ const FilterBtn = ({
       iconType={iconType}
       aria-label={buttonTitle}
       title={buttonTitle}
-      data-test-subj="routingConditionFilterForButton"
+      data-test-subj={testSubj}
     />
   );
 };

@@ -21,7 +21,8 @@ export type LensWrapperProps = {
   onCopyToDashboard?: () => void;
   syncTooltips?: boolean;
   syncCursor?: boolean;
-} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
+  abortController: AbortController | undefined;
+} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 

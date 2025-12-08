@@ -42,7 +42,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     };
   }
 
-  const mappedPanels = panels
+  const mappedPanels = (panels ?? [])
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
       if (!isDashboardSection(panel)) return removeEnhancements(panel);
@@ -86,7 +86,7 @@ export function throwOnUnmappedKeys(dashboardState: DashboardState) {
     }
   }
 
-  dashboardState.panels.forEach((panel) => {
+  dashboardState.panels?.forEach((panel) => {
     if (isDashboardSection(panel)) {
       panel.panels.forEach(throwOnUnmappedPanelKeys);
     } else {

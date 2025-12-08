@@ -9,41 +9,38 @@ import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
-import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
-import { useGetIncidentTypes } from './use_get_incident_types';
-import { useGetSeverity } from './use_get_severity';
+import { connector } from '../mock';
+import { useGetFieldsResponse } from './mocks';
+import { useGetFields } from './use_get_fields';
 import Fields from './case_fields';
 
 import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_incident_types');
-jest.mock('./use_get_severity');
+jest.mock('./use_get_fields');
 
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('ResilientParamsFields renders', () => {
-  const useGetIncidentTypesResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: resilientIncidentTypes,
-    },
-  };
-
-  const useGetSeverityResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: resilientSeverity,
-    },
-  };
-
   const fields = {
     severityCode: '6',
     incidentTypes: ['19'],
+    additionalFields: `{
+      "customField1": "customValue1",
+      "test_text": "some text",
+      "test_text_area": "some textarea",
+      "test_boolean": false,
+      "test_number": 1234,
+      "test_select": 110,
+      "test_multi_select": [
+        120,
+        130
+      ],
+      "test_date_picker": 1234567890123,
+      "test_date_time_picker": 1234567890123,
+      "resolution_summary": "some resolution summary"
+    }`,
   };
 
   let user: UserEvent;
@@ -60,8 +57,7 @@ describe('ResilientParamsFields renders', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
-    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
     jest.clearAllMocks();
   });
 
@@ -74,11 +70,11 @@ describe('ResilientParamsFields renders', () => {
 
     expect(screen.getByText('Malware')).toBeInTheDocument();
     expect(screen.getByTestId('severitySelect')).toHaveValue('6');
-    expect(screen.getByTestId('additionalFieldsEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('resilientAdditionalFieldsComboBox')).toBeInTheDocument();
   });
 
-  it('disabled the fields when loading incident types', async () => {
-    useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
+  it('disables the fields when loading field data', async () => {
+    useGetFieldsMock.mockReturnValue({ ...useGetFieldsResponse, isLoading: true });
 
     renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
@@ -87,20 +83,6 @@ describe('ResilientParamsFields renders', () => {
     );
 
     expect(within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox')).toBeDisabled();
-  });
-
-  it('disabled the fields when loading severity', () => {
-    useGetSeverityMock.mockReturnValue({
-      ...useGetSeverityResponse,
-      isLoading: true,
-    });
-
-    renderWithTestingProviders(
-      <MockFormWrapperComponent fields={fields}>
-        <Fields connector={connector} />
-      </MockFormWrapperComponent>
-    );
-
     expect(screen.getByTestId('severitySelect')).toBeDisabled();
   });
 
@@ -129,6 +111,46 @@ describe('ResilientParamsFields renders', () => {
 
     await user.selectOptions(screen.getByTestId('severitySelect'), 'Low');
     expect(screen.getByText('Low')).toBeInTheDocument();
+  });
+
+  it('sets additional fields correctly', async () => {
+    renderWithTestingProviders(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    const testText = screen.getByTestId('resilientAdditionalField-test_text');
+    const testTextArea = screen.getByTestId('resilientAdditionalField-test_text_area');
+    const testBoolean = screen.getByTestId('resilientAdditionalField-test_boolean');
+    const testNumber = screen.getByTestId('resilientAdditionalField-test_number');
+    const testSelect = screen.getByTestId('resilientAdditionalField-test_select');
+
+    // multi-select and date (time) fields are not interactively
+    // tested here because they're complex EUI components
+    // we're checking that they render correctly though
+    screen.getByTestId('resilientAdditionalField-test_multi_select');
+    screen.getByTestId('resilientAdditionalField-test_date_picker');
+    screen.getByTestId('resilientAdditionalField-test_date_time_picker');
+
+    expect(testText).toHaveValue('some text');
+    expect(testTextArea).toHaveValue('some textarea');
+    expect(testBoolean).not.toBeChecked();
+    expect(testNumber).toHaveValue(1234);
+    expect(testSelect).toHaveValue('110');
+
+    await user.type(testText, ' more text');
+    await user.type(testTextArea, ' more textarea');
+    await user.click(testBoolean);
+    await user.clear(testNumber);
+    await user.type(testNumber, '5678');
+    await user.selectOptions(testSelect, '120');
+
+    expect(testText).toHaveValue('some text more text');
+    expect(testTextArea).toHaveValue('some textarea more textarea');
+    expect(testBoolean).toBeChecked();
+    expect(testNumber).toHaveValue(5678);
+    expect(testSelect).toHaveValue('120');
   });
 
   it('should submit a resilient connector', async () => {

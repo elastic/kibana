@@ -203,8 +203,8 @@ describe('EVAL Autocomplete', () => {
   });
 
   test('with lists', async () => {
-    await evalExpectSuggestions('from index | EVAL doubleField in ', ['( $0 )']);
-    await evalExpectSuggestions('from index | EVAL doubleField not in /', ['( $0 )']);
+    await evalExpectSuggestions('from index | EVAL doubleField in ', ['($0)']);
+    await evalExpectSuggestions('from index | EVAL doubleField not in /', ['($0)']);
   });
 
   test('after assignment', async () => {

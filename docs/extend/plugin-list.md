@@ -104,6 +104,7 @@ mapped_pages:
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
 | [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
+| [workflowsExtensions](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_extensions/README.md) | Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types. |
 | [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This plugin contains the Workflows management application and APIs. |
 
 ## x-pack/plugins [_x_packplugins]
@@ -111,6 +112,7 @@ mapped_pages:
 | Name | Description |
 | --- | --- |
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
+| [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
 | [aiops](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/aiops/README.md) | The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team. |
 | [alerting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md) | The Kibana Alerting plugin provides a common place to set up rules. You can: |
 | [apm](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/readme.md) | This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics. |
@@ -132,6 +134,7 @@ mapped_pages:
 | [contentConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/content_connectors/README.mdx) | This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins. |
 | [crossClusterReplication](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cross_cluster_replication/README.md) | You can run a local cluster and simulate a remote cluster within a single Kibana directory. |
 | [customBranding](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/custom_branding/README.md) | This is a plugin to configure custom branding. Plugin server-side only. Plugin has three main functions: |
+| [dashboardAgent](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/dashboard_agent/README.md) | Server-side plugin that provides a specialized AI agent and tools for dashboard management via the Onechat framework. |
 | [dashboardEnhanced](dashboard-enhanced-plugin.md) | Adds drilldown capabilities to dashboard.  Owned by the Kibana App team. |
 | [dataConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_connectors/README.md) | Home of the Data Connectors plugin. |
 | [dataQuality](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_quality/README.md) | Page where users can see the quality of their log data sets. |
@@ -178,6 +181,7 @@ mapped_pages:
 | [logsDataAccess](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_data_access/README.md) | Exposes services to access logs data. |
 | [logsShared](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_shared/README.md) | Exposes the shared components and APIs to access and visualize logs. |
 | [logstash](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/logstash) | WARNING: Missing or empty README. |
+| [maintenanceWindows](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/maintenance_windows/README.md) | A Kibana plugin providing functionalities to manage maintenance windows. |
 | [maps](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/maps/README.md) | Visualize geo data from Elasticsearch or 3rd party geo-services. |
 | [metricsDataAccess](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/metrics_data_access/README.md) | Exposes utilities to access metrics data. |
 | [ml](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ml/readme.md) | This plugin provides access to the machine learning features provided by Elastic. |
@@ -185,7 +189,7 @@ mapped_pages:
 | [monitoringCollection](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/monitoring_collection/README.md) | This plugin allows for other plugins to add data to Kibana stack monitoring documents. |
 | [notifications](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/notifications/README.mdx) | The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users. |
 | [observability](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability/README.md) | This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI. |
-| [observabilityAgent](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_agent/README.md) | This plugin provides an agent specialized in logs, metrics, and traces for Agent Builder. |
+| [observabilityAgentBuilder](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_agent_builder/README.md) | This plugin provides an observability agent, observability tools and attachments for Agent Builder. |
 | [observabilityAIAssistant](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/observability_ai_assistant/README.md) | This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER. |
 | [observabilityAIAssistantApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_ai_assistant_app/README.md) | This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies. |
 | [observabilityAiAssistantManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/observability_ai_assistant_management/README.md) | The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section. |
