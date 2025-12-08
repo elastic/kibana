@@ -121,11 +121,7 @@ export const isEveryReadKeyValid = (someKey: unknown): someKey is ValidReadAuthE
  * @param appliedPatchesWithReadPrivs Array<BulkEditResult<RuleParams>>
  */
 export const gatherErrors = (appliedPatchesWithReadPrivs: Array<BulkEditResult<RuleParams>>) => {
-  if (
-    appliedPatchesWithReadPrivs.some(
-      (patchResp) => patchResp.errors != null || !isEmpty(patchResp.errors)
-    )
-  ) {
+  if (appliedPatchesWithReadPrivs.some((patchResp) => !isEmpty(patchResp.errors))) {
     // gather errors
     const errors = appliedPatchesWithReadPrivs.reduce((acc, patches) => {
       const theErrors = patches.errors;

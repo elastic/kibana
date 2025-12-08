@@ -72,11 +72,13 @@ export const updateRule = async ({
     ruleB: ruleUpdate as RuleResponse,
   });
 
-  // check if every key in ruleDiff is one of validFields
-  // for alerting read authz bulk update function
+  // gather all modified fields from ruleDiff
   const modifiedFields = Object.keys(ruleDiff).filter(
     (field) => !ruleDiff[field as keyof TwoWayDiffRule].is_equal
   );
+
+  // check if every key in ruleDiff is one of validFields
+  // for alerting read authz bulk update function
   // if every modified field is in validFields,
   // use bulk update function with read authz
   if (modifiedFields.every((field) => isEveryReadKeyValid(field))) {
