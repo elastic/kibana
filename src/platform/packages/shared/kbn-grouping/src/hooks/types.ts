@@ -89,5 +89,4 @@ export const EMPTY_GROUP_BY_ID: GroupsById = {};
 export const defaultGroup: GroupModel = {
   activeGroups: ['none'],
   options: [],
-  settings: undefined,
 };
