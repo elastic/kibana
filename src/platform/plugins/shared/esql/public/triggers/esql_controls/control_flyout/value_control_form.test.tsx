@@ -361,6 +361,28 @@ describe('ValueControlForm', () => {
           expect(queryEditor.textContent).toContain('custom-logs');
         }
       });
+
+      it("should show the 'no results' callout", async () => {
+        (getESQLResults as jest.Mock).mockResolvedValueOnce({
+          response: {
+            columns: [],
+          },
+        });
+
+        const { findByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field.id  == 'lala' | STATS BY field.name"
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
+      });
     });
   });
 });

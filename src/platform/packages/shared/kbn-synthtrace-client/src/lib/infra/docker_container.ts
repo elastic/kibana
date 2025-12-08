@@ -23,6 +23,7 @@ interface DockerContainerDocument extends Fields {
   'cloud.instance.id'?: string;
   'cloud.image.id'?: string;
   'event.dataset'?: string;
+  'event.module'?: string;
 }
 
 export class DockerContainer extends Entity<DockerContainerDocument> {
@@ -61,5 +62,6 @@ export function dockerContainer(id: string): DockerContainer {
     'cloud.image.id': 'image-1',
     'cloud.provider': 'aws',
     'event.dataset': 'docker.container',
+    'event.module': 'docker',
   });
 }
