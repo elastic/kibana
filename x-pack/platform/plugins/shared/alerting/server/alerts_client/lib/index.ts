@@ -6,6 +6,7 @@
  */
 
 export { buildAlert } from './build_alert';
+export { buildEvaluation } from './build_evaluation';
 export { buildNewAlert } from './build_new_alert';
 export { buildOngoingAlert } from './build_ongoing_alert';
 export { buildRecoveredAlert } from './build_recovered_alert';

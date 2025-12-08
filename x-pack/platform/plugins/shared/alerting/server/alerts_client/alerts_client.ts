@@ -56,6 +56,7 @@ import type {
 } from './types';
 import {
   buildAlert,
+  buildEvaluation,
   buildNewAlert,
   buildOngoingAlert,
   buildUpdatedRecoveredAlert,
@@ -751,28 +752,46 @@ export class AlertsClient<
         status: ALERT_STATUS_RECOVERED,
         ruleRunCount: this.ruleRunCount,
       });
-      activeAlertsToIndex.push(alertData);
+      recoveredAlertsToIndex.push(alertData);
       const a = new Alert<LegacyState, LegacyContext>(alert.id);
       a.setAlertAsData(alertData);
       this.legacyAlertsClient.setProcessedAlert('recoveredOnlyForActions', alert.id, a);
     }
 
-    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
-      (alert: AlertType & AlertData) => {
-        const alertUuid = get(alert, ALERT_UUID);
-        const alertIndex = this.trackedAlerts.indices[alertUuid];
-        if (!alertIndex) {
-          return true;
-        } else if (!isValidAlertIndexName(alertIndex)) {
-          this.options.logger.warn(
-            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported ${this.ruleInfoMessage}.`,
-            this.logTags
-          );
-          return false;
-        }
+    const evaluationsToIndex: Array<AlertType & AlertData> = [];
+    if (activeAlerts.length === 0 && recoveredAlerts.length === 0) {
+      const alertData = buildEvaluation<
+        AlertData,
+        LegacyState,
+        LegacyContext,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        rule: this.rule,
+        timestamp: currentTime,
+        ruleRunCount: this.ruleRunCount,
+      });
+      evaluationsToIndex.push(alertData);
+    }
+
+    const alertsToIndex = [
+      ...activeAlertsToIndex,
+      ...recoveredAlertsToIndex,
+      ...evaluationsToIndex,
+    ].filter((alert: AlertType & AlertData) => {
+      const alertUuid = get(alert, ALERT_UUID);
+      const alertIndex = this.trackedAlerts.indices[alertUuid];
+      if (!alertIndex) {
         return true;
+      } else if (!isValidAlertIndexName(alertIndex)) {
+        this.options.logger.warn(
+          `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported ${this.ruleInfoMessage}.`,
+          this.logTags
+        );
+        return false;
       }
-    );
+      return true;
+    });
 
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(

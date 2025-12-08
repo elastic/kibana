@@ -8,63 +8,40 @@
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_RULE_UUID, ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import type { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleAlertData,
-  WithoutReservedActionGroups,
-} from '../../types';
-import type { AlertRule, ReportedAlert } from '../types';
-import { stripFrameworkFields } from './strip_framework_fields';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
+import type { AlertRule } from '../types';
 
-interface BuildAlertOpts<
+interface BuildEvalutaionOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  alert: ReportedAlert<
-    AlertData,
-    LegacyState,
-    LegacyContext,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
   rule: AlertRule;
   timestamp: string;
-  status: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
   ruleRunCount: number;
 }
 
-/**
- * Builds a new alert document from the LegacyAlert class
- * Currently only populates framework fields and not any rule type specific fields
- */
-
-export const buildAlert = <
+export const buildEvaluation = <
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >({
-  alert,
   rule,
   timestamp,
-  status,
   ruleRunCount,
-}: BuildAlertOpts<
+}: BuildEvalutaionOpts<
   AlertData,
   LegacyState,
   LegacyContext,
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
-  const cleanedPayload = stripFrameworkFields(alert.payload);
   return deepmerge.all(
     [
-      cleanedPayload,
       {
         [ALERT_RULE_UUID]: rule[ALERT_RULE_UUID],
         'rule.parent_id': rule[ALERT_RULE_PARAMETERS].parentId,
@@ -72,7 +49,6 @@ export const buildAlert = <
       },
       {
         [TIMESTAMP]: timestamp,
-        status,
       },
     ],
     { arrayMerge: (_, sourceArray) => sourceArray }

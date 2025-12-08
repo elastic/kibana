@@ -51,7 +51,7 @@ const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
 
 // kibana.alert.consecutive_matches - count of consecutive times the alert has been active
-const ALERT_CONSECUTIVE_MATCHES = `run_id` as const;
+const ALERT_CONSECUTIVE_MATCHES = `run.id` as const;
 
 // kibana.alert.pending_recovered_count - count of consecutive times the alert has been recovered
 const ALERT_PENDING_RECOVERED_COUNT = `${ALERT_NAMESPACE}.pending_recovered_count` as const;
