@@ -434,4 +434,71 @@ inputs:
       expect(Array.isArray(errors)).toBe(true);
     });
   });
+
+  it('should validate legacy array format inputs with invalid default type', () => {
+    const yaml = `
+name: Test Workflow
+inputs:
+  - name: greeting
+    type: string
+    default: 1123
+  - name: people
+    type: array
+    default:
+      - alice
+      - bob
+`;
+    const doc = parseDocument(yaml);
+    const workflowDefinition = {
+      inputs: [
+        {
+          name: 'greeting',
+          type: 'string',
+          default: 1123,
+        },
+        {
+          name: 'people',
+          type: 'array',
+          default: ['alice', 'bob'],
+        },
+      ],
+    };
+
+    const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].message).toContain('Invalid default value');
+    expect(errors[0].message).toContain('greeting');
+    expect(errors[0].owner).toBe('json-schema-default-validation');
+  });
+
+  it('should not error for valid defaults in legacy array format', () => {
+    const yaml = `
+name: Test Workflow
+inputs:
+  - name: greeting
+    type: string
+    default: "Hello"
+  - name: count
+    type: number
+    default: 42
+`;
+    const doc = parseDocument(yaml);
+    const workflowDefinition = {
+      inputs: [
+        {
+          name: 'greeting',
+          type: 'string',
+          default: 'Hello',
+        },
+        {
+          name: 'count',
+          type: 'number',
+          default: 42,
+        },
+      ],
+    };
+
+    const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+    expect(errors.length).toBe(0);
+  });
 });

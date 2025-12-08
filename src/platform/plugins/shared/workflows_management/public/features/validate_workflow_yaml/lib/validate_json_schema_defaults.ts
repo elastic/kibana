@@ -109,6 +109,8 @@ export function validateJsonSchemaDefaults(
   }
 
   // Only build property map if properties exist and is a valid object (not array, not null)
+  // Note: normalizeInputsToJsonSchema already converts legacy array format to JSON Schema format,
+  // so normalizedInputs.properties contains all properties regardless of input format
   if (
     normalizedInputs.properties &&
     typeof normalizedInputs.properties === 'object' &&
@@ -126,14 +128,16 @@ export function validateJsonSchemaDefaults(
 
   /**
    * Extracts property key and name from a YAML path
+   * Handles both new JSON Schema format (inputs.properties.*) and legacy array format (inputs[0].*)
    */
   function extractPropertyPath(
     path: Array<string | number>
   ): { propertyKey: string; propertyName: string } | null {
     const isInProperties = path[1] === 'properties';
     const isInDefinitions = path[1] === 'definitions' || path[1] === '$defs';
+    const isLegacyArray = typeof path[1] === 'number' && path[0] === 'inputs';
 
-    if (!isInProperties && !isInDefinitions) {
+    if (!isInProperties && !isInDefinitions && !isLegacyArray) {
       return null;
     }
 
@@ -148,6 +152,21 @@ export function validateJsonSchemaDefaults(
         .map((segment) => String(segment));
       propertyKey = filteredPath.length > 0 ? `inputs.properties.${filteredPath.join('.')}` : '';
       propertyName = filteredPath[filteredPath.length - 1] as string;
+    } else if (isLegacyArray) {
+      // Legacy array format: inputs[0].default -> find the input name and map to normalized property
+      const arrayIndex = path[1] as number;
+      if (
+        Array.isArray(inputs) &&
+        inputs[arrayIndex] &&
+        typeof inputs[arrayIndex] === 'object' &&
+        'name' in inputs[arrayIndex]
+      ) {
+        const inputName = String(inputs[arrayIndex].name);
+        propertyName = inputName;
+        propertyKey = `inputs.properties.${inputName}`;
+      } else {
+        return null;
+      }
     } else {
       const definitionName = String(path[2]);
       const propertyPath = path.slice(4, -1);
@@ -285,8 +304,10 @@ export function validateJsonSchemaDefaults(
       // Get the path to this default value
       const path = getPathFromAncestors(ancestors, node);
 
-      // Check if this is within inputs.properties or inputs.definitions
-      if (path.length < 4 || path[0] !== 'inputs') {
+      // Check if this is within inputs (either properties/definitions format or legacy array format)
+      // New format: ['inputs', 'properties', 'greeting', 'default'] - length 4
+      // Legacy format: ['inputs', 0, 'default'] - length 3
+      if (path.length < 3 || path[0] !== 'inputs') {
         return;
       }
 
