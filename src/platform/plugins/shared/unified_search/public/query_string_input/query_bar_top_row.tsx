@@ -14,7 +14,7 @@ import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import { EMPTY, delay, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
-import { throttle } from 'lodash';
+import { throttle, debounce } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
@@ -542,9 +542,14 @@ export const QueryBarTopRow = React.memo(
       ]
     );
 
+    const onDraftChangeDebounced = useMemo(
+      () => (onDraftChange ? debounce(onDraftChange, 300) : undefined),
+      [onDraftChange]
+    );
+
     useEffect(() => {
-      onDraftChange?.(draft);
-    }, [onDraftChange, draft]);
+      onDraftChangeDebounced?.(draft);
+    }, [onDraftChangeDebounced, draft]);
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);

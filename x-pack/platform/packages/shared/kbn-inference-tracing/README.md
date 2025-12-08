@@ -6,7 +6,7 @@ Utilities for capturing GenAI / LLM traces in Kibana and exporting them to obser
 
 Attach one of the provided span processors to your (global) OpenTelemetry `NodeTracerProvider`.
 
-Commonly, these are configured in `@kbn/tracing`, which will be included by requiring `src/cli/apm.js`.
+Commonly, these are configured in `@kbn/tracing`, which will be included by requiring `src/cli/kibana/apm.js`.
 
 ### Phoenix
 

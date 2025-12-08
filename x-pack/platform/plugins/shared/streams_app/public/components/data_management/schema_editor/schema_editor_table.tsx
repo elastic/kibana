@@ -184,6 +184,7 @@ const createCellRenderer =
       return EMPTY_CONTENT;
     }
 
+    // @ts-expect-error upgrade typescript v5.9.3
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
   };
 

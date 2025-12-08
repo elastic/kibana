@@ -467,6 +467,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
             sourcererScope={SourcererScopeName.detections}
           >
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
+              key={isEventRenderedView ? 'eventRenderedView' : 'defaultView'}
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}

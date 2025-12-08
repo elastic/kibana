@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiScreenReaderOnly, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   ReactNode,
@@ -21,6 +21,7 @@ import type {
 import React, { useRef, useMemo, useCallback, cloneElement, useEffect, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
 import { focusFirstElement } from '../../utils/focus_first_element';
@@ -49,9 +50,17 @@ let anyPopoverOpen: boolean = false;
  */
 export const getIsAnyPopoverOpenNow = () => anyPopoverOpen;
 
+export interface PopoverIds {
+  popoverNavigationInstructionsId: string;
+}
+
+export type PopoverChildren =
+  | ReactNode
+  | ((closePopover: () => void, ids?: PopoverIds) => ReactNode);
+
 export interface SideNavPopoverProps {
   container?: HTMLElement;
-  children?: ReactNode | ((closePopover: () => void) => ReactNode);
+  children?: PopoverChildren;
   hasContent: boolean;
   isSidePanelOpen: boolean;
   label: string;
@@ -62,6 +71,7 @@ export interface SideNavPopoverProps {
     tabIndex?: number;
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
+    'aria-describedby'?: string;
   }>;
   persistent?: boolean;
 }
@@ -77,6 +87,12 @@ export const SideNavPopover = ({
 }: SideNavPopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { setTimeout, clearTimeout } = useHoverTimeout();
+  const popoverEnterAndExitInstructionsId = useGeneratedHtmlId({
+    prefix: 'popover-enter-exit-instructions',
+  });
+  const popoverNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'popover-navigation-instructions',
+  });
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
@@ -217,20 +233,32 @@ export const SideNavPopover = ({
     };
   }, [clearTimeout, handleClose]);
 
-  const enhancedTrigger = useMemo(
-    () =>
-      cloneElement(trigger, {
-        ref: triggerRef,
-        'aria-haspopup': hasContent,
-        'aria-expanded': hasContent ? isOpen : undefined,
-        onClick: (e: MouseEvent) => {
-          trigger.props.onClick?.(e);
-          handleTriggerClick();
-        },
-        onKeyDown: handleTriggerKeyDown,
-      }),
-    [trigger, hasContent, isOpen, handleTriggerKeyDown, handleTriggerClick]
-  );
+  const enhancedTrigger = useMemo(() => {
+    const existingDescribedBy = trigger.props['aria-describedby'];
+    const popoverDescribedBy =
+      hasContent && !isSidePanelOpen ? popoverEnterAndExitInstructionsId : undefined;
+    const finalDescribedBy = [existingDescribedBy, popoverDescribedBy].filter(Boolean).join(' ');
+
+    return cloneElement(trigger, {
+      ref: triggerRef,
+      'aria-haspopup': hasContent,
+      'aria-expanded': hasContent ? isOpen : undefined,
+      'aria-describedby': finalDescribedBy || undefined,
+      onClick: (e: MouseEvent) => {
+        trigger.props.onClick?.(e);
+        handleTriggerClick();
+      },
+      onKeyDown: handleTriggerKeyDown,
+    });
+  }, [
+    trigger,
+    hasContent,
+    isOpen,
+    handleTriggerKeyDown,
+    handleTriggerClick,
+    popoverEnterAndExitInstructionsId,
+    isSidePanelOpen,
+  ]);
 
   const wrapperStyles = css`
     width: 100%;
@@ -257,6 +285,15 @@ export const SideNavPopover = ({
       onFocus={handleMouseEnter}
       onBlur={handleBlur}
     >
+      {hasContent && !isSidePanelOpen && (
+        <EuiScreenReaderOnly>
+          <p id={popoverEnterAndExitInstructionsId}>
+            {i18n.translate('core.ui.chrome.sideNavigation.popoverInstruction', {
+              defaultMessage: 'Press Enter to go to the submenu.',
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+      )}
       <EuiPopover
         aria-label={label}
         anchorPosition="rightUp"
@@ -289,7 +326,20 @@ export const SideNavPopover = ({
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
         >
-          {typeof children === 'function' ? children(handleClose) : children}
+          <EuiScreenReaderOnly>
+            <p id={popoverNavigationInstructionsId}>
+              {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
+                defaultMessage:
+                  'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
+                values: {
+                  label,
+                },
+              })}
+            </p>
+          </EuiScreenReaderOnly>
+          {typeof children === 'function'
+            ? children(handleClose, { popoverNavigationInstructionsId })
+            : children}
         </div>
       </EuiPopover>
       {persistent && isOpenedByClick && isOpen && (
