@@ -32,7 +32,7 @@ import {
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { AlertsTable } from '../../alerts_table';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
-import { useGetDefaultGroupTitleRenderers } from './default_group_title_renderers/use_get_default_group_title_renderers';
+import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 

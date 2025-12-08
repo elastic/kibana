@@ -9,28 +9,25 @@ import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
-import { ALERT_ATTACK_IDS } from '../../../../../../common/field_maps/field_names';
-import { useFindAttackDiscoveries } from '../../../../../attack_discovery/pages/use_find_attack_discoveries';
-import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
+import { ALERT_ATTACK_IDS } from '../../../../common/field_maps/field_names';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { getMockAttackDiscoveryAlerts } from '../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import { useGetDefaultGroupTitleRenderers } from './use_get_default_group_title_renderers';
-import { ATTACK_TITLE_TEST_ID } from './attack_group_content';
+import { ATTACK_TITLE_TEST_ID } from '../../components/attacks/table/attack_group_content';
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
 
-jest.mock('../../../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
+jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
   useFindAttackDiscoveries: jest.fn(),
 }));
 
-jest.mock(
-  '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
-      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
-    )),
-  })
-);
+jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
+  AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
+    <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+  )),
+}));
 
 const mockAttacks = getMockAttackDiscoveryAlerts();
 

@@ -15,14 +15,14 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
-import { useGetDefaultGroupTitleRenderers } from './default_group_title_renderers/use_get_default_group_title_renderers';
+import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
-jest.mock('./default_group_title_renderers/use_get_default_group_title_renderers');
+jest.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
 jest.mock('../../alerts_table/alerts_grouping', () => ({
   ...jest.requireActual('../../alerts_table/alerts_grouping'),
   GroupedAlertsTable: jest.fn(),

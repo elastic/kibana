@@ -10,10 +10,10 @@ import { isArray } from 'lodash/fp';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
-import { ALERT_ATTACK_IDS } from '../../../../../../common/field_maps/field_names';
-import { useFindAttackDiscoveries } from '../../../../../attack_discovery/pages/use_find_attack_discoveries';
-import type { AlertsGroupingAggregation } from '../../../alerts_table/grouping_settings/types';
-import { AttackGroupContent } from './attack_group_content';
+import { ALERT_ATTACK_IDS } from '../../../../common/field_maps/field_names';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import type { AlertsGroupingAggregation } from '../../components/alerts_table/grouping_settings/types';
+import { AttackGroupContent } from '../../components/attacks/table/attack_group_content';
 
 export interface UseGetDefaultGroupTitleRenderersProps {
   attackIds?: string[];

@@ -9,11 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
-import {
-  AttackGroupContent,
-  ATTACK_DESCRIPTION_TEST_ID,
-  ATTACK_TITLE_TEST_ID,
-} from './attack_group_content';
+import { AttackGroupContent, ATTACK_DESCRIPTION_TEST_ID, ATTACK_TITLE_TEST_ID } from '.';
 
 jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
