@@ -27,6 +27,7 @@ import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 import { useAgentCount } from '../../hooks/api/use_agent_count';
 import { useStats } from '../../hooks/api/use_stats';
+
 interface MetricPanelProps {
   title: string;
   onClick?: () => void;
@@ -258,11 +259,11 @@ export const MetricPanel = ({
     </EuiPanel>
   );
 };
-interface BasicMetricPanel {
+interface BasicMetricPanelProps {
   title: string;
-  metric: string; // TODO proper type
+  metric: string | number;
 }
-const BasicMetricPanel = ({ title, metric }: BasicMetricPanel) => {
+const BasicMetricPanel = ({ title, metric }: BasicMetricPanelProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
@@ -293,7 +294,7 @@ interface MetricPanelsProps {
   panelType?: 'basic' | 'complex';
 }
 export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
-  const { data } = useStats();
+  const { data: storageStats, isLoading: isLoadingStorageStats } = useStats();
   const { data: indicesData, isLoading: isLoadingIndices } = useIndicesStats();
   const { data: dashboardsData, isLoading: isLoadingDashboards } = useDashboardsStats();
   const { tools } = useAgentCount();
@@ -305,7 +306,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.indices.title', {
         defaultMessage: 'Indices',
       }),
-      metric: isLoadingIndices ? '-' : String(indicesData?.normalIndices ?? 0),
+      metric: isLoadingIndices ? '-' : indicesData?.normalIndices ?? 0,
     },
     {
       id: 'storage',
@@ -313,7 +314,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.storage.title', {
         defaultMessage: 'Storage',
       }),
-      metric: '0 B',
+      metric: isLoadingStorageStats ? '-' : storageStats?.size ?? '-',
     },
     {
       id: 'tools',
@@ -321,7 +322,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.tools.title', {
         defaultMessage: 'Tools',
       }),
-      metric: String(tools),
+      metric: tools,
     },
     {
       id: 'discover',
@@ -329,7 +330,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.discover.title', {
         defaultMessage: 'Dashboards',
       }),
-      metric: isLoadingDashboards ? '-' : String(dashboardsData?.totalDashboards ?? 0),
+      metric: isLoadingDashboards ? '-' : dashboardsData?.totalDashboards ?? 0,
     },
   ];
   const complexPanels: Array<{ id: string; type: MetricPanelType }> = [

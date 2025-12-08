@@ -7,20 +7,27 @@
 
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
+import type { StatsResponse } from '../../../server/types';
 import { useKibana } from '../use_kibana';
 
-export const useStats = (): UseQueryResult => {
+export interface SizeStats {
+  documents: StatsResponse['sizeStats']['documents'];
+  size: StatsResponse['sizeStats']['size'];
+}
+
+export const useStats = (): UseQueryResult<SizeStats> => {
   const { http } = useKibana().services;
 
-  const queryResult = useQuery({
-    queryKey: ['fetchStats'],
+  const queryResult = useQuery<SizeStats, Error>({
+    queryKey: ['fetchSizeStats'],
     queryFn: async () => {
-      const response = await http.get('/internal/search_homepage/stats');
-      return response;
+      const response = await http.get<StatsResponse>('/internal/search_homepage/stats');
+      return {
+        documents: response.sizeStats.documents,
+        size: response.sizeStats.size,
+      };
     },
   });
 
-  return {
-    ...queryResult,
-  };
+  return queryResult;
 };

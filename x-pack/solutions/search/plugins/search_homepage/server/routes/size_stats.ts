@@ -8,15 +8,15 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { GET_STATS_ROUTE } from '../../common/routes';
+import type { RouterContextData, StatsResponse } from '../types';
+import { fetchSizeStats } from '../lib/size_stats';
 
 export const registerStatsRoutes = (
   router: IRouter,
-  logger: Logger,
-  config: {
-    isSizeAndDocCountEnabled: boolean;
-  }
-) => {
-  router.get(
+  _logger: Logger,
+  { isServerless }: RouterContextData
+): void => {
+  router.get<unknown, unknown, StatsResponse>(
     {
       path: GET_STATS_ROUTE,
       security: {
@@ -31,22 +31,13 @@ export const registerStatsRoutes = (
       },
     },
     async (context, _request, response) => {
-      const core = await context.core;
-      const client = core.elasticsearch.client;
+      const client = (await context.core).elasticsearch.client;
 
-      if (config.isSizeAndDocCountEnabled) {
-        const indexStats = await client.asSecondaryAuthUser.transport.request({
-          method: 'GET',
-          path: '/_metering/stats',
-        });
-
-        logger.info(indexStats);
-        return response.ok({
-          body: indexStats,
-        });
-      }
-
-      return response.notFound();
+      const stats = fetchSizeStats(client, isServerless);
+      return response.ok({
+        headers: { 'content-type': 'application/json' },
+        body: stats,
+      });
     }
   );
 };
