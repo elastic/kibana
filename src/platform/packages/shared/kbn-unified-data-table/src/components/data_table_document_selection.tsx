@@ -33,7 +33,7 @@ import { UnifiedDataTableContext } from '../table_context';
 import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
 import { DataTableCopyRowsAsJson } from './data_table_copy_rows_as_json';
 import { useControlColumn } from '../hooks/use_control_column';
-import type { CustomBulkActions } from '../types';
+import { type CustomBulkActions, CopyAsTextFormat } from '../types';
 import { styles as toolbarStyles } from './custom_toolbar/render_custom_toolbar';
 
 export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
@@ -220,6 +220,16 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as text
       <DataTableCopyRowsAsText
         key="copyRowsAsText"
+        format={CopyAsTextFormat.tabular}
+        rows={rows}
+        toastNotifications={toastNotifications}
+        columns={columns}
+        onCompleted={closePopover}
+      />,
+      // Copy results to clipboard as markdown
+      <DataTableCopyRowsAsText
+        key="copyRowsAsMarkdown"
+        format={CopyAsTextFormat.markdown}
         rows={rows}
         toastNotifications={toastNotifications}
         columns={columns}

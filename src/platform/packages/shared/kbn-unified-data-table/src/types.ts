@@ -71,3 +71,8 @@ export type CustomBulkActions = Array<
     key: string;
   }
 >;
+
+export enum CopyAsTextFormat {
+  tabular = 'tabular',
+  markdown = 'markdown',
+}

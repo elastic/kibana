@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ValueToStringConverter } from '../types';
+import { CopyAsTextFormat, type ValueToStringConverter } from '../types';
 import { convertNameToString } from './convert_value_to_string';
 import { getColumnDisplayName } from '../components/data_table_columns';
 
@@ -166,41 +166,74 @@ export const copyRowsAsTextToClipboard = async ({
   selectedRowIndices,
   toastNotifications,
   valueToStringConverter,
+  format,
 }: {
   columns: string[];
   dataView: DataView;
   selectedRowIndices: number[];
   toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
+  format: CopyAsTextFormat;
 }): Promise<string | null> => {
-  const columnSeparator = '\t';
   const rowSeparator = '\n';
   let withFormula = false;
   let textToCopy = '';
+  const valueToStringConverterOptions =
+    format === CopyAsTextFormat.markdown
+      ? { compatibleWithMarkdown: true }
+      : { compatibleWithCSV: true };
 
-  textToCopy +=
-    columns
-      .map((columnId) => {
-        const columnDisplayName = getColumnDisplayName(
-          columnId,
-          dataView.getFieldByName(columnId)?.displayName,
-          undefined
-        );
-        const nameFormattedResult = convertNameToString(columnDisplayName);
-        withFormula = withFormula || nameFormattedResult.withFormula;
-        return nameFormattedResult.formattedString;
-      })
-      .join(columnSeparator) + rowSeparator;
+  const addColumnSeparators = (text: string, index: number): string => {
+    const isFirst = index === 0;
+    const isLast = index === columns.length - 1;
+
+    if (format === CopyAsTextFormat.markdown) {
+      const escapedText = text.replace(/\|/g, '\\|');
+      if (isFirst) {
+        return `| ${escapedText}`;
+      }
+      if (isLast) {
+        return ` | ${escapedText} |`;
+      }
+      return ` | ${escapedText}`;
+    }
+
+    return isFirst ? text : '\t' + text;
+  };
+
+  const headerRow = columns
+    .map((columnId) => {
+      const columnDisplayName = getColumnDisplayName(
+        columnId,
+        dataView.getFieldByName(columnId)?.displayName,
+        undefined
+      );
+      if (format === CopyAsTextFormat.markdown) {
+        return columnDisplayName;
+      }
+      const nameFormattedResult = convertNameToString(columnDisplayName);
+      withFormula = withFormula || nameFormattedResult.withFormula;
+      return nameFormattedResult.formattedString;
+    })
+    .map(addColumnSeparators);
+
+  textToCopy += headerRow.join('') + rowSeparator;
+
+  if (format === CopyAsTextFormat.markdown) {
+    const separatorRow = columns.map(() => '---').map(addColumnSeparators);
+    textToCopy += separatorRow.join('') + rowSeparator;
+  }
 
   selectedRowIndices.forEach((rowIndex, index) => {
     textToCopy +=
       columns
         .map((columnId) => {
-          const result = valueToStringConverter(rowIndex, columnId, { compatibleWithCSV: true });
+          const result = valueToStringConverter(rowIndex, columnId, valueToStringConverterOptions);
           withFormula = withFormula || result.withFormula;
           return result.formattedString || '-';
         })
-        .join(columnSeparator) + (index !== selectedRowIndices.length - 1 ? rowSeparator : '');
+        .map(addColumnSeparators)
+        .join('') + (index !== selectedRowIndices.length - 1 ? rowSeparator : '');
   });
 
   let copied;
