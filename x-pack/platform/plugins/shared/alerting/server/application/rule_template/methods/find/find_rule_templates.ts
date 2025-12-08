@@ -104,10 +104,10 @@ export async function findRuleTemplates(
   });
 
   // this is a second layer of defence which validates the auth filter was applied correctly
-  const ensureRuleTypeIsAuthorized = (ruleTypeId: string) => {
-    if (!authorizedRuleTypes.has(ruleTypeId)) {
+  const ensureRuleTypeIsAuthorized = (returnedRuleTypeId: string) => {
+    if (!authorizedRuleTypes.has(returnedRuleTypeId)) {
       throw Boom.forbidden(
-        `Unauthorized to find ${AlertingAuthorizationEntity.Rule} for rule type "${ruleTypeId}"`
+        `Unauthorized to find ${AlertingAuthorizationEntity.Rule} for rule type "${returnedRuleTypeId}"`
       );
     }
   };
