@@ -20,11 +20,10 @@ export const chatExperienceSetting: Omit<UiSettingsParams<AIChatExperience>, 'va
   description: i18n.translate(
     'aiAssistantManagementSelection.preferredChatExperienceSettingDescription',
     {
-      defaultMessage:
-        'Choose which chat experience should be the default for all users in this space, between Classic Al Assistant or Al Agents. {link}',
+      defaultMessage: 'Choose which chat experience to use for everyone in this space. {link}',
       values: {
         // TODO: add the actual link when available
-        link: '<a href="" target="_blank" rel="noopener noreferrer" class="euiLink">Learn more</a>',
+        link: '<a href="" target="_blank" rel="noopener noreferrer" class="euiLink euiLink--primary">Learn more</a>',
       },
     }
   ),

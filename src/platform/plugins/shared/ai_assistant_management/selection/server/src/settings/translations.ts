@@ -36,7 +36,7 @@ export const HIDE_ALL_ASSISTANTS = i18n.translate(
 export const CHAT_EXPERIENCE_TITLE = i18n.translate(
   'aiAssistantManagementSelection.preferredChatExperienceSettingName',
   {
-    defaultMessage: 'AI Chat Experience',
+    defaultMessage: 'Chat Experience',
   }
 );
 

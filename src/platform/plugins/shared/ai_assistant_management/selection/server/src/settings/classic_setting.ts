@@ -27,7 +27,7 @@ export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = 
     'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
     {
       defaultMessage:
-        'Choose where and which AI Assistants are available. You can limit the AI Assistants to their own solutions, show either the Observability and Search AI Assistants or the Security AI Assistant in other Kibana apps, or hide AI Assistants entirely.',
+        'Configure AI Assistant availability for each solution. You can make them appear only in their own solutions, make a specific one appear throughout Kibana, or hide them completely.',
     }
   ),
   schema: schema.oneOf(

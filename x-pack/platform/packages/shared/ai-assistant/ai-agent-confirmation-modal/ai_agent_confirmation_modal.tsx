@@ -70,25 +70,20 @@ export const AIAgentConfirmationModal: React.FC<AIAgentConfirmationModalProps> =
       <EuiText>
         <FormattedMessage
           id="aiAssistantManagementSelection.agentConfirmModal.description"
-          defaultMessage="Based on the new <bold>Agent Builder</bold> platform, <bold>AI Agent</bold> is our new agentic chat experience. Learn more in our {learnMoreLink}.{br}{br}By selecting it as the default AI chat experience, <bold>all users in this space will be affected</bold>, regardless of what solution (Observability, Security, Elasticsearch), Analytics app (Discover, Dashboards, ML, Maps, Graph) or Management page they will be using.{br}{br}As you start anew with the AI Agent, all existing chats and prompts will still be stored and are accessible at all times by switching back to the default experience in the GenAI Settings.{br}{br}<bold>Please note:</bold> Some features as anonymization and chat sharing are not currently supported by the AI Agent. Check the comparison {comparisonLink}."
+          defaultMessage="Switching to AI Agent will affect all users in this space, regardless of which solution, app, or management page they're on.{br}{br} <bold>Please note:</bold> AI Agent will not have access to your chats, prompts, or knowledge base entries from AI Assistant. However this data will always be accessible if you switch back to AI Assistant using the GenAI Settings page. {br}{br} AI Agent does not currently support some AI Assistant features, such as anonymization and chat sharing. {learnMoreLink}"
           values={{
             br: <br />,
             bold: (str) => <strong>{str}</strong>,
             learnMoreLink: (
               // TODO: Update link when documentation is ready
-              <EuiLink href="#" target="_blank" data-test-subj="aiAgentDocumentationLink">
+              <EuiLink
+                href="#"
+                target="_blank"
+                data-test-subj="AIAgentConfirmationModalLearnMoreLink"
+              >
                 <FormattedMessage
-                  id="aiAssistantManagementSelection.agentConfirmModal.documentationLink"
-                  defaultMessage="documentation"
-                />
-              </EuiLink>
-            ),
-            comparisonLink: (
-              // TODO: Update link when documentation is ready
-              <EuiLink href="#" target="_blank" data-test-subj="aiAgentComparisonLink">
-                <FormattedMessage
-                  id="aiAssistantManagementSelection.agentConfirmModal.comparisonLink"
-                  defaultMessage="here"
+                  id="aiAssistantManagementSelection.agentConfirmModal.learnMoreLink"
+                  defaultMessage="Learn more"
                 />
               </EuiLink>
             ),
