@@ -7,14 +7,14 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ObservabilityAgentPlugin } from './plugin';
+import { ObservabilityAgentBuilderPlugin } from './plugin';
 
 export type {
-  ObservabilityAgentPluginSetup,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ObservabilityAgentPlugin(initializerContext);
+  new ObservabilityAgentBuilderPlugin(initializerContext);
