@@ -22,7 +22,7 @@ import { createAppService } from '@kbn/ai-assistant';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { observabilityAppId } from '@kbn/observability-plugin/common';
-import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -81,11 +81,11 @@ export class ObservabilityAIAssistantAppPlugin
 
         // Restrict access when the chat experience is set to AI Agents
         const currentExperience = coreStart.settings.client.get<AIChatExperience>(
-          AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+          AI_CHAT_EXPERIENCE_TYPE,
           AIChatExperience.Classic
         );
 
-        if (currentExperience === AIChatExperience.Agents) {
+        if (currentExperience === AIChatExperience.Agent) {
           coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
           return () => {};
         }

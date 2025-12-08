@@ -76,7 +76,7 @@ import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -383,13 +383,13 @@ export class Plugin
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
               const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
-                AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+                AI_CHAT_EXPERIENCE_TYPE,
                 AIChatExperience.Classic
               );
 
               return chatExperience$.pipe(
                 map((chatExperience) => {
-                  const showAiAssistant = chatExperience !== AIChatExperience.Agents;
+                  const showAiAssistant = chatExperience !== AIChatExperience.Agent;
 
                   const aiAssistantLink =
                     isAiAssistantEnabled &&

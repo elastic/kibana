@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessObservabilityPublicSetup,
@@ -45,7 +45,7 @@ export class ServerlessObservabilityPlugin
     const { serverless, management, security } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(
-      AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+      AI_CHAT_EXPERIENCE_TYPE,
       AIChatExperience.Classic
     );
 
@@ -58,7 +58,7 @@ export class ServerlessObservabilityPlugin
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
-          showAiAssistant: chatExperience !== AIChatExperience.Agents,
+          showAiAssistant: chatExperience !== AIChatExperience.Agent,
         });
       })
     );

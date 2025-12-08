@@ -11,7 +11,7 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { lazy } from 'react';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 const LazyIconBriefcase = lazy(() =>
   import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
@@ -602,14 +602,14 @@ export const createDefinition = (
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     pluginsStart.uiSettings.get$<AIChatExperience>(
-      AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+      AI_CHAT_EXPERIENCE_TYPE,
       AIChatExperience.Classic
     ),
   ]).pipe(
     map(([{ status }, chatExperience]) =>
       createNavTree({
         streamsAvailable: status === 'enabled',
-        showAiAssistant: chatExperience !== AIChatExperience.Agents,
+        showAiAssistant: chatExperience !== AIChatExperience.Agent,
       })
     )
   ),
