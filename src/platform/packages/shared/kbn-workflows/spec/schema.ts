@@ -510,51 +510,55 @@ export const BuiltInStepTypes = [
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
-export const WorkflowSchema = z
-  .object({
-    version: z.literal('1').default('1').describe('The version of the workflow schema'),
-    name: z.string().min(1),
-    description: z.string().optional(),
-    settings: WorkflowSettingsSchema.optional(),
-    enabled: z.boolean().default(true),
-    tags: z.array(z.string()).optional(),
-    triggers: z.array(TriggerSchema).min(1),
-    inputs: z
-      .union([
-        // New JSON Schema format
-        JsonModelSchema,
-        // Legacy array format (for backward compatibility)
-        z.array(WorkflowInputSchema),
-      ])
-      .optional(),
-    consts: WorkflowConstsSchema.optional(),
-    steps: z.array(StepSchema).min(1),
-  })
-  .transform((data) => {
-    // Transform inputs from legacy array format to JSON Schema format
-    let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-    if (data.inputs) {
-      if (
-        'properties' in data.inputs &&
-        typeof data.inputs === 'object' &&
-        !Array.isArray(data.inputs)
-      ) {
-        normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-      } else if (Array.isArray(data.inputs)) {
-        normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
-      }
-    }
+// Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
+const WorkflowSchemaBase = z.object({
+  version: z.literal('1').default('1').describe('The version of the workflow schema'),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  settings: WorkflowSettingsSchema.optional(),
+  enabled: z.boolean().default(true),
+  tags: z.array(z.string()).optional(),
+  triggers: z.array(TriggerSchema).min(1),
+  inputs: z
+    .union([
+      // New JSON Schema format
+      JsonModelSchema,
+      // Legacy array format (for backward compatibility)
+      z.array(WorkflowInputSchema),
+    ])
+    .optional(),
+  consts: WorkflowConstsSchema.optional(),
+  steps: z.array(StepSchema).min(1),
+});
 
-    // Return the data with normalized inputs, preserving all other fields as-is
-    // This preserves the optionality of fields since we're not explicitly listing them all
-    // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
-    const { inputs: _, ...rest } = data;
-    return {
-      ...rest,
-      version: '1' as const,
-      ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
-    };
-  });
+export const WorkflowSchema = WorkflowSchemaBase.transform((data) => {
+  // Transform inputs from legacy array format to JSON Schema format
+  let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
+  if (data.inputs) {
+    if (
+      'properties' in data.inputs &&
+      typeof data.inputs === 'object' &&
+      !Array.isArray(data.inputs)
+    ) {
+      normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
+    } else if (Array.isArray(data.inputs)) {
+      normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+    }
+  }
+
+  // Return the data with normalized inputs, preserving all other fields as-is
+  // This preserves the optionality of fields since we're not explicitly listing them all
+  // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
+  const { inputs: _, ...rest } = data;
+  return {
+    ...rest,
+    version: '1' as const,
+    ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+  };
+});
+
+// Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
+export { WorkflowSchemaBase };
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 

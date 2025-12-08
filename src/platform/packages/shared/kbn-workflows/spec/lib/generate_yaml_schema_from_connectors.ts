@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './input_conversion';
 import { type ConnectorContractUnion } from '../..';
+import type { JsonModelSchema } from '../schema';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -19,11 +20,8 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getWorkflowSettingsSchema,
-  JsonModelSchema,
-  TriggerSchema,
   WaitStepSchema,
-  WorkflowConstsSchema,
-  WorkflowInputSchema,
+  WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
 } from '../schema';
 
@@ -53,37 +51,12 @@ export function generateYamlSchemaFromConnectors(
     }));
   }
 
-  // For strict mode, we need to build from the base schema before the pipe
-  // since WorkflowSchema uses .pipe() which doesn't support .extend()
-  const baseWorkflowSchema = z.object({
-    version: z.literal('1').default('1').describe('The version of the workflow schema'),
-    name: z.string().min(1),
-    description: z.string().optional(),
+  // For strict mode, extend WorkflowSchemaBase (without transform) and apply the same transform as WorkflowSchema
+  return WorkflowSchemaBase.extend({
     settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-    enabled: z.boolean().default(true),
-    tags: z.array(z.string()).optional(),
-    triggers: z.array(TriggerSchema).min(1),
-    inputs: z
-      .union([JsonModelSchema, z.array(WorkflowInputSchema)])
-      .optional()
-      .transform((inputs) => {
-        if (!inputs) {
-          return undefined;
-        }
-        if ('properties' in inputs && typeof inputs === 'object' && !Array.isArray(inputs)) {
-          return inputs as z.infer<typeof JsonModelSchema>;
-        }
-        if (Array.isArray(inputs)) {
-          return convertLegacyInputsToJsonSchema(inputs);
-        }
-        return undefined;
-      }),
-    consts: WorkflowConstsSchema.optional(),
     steps: z.array(recursiveStepSchema),
-  });
-
-  return baseWorkflowSchema.transform((data) => {
-    // Transform inputs from legacy array format to JSON Schema format
+  }).transform((data) => {
+    // Transform inputs from legacy array format to JSON Schema format (same logic as WorkflowSchema)
     let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
     if (data.inputs) {
       if (
@@ -97,17 +70,12 @@ export function generateYamlSchemaFromConnectors(
       }
     }
 
+    // Return the data with normalized inputs, preserving all other fields as-is
+    const { inputs: _, ...rest } = data;
     return {
+      ...rest,
       version: '1' as const,
-      name: data.name,
-      description: data.description,
-      settings: data.settings,
-      enabled: data.enabled,
-      tags: data.tags,
-      triggers: data.triggers,
-      inputs: normalizedInputs,
-      consts: data.consts,
-      steps: data.steps,
+      ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
     };
   });
 }
