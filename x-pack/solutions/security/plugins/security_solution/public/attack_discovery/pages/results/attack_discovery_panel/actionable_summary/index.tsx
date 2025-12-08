@@ -85,11 +85,16 @@ const ActionableSummaryComponent: React.FC<Props> = ({
     [attackDiscovery, replacements]
   );
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.alert,
-    attachmentData: { alert: attackDiscoveryWithOriginalValues },
-    attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
-  });
+  const alertAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.alert,
+      attachmentData: { alert: attackDiscoveryWithOriginalValues, attachmentLabel: title },
+      attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
+    }),
+    [attackDiscoveryWithOriginalValues, title]
+  );
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
   return (
     <EuiPanel color="subdued" data-test-subj="actionableSummary">

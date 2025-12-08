@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
@@ -210,18 +211,24 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : null;
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.alert,
-    attachmentData: {
-      alert: attackDiscovery
-        ? getAttackDiscoveryMarkdown({
-            attackDiscovery,
-            replacements,
-          })
-        : '',
-    },
-    attachmentPrompt: i18n.VIEW_IN_AGENT_BUILDER,
-  });
+  const alertAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.alert,
+      attachmentData: {
+        alert: attackDiscovery
+          ? getAttackDiscoveryMarkdown({
+              attackDiscovery,
+              replacements,
+            })
+          : '',
+        attachmentLabel: attackDiscovery?.title,
+      },
+      attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
+    }),
+    [attackDiscovery, replacements]
+  );
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();

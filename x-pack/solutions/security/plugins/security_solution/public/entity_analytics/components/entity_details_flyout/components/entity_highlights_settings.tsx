@@ -98,12 +98,19 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   });
 
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
-
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.entity,
-    attachmentData: { identifierType: entityType, identifier: entityIdentifier },
-    attachmentPrompt: `Investigate the entity and suggest next steps.`,
-  });
+  const entityAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.entity,
+      attachmentData: {
+        identifierType: entityType,
+        identifier: entityIdentifier,
+        attachmentLabel: entityIdentifier,
+      },
+      attachmentPrompt: `Investigate the entity and suggest next steps.`,
+    }),
+    [entityIdentifier, entityType]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
 
   const items = useMemo(
     () => [

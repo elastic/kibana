@@ -43,16 +43,19 @@ export const PanelFooter = memo(() => {
 
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
-  const alertData = useMemo(() => {
+  const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
-    return stringifyEssentialAlertData(rawData);
+    return {
+      attachmentType: SecurityAgentBuilderAttachments.alert,
+      attachmentData: {
+        alert: stringifyEssentialAlertData(rawData),
+        attachmentLabel: rawData['kibana.alert.rule.name']?.[0],
+      },
+      attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
+    };
   }, [dataFormattedForFieldBrowser]);
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.alert,
-    attachmentData: { alert: alertData },
-    attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>

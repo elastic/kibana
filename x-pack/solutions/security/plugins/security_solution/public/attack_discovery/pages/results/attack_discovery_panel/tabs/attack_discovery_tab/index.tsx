@@ -57,7 +57,10 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   );
 
   const { euiTheme } = useEuiTheme();
-  const { detailsMarkdown, summaryMarkdown } = useMemo(() => attackDiscovery, [attackDiscovery]);
+  const { title, detailsMarkdown, summaryMarkdown } = useMemo(
+    () => attackDiscovery,
+    [attackDiscovery]
+  );
 
   const summaryMarkdownWithReplacements = useMemo(
     () =>
@@ -96,11 +99,16 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
     [attackDiscovery, replacements]
   );
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.alert,
-    attachmentData: { alert: attackDiscoveryWithOriginalValues },
-    attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
-  });
+  const alertAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.alert,
+      attachmentData: { alert: attackDiscoveryWithOriginalValues, attachmentLabel: title },
+      attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
+    }),
+    [attackDiscoveryWithOriginalValues, title]
+  );
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
   return (
     <div data-test-subj="attackDiscoveryTab">
