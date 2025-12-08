@@ -29,7 +29,7 @@ export interface McpConnectorToolsAttributes {
 
 export const mcpConnectorToolsType: SavedObjectsType<McpConnectorToolsAttributes> = {
   name: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-  hidden: true,
+  hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: {
     dynamic: false,
