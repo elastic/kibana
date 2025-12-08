@@ -764,3 +764,8 @@ export const AlertSuppressionCamel = z.object({
   duration: AlertSuppressionDuration.optional(),
   missingFieldsStrategy: AlertSuppressionMissingFieldsStrategy.optional(),
 });
+
+export type GapFillStatus = z.infer<typeof GapFillStatus>;
+export const GapFillStatus = z.enum(['unfilled', 'in_progress', 'filled']);
+export type GapFillStatusEnum = typeof GapFillStatus.enum;
+export const GapFillStatusEnum = GapFillStatus.enum;

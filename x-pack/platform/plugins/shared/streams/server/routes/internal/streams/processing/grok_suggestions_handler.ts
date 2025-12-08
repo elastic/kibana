@@ -12,9 +12,9 @@ import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { isOtelStream } from '@kbn/streams-schema';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import {
-  determineOtelFieldNameUsage,
   callInferenceWithPrompt,
   fetchFieldMetadata,
   normalizeFieldName,
@@ -74,8 +74,7 @@ export const handleProcessingGrokSuggestions = async ({
   signal,
   logger,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
-  // Determine if we should use OTEL field names
-  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
+  const stream = await streamsClient.getStream(params.path.name);
 
   try {
     // Call LLM inference to review fields
@@ -96,7 +95,7 @@ export const handleProcessingGrokSuggestions = async ({
 
     return {
       log_source: reviewResult.log_source,
-      fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames),
+      fields: mapFields(reviewResult.fields, fieldMetadata, isOtelStream(stream)),
     };
   } catch (error) {
     logger.error(error);
