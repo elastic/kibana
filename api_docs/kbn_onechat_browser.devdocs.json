@@ -56,6 +56,48 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/onechat-browser",
+        "id": "def-common.AgentsServiceStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentsServiceStartContract",
+        "description": [
+          "\nPublic-faving contract for AgentBuilder's agents service."
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-browser/agents/contract.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-browser",
+            "id": "def-common.AgentsServiceStartContract.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nList all agents available."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.AgentDefinition",
+                "text": "AgentDefinition"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-browser/agents/contract.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-browser",
         "id": "def-common.AttachmentServiceStartContract",
         "type": "Interface",
         "tags": [],
@@ -259,7 +301,9 @@
               "\nReturns the icon type to display for the attachment."
             ],
             "signature": [
-              "(() => string) | undefined"
+              "(() => ",
+              "IconType",
+              ") | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-browser/attachments/contract.ts",
             "deprecated": false,

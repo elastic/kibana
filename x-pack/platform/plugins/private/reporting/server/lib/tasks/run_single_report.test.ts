@@ -603,7 +603,10 @@ describe('Run Single Report Task', () => {
     await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
 
     expect(logger.error).toHaveBeenCalledWith(
-      new Error(`Saving execution error for test1 job test: Error: failure generating report`)
+      new Error(`Saving execution error for test1 job test: Error: failure generating report`),
+      {
+        tags: ['test'],
+      }
     );
     expect(store.setReportFailed).not.toHaveBeenCalled();
     expect(store.setReportError).toHaveBeenCalledWith(
@@ -675,7 +678,8 @@ describe('Run Single Report Task', () => {
     await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
 
     expect(logger.error).toHaveBeenCalledWith(
-      new Error(`Saving execution error for test1 job test: Error: failure generating report`)
+      new Error(`Saving execution error for test1 job test: Error: failure generating report`),
+      { tags: ['test'] }
     );
     expect(store.setReportError).not.toHaveBeenCalled();
     expect(store.setReportFailed).toHaveBeenCalledWith(

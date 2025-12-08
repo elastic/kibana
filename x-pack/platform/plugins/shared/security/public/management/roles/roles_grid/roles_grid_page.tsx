@@ -258,7 +258,7 @@ export const RolesGridPage: FC<Props> = ({
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
-    if (!args.error) {
+    if (!args.error && args.query) {
       const newState = {
         ...tableState,
         query: args.query,

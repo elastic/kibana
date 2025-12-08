@@ -28,12 +28,13 @@ export const FeatureEventsSparkline = ({
       feature: {
         name: feature.name,
         filter: feature.filter,
+        type: feature.type,
       },
       kql: { query: '' },
       id: 'feature-events-sparkline',
       title: feature.name,
     }),
-    [feature.name, feature.filter]
+    [feature.name, feature.filter, feature.type]
   );
 
   return (

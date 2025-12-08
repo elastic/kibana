@@ -22,6 +22,7 @@ import searchRocketIcon from '../assets/search-rocket.svg';
 import {
   EIS_PROMO_CALLOUT_CTA,
   EIS_PROMO_CALLOUT_DESCRIPTION,
+  EIS_PROMO_CALLOUT_DISMISS_ARIA,
   EIS_PROMO_CALLOUT_ICON_ALT,
   EIS_PROMO_CALLOUT_TITLE,
 } from '../translations';
@@ -40,7 +41,7 @@ export const EisPromotionalCallout = ({
   isCloudEnabled,
   direction,
 }: EisPromotionalCalloutProps) => {
-  const { isPromoVisible, onSkipTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}Callout`,
     isCloudEnabled,
   });
@@ -65,7 +66,13 @@ export const EisPromotionalCallout = ({
       color="subdued"
     >
       <div style={{ position: 'absolute', top: 8, right: 8 }}>
-        <EuiButtonIcon iconType="cross" aria-label="Dismiss" onClick={onSkipTour} size="s" />
+        <EuiButtonIcon
+          data-test-subj="eisPromoCalloutDismissBtn"
+          iconType="cross"
+          aria-label={EIS_PROMO_CALLOUT_DISMISS_ARIA}
+          onClick={onDismissTour}
+          size="s"
+        />
       </div>
       <EuiFlexGroup direction={direction} alignItems="flexStart">
         <EuiImage src={searchRocketIcon} alt={EIS_PROMO_CALLOUT_ICON_ALT} size="original" />

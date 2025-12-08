@@ -27,6 +27,7 @@ import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { NO_FEATURE } from '../utils/default_query';
+import { SeveritySelector } from '../common/severity_selector';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
@@ -179,6 +180,26 @@ export function GeneratedEventPreview({
           label={
             <EuiFormLabel>
               {i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSeverityLabel',
+                { defaultMessage: 'Severity' }
+              )}
+            </EuiFormLabel>
+          }
+        >
+          <SeveritySelector
+            disabled={!isEditing}
+            severityScore={query.severity_score}
+            onChange={(score) => {
+              setQuery({ ...query, severity_score: score });
+              setTouched((prev) => ({ ...prev, severity: true }));
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <EuiFormLabel>
+              {i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldFeatureLabel',
                 { defaultMessage: 'Feature' }
               )}
@@ -196,10 +217,7 @@ export function GeneratedEventPreview({
             onChange={(value) => {
               setQuery({
                 ...query,
-                feature: {
-                  name: value.name,
-                  filter: value.filter,
-                },
+                feature: value,
               });
               setTouched((prev) => ({ ...prev, feature: true }));
             }}
