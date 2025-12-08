@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiButtonProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,7 @@ import React from 'react';
 import { documentationService } from '../../../../services/documentation';
 
 interface EmptyMappingsProps {
-  addFieldButton: React.ComponentType<EuiButtonProps>;
+  addFieldButton: React.ReactNode;
 }
 
 export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({
@@ -49,7 +48,7 @@ export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({
             </EuiText>
           }
           actions={[
-            <AddFieldButtonComponent />,
+            AddFieldButtonComponent,
             <>
               <EuiHorizontalRule />
               <EuiLink
