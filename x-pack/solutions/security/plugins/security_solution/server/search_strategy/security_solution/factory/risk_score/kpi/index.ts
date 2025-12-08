@@ -51,7 +51,7 @@ export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
       riskBuckets.forEach((bucket: AggBucket) => {
         const severity = bucket.key as RiskSeverity;
         const count = getOr(0, 'unique_entries.value', bucket);
-        result[severity] = (result[severity] || 0) + count;
+        result[severity] += count;
       });
     });
 

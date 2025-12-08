@@ -28,7 +28,8 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import type { Criteria, Columns } from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
-import { EntityType, EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
@@ -68,22 +69,8 @@ const createEntityDataProviders = (
     return null;
   }
 
-  // Map entity type to the appropriate field name
-  let fieldName: string;
-  switch (entityType) {
-    case EntityType.user:
-      fieldName = EntityTypeToIdentifierField[EntityType.user];
-      break;
-    case EntityType.host:
-      fieldName = EntityTypeToIdentifierField[EntityType.host];
-      break;
-    case EntityType.service:
-      fieldName = EntityTypeToIdentifierField[EntityType.service];
-      break;
-    default:
-      // For generic entities, use entity.id
-      fieldName = 'entity.id';
-  }
+  // Map entity type to the appropriate field name, fallback to 'entity.id' if not found
+  const fieldName: string = EntityTypeToIdentifierField[entityType] || 'entity.id';
 
   const dataProviders = createDataProviders({
     contextId: THREAT_HUNTING_TABLE_ID,
@@ -126,11 +113,6 @@ const getRiskScoreColors = (
       return {
         background: euiTheme.colors.backgroundLightDanger,
         text: euiTheme.colors.textDanger,
-      };
-    default:
-      return {
-        background: euiTheme.colors.backgroundBaseSubdued,
-        text: euiTheme.colors.textSubdued,
       };
   }
 };
@@ -431,7 +413,7 @@ export const ThreatHuntingEntitiesTable: React.FC = () => {
         }
       }
     },
-    [setSorting, sorting]
+    [sorting]
   );
 
   const searchParams = useMemo(
@@ -467,11 +449,6 @@ export const ThreatHuntingEntitiesTable: React.FC = () => {
   }, [sorting, limit, filter]);
 
   const columns = useThreatHuntingColumns();
-
-  // Force a refetch when "refresh" button is clicked.
-  useEffect(() => {
-    refetch();
-  }, [from, to, refetch]);
 
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.queryError', {

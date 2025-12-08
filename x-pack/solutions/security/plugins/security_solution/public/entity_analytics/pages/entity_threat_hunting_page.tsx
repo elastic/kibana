@@ -51,7 +51,7 @@ export const EntityThreatHuntingPage = () => {
   }
 
   if (showEmptyPrompt) {
-    return <EmptyPrompt onSkip={() => {}} />;
+    return <EmptyPrompt />;
   }
 
   return (

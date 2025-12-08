@@ -91,9 +91,6 @@ const threatHuntingLinks: LinkItem = {
   ),
   path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting', {
-      defaultMessage: 'Entity Threat Hunting',
-    }),
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting.keywords', {
       defaultMessage: 'threat hunting',
     }),
