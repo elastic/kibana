@@ -7,7 +7,7 @@
 
 import { parse } from 'url';
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../ftr_provider_context';
