@@ -132,6 +132,7 @@ export class AlertsClient<
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
+  private ruleRunCount: number = 1;
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -180,7 +181,8 @@ export class AlertsClient<
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
 
-    const { runTimestamp } = opts;
+    const { runTimestamp, ruleRunCount } = opts;
+    this.ruleRunCount = ruleRunCount;
 
     if (runTimestamp) {
       this.runTimestampString = runTimestamp.toISOString();
@@ -723,6 +725,7 @@ export class AlertsClient<
         rule: this.rule,
         timestamp: currentTime,
         status: ALERT_STATUS_ACTIVE,
+        ruleRunCount: this.ruleRunCount,
       });
       activeAlertsToIndex.push(alertData);
 
@@ -746,6 +749,7 @@ export class AlertsClient<
         rule: this.rule,
         timestamp: currentTime,
         status: ALERT_STATUS_RECOVERED,
+        ruleRunCount: this.ruleRunCount,
       });
       activeAlertsToIndex.push(alertData);
       const a = new Alert<LegacyState, LegacyContext>(alert.id);
@@ -848,6 +852,10 @@ export class AlertsClient<
         },
       };
     }
+  }
+
+  public getRuleRunCountForState(): number {
+    return this.ruleRunCount + 1;
   }
 
   private async getMaintenanceWindowScopedQueryAlerts({

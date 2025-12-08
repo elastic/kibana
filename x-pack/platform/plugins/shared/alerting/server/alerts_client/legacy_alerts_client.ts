@@ -318,6 +318,10 @@ export class LegacyAlertsClient<
     return;
   }
 
+  public getRuleRunCountForState() {
+    return 0;
+  }
+
   private removeExpiredMaintenanceWindows({
     processedAlertsActive,
     processedAlertsRecovered,

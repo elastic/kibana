@@ -444,6 +444,7 @@ export class TaskRunner<
         alertInstances: alertsToReturn,
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
+        runCount: alertsClient.getRuleRunCountForState(),
       },
     };
   }

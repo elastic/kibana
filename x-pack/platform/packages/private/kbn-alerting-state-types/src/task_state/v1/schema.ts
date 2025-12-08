@@ -53,4 +53,5 @@ export const versionSchema = schema.object({
   alertRecoveredInstances: schema.maybe(schema.recordOf(schema.string(), rawAlertInstanceSchema)),
   previousStartedAt: schema.maybe(schema.nullable(schema.string())),
   summaryActions: schema.maybe(throttledActionSchema),
+  runCount: schema.maybe(schema.number()),
 });

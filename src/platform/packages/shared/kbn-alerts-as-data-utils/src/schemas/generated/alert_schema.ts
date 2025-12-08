@@ -73,6 +73,7 @@ const AlertRequired = rt.type({
   'rule.id': schemaString,
   'rule.parent_id': schemaString,
   'attrs': schemaUnknown,
+  'run_id': schemaStringOrNumber,
 });
 // prettier-ignore
 const AlertOptional = rt.partial({

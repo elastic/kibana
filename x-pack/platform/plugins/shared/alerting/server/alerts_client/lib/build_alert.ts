@@ -34,6 +34,7 @@ interface BuildAlertOpts<
   rule: AlertRule;
   timestamp: string;
   status: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
+  ruleRunCount: number;
 }
 
 /**
@@ -52,6 +53,7 @@ export const buildAlert = <
   rule,
   timestamp,
   status,
+  ruleRunCount,
 }: BuildAlertOpts<
   AlertData,
   LegacyState,
@@ -66,6 +68,7 @@ export const buildAlert = <
       {
         [ALERT_RULE_UUID]: rule[ALERT_RULE_UUID],
         'rule.parent_id': rule[ALERT_RULE_PARAMETERS].parentId,
+        run_id: ruleRunCount,
       },
       {
         [TIMESTAMP]: timestamp,

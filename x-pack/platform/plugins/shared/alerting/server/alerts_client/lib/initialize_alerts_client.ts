@@ -62,6 +62,7 @@ export const initializeAlertsClient = async <
     state: {
       alertInstances: alertRawInstances = {},
       alertRecoveredInstances: alertRecoveredRawInstances = {},
+      runCount: ruleRunCount = 1,
     },
   } = taskInstance;
 
@@ -128,6 +129,7 @@ export const initializeAlertsClient = async <
     runTimestamp,
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
+    ruleRunCount,
   });
 
   return alertsClient;

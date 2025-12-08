@@ -107,6 +107,7 @@ export interface IAlertsClient<
   > | null;
   determineFlappingAlerts(): void;
   determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
+  getRuleRunCountForState(): number;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -135,6 +136,7 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  ruleRunCount: number;
 }
 
 export interface TrackedAlerts<
