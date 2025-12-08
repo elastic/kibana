@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams, isInheritFailureStore } from '@kbn/streams-schema';
+import { Streams, isInheritFailureStore, parseEsTimeValueInMs } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual, noop } from 'lodash';
 import type {
@@ -208,6 +208,23 @@ export function validateSettings(definition: Streams.ingest.all.Definition, isSe
   Object.keys(definition.ingest.settings).forEach((setting) => {
     if (!serverlessAllowList.includes(setting)) {
       throw new Error(`Setting [${setting}] is not allowed in serverless`);
+    }
+
+    if (setting === 'index.refresh_interval') {
+      const value = definition.ingest.settings[setting]?.value;
+
+      if (value === -1 || value === '-1') {
+        return;
+      }
+
+      if (typeof value === 'string') {
+        const durationMs = parseEsTimeValueInMs(value);
+        if (durationMs !== undefined && durationMs < 5000) {
+          throw new Error(
+            `index setting [index.refresh_interval=${value}] should be either -1 or equal to or greater than 5s.`
+          );
+        }
+      }
     }
   });
 }
