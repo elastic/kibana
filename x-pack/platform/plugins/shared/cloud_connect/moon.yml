@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/features-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
