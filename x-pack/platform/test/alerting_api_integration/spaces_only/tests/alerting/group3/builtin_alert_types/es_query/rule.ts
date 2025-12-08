@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -24,7 +23,6 @@ import {
   getRuleServices,
   RULE_INTERVALS_TO_WRITE,
   RULE_INTERVAL_MILLIS,
-  RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
@@ -47,23 +45,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   describe('testtest rule', () => {
     let endDate: string;
     let connectorId: string;
-    let esTestDataViewDate: DataViewSpec;
-    let esTestDataViewDateEpochMillis: DataViewSpec;
     const objectRemover = new ObjectRemover(supertest);
-
-    before(async () => {
-      esTestDataViewDate = await indexPatterns.create(
-        { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-        { override: true },
-        getUrlPrefix(Spaces.space1.id)
-      );
-
-      esTestDataViewDateEpochMillis = await indexPatterns.create(
-        { title: ES_TEST_INDEX_NAME, timeFieldName: 'date_epoch_millis' },
-        { override: true },
-        getUrlPrefix(Spaces.space1.id)
-      );
-    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -110,13 +92,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           const rule1Id = await createSearchSourceRule(
             {
               name: 'never fire',
               thresholdComparator: '<',
               threshold: [0],
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
           const rule2Id = await createSearchSourceRule(
             {
@@ -124,7 +107,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               thresholdComparator: '>',
               threshold: [0],
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
           return [rule1Id, rule2Id];
         },
@@ -217,6 +200,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           const rule1Id = await createSearchSourceRule(
             {
               name: 'never fire',
@@ -225,7 +209,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               aggType: 'avg',
               aggField: 'testedValue',
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
           const rule2Id = await createSearchSourceRule(
             {
@@ -235,7 +219,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               aggType: 'avg',
               aggField: 'testedValue',
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
           return [rule1Id, rule2Id];
         },
@@ -328,6 +312,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           await createSearchSourceRule(
             {
               name: 'never fire',
@@ -337,7 +322,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               termField: 'group',
               termSize: ES_GROUPS_TO_WRITE,
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
           await createSearchSourceRule(
             {
@@ -348,15 +333,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               termField: 'group',
               termSize: ES_GROUPS_TO_WRITE,
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on grouped hit count < > for ${searchType} search type`, async () => {
-        // this test runs the rules once, injecting data between each run
-        // the always firing rule should fire each time, triggering an index action each time for each group
-        // the never firing rule should not fire or trigger any actions
+        // this test runs the rules once, injecting data before the first run
+        // the always firing rule should fire and trigger an index action for each group
+        // the never firing rule should never fire or trigger any actions
 
         // Run 1:
         // 1 - write source documents, dated now
@@ -419,6 +404,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           await createSearchSourceRule(
             {
               name: 'always fire',
@@ -428,15 +414,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               termField: ['group', 'testedValue'],
               termSize: ES_GROUPS_TO_WRITE,
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on grouped with multi term hit count < > for ${searchType} search type`, async () => {
-        // this test runs the rules once, injecting data between each run
-        // the always firing rule should fire each time, triggering an index action each time for each group
-        // the never firing rule should not fire or trigger any actions
+        // this test runs the rules once, injecting data before the first run
+        // the always firing rule should fire and trigger an index action for each group
+        // the never firing rule should never fire or trigger any actions
 
         // Run 1:
         // 1 - write source documents, dated now
@@ -501,6 +487,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           await createSearchSourceRule(
             {
               name: 'always fire',
@@ -513,15 +500,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               aggType: 'avg',
               aggField: 'testedValue',
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: threshold on grouped agg metric < > for ${searchType} search type`, async () => {
-        // this test runs the rules once, injecting data between each run
-        // the always firing rule should fire each time, triggering an index action each time for each group
-        // the never firing rule should not fire or trigger any actions
+        // this test runs the rules once, injecting data before the first run
+        // the always firing rule should fire and trigger an index action for each group
+        // the never firing rule should never fire or trigger any actions
 
         // Run 1:
         // 1 - write source documents, dated now
@@ -571,13 +558,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date_epoch_millis');
           const rule1Id = await createSearchSourceRule(
             {
               name: 'never fire',
               thresholdComparator: '<',
               threshold: [0],
             },
-            esTestDataViewDateEpochMillis.id
+            esTestDataViewId
           );
           const rule2Id = await createSearchSourceRule(
             {
@@ -585,7 +573,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               thresholdComparator: '>',
               threshold: [0],
             },
-            esTestDataViewDateEpochMillis.id
+            esTestDataViewId
           );
           return [rule1Id, rule2Id];
         },
@@ -677,13 +665,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           await createSearchSourceRule(
             {
               name: 'never fire',
               thresholdComparator: '<',
               threshold: [0],
             },
-            esTestDataViewDate.id,
+            esTestDataViewId,
             `testedValue > ${ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE + 1}`
           );
           await createSearchSourceRule(
@@ -692,18 +681,25 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               thresholdComparator: '>=',
               threshold: [0],
             },
-            esTestDataViewDate.id,
+            esTestDataViewId,
             `testedValue > ${Math.floor((ES_GROUPS_TO_WRITE * RULE_INTERVALS_TO_WRITE) / 2)}`
           );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly with query: threshold on hit count < > for ${searchType}`, async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-        await initData();
+        // this test runs the rules once, injecting data before the first run
+        // the fires once rule should fire and trigger an index action for each group
+        // the never firing rule should never fire or trigger any actions
 
+        // Run 1:
+        // 1 - write source documents, dated now
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output docs to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+        await initData();
         const docs = await waitForDocs(1);
+
         for (const doc of docs) {
           const { previousTimestamp, hits } = doc._source;
           const { name, title, message } = doc._source.params;
@@ -711,7 +707,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('fires once');
           expect(title).to.be(`rule 'fires once' matched query`);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than or equal to 0./;
+            /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than or equal to 0./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
           expect(previousTimestamp).to.be.empty();
@@ -733,21 +729,23 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           await createSearchSourceRule(
             {
               name: 'always fire',
               thresholdComparator: '<',
               threshold: [1],
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: no matches for ${searchType} search type`, async () => {
+        // purposely skip creating ES documents so the index is empty
         await initData();
-
         const docs = await waitForDocs(1);
+
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -756,7 +754,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when less than 1./;
+            /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when less than 1./;
           expect(message).to.match(messagePattern);
           expect(hits).to.be.empty();
 
@@ -777,37 +775,44 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         async () => {
           // This rule should be active initially when the number of documents is below the threshold
           // and then recover when we add more documents.
-          await createDSLRule({
+          return await createDSLRule({
             name: 'fire then recovers',
             thresholdComparator: '<',
             threshold: [1],
             notifyWhen: 'onActionGroupChange',
-            timeWindowSize: RULE_INTERVAL_SECONDS,
           });
         },
       ] as const,
       [
         'searchSource',
         async () => {
+          const esTestDataViewId = await createIndexPattern('date');
           // This rule should be active initially when the number of documents is below the threshold
           // and then recover when we add more documents.
-          await createSearchSourceRule(
+          return await createSearchSourceRule(
             {
               name: 'fire then recovers',
               thresholdComparator: '<',
               threshold: [1],
               notifyWhen: 'onActionGroupChange',
-              timeWindowSize: RULE_INTERVAL_SECONDS,
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly and populates recovery context for ${searchType} search type`, async () => {
-        await initData();
+        // this test runs the rules twice, injecting data after the first run
+        // the rule should fire the first run when there is no data in the index and
+        // then recover the second run after data is injected
 
+        // Run 1:
+        // 1 - skip writing source documents
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
+        const ruleId = await initData();
         let docs = await waitForDocs(1);
+
         const activeDoc = docs[0];
         const {
           name: activeName,
@@ -820,11 +825,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
         expect(activeValue).to.be('0');
         expect(activeMessage).to.match(
-          /Document count is \d+.?\d* in the last 6s in kibana-alerting-test-data (?:index|data view). Alert when less than 1./
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when less than 1./
         );
 
+        // Run 2:
+        // 1 - write source documents, dated now
+        // 2 - manually run the rule with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
         await createEsDocumentsInGroups(1, endDate);
+        await runSoon(ruleId);
         docs = await waitForDocs(2);
+
         const recoveredDoc = docs[1];
         const {
           name: recoveredName,
@@ -835,7 +846,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(recoveredName).to.be('fire then recovers');
         expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
         expect(recoveredMessage).to.match(
-          /Document count is \d+.?\d* in the last 6s in kibana-alerting-test-data (?:index|data view). Alert when less than 1./
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when less than 1./
         );
       })
     );
@@ -844,58 +855,85 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       [
         'esQuery',
         async () => {
-          await createDSLRule({
+          const rule1Id = await createDSLRule({
             name: 'never fire',
             thresholdComparator: '<',
             threshold: [0],
             indexName: ES_TEST_DATA_STREAM_NAME,
             timeField: '@timestamp',
           });
-          await createDSLRule({
+          const rule2Id = await createDSLRule({
             name: 'always fire',
             thresholdComparator: '>',
-            threshold: [-1],
+            threshold: [0],
             indexName: ES_TEST_DATA_STREAM_NAME,
             timeField: '@timestamp',
           });
+          return [rule1Id, rule2Id];
         },
       ] as const,
       [
         'searchSource',
         async () => {
-          await createSearchSourceRule(
+          const esTestDataViewId = await createIndexPattern('date', ES_TEST_DATA_STREAM_NAME);
+          const rule1Id = await createSearchSourceRule(
             {
               name: 'never fire',
               thresholdComparator: '<',
               threshold: [0],
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
-          await createSearchSourceRule(
+          const rule2Id = await createSearchSourceRule(
             {
               name: 'always fire',
               thresholdComparator: '>',
               threshold: [0],
             },
-            esTestDataViewDate.id
+            esTestDataViewId
           );
+          return [rule1Id, rule2Id];
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
-      it(`runs correctly over a data stream: threshold on hit count < > for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
+      it(`runs correctly over a data stream: threshold on ungrouped hit count < > for ${searchType} search type`, async () => {
+        // This runs the same test as above but specifically targets a data stream index
+
+        // this test runs the rules twice, injecting data between each run
+        // the always firing rule should fire each time, triggering an index action each time
+        // the never firing rule should not fire or trigger any actions
+
+        // Run 1:
+        // 1 - write source documents, dated 30 minutes in the past
+        // 2 - create the rules - they run one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
         await createEsDocumentsInGroups(
           ES_GROUPS_TO_WRITE,
-          endDate,
+          getEndDate(-(30 * 60 * 1000)),
           esTestIndexToolDataStream,
           ES_TEST_DATA_STREAM_NAME
         );
-        await initData();
+        const [neverFireRuleId, alwaysFireRuleId] = await initData();
+        let docs = await waitForDocs(1);
+
+        // Run 2:
+        // 1 - write source documents, dated now
+        // 2 - manually run the rules with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(
+          ES_GROUPS_TO_WRITE,
+          new Date(Date.now()).toISOString(),
+          esTestIndexToolDataStream,
+          ES_TEST_DATA_STREAM_NAME
+        );
+        await Promise.all([runSoon(neverFireRuleId), runSoon(alwaysFireRuleId)]);
+
+        // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
+        docs = await waitForDocs(2);
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in test-data-stream (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 1h in test-data-stream (?:index|data view). Alert when greater than 0./;
 
-        const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -921,7 +959,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
         expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
         expect(alertDoc['kibana.alert.evaluation.conditions']).to.be(
-          'Number of matching documents is greater than -1'
+          'Number of matching documents is greater than 0'
         );
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
@@ -934,21 +972,32 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     describe('excludeHitsFromPreviousRun', () => {
       it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is true', async () => {
-        endDate = new Date().toISOString();
+        // this test runs the rules twice, injecting data before the first run
+        // the rule should fire the first run with all the documents and then exclude those hits
+        // on the second run
 
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-
-        await createDSLRule({
+        // Run 1:
+        // 1 - write source documents, dated now
+        // 2 - create the rule - it runs one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, new Date(Date.now()).toISOString());
+        const ruleId = await createDSLRule({
           name: 'always fire',
           thresholdComparator: '>',
           threshold: [0],
-          timeWindowSize: 300,
           excludeHitsFromPreviousRun: true,
         });
+        let docs = await waitForDocs(1);
 
-        const docs = await waitForDocs(2);
+        // Run 2:
+        // 1 - don't run any more source docs
+        // 2 - manually run the rules with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await runSoon(ruleId);
+        docs = await waitForDocs(2);
+
         const messagePattern =
-          /Document count is \d+.?\d* in the last 300s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
@@ -957,20 +1006,31 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is undefined', async () => {
-        endDate = new Date().toISOString();
+        // this test runs the rules twice, injecting data before the first run
+        // the rule should fire the first run with all the documents and then exclude those hits
+        // on the second run
 
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-
-        await createDSLRule({
+        // Run 1:
+        // 1 - write source documents, dated now
+        // 2 - create the rule - it runs one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, new Date(Date.now()).toISOString());
+        const ruleId = await createDSLRule({
           name: 'always fire',
           thresholdComparator: '>',
           threshold: [0],
-          timeWindowSize: 300,
         });
+        let docs = await waitForDocs(1);
 
-        const docs = await waitForDocs(2);
+        // Run 2:
+        // 1 - don't run any more source docs
+        // 2 - manually run the rules with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await runSoon(ruleId);
+        docs = await waitForDocs(2);
+
         const messagePattern =
-          /Document count is \d+.?\d* in the last 300s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
@@ -979,21 +1039,32 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       it('does not exclude hits from the previous rule run when excludeHitsFromPreviousRun is false', async () => {
-        endDate = new Date().toISOString();
+        // this test runs the rules twice, injecting data before the first run
+        // the rule should fire the first run with all the documents and then exclude those hits
+        // on the second run
 
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-
-        await createDSLRule({
+        // Run 1:
+        // 1 - write source documents, dated now
+        // 2 - create the rule - it runs one time on creation
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, new Date(Date.now()).toISOString());
+        const ruleId = await createDSLRule({
           name: 'always fire',
           thresholdComparator: '>',
           threshold: [0],
-          timeWindowSize: 300,
           excludeHitsFromPreviousRun: false,
         });
+        let docs = await waitForDocs(1);
 
-        const docs = await waitForDocs(2);
+        // Run 2:
+        // 1 - don't run any more source docs
+        // 2 - manually run the rules with runSoon
+        // 3 - wait for output doc to be written, indicating rule is done running
+        await runSoon(ruleId);
+        docs = await waitForDocs(2);
+
         const messagePattern =
-          /Document count is \d+.?\d* in the last 300s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
@@ -1004,10 +1075,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     describe('aggType and groupBy', () => {
       it('sets aggType: "count" and groupBy: "all" when they are undefined', async () => {
-        endDate = new Date().toISOString();
-
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, new Date(Date.now()).toISOString());
         await createDSLRule({
           name: 'always fire',
           thresholdComparator: '>',
@@ -1016,15 +1084,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           groupBy: undefined,
         });
 
-        const docs = await waitForDocs(2);
+        const docs = await waitForDocs(1);
 
         expect(docs[0]._source.hits.length).greaterThan(0);
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.params.message).to.match(messagePattern);
-
-        expect(docs[1]._source.hits.length).to.be(0);
-        expect(docs[1]._source.params.message).to.match(messagePattern);
       });
     });
 
@@ -1164,15 +1229,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     }
 
     async function createDSLRule(params: CreateRuleParams): Promise<string> {
+      const esQuery = params.esQuery ?? `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`;
       const ruleParams = {
         index: [params.indexName || ES_TEST_INDEX_NAME],
         timeField: params.timeField || 'date',
-        esQuery: params.esQuery,
+        esQuery,
       };
-
-      if (params.esQuery === undefined) {
-        params.esQuery = `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`;
-      }
 
       return await createRule(params, ruleParams);
     }
@@ -1193,7 +1255,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         },
       };
 
-      return await createRule(params, ruleParams);
+      return await createRule({ ...params, searchType: 'searchSource' }, ruleParams);
+    }
+
+    async function createIndexPattern(timeFieldName: string, title: string = ES_TEST_INDEX_NAME) {
+      const esTestDataView = await indexPatterns.create(
+        { title, timeFieldName },
+        { override: true },
+        getUrlPrefix(Spaces.space1.id)
+      );
+      return esTestDataView.id;
     }
   });
 }
