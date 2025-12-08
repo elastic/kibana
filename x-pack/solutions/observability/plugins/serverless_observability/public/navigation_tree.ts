@@ -193,17 +193,16 @@ export const createNavigationTree = ({
           },
         ],
       },
-      ...(showAiAssistant
-        ? [
-            {
-              link: 'observabilityAIAssistant' as const,
-              title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
-                defaultMessage: 'AI Assistant',
-              }),
-              icon: 'sparkles',
-            },
-          ]
-        : []),
+      ...filterForFeatureAvailability(
+        {
+          link: 'observabilityAIAssistant' as const,
+          title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+            defaultMessage: 'AI Assistant',
+          }),
+          icon: 'sparkles',
+        },
+        showAiAssistant
+      ),
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',
