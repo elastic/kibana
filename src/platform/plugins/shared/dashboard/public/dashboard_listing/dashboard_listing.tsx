@@ -9,6 +9,8 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -34,6 +36,16 @@ export const DashboardListing = ({
   });
 
   const { activeTab } = useParams<{ activeTab?: string }>();
+  const { euiTheme } = useEuiTheme();
+
+  const dashboardListingStyles = css`
+    .visListingTable__typeImage,
+    .visListingTable__typeIcon {
+      margin-right: ${euiTheme.size.s};
+      position: relative;
+      top: -1px;
+    }
+  `;
 
   const tabs = useMemo(
     () =>
@@ -61,13 +73,15 @@ export const DashboardListing = ({
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
         {children}
-        <TabbedTableListView
-          headingId="dashboardListingHeading"
-          title="Dashboards"
-          tabs={tabs}
-          activeTabId={activeTab || 'dashboards'}
-          changeActiveTab={changeActiveTab}
-        />
+        <div css={dashboardListingStyles}>
+          <TabbedTableListView
+            headingId="dashboardListingHeading"
+            title="Dashboards"
+            tabs={tabs}
+            activeTabId={activeTab || 'dashboards'}
+            changeActiveTab={changeActiveTab}
+          />
+        </div>
       </QueryClientProvider>
     </I18nProvider>
   );

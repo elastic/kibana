@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
@@ -21,6 +22,7 @@ import {
   toTableListViewSavedObject,
   showNewVisModal,
   getNoItemsMessage,
+  getCustomColumn,
 } from '@kbn/visualizations-plugin/public';
 import type { EventAnnotationGroupContent } from '@kbn/event-annotation-common';
 
@@ -49,7 +51,7 @@ import {
 } from '../_dashboard_listing_strings';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
-import type { DashboardSavedObjectUserContent } from '../types';
+import type { DashboardSavedObjectUserContent, DashboardListingUserContent } from '../types';
 import {
   checkForDuplicateDashboardTitle,
   dashboardClient,
@@ -63,7 +65,7 @@ const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 type DashboardListingViewTableProps = Omit<
-  TableListViewTableProps<DashboardSavedObjectUserContent>,
+  TableListViewTableProps<DashboardListingUserContent>,
   'tableCaption'
 > & { title: string };
 
@@ -257,7 +259,15 @@ export const useDashboardListingTable = ({
     ) => {
       const searchStartTime = window.performance.now();
 
-      // Handle different content types
+      const reportSearchDuration = (savedObjectType: string) => {
+        const searchDuration = window.performance.now() - searchStartTime;
+        reportPerformanceMetricEvent(coreServices.analytics, {
+          eventName: SAVED_OBJECT_LOADED_TIME,
+          duration: searchDuration,
+          meta: { saved_object_type: savedObjectType },
+        });
+      };
+
       if (tabId === 'visualizations') {
         const response = await findVisualizationListItems(
           visualizationsService,
@@ -267,35 +277,18 @@ export const useDashboardListingTable = ({
           referencesToExclude
         );
 
-        const searchEndTime = window.performance.now();
-        const searchDuration = searchEndTime - searchStartTime;
-        reportPerformanceMetricEvent(coreServices.analytics, {
-          eventName: SAVED_OBJECT_LOADED_TIME,
-          duration: searchDuration,
-          meta: {
-            saved_object_type: 'visualization',
-          },
-        });
+        reportSearchDuration('visualization');
 
         const transformedHits = response.hits.map((hit: Record<string, unknown>) => {
           const visItem = toTableListViewSavedObject(hit);
 
-          // Map to our Dashboard listing type
           return {
+            ...visItem,
             type: visItem.savedObjectType || visItem.type,
-            id: visItem.id,
-            updatedAt: visItem.updatedAt,
-            createdAt: visItem.createdAt,
-            createdBy: visItem.createdBy,
-            updatedBy: visItem.updatedBy,
-            references: visItem.references ?? [],
-            managed: visItem.managed,
-            editor: visItem.editor, // Store editor info for proper navigation (Maps, Lens, etc.)
             attributes: {
               title: visItem.attributes.title,
               description: visItem.attributes.description,
               timeRestore: false, // visualizations don't have timeRestore
-              visType: visItem.typeTitle,
               readOnly: visItem.attributes.readOnly,
             },
           };
@@ -312,94 +305,67 @@ export const useDashboardListingTable = ({
           return { total: 0, hits: [] };
         }
 
-        try {
-          // Fetch annotation groups using the event annotation service
-          const annotationService = await eventAnnotationService.getService();
+        const annotationService = await eventAnnotationService.getService();
+        const response = await annotationService.findAnnotationGroupContent(
+          searchTerm,
+          listingLimit,
+          references?.map((r) => r.id),
+          referencesToExclude?.map((r) => r.id)
+        );
 
-          const response = await annotationService.findAnnotationGroupContent(
-            searchTerm,
-            listingLimit,
-            references?.map((r) => r.id),
-            referencesToExclude?.map((r) => r.id)
-          );
+        reportSearchDuration('event-annotation-group');
 
-          const searchEndTime = window.performance.now();
-          const searchDuration = searchEndTime - searchStartTime;
-          reportPerformanceMetricEvent(coreServices.analytics, {
-            eventName: SAVED_OBJECT_LOADED_TIME,
-            duration: searchDuration,
-            meta: {
-              saved_object_type: 'event-annotation-group',
-            },
-          });
+        const mappedHits = response.hits.map((hit: EventAnnotationGroupContent) => ({
+          ...hit,
+          type: 'event-annotation-group',
+          attributes: {
+            title: hit.attributes.title,
+            description: hit.attributes.description,
+            timeRestore: false,
+            indexPatternId: hit.attributes.indexPatternId,
+            dataViewSpec: hit.attributes.dataViewSpec,
+          },
+        }));
 
-          const mappedHits = response.hits.map((hit: EventAnnotationGroupContent) => {
-            return {
-              ...hit,
-              type: 'event-annotation-group', // Explicitly set type for client-side filtering
-              attributes: {
-                title: hit.attributes.title,
-                description: hit.attributes.description,
-                timeRestore: false, // Annotation groups don't have timeRestore
-                indexPatternId: hit.attributes.indexPatternId,
-                dataViewSpec: hit.attributes.dataViewSpec,
-              },
-            };
-          });
-
-          return {
-            total: response.total,
-            hits: mappedHits,
-          };
-        } catch (error) {
-          throw error;
-        }
+        return {
+          total: response.total,
+          hits: mappedHits,
+        };
       }
 
       // Default: fetch dashboards
-      return findService
-        .search({
-          search: searchTerm,
-          per_page: listingLimit,
-          tags: {
-            included: (references ?? []).map(({ id }) => id),
-            excluded: (referencesToExclude ?? []).map(({ id }) => id),
-          },
-        })
-        .then(({ total, dashboards }) => {
-          const searchEndTime = window.performance.now();
-          const searchDuration = searchEndTime - searchStartTime;
-          reportPerformanceMetricEvent(coreServices.analytics, {
-            eventName: SAVED_OBJECT_LOADED_TIME,
-            duration: searchDuration,
-            meta: {
-              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+      const { total, dashboards } = await findService.search({
+        search: searchTerm,
+        per_page: listingLimit,
+        tags: {
+          included: (references ?? []).map(({ id }) => id),
+          excluded: (referencesToExclude ?? []).map(({ id }) => id),
+        },
+      });
+
+      reportSearchDuration(DASHBOARD_SAVED_OBJECT_TYPE);
+
+      const tagApi = savedObjectsTaggingService?.getTaggingApi();
+      const hits = dashboards.map(
+        ({ id, data, meta }) =>
+          ({
+            type: 'dashboard',
+            id,
+            updatedAt: meta.updatedAt!,
+            createdAt: meta.createdAt,
+            createdBy: meta.createdBy,
+            updatedBy: meta.updatedBy,
+            references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
+            managed: meta.managed,
+            attributes: {
+              title: data.title,
+              description: data.description,
+              timeRestore: Boolean(data.timeRange),
             },
-          });
-          const tagApi = savedObjectsTaggingService?.getTaggingApi();
-          const hits = dashboards.map(
-            ({ id, data, meta }) =>
-              ({
-                type: 'dashboard',
-                id,
-                updatedAt: meta.updatedAt!,
-                createdAt: meta.createdAt,
-                createdBy: meta.createdBy,
-                updatedBy: meta.updatedBy,
-                references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
-                managed: meta.managed,
-                attributes: {
-                  title: data.title,
-                  description: data.description,
-                  timeRestore: Boolean(data.timeRange),
-                },
-              } as DashboardSavedObjectUserContent)
-          );
-          return {
-            total,
-            hits,
-          };
-        });
+          } as DashboardSavedObjectUserContent)
+      );
+
+      return { total, hits };
     },
     [listingLimit]
   );
@@ -632,14 +598,19 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
       createdByEnabled: true,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
+      customTableColumn:
+        contentTypeFilter === 'visualizations'
+          ? (getCustomColumn() as EuiBasicTableColumn<DashboardListingUserContent>)
+          : undefined,
     };
   }, [
     contentEditorValidators,
+    contentTypeFilter,
     createItem,
     dashboardListingId,
     deleteItems,
     editItem,
-    noItemsMessage,
+    emptyPrompt,
     entityName,
     entityNamePlural,
     wrappedFindItems,

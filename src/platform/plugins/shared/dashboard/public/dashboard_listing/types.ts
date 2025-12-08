@@ -40,3 +40,19 @@ export interface DashboardSavedObjectUserContent extends UserContentCommonSchema
     dataViewSpec?: { id?: string; name?: string }; // For annotation groups - ad-hoc data view (optional)
   };
 }
+
+// Extended type for visualization items in dashboard listing (includes VisualizationListItem fields)
+export interface DashboardVisualizationUserContent extends DashboardSavedObjectUserContent {
+  icon: string;
+  savedObjectType: string;
+  title: string;
+  typeTitle: string;
+  image?: string;
+  stage?: 'experimental' | 'beta' | 'production';
+  error?: string;
+}
+
+// Union type for items that can be either dashboards, visualizations, or annotation groups
+export type DashboardListingUserContent =
+  | DashboardSavedObjectUserContent
+  | DashboardVisualizationUserContent;
