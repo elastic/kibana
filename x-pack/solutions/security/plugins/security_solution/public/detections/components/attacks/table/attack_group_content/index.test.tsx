@@ -9,7 +9,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
-import { AttackGroupContent, ATTACK_DESCRIPTION_TEST_ID, ATTACK_TITLE_TEST_ID } from '.';
+import {
+  AttackGroupContent,
+  ATTACK_DESCRIPTION_TEST_ID_SUFFIX,
+  ATTACK_TITLE_TEST_ID_SUFFIX,
+} from '.';
 
 jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
@@ -29,11 +33,11 @@ describe('AttackGroupContent', () => {
     );
 
     expect(getByTestId('test_id-group-renderer')).toBeInTheDocument();
-    expect(getByTestId(ATTACK_TITLE_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Unix1 Malware and Credential Theft'
     );
-    expect(getByTestId(ATTACK_DESCRIPTION_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ATTACK_DESCRIPTION_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toBeInTheDocument();
+    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Malware and credential theft detected on {{ host.name SRVMAC08 }}.'
     );
   });
@@ -44,7 +48,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent attack={attackWithEmptyTitle} dataTestSubj="test_id" />
     );
 
-    expect(getByTestId(ATTACK_TITLE_TEST_ID)).toBeEmptyDOMElement();
+    expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeEmptyDOMElement();
   });
 
   it('should render an empty state when the attack summary is empty', () => {
@@ -53,8 +57,10 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent attack={attackWithEmptySummary} dataTestSubj="test_id" />
     );
 
-    expect(getByTestId(ATTACK_DESCRIPTION_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ATTACK_DESCRIPTION_TEST_ID).firstChild).toBeEmptyDOMElement();
+    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toBeInTheDocument();
+    expect(
+      getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`).firstChild
+    ).toBeEmptyDOMElement();
   });
 
   it('should show anonymized values when showAnonymized is true', () => {
@@ -62,10 +68,10 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized />
     );
 
-    expect(getByTestId(ATTACK_TITLE_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Unix1 Malware and Credential Theft'
     );
-    expect(getByTestId(ATTACK_DESCRIPTION_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Malware and credential theft detected on {{ host.name 3d241119-f77a-454e-8ee3-d36e05a8714f }}.'
     );
   });
@@ -75,10 +81,10 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized={false} />
     );
 
-    expect(getByTestId(ATTACK_TITLE_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Unix1 Malware and Credential Theft'
     );
-    expect(getByTestId(ATTACK_DESCRIPTION_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Malware and credential theft detected on {{ host.name SRVMAC08 }}.'
     );
   });

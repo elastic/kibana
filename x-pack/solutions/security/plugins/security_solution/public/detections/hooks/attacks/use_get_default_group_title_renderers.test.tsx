@@ -13,7 +13,7 @@ import { ALERT_ATTACK_IDS } from '../../../../common/field_maps/field_names';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { getMockAttackDiscoveryAlerts } from '../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import { useGetDefaultGroupTitleRenderers } from './use_get_default_group_title_renderers';
-import { ATTACK_TITLE_TEST_ID } from '../../components/attacks/table/attack_group_content';
+import { ATTACK_TITLE_TEST_ID_SUFFIX } from '../../components/attacks/table/attack_group_content';
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
@@ -54,7 +54,9 @@ describe('useGetDefaultGroupTitleRenderers', () => {
     const rendered = renderer(ALERT_ATTACK_IDS, bucket);
 
     const { getByTestId } = render(rendered as React.ReactElement);
-    expect(getByTestId(ATTACK_TITLE_TEST_ID)).toHaveTextContent(mockAttacks[0].title);
+    expect(getByTestId(`attack${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
+      mockAttacks[0].title
+    );
   });
 
   it('should return undefined if bucket key is an array with more than one element', () => {
@@ -123,6 +125,6 @@ describe('useGetDefaultGroupTitleRenderers', () => {
     const rendered = renderer(ALERT_ATTACK_IDS, bucket);
 
     const { queryByTestId } = render(rendered as React.ReactElement);
-    expect(queryByTestId(ATTACK_TITLE_TEST_ID)).toBeNull();
+    expect(queryByTestId(`attack${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeNull();
   });
 });

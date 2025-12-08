@@ -14,8 +14,8 @@ import {
 
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 
-export const ATTACK_TITLE_TEST_ID = 'attack-title' as const;
-export const ATTACK_DESCRIPTION_TEST_ID = 'attack-description' as const;
+export const ATTACK_TITLE_TEST_ID_SUFFIX = '-title' as const;
+export const ATTACK_DESCRIPTION_TEST_ID_SUFFIX = '-description' as const;
 
 export const AttackGroupContent = React.memo<{
   attack: AttackDiscoveryAlert;
@@ -51,11 +51,14 @@ export const AttackGroupContent = React.memo<{
       gutterSize="s"
     >
       <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj={ATTACK_TITLE_TEST_ID} size="xs">
+        <EuiTitle data-test-subj={`${dataTestSubj}${ATTACK_TITLE_TEST_ID_SUFFIX}`} size="xs">
           <h5>{title}</h5>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj={ATTACK_DESCRIPTION_TEST_ID}>
+      <EuiFlexItem
+        grow={false}
+        data-test-subj={`${dataTestSubj}${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`}
+      >
         <AttackDiscoveryMarkdownFormatter disableActions={true} markdown={summary} />
       </EuiFlexItem>
     </EuiFlexGroup>
