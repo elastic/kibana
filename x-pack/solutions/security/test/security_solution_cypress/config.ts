@@ -40,7 +40,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
         '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
-        '--xpack.alerting.gapAutoFillScheduler.enabled=true',
         // Without below line, default interval for rules is 1m
         // See https://github.com/elastic/kibana/pull/125396 for details
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
@@ -58,7 +57,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'bulkEditAlertSuppressionEnabled',
           'doesNotMatchForIndicatorMatchRuleEnabled',
-          'gapAutoFillSchedulerEnabled',
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',

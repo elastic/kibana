@@ -19,21 +19,37 @@ import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
 
-describe('Rule gaps auto fill status - Basic license', { tags: ['@ess'] }, () => {
-  beforeEach(() => {
-    login();
-    deleteAlertsAndRules();
-    deleteGapAutoFillScheduler();
-    startBasicLicense();
-    createRule(
-      getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
-    );
-  });
+describe(
+  'Rule gaps auto fill status - Basic license',
+  {
+    tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          '--xpack.alerting.gapAutoFillScheduler.enabled=true',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'gapAutoFillSchedulerEnabled',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      deleteAlertsAndRules();
+      deleteGapAutoFillScheduler();
+      startBasicLicense();
+      createRule(
+        getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
+      );
+    });
 
-  it('hides the badge for basic licenses', () => {
-    visitRulesManagementTable();
-    cy.get(RULES_MONITORING_TAB).click();
-    cy.get(RULE_GAPS_OVERVIEW_PANEL).should('exist');
-    cy.get(GAP_AUTO_FILL_STATUS_BADGE).should('not.exist');
-  });
-});
+    it('hides the badge for basic licenses', () => {
+      visitRulesManagementTable();
+      cy.get(RULES_MONITORING_TAB).click();
+      cy.get(RULE_GAPS_OVERVIEW_PANEL).should('exist');
+      cy.get(GAP_AUTO_FILL_STATUS_BADGE).should('not.exist');
+    });
+  }
+);

@@ -72,118 +72,134 @@ const ensureAutoGapFillEnabledViaUi = () => {
     });
 };
 
-describe('Rule gaps auto fill status', { tags: ['@ess'] }, () => {
-  describe('Platinum user flows', () => {
-    beforeEach(() => {
-      login();
-      deleteAlertsAndRules();
-      deleteGapAutoFillScheduler();
-      createRule(
-        getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
-      );
-    });
+describe(
+  'Rule gaps auto fill status',
+  {
+    tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          '--xpack.alerting.gapAutoFillScheduler.enabled=true',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'gapAutoFillSchedulerEnabled',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    describe('Platinum user flows', () => {
+      beforeEach(() => {
+        login();
+        deleteAlertsAndRules();
+        deleteGapAutoFillScheduler();
+        createRule(
+          getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
+        );
+      });
 
-    afterEach(() => {
-      deleteGapAutoFillScheduler();
-    });
+      afterEach(() => {
+        deleteGapAutoFillScheduler();
+      });
 
-    it('Enable/disable auto gap fill', () => {
-      ensureAutoGapFillEnabledViaUi();
+      it('Enable/disable auto gap fill', () => {
+        ensureAutoGapFillEnabledViaUi();
 
-      openRuleSettingsModalViaBadge();
+        openRuleSettingsModalViaBadge();
 
-      cy.get(RULE_SETTINGS_MODAL).should('exist');
-      cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('have.attr', 'aria-checked', 'true').click();
-      cy.get(RULE_SETTINGS_SAVE_BUTTON).should('not.be.disabled').click();
-      cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
-      closeRuleSettingsModal();
+        cy.get(RULE_SETTINGS_MODAL).should('exist');
+        cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('have.attr', 'aria-checked', 'true').click();
+        cy.get(RULE_SETTINGS_SAVE_BUTTON).should('not.be.disabled').click();
+        cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
+        closeRuleSettingsModal();
 
-      cy.waitUntil(() =>
-        getGapAutoFillSchedulerApi().then(
-          (response) => response.status === 200 && response.body.enabled === false
-        )
-      );
-    });
+        cy.waitUntil(() =>
+          getGapAutoFillSchedulerApi().then(
+            (response) => response.status === 200 && response.body.enabled === false
+          )
+        );
+      });
 
-    it('View gap fill scheduler logs and filter by status', () => {
-      ensureAutoGapFillEnabledViaUi();
+      it('View gap fill scheduler logs and filter by status', () => {
+        ensureAutoGapFillEnabledViaUi();
 
-      openRuleSettingsModalViaBadge();
-      cy.get(RULE_SETTINGS_MODAL).should('exist');
+        openRuleSettingsModalViaBadge();
+        cy.get(RULE_SETTINGS_MODAL).should('exist');
 
-      // Click on the logs link to open the flyout
-      cy.get(GAP_FILL_SCHEDULER_LOGS_LINK).click();
-      cy.get(GAP_AUTO_FILL_LOGS_FLYOUT).should('exist');
+        // Click on the logs link to open the flyout
+        cy.get(GAP_FILL_SCHEDULER_LOGS_LINK).click();
+        cy.get(GAP_AUTO_FILL_LOGS_FLYOUT).should('exist');
 
-      // Wait for the table to load
-      cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('be.visible');
-
-      // By default, filter is set to success/error
-      // Check table is displayed
-      cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('exist');
-
-      // Open the status filter popover
-      getGapAutoFillLogsTableRows().then(() => {
-        cy.get(GAP_AUTO_FILL_LOGS_STATUS_FILTER_POPOVER_BUTTON).click();
-
-        // Wait for the popover to be visible and interact with selectable items
-        cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]').should('be.visible');
-
-        // Find and click on "Success" to uncheck it (it's checked by default)
-        cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
-          .contains('Success')
-          .click();
-
-        // Find and click on "Error" to uncheck it (it's checked by default)
-        cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
-          .contains('Error')
-          .click();
-
-        // Find and click on "No gaps" to check it
-        cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
-          .contains('No gaps')
-          .click();
-
-        // Close the popover by clicking outside
-        cy.get('body').click(0, 0);
-
-        // Verify the filter was applied - the table should update
+        // Wait for the table to load
         cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('be.visible');
 
-        // Verify that after filtering, rows have the expected status in the status column
-        getGapAutoFillLogsTableRows()
-          .should('exist')
-          .each(($row) => {
-            cy.wrap($row).find('td').eq(1).contains('No gaps');
-          });
+        // By default, filter is set to success/error
+        // Check table is displayed
+        cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('exist');
+
+        // Open the status filter popover
+        getGapAutoFillLogsTableRows().then(() => {
+          cy.get(GAP_AUTO_FILL_LOGS_STATUS_FILTER_POPOVER_BUTTON).click();
+
+          // Wait for the popover to be visible and interact with selectable items
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]').should('be.visible');
+
+          // Find and click on "Success" to uncheck it (it's checked by default)
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
+            .contains('Success')
+            .click();
+
+          // Find and click on "Error" to uncheck it (it's checked by default)
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
+            .contains('Error')
+            .click();
+
+          // Find and click on "No gaps" to check it
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
+            .contains('No gaps')
+            .click();
+
+          // Close the popover by clicking outside
+          cy.get('body').click(0, 0);
+
+          // Verify the filter was applied - the table should update
+          cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('be.visible');
+
+          // Verify that after filtering, rows have the expected status in the status column
+          getGapAutoFillLogsTableRows()
+            .should('exist')
+            .each(($row) => {
+              cy.wrap($row).find('td').eq(1).contains('No gaps');
+            });
+        });
       });
     });
-  });
 
-  describe('Read-only user', () => {
-    beforeEach(() => {
-      deleteAlertsAndRules();
-      deleteGapAutoFillScheduler();
-      createRule(
-        getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
-      );
-      login();
-      ensureAutoGapFillEnabledViaUi();
-      login(ROLES.t1_analyst);
+    describe('Read-only user', () => {
+      beforeEach(() => {
+        deleteAlertsAndRules();
+        deleteGapAutoFillScheduler();
+        createRule(
+          getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
+        );
+        login();
+        ensureAutoGapFillEnabledViaUi();
+        login(ROLES.t1_analyst);
+      });
+
+      afterEach(() => {
+        deleteGapAutoFillScheduler();
+      });
+
+      it('shows the modal but disables edits for users without CRUD permissions', () => {
+        visitRulesManagementTable();
+        cy.get(RULES_MONITORING_TAB).click();
+
+        cy.get(GAP_AUTO_FILL_STATUS_BADGE).click();
+        cy.get(RULE_SETTINGS_MODAL).should('exist');
+        cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('be.disabled');
+        cy.get(RULE_SETTINGS_SAVE_BUTTON).should('be.disabled');
+      });
     });
-
-    afterEach(() => {
-      deleteGapAutoFillScheduler();
-    });
-
-    it('shows the modal but disables edits for users without CRUD permissions', () => {
-      visitRulesManagementTable();
-      cy.get(RULES_MONITORING_TAB).click();
-
-      cy.get(GAP_AUTO_FILL_STATUS_BADGE).click();
-      cy.get(RULE_SETTINGS_MODAL).should('exist');
-      cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('be.disabled');
-      cy.get(RULE_SETTINGS_SAVE_BUTTON).should('be.disabled');
-    });
-  });
-});
+  }
+);
