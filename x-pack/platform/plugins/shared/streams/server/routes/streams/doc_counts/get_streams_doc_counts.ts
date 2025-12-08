@@ -84,7 +84,7 @@ export async function getDocCountsForStreams(options: {
     for (let i = 0; i < allBackingIndices.length; i += chunkSize) {
       const indexChunk = allBackingIndices.slice(i, i + chunkSize);
 
-      const statsResponse = await esClient.indices.stats({
+      const statsResponse = await (esClientAsSecondaryAuthUser ?? esClient).indices.stats({
         index: indexChunk,
         metric: ['docs'],
       });

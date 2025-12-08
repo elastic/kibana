@@ -56,12 +56,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: { path: { name: 'logs' } },
         });
 
+        const { updated_at: _processingUpdatedAt, ...processingWithoutMeta } =
+          (rootStream.body as any)?.stream?.ingest?.processing ?? {};
+
         await putStream(apiClient, 'logs', {
           ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               ...(rootStream.body as any).stream.ingest,
+              processing: processingWithoutMeta,
               wired: {
                 ...(rootStream.body as any).stream.ingest.wired,
                 routing: [
@@ -187,12 +191,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: { path: { name: 'logs' } },
         });
 
+        const { updated_at: _processingUpdatedAt, ...processingWithoutMeta } =
+          (rootStream.body as any)?.stream?.ingest?.processing ?? {};
+
         await putStream(apiClient, 'logs', {
           ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               ...(rootStream.body as any).stream.ingest,
+              processing: processingWithoutMeta,
               wired: {
                 ...(rootStream.body as any).stream.ingest.wired,
                 routing: [
@@ -281,12 +289,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: { path: { name: 'logs' } },
         });
 
+        const { updated_at: _processingUpdatedAt, ...processingWithoutMeta } =
+          (rootStream.body as any)?.stream?.ingest?.processing ?? {};
+
         await putStream(apiClient, 'logs', {
           ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               ...(rootStream.body as any).stream.ingest,
+              processing: processingWithoutMeta,
               wired: {
                 ...(rootStream.body as any).stream.ingest.wired,
                 routing: [
