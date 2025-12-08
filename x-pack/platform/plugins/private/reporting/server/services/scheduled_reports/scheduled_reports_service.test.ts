@@ -291,6 +291,7 @@ describe('ScheduledReportsService', () => {
         user: { username: 'somebody' },
         page: 1,
         size: 10,
+        search: 'cool dashboard',
       });
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
@@ -298,6 +299,8 @@ describe('ScheduledReportsService', () => {
         type: 'scheduled_report',
         page: 1,
         perPage: 10,
+        search: 'cool dashboard',
+        searchFields: ['title', 'created_by'],
       });
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledWith({
@@ -438,6 +441,7 @@ describe('ScheduledReportsService', () => {
         page: 1,
         perPage: 10,
         filter: 'scheduled_report.attributes.createdBy: "somebody"',
+        searchFields: ['title', 'created_by'],
       });
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledWith({
@@ -480,6 +484,7 @@ describe('ScheduledReportsService', () => {
         type: 'scheduled_report',
         page: 1,
         perPage: 10,
+        searchFields: ['title', 'created_by'],
       });
       expect(client.search).not.toHaveBeenCalled();
       expect(taskManager.bulkGet).not.toHaveBeenCalled();

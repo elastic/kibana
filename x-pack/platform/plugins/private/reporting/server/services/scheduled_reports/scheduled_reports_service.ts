@@ -150,10 +150,12 @@ export class ScheduledReportsService {
     user,
     page = 1,
     size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
+    search,
   }: {
     user: ReportingUser;
     page: number;
     size: number;
+    search?: string;
   }): Promise<ListScheduledReportsApiResponse> {
     try {
       const username = this._getUsername(user);
@@ -162,6 +164,8 @@ export class ScheduledReportsService {
         type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         page,
         perPage: size,
+        search,
+        searchFields: ['title', 'created_by'],
         ...(!this.userCanManageReporting
           ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
           : {}),
