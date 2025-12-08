@@ -9,6 +9,7 @@
 
 import type { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
+import { z } from '@kbn/zod/v4';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
 describe('getWorkflowContextSchema - Legacy Array Format', () => {
@@ -54,17 +55,12 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     if (!peopleSchema.schema) {
       throw new Error('peopleSchema.schema is null');
     }
+    // Unwrap ZodDefault if present (Zod v4 API)
     const underlyingSchema =
-      (
-        peopleSchema.schema._def as unknown as {
-          typeName?: string;
-          innerType?: typeof peopleSchema.schema;
-        }
-      ).typeName === 'ZodDefault'
-        ? (peopleSchema.schema._def as unknown as { innerType: typeof peopleSchema.schema })
-            .innerType
+      peopleSchema.schema instanceof z.ZodDefault
+        ? peopleSchema.schema._def.innerType
         : peopleSchema.schema;
-    expect((underlyingSchema._def as { typeName?: string }).typeName).toBe('ZodArray');
+    expect(underlyingSchema instanceof z.ZodArray).toBe(true);
 
     // Should be able to access inputs.greeting as a string
     const greetingSchema = getSchemaAtPath(contextSchema, 'inputs.greeting');
@@ -73,17 +69,12 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     if (!greetingSchema.schema) {
       throw new Error('greetingSchema.schema is null');
     }
+    // Unwrap ZodDefault if present (Zod v4 API)
     const underlyingGreetingSchema =
-      (
-        greetingSchema.schema._def as unknown as {
-          typeName?: string;
-          innerType?: typeof greetingSchema.schema;
-        }
-      ).typeName === 'ZodDefault'
-        ? (greetingSchema.schema._def as unknown as { innerType: typeof greetingSchema.schema })
-            .innerType
+      greetingSchema.schema instanceof z.ZodDefault
+        ? greetingSchema.schema._def.innerType
         : greetingSchema.schema;
-    expect((underlyingGreetingSchema._def as { typeName?: string }).typeName).toBe('ZodString');
+    expect(underlyingGreetingSchema instanceof z.ZodString).toBe(true);
   });
 
   it('should handle legacy array format inputs with nested foreach validation', () => {
@@ -127,16 +118,11 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     if (!peopleSchema.schema) {
       throw new Error('peopleSchema.schema is null');
     }
+    // Unwrap ZodDefault if present (Zod v4 API)
     const underlyingSchema =
-      (
-        peopleSchema.schema._def as unknown as {
-          typeName?: string;
-          innerType?: typeof peopleSchema.schema;
-        }
-      ).typeName === 'ZodDefault'
-        ? (peopleSchema.schema._def as unknown as { innerType: typeof peopleSchema.schema })
-            .innerType
+      peopleSchema.schema instanceof z.ZodDefault
+        ? peopleSchema.schema._def.innerType
         : peopleSchema.schema;
-    expect((underlyingSchema._def as { typeName?: string }).typeName).toBe('ZodArray');
+    expect(underlyingSchema instanceof z.ZodArray).toBe(true);
   });
 });

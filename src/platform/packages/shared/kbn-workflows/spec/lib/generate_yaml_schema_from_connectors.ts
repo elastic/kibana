@@ -24,7 +24,7 @@ import {
   WaitStepSchema,
   WorkflowConstsSchema,
   WorkflowInputSchema,
-  WorkflowSchemaForAutocomplete,
+  WorkflowSchemaForAutocompleteBase,
 } from '../schema';
 
 export function getStepId(stepName: string): string {
@@ -43,10 +43,14 @@ export function generateYamlSchemaFromConnectors(
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
-    // For loose mode, use WorkflowSchemaForAutocomplete which already handles partial fields
-    return WorkflowSchemaForAutocomplete.extend({
+    // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
+    // We use the base schema (without transform) so we can extend it
+    return WorkflowSchemaForAutocompleteBase.extend({
       steps: z.array(recursiveStepSchema).optional(),
-    });
+    }).transform((data) => ({
+      ...data,
+      version: '1' as const,
+    }));
   }
 
   // For strict mode, we need to build from the base schema before the pipe

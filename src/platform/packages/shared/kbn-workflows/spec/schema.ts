@@ -561,7 +561,8 @@ export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 // Schema is required for autocomplete because WorkflowGraph and WorkflowDefinition use it to build the autocomplete context.
 // The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
 // We build this from the base object schema (before the pipe) to avoid issues with .partial() on piped schemas
-export const WorkflowSchemaForAutocomplete = z
+// Base schema without transform - can be extended
+const WorkflowSchemaForAutocompleteBase = z
   .object({
     version: z.literal('1').optional(),
     name: z.string().min(1).optional(),
@@ -603,6 +604,17 @@ export const WorkflowSchemaForAutocomplete = z
       .default([]),
   })
   .passthrough();
+
+// Final schema with transform to always set version
+export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.transform(
+  (data) => ({
+    ...data,
+    version: '1' as const,
+  })
+);
+
+// Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
+export { WorkflowSchemaForAutocompleteBase };
 
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),

@@ -39,6 +39,8 @@ describe('parseWorkflowYamlToJSON', () => {
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
     expect((result as ZodSafeParseResult<typeof yamlSchemaLoose>).data).toEqual({
+      version: '1',
+      enabled: true,
       triggers: [],
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, world!' } }],
     });
@@ -73,6 +75,8 @@ describe('parseWorkflowYamlToJSON', () => {
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
     expect((result as ZodSafeParseResult<typeof yamlSchemaLoose>).data).toEqual({
+      version: '1',
+      enabled: true,
       triggers: [],
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, {{event.message}}' } }],
     });
