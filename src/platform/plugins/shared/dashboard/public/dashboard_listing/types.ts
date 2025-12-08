@@ -23,7 +23,6 @@ export type DashboardListingProps = PropsWithChildren<{
   listingViewRegistry: DashboardListingViewRegistry;
 }>;
 
-// Base interface with common fields
 interface DashboardListingItemBase extends UserContentCommonSchema {
   managed?: boolean;
   attributes: {
