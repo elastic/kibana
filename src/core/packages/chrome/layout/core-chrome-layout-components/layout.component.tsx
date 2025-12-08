@@ -74,8 +74,17 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     <div css={styles.css} style={styles.style}>
       {banner}
       {header}
-      {navigation}
-      {application}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `${layoutState.navigationWidth}px 1fr`,
+          columnGap: '8px',
+          gridArea: 'navigation-application',
+        }}
+      >
+        {navigation}
+        {application}
+      </div>
       {footer}
       {sidebar}
     </div>

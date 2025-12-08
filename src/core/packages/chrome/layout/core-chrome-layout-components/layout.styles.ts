@@ -23,13 +23,17 @@ const cssProp = css`
 
   display: grid;
 
-  column-gap: 8px;
+  // Debug borders for grid cells
+  > * {
+    outline: 2px solid red;
+    outline-offset: -2px;
+  }
 
   grid-template-areas:
-    'banner banner banner'
-    'header header header'
-    'navigation application sidebar'
-    'footer footer footer';
+    'banner banner'
+    'header header'
+    'navigation-application sidebar'
+    'footer footer';
 `;
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
@@ -38,7 +42,6 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
 
   const style = {
     gridTemplateColumns: `
-      ${navigationWidth}px
       1fr
       ${sidebarWidth}px
     `,

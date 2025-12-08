@@ -14,8 +14,6 @@ import type { EmotionFn } from '../types';
 
 const root: EmotionFn = (useEuiTheme) =>
   css`
-    grid-area: application;
-
     height: calc(100% - ${layoutVar('application.marginBottom')});
     width: calc(100% - ${layoutVar('application.marginRight')});
     margin-bottom: ${layoutVar('application.marginBottom')};
