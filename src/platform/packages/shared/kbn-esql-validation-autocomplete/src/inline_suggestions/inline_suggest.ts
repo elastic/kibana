@@ -12,7 +12,7 @@ import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import type { InlineSuggestionItem } from './types';

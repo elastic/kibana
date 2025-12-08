@@ -37,13 +37,6 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
-  attackDiscoveryPublicApiEnabled: false,
-});
-jest.mock('./use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 jest.mock('react-use/lib/useLocalStorage', () =>
   jest.fn().mockImplementation((key, defaultValue) => {
     // Return different values based on the localStorage key
