@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { MoreActionsButton } from './more_actions_button';
 import { CloseDockedViewButton } from './close_docked_view_button';
-import { useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
+import { TourStep, useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
 
 const labels = {
   container: i18n.translate('xpack.onechat.conversationActions.container', {
@@ -40,7 +40,7 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <EuiTourStep {...getStepProps(4)!}>
+      <EuiTourStep {...getStepProps(TourStep.ConversationActions)!}>
         <MoreActionsButton onRenameConversation={onRenameConversation} />
       </EuiTourStep>
       {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}

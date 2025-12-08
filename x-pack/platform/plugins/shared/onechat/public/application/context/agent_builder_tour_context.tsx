@@ -19,6 +19,13 @@ import type { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/
 import { storageKeys } from '../storage_keys';
 import { useConversationContext } from './conversation/conversation_context';
 
+export enum TourStep {
+  AgentSelector = 'agent-selector',
+  LlmSelector = 'llm-selector',
+  ConversationsHistory = 'conversations-history',
+  ConversationActions = 'conversation-actions',
+}
+
 export type TourStepProps = Pick<
   EuiTourStepProps,
   | 'maxWidth'
@@ -34,7 +41,7 @@ export type TourStepProps = Pick<
 
 interface AgentBuilderTourContextValue {
   isTourActive: boolean;
-  getStepProps: (step: number) => TourStepProps | undefined;
+  getStepProps: (step: TourStep) => TourStepProps | undefined;
 }
 
 const AgentBuilderTourContext = createContext<AgentBuilderTourContextValue | undefined>(undefined);
@@ -49,7 +56,7 @@ const tourConfig = {
 };
 
 const labels = {
-  step1: {
+  agentSelector: {
     title: i18n.translate('xpack.onechat.agentBuilderTour.step1', {
       defaultMessage: 'Meet your active agent 🕵️‍♂️',
     }),
@@ -58,7 +65,7 @@ const labels = {
         'I’m here to help with your questions. Pick a different agent or customize a new one anytime.',
     }),
   },
-  step2: {
+  llmSelector: {
     title: i18n.translate('xpack.onechat.agentBuilderTour.step2', {
       defaultMessage: 'You’re using this model 🧠',
     }),
@@ -66,8 +73,8 @@ const labels = {
       defaultMessage: 'I’ll answer using this LLM. Switch to another model you have setup.',
     }),
   },
-  // TODO: Add step 3 once we have prompts.
-  // step3: {
+  // TODO: Add prompts step once we have prompts.
+  // prompts: {
   //   title: i18n.translate('xpack.onechat.agentBuilderTour.step3', {
   //     defaultMessage: 'Reuse your prompts ✍️',
   //   }),
@@ -75,7 +82,7 @@ const labels = {
   //     defaultMessage: 'Store your favorite queries here. Pick one to drop it into the chat.',
   //   }),
   // },
-  step3: {
+  conversationsHistory: {
     title: i18n.translate('xpack.onechat.agentBuilderTour.step3', {
       defaultMessage: 'Your conversations 💬',
     }),
@@ -83,7 +90,7 @@ const labels = {
       defaultMessage: 'Come back to earlier chats or jump between them from here.',
     }),
   },
-  step4: {
+  conversationActions: {
     title: i18n.translate('xpack.onechat.agentBuilderTour.step4', {
       defaultMessage: 'Additional actions ⚙️',
     }),
@@ -104,6 +111,7 @@ const labels = {
 };
 
 interface TourStepConfig {
+  step: number;
   title: string;
   content: React.ReactNode;
   footerActions: React.ReactNode[];
@@ -158,56 +166,60 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
     </EuiButton>,
   ];
 
-  const tourSteps: Record<number, TourStepConfig> = {
-    1: {
-      title: labels.step1.title,
+  const tourSteps: Record<TourStep, TourStepConfig> = {
+    [TourStep.AgentSelector]: {
+      title: labels.agentSelector.title,
       content: (
         <EuiText size="s">
-          <p>{labels.step1.content}</p>
+          <p>{labels.agentSelector.content}</p>
         </EuiText>
       ),
       footerActions,
+      step: 1,
     },
-    2: {
-      title: labels.step2.title,
+    [TourStep.LlmSelector]: {
+      title: labels.llmSelector.title,
       content: (
         <EuiText size="s">
-          <p>{labels.step2.content}</p>
+          <p>{labels.llmSelector.content}</p>
         </EuiText>
       ),
       footerActions,
+      step: 2,
     },
-    3: {
-      title: labels.step3.title,
+    [TourStep.ConversationsHistory]: {
+      title: labels.conversationsHistory.title,
       content: (
         <EuiText size="s">
-          <p>{labels.step3.content}</p>
+          <p>{labels.conversationsHistory.content}</p>
         </EuiText>
       ),
       footerActions,
+      step: 3,
     },
-    4: {
-      title: labels.step4.title,
+    [TourStep.ConversationActions]: {
+      title: labels.conversationActions.title,
       content: (
         <EuiText size="s">
-          <p>{labels.step4.content}</p>
+          <p>{labels.conversationActions.content}</p>
         </EuiText>
       ),
       footerActions: footerActionsFinish,
+      step: 4,
     },
   };
 
-  const getStepProps = (step: number): TourStepProps | undefined => {
+  const getStepProps = (step: TourStep): TourStepProps | undefined => {
     const stepConfig = tourSteps[step];
     if (!stepConfig) return undefined;
 
     return {
       maxWidth: tourConfig.tourPopoverWidth,
-      isStepOpen: currentStep === step && isTourActive,
+      isStepOpen: currentStep === stepConfig.step && isTourActive,
       title: stepConfig.title,
       content: stepConfig.content,
       onFinish: handleFinishTour,
-      step,
+      step: stepConfig.step,
       stepsTotal: tourConfig.maxSteps,
       anchorPosition: tourConfig.anchorPosition,
       footerAction: stepConfig.footerActions,

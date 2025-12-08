@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTourStep } from '@elastic/eui';
 import React from 'react';
-import { useAgentBuilderTour } from '../../../../context/agent_builder_tour_context';
+import { TourStep, useAgentBuilderTour } from '../../../../context/agent_builder_tour_context';
 import { AgentSelector } from './agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
@@ -36,14 +36,14 @@ export const InputActions: React.FC<InputActionsProps> = ({
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <EuiTourStep {...getStepProps(2)!}>
+          <EuiTourStep {...getStepProps(TourStep.LlmSelector)!}>
             <ConnectorSelector />
           </EuiTourStep>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTourStep {...getStepProps(1)!}>
+              <EuiTourStep {...getStepProps(TourStep.AgentSelector)!}>
                 <AgentSelector agentId={agentId} />
               </EuiTourStep>
             </EuiFlexItem>

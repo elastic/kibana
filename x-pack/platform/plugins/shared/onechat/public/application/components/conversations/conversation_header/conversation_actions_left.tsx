@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiTourStep } from '@elastic/eui';
 import { ConversationsHistoryButton } from './conversations_history_button';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
 import { NewConversationButton } from './new_conversation_button';
-import { useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
+import { TourStep, useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
 
 export const ConversationLeftActions: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
@@ -18,7 +18,7 @@ export const ConversationLeftActions: React.FC<{}> = () => {
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiTourStep {...getStepProps(3)!}>
+      <EuiTourStep {...getStepProps(TourStep.ConversationsHistory)!}>
         <ConversationsHistoryButton />
       </EuiTourStep>
       {hasActiveConversation && <NewConversationButton />}
