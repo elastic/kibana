@@ -7,20 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './src/register_globals';
-
-export { monaco } from './src/monaco_imports';
-
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-
-export * from './src/languages';
-
-export { BarePluginApi };
-export type * from './src/types';
-
-export {
-  defaultThemesResolvers,
-  CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
-} from './src/code_editor';
+export { getESQLSources } from './sources';
+export { getEsqlColumns } from './columns';
+export { getEsqlPolicies } from './policies';
+export { getJoinIndices } from './lookup_indices';
+export { getTimeseriesIndices } from './timeseries_indices';
+export { getInferenceEndpoints } from './inference';
+export { getEditorExtensions } from './extensions';
