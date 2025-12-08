@@ -514,6 +514,10 @@ describe('CreateClassicStreamFlyout', () => {
         await waitFor(() => {
           expect(onValidate).toHaveBeenCalledWith(
             'logs-template-1-mystream',
+            expect.objectContaining({
+              name: 'template-1',
+              indexPatterns: ['logs-template-1-*'],
+            }),
             expect.any(AbortSignal)
           );
           expect(onCreate).toHaveBeenCalledWith('logs-template-1-mystream');
@@ -596,6 +600,10 @@ describe('CreateClassicStreamFlyout', () => {
         await waitFor(() => {
           expect(onValidate).toHaveBeenCalledWith(
             'logs-template-1-newstream',
+            expect.objectContaining({
+              name: 'template-1',
+              indexPatterns: ['logs-template-1-*'],
+            }),
             expect.any(AbortSignal)
           );
         });
@@ -629,7 +637,7 @@ describe('CreateClassicStreamFlyout', () => {
         const onCreate = jest.fn();
         let abortSignal: AbortSignal | undefined;
 
-        const onValidate = jest.fn().mockImplementation((name, signal) => {
+        const onValidate = jest.fn().mockImplementation((name, template, signal) => {
           abortSignal = signal;
           return new Promise((resolve) => {
             setTimeout(() => resolve({ errorType: null }), 10000);
@@ -802,7 +810,14 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Wait for debounced validation to complete
         await waitFor(() => {
-          expect(onValidate).toHaveBeenCalledWith('logs-template-1-valid', expect.any(AbortSignal));
+          expect(onValidate).toHaveBeenCalledWith(
+            'logs-template-1-valid',
+            expect.objectContaining({
+              name: 'template-1',
+              indexPatterns: ['logs-template-1-*'],
+            }),
+            expect.any(AbortSignal)
+          );
         });
 
         // Clear mock to track new calls

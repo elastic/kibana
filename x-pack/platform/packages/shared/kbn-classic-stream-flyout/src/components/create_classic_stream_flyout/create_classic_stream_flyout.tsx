@@ -94,14 +94,15 @@ export const CreateClassicStreamFlyout = ({
   const isValidating = validation.isValidating;
   const isSubmitting = validation.mode === 'create';
 
+  const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
+
   const { handleStreamNameChange, handleCreate, resetValidation } = useStreamValidation({
     formState,
     dispatch,
     onCreate,
+    selectedTemplate: selectedTemplateData,
     onValidate,
   });
-
-  const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 
   const updateIndexPattern = useCallback(
     (pattern: string) => {

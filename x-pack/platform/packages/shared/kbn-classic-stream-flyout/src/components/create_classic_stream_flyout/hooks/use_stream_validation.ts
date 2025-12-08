@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useRef, type Dispatch } from 'react';
+import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';
 import { useDebouncedCallback } from './use_debounced_callback';
@@ -17,6 +18,7 @@ interface UseStreamValidationParams {
   formState: FormState;
   dispatch: Dispatch<FormAction>;
   onCreate: (streamName: string) => void;
+  selectedTemplate: TemplateDeserialized | undefined;
   onValidate?: StreamNameValidator;
   debounceMs?: number;
 }
@@ -31,12 +33,15 @@ export const useStreamValidation = ({
   formState,
   dispatch,
   onCreate,
+  selectedTemplate,
   onValidate,
   debounceMs = DEFAULT_VALIDATION_DEBOUNCE_MS,
 }: UseStreamValidationParams): UseStreamValidationReturn => {
   const { streamName, validation } = formState;
 
   const lastStreamNameRef = useRef<string>(streamName);
+  const selectedTemplateRef = useRef(selectedTemplate);
+  selectedTemplateRef.current = selectedTemplate;
   const onValidateRef = useRef(onValidate);
   onValidateRef.current = onValidate;
 
@@ -57,9 +62,15 @@ export const useStreamValidation = ({
       abortController: AbortController,
       isAbortedFn: (controller: AbortController) => boolean
     ): Promise<boolean> => {
+      // Cannot validate without a selected template
+      if (!selectedTemplateRef.current) {
+        return false;
+      }
+
       try {
         const result = await validateStreamName(
           name,
+          selectedTemplateRef.current,
           onValidateRef.current,
           abortController.signal
         );

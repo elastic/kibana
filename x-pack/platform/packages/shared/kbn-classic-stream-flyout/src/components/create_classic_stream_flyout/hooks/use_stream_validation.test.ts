@@ -7,6 +7,7 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useReducer } from 'react';
+import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { useStreamValidation } from './use_stream_validation';
 import type { StreamNameValidator } from '../../../utils';
 import { formReducer, initialFormState } from '../reducers/form_reducer';
@@ -16,6 +17,11 @@ describe('useStreamValidation', () => {
   const mockOnValidate: StreamNameValidator = jest.fn().mockResolvedValue({
     errorType: null,
   });
+
+  const mockTemplate: TemplateDeserialized = {
+    name: 'test-template',
+    indexPatterns: ['logs-*'],
+  } as TemplateDeserialized;
 
   // Helper to set up hook with form reducer
   const setupHook = (onValidate?: StreamNameValidator) => {
@@ -29,6 +35,7 @@ describe('useStreamValidation', () => {
         formState,
         dispatch,
         onCreate: mockOnCreate,
+        selectedTemplate: mockTemplate,
         onValidate,
       });
 
@@ -110,7 +117,11 @@ describe('useStreamValidation', () => {
 
       // Should NOT trigger validation
       expect(mockOnValidate).toHaveBeenCalledTimes(1); // Only Create validation
-      expect(mockOnValidate).not.toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
+      expect(mockOnValidate).not.toHaveBeenCalledWith(
+        'new-stream',
+        mockTemplate,
+        expect.any(AbortSignal)
+      );
     });
 
     it('SHOULD trigger debounced validation in Live Validation Mode (has error)', async () => {
@@ -141,7 +152,11 @@ describe('useStreamValidation', () => {
 
       // Should trigger debounced validation (in Live Validation Mode)
       await waitFor(() => {
-        expect(mockOnValidateWithError).toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
+        expect(mockOnValidateWithError).toHaveBeenCalledWith(
+          'new-stream',
+          mockTemplate,
+          expect.any(AbortSignal)
+        );
       });
     });
 
@@ -180,7 +195,11 @@ describe('useStreamValidation', () => {
 
       // Debounced validation should have been triggered
       await waitFor(() => {
-        expect(mockOnValidateWithError).toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
+        expect(mockOnValidateWithError).toHaveBeenCalledWith(
+          'new-stream',
+          mockTemplate,
+          expect.any(AbortSignal)
+        );
       });
     });
 
@@ -252,7 +271,11 @@ describe('useStreamValidation', () => {
 
       // Only the initial Create validation should have been called
       expect(slowValidator).toHaveBeenCalledTimes(1);
-      expect(slowValidator).toHaveBeenCalledWith('test-stream', expect.any(AbortSignal));
+      expect(slowValidator).toHaveBeenCalledWith(
+        'test-stream',
+        mockTemplate,
+        expect.any(AbortSignal)
+      );
 
       // Should still be in IDLE mode with no validation
       expect(result.current.formState.validation.mode).toBe('idle');
@@ -270,7 +293,11 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      expect(mockOnValidate).toHaveBeenCalledWith('test-stream', expect.any(AbortSignal));
+      expect(mockOnValidate).toHaveBeenCalledWith(
+        'test-stream',
+        mockTemplate,
+        expect.any(AbortSignal)
+      );
       expect(mockOnCreate).toHaveBeenCalledWith('test-stream');
       expect(result.current.formState.validation.mode).toBe('idle'); // Success returns to IDLE
       expect(result.current.formState.validation.isValidating).toBe(false);
@@ -306,6 +333,7 @@ describe('useStreamValidation', () => {
           formState,
           dispatch,
           onCreate: mockOnCreate,
+          selectedTemplate: mockTemplate,
           onValidate: mockOnValidate,
         });
 
@@ -379,6 +407,7 @@ describe('useStreamValidation', () => {
       expect(mockOnValidateWithError).toHaveBeenCalledTimes(2); // Once for first submit, once for second Create
       expect(mockOnValidateWithError).toHaveBeenLastCalledWith(
         'new-stream',
+        mockTemplate,
         expect.any(AbortSignal)
       );
     });
@@ -478,7 +507,11 @@ describe('useStreamValidation', () => {
       });
 
       await waitFor(() => {
-        expect(mockOnValidateWithError).toHaveBeenCalledWith('final', expect.any(AbortSignal));
+        expect(mockOnValidateWithError).toHaveBeenCalledWith(
+          'final',
+          mockTemplate,
+          expect.any(AbortSignal)
+        );
       });
 
       // Should only validate final name
@@ -524,7 +557,11 @@ describe('useStreamValidation', () => {
       });
 
       await waitFor(() => {
-        expect(mockOnValidateWithError).toHaveBeenCalledWith('second', expect.any(AbortSignal));
+        expect(mockOnValidateWithError).toHaveBeenCalledWith(
+          'second',
+          mockTemplate,
+          expect.any(AbortSignal)
+        );
       });
 
       // Only the second validation should have completed
@@ -548,6 +585,7 @@ describe('useStreamValidation', () => {
           formState,
           dispatch,
           onCreate: mockOnCreate,
+          selectedTemplate: mockTemplate,
           onValidate: mockOnValidateWithError,
           debounceMs: 500, // Custom delay
         });

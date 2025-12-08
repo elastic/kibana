@@ -252,17 +252,29 @@ const createMockValidator = (
 ): StreamNameValidator => {
   const onValidateAction = action('onValidate');
 
-  return async (streamName: string, signal?: AbortSignal) => {
+  return async (
+    streamName: string,
+    selectedTemplate: TemplateDeserialized,
+    signal?: AbortSignal
+  ) => {
     // Log the validation call to Storybook actions panel
-    onValidateAction(streamName);
-    action('onValidate:start')({ streamName, timestamp: Date.now() });
+    onValidateAction({ streamName, template: selectedTemplate.name });
+    action('onValidate:start')({
+      streamName,
+      template: selectedTemplate.name,
+      timestamp: Date.now(),
+    });
 
     // Simulate network delay (configurable for testing race conditions)
     const delay = delayMs;
 
     // Check if aborted before starting delay
     if (signal?.aborted) {
-      action('onValidate:aborted')({ streamName, reason: 'aborted before delay' });
+      action('onValidate:aborted')({
+        streamName,
+        template: selectedTemplate.name,
+        reason: 'aborted before delay',
+      });
       throw new Error('Validation aborted');
     }
 
@@ -273,6 +285,7 @@ const createMockValidator = (
       if (signal?.aborted) {
         action('onValidate:aborted')({
           streamName,
+          template: selectedTemplate.name,
           reason: 'aborted during delay',
           elapsed: Date.now() - startTime,
         });
@@ -283,7 +296,11 @@ const createMockValidator = (
     // Check for duplicate
     if (existingNames.includes(streamName)) {
       const result = { errorType: 'duplicate' as const, conflictingIndexPattern: undefined };
-      action('onValidate:result')(result);
+      action('onValidate:result')({
+        streamName,
+        template: selectedTemplate.name,
+        result,
+      });
       return result;
     }
 
@@ -293,13 +310,21 @@ const createMockValidator = (
       const regex = new RegExp(`^${regexPattern}$`);
       if (regex.test(streamName)) {
         const result = { errorType: 'higherPriority' as const, conflictingIndexPattern: pattern };
-        action('onValidate:result')(result);
+        action('onValidate:result')({
+          streamName,
+          template: selectedTemplate.name,
+          result,
+        });
         return result;
       }
     }
 
     const result = { errorType: null, conflictingIndexPattern: undefined };
-    action('onValidate:result')(result);
+    action('onValidate:result')({
+      streamName,
+      template: selectedTemplate.name,
+      result,
+    });
     return result;
   };
 };
