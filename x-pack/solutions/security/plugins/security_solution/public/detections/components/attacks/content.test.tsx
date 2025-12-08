@@ -44,6 +44,18 @@ describe('AttacksPageContent', () => {
     });
   });
 
+  it('should render `Connector` filter', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connectorFilterButton')).toBeInTheDocument();
+    });
+  });
+
   it('should render `Assignee` button', async () => {
     render(
       <TestProviders>

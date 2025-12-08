@@ -188,7 +188,7 @@ function PipelinesTableUi({
       data-test-subj="pipelineTable"
       itemId="id"
       items={pipelines}
-      message={message}
+      noItemsMessage={message}
       pagination={pagination}
       search={search}
       selection={selectionOptions}

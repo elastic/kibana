@@ -32,7 +32,8 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-navigation-tour",
     "@kbn/split-button",
-    "@kbn/tour-queue"
+    "@kbn/tour-queue",
+    "@kbn/unified-tabs"
   ],
   "exclude": [
     "target/**/*",

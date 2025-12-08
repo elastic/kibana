@@ -6,12 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLIdentifier } from '../../types';
-import type {
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ICommandContext,
-} from '../../commands_registry/types';
+import type { ESQLUserDefinedColumn, ICommandContext } from '../../commands_registry/types';
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { ESQLAstItem } from '../../types';
 import type { SupportedDataType } from '../types';

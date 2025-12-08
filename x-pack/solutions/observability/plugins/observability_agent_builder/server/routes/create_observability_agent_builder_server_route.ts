@@ -8,16 +8,19 @@
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { CoreSetup } from '@kbn/core/server';
-import type { ObservabilityAgentDataRegistry } from '../data_registry/data_registry';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 
 export interface ObservabilityAgentBuilderRouteHandlerResources
   extends DefaultRouteHandlerResources {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  dataRegistry: ObservabilityAgentDataRegistry;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
 export const createObservabilityAgentBuilderServerRoute = createServerRouteFactory<

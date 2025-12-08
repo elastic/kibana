@@ -29,7 +29,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type {
-  AttackDiscoveryPostInternalRequestBody,
+  PostAttackDiscoveryGenerateRequestBody,
   DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
@@ -295,7 +295,7 @@ export interface AssistantToolParams {
     unknown,
     unknown,
     | ExecuteConnectorRequestBody
-    | AttackDiscoveryPostInternalRequestBody
+    | PostAttackDiscoveryGenerateRequestBody
     | DefendInsightsPostRequestBody
   >;
   size?: number;

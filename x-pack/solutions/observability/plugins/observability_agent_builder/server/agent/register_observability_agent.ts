@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ObservabilityAgentPluginSetupDependencies } from '../types';
+import type { ObservabilityAgentBuilderPluginSetupDependencies } from '../types';
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '../tools';
 
@@ -16,7 +16,7 @@ export async function registerObservabilityAgent({
   plugins,
   logger,
 }: {
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
   plugins.onechat.agents.register({

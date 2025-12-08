@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
         // Cannot predict order of SO creation.
         const re = new RegExp(
-          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}-[1-2], ${pkgName}-[1-2]`,
+          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3]`,
           'g'
         );
         expect(res.body.message).to.match(re);
@@ -223,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
         // Cannot predict order of SO creation.
-        const errorMsg = String.raw`${pkgName}-[1-2] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
+        const errorMsg = String.raw`${pkgName}(-all-spaces)?-[1-2-3] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
         const re = new RegExp(
           `Failed to roll back package ${pkgName}: Wrong previous version for package policies: ${errorMsg}, ${errorMsg}`,
           'g'

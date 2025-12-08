@@ -10,11 +10,11 @@ import {
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiProgress,
-  EuiSpacer,
   useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { PrePackagedRulesPrompt } from '../pre_packaged_rules/load_empty_prompt';
@@ -45,13 +45,12 @@ import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/u
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
-import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { BulkEditDeleteAlertSuppressionConfirmation } from './bulk_actions/bulk_edit_delete_alert_suprression_confirmation';
 import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { BulkFillRuleGapsModal } from '../../../rule_gaps/components/bulk_fill_rule_gaps';
 import { useBulkFillRuleGapsConfirmation } from '../../../rule_gaps/components/bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
 import { BulkFillRuleGapsRuleLimitErrorModal } from './bulk_actions/bulk_schedule_gap_fills_rule_limit_error_modal';
+import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -97,7 +96,14 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       selectedRuleIds,
       sortingOptions,
     },
-    actions: { setIsAllSelected, setPage, setPerPage, setSelectedRuleIds, setSortingOptions },
+    actions: {
+      setFilterOptions,
+      setIsAllSelected,
+      setPage,
+      setPerPage,
+      setSelectedRuleIds,
+      setSortingOptions,
+    },
   } = rulesTableContext;
 
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
@@ -241,14 +247,17 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     setIsAllSelected(!isAllSelected);
     setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
-
-  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
-
   const isTableEmpty =
     ruleManagementFilters?.rules_summary.custom_count === 0 &&
     ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
 
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
+
+  useEffect(() => {
+    if (selectedTab !== AllRulesTabs.monitoring && filterOptions.gapFillStatuses) {
+      setFilterOptions({ gapFillStatuses: undefined });
+    }
+  }, [filterOptions.gapFillStatuses, selectedTab, setFilterOptions]);
 
   let tableProps;
   switch (selectedTab) {
@@ -367,13 +376,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
       {shouldShowRulesTable && (
         <>
-          {selectedTab === AllRulesTabs.monitoring && storeGapsInEventLogEnabled && (
+          {selectedTab === AllRulesTabs.monitoring && (
             <>
               <RulesWithGapsOverviewPanel />
               <EuiSpacer />
             </>
           )}
-          <RulesTableFilters />
+          <RulesTableFilters selectedTab={selectedTab} />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}

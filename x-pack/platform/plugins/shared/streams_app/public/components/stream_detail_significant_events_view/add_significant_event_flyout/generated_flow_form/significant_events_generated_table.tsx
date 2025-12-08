@@ -22,6 +22,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
+import { SeverityBadge } from '../../severity_badge';
+import { NO_FEATURE } from '../utils/default_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -133,20 +135,25 @@ export function SignificantEventsGeneratedTable({
     },
     {
       field: 'title',
-      width: '30%',
+      width: '25%',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
         defaultMessage: 'Title',
       }),
       render: (_, query) => <EuiText size="s">{query.title}</EuiText>,
     },
     {
-      width: '20%',
+      width: '15%',
       field: 'feature',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.featureColumn', {
         defaultMessage: 'Feature',
       }),
       render: (_, item: StreamQueryKql) => {
-        return <EuiBadge color="hollow">{item.feature?.name}</EuiBadge>;
+        const effectiveFeature = item.feature
+          ? item.feature.name === NO_FEATURE.name
+            ? undefined
+            : item.feature
+          : undefined;
+        return <EuiBadge color="hollow">{effectiveFeature?.name ?? '--'}</EuiBadge>;
       },
     },
     {
@@ -157,6 +164,16 @@ export function SignificantEventsGeneratedTable({
       }),
       render: (_, item: StreamQueryKql) => {
         return <EuiCodeBlock paddingSize="none">{JSON.stringify(item.kql?.query)}</EuiCodeBlock>;
+      },
+    },
+    {
+      width: '10%',
+      field: 'severity_score',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.severityScoreColumn', {
+        defaultMessage: 'Severity',
+      }),
+      render: (score: number) => {
+        return <SeverityBadge score={score} />;
       },
     },
     {

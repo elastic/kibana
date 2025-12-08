@@ -11,12 +11,15 @@ import {
   OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
 } from '../../common/constants';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 
 export async function getIsObservabilityAgentEnabled(
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >
 ) {
   const [coreStart] = await core.getStartServices();
   const isFeatureFlagEnabled = await coreStart.featureFlags.getBooleanValue(

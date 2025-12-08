@@ -20,9 +20,11 @@ const ScriptsLibraryAttributesSchemaV1 = schema.object({
   description: schema.maybe(schema.string()),
   instructions: schema.maybe(schema.string()),
   example: schema.maybe(schema.string()),
-  pathToExecutable: schema.maybe(schema.string()),
+  path_to_executable: schema.maybe(schema.string()),
   created_by: schema.string(),
+  created_at: schema.string(),
   updated_by: schema.string(),
+  updated_at: schema.string(),
 });
 
 export type ScriptsLibrarySavedObjectAttributes = DeepMutable<
@@ -45,10 +47,11 @@ export const scriptsLibrarySavedObjectType: SavedObjectsType = {
       description: { type: 'keyword' },
       instructions: { type: 'keyword' },
       example: { type: 'keyword' },
-      pathToExecutable: { type: 'keyword' },
+      path_to_executable: { type: 'keyword' },
       created_by: { type: 'keyword' },
+      created_at: { type: 'date' },
       updated_by: { type: 'keyword' },
-      // FYI: the created_at/_by fields are auto populated by the so framework
+      updated_at: { type: 'date' },
     },
   },
   modelVersions: {

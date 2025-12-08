@@ -15901,6 +15901,22 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.likePatternItems",
+        "type": "Array",
+        "tags": [],
+        "label": "likePatternItems",
+        "description": [],
+        "signature": [
+          "ISuggestionItem",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.METADATA_FIELDS",
         "type": "Array",
         "tags": [],
@@ -16054,6 +16070,22 @@
           "\"missingCommand\" | \"unsupportedFunction\" | \"unknownFunction\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.rlikePatternItems",
+        "type": "Array",
+        "tags": [],
+        "label": "rlikePatternItems",
+        "description": [],
+        "signature": [
+          "ISuggestionItem",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

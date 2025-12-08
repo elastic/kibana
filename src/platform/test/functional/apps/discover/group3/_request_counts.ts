@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -26,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
   const log = getService('log');
-  const retry = getService('retry');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
@@ -57,39 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    const expectSearchCount = async (type: 'ese' | 'esql', searchCount: number) => {
-      await retry.tryWithRetries(
-        `expect ${type} request to match count ${searchCount}`,
-        async () => {
-          if (searchCount === 0) {
-            await browser.execute(async () => {
-              performance.clearResourceTimings();
-            });
-          }
-          await waitForLoadingToFinish();
-          const endpoint = type === 'esql' ? `${type}_async` : type;
-          const requests = await browser.execute(() =>
-            performance
-              .getEntries()
-              .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
-          );
-          const result = requests.filter((entry) =>
-            entry.name.endsWith(`/internal/search/${endpoint}`)
-          );
-          const count = result.length;
-          if (count !== searchCount) {
-            log.warning('Request count differs:', result);
-          }
-          expect(count).to.be(searchCount);
-        },
-        { retryCount: 5, retryDelay: 500 }
-      );
-    };
-
     const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
-      await expectSearchCount(type, 0);
-      await cb();
-      await expectSearchCount(type, expected);
+      await discover.expectSearchRequestCount(type, expected, cb);
     };
 
     const waitForLoadingToFinish = async () => {
@@ -123,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await queryBar.clickQuerySubmitButton();
           });
         } else {
-          await expectSearchCount(type, 2);
+          await discover.expectSearchRequestCount(type, 2);
         }
       });
 

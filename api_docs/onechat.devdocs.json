@@ -74,6 +74,28 @@
       "children": [
         {
           "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.agents",
+          "type": "Object",
+          "tags": [],
+          "label": "agents",
+          "description": [
+            "\nAgent service contract, can be used to list agents."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/onechat-browser",
+              "scope": "common",
+              "docId": "kibKbnOnechatBrowserPluginApi",
+              "section": "def-common.AgentsServiceStartContract",
+              "text": "AgentsServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
           "id": "def-public.OnechatPluginStart.attachments",
           "type": "Object",
           "tags": [],

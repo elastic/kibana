@@ -9,7 +9,6 @@ import { useAbortController } from '@kbn/react-hooks';
 import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
-import { NO_FEATURE } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
@@ -50,8 +49,7 @@ export function useSignificantEventsApi({
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ feature, kql, title, id }) => {
-      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
+    upsertQuery: async ({ feature, kql, title, id, severity_score: severityScore }) => {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -62,7 +60,8 @@ export function useSignificantEventsApi({
           body: {
             kql,
             title,
-            feature: effectiveFeature,
+            feature,
+            severity_score: severityScore,
           },
         },
       });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +18,9 @@ import { noop } from 'lodash/fp';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isEqual } from 'lodash';
+import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useKibana } from '../../../common/lib/kibana';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
@@ -29,6 +32,7 @@ import { SearchBarSection } from './search_bar/search_bar_section';
 import { SchedulesFlyout } from './schedule_flyout';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
+import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -56,6 +60,20 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const { globalFullScreen } = useGlobalFullScreen();
+  const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
+  const {
+    services: { settings },
+  } = useKibana();
+
+  const { http, inferenceEnabled } = useAssistantContext();
+  const { data: aiConnectors } = useLoadConnectors({
+    http,
+    inferenceEnabled,
+    settings,
+  });
+
+  const { data } = useFindAttackDiscoveries({ http, isAssistantEnabled: true });
+  const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
@@ -89,6 +107,14 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 <FilterByAssigneesPopover
                   selectedUserIds={assignees}
                   onSelectionChange={onAssigneesSelectionChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ConnectorFilter
+                  aiConnectors={aiConnectors}
+                  connectorNames={aiConnectorNames}
+                  selectedConnectorNames={selectedConnectorNames}
+                  setSelectedConnectorNames={setSelectedConnectorNames}
                 />
               </EuiFlexItem>
               <EuiFlexItem>

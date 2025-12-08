@@ -101,8 +101,12 @@ export const SettingsSchemaV5 = schema.object({
   ),
 });
 
+export const SettingsSchemaV6 = SettingsSchemaV5.extends({
+  ssl_secret_storage_requirements_met: schema.maybe(schema.boolean()),
+});
+
 export const SettingsResponseSchema = schema.object({
-  item: SettingsSchemaV5,
+  item: SettingsSchemaV6,
 });
 
 export const PutSpaceSettingsRequestSchema = {

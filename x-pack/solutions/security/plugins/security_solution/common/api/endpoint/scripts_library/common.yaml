@@ -30,7 +30,7 @@ components:
         downloadUri:
           type: string
           description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
-          example: /api/endpoint/action/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          example: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
         description:
           type: string
           description: Description of the script and its purpose/functionality
@@ -40,7 +40,7 @@ components:
           description: Instructions for using the script, including details around its supported input arguments
         example:
           type: string
-        executable:
+        pathToExecutable:
           type: string
           description: >
             The relative path to the file included in the archive that should be executed once its contents
@@ -72,7 +72,7 @@ components:
           name: Collect host data
           platform: [ linux, macos ]
           requiresInput: false
-          downloadUri: /api/endpoint/action/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          downloadUri: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
           description: Collects host data for investigation
           instructions: Collects host data for investigation
           example: ./collect_host_data.sh --help

@@ -11,13 +11,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { getAttackDiscoveryGenerationsRoute } from './get_attack_discovery_generations';
 import * as helpers from '../../../helpers';
-import { getKibanaFeatureFlags } from '../../helpers/get_kibana_feature_flags';
 import { getMockAttackDiscoveryGenerationsResponse } from '../../../../__mocks__/attack_discovery_generations_response';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
-
-jest.mock('../../helpers/get_kibana_feature_flags', () => ({
-  getKibanaFeatureFlags: jest.fn(),
-}));
 
 const mockAttackDiscoveryGenerationsResponse = getMockAttackDiscoveryGenerationsResponse();
 
@@ -67,10 +62,6 @@ describe('getAttackDiscoveryGenerationsRoute', () => {
       .spyOn(helpers, 'performChecks')
       .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
 
-    (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-      attackDiscoveryPublicApiEnabled: true, // enabled by default
-    });
-
     addVersionMock = jest.fn();
     (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
     getAttackDiscoveryGenerationsRoute(router);
@@ -111,47 +102,6 @@ describe('getAttackDiscoveryGenerationsRoute', () => {
     const result = await getHandler(mockContext, mockRequest, mockResponse);
 
     expect(result).toEqual({ status: 403, payload: { message: 'Forbidden' } });
-  });
-
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: false,
-        });
-      });
-
-      it('returns a 403 custom response when the public API is disabled', async () => {
-        await getHandler(mockContext, mockRequest, mockResponse);
-
-        expect(mockResponse.custom).toHaveBeenCalledWith({
-          body: Buffer.from(
-            JSON.stringify({
-              message: 'Attack discovery public API is disabled',
-              status_code: 403,
-            })
-          ),
-          headers: expect.any(Object),
-          statusCode: 403,
-        });
-      });
-    });
-
-    describe('when the public API is enabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: true,
-        });
-      });
-
-      it('proceeds with normal execution when the public API is enabled', async () => {
-        await getHandler(mockContext, mockRequest, mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: mockAttackDiscoveryGenerationsResponse,
-        });
-      });
-    });
   });
 
   describe('when data client throws', () => {

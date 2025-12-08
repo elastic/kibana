@@ -179,7 +179,8 @@ export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
-export { gapStatus } from './constants';
+export { gapStatus, gapFillStatus } from './constants';
+export type { GapStatus, GapFillStatus } from './constants';
 
 export {
   mappingFromFieldMap,

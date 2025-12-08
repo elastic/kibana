@@ -22,7 +22,11 @@ import { OptionalDroppable } from './optional_droppable';
 
 const renderDraggableWithDroppable = (disableDragAndDrop: boolean = false) =>
   render(
-    <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={jest.fn()}>
+    <OptionalDroppable
+      disableDragAndDrop={disableDragAndDrop}
+      onDragEnd={jest.fn()}
+      onDragStart={jest.fn()}
+    >
       <OptionalDraggable
         item={{
           id: 'test-tab-1',

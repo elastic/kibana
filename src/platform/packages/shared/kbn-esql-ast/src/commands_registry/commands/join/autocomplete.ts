@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import {
   getLookupIndexCreateSuggestion,
   handleFragment,
 } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '../../../types';
-import type { ESQLFieldWithMetadata, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {

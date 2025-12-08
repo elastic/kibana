@@ -11,7 +11,7 @@ import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../
 import { createDownstreamDependenciesTool } from './get_downstream_dependencies/get_downstream_dependencies';
 import { createGetServicesTool } from './get_services/get_services';
 
-export async function registerAgentTools({
+export async function registerTools({
   core,
   plugins,
   logger,

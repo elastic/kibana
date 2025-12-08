@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import { getMessageFromId } from '../../../definitions/utils/errors';
 import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
-import type { FieldType } from '../../../definitions/types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
@@ -19,11 +19,11 @@ export const validate = (
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
-  const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
+  const acceptedColumnTypes: EsqlFieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;
   const columnRef = context?.columns.get(astCol.name);
 
-  if (columnRef && !acceptedColumnTypes.includes(columnRef.type as FieldType)) {
+  if (columnRef && !acceptedColumnTypes.includes(columnRef.type as EsqlFieldType)) {
     messages.push(
       getMessageFromId({
         messageId: 'unsupportedColumnTypeForCommand',

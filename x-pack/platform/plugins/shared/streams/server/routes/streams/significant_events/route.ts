@@ -6,6 +6,7 @@
  */
 import {
   featureSchema,
+  featureTypeSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
@@ -36,6 +37,7 @@ const previewSignificantEventsRoute = createServerRoute({
           .object({
             name: z.string(),
             filter: conditionSchema,
+            type: featureTypeSchema,
           })
           .optional(),
         kql: z.object({

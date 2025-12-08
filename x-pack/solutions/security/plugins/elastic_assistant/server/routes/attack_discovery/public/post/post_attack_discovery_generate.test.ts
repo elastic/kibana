@@ -12,7 +12,6 @@ type PostAttackDiscoveryGenerateRequestBody =
   import('@kbn/elastic-assistant-common').PostAttackDiscoveryGenerateRequestBody;
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
-import { getKibanaFeatureFlags } from '../../helpers/get_kibana_feature_flags';
 import { performChecks } from '../../../helpers';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
 import { requestIsValid } from './helpers/request_is_valid';
@@ -33,10 +32,6 @@ jest.mock('../../helpers/index_privileges', () => {
     hasReadWriteAttackDiscoveryAlertsPrivileges: jest.fn(),
   };
 });
-
-jest.mock('../../helpers/get_kibana_feature_flags', () => ({
-  getKibanaFeatureFlags: jest.fn(),
-}));
 
 jest.mock('../../../helpers', () => {
   const helpersModuleOriginal = jest.requireActual('../../../helpers');
@@ -117,10 +112,6 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     (requestIsValid as jest.Mock).mockReturnValue(true);
     (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({
       isSuccess: true,
-    });
-    // Mock getKibanaFeatureFlags to be enabled by default
-    (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-      attackDiscoveryPublicApiEnabled: true,
     });
 
     // Mock generateAndUpdateAttackDiscoveries to resolve successfully
@@ -325,68 +316,24 @@ describe('postAttackDiscoveryGenerateRoute', () => {
         })
       );
     });
-  });
 
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: false,
-        });
-      });
+    it('returns a 200 status', async () => {
+      const response = await server.inject(
+        postAttackDiscoveryRequest(mockRequestBody),
+        requestContextMock.convertContext(context)
+      );
 
-      it('returns a 403 response when the public API is disabled', async () => {
-        const response = await server.inject(
-          postAttackDiscoveryRequest(mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
-
-        expect(response.status).toEqual(403);
-        expect(response.body).toEqual({
-          message: {
-            error: 'Attack discovery public API is disabled',
-            success: false,
-          },
-          status_code: 403,
-        });
-      });
-
-      it('responds with status code 403 in the body when disabled', async () => {
-        const response = await server.inject(
-          postAttackDiscoveryRequest(mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
-
-        expect(response.status).toEqual(403);
-        expect(response.body).toHaveProperty('status_code', 403);
-      });
+      expect(response.status).toEqual(200);
     });
 
-    describe('when the public API is enabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: true,
-        });
-      });
+    it('returns an execution_uuid', async () => {
+      const response = await server.inject(
+        postAttackDiscoveryRequest(mockRequestBody),
+        requestContextMock.convertContext(context)
+      );
 
-      it('returns a 200 status', async () => {
-        const response = await server.inject(
-          postAttackDiscoveryRequest(mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
-
-        expect(response.status).toEqual(200);
-      });
-
-      it('returns an execution_uuid', async () => {
-        const response = await server.inject(
-          postAttackDiscoveryRequest(mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
-
-        expect(response.body).toEqual({
-          execution_uuid: 'static-uuid',
-        });
+      expect(response.body).toEqual({
+        execution_uuid: 'static-uuid',
       });
     });
   });

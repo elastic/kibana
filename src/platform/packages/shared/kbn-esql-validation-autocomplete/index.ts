@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ESQLCallbacks } from './src/shared/types';
 export type { ValidationOptions } from './src/validation/types';
 
 /**

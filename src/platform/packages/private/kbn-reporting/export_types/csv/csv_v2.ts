@@ -148,7 +148,8 @@ export class CsvV2ExportType extends ExportType<
         clients,
         cancellationToken,
         logger,
-        stream
+        stream,
+        jobId
       );
       return await csv.generateData();
     }
@@ -174,7 +175,8 @@ export class CsvV2ExportType extends ExportType<
       dependencies,
       cancellationToken,
       logger,
-      stream
+      stream,
+      jobId
     );
     return await csv.generateData();
   };

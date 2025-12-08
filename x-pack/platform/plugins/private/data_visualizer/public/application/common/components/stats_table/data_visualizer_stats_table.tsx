@@ -493,7 +493,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <EuiInMemoryTable<T>
-            message={message}
+            noItemsMessage={message}
             css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}

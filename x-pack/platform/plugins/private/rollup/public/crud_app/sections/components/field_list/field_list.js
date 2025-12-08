@@ -67,7 +67,7 @@ export const FieldList = ({
       search={search}
       pagination={pagination}
       sorting={true}
-      message={message}
+      noItemsMessage={message}
       data-test-subj={dataTestSubj}
     />
   );
