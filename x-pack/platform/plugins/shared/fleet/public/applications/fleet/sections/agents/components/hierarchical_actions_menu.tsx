@@ -93,44 +93,21 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
 
   /**
    * Recursively converts the MenuItem tree into EUI panel descriptors.
-   * Each panel gets a unique numeric ID starting from 0 for the root.
+   * Uses item paths as panel IDs (e.g., "reassign.newPolicy") for simplicity.
+   * Root panel has ID 0, child panels use their path as the ID.
    */
   const panels = useMemo(() => {
     const result: EuiContextMenuPanelDescriptor[] = [];
-    let panelIdCounter = 0;
 
-    // Map from item ID to panel ID for looking up child panel IDs
-    const itemToPanelMap = new Map<string, number>();
-
-    // First pass: assign panel IDs to all items with children
-    const assignPanelIds = (menuItems: MenuItem[], parentPath: string = '') => {
-      menuItems.forEach((item) => {
-        if (item.children && item.children.length > 0) {
-          panelIdCounter++;
-          const itemPath = parentPath ? `${parentPath}.${item.id}` : item.id;
-          itemToPanelMap.set(itemPath, panelIdCounter);
-          assignPanelIds(item.children, itemPath);
-        }
-      });
-    };
-
-    assignPanelIds(items);
-
-    // Reset counter for second pass
-    panelIdCounter = 0;
-
-    // Second pass: build the panels
     const buildPanels = (
       menuItems: MenuItem[],
-      panelId: number,
-      parentPanelId: number | null,
+      panelId: string | number,
       parentPanelTitle?: string,
       parentPath: string = ''
     ) => {
       const panelItems = menuItems.map((item) => {
         const itemPath = parentPath ? `${parentPath}.${item.id}` : item.id;
         const hasChildren = item.children && item.children.length > 0;
-        const childPanelId = hasChildren ? itemToPanelMap.get(itemPath) : undefined;
 
         // For items with children, only include panel (no onClick)
         // For action items, only include onClick (no panel)
@@ -141,7 +118,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
               <EuiIcon type={item.icon} size="m" color={item.iconColor} />
             ) : undefined,
             disabled: item.disabled,
-            panel: childPanelId,
+            panel: itemPath,
             'data-test-subj': item['data-test-subj'],
           };
         }
@@ -165,14 +142,13 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
         };
       });
 
-      // For child panels, use EUI's built-in title with back navigation
       const panelDescriptor: EuiContextMenuPanelDescriptor = {
         id: panelId,
         items: panelItems,
       };
 
       // Add title for child panels - clicking it navigates back
-      if (parentPanelId !== null && parentPanelTitle) {
+      if (parentPanelTitle) {
         panelDescriptor.title = parentPanelTitle;
       }
 
@@ -182,16 +158,15 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       menuItems.forEach((item) => {
         if (item.children && item.children.length > 0) {
           const itemPath = parentPath ? `${parentPath}.${item.id}` : item.id;
-          const childPanelId = itemToPanelMap.get(itemPath)!;
           // Use panelTitle if provided, otherwise try to extract string from name
           const childPanelTitle =
             item.panelTitle || (typeof item.name === 'string' ? item.name : item.id);
-          buildPanels(item.children, childPanelId, panelId, childPanelTitle, itemPath);
+          buildPanels(item.children, itemPath, childPanelTitle, itemPath);
         }
       });
     };
 
-    buildPanels(items, 0, null);
+    buildPanels(items, 0);
 
     return result;
   }, [items, closeMenu]);

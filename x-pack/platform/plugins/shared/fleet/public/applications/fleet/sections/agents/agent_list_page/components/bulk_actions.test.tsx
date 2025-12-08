@@ -141,7 +141,7 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Upgrade management');
 
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeDisabled();
-      expect(results.getByText('Restart upgrade 2 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Restart upgrade for 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show maintenance and diagnostics submenu items', async () => {

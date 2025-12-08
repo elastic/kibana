@@ -197,7 +197,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             name: (
               <FormattedMessage
                 id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
-                defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
+                defaultMessage="Restart upgrade for {agentCount, plural, one {# agent} other {# agents}}"
                 values={{ agentCount }}
               />
             ),
