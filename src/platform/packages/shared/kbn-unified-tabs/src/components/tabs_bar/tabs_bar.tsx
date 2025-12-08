@@ -113,6 +113,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     componentRef
   ) => {
     const { euiTheme } = useEuiTheme();
+    const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
     const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
       useState<HTMLDivElement | null>(null);
     const [tabsContainerElement, setTabsContainerElement] = useState<HTMLDivElement | null>(null);
@@ -130,6 +131,10 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       },
       [onEBTEvent]
     );
+
+    const handleHoverChange = useCallback((itemId: string, isHovered: boolean) => {
+      setHoveredTabId(isHovered ? itemId : null);
+    }, []);
 
     const moveFocusToNextSelectedItem = useCallback((item: TabItem) => {
       moveFocusToItemIdRef.current = item.id;
@@ -180,6 +185,10 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         }
       }
     }, [selectedItem]);
+
+    const onDragStart = useCallback(() => {
+      setHoveredTabId(null);
+    }, []);
 
     const onDragEnd = useCallback(
       ({ source, destination }: DropResult) => {
@@ -276,7 +285,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         alignItems="center"
         gutterSize="s"
         css={css`
-          padding-right: ${euiTheme.size.base};
+          padding-right: ${euiTheme.size.s};
         `}
       >
         <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
@@ -295,42 +304,58 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                   When false, it renders a plain flex container with consistent styling.
                   This eliminates conditional rendering logic from this file.
                 */}
-                <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={onDragEnd}>
+                <OptionalDroppable
+                  disableDragAndDrop={disableDragAndDrop}
+                  onDragStart={onDragStart}
+                  onDragEnd={onDragEnd}
+                >
                   {/* Render each tab, optionally wrapped with drag functionality */}
-                  {items.map((item, index) => (
-                    /*
-                      OptionalDraggable uses render prop pattern to conditionally wrap each tab with EuiDraggable.
-                    */
-                    <OptionalDraggable
-                      item={item}
-                      index={index}
-                      disableDragAndDrop={disableDragAndDrop}
-                      key={item.id}
-                    >
-                      {/* Render prop receives drag-related props when drag is enabled */}
-                      {({ dragHandleProps, isDragging }) => (
-                        <Tab
-                          item={item}
-                          isSelected={selectedItem?.id === item.id}
-                          isUnsaved={unsavedItemIds?.includes(item.id)}
-                          isDragging={isDragging}
-                          dragHandleProps={dragHandleProps}
-                          tabContentId={tabContentId}
-                          tabsSizeConfig={tabsSizeConfig}
-                          services={services}
-                          getTabMenuItems={getTabMenuItems}
-                          getPreviewData={getPreviewData}
-                          onLabelEdited={onLabelEdited}
-                          onSelect={onSelect}
-                          onSelectedTabKeyDown={onSelectedTabKeyDown}
-                          onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                          disableCloseButton={disableCloseButton}
-                          disableInlineLabelEditing={disableInlineLabelEditing}
-                          disableDragAndDrop={disableDragAndDrop}
-                        />
-                      )}
-                    </OptionalDraggable>
-                  ))}
+                  {items.map((item, index) => {
+                    const nextItem = items[index + 1];
+                    const hideRightSeparator =
+                      item.id === hoveredTabId || // hide own separator if hovered
+                      item.id === selectedItem?.id || // hide own separator if selected
+                      nextItem?.id === selectedItem?.id || // hide left sibling separator if next is selected
+                      nextItem?.id === hoveredTabId; // hide left sibling separator if next is hovered
+
+                    return (
+                      /*
+                        OptionalDraggable uses render prop pattern to conditionally wrap each tab with EuiDraggable.
+                      */
+                      <OptionalDraggable
+                        item={item}
+                        index={index}
+                        disableDragAndDrop={disableDragAndDrop}
+                        key={item.id}
+                      >
+                        {/* Render prop receives drag-related props when drag is enabled */}
+                        {({ dragHandleProps, isDragging }) => (
+                          <Tab
+                            item={item}
+                            isSelected={selectedItem?.id === item.id}
+                            selectedItemId={selectedItem?.id}
+                            isUnsaved={unsavedItemIds?.includes(item.id)}
+                            isDragging={isDragging}
+                            hideRightSeparator={hideRightSeparator}
+                            onHoverChange={handleHoverChange}
+                            dragHandleProps={dragHandleProps}
+                            tabContentId={tabContentId}
+                            tabsSizeConfig={tabsSizeConfig}
+                            services={services}
+                            getTabMenuItems={getTabMenuItems}
+                            getPreviewData={getPreviewData}
+                            onLabelEdited={onLabelEdited}
+                            onSelect={onSelect}
+                            onSelectedTabKeyDown={onSelectedTabKeyDown}
+                            onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                            disableCloseButton={disableCloseButton}
+                            disableInlineLabelEditing={disableInlineLabelEditing}
+                            disableDragAndDrop={disableDragAndDrop}
+                          />
+                        )}
+                      </OptionalDraggable>
+                    );
+                  })}
                 </OptionalDroppable>
               </div>
             </EuiFlexItem>
