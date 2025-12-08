@@ -2619,6 +2619,10 @@
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-observability",
                 "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_project_monitor_policy.ts"
               },
@@ -27083,6 +27087,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
