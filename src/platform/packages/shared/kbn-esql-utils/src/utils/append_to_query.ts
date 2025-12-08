@@ -156,10 +156,6 @@ export const appendStatsByToQuery = (queryString: string, column: string) => {
 
 export const appendLimitToQuery = (queryString: string, limit: number) => {
   const { root } = Parser.parse(queryString);
-  const lastCommand = root.commands[root.commands.length - 1];
-  if (lastCommand) {
-    const index = lastCommand.location.max + 1;
-    return queryString.slice(0, index) + ` | LIMIT ${limit}` + queryString.slice(index);
-  }
-  return queryString;
+  mutate.commands.limit.upsert(root, limit);
+  return BasicPrettyPrinter.print(root);
 };

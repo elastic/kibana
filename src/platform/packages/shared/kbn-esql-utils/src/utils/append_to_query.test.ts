@@ -207,13 +207,13 @@ and \`ip\` != "127.0.0.2/32"`
     it('should append the limit clause to the query with comments', () => {
       const queryString = 'FROM my_index | STATS BY meow // new comment';
       const updatedQueryString = appendLimitToQuery(queryString, 10);
-      expect(updatedQueryString).toBe('FROM my_index | STATS BY meow | LIMIT 10 // new comment');
+      expect(updatedQueryString).toBe('FROM my_index | STATS BY meow | LIMIT 10');
     });
 
-    it('should return the query string if there are no commands', () => {
+    it('shouldappend the limit clause to the query with no commands', () => {
       const queryString = '';
       const updatedQueryString = appendLimitToQuery(queryString, 10);
-      expect(updatedQueryString).toBe('');
+      expect(updatedQueryString).toBe('LIMIT 10');
     });
   });
 });
