@@ -8,7 +8,7 @@
  */
 
 import { defaultConfig } from './serverless.base.config';
-import { ScoutServerConfig } from '../../types';
+import type { ScoutServerConfig } from '../../../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -17,8 +17,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
       'xpack.apm_data.enabled=true',
-      // for ML, data frame analytics are not part of this project type
-      'xpack.ml.dfa.enabled=false',
+      'serverless.project_type=observability',
+      'serverless.observability.tier=logs_essentials',
     ],
   },
   kbnTestServer: {
@@ -28,6 +28,9 @@ export const servers: ScoutServerConfig = {
       '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      `--pricing.tiers.products=${JSON.stringify([
+        { name: 'observability', tier: 'logs_essentials' },
+      ])}`,
     ],
   },
 };
