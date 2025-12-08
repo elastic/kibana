@@ -14,7 +14,10 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { InterceptDialogService, UserInterceptRunPersistenceService } from './service';
 import type { Intercept } from './prompter';
 import { InterceptPrompter } from './prompter';
-import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
+import {
+  TRIGGER_INFO_API_ROUTE,
+  INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
+} from '../../common/constants';
 import type { TriggerInfo } from '../../common/types';
 
 describe('ProductInterceptPrompter', () => {
@@ -230,7 +233,7 @@ describe('ProductInterceptPrompter', () => {
 
         // a record should have been created in localstorage to track the timer start for the intercept for the current user
         expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-          InterceptPrompter.CLIENT_STORAGE_KEY,
+          INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
           expect.stringMatching(new RegExp(`{\"${intercept.id}\":{\"timerStart\":\".*\"}}`))
         );
 
@@ -311,7 +314,7 @@ describe('ProductInterceptPrompter', () => {
 
         // record in localstorage is updated to track the timer start of the intercept for next iteration
         expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-          InterceptPrompter.CLIENT_STORAGE_KEY,
+          INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
           '{}'
         );
 
@@ -389,7 +392,7 @@ describe('ProductInterceptPrompter', () => {
 
         // record in localstorage is cleared after showing the intercept
         expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-          InterceptPrompter.CLIENT_STORAGE_KEY,
+          INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
           '{}'
         );
 

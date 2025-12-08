@@ -12,7 +12,10 @@ import type { InterceptServiceStartDeps } from './service';
 import { InterceptDialogService } from './service';
 import { UserInterceptRunPersistenceService } from './service/user_intercept_run_persistence_service';
 import type { Intercept } from './service';
-import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
+import {
+  TRIGGER_INFO_API_ROUTE,
+  INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
+} from '../../common/constants';
 import type { TriggerInfo } from '../../common/types';
 
 export type { Intercept } from './service';
@@ -25,8 +28,6 @@ type ProductInterceptPrompterStartDeps = Omit<
   Pick<CoreStart, 'http'>;
 
 export class InterceptPrompter {
-  public static readonly CLIENT_STORAGE_KEY = 'intercepts.prompter.clientCache';
-
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
   private interceptDialogService = new InterceptDialogService();
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
@@ -40,20 +41,20 @@ export class InterceptPrompter {
       get: (target, prop) => {
         if (typeof prop === 'symbol') return undefined;
         const storage = JSON.parse(
-          localStorage.getItem(InterceptPrompter.CLIENT_STORAGE_KEY) || JSON.stringify(target)
+          localStorage.getItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY) || JSON.stringify(target)
         );
         return storage[prop];
       },
       set: (target, prop, value) => {
         if (typeof prop === 'symbol') return false;
         target[prop] = value;
-        localStorage.setItem(InterceptPrompter.CLIENT_STORAGE_KEY, JSON.stringify(target));
+        localStorage.setItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY, JSON.stringify(target));
         return true;
       },
       deleteProperty: (target, prop) => {
         if (typeof prop === 'symbol') return false;
         delete target[prop];
-        localStorage.setItem(InterceptPrompter.CLIENT_STORAGE_KEY, JSON.stringify(target));
+        localStorage.setItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY, JSON.stringify(target));
         return true;
       },
     }

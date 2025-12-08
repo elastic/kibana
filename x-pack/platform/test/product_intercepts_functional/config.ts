@@ -7,16 +7,19 @@
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { services, pageObjects } from '../../ftr_provider_context';
+import { services, pageObjects } from './ftr_provider_context';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../functional/config.base.ts')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
-    testFiles: [require.resolve('./product_intercept_standard_test.ts')],
+    testFiles: [
+      require.resolve('./tests/product_intercept_standard_test.ts'),
+      require.resolve('./tests/product_intercepts_upgrade_test.ts'),
+    ],
     servers: {
       ...kibanaFunctionalConfig.get('servers'),
     },
@@ -24,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
 
     junit: {
-      reportName: 'X-Pack Standard Product Intercepts Functional Tests',
+      reportName: 'X-Pack Product Intercepts Functional Tests',
     },
 
     esTestCluster: kibanaFunctionalConfig.get('esTestCluster'),
@@ -34,10 +37,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.product_intercept.interval=10s',
-      ],
     },
   };
 }
