@@ -24,7 +24,7 @@ export const hasValue = (value: unknown): boolean => {
   return true;
 };
 
-export type SpecsKey = `${string}>${string}`;
-export const buildFieldSpecsKey = (index: string, fieldName: string): SpecsKey => {
+export type FieldSpecId = `${string}>${string}`;
+export const buildFieldSpecId = (index: string, fieldName: string): FieldSpecId => {
   return `${index}>${fieldName}`;
 };

@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { createContext } from 'react';
-import type { Dimension } from '../../types';
+import type { Dimension, DimensionValueFilters } from '../../types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
-import type { SpecsKey } from '../../common/utils';
+import type { FieldSpecId } from '../../common/utils';
+import { parseDimensionFilters } from '../../common/utils/parse_dimension_filters';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
+  dimensionFilters: DimensionValueFilters | undefined;
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
-  onDimensionValuesChange: (items: { value: string; metricFields: Set<SpecsKey> }[]) => void;
+  onDimensionValuesChange: (items: { value: string; metricFields: Set<FieldSpecId> }[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
 }
@@ -32,8 +34,8 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     'selectedDimensionValues',
     []
   );
-  const [selectedValueMetricFields, setSelectedValueMetricFields] = useRestorableState(
-    'selectedValueMetricFields',
+  const [selectedValueMetricFieldIds, setSelectedValueMetricFieldIds] = useRestorableState(
+    'selectedValueMetricFieldIds',
     []
   );
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
@@ -57,11 +59,11 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   );
 
   const onDimensionValuesChange = useCallback(
-    (items: { value: string; metricFields: Set<SpecsKey> }[]) => {
+    (items: { value: string; metricFields: Set<FieldSpecId> }[]) => {
       setSelectedDimensionValues(items.map((item) => item.value));
-      setSelectedValueMetricFields(items.flatMap((item) => Array.from(item.metricFields)));
+      setSelectedValueMetricFieldIds(items.flatMap((item) => Array.from(item.metricFields)));
     },
-    [setSelectedDimensionValues, setSelectedValueMetricFields]
+    [setSelectedDimensionValues, setSelectedValueMetricFieldIds]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
@@ -78,6 +80,11 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     setIsFullscreen((prev) => !prev);
   }, [setIsFullscreen]);
 
+  const dimensionFilters = useMemo(
+    () => parseDimensionFilters(selectedDimensionValues),
+    [selectedDimensionValues]
+  );
+
   return (
     <MetricsExperienceStateContext.Provider
       value={{
@@ -86,7 +93,8 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         isFullscreen,
         searchTerm,
         selectedDimensionValues,
-        selectedValueMetricFields,
+        selectedValueMetricFieldIds,
+        dimensionFilters,
         onPageChange,
         onDimensionsChange,
         onDimensionValuesChange,

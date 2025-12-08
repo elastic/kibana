@@ -41,17 +41,19 @@ export const MetricsExperienceGrid = ({
     searchTerm,
     isFullscreen,
     selectedDimensionValues,
+    dimensionFilters,
     onSearchTermChange,
     onToggleFullscreen,
   } = useMetricsExperienceState();
 
   const { isFetching: isFetchingFieldsCaps } = useMetricFieldsCapsContext();
 
-  const { metricFields, visibleFields, dimensionFilters } = useMetricFields();
+  const { metricFields, visibleFields, dimensions } = useMetricFields();
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     metricFields,
     visibleFields,
+    dimensions,
     renderToggleActions,
     isLoading: isFetchingFieldsCaps,
   });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { Dimension, MetricField, MetricUnit } from '../types';
@@ -25,7 +25,7 @@ import { useMetricFieldsFilter } from './use_metric_fields_filter';
  * - visibleFields: Currently visible fields based on filters (for grid, value selector)
  */
 export const useMetricFields = () => {
-  const { searchTerm, selectedDimensionValues, selectedDimensions, selectedValueMetricFields } =
+  const { searchTerm, selectedDimensions, selectedValueMetricFieldIds, onDimensionsChange } =
     useMetricsExperienceState();
   const { fieldSpecs, sampleRowByMetric, isFetching } = useMetricFieldsCapsContext();
 
@@ -49,27 +49,48 @@ export const useMetricFields = () => {
     return result;
   }, [fieldSpecs, sampleRowByMetric]);
 
-  const { filteredFields: visibleFields, dimensionFilters } = useMetricFieldsFilter({
+  const { filteredFields: visibleFields } = useMetricFieldsFilter({
     fields: metricFields,
     searchTerm,
     dimensions: selectedDimensions,
-    dimensionValues: selectedDimensionValues,
-    dimensionMetricFields: selectedValueMetricFields,
+    dimensionMetricFields: selectedValueMetricFieldIds,
   });
 
-  const lastValueRef = useRef<{ metricFields: MetricField[]; visibleFields: MetricField[] }>({
+  const dimensions = useMemo(() => getUniqueDimensions(metricFields), [metricFields]);
+
+  const lastValueRef = useRef<{
+    metricFields: MetricField[];
+    visibleFields: MetricField[];
+    dimensions: Dimension[];
+  }>({
     metricFields,
     visibleFields,
+    dimensions,
   });
 
   if (!isFetching) {
-    lastValueRef.current = { metricFields, visibleFields };
+    lastValueRef.current = { metricFields, visibleFields, dimensions };
   }
+
+  // Sync selected dimensions when available dimensions change
+  useEffect(() => {
+    const currentDimensions = lastValueRef.current.dimensions;
+    if (isFetching || currentDimensions.length === 0) {
+      return;
+    }
+
+    const availableDimNames = new Set(currentDimensions.map((d) => d.name));
+    const validSelection = selectedDimensions.filter((d) => availableDimNames.has(d.name));
+
+    if (validSelection.length !== selectedDimensions.length) {
+      onDimensionsChange(validSelection);
+    }
+  }, [selectedDimensions, onDimensionsChange, isFetching, dimensions]);
 
   return {
     metricFields: lastValueRef.current.metricFields,
     visibleFields: lastValueRef.current.visibleFields,
-    dimensionFilters,
+    dimensions: lastValueRef.current.dimensions,
   };
 };
 
@@ -105,6 +126,8 @@ const getUnit = (
   return undefined;
 };
 
+// utility functions
+
 const buildMetricField = (spec: FieldSpec, row: DatatableRow): MetricField => {
   const meta = spec.typeInfo.meta ?? {};
   const display = Array.isArray(meta.display) ? meta.display[0] : meta.display;
@@ -119,4 +142,20 @@ const buildMetricField = (spec: FieldSpec, row: DatatableRow): MetricField => {
     display,
     noData: false,
   };
+};
+
+const getUniqueDimensions = (fields: Array<{ dimensions: Dimension[] }>): Dimension[] => {
+  const dimensionMap = new Map<string, Dimension>();
+
+  for (const field of fields) {
+    for (const dimension of field.dimensions) {
+      if (!dimensionMap.has(dimension.name)) {
+        dimensionMap.set(dimension.name, dimension);
+      }
+    }
+  }
+
+  return [...dimensionMap.values()].sort((a, b) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
 };

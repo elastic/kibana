@@ -9,7 +9,7 @@
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import type { Dimension } from './types';
-import type { SpecsKey } from './common/utils';
+import type { FieldSpecId } from './common/utils';
 
 export interface MetricsExperienceRestorableState {
   // Pagination page index
@@ -27,7 +27,7 @@ export interface MetricsExperienceRestorableState {
   // Metric value filters
   selectedDimensionValues: string[];
   // Metric field keys
-  selectedValueMetricFields: SpecsKey[];
+  selectedValueMetricFieldIds: FieldSpecId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

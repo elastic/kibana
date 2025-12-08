@@ -9,24 +9,20 @@
 
 import { useMemo } from 'react';
 import type { MetricField, Dimension } from '../types';
-import { parseDimensionFilters, buildFieldSpecsKey } from '../common/utils';
-import type { SpecsKey } from '../common/utils';
+import { buildFieldSpecId } from '../common/utils';
+import type { FieldSpecId } from '../common/utils';
 
 export const useMetricFieldsFilter = ({
   fields,
   dimensions,
   searchTerm,
-  dimensionValues,
   dimensionMetricFields,
 }: {
   fields: MetricField[];
   searchTerm: string;
   dimensions: Dimension[];
-  dimensionValues: string[];
-  dimensionMetricFields: SpecsKey[];
+  dimensionMetricFields: FieldSpecId[];
 }) => {
-  const dimensionFilters = useMemo(() => parseDimensionFilters(dimensionValues), [dimensionValues]);
-
   const filteredFields = useMemo(() => {
     const dimensionFieldNamesSet = new Set(dimensions.map((d) => d.name));
     const dimensionMetricFieldsSet = new Set(dimensionMetricFields);
@@ -44,7 +40,7 @@ export const useMetricFieldsFilter = ({
       }
 
       if (dimensionMetricFieldsSet.size > 0) {
-        return dimensionMetricFieldsSet.has(buildFieldSpecsKey(field.index, field.name));
+        return dimensionMetricFieldsSet.has(buildFieldSpecId(field.index, field.name));
       } else if (dimensionFieldNamesSet.size > 0) {
         return field.dimensions.some((d) => dimensionFieldNamesSet.has(d.name));
       }
@@ -53,5 +49,5 @@ export const useMetricFieldsFilter = ({
     });
   }, [fields, searchTerm, dimensions, dimensionMetricFields]);
 
-  return { filteredFields, dimensionFilters };
+  return { filteredFields };
 };

@@ -15,7 +15,7 @@ import type {
   MappingTimeSeriesMetricType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { SpecsKey } from './common/utils/fields';
+import type { FieldSpecId } from './common/utils/fields';
 
 export interface MetricsExperienceService {
   client: MetricsExperienceClient;
@@ -54,7 +54,7 @@ export interface MetricField {
 export type DimensionValueFilters = Record<string, string[]>;
 
 export interface FieldSpec {
-  key: SpecsKey;
+  key: FieldSpecId;
   index: string;
   fieldName: string;
   fieldType: string;

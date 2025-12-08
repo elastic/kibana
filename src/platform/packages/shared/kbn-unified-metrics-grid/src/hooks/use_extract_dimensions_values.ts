@@ -9,8 +9,8 @@
 
 import { useMemo } from 'react';
 import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
-import type { SpecsKey } from '../common/utils';
-import { buildFieldSpecsKey } from '../common/utils';
+import type { FieldSpecId } from '../common/utils';
+import { buildFieldSpecId } from '../common/utils';
 
 /**
  * Extracts dimension values for specific indices and selected dimensions.
@@ -27,7 +27,7 @@ export const useExtractDimensionsValues = ({
 
   const requiredDimensionFields = useMemo(() => {
     return dimensionNames.flatMap((dimName) =>
-      indices.map((index) => buildFieldSpecsKey(index, dimName))
+      indices.map((index) => buildFieldSpecId(index, dimName))
     );
   }, [indices, dimensionNames]);
 
@@ -37,10 +37,10 @@ export const useExtractDimensionsValues = ({
 
   return useMemo(() => {
     if (valuesByDimension.size === 0) {
-      return new Map<string, Map<string, Set<SpecsKey>>>();
+      return new Map<string, Map<string, Set<FieldSpecId>>>();
     }
 
-    const result = new Map<string, Map<string, Set<SpecsKey>>>();
+    const result = new Map<string, Map<string, Set<FieldSpecId>>>();
 
     for (const [key, values] of valuesByDimension.entries()) {
       result.set(key, values);

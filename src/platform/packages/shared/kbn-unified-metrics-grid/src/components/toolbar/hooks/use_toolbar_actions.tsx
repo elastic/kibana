@@ -12,7 +12,7 @@ import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
-import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
@@ -21,6 +21,7 @@ import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   metricFields: MetricField[];
   visibleFields: MetricField[];
+  dimensions: Dimension[];
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
   isLoading?: boolean;
@@ -29,6 +30,7 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
 export const useToolbarActions = ({
   metricFields,
   visibleFields,
+  dimensions,
   renderToggleActions,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
@@ -71,6 +73,7 @@ export const useToolbarActions = ({
       hideDimensionsSelector ? null : (
         <DimensionsSelector
           fields={metricFields}
+          dimensions={dimensions}
           onChange={onDimensionsChange}
           selectedDimensions={selectedDimensions}
           singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
@@ -96,6 +99,7 @@ export const useToolbarActions = ({
       isSmallScreen,
       selectedDimensions,
       metricFields,
+      dimensions,
       onClearValues,
       onDimensionsChange,
       onDimensionValuesChange,

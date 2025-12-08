@@ -107,9 +107,10 @@ describe('MetricsExperienceGridContent', () => {
       currentPage: 0,
       selectedDimensions: [],
       selectedDimensionValues: [],
-      selectedValueMetricFields: [],
+      selectedValueMetricFieldIds: [],
       onDimensionValuesChange: jest.fn(),
       onDimensionsChange: jest.fn(),
+      dimensionFilters: undefined,
       onPageChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
@@ -119,7 +120,6 @@ describe('MetricsExperienceGridContent', () => {
 
     useMetricFieldsFilterMock.mockReturnValue({
       filteredFields: allFields,
-      dimensionFilters: {},
     });
 
     usePaginationMock.mockReturnValue({
@@ -145,7 +145,6 @@ describe('MetricsExperienceGridContent', () => {
   it('renders the no data state when filtered/paginated fields returns no fields', () => {
     useMetricFieldsFilterMock.mockReturnValue({
       filteredFields: [],
-      dimensionFilters: {},
     });
 
     usePaginationMock.mockReturnValue({
@@ -174,10 +173,11 @@ describe('MetricsExperienceGridContent', () => {
       currentPage: 0,
       selectedDimensions: [],
       selectedDimensionValues: [],
-      selectedValueMetricFields: [],
+      selectedValueMetricFieldIds: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onDimensionValuesChange: jest.fn(),
+      dimensionFilters: undefined,
       isFullscreen: false,
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
@@ -188,7 +188,6 @@ describe('MetricsExperienceGridContent', () => {
 
     useMetricFieldsFilterMock.mockReturnValue({
       filteredFields: cpuFields,
-      dimensionFilters: {},
     });
 
     usePaginationMock.mockReturnValue({

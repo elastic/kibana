@@ -128,7 +128,8 @@ describe('MetricsExperienceGrid', () => {
       currentPage: 0,
       selectedDimensions: [],
       selectedDimensionValues: [],
-      selectedValueMetricFields: [],
+      selectedValueMetricFieldIds: [],
+      dimensionFilters: undefined,
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onDimensionValuesChange: jest.fn(),
@@ -159,7 +160,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsMock.mockReturnValue({
       metricFields: allFields,
       visibleFields: allFields,
-      dimensionFilters: undefined,
+      dimensions,
     });
   });
 
@@ -180,7 +181,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsMock.mockReturnValue({
       metricFields: [],
       visibleFields: [],
-      dimensionFilters: undefined,
+      dimensions: [],
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -202,7 +203,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsMock.mockReturnValue({
       metricFields: [],
       visibleFields: [],
-      dimensionFilters: undefined,
+      dimensions: [],
     });
 
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -231,7 +232,8 @@ describe('MetricsExperienceGrid', () => {
       currentPage: 0,
       selectedDimensions: [{ name: 'foo', type: ES_FIELD_TYPES.KEYWORD }],
       selectedDimensionValues: [`foo${FIELD_VALUE_SEPARATOR}bar`],
-      selectedValueMetricFields: [],
+      selectedValueMetricFieldIds: [],
+      dimensionFilters: { foo: ['bar'] },
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onDimensionValuesChange: jest.fn(),
@@ -257,7 +259,8 @@ describe('MetricsExperienceGrid', () => {
       currentPage: 0,
       selectedDimensions: [],
       selectedDimensionValues: [],
-      selectedValueMetricFields: [],
+      selectedValueMetricFieldIds: [],
+      dimensionFilters: undefined,
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onDimensionValuesChange: jest.fn(),
@@ -302,7 +305,8 @@ describe('MetricsExperienceGrid', () => {
       currentPage: 0,
       selectedDimensions: [],
       selectedDimensionValues: [],
-      selectedValueMetricFields: [],
+      selectedValueMetricFieldIds: [],
+      dimensionFilters: undefined,
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onDimensionValuesChange: jest.fn(),
