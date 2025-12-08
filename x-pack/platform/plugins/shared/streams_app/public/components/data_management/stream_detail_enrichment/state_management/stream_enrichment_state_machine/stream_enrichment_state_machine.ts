@@ -78,11 +78,27 @@ export const streamEnrichmentMachine = setup({
     refreshDefinition: () => {},
     /* Validation actions */
     computeValidation: assign(({ context }) => {
+      // First, check for schema errors (Zod parsing)
+      const parseResult = streamlangDSLSchema.safeParse(context.nextStreamlangDSL);
+      if (!parseResult.success) {
+        const schemaErrors = parseResult.error.issues.map((issue) => {
+          const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
+          return `${path}: ${issue.message}`;
+        });
+        // Skip full validation if schema is invalid
+        return {
+          schemaErrors,
+          validationErrors: new Map(),
+          fieldTypesByProcessor: new Map(),
+        };
+      }
+
       const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
 
-      // Only run validation for wired streams
+      // Only run full validation for wired streams
       if (!isWiredStream) {
         return {
+          schemaErrors: [],
           validationErrors: new Map(),
           fieldTypesByProcessor: new Map(),
         };
@@ -101,6 +117,7 @@ export const streamEnrichmentMachine = setup({
       });
 
       return {
+        schemaErrors: [],
         validationErrors: errorsByStep,
         fieldTypesByProcessor: validationResult.fieldTypesByProcessor,
       };
@@ -128,23 +145,11 @@ export const streamEnrichmentMachine = setup({
         fieldTypesByProcessor: new Map(),
       };
     }),
-    updateDSL: assign(({ context }, params: { dsl: StreamlangDSL }) => {
-      // Parse with Zod to get schema errors
-      const parseResult = streamlangDSLSchema.safeParse(params.dsl);
-      const schemaErrors = parseResult.success
-        ? []
-        : parseResult.error.issues.map((issue) => {
-            const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
-            return `${path}: ${issue.message}`;
-          });
-
-      return {
-        nextStreamlangDSL: params.dsl,
-        schemaErrors,
-        hasChanges:
-          JSON.stringify(params.dsl.steps) !== JSON.stringify(context.previousStreamlangDSL.steps),
-      };
-    }),
+    updateDSL: assign(({ context }, params: { dsl: StreamlangDSL }) => ({
+      nextStreamlangDSL: params.dsl,
+      hasChanges:
+        JSON.stringify(params.dsl.steps) !== JSON.stringify(context.previousStreamlangDSL.steps),
+    })),
     /* Mode machine spawning */
     spawnInteractiveMode: assign(({ context, spawn, self }) => {
       const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assign, setup, sendParent, type ActorRefFrom, type SnapshotFrom, and } from 'xstate5';
+import { assign, setup, type ActorRefFrom, type SnapshotFrom, and } from 'xstate5';
 import {
   checkAdditiveChanges,
   addDeterministicCustomIdentifiers,
@@ -182,7 +182,6 @@ export const yamlModeMachine = setup({
           actions: [
             { type: 'updateDSL', params: ({ event }) => event },
             { type: 'sendDSLToParent' },
-            sendParent({ type: 'simulation.reset' }),
           ],
         },
         'yaml.runSimulation': {
