@@ -34,7 +34,7 @@ export async function registerObservabilityAgent({
         `- When choosing fields for the columns, choose fields that are most relevant to the user's request and conversation context.\n` +
         `- Generate human-friendly column names by converting dotted paths to Title Case and stripping common prefixes like \`kibana.alert.\` or \`service.\`.\n` +
         `- Leave cells blank when values are missing.\n` +
-        `- Always add a summary of the results in addition to the table. Mention the total number of alerts in the summary.\n`,
+        `- Always add a summary of the results in addition to the table. Mention the total number of alerts in the summary.`,
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
