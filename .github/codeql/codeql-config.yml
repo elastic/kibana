@@ -136,5 +136,13 @@ query-filters:
       paths:
         - codeql/javascript-queries/AngularJS
         - codeql/javascript-queries/Electron
+  # Temporarily disabled - enable incrementally after unbounded array rules are stable
+  - exclude:
+      id: js/kibana/unbounded-string-in-route
+  - exclude:
+      id: js/kibana/schema-any-in-route-body
+  - exclude:
+      id: js/kibana/unbounded-record-in-route
 packs:
   - githubsecuritylab/codeql-javascript-queries
+  - ./.github/codeql/custom-queries
