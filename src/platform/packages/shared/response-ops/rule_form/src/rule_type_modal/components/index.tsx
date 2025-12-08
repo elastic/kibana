@@ -14,6 +14,7 @@ import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import type { FindRuleTemplatesRequestQueryV1, FindRuleTemplatesResponseV1 } from '@kbn/alerting-plugin/common/routes/rule_template/apis/find';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 
@@ -80,14 +81,17 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   // Debounce search string for template API calls to avoid excessive requests
   const [debouncedSearchString, setDebouncedSearchString] = useState(searchString);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebouncedSearchString(searchString);
+  const { run: updateDebouncedSearch } = useDebounceFn(
+    (value: string) => {
+      setDebouncedSearchString(value);
       setCurrentPage(1); // Reset to first page when search changes
-    }, 300);
+    },
+    { wait: 300 }
+  );
 
-    return () => clearTimeout(timeoutId);
-  }, [searchString]);
+  useEffect(() => {
+    updateDebouncedSearch(searchString);
+  }, [searchString, updateDebouncedSearch]);
 
   // Fetch templates when in Template mode
   useEffect(() => {
