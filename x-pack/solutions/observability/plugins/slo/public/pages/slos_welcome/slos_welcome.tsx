@@ -18,7 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
-import { paths } from '../../../common/locators/paths';
+import { useHistory } from 'react-router-dom';
+import { paths, SLOS_PATH } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';
@@ -42,6 +43,7 @@ export function SlosWelcomePage() {
   const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const history = useHistory();
 
   const { data: { total } = { total: 0 }, isLoading } = useFetchSloDefinitions({ perPage: 0 });
 
@@ -54,9 +56,9 @@ export function SlosWelcomePage() {
 
   useEffect(() => {
     if (hasSlosAndPermissions) {
-      navigateToUrl(basePath.prepend(paths.slos));
+      history.replace(SLOS_PATH);
     }
-  }, [basePath, navigateToUrl, hasSlosAndPermissions]);
+  }, [hasSlosAndPermissions, history]);
 
   useBreadcrumbs(
     [

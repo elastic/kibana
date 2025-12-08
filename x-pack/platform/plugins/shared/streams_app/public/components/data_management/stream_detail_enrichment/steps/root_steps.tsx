@@ -18,7 +18,13 @@ import { getRootLevelStepsMap } from '../state_management/stream_enrichment_stat
 import { useStepsProcessingSummary } from '../state_management/use_steps_processing_summary';
 import { CreateStepButton } from '../create_step_button';
 
-export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType['stepRefs'] }) => {
+export const RootSteps = ({
+  stepRefs,
+  readOnly = false,
+}: {
+  stepRefs: StreamEnrichmentContextType['stepRefs'];
+  readOnly?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const rootSteps = stepRefs.filter((stepRef) => isRootStep(stepRef.getSnapshot()));
@@ -44,6 +50,7 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
       borderRadius="none"
       css={css`
         overflow: auto;
+        background: none;
         padding: ${euiTheme.size.xs};
         // Root panels
         > .euiPanel {
@@ -61,13 +68,16 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
           stepsProcessingSummaryMap={stepsProcessingSummaryMap}
           isFirstStepInLevel={index === 0}
           isLastStepInLevel={index === rootSteps.length - 1}
+          readOnly={readOnly}
         />
       ))}
-      <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
-        <EuiFlexItem grow={false}>
-          <CreateStepButton mode="subdued" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!readOnly && (
+        <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
+          <EuiFlexItem grow={false}>
+            <CreateStepButton mode="subdued" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiPanel>
   );
 };

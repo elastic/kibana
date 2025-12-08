@@ -11,12 +11,7 @@ import type { monaco } from '@kbn/monaco';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { stepSchemas } from '../../../../../common/step_schemas';
-import type {
-  ActionContext,
-  ActionInfo,
-  ConnectorExamples,
-  HoverContext,
-} from '../monaco_providers/provider_interfaces';
+import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 
 /**
  * Generic Monaco connector handler for unknown/unsupported connector types
@@ -83,33 +78,6 @@ export class CustomMonacoStepHandler extends BaseMonacoConnectorHandler {
   }
 
   /**
-   * Generate basic actions for generic connectors
-   */
-  async generateActions(context: ActionContext): Promise<ActionInfo[]> {
-    const actions: ActionInfo[] = [];
-
-    // Add generic "Copy Step" action
-    actions.push(
-      this.createActionInfo('copy-step', 'Copy Step', () => this.copyStep(context), {
-        icon: 'copy',
-        tooltip: 'Copy this workflow step to clipboard',
-        priority: 5,
-      })
-    );
-
-    // Add "Validate Step" action
-    actions.push(
-      this.createActionInfo('validate-step', 'Validate Step', () => this.validateStep(context), {
-        icon: 'check',
-        tooltip: 'Validate step configuration',
-        priority: 3,
-      })
-    );
-
-    return actions;
-  }
-
-  /**
    * Get basic examples for generic connector types
    */
   getExamples(connectorType: string): ConnectorExamples | null {
@@ -135,55 +103,5 @@ ${stepDefinition.documentation.examples
     }
 
     return null;
-  }
-
-  /**
-   * Copy step to clipboard
-   */
-  private async copyStep(context: ActionContext): Promise<void> {
-    try {
-      const { stepContext } = context;
-      if (!stepContext?.stepNode) {
-        return;
-      }
-
-      // Convert step node to YAML string
-      const stepYaml = stepContext.stepNode.toString();
-      await navigator.clipboard.writeText(stepYaml);
-
-      // console.log('GenericMonacoConnectorHandler: Step copied to clipboard');
-    } catch (error) {
-      // console.error('GenericMonacoConnectorHandler: Error copying step', error);
-    }
-  }
-
-  /**
-   * Validate step configuration
-   */
-  private async validateStep(context: ActionContext): Promise<void> {
-    try {
-      const { stepContext } = context;
-      if (!stepContext) {
-        return;
-      }
-
-      // Basic validation - check for required fields
-      const hasName = !!stepContext.stepName;
-      const hasType = !!stepContext.stepType;
-
-      const issues: string[] = [];
-      if (!hasName) issues.push('Missing step name');
-      if (!hasType) issues.push('Missing step type');
-
-      /*
-      if (issues.length === 0) {
-        console.log('GenericMonacoConnectorHandler: Step validation passed');
-      } else {
-        console.warn('GenericMonacoConnectorHandler: Step validation issues:', issues);
-      }
-      */
-    } catch (error) {
-      // console.error('GenericMonacoConnectorHandler: Error validating step', error);
-    }
   }
 }
