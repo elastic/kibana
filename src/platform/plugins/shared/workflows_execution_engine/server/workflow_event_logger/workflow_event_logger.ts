@@ -15,6 +15,7 @@ import type {
   WorkflowEventLoggerOptions,
 } from './types';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
+import { ExecutionError } from '../utils';
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
   private eventQueue: WorkflowLogEvent[] = [];
@@ -64,11 +65,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     const errorData: Partial<WorkflowLogEvent> = {};
 
     if (error) {
-      errorData.error = {
-        message: error.message,
-        type: error.name,
-        stack_trace: error.stack,
-      };
+      errorData.error = ExecutionError.fromError(error).toSerializableObject();
     }
 
     this.logEvent({
@@ -256,7 +253,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     try {
       await this.logsRepository.createLogs(events);
 
-      this.logger.info(`Successfully indexed ${events.length} workflow events`);
+      this.logger.debug(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
       this.logger.error(`Failed to index workflow events: ${error.message}`, {
         eventsCount: events.length,

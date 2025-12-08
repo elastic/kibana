@@ -18,15 +18,15 @@ import { ErrorBudgetActions } from './error_budget_actions';
 interface Props {
   slo: SLOWithSummaryResponse;
   hideTitle?: boolean;
+  hideHeaderDurationLabel?: boolean;
   isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
-  hideMetadata?: boolean;
 }
 
 export function ErrorBudgetHeader({
   slo,
   hideTitle = false,
-  hideMetadata = false,
+  hideHeaderDurationLabel = false,
   isMouseOver,
   setDashboardAttachmentReady,
 }: Props) {
@@ -60,7 +60,7 @@ export function ErrorBudgetHeader({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!hideMetadata && (
+      {!hideHeaderDurationLabel && (
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
