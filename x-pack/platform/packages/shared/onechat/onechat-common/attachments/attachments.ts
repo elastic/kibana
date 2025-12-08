@@ -41,5 +41,5 @@ export type TimerangeAttachment = Attachment<AttachmentType.timeRange>;
  */
 export type AttachmentInput<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : object
 > = Omit<Attachment<Type, DataType>, 'id'> & Partial<Pick<Attachment<Type, DataType>, 'id'>>;
