@@ -110,6 +110,7 @@
     "vega-util": "1.17.4"
   },
   "dependencies": {
+    "@ai-sdk/langchain": "^1.0.102",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
     "@aws-sdk/client-bedrock-runtime": "^3.744.0",
@@ -1127,7 +1128,7 @@
     "@xstate5/react": "npm:@xstate/react@^5.0.3",
     "@xyflow/react": "^12.4.1",
     "adm-zip": "^0.5.9",
-    "ai": "^4.0.18",
+    "ai": "^5.0.102",
     "ajv": "^8.17.1",
     "antlr4": "^4.13.1-patch-1",
     "archiver": "^7.0.1",
