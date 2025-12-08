@@ -29,7 +29,7 @@ jobs:
 
     - name: Run CodeQL Query Tests
       run: |
-        codeql test run .github/codeql/custom-queries/
+        "${CODEQL_DIST}/codeql" test run .github/codeql/custom-queries/
 
   analyze:
     name: Analyze javascript
