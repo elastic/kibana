@@ -8,6 +8,11 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+export const SELECTOR_LIST_HEADER_HEIGHT = 57;
+const SELECTOR_POPOVER_MAX_HEIGHT = 300;
+// The EuiSelectable height prop only limits the list content's height, so we need to subtract our header height
+export const SELECTOR_LIST_MAX_HEIGHT = SELECTOR_POPOVER_MAX_HEIGHT - SELECTOR_LIST_HEADER_HEIGHT;
+
 export const useSelectorListStyles = ({ listId }: { listId: string }) => {
   const { euiTheme } = useEuiTheme();
   return css`

@@ -8,10 +8,8 @@
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelectable,
   useEuiTheme,
 } from '@elastic/eui';
@@ -25,12 +23,12 @@ import { useHasActiveConversation } from '../../../../../hooks/use_conversation'
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { RobotIcon } from '../../../../common/icons/robot';
-import { useSelectorListStyles } from '../input_actions.styles';
+import { SELECTOR_LIST_MAX_HEIGHT, useSelectorListStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
+import { SelectorListHeader } from '../selector_list_header';
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
-const AGENT_SELECT_POPOVER_MAX_HEIGHT = 243;
 
 const selectAgentAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.agentSelector.selectAgent.ariaLabel',
@@ -78,38 +76,36 @@ const AgentSelectPopoverButton: React.FC<{
   );
 };
 
-const AgentPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
+const AgentListHeader: React.FC<{ search: ReactNode }> = ({ search }) => {
   const { createOnechatUrl } = useNavigation();
   const createAgentHref = createOnechatUrl(appPaths.agents.new);
   const manageAgentsHref = createOnechatUrl(appPaths.agents.list);
   return (
-    <EuiPopoverTitle paddingSize="s">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow={true}>{search}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="plus"
-            color="text"
-            aria-label={createAgentAriaLabel}
-            href={createAgentHref}
-          >
-            <FormattedMessage
-              id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
-              defaultMessage="New"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            size="m"
-            iconType="gear"
-            color="text"
-            aria-label={manageAgentsAriaLabel}
-            href={manageAgentsHref}
+    <SelectorListHeader>
+      <EuiFlexItem grow={true}>{search}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          iconType="plus"
+          color="text"
+          aria-label={createAgentAriaLabel}
+          href={createAgentHref}
+        >
+          <FormattedMessage
+            id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
+            defaultMessage="New"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPopoverTitle>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          size="m"
+          iconType="gear"
+          color="text"
+          aria-label={manageAgentsAriaLabel}
+          href={manageAgentsHref}
+        />
+      </EuiFlexItem>
+    </SelectorListHeader>
   );
 };
 
@@ -177,11 +173,11 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
           rowHeight: AGENT_OPTION_ROW_HEIGHT,
           css: selectorListStyles,
         }}
-        height={AGENT_SELECT_POPOVER_MAX_HEIGHT}
+        height={SELECTOR_LIST_MAX_HEIGHT}
       >
         {(list, search) => (
           <div>
-            <AgentPopoverTitle search={search} />
+            <AgentListHeader search={search} />
             {list}
           </div>
         )}

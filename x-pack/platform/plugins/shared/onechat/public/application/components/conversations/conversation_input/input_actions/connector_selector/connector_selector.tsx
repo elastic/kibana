@@ -9,11 +9,9 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonIcon,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelectable,
   EuiText,
   useEuiTheme,
@@ -28,8 +26,9 @@ import { useSendMessage } from '../../../../../context/send_message/send_message
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { useSelectorListStyles } from '../input_actions.styles';
+import { SELECTOR_LIST_MAX_HEIGHT, useSelectorListStyles } from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
+import { SelectorListHeader } from '../selector_list_header';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
@@ -79,22 +78,21 @@ const ConnectorPopoverButton: React.FC<{
   );
 };
 
-const ConnectorPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
+const ConnectorListHeader: React.FC<{ search: ReactNode }> = ({ search }) => {
   const { navigateToManageConnectors } = useNavigation();
   return (
-    <EuiPopoverTitle paddingSize="s">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={true}>{search}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="gear"
-            color="text"
-            aria-label={manageConnectorsAriaLabel}
-            onClick={navigateToManageConnectors}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPopoverTitle>
+    <SelectorListHeader>
+      <EuiFlexItem grow={true}>{search}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          size="m"
+          iconType="gear"
+          color="text"
+          aria-label={manageConnectorsAriaLabel}
+          onClick={navigateToManageConnectors}
+        />
+      </EuiFlexItem>
+    </SelectorListHeader>
   );
 };
 
@@ -236,11 +234,12 @@ export const ConnectorSelector: React.FC<{}> = () => {
             />
           );
         }}
+        height={SELECTOR_LIST_MAX_HEIGHT}
         listProps={{ id: connectorListId, css: selectorListStyles }}
       >
         {(list, search) => (
           <>
-            <ConnectorPopoverTitle search={search} />
+            <ConnectorListHeader search={search} />
             {list}
           </>
         )}
