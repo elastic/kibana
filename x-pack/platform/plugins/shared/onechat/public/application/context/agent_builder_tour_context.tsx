@@ -13,27 +13,39 @@ import React, {
   useEffect,
 } from 'react';
 
-import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText, type EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { storageKeys } from '../storage_keys';
 import { useConversationContext } from './conversation/conversation_context';
 
+export type TourStepProps = Pick<
+  EuiTourStepProps,
+  | 'maxWidth'
+  | 'isStepOpen'
+  | 'title'
+  | 'content'
+  | 'onFinish'
+  | 'step'
+  | 'stepsTotal'
+  | 'anchorPosition'
+  | 'footerAction'
+> & { anchor?: undefined };
+
 interface AgentBuilderTourContextValue {
   isTourActive: boolean;
-  setIsTourActive: React.Dispatch<React.SetStateAction<boolean>>;
-  currentStep: number;
-  getStepProps: (step: number) => TourStep | undefined;
-  tourConfig: {
-    tourPopoverWidth: number;
-  };
+  getStepProps: (step: number) => TourStepProps | undefined;
 }
 
 const AgentBuilderTourContext = createContext<AgentBuilderTourContextValue | undefined>(undefined);
 
 const DEFAULT_STEP = 1;
+const TOUR_DELAY = 250; // 250ms
 
 const tourConfig = {
   tourPopoverWidth: 370,
+  anchorPosition: 'downCenter' as PopoverAnchorPosition,
+  maxSteps: 4,
 };
 
 const labels = {
@@ -54,27 +66,28 @@ const labels = {
       defaultMessage: 'I’ll answer using this LLM. Switch to another model you have setup.',
     }),
   },
+  // TODO: Add step 3 once we have prompts.
+  // step3: {
+  //   title: i18n.translate('xpack.onechat.agentBuilderTour.step3', {
+  //     defaultMessage: 'Reuse your prompts ✍️',
+  //   }),
+  //   content: i18n.translate('xpack.onechat.agentBuilderTour.step3Content', {
+  //     defaultMessage: 'Store your favorite queries here. Pick one to drop it into the chat.',
+  //   }),
+  // },
   step3: {
     title: i18n.translate('xpack.onechat.agentBuilderTour.step3', {
-      defaultMessage: 'Reuse your prompts ✍️',
+      defaultMessage: 'Your conversations 💬',
     }),
     content: i18n.translate('xpack.onechat.agentBuilderTour.step3Content', {
-      defaultMessage: 'Store your favorite queries here. Pick one to drop it into the chat.',
+      defaultMessage: 'Come back to earlier chats or jump between them from here.',
     }),
   },
   step4: {
     title: i18n.translate('xpack.onechat.agentBuilderTour.step4', {
-      defaultMessage: 'Your conversations 💬',
-    }),
-    content: i18n.translate('xpack.onechat.agentBuilderTour.step4Content', {
-      defaultMessage: 'Come back to earlier chats or jump between them from here.',
-    }),
-  },
-  step5: {
-    title: i18n.translate('xpack.onechat.agentBuilderTour.step5', {
       defaultMessage: 'Additional actions ⚙️',
     }),
-    content: i18n.translate('xpack.onechat.agentBuilderTour.step5Content', {
+    content: i18n.translate('xpack.onechat.agentBuilderTour.step4Content', {
       defaultMessage:
         'Access conversation actions, agent controls, and management settings from here.',
     }),
@@ -90,11 +103,9 @@ const labels = {
   }),
 };
 
-interface TourStep {
-  step: number;
+interface TourStepConfig {
   title: string;
   content: React.ReactNode;
-  anchorRef: string;
   footerActions: React.ReactNode[];
 }
 
@@ -107,9 +118,20 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem(storageKeys.hasSeenAgentBuilderTour);
+    let timer: NodeJS.Timeout | undefined;
+
     if (!isEmbeddedContext && !hasSeenTour) {
-      setIsTourActive(true);
+      // We use a delay to ensure the tour is not triggered immediately when the page loads to ensure correct anchor positioning.
+      timer = setTimeout(() => {
+        setIsTourActive(true);
+      }, TOUR_DELAY);
     }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [isEmbeddedContext]);
 
   const handleMoveToNextStep = () => {
@@ -136,74 +158,65 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
     </EuiButton>,
   ];
 
-  const tourSteps: TourStep[] = [
-    {
-      step: 1,
+  const tourSteps: Record<number, TourStepConfig> = {
+    1: {
       title: labels.step1.title,
       content: (
         <EuiText size="s">
           <p>{labels.step1.content}</p>
         </EuiText>
       ),
-      anchorRef: 'step1Anchor',
       footerActions,
     },
-    {
-      step: 2,
+    2: {
       title: labels.step2.title,
       content: (
         <EuiText size="s">
           <p>{labels.step2.content}</p>
         </EuiText>
       ),
-      anchorRef: 'step2Anchor',
       footerActions,
     },
-    {
-      step: 3,
+    3: {
       title: labels.step3.title,
       content: (
         <EuiText size="s">
           <p>{labels.step3.content}</p>
         </EuiText>
       ),
-      anchorRef: 'step3Anchor',
       footerActions,
     },
-    {
-      step: 4,
+    4: {
       title: labels.step4.title,
       content: (
         <EuiText size="s">
           <p>{labels.step4.content}</p>
         </EuiText>
       ),
-      anchorRef: 'step4Anchor',
-      footerActions,
-    },
-    {
-      step: 5,
-      title: labels.step5.title,
-      content: (
-        <EuiText size="s">
-          <p>{labels.step5.content}</p>
-        </EuiText>
-      ),
-      anchorRef: 'step5Anchor',
       footerActions: footerActionsFinish,
     },
-  ];
-
-  const getStepProps = (step: number) => {
-    return tourSteps.find((s) => s.step === step);
   };
 
-  const contextValue = {
+  const getStepProps = (step: number): TourStepProps | undefined => {
+    const stepConfig = tourSteps[step];
+    if (!stepConfig) return undefined;
+
+    return {
+      maxWidth: tourConfig.tourPopoverWidth,
+      isStepOpen: currentStep === step && isTourActive,
+      title: stepConfig.title,
+      content: stepConfig.content,
+      onFinish: handleFinishTour,
+      step,
+      stepsTotal: tourConfig.maxSteps,
+      anchorPosition: tourConfig.anchorPosition,
+      footerAction: stepConfig.footerActions,
+    };
+  };
+
+  const contextValue: AgentBuilderTourContextValue = {
     isTourActive,
-    setIsTourActive,
-    currentStep,
     getStepProps,
-    tourConfig,
   };
 
   return (
