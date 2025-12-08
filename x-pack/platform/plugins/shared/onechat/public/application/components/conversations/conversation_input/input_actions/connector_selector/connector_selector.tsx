@@ -107,7 +107,7 @@ const ConnectorOption: React.FC<{
     return null;
   }
   return (
-    <EuiText size="s" color="subdued">
+    <EuiText size="s">
       <h4>
         <EuiHighlight search={searchValue}>{connectorName}</EuiHighlight>
       </h4>
