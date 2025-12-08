@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
@@ -41,6 +41,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
     onSuccess,
     observables = [],
   }) => {
+    const { euiTheme } = useEuiTheme();
     const handleCancel = onClose || noop;
     const handleOnSuccess = onSuccess || noop;
 
