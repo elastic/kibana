@@ -15,6 +15,8 @@ import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import { groupBy } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { ExceptionItemImportError } from '@kbn/lists-plugin/server/exception_item_import_error';
 import { stringify } from '../../../endpoint/utils/stringify';
 import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
@@ -429,5 +431,49 @@ export class BaseValidator {
       `Item not found in space [${activeSpaceId}]`,
       404
     );
+  }
+
+  protected async validatePreImportItems(
+    items: PromiseFromStreams,
+    validator: (item: ExceptionItemLikeOptions) => Promise<void>
+  ): Promise<void> {
+    const validatedItems: PromiseFromStreams['items'] = [];
+
+    for (const _item of items.items) {
+      if (_item instanceof Error) {
+        validatedItems.push(_item);
+      } else {
+        const item: ExceptionItemLikeOptions = {
+          name: _item.name,
+          description: _item.description,
+          entries: _item.entries,
+          osTypes: _item.os_types,
+          tags: _item.tags,
+          namespaceType: _item.namespace_type,
+          comments: _item.comments,
+          listId: _item.list_id,
+        };
+
+        try {
+          await validator(item);
+
+          validatedItems.push({
+            ..._item,
+
+            name: item.name,
+            description: item.description,
+            entries: item.entries,
+            os_types: item.osTypes,
+            tags: item.tags,
+            namespace_type: item.namespaceType,
+            list_id: item.listId ?? _item.list_id,
+          });
+        } catch (error) {
+          validatedItems.push(new ExceptionItemImportError(error, _item.list_id, _item.item_id));
+        }
+      }
+    }
+
+    items.items = validatedItems;
   }
 }

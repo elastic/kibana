@@ -8,6 +8,7 @@
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { buildSpaceOwnerIdTag } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -82,6 +83,13 @@ export class BaseValidatorMock extends BaseValidator {
 
   _validateCanReadItemInActiveSpace(currentSavedItem: ExceptionListItemSchema): Promise<void> {
     return this.validateCanReadItemInActiveSpace(currentSavedItem);
+  }
+
+  _validatePreImportItems(
+    items: PromiseFromStreams,
+    validator: (item: ExceptionItemLikeOptions) => Promise<void>
+  ): Promise<void> {
+    return this.validatePreImportItems(items, validator);
   }
 }
 
