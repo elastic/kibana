@@ -25,7 +25,6 @@ import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 
-// Constants
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
 const CATEGORY_TO_INTEGRATION_FILTER: Record<string, string> = {
@@ -39,14 +38,12 @@ const CATEGORY_TO_INTEGRATION_FILTER: Record<string, string> = {
 const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
 
-// Types
 interface CategoryCoverageData {
   category: string;
   hasCoverage: boolean;
   totalDocs: number;
 }
 
-// Helper functions
 const buildMissingCategoriesDescription = (
   missingCategories: CategoryCoverageData[],
   getCategoryUrl: (category: string) => string
@@ -103,7 +100,6 @@ export const DataCoveragePanel: React.FC = () => {
     });
   }, [getReadinessCategories.data?.mainCategoriesMap]);
 
-  // Derive missing data state
   const missingCategories = useMemo(
     () => coverageData.filter((row) => !row.hasCoverage),
     [coverageData]
@@ -112,13 +108,11 @@ export const DataCoveragePanel: React.FC = () => {
   const hasMissingData = missingCategories.length > 0;
   const missingCategoriesCount = missingCategories.length;
 
-  // Build case description for missing integrations
   const caseDescription = useMemo(
     () => buildMissingCategoriesDescription(missingCategories, getCategoryIntegrationUrl),
     [missingCategories, getCategoryIntegrationUrl]
   );
 
-  // Handle creating a case for missing integrations
   const handleCreateCase = useCallback(() => {
     openNewCaseFlyout({
       title: i18n.translate(
@@ -132,7 +126,6 @@ export const DataCoveragePanel: React.FC = () => {
     });
   }, [openNewCaseFlyout, caseDescription]);
 
-  // Table column definitions
   const columns: Array<EuiBasicTableColumn<CategoryCoverageData>> = [
     {
       field: 'category',
@@ -210,9 +203,7 @@ export const DataCoveragePanel: React.FC = () => {
     },
   ];
 
-  // Handle viewing missing integrations
   const handleViewMissingIntegrations = useCallback(() => {
-    // Open integration pages in new tabs for each missing category
     missingCategories.forEach((category) => {
       const url = getCategoryIntegrationUrl(category.category);
       window.open(url, '_blank', 'noopener,noreferrer');
