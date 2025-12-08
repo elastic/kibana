@@ -13,7 +13,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import type { FindRuleTemplatesRequestQueryV1, FindRuleTemplatesResponseV1 } from '@kbn/alerting-plugin/common/routes/rule_template/apis/find';
+import type {
+  FindRuleTemplatesRequestQueryV1,
+  FindRuleTemplatesResponseV1,
+} from '@kbn/alerting-plugin/common/routes/rule_template/apis/find';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
@@ -87,10 +90,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     setCurrentPage(1); // Reset to first page when search changes
   }, []);
 
-  const { run: updateDebouncedSearch } = useDebounceFn(
-    updateSearchAndResetPage,
-    DEBOUNCE_OPTIONS
-  );
+  const { run: updateDebouncedSearch } = useDebounceFn(updateSearchAndResetPage, DEBOUNCE_OPTIONS);
 
   useEffect(() => {
     updateDebouncedSearch(searchString);
@@ -103,7 +103,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
       return;
     }
 
-    // we offload the searching to the API here which is a little different to how we fetch rule types. 
+    // we offload the searching to the API here which is a little different to how we fetch rule types.
     // this is appropriate since the number of templates may be large, and the API offers paginated search.
     const fetchTemplates = async () => {
       // Only show full loading state on initial load (page 1), otherwise just loading indicator on button
@@ -159,19 +159,16 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   }, [http, toasts, selectedMode, debouncedSearchString, currentPage]);
 
   // Enrich templates with rule type metadata
-  const templates = useMemo(
-    () => {
-      return rawTemplates.map((t) => {
-        const rt = ruleTypeIndex.get(t.ruleTypeId);
-        return {
-          ...t,
-          ruleTypeName: rt?.name,
-          producer: rt?.producer,
-        };
-      });
-    },
-    [rawTemplates, ruleTypeIndex]
-  );
+  const templates = useMemo(() => {
+    return rawTemplates.map((t) => {
+      const rt = ruleTypeIndex.get(t.ruleTypeId);
+      return {
+        ...t,
+        ruleTypeName: rt?.name,
+        producer: rt?.producer,
+      };
+    });
+  }, [rawTemplates, ruleTypeIndex]);
 
   const hasMoreTemplates = rawTemplates.length < totalTemplates;
 

@@ -69,8 +69,8 @@ export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) 
     return;
   }
 
-  return buildFilter({ filters: tags, field: 'tags', operator: 'or', type});
-}
+  return buildFilter({ filters: tags, field: 'tags', operator: 'or', type });
+};
 
 /**
  * Combines Kuery nodes and accepts an array with a mixture of undefined and KueryNodes. This will filter out the undefined

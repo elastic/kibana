@@ -333,9 +333,10 @@ describe('RuleTypeModalComponent', () => {
       // Mock a pending promise that we can control
       let resolveTemplates: any;
       mockHttpGet.mockImplementation(
-        () => new Promise((resolve) => {
-          resolveTemplates = () => resolve(mockTemplatesResponse);
-        })
+        () =>
+          new Promise((resolve) => {
+            resolveTemplates = () => resolve(mockTemplatesResponse);
+          })
       );
 
       render(
@@ -582,7 +583,7 @@ describe('RuleTypeModalComponent', () => {
       // Verify templates are enriched with rule type names from registeredRuleTypes
       // Template 1 has rule_type_id: 'ruleType1', should show enriched name 'ruleType1'
       expect(screen.getByText('ruleType1')).toBeInTheDocument();
-      // Template 2 has rule_type_id: 'ruleType3', should show enriched name 'ruleType3'  
+      // Template 2 has rule_type_id: 'ruleType3', should show enriched name 'ruleType3'
       expect(screen.getByText('ruleType3')).toBeInTheDocument();
     });
   });

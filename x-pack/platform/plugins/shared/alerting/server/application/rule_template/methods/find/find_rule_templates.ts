@@ -15,7 +15,12 @@ import type { FindRuleTemplatesParams } from './types';
 import { findRuleTemplatesParamsSchema } from './schema';
 import { transformRawRuleTemplateToRuleTemplate } from '../../transforms/transform_raw_rule_template_to_rule_template';
 import type { RuleTemplate } from '../../types';
-import { buildRuleTypeIdsFilter, buildTagsFilter, combineFilters, combineFilterWithAuthorizationFilter } from '../../../../rules_client/common/filters';
+import {
+  buildRuleTypeIdsFilter,
+  buildTagsFilter,
+  combineFilters,
+  combineFilterWithAuthorizationFilter,
+} from '../../../../rules_client/common/filters';
 import { mapSortField } from '../../../../rules_client/common';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ensureFieldIsSafeForQuery } from '../../../../authorization/alerting_authorization_kuery';
@@ -38,7 +43,7 @@ export async function findRuleTemplates(
   }
 
   // we follow the same auth patterns as in the find rules API, however the implementation is slightly
-  // different because rule templates do not have consumers. If the user has access to a rule type for 
+  // different because rule templates do not have consumers. If the user has access to a rule type for
   // at least one consumer, then all the templates of that rule type should be returned.
   const authorizedRuleTypes = await context.authorization.getAllAuthorizedRuleTypesFindOperation({
     authorizationEntity: AlertingAuthorizationEntity.Rule,
@@ -60,18 +65,12 @@ export async function findRuleTemplates(
     })
   );
 
-  const {
-    ruleTypeId,
-    tags,
-    perPage,
-    page,
-    search,
-    defaultSearchOperator,
-    sortField,
-    sortOrder,
-  } = params;
+  const { ruleTypeId, tags, perPage, page, search, defaultSearchOperator, sortField, sortOrder } =
+    params;
 
-  const ruleTypeFilter = ruleTypeId ? buildRuleTypeIdsFilter([ruleTypeId], RULE_TEMPLATE_SAVED_OBJECT_TYPE) : undefined;
+  const ruleTypeFilter = ruleTypeId
+    ? buildRuleTypeIdsFilter([ruleTypeId], RULE_TEMPLATE_SAVED_OBJECT_TYPE)
+    : undefined;
   const tagsFilter = tags ? buildTagsFilter(tags, RULE_TEMPLATE_SAVED_OBJECT_TYPE) : undefined;
   const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter], 'and');
 
@@ -80,9 +79,9 @@ export async function findRuleTemplates(
     authorizationFilter as KueryNode
   );
 
-  // aside from rule type, these are the only mapped fields. 
-  // it doesn't make much sense to expose a param to customize this yet. 
-  // we should add 'description' here when it's available. 
+  // aside from rule type, these are the only mapped fields.
+  // it doesn't make much sense to expose a param to customize this yet.
+  // we should add 'description' here when it's available.
   const searchFields = ['name', 'tags'];
 
   const {

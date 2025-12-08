@@ -31,7 +31,8 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
       },
     })
   ),
-  default_search_operator: schema.maybe(schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
+  default_search_operator: schema.maybe(
+    schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
       defaultValue: 'OR',
       meta: {
         description: 'The default operator to use for the simple_query_string.',

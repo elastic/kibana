@@ -111,12 +111,9 @@ export const TemplateList: React.FC<TemplateListProps> = ({
                   iconType="arrowDown"
                   data-test-subj="templateList-loadMore"
                 >
-                  {i18n.translate(
-                    'responseOpsRuleForm.components.templateList.loadMoreButton',
-                    {
-                      defaultMessage: 'Load more',
-                    }
-                  )}
+                  {i18n.translate('responseOpsRuleForm.components.templateList.loadMoreButton', {
+                    defaultMessage: 'Load more',
+                  })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

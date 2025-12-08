@@ -1025,7 +1025,9 @@ export const RulesList = ({
             }}
             onSelectTemplate={(templateId) => {
               navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(encodeURIComponent(templateId))}`,
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
               });
             }}
             http={http}

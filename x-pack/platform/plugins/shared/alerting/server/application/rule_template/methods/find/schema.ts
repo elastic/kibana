@@ -11,9 +11,7 @@ export const findRuleTemplatesParamsSchema = schema.object({
   perPage: schema.maybe(schema.number()),
   page: schema.maybe(schema.number()),
   search: schema.maybe(schema.string()),
-  defaultSearchOperator: schema.maybe(
-    schema.oneOf([schema.literal('AND'), schema.literal('OR')])
-  ),
+  defaultSearchOperator: schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')])),
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   ruleTypeId: schema.maybe(schema.string()),

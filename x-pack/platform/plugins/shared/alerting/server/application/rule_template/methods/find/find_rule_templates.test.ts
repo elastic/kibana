@@ -111,7 +111,7 @@ describe('findRuleTemplates', () => {
       sortOrder: undefined,
       filter: expect.any(Object), // Authorization filter is always applied
     });
-    
+
     expect(authorization.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
       authorizationEntity: 'rule',
     });
@@ -134,7 +134,7 @@ describe('findRuleTemplates', () => {
     expect(result.total).toBe(1);
     expect(result.data).toHaveLength(1);
     expect(result.data[0].ruleTypeId).toBe('test.rule.type');
-    
+
     // Verify the filter was built correctly for the rule type
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -160,7 +160,7 @@ describe('findRuleTemplates', () => {
     expect(result.total).toBe(1);
     expect(result.data).toHaveLength(1);
     expect(result.data[0].tags).toContain('tag1');
-    
+
     // Verify the filter was built correctly for tags
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -344,7 +344,9 @@ describe('findRuleTemplates', () => {
     test('filters templates to only authorized rule types', async () => {
       // User only has access to test.rule.type
       authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }]])
+        new Map([
+          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
+        ])
       );
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
@@ -403,7 +405,9 @@ describe('findRuleTemplates', () => {
 
     test('throws 403 if unauthorized template slips through filter', async () => {
       authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }]])
+        new Map([
+          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
+        ])
       );
 
       // Simulating a template with unauthorized rule type slipping through
@@ -429,7 +433,9 @@ describe('findRuleTemplates', () => {
 
     test('applies authorization filter combined with user filters', async () => {
       authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }]])
+        new Map([
+          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
+        ])
       );
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
