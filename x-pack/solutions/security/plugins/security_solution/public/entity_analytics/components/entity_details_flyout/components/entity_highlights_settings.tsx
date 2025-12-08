@@ -216,12 +216,12 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       showAnonymizedValues,
       onChangeShowAnonymizedValues,
       selectedConversationHasAnonymizedValues,
+      isAgentBuilderEnabled,
+      onAgentBuildAttachmentClick,
       setConnectorId,
       connectorId,
       showAssistantOverlay,
       closePopover,
-      isAgentBuilderEnabled,
-      openAgentBuilderFlyout,
     ]
   );
 
