@@ -213,6 +213,11 @@ const ContextMenu = React.memo(
         rowStatsFieldSummary?.terminals ?? [],
         esqlVariables
       );
+
+      if (typeof fieldParamDef !== 'string') {
+        return undefined;
+      }
+
       return dataView.fields.getByName(fieldParamDef ?? row.groupId);
     }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.terminals]);
 
