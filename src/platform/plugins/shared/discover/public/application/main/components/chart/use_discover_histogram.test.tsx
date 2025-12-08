@@ -511,6 +511,70 @@ describe('useDiscoverHistogram', () => {
         expect.objectContaining({ externalVisContext: visContext })
       );
     });
+
+    it('should call fetch when only breakdownField changes', async () => {
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      const stateContainer = getStateContainer();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { esql: 'from logs*' } },
+        })
+      );
+      stateContainer.dataState.fetchChart$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      expect(api.fetch).not.toHaveBeenCalled();
+      const abortController = new AbortController();
+      act(() => {
+        fetch$.next({ abortController });
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(1);
+      const breakdownField = 'host.name';
+      act(() => {
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { breakdownField },
+          })
+        );
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ breakdownField }));
+    });
+
+    it('should call fetch when only timeInterval changes', async () => {
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      const stateContainer = getStateContainer();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { language: 'kuery', query: 'test' } },
+        })
+      );
+      stateContainer.dataState.fetchChart$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      expect(api.fetch).not.toHaveBeenCalled();
+      const abortController = new AbortController();
+      act(() => {
+        fetch$.next({ abortController });
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(1);
+      const timeInterval = 'm';
+      act(() => {
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { interval: timeInterval },
+          })
+        );
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ timeInterval }));
+    });
   });
 
   describe('customization', () => {
