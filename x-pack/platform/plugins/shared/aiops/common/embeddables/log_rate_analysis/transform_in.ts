@@ -6,6 +6,7 @@
  */
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import type { Reference } from '@kbn/content-management-utils';
 import { LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-rate-analysis/constants';
 import type { LogRateAnalysisEmbeddableState, StoredLogRateAnalysisEmbeddableState } from './types';
@@ -14,7 +15,8 @@ export function transformIn(state: LogRateAnalysisEmbeddableState): {
   state: StoredLogRateAnalysisEmbeddableState;
   references: Reference[];
 } {
-  const { dataViewId, ...rest } = state;
+  const stateWithStoredTitles = transformTitlesIn(state);
+  const { dataViewId, ...rest } = stateWithStoredTitles;
   return {
     state: rest,
     references: dataViewId

@@ -6,15 +6,17 @@
  */
 
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import type { Reference } from '@kbn/content-management-utils';
-import type { OverviewStatsEmbeddableState } from './types';
+import type { OverviewStatsEmbeddableState, OverviewStatsStoredState } from './types';
 
 export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
   function transformIn(state: OverviewStatsEmbeddableState): {
-    state: OverviewStatsEmbeddableState;
+    state: OverviewStatsStoredState;
     references: Reference[];
   } {
-    const { enhancements, ...rest } = state;
+    const stateWithStoredTitles = transformTitlesIn(state);
+    const { enhancements, ...rest } = stateWithStoredTitles;
     const { enhancementsState, enhancementsReferences } = enhancements
       ? transformEnhancementsIn(enhancements)
       : { enhancementsState: undefined, enhancementsReferences: [] };

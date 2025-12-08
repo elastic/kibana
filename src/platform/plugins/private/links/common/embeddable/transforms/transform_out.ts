@@ -8,11 +8,12 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
+import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
-import { injectReferences } from './references';
 import { getOptions } from './get_options';
+import { injectReferences } from './references';
 
 export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
@@ -21,6 +22,7 @@ export function transformOut(
   const state = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
+  const stateWithApiTitles = transformTitlesOut(state);
 
   // inject saved object reference when by-reference
   const savedObjectRef = (references ?? []).find(
@@ -28,14 +30,14 @@ export function transformOut(
   );
   if (savedObjectRef) {
     return {
-      ...state,
+      ...stateWithApiTitles,
       savedObjectId: savedObjectRef.id,
     };
   }
 
   // inject dashboard references when by-value
   return {
-    ...state,
+    ...stateWithApiTitles,
     links: injectReferences(state.links, references).map((link) => ({
       ...link,
       ...(link.options && { options: getOptions(link.type, link.options) }),

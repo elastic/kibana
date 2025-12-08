@@ -6,13 +6,10 @@
  */
 
 import type { SerializedTimeRange } from '@kbn/presentation-publishing';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+import type { SerializedTitles, StoredTitles } from '@kbn/presentation-publishing-schemas';
 
 export interface LogRateAnalysisEmbeddableState extends SerializedTitles, SerializedTimeRange {
   dataViewId?: string;
 }
 
-export type StoredLogRateAnalysisEmbeddableState = Omit<
-  LogRateAnalysisEmbeddableState,
-  'dataViewId'
->;
+export type StoredLogRateAnalysisEmbeddableState = StoredTitles & SerializedTimeRange;

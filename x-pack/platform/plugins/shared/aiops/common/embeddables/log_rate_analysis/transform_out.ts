@@ -6,6 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
 import { LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-rate-analysis/constants';
 import type { LogRateAnalysisEmbeddableState, StoredLogRateAnalysisEmbeddableState } from './types';
 
@@ -13,11 +14,12 @@ export function transformOut(
   state: StoredLogRateAnalysisEmbeddableState,
   references?: Reference[]
 ): LogRateAnalysisEmbeddableState {
+  const stateWithApiTitles = transformTitlesOut(state);
   const dataViewIdRef = references?.find(
     (ref) => ref.name === LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME
   );
   return {
-    ...state,
+    ...stateWithApiTitles,
     ...(dataViewIdRef && { dataViewId: dataViewIdRef.id }),
   };
 }

@@ -8,10 +8,12 @@
  */
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { StoredTitles } from '@kbn/presentation-publishing-schemas';
 import type { SerializedVis, SerializedVisData } from '../../types';
 import type { VisualizeByReferenceState, VisualizeEmbeddableBaseState } from '../types';
 
 export type StoredVisualizeByReferenceState = VisualizeEmbeddableBaseState &
+  StoredTitles &
   Omit<VisualizeByReferenceState, 'savedObjectId'>;
 
 export type StoredVis = Omit<SerializedVis, 'data'> & {
@@ -21,9 +23,10 @@ export type StoredVis = Omit<SerializedVis, 'data'> & {
   };
 };
 
-export type StoredVisualizeByValueState = VisualizeEmbeddableBaseState & {
-  savedVis: StoredVis;
-};
+export type StoredVisualizeByValueState = VisualizeEmbeddableBaseState &
+  StoredTitles & {
+    savedVis: StoredVis;
+  };
 
 export type StoredVisualizeEmbeddableState =
   | StoredVisualizeByReferenceState

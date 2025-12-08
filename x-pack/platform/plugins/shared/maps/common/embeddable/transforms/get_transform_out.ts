@@ -7,16 +7,18 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { StoredMapEmbeddableState } from './types';
-import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
-import type { MapByValueState } from '../types';
+import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
+import type { MapByValueState } from '../types';
+import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import type { StoredMapEmbeddableState } from './types';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
   function transformOut(state: StoredMapEmbeddableState, references?: Reference[]) {
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
+    const stateWithApiTitles = transformTitlesOut(state);
+    const enhancementsState = stateWithApiTitles.enhancements
+      ? transformEnhancementsOut(stateWithApiTitles.enhancements, references ?? [])
       : undefined;
 
     // by ref
@@ -25,26 +27,26 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
     );
     if (savedObjectRef) {
       return {
-        ...state,
+        ...stateWithApiTitles,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
 
     // by value
-    if ((state as MapByValueState).attributes) {
+    if ((stateWithApiTitles as MapByValueState).attributes) {
       return {
-        ...state,
+        ...stateWithApiTitles,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         attributes: transformMapAttributesOut(
-          (state as MapByValueState).attributes,
+          (stateWithApiTitles as MapByValueState).attributes,
           references ?? []
         ),
       };
     }
 
     return {
-      ...state,
+      ...stateWithApiTitles,
       ...(enhancementsState ? { enhancements: enhancementsState } : {}),
     };
   }

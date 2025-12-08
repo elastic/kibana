@@ -9,15 +9,17 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
-import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
-import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import { injectVisReferences } from '../../references/inject_vis_references';
+import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
   function transformOut(state: StoredVisualizeEmbeddableState, references?: Reference[]) {
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
+    const stateWithApiTitles = transformTitlesOut(state);
+    const enhancementsState = stateWithApiTitles.enhancements
+      ? transformEnhancementsOut(stateWithApiTitles.enhancements, references ?? [])
       : undefined;
 
     // by ref
@@ -26,28 +28,28 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
     );
     if (savedObjectRef) {
       return {
-        ...state,
+        ...stateWithApiTitles,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
 
     // by value
-    if ((state as StoredVisualizeByValueState).savedVis) {
+    if ((stateWithApiTitles as StoredVisualizeByValueState).savedVis) {
       const savedVis = injectVisReferences(
-        (state as StoredVisualizeByValueState).savedVis,
+        (stateWithApiTitles as StoredVisualizeByValueState).savedVis,
         references ?? []
       );
 
       return {
-        ...state,
+        ...stateWithApiTitles,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedVis,
       };
     }
 
     return {
-      ...state,
+      ...stateWithApiTitles,
       ...(enhancementsState ? { enhancements: enhancementsState } : {}),
     };
   }

@@ -6,37 +6,48 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { Reference } from '@kbn/content-management-utils';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { ImageEmbeddableState } from '../server';
+import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
+import {
+  type StoredTitles,
+  transformTitlesIn,
+  transformTitlesOut,
+} from '@kbn/presentation-publishing-schemas';
+import type { ImageConfig, ImageEmbeddableState } from '../server';
+
+type StoredImageEmbeddableState = { imageConfig: ImageConfig } & StoredTitles & {
+    enhancements?: any;
+  };
 
 export function getTransforms(
   transformEnhancementsIn: EnhancementsRegistry['transformIn'],
   transformEnhancementsOut: EnhancementsRegistry['transformOut']
-) {
+): EmbeddableTransforms<StoredImageEmbeddableState, ImageEmbeddableState> {
   return {
     transformOutInjectsReferences: true,
     transformIn: (state: ImageEmbeddableState) => {
-      const { enhancementsState, enhancementsReferences } = state.enhancements
+      const stateWithStoredTitles = transformTitlesIn(state);
+      const { enhancementsState, enhancementsReferences } = stateWithStoredTitles.enhancements
         ? transformEnhancementsIn(state.enhancements)
         : { enhancementsState: undefined, enhancementsReferences: [] };
 
       return {
         state: {
-          ...state,
+          ...stateWithStoredTitles,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         },
         references: enhancementsReferences,
       };
     },
     transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
+      const stateWithApiTitles = transformTitlesOut(state);
       const enhancementsState = state.enhancements
-        ? transformEnhancementsOut(state.enhancements, references ?? [])
+        ? transformEnhancementsOut(stateWithApiTitles.enhancements, references ?? [])
         : undefined;
 
       return {
-        ...state,
+        ...stateWithApiTitles,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
       };
     },

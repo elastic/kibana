@@ -10,6 +10,7 @@
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
@@ -21,7 +22,7 @@ import { extract } from './search_inject_extract';
 
 export const SAVED_SEARCH_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-function isByRefState(state: SearchEmbeddableState): state is SearchEmbeddableByReferenceState {
+function isByRefState(state: object): state is SearchEmbeddableByReferenceState {
   return 'savedObjectId' in state;
 }
 
@@ -30,14 +31,17 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
-    const { enhancementsState, enhancementsReferences } = state.enhancements
-      ? transformEnhancementsIn(state.enhancements)
+    const stateWithStoredTitles = transformTitlesIn(state);
+
+    const { enhancementsState, enhancementsReferences } = stateWithStoredTitles.enhancements
+      ? transformEnhancementsIn(stateWithStoredTitles.enhancements)
       : { enhancementsState: undefined, enhancementsReferences: [] };
 
-    if (isByRefState(state)) {
-      const { savedObjectId, ...rest } = state;
+    if (isByRefState(stateWithStoredTitles)) {
+      const { savedObjectId, ...rest } = stateWithStoredTitles;
       return {
         state: {
+          ...stateWithStoredTitles,
           ...rest,
           ...(enhancementsState
             ? {
@@ -60,19 +64,19 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     // by value
     const { state: extractedState, references } = extract({
       type: SavedSearchType,
-      attributes: state.attributes,
+      attributes: (stateWithStoredTitles as StoredSearchEmbeddableByValueState).attributes,
     });
 
     return {
       state: {
-        ...state,
+        ...stateWithStoredTitles,
         ...(enhancementsState
           ? {
               enhancements: enhancementsState as StoredSearchEmbeddableByValueState['enhancements'],
             }
           : {}),
         attributes: {
-          ...state.attributes,
+          ...(stateWithStoredTitles as StoredSearchEmbeddableByValueState).attributes,
           ...extractedState.attributes,
           // discover session stores references as part of attributes
           references,

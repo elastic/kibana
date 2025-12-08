@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
 import { CHANGE_POINT_CHART_DATA_VIEW_REF_NAME } from '@kbn/aiops-change-point-detection/constants';
+import type { Reference } from '@kbn/content-management-utils';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import type { ChangePointEmbeddableState, StoredChangePointEmbeddableState } from './types';
 
 export function transformIn(state: ChangePointEmbeddableState): {
   state: StoredChangePointEmbeddableState;
   references: Reference[];
 } {
-  const { dataViewId, ...rest } = state;
+  const stateWithStoredTitles = transformTitlesIn(state);
+  const { dataViewId, ...rest } = stateWithStoredTitles;
   return {
     state: rest,
     references: dataViewId

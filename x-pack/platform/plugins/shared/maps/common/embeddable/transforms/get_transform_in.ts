@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { Reference } from '@kbn/content-management-utils';
-import type { MapByReferenceState, MapByValueState, MapEmbeddableState } from '../types';
-import type { StoredMapEmbeddableState } from './types';
+import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesIn } from '../../content_management/transform_map_attributes_in';
+import type { MapByReferenceState, MapByValueState, MapEmbeddableState } from '../types';
+import type { StoredMapEmbeddableState } from './types';
 
 export const MAP_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
@@ -19,13 +20,14 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     state: StoredMapEmbeddableState;
     references: Reference[];
   } {
-    const { enhancementsState, enhancementsReferences } = state.enhancements
-      ? transformEnhancementsIn(state.enhancements)
+    const stateWithStoredTitles = transformTitlesIn(state);
+    const { enhancementsState, enhancementsReferences } = stateWithStoredTitles.enhancements
+      ? transformEnhancementsIn(stateWithStoredTitles.enhancements)
       : { enhancementsState: undefined, enhancementsReferences: [] };
 
     // by ref
-    if ((state as MapByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = state as MapByReferenceState;
+    if ((stateWithStoredTitles as MapByReferenceState).savedObjectId) {
+      const { savedObjectId, ...rest } = stateWithStoredTitles as MapByReferenceState;
       return {
         state: {
           ...rest,
@@ -43,14 +45,14 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     }
 
     // by value
-    if ((state as MapByValueState).attributes) {
+    if ((stateWithStoredTitles as MapByValueState).attributes) {
       const { attributes, references } = transformMapAttributesIn(
-        (state as MapByValueState).attributes
+        (stateWithStoredTitles as MapByValueState).attributes
       );
 
       return {
         state: {
-          ...state,
+          ...stateWithStoredTitles,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
           attributes,
         } as StoredMapEmbeddableState,
@@ -60,7 +62,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
 
     return {
       state: {
-        ...state,
+        ...stateWithStoredTitles,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
       } as StoredMapEmbeddableState,
       references: enhancementsReferences,

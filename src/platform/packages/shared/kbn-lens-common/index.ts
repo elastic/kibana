@@ -243,6 +243,7 @@ export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
   LensSerializedState,
+  LensStoredState,
   LensSerializedSharedState,
   LensByReferenceInput,
   LensSavedObjectAttributes,

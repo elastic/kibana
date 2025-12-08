@@ -6,6 +6,7 @@
  */
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import type { Reference } from '@kbn/content-management-utils';
 import { PATTERN_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { PatternAnalysisEmbeddableState, StoredPatternAnalysisEmbeddableState } from './types';
@@ -14,7 +15,8 @@ export function transformIn(state: PatternAnalysisEmbeddableState): {
   state: StoredPatternAnalysisEmbeddableState;
   references: Reference[];
 } {
-  const { dataViewId, ...rest } = state;
+  const stateWithStoredTitles = transformTitlesIn(state);
+  const { dataViewId, ...rest } = stateWithStoredTitles;
   return {
     state: rest,
     references: dataViewId

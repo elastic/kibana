@@ -8,7 +8,8 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTimeRange } from '@kbn/presentation-publishing';
+import type { SerializedTitles, StoredTitles } from '@kbn/presentation-publishing-schemas';
 import type {
   SavedSearchAttributes,
   SavedSearchByValueAttributes,
@@ -27,8 +28,7 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
-type SearchEmbeddableBaseState = SerializedTitles &
-  SerializedTimeRange &
+type SearchEmbeddableBaseState = SerializedTimeRange &
   Partial<DynamicActionsSerializedState> &
   EditableSavedSearchAttributes & {
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
@@ -42,7 +42,8 @@ export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
   savedObjectId: string;
 };
 
-export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;
+export type SearchEmbeddableState = SerializedTitles &
+  (SearchEmbeddableByValueState | SearchEmbeddableByReferenceState);
 
 export type StoredSearchEmbeddableByValueState = SearchEmbeddableByValueState;
 
@@ -51,6 +52,5 @@ export type StoredSearchEmbeddableByReferenceState = Omit<
   'nonPersistedDisplayOptions' | 'savedObjectId'
 >;
 
-export type StoredSearchEmbeddableState =
-  | StoredSearchEmbeddableByValueState
-  | StoredSearchEmbeddableByReferenceState;
+export type StoredSearchEmbeddableState = StoredTitles &
+  (StoredSearchEmbeddableByValueState | StoredSearchEmbeddableByReferenceState);
