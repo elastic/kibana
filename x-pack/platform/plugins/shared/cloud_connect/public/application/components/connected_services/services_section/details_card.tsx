@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../../app_context';
 
 export interface ServiceCardProps {
+  key?: string;
   title: string;
   enabled: boolean;
   supported?: boolean;
@@ -49,6 +50,7 @@ export interface ServiceCardProps {
 }
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
+  key: serviceKey,
   title,
   enabled,
   supported = true,
@@ -67,7 +69,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   subscriptionRequired = false,
   hasActiveSubscription = true,
 }) => {
-  const { hasConfigurePermission } = useCloudConnectedAppContext();
+  const { hasConfigurePermission, telemetryClient } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = () => setIsPopoverOpen(false);
@@ -232,7 +234,18 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
-                onClick={onOpen}
+                onClick={(e) => {
+                  // Track telemetry for opening service
+                  if (serviceKey) {
+                    telemetryClient.trackLinkClicked({
+                      destination_type: 'service_portal',
+                      service_type: serviceKey,
+                    });
+                  }
+                  if (onOpen) {
+                    onOpen();
+                  }
+                }}
                 disabled={isLoading}
                 isLoading={isLoading}
                 data-test-subj="serviceCardOpenButton"
@@ -322,7 +335,20 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           <EuiText size="s">
             {description}{' '}
             {learnMoreUrl && (
-              <EuiLink href={learnMoreUrl} target="_blank" external>
+              <EuiLink
+                href={learnMoreUrl}
+                target="_blank"
+                external
+                onClick={() => {
+                  // Track telemetry for learn more link
+                  if (serviceKey) {
+                    telemetryClient.trackLinkClicked({
+                      destination_type: 'service_documentation',
+                      service_type: serviceKey,
+                    });
+                  }
+                }}
+              >
                 <FormattedMessage
                   id="xpack.cloudConnect.connectedServices.service.learnMore"
                   defaultMessage="Learn more"

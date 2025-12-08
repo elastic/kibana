@@ -12,6 +12,7 @@ import { CloudConnectedAppContextProvider } from './app_context';
 import { CloudConnectedAppMain } from './app';
 import { apiService } from '../lib/api';
 import type { CloudConnectedAppComponentProps } from '../types';
+import type { CloudConnectTelemetryClient } from '../telemetry/client';
 
 const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   chrome,
@@ -21,10 +22,20 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   notifications,
   history,
   cloudUrl,
+  telemetryClient,
 }) => {
   return (
     <CloudConnectedAppContextProvider
-      value={{ chrome, application, http, docLinks, notifications, history, cloudUrl }}
+      value={{
+        chrome,
+        application,
+        http,
+        docLinks,
+        notifications,
+        history,
+        cloudUrl,
+        telemetryClient,
+      }}
     >
       <CloudConnectedAppMain />
     </CloudConnectedAppContextProvider>
@@ -34,7 +45,8 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
 export const CloudConnectedApp = (
   core: CoreStart,
   params: AppMountParameters,
-  cloudUrl: string
+  cloudUrl: string,
+  telemetryClient: CloudConnectTelemetryClient
 ) => {
   apiService.setup(core.http);
 
@@ -48,6 +60,7 @@ export const CloudConnectedApp = (
         notifications={core.notifications}
         history={params.history}
         cloudUrl={cloudUrl}
+        telemetryClient={telemetryClient}
       />
     ),
     params.element

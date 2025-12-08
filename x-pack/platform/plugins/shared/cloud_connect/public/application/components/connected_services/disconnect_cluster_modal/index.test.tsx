@@ -10,11 +10,28 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DisconnectClusterModal } from '.';
+import { CloudConnectedAppContextProvider } from '../../../app_context';
+
+const mockTelemetryClient = {
+  trackClusterConnected: jest.fn(),
+  trackClusterDisconnected: jest.fn(),
+  trackServiceEnabled: jest.fn(),
+  trackServiceDisabled: jest.fn(),
+  trackLinkClicked: jest.fn(),
+};
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>
-      {component}
+      <CloudConnectedAppContextProvider
+        value={
+          {
+            telemetryClient: mockTelemetryClient,
+          } as any
+        }
+      >
+        {component}
+      </CloudConnectedAppContextProvider>
     </IntlProvider>
   );
 };
@@ -147,7 +164,15 @@ describe('DisconnectClusterModal', () => {
       // Start with isLoading false, then set to true
       rerender(
         <IntlProvider locale="en" messages={{}}>
-          <DisconnectClusterModal {...defaultProps} onConfirm={onConfirm} isLoading={true} />
+          <CloudConnectedAppContextProvider
+            value={
+              {
+                telemetryClient: mockTelemetryClient,
+              } as any
+            }
+          >
+            <DisconnectClusterModal {...defaultProps} onConfirm={onConfirm} isLoading={true} />
+          </CloudConnectedAppContextProvider>
         </IntlProvider>
       );
 

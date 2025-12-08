@@ -39,7 +39,7 @@ interface ConnectionWizardProps {
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, clusterConfig, cloudUrl } = useCloudConnectedAppContext();
+  const { docLinks, clusterConfig, cloudUrl, telemetryClient } = useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,10 +63,23 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     }
 
     if (data?.success) {
+      telemetryClient.trackClusterConnected();
       onConnect();
     }
 
     setIsLoading(false);
+  };
+
+  const handleSignUpClick = () => {
+    telemetryClient.trackLinkClicked({
+      destination_type: 'cloud_signup',
+    });
+  };
+
+  const handleLoginClick = () => {
+    telemetryClient.trackLinkClicked({
+      destination_type: 'cloud_login',
+    });
   };
 
   const step1 = {
@@ -88,6 +101,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               target="_blank"
               iconType="popout"
               iconSide="right"
+              onClick={handleSignUpClick}
               data-test-subj="connectionWizardSignUpButton"
             >
               {SIGN_UP_BUTTON}
@@ -99,6 +113,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               target="_blank"
               iconType="popout"
               iconSide="right"
+              onClick={handleLoginClick}
               data-test-subj="connectionWizardLoginButton"
             >
               {LOGIN_BUTTON}

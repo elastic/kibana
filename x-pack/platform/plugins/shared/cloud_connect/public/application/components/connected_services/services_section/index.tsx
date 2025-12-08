@@ -36,7 +36,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     showDisableModal,
     closeDisableModal,
     handleEnableServiceByUrl,
-  } = useServiceActions(onServiceUpdate);
+  } = useServiceActions({ onServiceUpdate, services });
 
   // Check if there's an active subscription (active or trial)
   const hasActiveSubscription = subscription === 'active' || subscription === 'trial';
@@ -96,7 +96,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       enableServiceByUrl: services.auto_ops?.metadata?.connect_url,
       onEnable:
         services.auto_ops?.support?.supported && services.auto_ops?.metadata?.connect_url
-          ? () => handleEnableServiceByUrl(services.auto_ops!.metadata!.connect_url!)
+          ? () => handleEnableServiceByUrl('auto_ops', services.auto_ops!.metadata!.connect_url!)
           : undefined,
       onDisable: () =>
         showDisableModal(

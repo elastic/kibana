@@ -19,6 +19,7 @@ import type {
   CloudConnectedSetupDeps,
   CloudConnectConfig,
 } from './types';
+import { CloudConnectTelemetryService } from './telemetry/service';
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 
@@ -26,6 +27,7 @@ export class CloudConnectedPlugin
   implements Plugin<CloudConnectedPluginSetup, CloudConnectedPluginStart, CloudConnectedSetupDeps>
 {
   private readonly config: CloudConnectConfig;
+  private readonly telemetry = new CloudConnectTelemetryService();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<CloudConnectConfig>();
@@ -38,8 +40,13 @@ export class CloudConnectedPlugin
       return {};
     }
 
+    // Setup telemetry
+    this.telemetry.setup(core.analytics);
+
     // Register the app in the management section
     const cloudUrl = this.config.cloudUrl;
+    const telemetryClient = this.telemetry.getClient();
+
     core.application.register({
       id: 'cloud_connect',
       title: i18n.translate('xpack.cloudConnect.appTitle', {
@@ -51,7 +58,7 @@ export class CloudConnectedPlugin
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         const { CloudConnectedApp } = await import('./application/mount_plugin');
-        return CloudConnectedApp(coreStart, params, cloudUrl);
+        return CloudConnectedApp(coreStart, params, cloudUrl, telemetryClient);
       },
     });
 

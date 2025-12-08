@@ -9,16 +9,23 @@ import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import { apiService } from '../../../../lib/api';
+import type { CloudService, ServiceType } from '../../../../types';
 
 interface DisableModalService {
   key: string;
   name: string;
 }
 
-export const useServiceActions = (
-  onServiceUpdate: (serviceKey: string, enabled: boolean) => void
-) => {
-  const { notifications } = useCloudConnectedAppContext();
+interface UseServiceActionsParams {
+  onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
+  services: {
+    auto_ops?: CloudService;
+    eis?: CloudService;
+  };
+}
+
+export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActionsParams) => {
+  const { notifications, telemetryClient } = useCloudConnectedAppContext();
 
   // Tracks which service is currently being updated (for loading spinner)
   const [loadingService, setLoadingService] = useState<string | null>(null);
@@ -75,6 +82,19 @@ export const useServiceActions = (
       });
     }
 
+    // Track telemetry for service enable/disable
+    const service = services[serviceKey as ServiceType];
+    const telemetryProps = {
+      service_type: serviceKey as ServiceType,
+      region_id: service?.config?.region_id,
+    };
+
+    if (enabled) {
+      telemetryClient.trackServiceEnabled(telemetryProps);
+    } else {
+      telemetryClient.trackServiceDisabled(telemetryProps);
+    }
+
     setLoadingService(null);
     // Optimistically update the UI
     onServiceUpdate(serviceKey, enabled);
@@ -100,7 +120,13 @@ export const useServiceActions = (
     setDisableModalService(null);
   };
 
-  const handleEnableServiceByUrl = (url: string) => {
+  const handleEnableServiceByUrl = (serviceKey: string, url: string) => {
+    // Track telemetry for external link click to enable service
+    telemetryClient.trackLinkClicked({
+      destination_type: 'service_enable_url',
+      service_type: serviceKey as ServiceType,
+    });
+
     window.open(url, '_blank');
   };
 

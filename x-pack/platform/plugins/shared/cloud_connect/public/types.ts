@@ -8,6 +8,7 @@
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudConnectTelemetryClient } from './telemetry/client';
 
 export interface CloudConnectedPluginSetup {
   cloudUrl?: string;
@@ -46,6 +47,7 @@ export interface CloudConnectedAppComponentProps {
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
   cloudUrl: string;
+  telemetryClient: CloudConnectTelemetryClient;
 }
 
 export interface ServiceMetadata {
@@ -93,3 +95,6 @@ export interface ClusterDetails {
     eis?: CloudService;
   };
 }
+
+// Utility type to extract service keys from ClusterDetails
+export type ServiceType = keyof ClusterDetails['services'];

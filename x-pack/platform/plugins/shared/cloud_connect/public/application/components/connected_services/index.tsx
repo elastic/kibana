@@ -43,7 +43,8 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications, hasConfigurePermission, docLinks } = useCloudConnectedAppContext();
+  const { notifications, hasConfigurePermission, docLinks, telemetryClient } =
+    useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -142,7 +143,17 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
             defaultMessage="This cluster is connected to an Elastic Cloud organization. {learnMore}"
             values={{
               learnMore: (
-                <EuiLink href={docLinks.links.cloud.cloudConnect} target="_blank" external>
+                <EuiLink
+                  href={docLinks.links.cloud.cloudConnect}
+                  target="_blank"
+                  external
+                  onClick={() => {
+                    // Track telemetry for learn more documentation link
+                    telemetryClient.trackLinkClicked({
+                      destination_type: 'cloud_connect_docs',
+                    });
+                  }}
+                >
                   <FormattedMessage
                     id="xpack.cloudConnect.connectedServices.learnMore"
                     defaultMessage="Learn more"

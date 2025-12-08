@@ -31,6 +31,13 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('ConnectionWizard', () => {
   const mockOnConnect = jest.fn();
+  const mockTelemetryClient = {
+    trackClusterConnected: jest.fn(),
+    trackClusterDisconnected: jest.fn(),
+    trackServiceEnabled: jest.fn(),
+    trackServiceDisabled: jest.fn(),
+    trackLinkClicked: jest.fn(),
+  };
   const mockContext: CloudConnectedAppContextValue = {
     chrome: {} as any,
     application: {} as any,
@@ -45,6 +52,7 @@ describe('ConnectionWizard', () => {
       },
     } as any,
     cloudUrl: 'https://cloud.elastic.co',
+    telemetryClient: mockTelemetryClient as any,
     clusterConfig: {
       hasEncryptedSOEnabled: true,
       license: { type: 'platinum', uid: 'license-123' },

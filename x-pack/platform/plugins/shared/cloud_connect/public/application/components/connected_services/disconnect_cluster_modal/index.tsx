@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useCloudConnectedAppContext } from '../../../app_context';
 
 interface DisconnectClusterModalProps {
   clusterName: string;
@@ -39,12 +40,14 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
   onConfirm,
   isLoading,
 }) => {
+  const { telemetryClient } = useCloudConnectedAppContext();
   const [confirmationText, setConfirmationText] = useState('');
   const isConfirmationValid = confirmationText === clusterName;
 
   const handleConfirm = async () => {
     if (isConfirmationValid) {
       await onConfirm();
+      telemetryClient.trackClusterDisconnected();
     }
   };
 
