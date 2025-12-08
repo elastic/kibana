@@ -12,7 +12,7 @@ type AttachmentFormatContextMock = AttachmentFormatContext;
 
 export const createFormatContextMock = (): AttachmentFormatContextMock => {
   return {
-    space: 'default',
-    request: httpServerMock.createFakeKibanaRequest(),
+    spaceId: 'default',
+    request: httpServerMock.createKibanaRequest(),
   };
 };
