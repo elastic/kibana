@@ -2018,6 +2018,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ActionType.validate",
             "type": "Object",
             "tags": [],

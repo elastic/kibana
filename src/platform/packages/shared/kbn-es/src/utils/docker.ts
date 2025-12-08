@@ -71,29 +71,57 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'workplaceai']);
-export const serverlessProductTiers = new Set<string>([
+export const serverlessProjectTypes = ['es', 'oblt', 'security', 'workplaceai'] as const;
+export type ServerlessProjectType = (typeof serverlessProjectTypes)[number];
+
+export const esServerlessProjectTypes = [
+  'elasticsearch_general_purpose',
+  'elasticsearch_search',
+  'elasticsearch_vector',
+  'elasticsearch_timeseries',
+  'observability',
+  'security',
+  'workplaceai',
+] as const;
+export type EsServerlessProjectType = (typeof esServerlessProjectTypes)[number];
+
+export const serverlessProductTiers = [
   'essentials',
   'logs_essentials',
   'complete',
   'search_ai_lake',
-]);
+] as const;
+export type ServerlessProductTier = (typeof serverlessProductTiers)[number];
+
 export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
-  return serverlessProjectTypes.has(value);
+  return serverlessProjectTypes.includes(value as ServerlessProjectType);
 };
 
-export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'workplaceai';
-export type ServerlessProductTier =
-  | 'essentials'
-  | 'logs_essentials'
-  | 'complete'
-  | 'search_ai_lake';
+export const isEsServerlessProjectType = (value: string): value is EsServerlessProjectType => {
+  return esServerlessProjectTypes.includes(value as EsServerlessProjectType);
+};
 
-export const esServerlessProjectTypes = new Map<string, string>([
-  ['es', 'elasticsearch'],
+export const isServerlessProjectTier = (value: string): value is ServerlessProductTier => {
+  return serverlessProductTiers.includes(value as ServerlessProductTier);
+};
+
+export const esProjectTypeFromKbn = new Map<string, string>([
+  // resolve Kibana `es` project type to general purpose by default
+  // other elasticsearch_* project types need to be set explicitly in the test config
+  ['es', 'elasticsearch_general_purpose'],
   ['oblt', 'observability'],
   ['security', 'security'],
-  ['workplaceai', 'elasticsearch'],
+  ['workplaceai', 'workplaceai'],
+]);
+
+export const kbnProjectTypeFromEs = new Map<string, string>([
+  ['elasticsearch_general_purpose', 'es'],
+  ['elasticsearch_search', 'es'],
+  ['elasticsearch_vector', 'es'],
+  ['elasticsearch_timeseries', 'es'],
+  ['observability', 'oblt'],
+  ['security', 'security'],
+  ['workplaceai', 'workplaceai'],
 ]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -103,8 +131,10 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Publish ES docker container on additional host IP */
   host?: string;
-  /**  Serverless project type */
+  /** Serverless project type */
   projectType: ServerlessProjectType;
+  /** Elasticsearch serverless project type */
+  esProjectType?: EsServerlessProjectType;
   /** Product tier for serverless project */
   productTier?: ServerlessProductTier;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
@@ -649,12 +679,32 @@ export function resolveEsArgs(
       );
 
       esArgs.set('serverless.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
-      esArgs.set('serverless.project_type', esServerlessProjectTypes.get(options.projectType)!);
+      esArgs.set('serverless.project_type', esProjectTypeFromKbn.get(options.projectType)!);
       esArgs.set('serverless.project_id', MOCK_IDP_UIAM_PROJECT_ID);
 
       esArgs.set('serverless.universal_iam_service.enabled', 'true');
       esArgs.set('serverless.universal_iam_service.url', MOCK_IDP_UIAM_SERVICE_INTERNAL_URL);
     }
+  }
+
+  const getEsProjectTypeValue = () => {
+    const esProjectTypeParam = esArgs.get('serverless.project_type');
+    if (esProjectTypeParam) {
+      // parameter explicitly set, use that as first option
+      return esProjectTypeParam;
+    }
+    if ('esProjectType' in options) {
+      // esProjectType specified, pass that as parameter value
+      return options.esProjectType;
+    }
+    if ('projectType' in options) {
+      // determine ES project type from Kibana project type as fallback
+      return esProjectTypeFromKbn.get(options.projectType);
+    }
+  };
+  const esProjectTypeValue = getEsProjectTypeValue();
+  if (esProjectTypeValue) {
+    esArgs.set('serverless.project_type', esProjectTypeValue);
   }
 
   const javaOptions = esArgs.get('ES_JAVA_OPTS');
