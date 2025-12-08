@@ -282,6 +282,7 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
+    const { euiTheme } = useEuiTheme();
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -291,14 +292,14 @@ export const QueryBarTopRow = React.memo(
       if (submitButtonStyle !== 'auto') return;
 
       const handleResize = throttle(() => {
-        setIsXXLarge(window.innerWidth >= 1440);
+        setIsXXLarge(window.innerWidth >= euiTheme.breakpoint.m);
       }, 50);
 
       window.addEventListener('resize', handleResize);
       handleResize();
 
       return () => window.removeEventListener('resize', handleResize);
-    }, [submitButtonStyle]);
+    }, [euiTheme.breakpoint.m, submitButtonStyle]);
 
     const {
       showQueryInput = true,
@@ -925,7 +926,6 @@ export const QueryBarTopRow = React.memo(
         )
       );
     }
-    const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
     const styles = useMemoCss(inputStringStyles);
 
