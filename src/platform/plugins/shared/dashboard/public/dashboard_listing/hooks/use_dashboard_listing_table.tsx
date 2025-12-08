@@ -219,7 +219,7 @@ export const useDashboardListingTable = ({
     []
   );
 
-  const noItemsMessage = useMemo(() => {
+  const emptyPrompt = useMemo(() => {
     if (contentTypeFilter === 'visualizations') {
       return getNoItemsMessage(createItem);
     }
@@ -614,7 +614,7 @@ export const useDashboardListingTable = ({
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
-      noItemsMessage,
+      emptyPrompt,
       entityName,
       entityNamePlural,
       findItems: wrappedFindItems,

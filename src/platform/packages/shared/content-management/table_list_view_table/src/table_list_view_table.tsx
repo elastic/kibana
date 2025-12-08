@@ -78,7 +78,7 @@ export interface TableListViewTableProps<
   entityNamePlural: string;
   initialFilter?: string;
   initialPageSize: number;
-  noItemsMessage?: JSX.Element;
+  emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
   customSortingOptions?: CustomSortingOptions;
@@ -108,7 +108,6 @@ export interface TableListViewTableProps<
   getDetailViewLink?: (entity: T) => string | undefined;
   /** Handler to execute when clicking the item title */
   getOnClickTitle?: (item: T) => (() => void) | undefined;
-  /** Handler to create a new item. */
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   /**
@@ -270,10 +269,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
-  filter?: {
-    createdBy?: string[];
-    favorites?: boolean;
-  };
+  filter?: { createdBy?: string[]; favorites?: boolean };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -328,7 +324,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   urlStateEnabled = true,
   customSortingOptions,
   customTableColumn,
-  noItemsMessage,
+  emptyPrompt,
   rowItemActions,
   findItems,
   createItem,
@@ -473,10 +469,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         ? await searchQueryParser(searchQuery.text)
         : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
-      const response = await findItems(searchQueryParsed, {
-        references,
-        referencesToExclude,
-      });
+      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
 
       if (!isMounted.current) {
         return;
@@ -599,8 +592,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   );
 
   const tableColumns = useMemo(() => {
-    const showCreatorColumn = hasCreatedByMetadata && createdByEnabled;
-
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
         field: tableColumnMetadata.title.field,
@@ -636,7 +627,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
-    if (showCreatorColumn) {
+    if (hasCreatedByMetadata && createdByEnabled) {
       columns.push({
         field: tableColumnMetadata.createdBy.field,
         name: (
@@ -998,8 +989,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   );
 
   const renderNoItemsMessage = useCallback(() => {
-    if (noItemsMessage) {
-      return noItemsMessage;
+    if (emptyPrompt) {
+      return emptyPrompt;
     } else {
       return (
         <EuiEmptyPrompt
@@ -1018,7 +1009,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         />
       );
     }
-  }, [noItemsMessage, entityNamePlural, renderCreateButton]);
+  }, [emptyPrompt, entityNamePlural, renderCreateButton]);
 
   const renderFetchError = useCallback(() => {
     return (
@@ -1216,7 +1207,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
-          noItemsMessage={noItemsMessage}
+          emptyPrompt={emptyPrompt}
         />
 
         {/* Delete modal */}

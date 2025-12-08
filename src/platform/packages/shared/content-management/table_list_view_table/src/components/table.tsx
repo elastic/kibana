@@ -86,7 +86,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
-  noItemsMessage?: JSX.Element;
+  emptyPrompt?: JSX.Element;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -118,7 +118,7 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
-  noItemsMessage,
+  emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
@@ -291,6 +291,7 @@ export function Table<T extends UserContentCommonSchema>({
     searchQuery.query,
     searchQuery.error,
   ]);
+
   const hasQueryOrFilters = Boolean(
     searchQuery.text || tableFilter.favorites || tableFilter.createdBy.length > 0
   );
@@ -394,8 +395,8 @@ export function Table<T extends UserContentCommonSchema>({
           noItemsMessage={
             isFetchingItems ? (
               <></>
-            ) : noItemsMessage && items.length === 0 && !hasQueryOrFilters ? (
-              noItemsMessage
+            ) : emptyPrompt && items.length === 0 && !hasQueryOrFilters ? (
+              emptyPrompt
             ) : tableFilter.favorites ? (
               <FavoritesEmptyState
                 emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
