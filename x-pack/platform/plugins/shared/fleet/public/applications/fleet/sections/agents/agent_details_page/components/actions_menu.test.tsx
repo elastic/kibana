@@ -283,6 +283,7 @@ describe('AgentDetailsActionMenu', () => {
         agent: {
           status: 'updating',
           upgrade_started_at: '2022-11-21T12:27:24Z',
+          local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: true } } },
         } as any,
         agentPolicy: {} as AgentPolicy,
       });
@@ -296,6 +297,7 @@ describe('AgentDetailsActionMenu', () => {
         agent: {
           status: 'updating',
           upgrade_started_at: new Date().toISOString(),
+          local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: true } } },
         } as any,
         agentPolicy: {} as AgentPolicy,
       });
@@ -303,6 +305,21 @@ describe('AgentDetailsActionMenu', () => {
       // Button should exist but be disabled
       expect(res).not.toBe(null);
       expect(res).not.toBeEnabled();
+    });
+
+    it('should not render upgrade management submenu if agent is not upgradeable', async () => {
+      const { utils } = renderActions({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: false } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+
+      expect(utils.queryByText('Upgrade management')).toBe(null);
     });
   });
 
