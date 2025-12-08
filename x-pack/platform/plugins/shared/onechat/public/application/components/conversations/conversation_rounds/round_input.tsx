@@ -48,6 +48,7 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
     max-inline-size: 90%;
     background: ${backgroundColorStyle.background};
     ${euiTextBreakWord()}
+    white-space: pre-wrap;
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
   `;
 
@@ -67,7 +68,7 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
       >
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{input}</EuiText>
+            <EuiText size="m">{input}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

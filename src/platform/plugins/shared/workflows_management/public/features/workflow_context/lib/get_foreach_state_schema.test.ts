@@ -8,9 +8,9 @@
  */
 
 import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
+import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 
 describe('getForeachStateSchema', () => {
   it('should return plain foreach state if item type is not inferable', () => {
@@ -68,7 +68,7 @@ describe('getForeachStateSchema', () => {
     );
   });
 
-  it('should throw if inferred type is not an array', () => {
+  it('should return an unknown schema with a description if inferred type is not an array', () => {
     const stepContext = DynamicStepContextSchema.extend({
       consts: z.object({
         items: z.object({ name: z.string(), surname: z.string() }),
@@ -82,6 +82,43 @@ describe('getForeachStateSchema', () => {
     expect(foreachStateSchema).toBeDefined();
     expect(foreachStateSchema.shape.item.description).toMatch(
       /Expected array for foreach iteration, but got object/
+    );
+  });
+
+  it('should try to parse the foreach parameter as JSON if it is not a valid variable path', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      consts: z.object({
+        items: z.object({ name: z.string(), surname: z.string() }),
+      }),
+    });
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: '[{"name": "item1"}, {"name": "item2"}, {"name": "item3"}]',
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expectZodSchemaEqual(
+      foreachStateSchema,
+      ForEachContextSchema.extend({
+        item: z.object({ name: z.string() }),
+        items: z.array(z.object({ name: z.string() })),
+      })
+    );
+  });
+
+  it('should return an unknown schema with a description if the foreach parameter is not a valid JSON', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      consts: z.object({
+        items: z.object({ name: z.string(), surname: z.string() }),
+      }),
+    });
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: 'invalid json',
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expect(foreachStateSchema).toBeDefined();
+    expect(foreachStateSchema.shape.item.description).toMatch(
+      /Unable to parse foreach parameter as JSON/
     );
   });
 });

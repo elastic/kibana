@@ -49,6 +49,9 @@ export const executeConnectorRoute = (
             description: 'Indicates a successful call.',
             body: () => connectorResponseSchemaV1,
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },
