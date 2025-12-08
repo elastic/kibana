@@ -12,12 +12,15 @@ const layoutSchema = z.object({
   hasHeader: z.boolean(),
   hasFooter: z.boolean(),
   useReportingBranding: z.boolean(),
-  pageSize: z.string().or(
-    z.object({
-      width: z.number().positive().max(14400),
-      height: z.enum(['auto']).or(z.number().positive().max(14400)),
-    })
-  ),
+  pageSize: z
+    .string()
+    .max(16)
+    .or(
+      z.object({
+        width: z.number().positive().max(14400),
+        height: z.enum(['auto']).or(z.number().positive().max(14400)),
+      })
+    ),
 });
 
 const titleSchema = z.string().min(0).max(1024);
@@ -25,13 +28,13 @@ const logoSchema = z.string().url().max(1024).optional().nullable();
 
 const contentBreakSchema = z.array(
   z.object({
-    text: z.string().max(10),
+    text: z.string().max(16),
     pageBreak: z.enum(['before', 'after']),
   })
 );
 
 const contentTextSchema = z.object({
-  text: z.string(),
+  text: z.string().max(2056),
   style: z.enum(['heading', 'subheading']).optional(),
   font: z.enum(['Roboto', 'noto-cjk']).optional(),
   noWrap: z.boolean().optional(),
