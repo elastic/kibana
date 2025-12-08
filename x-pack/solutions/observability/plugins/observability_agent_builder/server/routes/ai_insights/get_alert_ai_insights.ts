@@ -9,7 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
-import type { ObservabilityAgentDataRegistry } from '../../data_registry/data_registry';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -34,8 +35,9 @@ export interface AlertDocForInsight {
 interface GetAlertAiInsightParams {
   alertDoc: AlertDocForInsight;
   inferenceClient: InferenceClient;
+  inferenceStart: InferenceServerStart;
   connectorId: string | undefined;
-  dataRegistry: ObservabilityAgentDataRegistry;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
   logger: Logger;
 }
@@ -48,11 +50,20 @@ interface AlertAiInsightResult {
 export async function getAlertAiInsight({
   alertDoc,
   inferenceClient,
-  connectorId,
+  inferenceStart,
+  connectorId: initialConnectorId,
   dataRegistry,
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
+  let connectorId = initialConnectorId;
+  if (!connectorId) {
+    const defaultConnector = await inferenceStart.getDefaultConnector(request);
+    connectorId = defaultConnector?.connectorId;
+  }
+  if (!connectorId) {
+    throw new Error('No default connector found');
+  }
   const relatedContext = await fetchAlertContext({ alertDoc, dataRegistry, request, logger });
   const summary = await generateAlertSummary({
     inferenceClient,
@@ -209,7 +220,7 @@ async function generateAlertSummary({
   context,
 }: {
   inferenceClient: InferenceClient;
-  connectorId: string | undefined;
+  connectorId: string;
   alertDoc: AlertDocForInsight;
   context: string;
 }): Promise<string> {
@@ -256,7 +267,7 @@ async function generateAlertSummary({
   `);
 
   const completion = await inferenceClient.chatComplete({
-    connectorId: connectorId ?? '',
+    connectorId,
     system: systemPrompt,
     messages: [{ role: MessageRole.User, content: userPrompt }],
   });
