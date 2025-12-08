@@ -19,12 +19,11 @@ export const aiPromptStepDefinition = (
   createServerStepDefinition({
     ...AiPromptStepCommonDefinition,
     handler: async (context) => {
-      const [, { actions, inference }] = await coreSetup.getStartServices();
-      await inference.getConnectorList(context.contextManager.getFakeRequest());
+      const [, { inference }] = await coreSetup.getStartServices();
 
       const connectorId = await resolveConnectorId(
         context.input.connectorId,
-        actions,
+        inference,
         context.contextManager.getFakeRequest()
       );
 

@@ -20,8 +20,8 @@ export const AiPromptStepTypeId = 'ai.prompt';
  * Uses variables structure with key->value pairs.
  */
 export const InputSchema = z.object({
-  connectorId: z.string(),
   prompt: z.string(),
+  connectorId: z.string().optional(),
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
   outputSchema: z
     .object({

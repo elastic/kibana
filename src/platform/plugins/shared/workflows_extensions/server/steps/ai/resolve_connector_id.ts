@@ -8,28 +8,35 @@
  */
 
 import { validate as validateUuid } from 'uuid';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 export async function resolveConnectorId(
-  nameOrId: string,
-  actionsPlugin: ActionsPluginStartContract,
+  nameOrId: string | undefined,
+  inferencePlugin: InferenceServerStart,
   kibanaRequest: KibanaRequest
 ): Promise<string> {
+  if (!nameOrId) {
+    const defaultConnector = await inferencePlugin.getDefaultConnector(kibanaRequest);
+
+    if (!defaultConnector) {
+      throw new Error('No default connector configured');
+    }
+
+    return defaultConnector.connectorId;
+  }
+
   if (validateUuid(nameOrId)) {
     return nameOrId;
   }
 
-  const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(kibanaRequest);
+  const allConnectors = await inferencePlugin.getConnectorList(kibanaRequest);
 
-  const allConnectors = await scopedActionsClient.getAll();
-
-  const connector = allConnectors.find((c: ConnectorWithExtraFindData) => c.name === nameOrId);
+  const connector = allConnectors.find((c) => c.name === nameOrId);
 
   if (!connector) {
     throw new Error(`Connector with name ${nameOrId} not found`);
   }
 
-  return connector.id;
+  return connector.connectorId;
 }
