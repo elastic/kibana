@@ -221,11 +221,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
    * @protected
    */
   protected async storeFile({
-    scriptId,
     file,
     fileName = '',
   }: {
-    scriptId: string;
     file: HapiReadableStream;
     /** The file name. By Default, an attempt will be made to get it from the File stream unless this option is set. */
     fileName?: string;
@@ -384,7 +382,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     }
 
     if (file) {
-      fileStorage = await this.storeFile({ scriptId: id, file: file as HapiReadableStream });
+      fileStorage = await this.storeFile({ file: file as HapiReadableStream });
 
       this.logger.debug(
         () => `New file for Script id ${id} uploaded successfully: ${stringify(fileStorage?.data)}`
@@ -392,15 +390,21 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     }
 
     try {
-      // FIXME:PT create a partial update instead of a combined update. SO client seems to take in partial attributes
-      const soUpdate = this.mapToSavedObjectProperties({
-        ...this.mapSoAttributesToEndpointScript(currentScriptSoItem),
-        ...scriptUpdates,
-      });
+      const soUpdate = Object.entries(scriptUpdates).reduce((acc, [fieldName, value]) => {
+        const soFieldName = (KUERY_FIELD_TO_SO_FIELD_MAP[
+          fieldName as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP
+        ] ?? fieldName) as keyof ScriptsLibrarySavedObjectAttributes;
+
+        // @ts-expect-error: TS2322 - caused by the fact that `scriptUpdates` is a subset of fields
+        acc[soFieldName] = value;
+
+        return acc;
+      }, {} as Partial<ScriptsLibrarySavedObjectAttributes>);
 
       soUpdate.updated_by = this.username;
       soUpdate.updated_at = new Date().toISOString();
 
+      // If a new file was uploaded, then update SO entry with its info.
       if (fileStorage) {
         // FIXME:PT update file info. to SO once PR245273 merges
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -417,12 +421,24 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         )
         .catch(catchAndWrapError.withMessage(`Failed to update script with id: ${id}`));
     } catch (error) {
-      // TODO: If a new file was uploaded, then delete it now since the update failed
+      // If a new file was uploaded, then delete it now since the update failed
+      if (fileStorage) {
+        await fileStorage.delete().catch((deleteError) => {
+          this.logger.error(
+            `Error encountered while attempting to cleanup new file [${fileStorage.id}] upload for Script [${id}]: ${deleteError.message}`,
+            { error: deleteError }
+          );
+        });
+      }
 
       throw wrapErrorIfNeeded(error);
     }
 
-    // TODO:PT delete old file if a new one was uploaded and since update was successful
+    // If a new file was uploaded, then delete the old one
+    if (fileStorage) {
+      // FIXME:PT update file info. to SO once PR245273 merges
+      // this.filesClient.delete({ id: currentScriptSoItem.file_id });
+    }
 
     return this.mapSoAttributesToEndpointScript(await this.getScriptSavedObject(id));
   }
