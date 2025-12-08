@@ -2697,7 +2697,7 @@ module.exports = {
       files: [
         'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/plugins/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
