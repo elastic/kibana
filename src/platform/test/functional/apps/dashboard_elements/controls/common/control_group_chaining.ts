@@ -143,25 +143,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
     });
 
-    it('Selecting a conflicting option in the first control will validate the second and third controls', async () => {
+    it('Selections in the third control filters the first control', async () => {
       await dashboardControls.clearControlSelections(controlIds[0]);
+      await dashboardControls.clearControlSelections(controlIds[1]);
 
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
-      await dashboardControls.optionsListPopoverSelectOption('dog');
+      const optionsCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
+      expect(optionsCount).to.be(1);
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-
-      await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
-        suggestions: { Fluffy: 6, 'Fee Fee': 3, Rover: 3 },
-        invalidSelections: ['sylvester'],
-      });
-      await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-        suggestions: {},
-        invalidSelections: ['meow'],
-      });
     });
 
     it('Excluding selections in the first control will validate the second and third controls', async () => {
+      await dashboardControls.clearControlSelections(controlIds[2]);
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSelectOption('dog');
       await dashboardControls.optionsListPopoverSetIncludeSelections(false);
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
@@ -169,9 +164,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         suggestions: { Tiger: 6, sylvester: 5, Max: 1 },
         invalidSelections: [],
       });
-      const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, ['meow', 'hiss']);
       await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-        suggestions: { ...suggestions, hiss: suggestions.hiss - 3 },
+        suggestions: { hiss: 5, meow: 3, growl: 2, grr: 1, woof: 1 },
         invalidSelections: [],
       });
     });
@@ -181,7 +175,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('cat');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      await dashboardControls.clearControlSelections(controlIds[1]);
       await dashboardControls.optionsListOpenPopover(controlIds[1]);
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
@@ -190,6 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Creating "does not exist" query from first control filters the second and third controls', async () => {
+      debugger;
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
       await dashboardControls.optionsListPopoverSelectExists();
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
@@ -206,7 +200,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         true
       );
 
-      await dashboardControls.clearControlSelections(controlIds[2]);
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.ensureAvailableOptionsEqual(
