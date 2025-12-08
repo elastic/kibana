@@ -47,7 +47,6 @@ export const getDashboardListingTabs = ({
   initialFilter,
   listingViewRegistry,
 }: GetDashboardListingTabsParams): TableListTab<DashboardListingUserContent>[] => {
-  // Dashboards tab
   const dashboardsTab: TableListTab<DashboardListingUserContent> = {
     title: 'Dashboards',
     id: 'dashboards',
@@ -63,7 +62,7 @@ export const getDashboardListingTabs = ({
           getDashboardUrl,
           useSessionStorageIntegration,
           initialFilter,
-          contentTypeFilter: 'dashboards', // Only show dashboards
+          contentTypeFilter: 'dashboards',
           ...parentProps,
         });
 
@@ -104,7 +103,6 @@ export const getDashboardListingTabs = ({
     },
   };
 
-  // Visualizations tab
   const visualizationsTab: TableListTab<DashboardListingUserContent> = {
     title: 'Visualizations',
     id: 'visualizations',
@@ -115,17 +113,9 @@ export const getDashboardListingTabs = ({
           getDashboardUrl,
           useSessionStorageIntegration,
           initialFilter,
-          contentTypeFilter: 'visualizations', // Only show visualizations
+          contentTypeFilter: 'visualizations',
           ...parentProps,
         });
-
-        const dashboardFavoritesClient = useMemo(() => {
-          return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-            http: coreServices.http,
-            usageCollection: usageCollectionService,
-            userProfile: coreServices.userProfile,
-          });
-        }, []);
 
         return (
           <TableListViewKibanaProvider
@@ -133,7 +123,6 @@ export const getDashboardListingTabs = ({
               core: coreServices,
               savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
               FormattedRelative,
-              favorites: dashboardFavoritesClient,
               contentInsightsClient,
               isKibanaVersioningEnabled: !serverlessService,
             }}
