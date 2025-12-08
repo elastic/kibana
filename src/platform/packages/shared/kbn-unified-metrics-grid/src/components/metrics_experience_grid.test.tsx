@@ -14,11 +14,12 @@ import * as hooks from '../hooks';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 import type {
   ChartSectionProps,
-  UnifiedHistogramInputMessage,
+  UnifiedHistogramFetch$,
+  UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
+import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Subject } from 'rxjs';
 import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
@@ -84,32 +85,33 @@ const allFields: MetricField[] = [
 ];
 
 describe('MetricsExperienceGrid', () => {
-  let input$: Subject<UnifiedHistogramInputMessage>;
+  let fetch$: UnifiedHistogramFetch$;
+  let fetchParams: UnifiedHistogramFetchParams;
   let defaultProps: ChartSectionProps;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    fetchParams = getFetchParamsMock({
+      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
+      filters: [],
+      query: { esql: 'FROM metrics-*' },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+    });
+
     // Create new Subject for each test to prevent memory leaks
-    input$ = new Subject<UnifiedHistogramInputMessage>();
+    fetch$ = getFetch$Mock(fetchParams);
 
     defaultProps = {
-      dataView: { getIndexPattern: () => 'metrics-*' } as ChartSectionProps['dataView'],
       renderToggleActions: () => <div data-test-subj="toggleActions" />,
       chartToolbarCss: { name: '', styles: '' },
       histogramCss: { name: '', styles: '' },
-      requestParams: {
-        getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
-        filters: [],
-        query: { esql: 'FROM metrics-*' },
-        esqlVariables: [],
-        relativeTimeRange: { from: 'now-15m', to: 'now' },
-        updateTimeRange: () => {},
-      },
+      fetchParams,
       services: {
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
       } as unknown as UnifiedHistogramServices,
-      input$,
+      fetch$,
       isComponentVisible: true,
     };
 
@@ -149,7 +151,7 @@ describe('MetricsExperienceGrid', () => {
 
   afterEach(() => {
     // Complete the Subject to prevent memory leaks and hanging tests
-    input$.complete();
+    fetch$.complete();
   });
 
   it('renders the loading state when fields API is fetching', () => {

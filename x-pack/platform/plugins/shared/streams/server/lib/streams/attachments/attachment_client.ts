@@ -15,13 +15,21 @@ import { AttachmentLinkNotFoundError } from '../errors/attachment_link_not_found
 import type { AttachmentStorageSettings } from './storage_settings';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
 import {
+  ATTACHMENT_TYPES,
   type Attachment,
   type AttachmentBulkOperation,
+  type AttachmentData,
   type AttachmentDocument,
   type AttachmentLink,
   type AttachmentType,
 } from './types';
-import { getAttachmentDocument, getAttachmentLinkUuid, getSoByIds, getSuggestedSo } from './utils';
+import {
+  getAttachmentDocument,
+  getAttachmentLinkUuid,
+  getSoByIds,
+  getSuggestedSo,
+  processRuleResults,
+} from './utils';
 
 /**
  * Client for managing attachments linked to streams.
@@ -43,7 +51,7 @@ export class AttachmentClient {
 
   private getAttachmentEntitiesMap: Record<
     AttachmentType,
-    (ids: string[]) => Promise<Attachment[]>
+    (ids: string[]) => Promise<AttachmentData[]>
   > = {
     dashboard: async (ids) =>
       getSoByIds({ soClient: this.clients.soClient, attachmentType: 'dashboard', ids }),
@@ -53,12 +61,7 @@ export class AttachmentClient {
           ids,
         });
 
-        return rules.map((rule) => ({
-          id: rule.id,
-          title: rule.name,
-          tags: rule.tags,
-          type: 'rule',
-        }));
+        return processRuleResults(rules);
       } catch (error) {
         if (error.message === 'No rules found for bulk get') {
           return [];
@@ -66,11 +69,12 @@ export class AttachmentClient {
         throw error;
       }
     },
+    slo: async (ids) => getSoByIds({ soClient: this.clients.soClient, attachmentType: 'slo', ids }),
   };
 
   private getSuggestedEntitiesMap: Record<
     AttachmentType,
-    (options: { query: string; tags?: string[]; perPage: number }) => Promise<Attachment[]>
+    (options: { query: string; tags?: string[]; perPage: number }) => Promise<AttachmentData[]>
   > = {
     dashboard: async ({ query, tags, perPage }) =>
       getSuggestedSo({
@@ -93,13 +97,16 @@ export class AttachmentClient {
         },
       });
 
-      return data.map((rule) => ({
-        id: rule.id,
-        title: rule.name,
-        tags: rule.tags,
-        type: 'rule',
-      }));
+      return processRuleResults(data);
     },
+    slo: async ({ query, tags, perPage }) =>
+      getSuggestedSo({
+        soClient: this.clients.soClient,
+        attachmentType: 'slo',
+        query,
+        tags,
+        perPage,
+      }),
   };
 
   /**
@@ -126,6 +133,13 @@ export class AttachmentClient {
         throw new AttachmentNotFoundError(`Rule with id "${id}" not found in the current space`);
       }
     },
+    slo: async (id) => {
+      try {
+        await this.clients.soClient.get('slo', id);
+      } catch (error) {
+        throw new AttachmentNotFoundError(`SLO with id "${id}" not found in the current space`);
+      }
+    },
   };
 
   /**
@@ -145,14 +159,14 @@ export class AttachmentClient {
    * client methods (bulk operations when available).
    *
    * @param attachmentLinks - Array of attachment links to fetch
-   * @returns A promise that resolves with an array of full attachment details
+   * @returns A promise that resolves with an array of full attachment details (without stream names)
    */
-  private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<Attachment[]> {
+  private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<AttachmentData[]> {
     // Group attachment links by type using lodash groupBy
     const attachmentLinksByType = groupBy(attachmentLinks, 'type');
 
     // Fetch attachments for each type and flatten results
-    const attachments: Attachment[] = (
+    const attachments: AttachmentData[] = (
       await Promise.all(
         Object.entries(attachmentLinksByType).map(async ([type, links]) => {
           const ids = links.map((link) => link.id);
@@ -518,13 +532,23 @@ export class AttachmentClient {
       },
     });
 
-    // Convert attachment documents to attachment links
-    const attachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(({ _source }) => ({
-      id: _source[ATTACHMENT_ID],
-      type: _source[ATTACHMENT_TYPE],
-    }));
+    // Extract attachment links and stream names in a single pass
+    const streamNamesById = new Map<string, string[]>();
+    const attachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(({ _source }) => {
+      streamNamesById.set(_source[ATTACHMENT_ID], _source[STREAM_NAMES]);
+      return {
+        id: _source[ATTACHMENT_ID],
+        type: _source[ATTACHMENT_TYPE],
+      };
+    });
 
-    return this.fetchAttachments(attachmentLinks);
+    const attachments = await this.fetchAttachments(attachmentLinks);
+
+    // Enrich attachments with stream names
+    return attachments.map((attachment) => ({
+      ...attachment,
+      streamNames: streamNamesById.get(attachment.id) ?? [],
+    }));
   }
 
   /**
@@ -537,9 +561,9 @@ export class AttachmentClient {
    * @param options.query - Search query string to match against attachment titles/names
    * @param options.attachmentTypes - Optional array of attachment types to search (searches all if not provided)
    * @param options.tags - Optional array of tags to filter attachments by
-   * @returns A promise that resolves with search results
-   * @returns result.attachments - Array of matching attachments (up to 100)
-   * @returns result.hasMore - Whether there are more results available beyond the returned set
+   * @returns A promise that resolves with an array of matching attachments
+   *
+   * @note Until pagination is implemented, this returns up to 1000 attachments per type.
    *
    * @example
    * ```typescript
@@ -558,39 +582,65 @@ export class AttachmentClient {
     query: string;
     attachmentTypes?: AttachmentType[];
     tags?: string[];
-  }): Promise<{ hasMore: boolean; attachments: Attachment[] }> {
-    const perPage = 101;
+  }): Promise<Attachment[]> {
+    // TODO: Implement pagination
+    const perPage = 1000;
 
-    const searchAll = !attachmentTypes;
+    // Search all types if none specified, otherwise only search the requested types
+    const typesToSearch = attachmentTypes || [...ATTACHMENT_TYPES];
 
-    const searchDashboards = searchAll || attachmentTypes.includes('dashboard');
-    const searchRules = searchAll || attachmentTypes.includes('rule');
-    const suggestionsPromises: Promise<Attachment[]>[] = [];
-    if (searchDashboards) {
-      suggestionsPromises.push(
-        this.getSuggestedEntitiesMap.dashboard({
-          query,
-          tags,
-          perPage,
-        })
-      );
+    const suggestionsPromises = typesToSearch.map((type) =>
+      this.getSuggestedEntitiesMap[type]({
+        query,
+        tags,
+        perPage,
+      })
+    );
+
+    const results = await Promise.all(suggestionsPromises);
+    const attachments = results.flat();
+
+    // Get stream names for all suggested attachments
+    const streamNamesById = await this.getStreamNamesForAttachments(attachments.map((a) => a.id));
+
+    // Enrich attachments with stream names (empty array if not linked to any stream)
+    return attachments.map((attachment) => ({
+      ...attachment,
+      streamNames: streamNamesById.get(attachment.id) ?? [],
+    }));
+  }
+
+  /**
+   * Retrieves the stream names for a list of attachment IDs.
+   *
+   * Queries the attachments storage to find which streams each attachment is linked to.
+   *
+   * @param attachmentIds - Array of attachment IDs to look up
+   * @returns A Map where keys are attachment IDs and values are arrays of stream names
+   */
+  private async getStreamNamesForAttachments(
+    attachmentIds: string[]
+  ): Promise<Map<string, string[]>> {
+    if (attachmentIds.length === 0) {
+      return new Map();
     }
 
-    if (searchRules) {
-      suggestionsPromises.push(
-        this.getSuggestedEntitiesMap.rule({
-          query,
-          tags,
-          perPage,
-        })
-      );
-    }
-    const suggestions = (await Promise.all(suggestionsPromises)).flat();
+    const response = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ terms: { [ATTACHMENT_ID]: attachmentIds } }],
+        },
+      },
+    });
 
-    return {
-      attachments: suggestions,
-      hasMore: suggestions.length > perPage - 1,
-    };
+    const streamNamesById = new Map<string, string[]>();
+    for (const hit of response.hits.hits) {
+      streamNamesById.set(hit._source[ATTACHMENT_ID], hit._source[STREAM_NAMES]);
+    }
+
+    return streamNamesById;
   }
 
   /**

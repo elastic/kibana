@@ -276,26 +276,25 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     suggestions.push(...builder.build());
   }
 
-  // Suggest control variables (e.g., "?fieldName", "$valueName") if supported and not already present
-  if (context?.supportsControls) {
-    const hasControl = suggestions.some((suggestion) =>
-      suggestion.command?.id?.includes('esql.control')
+  // Suggest control variables (e.g., "??fieldName", "?valueName") if supported and not already present
+  const hasControl = suggestions.some((suggestion) =>
+    suggestion.command?.id?.includes('esql.control')
+  );
+
+  if (!hasControl) {
+    const prefix = getVariablePrefix(controlType);
+    const variableNames =
+      context?.variables
+        ?.filter(({ type }) => type === controlType)
+        .map(({ key }) => `${prefix}${key}`) ?? [];
+
+    const controlSuggestions = getControlSuggestion(
+      controlType,
+      ControlTriggerSource.SMART_SUGGESTION,
+      variableNames,
+      Boolean(context?.supportsControls)
     );
-
-    if (!hasControl) {
-      const prefix = getVariablePrefix(controlType);
-      const variableNames =
-        context.variables
-          ?.filter(({ type }) => type === controlType)
-          .map(({ key }) => `${prefix}${key}`) ?? [];
-
-      const controlSuggestions = getControlSuggestion(
-        controlType,
-        ControlTriggerSource.SMART_SUGGESTION,
-        variableNames
-      );
-      suggestions.push(...controlSuggestions);
-    }
+    suggestions.push(...controlSuggestions);
   }
 
   return suggestions;

@@ -8,6 +8,7 @@
 import type { Feature, FeatureType } from '@kbn/streams-schema';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import objectHash from 'object-hash';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { FEATURE_TYPE, FEATURE_NAME, STREAM_NAME } from './fields';
 import type { StoredFeature } from './stored_feature';
 
@@ -16,7 +17,9 @@ export abstract class FeatureTypeHandler<T extends Feature = Feature> {
 
   abstract fromStorage(stored: StoredFeature): T;
   abstract toStorage(streamName: string, feature: T): StoredFeature;
-  abstract identifyFeatures(options: IdentifyFeaturesOptions): Promise<{ features: T[] }>;
+  abstract identifyFeatures(
+    options: IdentifyFeaturesOptions
+  ): Promise<{ features: T[]; tokensUsed: ChatCompletionTokenCount }>;
 
   public getFeatureUuid(streamName: string, featureName: string): string {
     return objectHash({

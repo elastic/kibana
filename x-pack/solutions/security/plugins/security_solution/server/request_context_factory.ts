@@ -115,6 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
+    const getLogger = () => options.logger;
 
     const getEntityStoreApiKeyManager = () =>
       getApiKeyManagerEntityStore({
@@ -205,6 +206,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAuditLogger,
 
       getInferenceService: () => startPlugins.inference,
+
+      getLogger,
 
       getDataViewsService: () => dataViewsService,
 

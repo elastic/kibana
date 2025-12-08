@@ -84,6 +84,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         items: [
           {
             icon: 'dashboardApp',
+            // @ts-expect-error upgrade typescript v5.9.3
             href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboards[0]?.id } || ''),
             name: actionNameSingular,
           },
@@ -110,6 +111,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
       items: dashboards.map((dashboard) => {
         return {
           icon: 'dashboardApp',
+          // @ts-expect-error upgrade typescript v5.9.3
           href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
           name: dashboard.title,
         };

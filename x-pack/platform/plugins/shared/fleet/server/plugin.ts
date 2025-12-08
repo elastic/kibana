@@ -148,7 +148,7 @@ import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/mana
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
-import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
+import { UpgradeAgentlessDeploymentsTask } from './tasks/agentless/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
@@ -156,6 +156,10 @@ import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_pac
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
 import { FleetPolicyRevisionsCleanupTask } from './tasks/fleet_policy_revisions_cleanup/fleet_policy_revisions_cleanup_task';
 import { registerSetupTasks } from './tasks/setup';
+import {
+  registerAgentlessDeploymentSyncTask,
+  scheduleAgentlessDeploymentSyncTask,
+} from './tasks/agentless/deployment_sync_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -659,6 +663,7 @@ export class FleetPlugin
     registerBumpAgentPoliciesTask(deps.taskManager);
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
+    registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
@@ -807,6 +812,10 @@ export class FleetPlugin
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
     this.agentStatusChangeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    scheduleAgentlessDeploymentSyncTask(
+      plugins.taskManager,
+      this.configInitialValue as FleetConfigType
+    ).catch(() => {});
     this.fleetPolicyRevisionsCleanupTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});

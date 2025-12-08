@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import type {
-  FieldType,
   SupportedDataType,
   FunctionDefinition,
   ESQLMessage,
@@ -77,7 +77,7 @@ function getLiteralType(typeString: 'time_duration') {
   return `1 ${literals[typeString]}`;
 }
 
-export const fieldNameFromType = (type: FieldType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: EsqlFieldType) => `${camelCase(type)}Field`;
 
 function getFieldName(
   typeString: string,

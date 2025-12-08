@@ -9,6 +9,7 @@ export enum GapRangeValue {
   LAST_24_H = 'last_24_h',
   LAST_3_D = 'last_3_d',
   LAST_7_D = 'last_7_d',
+  LAST_90_D = 'last_90_d',
 }
 
-export const defaultRangeValue = GapRangeValue.LAST_24_H;
+export const defaultRangeValue = GapRangeValue.LAST_90_D;

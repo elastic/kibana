@@ -193,7 +193,12 @@ export const getKibanaMigratorTestKit = async ({
     typeRegistry,
     kibanaIndex,
     client,
-    loggerFactory.get('saved_objects')
+    loggerFactory.get('saved_objects'),
+    // the toolkit's SavedObjectsRepository must allow testing hidden types
+    typeRegistry
+      .getAllTypes()
+      .filter(({ hidden }) => hidden)
+      .map(({ name }) => name)
   );
 
   return {

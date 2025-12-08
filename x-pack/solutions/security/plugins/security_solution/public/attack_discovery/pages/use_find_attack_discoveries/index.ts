@@ -13,7 +13,6 @@ import type {
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_FIND,
-  ATTACK_DISCOVERY_INTERNAL_FIND,
   transformAttackDiscoveryAlertFromApi,
 } from '@kbn/elastic-assistant-common';
 import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
@@ -22,7 +21,6 @@ import { useCallback, useRef } from 'react';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -83,7 +81,6 @@ export const useFindAttackDiscoveries = ({
   sortOrder = 'desc',
 }: Props): UseFindAttackDiscoveries => {
   const { addError } = useAppToasts();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const abortController = useRef(new AbortController());
 
@@ -91,14 +88,6 @@ export const useFindAttackDiscoveries = ({
     abortController.current.abort();
     abortController.current = new AbortController(); // LOCAL MUTATION
   }, []);
-
-  const route = attackDiscoveryPublicApiEnabled
-    ? ATTACK_DISCOVERY_FIND
-    : ATTACK_DISCOVERY_INTERNAL_FIND;
-
-  const version = attackDiscoveryPublicApiEnabled
-    ? API_VERSIONS.public.v1
-    : API_VERSIONS.internal.v1;
 
   const queryFn = useCallback(
     async ({ pageParam }: { pageParam?: PageParam }) => {
@@ -118,29 +107,19 @@ export const useFindAttackDiscoveries = ({
         status,
       };
 
-      if (attackDiscoveryPublicApiEnabled) {
-        return http.fetch<AttackDiscoveryFindResponse>(route, {
-          method: 'GET',
-          version,
-          query: {
-            ...baseQuery,
-            enable_field_rendering: true, // always true to enable rendering fields using the `{{ user.name james }}` syntax
-            with_replacements: false, // always false because Attack discoveries rendered in Kibana may be passed as context to a conversation, and to enable the user to see the original alert details via the `Show anonymized values` toggle
-          },
-          signal: abortController.current.signal,
-        });
-      }
-
-      return http.fetch<AttackDiscoveryFindResponse>(route, {
+      return http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
         method: 'GET',
-        version,
-        query: baseQuery,
+        version: API_VERSIONS.public.v1,
+        query: {
+          ...baseQuery,
+          enable_field_rendering: true, // always true to enable rendering fields using the `{{ user.name james }}` syntax
+          with_replacements: false, // always false because Attack discoveries rendered in Kibana may be passed as context to a conversation, and to enable the user to see the original alert details via the `Show anonymized values` toggle
+        },
         signal: abortController.current.signal,
       });
     },
     [
       alertIds,
-      attackDiscoveryPublicApiEnabled,
       connectorNames,
       end,
       http,
@@ -148,14 +127,12 @@ export const useFindAttackDiscoveries = ({
       includeUniqueAlertIds,
       page,
       perPage,
-      route,
       search,
       shared,
       sortField,
       sortOrder,
       start,
       status,
-      version,
     ]
   );
 
@@ -184,7 +161,7 @@ export const useFindAttackDiscoveries = ({
   } = useQuery(
     [
       'GET',
-      route,
+      ATTACK_DISCOVERY_FIND,
       alertIds,
       connectorNames,
       end,
@@ -204,26 +181,18 @@ export const useFindAttackDiscoveries = ({
       enabled: isAssistantEnabled,
       getNextPageParam,
       // Transform the API response's data items into UI-friendly alerts
-      // only when the public API is enabled. Otherwise return the raw
-      // response shape (internal API uses different field names).
-      select: (
-        response: AttackDiscoveryFindResponse | AttackDiscoveryFindInternalResponse
-      ): AttackDiscoveryFindInternalResponse => {
-        if (attackDiscoveryPublicApiEnabled) {
-          return {
-            connector_names: response.connector_names,
-            data: ((response as AttackDiscoveryFindResponse).data ?? []).map(
-              transformAttackDiscoveryAlertFromApi // transform each alert from snake_case to camelCase
-            ),
-            page: response.page,
-            per_page: response.per_page,
-            total: response.total,
-            unique_alert_ids_count: response.unique_alert_ids_count,
-            unique_alert_ids: response.unique_alert_ids,
-          };
-        }
-
-        return response as AttackDiscoveryFindInternalResponse;
+      select: (response: AttackDiscoveryFindResponse): AttackDiscoveryFindInternalResponse => {
+        return {
+          connector_names: response.connector_names,
+          data: ((response as AttackDiscoveryFindResponse).data ?? []).map(
+            transformAttackDiscoveryAlertFromApi // transform each alert from snake_case to camelCase
+          ),
+          page: response.page,
+          per_page: response.per_page,
+          total: response.total,
+          unique_alert_ids_count: response.unique_alert_ids_count,
+          unique_alert_ids: response.unique_alert_ids,
+        };
       },
       onError: (e: ServerError) => {
         addError(e.body && e.body.message ? new Error(e.body.message) : e, {
@@ -251,15 +220,10 @@ export const useFindAttackDiscoveries = ({
  */
 export const useInvalidateFindAttackDiscoveries = () => {
   const queryClient = useQueryClient();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
-
-  const route = attackDiscoveryPublicApiEnabled
-    ? ATTACK_DISCOVERY_FIND
-    : ATTACK_DISCOVERY_INTERNAL_FIND;
 
   return useCallback(() => {
-    queryClient.invalidateQueries(['GET', route], {
+    queryClient.invalidateQueries(['GET', ATTACK_DISCOVERY_FIND], {
       refetchType: 'all',
     });
-  }, [queryClient, route]);
+  }, [queryClient]);
 };

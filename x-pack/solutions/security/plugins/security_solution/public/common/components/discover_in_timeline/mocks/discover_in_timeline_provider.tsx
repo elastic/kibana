@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import type { ExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public';
 import React, { useRef, useCallback } from 'react';
 import type { FC, PropsWithChildren } from 'react';
+import { createDiscoverServicesMock } from '@kbn/discover-plugin/public/__mocks__/services';
+import { getExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public/customizations';
+import { getDiscoverStateMock } from '@kbn/discover-plugin/public/__mocks__/discover_state.mock';
 import { DiscoverInTimelineContext } from '../context';
 import { useDiscoverInTimelineActions } from '../use_discover_in_timeline_actions';
 
@@ -17,11 +19,20 @@ type Props = PropsWithChildren<{}>;
 jest.mock('../use_discover_in_timeline_actions');
 
 export const MockDiscoverInTimelineContext: FC<Props> = ({ children }) => {
-  const discoverStateContainer = useRef(discoverPluginMock.getDiscoverStateMock({}));
+  const discoverServices = createDiscoverServicesMock();
+  const discoverStateContainer = useRef(
+    getExtendedDiscoverStateContainer(
+      getDiscoverStateMock({ services: discoverServices }),
+      discoverServices
+    )
+  );
 
-  const setDiscoverStateContainer = useCallback((stateContainer: DiscoverStateContainer) => {
-    discoverStateContainer.current = stateContainer;
-  }, []);
+  const setDiscoverStateContainer = useCallback(
+    (stateContainer: ExtendedDiscoverStateContainer) => {
+      discoverStateContainer.current = stateContainer;
+    },
+    []
+  );
 
   const actions = useDiscoverInTimelineActions(discoverStateContainer);
 
