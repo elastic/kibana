@@ -19,6 +19,7 @@ import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
 } from '@kbn/observability-agent-builder-plugin/common';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -50,6 +51,8 @@ export function ErrorSampleAgentBuilderAiInsight({
   const [context, setContext] = useState('');
 
   const { selectedConnector, defaultConnectorId } = useConnectorSelection();
+  const license = useLicenseContext();
+  const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
 
   const errorId = error.error.id;
   const serviceName = error.service.name;
@@ -86,7 +89,7 @@ export function ErrorSampleAgentBuilderAiInsight({
   };
 
   const attachments = useMemo(() => {
-    if (!onechat || !isObservabilityAgentEnabled) {
+    if (!onechat || !isObservabilityAgentEnabled || !hasEnterpriseLicense) {
       return [];
     }
 
@@ -121,6 +124,7 @@ export function ErrorSampleAgentBuilderAiInsight({
   }, [
     onechat,
     isObservabilityAgentEnabled,
+    hasEnterpriseLicense,
     errorId,
     serviceName,
     summary,
@@ -130,7 +134,7 @@ export function ErrorSampleAgentBuilderAiInsight({
     end,
   ]);
 
-  if (!onechat || !isObservabilityAgentEnabled) {
+  if (!onechat || !isObservabilityAgentEnabled || !hasEnterpriseLicense) {
     return <></>;
   }
 
