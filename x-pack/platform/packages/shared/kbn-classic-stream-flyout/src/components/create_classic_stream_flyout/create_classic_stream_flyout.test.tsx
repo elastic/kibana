@@ -694,6 +694,12 @@ describe('CreateClassicStreamFlyout', () => {
         await waitFor(() => {
           expect(queryByText(/This stream name already exists/i)).not.toBeInTheDocument();
         });
+
+        // Ensure debounced validation doesn't bring it back
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(queryByText(/Please supply a valid text string/i)).not.toBeInTheDocument();
       });
 
       it('should reset validation when index pattern changes', async () => {
@@ -722,6 +728,12 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Error should be cleared immediately
         expect(queryByText(/This stream name already exists/i)).not.toBeInTheDocument();
+
+        // Ensure debounced validation doesn't bring it back
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(queryByText(/Please supply a valid text string/i)).not.toBeInTheDocument();
       });
     });
 

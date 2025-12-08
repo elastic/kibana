@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useRef, type Dispatch } from 'react';
+import { useCallback, type Dispatch } from 'react';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+
 import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';
 import { useDebouncedCallback } from './use_debounced_callback';
@@ -27,6 +28,7 @@ interface UseStreamValidationReturn {
   handleStreamNameChange: (streamName: string) => void;
   handleCreate: () => Promise<void>;
   resetValidation: () => void;
+  setStreamName: (streamName: string) => void;
 }
 
 export const useStreamValidation = ({
@@ -38,12 +40,6 @@ export const useStreamValidation = ({
   debounceMs = DEFAULT_VALIDATION_DEBOUNCE_MS,
 }: UseStreamValidationParams): UseStreamValidationReturn => {
   const { streamName, validation } = formState;
-
-  const lastStreamNameRef = useRef<string>(streamName);
-  const selectedTemplateRef = useRef(selectedTemplate);
-  selectedTemplateRef.current = selectedTemplate;
-  const onValidateRef = useRef(onValidate);
-  onValidateRef.current = onValidate;
 
   const {
     getAbortController: getCreateValidationAbortController,
@@ -63,15 +59,15 @@ export const useStreamValidation = ({
       isAbortedFn: (controller: AbortController) => boolean
     ): Promise<boolean> => {
       // Cannot validate without a selected template
-      if (!selectedTemplateRef.current) {
+      if (!selectedTemplate) {
         return false;
       }
 
       try {
         const result = await validateStreamName(
           name,
-          selectedTemplateRef.current,
-          onValidateRef.current,
+          selectedTemplate,
+          onValidate,
           abortController.signal
         );
 
@@ -99,14 +95,14 @@ export const useStreamValidation = ({
         return false;
       }
     },
-    [dispatch]
+    [dispatch, selectedTemplate, onValidate]
   );
 
   // Debounce validation calls to avoid excessive requests while user is typing
   const { trigger: triggerDebouncedValidation, cancel: cancelDebouncedValidationTimer } =
     useDebouncedCallback(async (name: string) => {
       // Ensure we validate the current stream name, not a stale one
-      if (lastStreamNameRef.current !== name) {
+      if (name !== formState.streamName) {
         return;
       }
 
@@ -116,21 +112,12 @@ export const useStreamValidation = ({
 
   const handleStreamNameChange = useCallback(
     (newStreamName: string) => {
-      // Skip if name hasn't changed
-      if (newStreamName === lastStreamNameRef.current) {
+      // Skip if name hasn't changed from current prop
+      if (newStreamName === streamName) {
         return;
       }
-
-      const hasNameChanged =
-        lastStreamNameRef.current !== '' && newStreamName !== lastStreamNameRef.current;
-      lastStreamNameRef.current = newStreamName;
 
       dispatch({ type: 'SET_STREAM_NAME', payload: newStreamName });
-
-      // Skip validation when transitioning from initial empty state
-      if (!hasNameChanged) {
-        return;
-      }
 
       switch (validation.mode) {
         case 'idle':
@@ -156,11 +143,19 @@ export const useStreamValidation = ({
     [
       dispatch,
       validation.mode,
+      streamName,
       abortCreateValidation,
       abortDebouncedValidation,
       cancelDebouncedValidationTimer,
       triggerDebouncedValidation,
     ]
+  );
+
+  const setStreamName = useCallback(
+    (newStreamName: string) => {
+      dispatch({ type: 'SET_STREAM_NAME', payload: newStreamName });
+    },
+    [dispatch]
   );
 
   // Create handler - immediate validation triggered by create button
@@ -196,5 +191,6 @@ export const useStreamValidation = ({
     handleStreamNameChange,
     handleCreate,
     resetValidation,
+    setStreamName,
   };
 };

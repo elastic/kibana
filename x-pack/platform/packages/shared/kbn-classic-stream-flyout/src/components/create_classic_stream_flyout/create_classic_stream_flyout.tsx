@@ -96,13 +96,14 @@ export const CreateClassicStreamFlyout = ({
 
   const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 
-  const { handleStreamNameChange, handleCreate, resetValidation } = useStreamValidation({
-    formState,
-    dispatch,
-    onCreate,
-    selectedTemplate: selectedTemplateData,
-    onValidate,
-  });
+  const { handleStreamNameChange, handleCreate, resetValidation, setStreamName } =
+    useStreamValidation({
+      formState,
+      dispatch,
+      onCreate,
+      selectedTemplate: selectedTemplateData,
+      onValidate,
+    });
 
   const updateIndexPattern = useCallback(
     (pattern: string) => {
@@ -111,9 +112,9 @@ export const CreateClassicStreamFlyout = ({
       const emptyParts = Array(wildcardCount).fill('');
       dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: emptyParts });
       const newStreamName = buildStreamName(pattern, emptyParts);
-      handleStreamNameChange(newStreamName);
+      setStreamName(newStreamName);
     },
-    [handleStreamNameChange]
+    [dispatch, setStreamName]
   );
 
   const handleTemplateSelect = useCallback(
