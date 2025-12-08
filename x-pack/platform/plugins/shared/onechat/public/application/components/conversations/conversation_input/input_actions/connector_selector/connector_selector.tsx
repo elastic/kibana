@@ -8,7 +8,6 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,6 +29,7 @@ import { useDefaultConnector } from '../../../../../hooks/chat/use_default_conne
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
+import { InputPopoverButton } from '../input_popover_button';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
@@ -64,22 +64,19 @@ const ConnectorPopoverButton: React.FC<{
 }> = ({ isPopoverOpen, onClick, disabled }) => {
   const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
   return (
-    <EuiButton
-      css={popoverButtonStyles}
-      color="text"
-      iconType="sparkles"
-      iconSide="left"
-      onClick={onClick}
+    <InputPopoverButton
+      open={isPopoverOpen}
       disabled={disabled}
-      data-test-subj="agentBuilderConnectorSelectorButton"
-      aria-haspopup="menu"
+      iconType="sparkles"
+      onClick={onClick}
       aria-labelledby={connectorSelectId}
+      data-test-subj="agentBuilderConnectorSelectorButton"
     >
       <FormattedMessage
         id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
         defaultMessage="LLM"
       />
-    </EuiButton>
+    </InputPopoverButton>
   );
 };
 

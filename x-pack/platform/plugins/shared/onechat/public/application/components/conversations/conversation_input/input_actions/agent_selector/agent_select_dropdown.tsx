@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,8 +23,9 @@ import { useHasActiveConversation } from '../../../../../hooks/use_conversation'
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { RobotIcon } from '../../../../common/icons/robot';
-import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
+import { selectorListStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
+import { InputPopoverButton } from '../input_popover_button';
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
 
@@ -61,26 +61,17 @@ const AgentSelectPopoverButton: React.FC<{
   onClick: () => void;
 }> = ({ isPopoverOpen, selectedAgentName, onClick }) => {
   const hasActiveConversation = useHasActiveConversation();
-  const disabled = hasActiveConversation;
-  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen, disabled });
   return (
-    <EuiButton
-      color="text"
-      css={popoverButtonStyles}
-      iconSide="left"
+    <InputPopoverButton
+      open={isPopoverOpen}
+      disabled={hasActiveConversation}
       iconType={RobotIcon}
-      onClick={() => {
-        if (!disabled) {
-          onClick();
-        }
-      }}
-      disabled={disabled}
-      aria-haspopup="menu"
+      onClick={onClick}
       aria-labelledby={agentSelectId}
       data-test-subj="agentBuilderAgentSelectorButton"
     >
       {selectedAgentName}
-    </EuiButton>
+    </InputPopoverButton>
   );
 };
 
