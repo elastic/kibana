@@ -10,10 +10,13 @@ import { isArray } from 'lodash/fp';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { ALERT_ATTACK_IDS } from '../../../../common/field_maps/field_names';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { AlertsGroupingAggregation } from '../../components/alerts_table/grouping_settings/types';
 import { AttackGroupContent } from '../../components/attacks/table/attack_group_content';
+
+const EMPTY_ARRAY: AttackDiscoveryAlert[] = [];
 
 export interface UseGetDefaultGroupTitleRenderersProps {
   attackIds?: string[];
@@ -33,7 +36,7 @@ export const useGetDefaultGroupTitleRenderers = ({
 
   const attacks = useMemo(() => {
     if (isLoadingAttacks || !attacksData?.data.length) {
-      return [];
+      return EMPTY_ARRAY;
     }
     return attacksData.data;
   }, [attacksData?.data, isLoadingAttacks]);
