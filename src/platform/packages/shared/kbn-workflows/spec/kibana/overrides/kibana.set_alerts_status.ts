@@ -8,25 +8,19 @@
  */
 
 /*
- * AUTO-GENERATED FILE - DO NOT EDIT
+ * OVERRIDE FILE
  *
  * Source: /oas_docs/output/kibana.yaml, operations: SetAlertsStatus
- *
- * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
-
-import { z } from '@kbn/zod/v4';
-
-import {
-  set_alerts_status_request,
-  set_alerts_status_response,
-} from './schemas/kibana_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema } from '../../schema';
+import { insertFetcherToSchemaRecursively } from '../../lib/insert_fetcher_to_schema';
+import {
+  set_alerts_status_request,
+  set_alerts_status_response,
+} from '../generated/schemas/kibana_openapi_zod.gen';
 
 // export contract
 export const SET_ALERTS_STATUS_CONTRACT: InternalConnectorContract = {
@@ -48,11 +42,6 @@ Set the status of one or more detection alerts.`,
     urlParams: [],
     bodyParams: ['reason', 'signal_ids', 'status', 'conflicts', 'query'],
   },
-  paramsSchema: z.object({
-    ...getShapeAt(set_alerts_status_request, 'body'),
-    ...getShapeAt(set_alerts_status_request, 'path'),
-    ...getShapeAt(set_alerts_status_request, 'query'),
-    fetcher: FetcherConfigSchema,
-  }),
+  paramsSchema: insertFetcherToSchemaRecursively(set_alerts_status_request.shape.body),
   outputSchema: set_alerts_status_response,
 };

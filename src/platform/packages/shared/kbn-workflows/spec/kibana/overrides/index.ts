@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ES_VALID_SAMPLE_STEPS, ES_INVALID_SAMPLE_STEPS } from './es_steps';
+import { SET_ALERTS_STATUS_CONTRACT } from './kibana.set_alerts_status';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-export { KIBANA_SAMPLE_STEPS } from './kibana_steps';
+export const KIBANA_OVERRIDES: Record<string, InternalConnectorContract> = {
+  'kibana.SetAlertsStatus': SET_ALERTS_STATUS_CONTRACT,
+};
