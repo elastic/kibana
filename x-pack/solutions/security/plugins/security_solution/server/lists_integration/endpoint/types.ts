@@ -15,5 +15,5 @@ import type { CreateExceptionListItemOptions } from '@kbn/lists-plugin/server';
  */
 export type ExceptionItemLikeOptions = Pick<
   CreateExceptionListItemOptions,
-  'osTypes' | 'tags' | 'description' | 'name' | 'entries' | 'namespaceType'
+  'osTypes' | 'tags' | 'description' | 'name' | 'entries' | 'namespaceType' | 'comments'
 > & { listId?: string };

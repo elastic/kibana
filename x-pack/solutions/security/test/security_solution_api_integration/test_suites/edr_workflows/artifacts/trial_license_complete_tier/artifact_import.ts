@@ -15,12 +15,16 @@ import {
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type {
+  ExceptionListItemSchema,
   ExportExceptionDetails,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
-import { buildSpaceOwnerIdTag } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
+import {
+  buildPerPolicyTag,
+  buildSpaceOwnerIdTag,
+} from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
@@ -129,6 +133,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
     if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
       describe('Endpoint exceptions move feature flag enabled', () => {
         const DEFAULT_SPACE_OWNER_ID = buildSpaceOwnerIdTag('default');
+        const OTHER_SPACE_OWNER_ID = buildSpaceOwnerIdTag('other-space');
 
         const supertest: Record<
           (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
@@ -209,14 +214,115 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
             describe('Space awareness', () => {
               describe('when user has no global artifact privilege', () => {
-                it('should import per-policy artifacts from current space', async () => {});
-                it('should not import per-policy artifacts to other spaces when importing without global artifact privilege', async () => {});
+                it('should import per-policy artifacts from current space', async () => {
+                  await supertest[artifact.listId].all
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        { tags: [DEFAULT_SPACE_OWNER_ID] },
+                        {
+                          tags: [
+                            DEFAULT_SPACE_OWNER_ID,
+                            buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                          ],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [],
+                      success: true,
+                      success_count: 3,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: true,
+                      success_count_exception_list_items: 2,
+                    } as ImportExceptionsResponseSchema);
+
+                  const { body } = await endpointOpsAnalystSupertest
+                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .query({
+                      list_id: artifact.listId,
+                      namespace_type: 'agnostic',
+                    })
+                    .send()
+                    .expect(200);
+
+                  expect(body.data.length).to.eql(2);
+                  expect(body.data[0].tags).to.eql([DEFAULT_SPACE_OWNER_ID]);
+                  expect(body.data[1].tags).to.eql([
+                    DEFAULT_SPACE_OWNER_ID,
+                    buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                  ]);
+                });
+
+                it('should not import per-policy artifacts to other spaces when importing without global artifact privilege', async () => {
+                  await supertest[artifact.listId].all
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        { item_id: 'wrong-item', tags: [OTHER_SPACE_OWNER_ID] },
+                        {
+                          item_id: 'good-item',
+                          tags: [
+                            DEFAULT_SPACE_OWNER_ID,
+                            buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                          ],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [
+                        {
+                          error: {
+                            message:
+                              'EndpointArtifactError: Endpoint authorization failure. Management of "ownerSpaceId" tag requires global artifact management privilege',
+                            status_code: 403,
+                          },
+                          item_id: 'wrong-item',
+                          list_id: artifact.listId,
+                        },
+                      ],
+                      success: false,
+                      success_count: 2,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: false,
+                      success_count_exception_list_items: 1,
+                    } as ImportExceptionsResponseSchema);
+
+                  const { body } = await endpointOpsAnalystSupertest
+                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .query({
+                      list_id: artifact.listId,
+                      namespace_type: 'agnostic',
+                    })
+                    .send()
+                    .expect(200);
+
+                  expect(body.data.length).to.eql(1);
+                  expect(body.data[0].item_id).to.eql('good-item');
+                });
+
                 it('should not import global artifacts when importing without global artifact privilege', async () => {});
               });
 
               describe('when with global artifact privilege', () => {
                 it(`should import global artifacts`, async () => {
-                  await endpointOpsAnalystSupertest
+                  await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
                     .post(`${EXCEPTION_LIST_URL}/_import`)
                     .set('kbn-xsrf', 'true')
                     .on('error', createSupertestErrorLogger(log))
