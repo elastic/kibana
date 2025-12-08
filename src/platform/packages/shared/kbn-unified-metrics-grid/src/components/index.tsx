@@ -10,6 +10,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { MetricsExperienceClientProvider } from '../context/metrics_experience_client_provider';
 import { withRestorableState } from '../restorable_state';
@@ -38,9 +39,11 @@ const InternalUnifiedMetricsExperienceGrid = (
   return (
     <MetricsExperienceClientProvider value={{ client: props.client }}>
       <QueryClientProvider client={queryClient}>
-        <MetricFieldsCapsProvider fetchParams={props.fetchParams}>
-          <MetricsExperienceGrid {...props} />
-        </MetricFieldsCapsProvider>
+        <PerformanceContextProvider>
+          <MetricFieldsCapsProvider fetchParams={props.fetchParams}>
+            <MetricsExperienceGrid {...props} />
+          </MetricFieldsCapsProvider>
+        </PerformanceContextProvider>
       </QueryClientProvider>
     </MetricsExperienceClientProvider>
   );

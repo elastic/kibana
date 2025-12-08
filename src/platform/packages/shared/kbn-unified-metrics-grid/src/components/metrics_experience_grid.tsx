@@ -48,7 +48,7 @@ export const MetricsExperienceGrid = ({
 
   const { isFetching: isFetchingFieldsCaps } = useMetricFieldsCapsContext();
 
-  const { metricFields, visibleFields, dimensions } = useMetricFields();
+  const { metricFields, visibleFields, dimensions } = useMetricFields({ fetchParams });
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     metricFields,

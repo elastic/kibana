@@ -10,6 +10,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, MetricField, MetricUnit } from '../types';
 import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
 import { normalizeUnit } from '../common/utils/metric_unit/normalize_unit';
@@ -24,10 +26,16 @@ import { useMetricFieldsFilter } from './use_metric_fields_filter';
  * - metricFields: Complete set of metric fields (for dimension selector, filtering source)
  * - visibleFields: Currently visible fields based on filters (for grid, value selector)
  */
-export const useMetricFields = () => {
+export const useMetricFields = ({
+  fetchParams,
+}: {
+  fetchParams: ChartSectionProps['fetchParams'];
+}) => {
   const { searchTerm, selectedDimensions, selectedValueMetricFieldIds, onDimensionsChange } =
     useMetricsExperienceState();
   const { fieldSpecs, sampleRowByMetric, isFetching } = useMetricFieldsCapsContext();
+
+  const { onPageReady } = usePerformanceContext();
 
   const metricFields = useMemo(() => {
     if (fieldSpecs.length === 0 || sampleRowByMetric.size === 0) {
@@ -86,6 +94,29 @@ export const useMetricFields = () => {
       onDimensionsChange(validSelection);
     }
   }, [selectedDimensions, onDimensionsChange, isFetching, dimensions]);
+
+  useEffect(() => {
+    if (!isFetching && lastValueRef.current.metricFields.length > 0) {
+      onPageReady({
+        meta: {
+          rangeFrom: fetchParams.timeRange?.from,
+          rangeTo: fetchParams.timeRange?.to,
+        },
+        customMetrics: {
+          key1: 'metric_experience_fields_loaded',
+          value1: fieldSpecs.length,
+          key2: 'metrics_experience_poc_version',
+          value2: 1,
+        },
+      });
+    }
+  }, [
+    isFetching,
+    fieldSpecs.length,
+    onPageReady,
+    fetchParams.timeRange?.from,
+    fetchParams.timeRange?.to,
+  ]);
 
   return {
     metricFields: lastValueRef.current.metricFields,
