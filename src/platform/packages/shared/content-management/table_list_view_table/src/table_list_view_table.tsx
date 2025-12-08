@@ -78,7 +78,7 @@ export interface TableListViewTableProps<
   entityNamePlural: string;
   initialFilter?: string;
   initialPageSize: number;
-  emptyPrompt?: JSX.Element;
+  noItemsMessage?: JSX.Element;
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
   customSortingOptions?: CustomSortingOptions;
@@ -180,6 +180,7 @@ export interface URLState {
   };
   filter?: {
     createdBy?: string[];
+    favorites?: boolean;
   };
 
   [key: string]: unknown;
@@ -191,6 +192,7 @@ interface URLQueryParams {
   sort?: string;
   sortdir?: string;
   created_by?: string[];
+  favorites?: 'true';
 
   [key: string]: unknown;
 }
@@ -250,6 +252,12 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     stateFromURL.filter = { createdBy: [] };
   }
 
+  if (sanitizedParams.favorites === 'true') {
+    stateFromURL.filter.favorites = true;
+  } else {
+    stateFromURL.filter.favorites = false;
+  }
+
   return stateFromURL;
 };
 
@@ -264,6 +272,7 @@ const urlStateSerializer = (updated: {
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
   filter?: {
     createdBy?: string[];
+    favorites?: boolean;
   };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
@@ -285,6 +294,10 @@ const urlStateSerializer = (updated: {
 
   if (updated.filter?.createdBy) {
     updatedQueryParams.created_by = updated.filter.createdBy;
+  }
+
+  if (updated?.filter && 'favorites' in updated.filter) {
+    updatedQueryParams.favorites = updated.filter.favorites ? 'true' : undefined;
   }
 
   return updatedQueryParams;
@@ -315,7 +328,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   urlStateEnabled = true,
   customSortingOptions,
   customTableColumn,
-  emptyPrompt,
+  noItemsMessage,
   rowItemActions,
   findItems,
   createItem,
@@ -396,7 +409,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const initialState = useMemo<State<T>>(() => {
     const initialSort = getInitialSorting(entityName);
-
     return {
       items: [],
       hasNoItems: undefined,
@@ -587,7 +599,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   );
 
   const tableColumns = useMemo(() => {
-    const customColumn = customTableColumn;
     const showCreatorColumn = hasCreatedByMetadata && createdByEnabled;
 
     const columns: Array<EuiBasicTableColumn<T>> = [
@@ -621,8 +632,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       },
     ];
 
-    if (customColumn) {
-      columns.push(customColumn);
+    if (customTableColumn) {
+      columns.push(customTableColumn);
     }
 
     if (showCreatorColumn) {
@@ -861,6 +872,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         });
       }
 
+      if (data.filter && urlStateEnabled) {
+        setUrlState({
+          filter: data.filter,
+        });
+      }
+
       dispatch({
         type: 'onTableChange',
         data,
@@ -981,8 +998,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   );
 
   const renderNoItemsMessage = useCallback(() => {
-    if (emptyPrompt) {
-      return emptyPrompt;
+    if (noItemsMessage) {
+      return noItemsMessage;
     } else {
       return (
         <EuiEmptyPrompt
@@ -1001,7 +1018,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         />
       );
     }
-  }, [emptyPrompt, entityNamePlural, renderCreateButton]);
+  }, [noItemsMessage, entityNamePlural, renderCreateButton]);
 
   const renderFetchError = useCallback(() => {
     return (
@@ -1098,6 +1115,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: {
           filter: {
             createdBy: filter.createdBy ?? [],
+            favorites: filter.favorites ?? false,
           },
         },
       });
@@ -1198,7 +1216,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
-          emptyPrompt={emptyPrompt}
+          noItemsMessage={noItemsMessage}
         />
 
         {/* Delete modal */}

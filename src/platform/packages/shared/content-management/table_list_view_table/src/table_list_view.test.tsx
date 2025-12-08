@@ -133,7 +133,7 @@ describe('TableListView', () => {
       };
 
       await act(async () => {
-        testBed = await setup({ emptyPrompt: <CustomEmptyPrompt /> });
+        testBed = await setup({ noItemsMessage: <CustomEmptyPrompt /> });
       });
 
       const { component, exists } = testBed!;
@@ -169,7 +169,7 @@ describe('TableListView', () => {
       };
 
       await act(async () => {
-        testBed = await setup({ emptyPrompt: <EmptyPrompt />, findItems, deleteItems });
+        testBed = await setup({ noItemsMessage: <EmptyPrompt />, findItems, deleteItems });
       });
 
       const { component, exists, table } = testBed!;
