@@ -7,6 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
@@ -28,8 +29,12 @@ export const InputPopoverButton: React.FC<
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
 }) => {
+  const openStyles = css`
+    text-decoration: underline;
+  `;
   return (
     <EuiButtonEmpty
+      css={open && openStyles}
       color="text"
       iconSide="left"
       flush="both"
