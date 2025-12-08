@@ -96,7 +96,7 @@ export const useMetricFields = ({
   }, [selectedDimensions, onDimensionsChange, isFetching, dimensions]);
 
   useEffect(() => {
-    if (!isFetching && lastValueRef.current.metricFields.length > 0) {
+    if (!isFetching) {
       onPageReady({
         meta: {
           rangeFrom: fetchParams.timeRange?.from,
