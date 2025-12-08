@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/features-plugin'
   - '@kbn/task-manager-plugin'
+  - '@kbn/logging'
 tags:
   - plugin
   - prod
