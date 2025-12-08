@@ -23,7 +23,7 @@ function getDrilldownReferences(
     };
   };
   const events = config.enhancements?.dynamicActions?.events;
-  if (!Array.isArray(events)) return [];
+  if (!Array.isArray(events) || events.length === 0) return [];
 
   const eventIds = events.map(({ eventId }) => eventId).filter((eventId) => eventId !== undefined);
 
