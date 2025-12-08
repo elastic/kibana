@@ -126,7 +126,6 @@ export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
-export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/endpoint_exceptions` as const;
