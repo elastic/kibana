@@ -24,7 +24,7 @@ export const executeEsqlQuery = async (
 
     return response;
   } catch (error) {
-    logger.error(`Error executing ES|QL request for type ${type}: ${error.message}`);
+    logger.error(`[Entity Store ESQL] [${type}] Error executing ES|QL request: ${error.message}`);
     // Return empty response structure instead of empty array
     return { columns: [], values: [] };
   }

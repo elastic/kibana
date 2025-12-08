@@ -50,7 +50,7 @@ describe('buildEsql', () => {
 
     expect(cleanEsql(esql)).toEqual(
       cleanEsql(`
-     FROM logs-*, .entities.v1.updates.security_host_default
+         FROM logs-*, .entities.v1.updates.security_host_default
       | WHERE (
                   (host.entity.id IS NOT NULL AND host.entity.id != "")
                 OR (host.id IS NOT NULL AND host.id != "")
@@ -60,22 +60,22 @@ describe('buildEsql', () => {
               )
           AND @timestamp > TO_DATETIME("${from}")
           AND @timestamp <= TO_DATETIME("${to}")
-      // | SORT @timestamp ASC
-      // | LIMIT 10
       | EVAL host.entity.id = COALESCE(
                     host.entity.id,
                     host.id,
-                    CASE(host.domain IS NOT NULL,
-                      COALESCE(
-                          CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, ".", TO_STRING(host.domain)), NULL),
-                          CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, ".", TO_STRING(host.domain)), NULL)
+                    CASE(host.domain IS NOT NULL AND host.domain != "",
+                      CASE(
+                        host.name IS NOT NULL AND host.name != "", CONCAT(host.name, ".", TO_STRING(host.domain)),
+                        host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, ".", TO_STRING(host.domain)),
+                        NULL
                       ),
-                    NULL
+                      NULL
                     ),
-                    CASE(host.mac IS NOT NULL,
-                      COALESCE(
-                          CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.mac)), NULL),
-                          CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.mac)), NULL)
+                    CASE(host.mac IS NOT NULL AND host.mac != "",
+                      CASE(
+                        host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.mac)),
+                        host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.mac)),
+                        NULL
                       ),
                       NULL
                     ),
@@ -207,7 +207,6 @@ describe('buildEsql', () => {
         host.entity.id,
         entity.Metadata.EngineType
       | LIMIT 10
-      // | SORT @timestamp ASC
       `)
     );
   });

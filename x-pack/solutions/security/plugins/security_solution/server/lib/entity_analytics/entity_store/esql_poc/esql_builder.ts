@@ -42,8 +42,6 @@ export const buildESQLQuery = async (
   | WHERE ${entityIdFilter(description)}
       AND @timestamp > TO_DATETIME("${fromDateISO}")
       AND @timestamp <= TO_DATETIME("${toDateISO}")
-  // | SORT @timestamp ASC
-  // | LIMIT ${config.maxPageSearchSize}
   ${generateEUID(description)}
   | RENAME
     ${description.identityField} AS ${recentData(description.identityField)}
@@ -62,8 +60,7 @@ export const buildESQLQuery = async (
   | KEEP
     ${fieldsToKeep(description)},
     entity.Metadata.EngineType
-  | LIMIT ${config.maxPageSearchSize}
-  // | SORT @timestamp ASC`;
+  | LIMIT ${config.maxPageSearchSize}`;
 };
 
 function entityIdFilter({ identityField, entityType }: EntityDescription) {
@@ -95,27 +92,19 @@ function generateEUID({ entityType }: EntityDescription) {
                 user.id,
                 user.email,
                 CASE(user.name IS NOT NULL AND user.name != "", 
-                    COALESCE(
-                        CASE(user.domain IS NOT NULL AND user.domain != "", CONCAT(user.name, "@", user.domain), NULL),
-                        CASE(host.id IS NOT NULL AND host.id != "", CONCAT(user.name, "@", host.id), NULL),
-                        CASE(host.domain IS NOT NULL,
-                          COALESCE(
-                              CASE(host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name, ".", TO_STRING(host.domain)), NULL),
-                              CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname, ".", TO_STRING(host.domain)), NULL)
-                          ),
-                        NULL
-                        ),
-                        CASE(host.mac IS NOT NULL,
-                          COALESCE(
-                              CASE(host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name, "|", TO_STRING(host.mac)), NULL),
-                              CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname, "|", TO_STRING(host.mac)), NULL)
-                          ),
-                          NULL
-                        ),
-                        CASE(host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name), NULL),
-                        CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname), NULL)
+                  CASE(
+                    user.domain IS NOT NULL AND user.domain != "", CONCAT(user.name, "@", user.domain),
+                    host.id IS NOT NULL AND host.id != "", CONCAT(user.name, "@", host.id),
+                    host.domain IS NOT NULL AND host.domain != "", CASE(
+                      host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name, ".", TO_STRING(host.domain)),
+                      host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname, ".", TO_STRING(host.domain)),
+                      NULL
                     ),
+                    host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name),
+                    host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname),
                     NULL
+                  ),
+                  NULL
                 ),
                 user.name
             )`;
@@ -123,17 +112,19 @@ function generateEUID({ entityType }: EntityDescription) {
     return `| EVAL host.entity.id = COALESCE(
                 host.entity.id,
                 host.id,
-                CASE(host.domain IS NOT NULL,
-                  COALESCE(
-                      CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, ".", TO_STRING(host.domain)), NULL),
-                      CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, ".", TO_STRING(host.domain)), NULL)
+                CASE(host.domain IS NOT NULL AND host.domain != "",
+                  CASE(
+                    host.name IS NOT NULL AND host.name != "", CONCAT(host.name, ".", TO_STRING(host.domain)),
+                    host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, ".", TO_STRING(host.domain)),
+                    NULL
                   ),
-                NULL
+                  NULL
                 ),
-                CASE(host.mac IS NOT NULL,
-                  COALESCE(
-                      CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.mac)), NULL),
-                      CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.mac)), NULL)
+                CASE(host.mac IS NOT NULL AND host.mac != "",
+                  CASE(
+                    host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.mac)),
+                    host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.mac)),
+                    NULL
                   ),
                   NULL
                 ),
