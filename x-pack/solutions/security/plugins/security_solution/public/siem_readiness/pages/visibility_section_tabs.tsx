@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiTabbedContent, type EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisibilityTabId } from './visibility_section_boxes';
-import { CoverageTab } from './tabs/coverage/coverage_tab';
+import { CoverageTab } from './tabs/coverage_tab/coverage_tab';
 import { QualityTab } from './tabs/quality/quality_tab';
 import { ContinuityTab } from './tabs/continuity/continuity_tab';
 import { RetentionTab } from './tabs/retention/retention_tab';
