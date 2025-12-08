@@ -76,6 +76,9 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
+                setIsEditFlyoutOpen(false);
+                refresh();
+
                 telemetryClient.trackSignificantEventsCreated({
                   count: 1,
                   count_by_feature_type: !data.query.feature
@@ -88,8 +91,6 @@ export const EditSignificantEventFlyout = ({
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
-                refresh();
               },
               (error) => {
                 notifications.showErrorDialog({
