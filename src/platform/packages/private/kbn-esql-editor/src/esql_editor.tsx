@@ -32,14 +32,18 @@ import {
   getTimeseriesIndices,
   getInferenceEndpoints,
   getEditorExtensions,
+  fixESQLQueryWithVariables,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
-import type { ESQLControlVariable, ESQLCallbacks } from '@kbn/esql-types';
-import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import type {
+  ESQLTelemetryCallbacks,
+  ESQLControlVariable,
+  ESQLCallbacks,
+  TelemetryQuerySubmittedProps,
+} from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -49,7 +53,6 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
 import { QuerySource } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
