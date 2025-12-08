@@ -44,7 +44,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   // Build service cards array
   const allServiceCards = [
     {
-      key: 'eis',
+      serviceKey: 'eis',
       title: i18n.translate('xpack.cloudConnect.services.eis.title', {
         defaultMessage: 'Elastic Inference Service',
       }),
@@ -75,7 +75,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       hasActiveSubscription,
     },
     {
-      key: 'auto_ops',
+      serviceKey: 'auto_ops',
       title: i18n.translate('xpack.cloudConnect.services.autoOps.title', {
         defaultMessage: 'AutoOps',
       }),
@@ -111,7 +111,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     },
     // Synthetics Service (hardcoded as coming soon)
     {
-      key: 'synthetics',
+      serviceKey: 'synthetics',
       title: i18n.translate('xpack.cloudConnect.services.synthetics.title', {
         defaultMessage: 'Synthetics',
       }),
@@ -146,7 +146,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       {serviceCards.map((service, index) => (
-        <React.Fragment key={service.key}>
+        <React.Fragment key={service.serviceKey}>
           <ServiceCard {...service} />
           {index < serviceCards.length - 1 && <EuiSpacer size="m" />}
         </React.Fragment>

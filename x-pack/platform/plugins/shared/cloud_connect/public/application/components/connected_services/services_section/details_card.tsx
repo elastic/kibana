@@ -27,9 +27,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../../app_context';
+import type { ServiceType } from '../../../../types';
 
 export interface ServiceCardProps {
-  key?: string;
+  serviceKey?: string;
   title: string;
   enabled: boolean;
   supported?: boolean;
@@ -50,7 +51,7 @@ export interface ServiceCardProps {
 }
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
-  key: serviceKey,
+  serviceKey,
   title,
   enabled,
   supported = true,
@@ -239,7 +240,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                   if (serviceKey) {
                     telemetryService.trackLinkClicked({
                       destination_type: 'service_portal',
-                      service_type: serviceKey,
+                      service_type: serviceKey as ServiceType,
                     });
                   }
                   if (onOpen) {
@@ -344,7 +345,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                   if (serviceKey) {
                     telemetryService.trackLinkClicked({
                       destination_type: 'service_documentation',
-                      service_type: serviceKey,
+                      service_type: serviceKey as ServiceType,
                     });
                   }
                 }}
