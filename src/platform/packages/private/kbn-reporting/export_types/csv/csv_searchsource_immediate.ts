@@ -134,7 +134,7 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
       cancellationToken,
       this.logger,
       stream,
-      _jobId
+      _jobId || 'immediate-download'
     );
     const result = await csv.generateData();
 
