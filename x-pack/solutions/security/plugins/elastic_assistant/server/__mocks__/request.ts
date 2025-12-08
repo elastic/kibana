@@ -8,15 +8,13 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES } from '../../common/constants';
 import type {
   CreateAttackDiscoverySchedulesRequestBody,
-  CreateAttackDiscoverySchedulesInternalRequestBody,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
   KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
-  UpdateAttackDiscoverySchedulesInternalRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
-  AttackDiscoveryPostInternalRequestBody,
+  PostAttackDiscoveryGenerateRequestBody,
   ConversationCreateProps,
   ConversationUpdateProps,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
@@ -24,14 +22,12 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_USERS_SUGGEST_URL,
-  ATTACK_DISCOVERY_INTERNAL,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
+  ATTACK_DISCOVERY_GENERATE,
   ATTACK_DISCOVERY_SCHEDULES,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
+  ATTACK_DISCOVERY_SCHEDULES_FIND,
   DEFEND_INSIGHTS,
   DEFEND_INSIGHTS_BY_ID,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
@@ -305,10 +301,10 @@ export const getAlertSummaryBulkActionRequest = (
     },
   });
 
-export const postAttackDiscoveryRequest = (body: AttackDiscoveryPostInternalRequestBody) =>
+export const postAttackDiscoveryRequest = (body: PostAttackDiscoveryGenerateRequestBody) =>
   requestMock.create({
     method: 'post',
-    path: ATTACK_DISCOVERY_INTERNAL,
+    path: ATTACK_DISCOVERY_GENERATE,
     body,
   });
 
@@ -342,80 +338,10 @@ export const getAttackDiscoveryMissingPrivilegesRequest = () =>
 export const findAttackDiscoverySchedulesRequest = () =>
   requestMock.create({
     method: 'get',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
+    path: ATTACK_DISCOVERY_SCHEDULES_FIND,
   });
 
 export const createAttackDiscoverySchedulesRequest = (
-  body: CreateAttackDiscoverySchedulesInternalRequestBody
-) =>
-  requestMock.create({
-    method: 'post',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES,
-    body,
-  });
-
-export const deleteAttackDiscoverySchedulesRequest = (id: string) =>
-  requestMock.create({
-    method: 'delete',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
-    params: { id },
-  });
-
-export const getAttackDiscoverySchedulesRequest = (id: string) =>
-  requestMock.create({
-    method: 'get',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
-    params: { id },
-  });
-
-export const updateAttackDiscoverySchedulesRequest = (
-  id: string,
-  body: UpdateAttackDiscoverySchedulesInternalRequestBody
-) =>
-  requestMock.create({
-    method: 'put',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
-    params: { id },
-    body,
-  });
-
-export const enableAttackDiscoverySchedulesRequest = (id: string) =>
-  requestMock.create({
-    method: 'post',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE,
-    params: { id },
-  });
-
-export const disableAttackDiscoverySchedulesRequest = (id: string) =>
-  requestMock.create({
-    method: 'put',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE,
-    params: { id },
-  });
-
-// Internal API request mocks (for internal tests)
-export const createAttackDiscoverySchedulesInternalRequest = (
-  body: CreateAttackDiscoverySchedulesInternalRequestBody
-) =>
-  requestMock.create({
-    method: 'post',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES,
-    body,
-  });
-
-export const updateAttackDiscoverySchedulesInternalRequest = (
-  id: string,
-  body: UpdateAttackDiscoverySchedulesInternalRequestBody
-) =>
-  requestMock.create({
-    method: 'put',
-    path: ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
-    params: { id },
-    body,
-  });
-
-// Public API request mocks (for public tests)
-export const createAttackDiscoverySchedulesPublicRequest = (
   body: CreateAttackDiscoverySchedulesRequestBody
 ) =>
   requestMock.create({
@@ -424,7 +350,21 @@ export const createAttackDiscoverySchedulesPublicRequest = (
     body,
   });
 
-export const updateAttackDiscoverySchedulesPublicRequest = (
+export const deleteAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'delete',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+    params: { id },
+  });
+
+export const getAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'get',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+    params: { id },
+  });
+
+export const updateAttackDiscoverySchedulesRequest = (
   id: string,
   body: UpdateAttackDiscoverySchedulesRequestBody
 ) =>
@@ -433,4 +373,18 @@ export const updateAttackDiscoverySchedulesPublicRequest = (
     path: ATTACK_DISCOVERY_SCHEDULES_BY_ID,
     params: { id },
     body,
+  });
+
+export const enableAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
+    params: { id },
+  });
+
+export const disableAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
+    params: { id },
   });
