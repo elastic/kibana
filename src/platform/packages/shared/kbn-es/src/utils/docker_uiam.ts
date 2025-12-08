@@ -20,16 +20,10 @@ import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PAT
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'mcr.microsoft.com';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/cosmosdb/linux/azure-cosmos-emulator`;
 
-// We're pinning to a specific SHA256 tag to avoid unexpected breakages from image updates.
-// This tag has been verified to work with UIAM as of 2025-11-25.
-// To update this tag, please do the following:
-// 1. Pull the latest version of the tag
-//   $ docker pull mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
-// 2. Get the digest
-//   $ docker inspect --format='{{index .RepoDigests 0}}' mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
-const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG =
-  '2062ea5f8dc4416381014dae9bb66059ac2ac29912f2ca6f47bd1b4f360d7445';
-export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}@sha256:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
+// Check new version at https://github.com/Azure/azure-cosmos-db-emulator-docker/releases. DON'T use the rolling
+// `vnext-preview` image tag.
+const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-EN20251124';
+export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_REPO = `${UIAM_DOCKER_REGISTRY}/cloud-ci/uiam`;
@@ -45,7 +39,7 @@ const UIAM_COSMOS_DB_COLLECTION_API_KEYS = 'api-keys';
 const UIAM_COSMOS_DB_COLLECTION_USERS = 'users';
 const UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION = 'token-invalidation';
 
-const MAX_HEALTHCHECK_RETRIES = 15;
+const MAX_HEALTHCHECK_RETRIES = 30;
 
 const ENV_DEFAULTS = {
   UIAM_API_PORT: '8080',
@@ -214,7 +208,7 @@ export async function runUiamContainer(
     }
 
     log.info(chalk.bold(`Waiting for "${container.name}" container (${currentStatus})…`));
-    await setTimeoutAsync(1000);
+    await setTimeoutAsync(2000);
 
     healthcheckRetries++;
     if (healthcheckRetries >= MAX_HEALTHCHECK_RETRIES) {

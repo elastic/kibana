@@ -18,6 +18,7 @@ import { adHocRunStatus } from '../../../../common/constants';
 import { alertingEventLoggerMock } from '../../alerting_event_logger/alerting_event_logger.mock';
 import { findOverlappingIntervals, toScheduledItem, prepareGapsForUpdate } from './utils';
 import { applyScheduledBackfillsToGap } from './apply_scheduled_backfills_to_gap';
+import { backfillInitiator } from '../../../../common/constants';
 
 jest.mock('./update_gaps_in_event_log', () => ({
   updateGapsInEventLog: jest.fn().mockResolvedValue(true),
@@ -82,6 +83,7 @@ describe('updateGapsBatch', () => {
       ruleId,
       backfillClient,
       shouldRefetchAllBackfills: true,
+      initiator: backfillInitiator.USER,
     });
   });
 
@@ -130,6 +132,7 @@ describe('updateGapsBatch', () => {
           backfillClient,
           actionsClient,
           ruleId,
+          initiator: backfillInitiator.USER,
         });
       });
     });

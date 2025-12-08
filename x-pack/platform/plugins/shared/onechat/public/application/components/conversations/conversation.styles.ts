@@ -12,6 +12,10 @@ const maxConversationWidthStyles = css`
   max-width: 800px;
 `;
 
+export const conversationElementPaddingStyles = css`
+  padding: 0px 16px 16px;
+`;
+
 // Ensures the conversation element is always 100% of it's parent or 800px, whichever is smaller.
 export const conversationElementWidthStyles = css`
   width: 100%;
@@ -25,9 +29,13 @@ export const fullWidthAndHeightStyles = css`
 
 const ROUNDED_BORDER_RADIUS = '6px';
 export const ROUNDED_BORDER_RADIUS_LARGE = '12px';
+const ROUNDED_BORDER_RADIUS_EXTRA_LARGE = '16px';
 
 export const roundedBorderRadiusStyles = css`
   border-radius: ${ROUNDED_BORDER_RADIUS};
+`;
+export const borderRadiusXlStyles = css`
+  border-radius: ${ROUNDED_BORDER_RADIUS_EXTRA_LARGE};
 `;
 
 export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`
