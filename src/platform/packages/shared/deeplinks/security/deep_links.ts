@@ -12,6 +12,7 @@ export enum SecurityPageName {
   alerts = 'alerts',
   attacks = 'attacks',
   aiValue = 'ai_value',
+  aiAssistedRuleCreate = 'ai_assisted_rule_create',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',

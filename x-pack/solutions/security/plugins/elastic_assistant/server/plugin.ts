@@ -202,6 +202,7 @@ export class ElasticAssistantPlugin
       registerCallback: (callbackId: CallbackIds, callback: Function) => {
         return appContextService.registerCallback(callbackId, callback);
       },
+      getAIAssistantService: () => this.assistantService,
     };
   }
 

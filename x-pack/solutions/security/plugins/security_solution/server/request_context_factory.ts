@@ -205,6 +205,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getInferenceService: () => startPlugins.inference,
+
       getLogger,
 
       getDataViewsService: () => dataViewsService,
@@ -263,6 +265,44 @@ export class RequestContextFactory implements IRequestContextFactory {
       }),
 
       getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
+
+      getAIAssistantService: () => startPlugins.elasticAssistant.getAIAssistantService(),
+
+      getAIAssistantKnowledgeBaseDataClient: memoize(async (params) => {
+        const currentUser = await coreContext.security.authc.getCurrentUser();
+
+        const { securitySolutionAssistant } = await coreStart.capabilities.resolveCapabilities(
+          request,
+          {
+            capabilityPath: 'securitySolutionAssistant.*',
+          }
+        );
+
+        const assistantService = startPlugins.elasticAssistant.getAIAssistantService();
+        if (!assistantService) {
+          return null;
+        }
+
+        return assistantService.createAIAssistantKnowledgeBaseDataClient({
+          spaceId: getSpaceId(),
+          logger: options.logger,
+          licensing: context.licensing,
+          currentUser,
+          elserInferenceId: params?.elserInferenceId,
+          manageGlobalKnowledgeBaseAIAssistant:
+            securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
+          // uses internal user to interact with ML API
+          getTrainedModelsProvider: () => {
+            if (!plugins.ml) {
+              throw new Error('ML plugin is not available');
+            }
+            return plugins.ml.trainedModelsProvider(
+              {} as KibanaRequest,
+              coreStart.savedObjects.createInternalRepository()
+            );
+          },
+        });
+      }),
 
       getExceptionListClient: () => {
         if (!lists) {

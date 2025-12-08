@@ -257,6 +257,7 @@
     "@kbn/onechat-genai-utils",
     "@kbn/onechat-server",
     "@kbn/object-utils",
+    "@kbn/ml-response-stream",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/response-ops-rule-form",
