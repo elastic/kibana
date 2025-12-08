@@ -34,6 +34,7 @@ import {
   EntityTypeToScoreField,
   RiskSeverity,
 } from '../../../../common/search_strategy';
+import { getRiskLevel } from '../../../../common/entity_analytics/risk_engine';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { createDataProviders } from '../../../app/actions/add_to_timeline/data_provider';
@@ -56,17 +57,12 @@ import {
 
 const THREAT_HUNTING_TABLE_ID = 'threat-hunting-table';
 
-interface ThreatHuntingEntitiesTableProps {
-  height?: number;
-}
-
 /**
  * Creates data providers for timeline investigation based on entity type and name
  */
 const createEntityDataProviders = (
   entityType: EntityType | undefined,
-  entityName: string | undefined,
-  entityId: string | undefined
+  entityName: string | undefined
 ) => {
   if (!entityName || !entityType) {
     return null;
@@ -96,17 +92,6 @@ const createEntityDataProviders = (
   });
 
   return dataProviders;
-};
-
-/**
- * Helper to determine risk level from risk score
- */
-const getRiskLevelFromScore = (score: number): RiskSeverity => {
-  if (score >= 70) return RiskSeverity.Critical;
-  if (score >= 50) return RiskSeverity.High;
-  if (score >= 30) return RiskSeverity.Moderate;
-  if (score >= 20) return RiskSeverity.Low;
-  return RiskSeverity.Unknown;
 };
 
 /**
@@ -179,7 +164,6 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
       render: (record: Entity) => {
         const entityType = getEntityType(record);
         const entityName = record.entity.name;
-        const entityId = record.entity.id;
 
         const handleFlyoutClick = () => {
           const id = EntityPanelKeyByType[entityType];
@@ -197,7 +181,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
         };
 
         const handleTimelineClick = () => {
-          const dataProviders = createEntityDataProviders(entityType, entityName, entityId);
+          const dataProviders = createEntityDataProviders(entityType, entityName);
           if (dataProviders && dataProviders.length > 0) {
             investigateInTimeline({
               dataProviders,
@@ -350,8 +334,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
 
         // Determine risk level from risk score if not directly available
         const level =
-          riskLevel ||
-          (riskScore != null ? getRiskLevelFromScore(riskScore) : RiskSeverity.Unknown);
+          riskLevel || (riskScore != null ? getRiskLevel(riskScore) : RiskSeverity.Unknown);
 
         const colors = getRiskScoreColors(level, euiTheme);
 
@@ -414,7 +397,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
   ];
 };
 
-export const ThreatHuntingEntitiesTable: React.FC<ThreatHuntingEntitiesTableProps> = () => {
+export const ThreatHuntingEntitiesTable: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
   const [activePage, setActivePage] = useState(0);
   const [limit, setLimit] = useState(10);

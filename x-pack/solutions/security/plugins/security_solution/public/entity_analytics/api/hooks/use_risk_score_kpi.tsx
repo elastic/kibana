@@ -69,22 +69,12 @@ export const useRiskScoreKpi = ({
     [timerange]
   );
 
-  // Memoize entity to prevent unnecessary re-renders when it's an array
-  const entityKey = useMemo(() => {
-    return Array.isArray(riskEntity) ? JSON.stringify(riskEntity) : riskEntity;
-  }, [riskEntity]);
-
-  const memoizedEntity = useMemo(() => {
-    return riskEntity;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entityKey]);
-
   useEffect(() => {
     if (!skip && defaultIndex && !isStatusLoading && riskEngineHasBeenEnabled) {
       search({
         filterQuery,
         defaultIndex: [defaultIndex],
-        entity: memoizedEntity,
+        entity: riskEntity,
         timerange: requestTimerange,
       });
     }
@@ -93,7 +83,7 @@ export const useRiskScoreKpi = ({
     search,
     filterQuery,
     skip,
-    memoizedEntity,
+    riskEntity,
     requestTimerange,
     isStatusLoading,
     riskEngineHasBeenEnabled,

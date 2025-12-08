@@ -15,7 +15,6 @@ import type { SeverityCount } from '../severity/types';
 
 interface RiskLevelBreakdownItem {
   level: RiskSeverity;
-  levelLabel: string;
   scoreRange: string;
   count: number;
 }
@@ -35,31 +34,26 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
     return [
       {
         level: RiskSeverity.Critical,
-        levelLabel: 'Critical',
         scoreRange: '>90',
         count: severityCount[RiskSeverity.Critical] ?? 0,
       },
       {
         level: RiskSeverity.High,
-        levelLabel: 'High',
         scoreRange: '70-90',
         count: severityCount[RiskSeverity.High] ?? 0,
       },
       {
         level: RiskSeverity.Moderate,
-        levelLabel: 'Medium',
         scoreRange: '40-70',
         count: severityCount[RiskSeverity.Moderate] ?? 0,
       },
       {
         level: RiskSeverity.Low,
-        levelLabel: 'Low',
         scoreRange: '20-40',
         count: severityCount[RiskSeverity.Low] ?? 0,
       },
       {
         level: RiskSeverity.Unknown,
-        levelLabel: 'Unknown',
         scoreRange: '<20',
         count: severityCount[RiskSeverity.Unknown] ?? 0,
       },
@@ -76,7 +70,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
             defaultMessage="Risk level"
           />
         ),
-        render: (level: RiskSeverity, item: RiskLevelBreakdownItem) => (
+        render: (level: RiskSeverity) => (
           <EuiText size="s">
             <RiskScoreLevel hideBackgroundColor severity={level} />
           </EuiText>
@@ -120,6 +114,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
       items={tableItems}
       columns={columns}
       loading={loading}
+      tableCaption="Risk level breakdown by entity count"
       data-test-subj="risk-level-breakdown-table"
     />
   );
