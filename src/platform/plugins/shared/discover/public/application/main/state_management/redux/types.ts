@@ -15,7 +15,10 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import type {
+  UnifiedFieldListRestorableState,
+  UnifiedFieldListSidebarContainerProps,
+} from '@kbn/unified-field-list';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
@@ -146,6 +149,7 @@ export interface TabState extends TabItem {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
+    fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
