@@ -18,7 +18,7 @@ export const ConversationLeftActions: React.FC<{}> = () => {
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiTourStep {...getStepProps(TourStep.ConversationsHistory)!}>
+      <EuiTourStep {...getStepProps(TourStep.ConversationsHistory)}>
         <ConversationsHistoryButton />
       </EuiTourStep>
       {hasActiveConversation && <NewConversationButton />}

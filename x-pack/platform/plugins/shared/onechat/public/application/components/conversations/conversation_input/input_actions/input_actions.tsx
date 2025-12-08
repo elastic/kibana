@@ -36,14 +36,14 @@ export const InputActions: React.FC<InputActionsProps> = ({
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <EuiTourStep {...getStepProps(TourStep.LlmSelector)!}>
+          <EuiTourStep {...getStepProps(TourStep.LlmSelector)}>
             <ConnectorSelector />
           </EuiTourStep>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTourStep {...getStepProps(TourStep.AgentSelector)!}>
+              <EuiTourStep {...getStepProps(TourStep.AgentSelector)}>
                 <AgentSelector agentId={agentId} />
               </EuiTourStep>
             </EuiFlexItem>

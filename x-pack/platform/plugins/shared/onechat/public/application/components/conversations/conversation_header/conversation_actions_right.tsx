@@ -40,7 +40,7 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <EuiTourStep {...getStepProps(TourStep.ConversationActions)!}>
+      <EuiTourStep {...getStepProps(TourStep.ConversationActions)}>
         <MoreActionsButton onRenameConversation={onRenameConversation} />
       </EuiTourStep>
       {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}

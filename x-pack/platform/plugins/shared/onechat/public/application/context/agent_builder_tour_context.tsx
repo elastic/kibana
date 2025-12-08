@@ -41,7 +41,7 @@ export type TourStepProps = Pick<
 
 interface AgentBuilderTourContextValue {
   isTourActive: boolean;
-  getStepProps: (step: TourStep) => TourStepProps | undefined;
+  getStepProps: (step: TourStep) => TourStepProps;
 }
 
 const AgentBuilderTourContext = createContext<AgentBuilderTourContextValue | undefined>(undefined);
@@ -209,9 +209,8 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
     },
   };
 
-  const getStepProps = (step: TourStep): TourStepProps | undefined => {
+  const getStepProps = (step: TourStep): TourStepProps => {
     const stepConfig = tourSteps[step];
-    if (!stepConfig) return undefined;
 
     return {
       maxWidth: tourConfig.tourPopoverWidth,
