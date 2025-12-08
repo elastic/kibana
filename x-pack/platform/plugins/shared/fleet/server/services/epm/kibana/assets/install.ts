@@ -8,7 +8,7 @@
 import { setTimeout } from 'timers/promises';
 
 import { v5 } from 'uuid';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
@@ -102,7 +102,7 @@ export function createSavedObjectKibanaAsset(
   // convert that to an object
   const so: Partial<SavedObjectToBe> = {
     type: asset.type,
-    id: rewriteId ? v5(asset.id, v5.DNS) : asset.id,
+    id: rewriteId ? v5(`$${options?.spaceId ?? DEFAULT_SPACE_ID}:${asset.id}`, v5.DNS) : asset.id,
     ...(rewriteId ? { originId: asset.id } : {}),
     attributes: asset.attributes,
     references: asset.references || [],
