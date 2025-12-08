@@ -128,12 +128,14 @@ export const useDashboardListingTable = ({
 
   const createItem = useCallback(
     (contentTypeTab?: 'dashboards' | 'visualizations' | 'annotation-groups') => {
-      if (contentTypeTab === 'visualizations') {
+      const contentType = contentTypeTab ?? contentTypeFilter;
+
+      if (contentType === 'visualizations') {
         closeNewVisModal.current = showNewVisModal();
         return;
       }
 
-      if (contentTypeTab === 'annotation-groups') {
+      if (contentType === 'annotation-groups') {
         // For annotation groups, navigate to Lens
         coreServices.application.navigateToApp('lens', { path: '#/' });
         return;
@@ -149,7 +151,7 @@ export const useDashboardListingTable = ({
       }
       goToDashboard();
     },
-    [dashboardBackupService, goToDashboard, useSessionStorageIntegration]
+    [dashboardBackupService, goToDashboard, useSessionStorageIntegration, contentTypeFilter]
   );
 
   // Close new visualization modal when navigating away (e.g., browser back button)

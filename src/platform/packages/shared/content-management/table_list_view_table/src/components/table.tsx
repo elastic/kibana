@@ -77,7 +77,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   customSortingOptions?: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
-  renderCreateButton: () => React.ReactElement | undefined;
+  renderCreateButton: (options?: { fill?: boolean }) => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
@@ -312,9 +312,14 @@ export function Table<T extends UserContentCommonSchema>({
     );
   }, [entityNamePlural]);
 
+  // Check if we have active filters (favorites or createdBy)
+  const hasActiveFilters = React.useMemo(() => {
+    return tableFilter.favorites || tableFilter?.createdBy?.length > 0;
+  }, [tableFilter]);
+
   const emptyPromptActions = useMemo(() => {
-    return renderCreateButton();
-  }, [renderCreateButton]);
+    return renderCreateButton({ fill: !hasActiveFilters });
+  }, [renderCreateButton, hasActiveFilters]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
@@ -391,7 +396,7 @@ export function Table<T extends UserContentCommonSchema>({
           noItemsMessage={
             isFetchingItems ? (
               <></>
-            ) : emptyPrompt ? (
+            ) : emptyPrompt && items.length === 0 && !hasActiveFilters ? (
               emptyPrompt
             ) : (
               <EuiEmptyPrompt
