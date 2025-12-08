@@ -273,6 +273,7 @@ export function useSingleAgentMenuItems({
           />
         ),
         icon: 'trash',
+        iconColor: 'danger',
         disabled: !agent.active || agentPolicy?.supports_agentless === true,
         onClick: () => {
           callbacks.onUnenrollClick();
@@ -291,6 +292,7 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'minusInCircle',
+          iconColor: 'danger',
           disabled: !agent.active,
           onClick: () => {
             callbacks.onUninstallClick();

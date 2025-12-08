@@ -312,6 +312,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
               />
             ),
             icon: 'trash',
+            iconColor: 'danger',
             disabled: !authz.fleet.allAgents,
             onClick: () => {
               setIsUnenrollModalOpen(true);

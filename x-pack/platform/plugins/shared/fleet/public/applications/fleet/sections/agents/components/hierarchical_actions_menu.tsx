@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { EuiPopover, EuiContextMenu, EuiButtonIcon, EuiButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, IconType, EuiIconProps } from '@elastic/eui';
 
 /**
  * Recursive menu item interface that supports infinite nesting using EUI's ContextMenu component.
@@ -22,6 +22,8 @@ export interface MenuItem {
   name: React.ReactNode;
   /** Icon to display (EUI icon type) */
   icon?: IconType;
+  /** Color for the icon (e.g., 'danger' for destructive actions). Defaults to 'default' if not specified. */
+  iconColor?: EuiIconProps['color'];
   /** Whether the item is disabled */
   disabled?: boolean;
   /** Click handler for action items (not used if children are present) */
@@ -135,7 +137,9 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
         if (hasChildren) {
           return {
             name: item.name,
-            icon: item.icon ? <EuiIcon type={item.icon} size="m" /> : undefined,
+            icon: item.icon ? (
+              <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+            ) : undefined,
             disabled: item.disabled,
             panel: childPanelId,
             'data-test-subj': item['data-test-subj'],
@@ -144,7 +148,9 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
 
         return {
           name: item.name,
-          icon: item.icon ? <EuiIcon type={item.icon} size="m" /> : undefined,
+          icon: item.icon ? (
+            <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+          ) : undefined,
           disabled: item.disabled,
           onClick: (event: React.MouseEvent) => {
             if (item.onClick) {
