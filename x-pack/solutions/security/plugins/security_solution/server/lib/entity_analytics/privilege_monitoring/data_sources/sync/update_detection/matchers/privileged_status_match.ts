@@ -18,6 +18,7 @@ import type { PrivBucket, PrivMatchersAggregation, PrivTopHit } from '../types';
 import { PRIV_MATCHER_MODE_CONFIG } from '../types';
 import type { MonitoringEntitySyncType, PrivMonBulkUser } from '../../../../types';
 import { createSyncMarkersStrategy } from '../sync_markers_strategy/sync_markers_strategy';
+import type { AfterKey } from '../../types';
 
 export const createPatternMatcherService = ({
   dataClient,
