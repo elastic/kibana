@@ -12,23 +12,7 @@ import { esClient } from './support/es_client';
 export default defineCypressConfig({
   reporter: '../../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: {
-      reporterEnabled: 'mochawesome, mocha-junit-reporter, buildkite-test-collector/mocha/reporter',
-      buildkiteTestCollectorMochaReporterReporterOptions: {
-        token_name: 'BK_ANALYTICS_API_KEY',
-        'follow-symlinks': true,
-        timeout: 120,
-        'upload-concurrency': 50,
-      },
-      reporterOptions: {
-        html: false,
-        json: true,
-        mochaFile:
-          '../../../../../target/kibana-security-solution/cypress/results/TEST-security-solution-cypress-[hash].xml',
-        overwrite: false,
-        reportDir: '../../../../../target/kibana-security-solution/cypress/results',
-      },
-    },
+    configFile: './cypress/reporter_config.json',
   },
   chromeWebSecurity: false,
   defaultCommandTimeout: 150000,
