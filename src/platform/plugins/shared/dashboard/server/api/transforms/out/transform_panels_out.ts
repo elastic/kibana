@@ -14,7 +14,7 @@ import { getReferencesForPanelId } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
 
 export function transformPanelsOut(
-  panelsJSON: string = '{}',
+  panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   references?: SavedObjectReference[]
 ): DashboardState['panels'] {

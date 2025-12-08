@@ -12,6 +12,7 @@ import type {
   LegacyMetricState as LegacyMetricVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -29,7 +30,6 @@ import {
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type { LensApiState, LegacyMetricState } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
-import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type {
@@ -84,10 +84,7 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     metric: isEsqlTableTypeDataset(dataset)
       ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
-      : (operationFromColumn(
-          visualization.accessor,
-          layer as FormBasedLayer
-        ) as LensApiAllMetricOperations),
+      : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
   } as LegacyMetricState;
 
   if (props.metric) {
@@ -121,7 +118,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
+  const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
   const defaultLayer = layers[DEFAULT_LAYER_ID];
@@ -135,7 +132,18 @@ function getValueColumns(layer: LegacyMetricStateESQL) {
   return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
 }
 
-export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
+type LegacyMetricAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsLegacyMetric' }
+>;
+
+type LegacyMetricAttributesWithoutFiltersAndQuery = Omit<LegacyMetricAttributes, 'state'> & {
+  state: Omit<LegacyMetricAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(
+  config: LegacyMetricState
+): LegacyMetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as LegacyMetricStateNoESQL);
 
@@ -158,8 +166,6 @@ export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },

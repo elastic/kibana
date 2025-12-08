@@ -33,6 +33,9 @@ export const dashboardClient = {
   create: async (dashboardState: DashboardState, references: Reference[]) => {
     return coreServices.http.post<DashboardCreateResponseBody>(`/api/dashboards/dashboard`, {
       version: DASHBOARD_API_VERSION,
+      query: {
+        allowUnmappedKeys: true,
+      },
       body: JSON.stringify({
         data: {
           ...dashboardState,
@@ -55,6 +58,9 @@ export const dashboardClient = {
     const result = await coreServices.http
       .get<DashboardReadResponseBody>(`/api/dashboards/dashboard/${id}`, {
         version: DASHBOARD_API_VERSION,
+        query: {
+          allowUnmappedKeys: true,
+        },
       })
       .catch((e) => {
         if (e.response?.status === 404) {
@@ -87,6 +93,9 @@ export const dashboardClient = {
       `/api/dashboards/dashboard/${id}`,
       {
         version: DASHBOARD_API_VERSION,
+        query: {
+          allowUnmappedKeys: true,
+        },
         body: JSON.stringify({
           data: {
             ...dashboardState,

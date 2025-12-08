@@ -15,3 +15,7 @@ export const controlYamlHelp = i18n.translate('xpack.cloudDefend.controlYamlHelp
   defaultMessage:
     'Configure your policy by creating "file" or "process" selectors and responses below.',
 });
+
+export const controlYamlLoading = i18n.translate('xpack.cloudDefend.controlYamlLoading', {
+  defaultMessage: 'Loading editor....',
+});

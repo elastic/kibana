@@ -202,8 +202,13 @@ export async function runPlaywrightTestCheck(log: ToolingLog) {
     `--list`,
   ];
 
+  const pwEnv = {
+    SCOUT_TARGET_TYPE: 'local',
+    SCOUT_TARGET_MODE: 'stateful',
+  };
+
   await withProcRunner(log, async (procs) => {
-    await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
+    await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
 
     reportTime(runStartTime, 'ready', {
       success: true,

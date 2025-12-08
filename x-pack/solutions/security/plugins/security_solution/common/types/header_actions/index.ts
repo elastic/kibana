@@ -93,12 +93,10 @@ export interface ActionProps {
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
   index?: number;
   isEventViewer?: boolean;
-  isEventPinned?: boolean;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
-  pinnedEventIds?: Readonly<Record<string, boolean>>;
   refetch?: () => void;
   setEventsDeleted?: SetEventsDeleted;
   setEventsLoading?: SetEventsLoading;

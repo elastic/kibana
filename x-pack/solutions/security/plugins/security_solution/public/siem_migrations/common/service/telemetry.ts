@@ -62,14 +62,14 @@ export class SiemBaseMigrationsTelemetry {
 
   reportSetupMigrationCreated = (params: {
     migrationId?: string;
-    rulesCount: number;
+    count: number;
     error?: Error;
   }) => {
-    const { migrationId, rulesCount, error } = params;
+    const { migrationId, count, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.SetupMigrationCreated, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupMigrationCreated],
       migrationId,
-      rulesCount,
+      count,
       ...this.getBaseResultParams(error),
     });
   };

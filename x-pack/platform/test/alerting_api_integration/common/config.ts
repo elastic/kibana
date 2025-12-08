@@ -91,6 +91,7 @@ const enabledActionTypes = [
   'test.system-action-connector-adapter',
   'test.connector-with-hooks',
   'test.deprecated',
+  'test.single_file_connector',
 ];
 
 export const getPreConfiguredActions = (
@@ -351,6 +352,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
+          '--xpack.alerting.gapAutoFillScheduler.enabled=true',
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
 
 export function HeaderMenu(): React.ReactElement | null {

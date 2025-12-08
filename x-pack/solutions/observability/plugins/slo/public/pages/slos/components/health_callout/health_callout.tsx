@@ -8,10 +8,11 @@
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { uniqBy } from 'lodash';
 import React, { useState } from 'react';
+import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { ContentWithInspectCta } from '../../../slo_details/components/health_callout/content_with_inspect_cta';
-import { paths } from '../../../../../common/locators/paths';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
@@ -22,6 +23,11 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
   );
   const [isOpen, setIsOpen] = useState(false);
 
+  const dismiss = () => {
+    setShowCallOut(false);
+    sessionStorage.setItem('slo_health_callout_hidden', 'true');
+  };
+
   if (!showCallOut) {
     return null;
   }
@@ -30,17 +36,12 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     return null;
   }
 
-  const unhealthyAndMissingSloList = results.filter(
-    (result) => result.health.overall !== 'healthy'
-  );
-  if (unhealthyAndMissingSloList.length === 0) {
+  const problematicSloList = results.filter((result) => result.health.isProblematic);
+  if (problematicSloList.length === 0) {
     return null;
   }
 
-  const dismiss = () => {
-    setShowCallOut(false);
-    sessionStorage.setItem('slo_health_callout_hidden', 'true');
-  };
+  const deduplicatedList = uniqBy(problematicSloList, (item) => item.id);
 
   return (
     <EuiCallOut
@@ -70,20 +71,20 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
           <EuiFlexItem>
             <span data-test-subj="sloHealthCalloutDescription">
               <FormattedMessage
-                id="xpack.slo.sloList.healthCallout.description"
-                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
+                id="xpack.slo.sloList.healthCallout.operationalProblemsDescription"
+                defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems. You can inspect {count, plural, one {it} other {each one}} here:"
                 values={{
-                  count: unhealthyAndMissingSloList.length,
+                  count: deduplicatedList.length,
                 }}
               />
             </span>
             <ul>
-              {unhealthyAndMissingSloList.map((result) => (
-                <li key={result.sloId}>
+              {deduplicatedList.map((result) => (
+                <li key={result.id}>
                   <ContentWithInspectCta
                     textSize="xs"
-                    content={result.sloName}
-                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
+                    content={result.name}
+                    url={paths.sloDetails(result.id, result.instanceId, undefined, 'overview')}
                   />
                 </li>
               ))}

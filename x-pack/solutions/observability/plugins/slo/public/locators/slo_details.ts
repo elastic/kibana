@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { sloDetailsLocatorID } from '@kbn/observability-plugin/common';
+import { sloDetailsLocatorID, type SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
-
-export interface SloDetailsLocatorParams extends SerializableRecord {
-  sloId?: string;
-  instanceId?: string;
-}
 
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
   public readonly id = sloDetailsLocatorID;
 
-  public readonly getLocation = async ({ sloId, instanceId }: SloDetailsLocatorParams) => {
-    const queryParams =
-      !!instanceId && instanceId !== ALL_VALUE
-        ? `?instanceId=${encodeURIComponent(instanceId)}`
-        : '';
-    const path = !!sloId ? `/${encodeURIComponent(sloId)}${queryParams}` : '/';
+  public readonly getLocation = async ({ sloId, instanceId, tabId }: SloDetailsLocatorParams) => {
+    const qs = new URLSearchParams();
+    if (!!instanceId && instanceId !== ALL_VALUE) qs.append('instanceId', instanceId);
+
+    let path = `/${encodeURIComponent(sloId)}${formatQueryParams(qs)}`;
+    if (tabId) {
+      path = `/${encodeURIComponent(sloId)}/${tabId}${formatQueryParams(qs)}`;
+    }
 
     return {
       app: 'slo',
@@ -31,4 +27,11 @@ export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetails
       state: {},
     };
   };
+}
+
+function formatQueryParams(qs: URLSearchParams): string {
+  if (qs.size === 0) {
+    return '';
+  }
+  return `?${qs.toString()}`;
 }

@@ -970,6 +970,34 @@ export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   }
 );
 
+export const GAP_FILL_STATUS_FILTER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label',
+  {
+    defaultMessage: 'Gap fill status',
+  }
+);
+
+export const GAP_FILL_STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+
+export const GAP_FILL_STATUS_UNFILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.unfilled',
+  {
+    defaultMessage: 'Unfilled',
+  }
+);
+
+export const GAP_FILL_STATUS_FILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
+  {
+    defaultMessage: 'Filled',
+  }
+);
+
 export const SOLVABLE_CONFLICT_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictLabel',
   {
@@ -1626,5 +1654,12 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDurationTooltip',
   {
     defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
+  }
+);
+
+export const CHAT_IN_AGENT_BUILDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
+  {
+    defaultMessage: 'Chat in Agent Builder',
   }
 );
