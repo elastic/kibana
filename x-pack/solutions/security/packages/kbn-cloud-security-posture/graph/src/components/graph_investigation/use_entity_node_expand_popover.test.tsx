@@ -19,6 +19,8 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
 } from '../test_ids';
+import { addFilter } from './search_filters';
+import { RELATED_ENTITY } from '../../common/constants';
 
 const mockSetSearchFilters = jest.fn();
 const mockOnShowEntityDetailsClick = jest.fn();
@@ -173,24 +175,6 @@ describe('useEntityNodeExpandPopover', () => {
         disabled: false,
       });
     });
-
-    it('should disable entity details item when onShowEntityDetailsClick is not provided', () => {
-      const node = createMockNode('single-entity', 'user');
-      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      const entityDetailsItem = items.find(
-        (item) =>
-          item.type === 'item' &&
-          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
-      );
-      expect(entityDetailsItem).toMatchObject({
-        disabled: true,
-        showToolTip: true,
-      });
-    });
   });
 
   describe('itemsFn - grouped-entities mode', () => {
@@ -213,22 +197,6 @@ describe('useEntityNodeExpandPopover', () => {
         type: 'item',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
         disabled: false,
-      });
-    });
-
-    it('should disable entity details item when onShowEntityDetailsClick is not provided in grouped-entities mode', () => {
-      const node = createMockNode('grouped-entities', 'user');
-      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      expect(items).toHaveLength(1);
-      expect(items[0]).toMatchObject({
-        type: 'item',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-        disabled: true,
-        showToolTip: true,
       });
     });
 
@@ -266,7 +234,7 @@ describe('useEntityNodeExpandPopover', () => {
   });
 
   describe('shouldDisableEntityDetailsListItem', () => {
-    it('should disable entity details when onShowEntityDetailsClick is undefined', () => {
+    it('should disable entity details when onShowEntityDetailsClick is not provided in single-entity mode', () => {
       const node = createMockNode('single-entity', 'user');
       renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
 
@@ -280,30 +248,23 @@ describe('useEntityNodeExpandPopover', () => {
 
       expect(entityDetailsItem).toMatchObject({
         disabled: true,
+        showToolTip: true,
       });
     });
 
-    it('should enable entity details when onShowEntityDetailsClick is provided and docMode is single-entity with entity data', () => {
-      const node = createMockNode('single-entity', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+    it('should disable entity details item when onShowEntityDetailsClick is not provided in grouped-entities mode', () => {
+      const node = createMockNode('grouped-entities', 'user');
+      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
-      const entityDetailsItem = items.find(
-        (item) =>
-          item.type === 'item' &&
-          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
-      );
 
-      expect(entityDetailsItem).toMatchObject({
-        disabled: false,
+      expect(items).toHaveLength(1);
+      expect(items[0]).toMatchObject({
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        disabled: true,
+        showToolTip: true,
       });
     });
 
@@ -416,6 +377,52 @@ describe('useEntityNodeExpandPopover', () => {
       }
       if (relatedItem?.type === 'item') {
         expect(relatedItem.label).toContain('Show');
+      }
+    });
+
+    it('should show "Hide" labels when filters are active', () => {
+      const node = createMockNode('single-entity', 'user');
+
+      // Create filters that match the node ID for all three filter types
+      // This simulates filters being active for this node
+      let activeFilters: Filter[] = [];
+      activeFilters = addFilter(dataViewId, activeFilters, 'user.entity.id', node.id);
+      activeFilters = addFilter(dataViewId, activeFilters, 'user.target.entity.id', node.id);
+      activeFilters = addFilter(dataViewId, activeFilters, RELATED_ENTITY, node.id);
+
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          mockSetSearchFilters,
+          dataViewId,
+          activeFilters,
+          mockOnShowEntityDetailsClick
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const actionsByItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
+      const actionsOnItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID
+      );
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (actionsByItem?.type === 'item') {
+        expect(actionsByItem.label).toContain('Hide');
+      }
+      if (actionsOnItem?.type === 'item') {
+        expect(actionsOnItem.label).toContain('Hide');
+      }
+      if (relatedItem?.type === 'item') {
+        expect(relatedItem.label).toContain('Hide');
       }
     });
   });
