@@ -17,12 +17,14 @@ import {
   EuiHighlight,
   EuiIconTip,
   EuiButtonIcon,
+  EuiTourStep,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { Streams } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
+import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
   buildStreamRows,
@@ -74,6 +76,7 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
+  const { getStepPropsByStepId } = useStreamsTour();
 
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -296,6 +299,25 @@ export function StreamsTreeTable({
     />
   );
 
+  const streamsListStepProps = getStepPropsByStepId('streams_list');
+
+  const nameColumnHeader = (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {shouldComposeTree(sortField) && hasExpandable && (
+        <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        {streamsListStepProps ? (
+          <EuiTourStep {...streamsListStepProps}>
+            <span>{NAME_COLUMN_HEADER}</span>
+          </EuiTourStep>
+        ) : (
+          <span>{NAME_COLUMN_HEADER}</span>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiInMemoryTable<TableRow>
       loading={loading}
@@ -303,14 +325,7 @@ export function StreamsTreeTable({
       columns={[
         {
           field: 'nameSortKey',
-          name: (
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              {shouldComposeTree(sortField) && hasExpandable && (
-                <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
-              )}
-              <EuiFlexItem>{NAME_COLUMN_HEADER}</EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+          name: nameColumnHeader,
           sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
           render: (_: unknown, item: TableRow) => {
