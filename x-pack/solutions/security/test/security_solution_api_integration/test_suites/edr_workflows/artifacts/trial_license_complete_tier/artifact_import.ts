@@ -132,10 +132,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
         const supertest: Record<
           (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-          Record<'none' | 'read' | 'all', TestAgent>
+          Record<'none' | 'read' | 'all' | 'allWithGlobalArtifactManagementPrivilege', TestAgent>
         > = {} as Record<
           (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-          Record<'none' | 'read' | 'all', TestAgent>
+          Record<'none' | 'read' | 'all' | 'allWithGlobalArtifactManagementPrivilege', TestAgent>
         >;
 
         before(async () => {
@@ -150,6 +150,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 'minimal_read',
                 artifact.all,
               ]),
+              allWithGlobalArtifactManagementPrivilege: await createSupertestWithCustomRole(
+                `${artifact.listId}_allWithGlobal`,
+                ['minimal_read', artifact.all, 'global_artifact_management_all']
+              ),
             };
           }
         });
@@ -168,7 +172,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [DEFAULT_SPACE_OWNER_ID]),
+                    buildImportBuffer(artifact.listId, [{ tags: [DEFAULT_SPACE_OWNER_ID] }]),
                     'import_data.ndjson'
                   )
                   .expect(403)
@@ -182,7 +186,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [DEFAULT_SPACE_OWNER_ID]),
+                    buildImportBuffer(artifact.listId, [{ tags: [DEFAULT_SPACE_OWNER_ID] }]),
                     'import_data.ndjson'
                   )
                   .expect(403)
@@ -196,7 +200,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [DEFAULT_SPACE_OWNER_ID]),
+                    buildImportBuffer(artifact.listId, [{ tags: [DEFAULT_SPACE_OWNER_ID] }]),
                     'import_data.ndjson'
                   )
                   .expect(200);
@@ -219,8 +223,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .attach(
                       'file',
                       buildImportBuffer(artifact.listId, [
-                        DEFAULT_SPACE_OWNER_ID,
-                        GLOBAL_ARTIFACT_TAG,
+                        { tags: [DEFAULT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG] },
+                        { tags: [DEFAULT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG] },
+                        { tags: [DEFAULT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG] },
                       ]),
                       'import_data.ndjson'
                     )
@@ -335,6 +340,11 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             it('should add current space ID to artifacts without ownerSpaceId on import', async () => {});
             it('should add a comment to imported artifacts with relevant data', async () => {});
             it('should add a tag to imported artifacts', async () => {});
+
+            describe('compatibility with artifacts exported before space awareness - when artifacts have no ownerSpaceId', () => {
+              it('should add/not add global artifact tag to Endpoint exceptions/artifacts', async () => {});
+              it('should/should not import artifacts without global artifact privilege', async () => {});
+            });
           });
         });
       });
@@ -423,21 +433,17 @@ const anEndpointArtifactErrorOf = (message: string) => (res: { body: { message: 
 
 const buildImportBuffer = (
   listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-  tags: string[] = []
+  itemsArray: Partial<ExceptionListItemSchema>[] = [{}, {}, {}]
 ): Buffer => {
   const generator = new ExceptionsListItemGenerator();
 
-  const item1 = generator.generateEndpointArtifact(listId, { tags });
-  const item2 = generator.generateEndpointArtifact(listId, { tags });
-  const item3 = generator.generateEndpointArtifact(listId, { tags });
+  const items = itemsArray.map((override) => generator.generateEndpointArtifact(listId, override));
 
   return Buffer.from(
     `
       ${buildListInfo(listId)}
-      ${JSON.stringify(item1)}
-      ${JSON.stringify(item2)}
-      ${JSON.stringify(item3)}
-      ${JSON.stringify(buildDetails())}
+      ${items.map((item) => JSON.stringify(item)).join('\n')}
+      ${JSON.stringify(buildDetails({ exported_exception_list_item_count: items.length }))}
       `,
     'utf8'
   );

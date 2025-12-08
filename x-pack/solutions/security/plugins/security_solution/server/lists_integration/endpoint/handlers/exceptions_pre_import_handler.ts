@@ -11,6 +11,7 @@ import {
   ENDPOINT_ARTIFACT_LISTS,
 } from '@kbn/securitysolution-list-constants';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
@@ -151,7 +152,7 @@ const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
     if (
       !(item instanceof Error) &&
       item.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
-      item.tags?.includes(GLOBAL_ARTIFACT_TAG) === false
+      !hasArtifactOwnerSpaceId(item)
     ) {
       item.tags = item.tags ?? [];
       item.tags.push(GLOBAL_ARTIFACT_TAG);
