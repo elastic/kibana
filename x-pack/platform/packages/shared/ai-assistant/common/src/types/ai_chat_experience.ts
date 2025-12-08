@@ -7,5 +7,5 @@
 
 export enum AIChatExperience {
   Classic = 'classic',
-  Agents = 'agents',
+  Agent = 'agent',
 }

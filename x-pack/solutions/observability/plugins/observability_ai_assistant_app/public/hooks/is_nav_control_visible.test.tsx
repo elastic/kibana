@@ -285,8 +285,8 @@ describe('isNavControlVisible', () => {
       expect(result.current.isVisible).toBe(false);
     });
 
-    it('returns false when chatExperience is Agents regardless of other settings', () => {
-      settings.client.get$.mockReturnValue(of(AIChatExperience.Agents));
+    it('returns false when chatExperience is Agent regardless of other settings', () => {
+      settings.client.get$.mockReturnValue(of(AIChatExperience.Agent));
 
       const coreStart = {
         application: {
@@ -301,7 +301,7 @@ describe('isNavControlVisible', () => {
       const pluginsStart = {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Observability),
-          chatExperience$: of(AIChatExperience.Agents),
+          chatExperience$: of(AIChatExperience.Agent),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'oblt' }),

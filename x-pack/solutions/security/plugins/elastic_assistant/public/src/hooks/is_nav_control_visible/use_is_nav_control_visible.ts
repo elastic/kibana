@@ -23,7 +23,7 @@ function getVisibility(
 ) {
   // If AI Agents are enabled, hide the nav control
   // OnechatNavControl will be used instead
-  if (chatExperience === AIChatExperience.Agents) {
+  if (chatExperience === AIChatExperience.Agent) {
     return false;
   }
 

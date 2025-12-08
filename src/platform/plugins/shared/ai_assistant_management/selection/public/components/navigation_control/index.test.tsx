@@ -82,7 +82,7 @@ describe('AIAssistantHeaderButton', () => {
     });
 
     it('should render modal title and description', () => {
-      expect(screen.getByText('Select an AI Assistant solution')).toBeInTheDocument();
+      expect(screen.getByText('Select an AI chat experience')).toBeInTheDocument();
       expect(screen.getByText(/Choose which chat experience/i)).toBeInTheDocument();
     });
 
@@ -234,7 +234,7 @@ describe('AIAssistantHeaderButton', () => {
       await waitFor(() => {
         expect(mockCoreStart.settings.client.set).toHaveBeenCalled();
         expect(mockTriggerOpenChat).toHaveBeenCalledWith({
-          chatExperience: AIChatExperience.Agents,
+          chatExperience: AIChatExperience.Agent,
           assistant: AIAssistantType.Default,
         });
       });

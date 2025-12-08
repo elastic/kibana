@@ -12,7 +12,7 @@ import { combineLatest, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
@@ -28,7 +28,7 @@ function getVisibility(
 ) {
   // If AI Agents are enabled, hide the nav control
   // OnechatNavControl will be used instead
-  if (chatExperience === AIChatExperience.Agents) {
+  if (chatExperience === AIChatExperience.Agent) {
     return false;
   }
   const categoryId =

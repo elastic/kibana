@@ -28,14 +28,14 @@ export const chatExperienceSetting: Omit<UiSettingsParams<AIChatExperience>, 'va
     }
   ),
   schema: schema.oneOf(
-    [schema.literal(AIChatExperience.Classic), schema.literal(AIChatExperience.Agents)],
+    [schema.literal(AIChatExperience.Classic), schema.literal(AIChatExperience.Agent)],
     { defaultValue: AIChatExperience.Classic }
   ),
-  options: [AIChatExperience.Classic, AIChatExperience.Agents],
+  options: [AIChatExperience.Classic, AIChatExperience.Agent],
   type: 'select' as const,
   optionLabels: {
     [AIChatExperience.Classic]: CLASSIC_AI_ASSISTANT,
-    [AIChatExperience.Agents]: AI_AGENT,
+    [AIChatExperience.Agent]: AI_AGENT,
   },
   requiresPageReload: true,
   solutionViews: [], // Display across all solutions

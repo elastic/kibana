@@ -11,7 +11,7 @@ import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
-import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -31,8 +31,8 @@ export const AIAssistantVisibility: React.FC = () => {
     chatExperienceField?.savedValue ??
     AIChatExperience.Classic;
 
-  // Hide AI Assistant Visibility when AI Agents is selected
-  if (currentChatExperience === AIChatExperience.Agents) {
+  // Hide AI Assistant Visibility when AI Agent is selected
+  if (currentChatExperience === AIChatExperience.Agent) {
     return null;
   }
 

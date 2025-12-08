@@ -196,8 +196,8 @@ describe('isNavControlVisible', () => {
     expect(result.current.isVisible).toEqual(true);
   });
 
-  it('returns false when chat experience is set to Agents (OnechatNavControl will be used instead)', () => {
-    settings.client.get$.mockReturnValue(of(AIChatExperience.Agents));
+  it('returns false when chat experience is set to Agent (OnechatNavControl will be used instead)', () => {
+    settings.client.get$.mockReturnValue(of(AIChatExperience.Agent));
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {

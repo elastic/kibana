@@ -140,7 +140,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   }, []);
 
   const onApply = useCallback(async () => {
-    if (selectedType.chatExperience === AIChatExperience.Agents) {
+    if (selectedType.chatExperience === AIChatExperience.Agent) {
       setConfirmModalOpen(true);
     } else {
       setModalOpen(false);
@@ -298,10 +298,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                         ),
                       }}
                       selectable={{
-                        isSelected: selectedType.chatExperience === AIChatExperience.Agents,
+                        isSelected: selectedType.chatExperience === AIChatExperience.Agent,
                         onClick: () =>
                           handleSelect({
-                            chatExperience: AIChatExperience.Agents,
+                            chatExperience: AIChatExperience.Agent,
                             assistant: AIAssistantType.Default,
                           }),
                       }}

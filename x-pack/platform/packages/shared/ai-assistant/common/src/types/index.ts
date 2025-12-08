@@ -7,4 +7,4 @@
 
 export type AssistantScope = 'observability' | 'search' | 'all';
 
-export * from './chat_experience';
+export * from './ai_chat_experience';

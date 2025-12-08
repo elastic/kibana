@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal';
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import { useSettingsContext } from '../../contexts/settings_context';
@@ -39,14 +39,14 @@ export const ChatExperience: React.FC = () => {
   useEffect(() => {
     const unsavedChatExperience = unsavedChanges[AI_ASSISTANT_CHAT_EXPERIENCE_TYPE];
     if (
-      unsavedChatExperience?.unsavedValue === AIChatExperience.Agents &&
+      unsavedChatExperience?.unsavedValue === AIChatExperience.Agent &&
       !isConfirmModalOpen &&
       !hasHandledAgentSelection
     ) {
       setConfirmModalOpen(true);
       setHasHandledAgentSelection(true);
     } else if (
-      (!unsavedChatExperience || unsavedChatExperience.unsavedValue !== AIChatExperience.Agents) &&
+      (!unsavedChatExperience || unsavedChatExperience.unsavedValue !== AIChatExperience.Agent) &&
       hasHandledAgentSelection
     ) {
       // Reset the handled state when user selects something else or clears the change
