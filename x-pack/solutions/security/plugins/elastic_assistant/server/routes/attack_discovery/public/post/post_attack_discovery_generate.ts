@@ -25,7 +25,6 @@ import {
 } from '../../../../../common/constants';
 import { getDurationNanoseconds } from './get_duration_nanoseconds';
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
@@ -96,8 +95,6 @@ export const postAttackDiscoveryGenerateRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const eventLogger = (await context.elasticAssistant).eventLogger;
 
           // get the actions plugin start contract from the request context:
