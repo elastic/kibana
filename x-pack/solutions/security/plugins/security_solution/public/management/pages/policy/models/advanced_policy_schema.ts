@@ -2677,8 +2677,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_capture',
       {
-        defaultMessage:
-          'Capture script content for process create events. Default: false.',
+        defaultMessage: 'Capture script content for process create events. Default: false.',
       }
     ),
   },
@@ -2688,8 +2687,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_max_size',
       {
-        defaultMessage:
-          'Maximum size of script being captured in bytes. Default 1024.',
+        defaultMessage: 'Maximum size of script being captured in bytes. Default 1024.',
       }
     ),
   },
