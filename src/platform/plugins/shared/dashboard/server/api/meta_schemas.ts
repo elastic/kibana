@@ -23,13 +23,13 @@ export const baseMetaSchema = schema.object({
 });
 
 export const createdMetaSchema = schema.object({
-  createdAt: schema.maybe(schema.string()),
-  createdBy: schema.maybe(schema.string()),
+  created_at: schema.maybe(schema.string()),
+  created_by: schema.maybe(schema.string()),
 });
 
 export const updatedMetaSchema = schema.object({
-  updatedAt: schema.maybe(schema.string()),
-  updatedBy: schema.maybe(schema.string()),
+  updated_at: schema.maybe(schema.string()),
+  updated_by: schema.maybe(schema.string()),
 });
 
 export const resolveMetaSchema = schema.object({
@@ -38,8 +38,8 @@ export const resolveMetaSchema = schema.object({
     schema.literal('aliasMatch'),
     schema.literal('conflict'),
   ]),
-  aliasTargetId: schema.maybe(schema.string()),
-  aliasPurpose: schema.maybe(
+  alias_target_id: schema.maybe(schema.string()),
+  alias_purpose: schema.maybe(
     schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
   ),
 });
