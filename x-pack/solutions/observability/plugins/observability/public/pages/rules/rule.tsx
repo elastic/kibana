@@ -133,9 +133,9 @@ export function RulePage() {
           iconType="error"
         >
           <p>
-            {(ruleTemplateError as any)?.body?.message
-             ?? (ruleTemplateError as Error)?.message
-             ?? i18n.translate('xpack.observability.ruleForm.templateError.description', {
+            {(ruleTemplateError as any)?.body?.message ??
+              (ruleTemplateError as Error)?.message ??
+              i18n.translate('xpack.observability.ruleForm.templateError.description', {
                 defaultMessage: 'There was an error loading the rule template. Please try again.',
               })}
           </p>
