@@ -131,8 +131,8 @@ export function useSingleAgentMenuItems({
       );
     }
 
-    // Upgrade management submenu - conditionally shown if the user has privileges
-    if (hasFleetAllPrivileges) {
+    // Upgrade management submenu - conditionally shown if the user has privileges and is the agent is upgradeable
+    if (hasFleetAllPrivileges && isAgentUpgradeable(agent)) {
       items.push({
         id: 'upgrade-management',
         name: (
