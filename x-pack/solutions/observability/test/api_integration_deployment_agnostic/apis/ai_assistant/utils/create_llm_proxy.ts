@@ -246,7 +246,7 @@ export class LlmProxy {
         log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
         return documentsToScore;
       } catch (error) {
-        log.warn(`Failed to extract documents to score: ${error}`);
+        log.error(`Failed to extract documents to score: ${error}`);
         log.debug(`Raw string: ${jsonString}`);
       }
       return [];
