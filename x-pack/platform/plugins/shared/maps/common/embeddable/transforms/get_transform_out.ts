@@ -14,7 +14,20 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
-  function transformOut(state: StoredMapEmbeddableState, references?: Reference[]) {
+  function transformOut(
+    state: StoredMapEmbeddableState,
+    panelReferences?: Reference[],
+    containerReferences?: Reference[]
+  ) {
+    function getReferences() {
+      if (panelReferences?.length) {
+        return panelReferences;
+      }
+
+      return containerReferences ?? [];
+    }
+
+    const references = getReferences();
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;
