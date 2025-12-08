@@ -21,18 +21,12 @@ import type {
 import { dateHistogram } from './common';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTotalHits } from '../../utils/get_total_hits';
-import { type Bucket, getChangePoints, searchChangePoints } from '../../utils/get_change_points';
+import { type Bucket, getChangePoints } from '../../utils/get_change_points';
+import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
+import { getTypedSearch } from '../../utils/get_typed_search';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
-
-interface AggregationsResponse {
-  sampler?: {
-    groups?: {
-      buckets?: Bucket[];
-    };
-  };
-}
 
 function getProbability(totalHits: number): number {
   const probability = Math.min(1, 500_000 / totalHits);
@@ -62,7 +56,13 @@ async function getLogChangePoint({
     index,
     query: {
       bool: {
-        filter: [...timeRangeFilter('@timestamp', { start, end }), ...kqlFilter(kuery)],
+        filter: [
+          ...timeRangeFilter('@timestamp', {
+            start: parseDatemath(start),
+            end: parseDatemath(end),
+          }),
+          ...kqlFilter(kuery),
+        ],
       },
     },
   });
@@ -99,16 +99,28 @@ async function getLogChangePoint({
       },
     },
   };
-  const response = await searchChangePoints({
-    esClient,
+
+  const search = getTypedSearch(esClient.asCurrentUser);
+
+  const response = await search({
     index,
-    start,
-    end,
-    kqlFilter: kuery,
-    aggregations,
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', {
+            start: parseDatemath(start),
+            end: parseDatemath(end),
+          }),
+          ...kqlFilter(kuery),
+        ],
+      },
+    },
+    aggs: aggregations,
   });
 
-  const buckets = (response.aggregations as AggregationsResponse)?.sampler?.groups?.buckets;
+  const buckets = response.aggregations?.sampler?.groups?.buckets;
 
   if (!buckets) {
     return [];
@@ -116,7 +128,7 @@ async function getLogChangePoint({
 
   return await getChangePoints({
     name,
-    buckets,
+    buckets: buckets as Bucket[],
   });
 }
 
