@@ -173,7 +173,7 @@ describe('CloudConnectorService', () => {
         ...mockSavedObject,
         attributes: {
           ...mockSavedObject.attributes,
-          accountType: 'single',
+          accountType: 'single-account',
         },
       };
 
@@ -184,11 +184,11 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.create).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          accountType: 'single',
+          accountType: 'single-account',
         })
       );
 
-      expect(result.accountType).toEqual('single');
+      expect(result.accountType).toEqual('single-account');
     });
 
     it('should create a cloud connector with organization accountType', async () => {
@@ -216,11 +216,11 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.create).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          accountType: 'organization',
+          accountType: 'organization-account',
         })
       );
 
-      expect(result.accountType).toEqual('organization');
+      expect(result.accountType).toEqual('organization-account');
     });
 
     it('should throw error when vars are empty', async () => {
@@ -589,7 +589,7 @@ describe('CloudConnectorService', () => {
             ...mockCloudConnectors.saved_objects[0],
             attributes: {
               ...mockCloudConnectors.saved_objects[0].attributes,
-              accountType: 'single',
+              accountType: 'single-account',
             },
           },
         ],
@@ -599,7 +599,7 @@ describe('CloudConnectorService', () => {
 
       const result = await service.getList(mockSoClient);
 
-      expect(result[0].accountType).toEqual('single');
+      expect(result[0].accountType).toEqual('single-account');
     });
 
     it('should throw error when find operation fails', async () => {
