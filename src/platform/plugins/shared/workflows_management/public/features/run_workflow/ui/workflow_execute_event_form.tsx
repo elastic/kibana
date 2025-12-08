@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -19,9 +20,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { take } from 'rxjs';
-import type { Query, TimeRange } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildEsQuery } from '@kbn/es-query';
+import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
@@ -55,75 +56,30 @@ export const WorkflowExecuteEventForm = ({
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { services } = useKibana();
-  const {
-    unifiedSearch: {
-      ui: { SearchBar },
-    },
-    spaces,
-    dataViews,
-  } = services;
+  const { spaces, http, notifications, data: dataService, unifiedSearch } = services;
   const [spaceId, setSpaceId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [alertsDataView, setAlertsDataView] = useState<DataView | null>(null);
-  const [timeRange, setTimeRange] = useState<TimeRange>({
+  const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
     from: 'now-15m',
     to: 'now',
   });
 
   const [alertsLoading, setAlertsLoading] = useState(false);
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [query, setQuery] = useState<string>('');
+  const [submittedQuery, setSubmittedQuery] = useState<string>('');
+  const [filters, setFilters] = useState<Filter[]>([]);
 
-  // Get space ID and create alerts data view
+  // Get space ID
   useEffect(() => {
     if (spaces) {
-      spaces.getActiveSpace().then(async (space) => {
+      spaces.getActiveSpace().then((space) => {
         setSpaceId(space.id);
-
-        if (dataViews && space.id) {
-          try {
-            const alertsIndexPattern = `.alerts-*-${space.id}`;
-            const existingDataViews = await dataViews.find(alertsIndexPattern);
-            let dataView;
-            if (existingDataViews.length > 0) {
-              dataView = existingDataViews[0];
-              await dataViews.refreshFields(dataView, false, true);
-            } else {
-              dataView = await dataViews.create({
-                title: alertsIndexPattern,
-                timeFieldName: '@timestamp',
-              });
-              await dataViews.refreshFields(dataView, false, true);
-            }
-            setAlertsDataView(dataView);
-          } catch (error) {
-            // If we can't create a data view, continue without it (autocomplete won't work)
-          }
-        }
       });
     }
-  }, [spaces, dataViews]);
-
-  // Transform query to map rule.* to kibana.alert.rule.*
-  const transformQueryForAlerts = useCallback((inputQuery: Query): Query => {
-    if (!inputQuery.query || typeof inputQuery.query !== 'string') {
-      return inputQuery;
-    }
-
-    let transformedQuery = inputQuery.query;
-    transformedQuery = transformedQuery.replace(
-      /\brule\.([a-zA-Z_][a-zA-Z0-9_]*)\b/g,
-      'kibana.alert.rule.$1'
-    );
-
-    return {
-      ...inputQuery,
-      query: transformedQuery,
-    };
-  }, []);
+  }, [spaces]);
 
   const fetchAlerts = useCallback(async () => {
-    if (!services.data || !spaceId) {
+    if (!dataService || !spaceId) {
       return;
     }
 
@@ -131,45 +87,70 @@ export const WorkflowExecuteEventForm = ({
     setErrors(null);
 
     try {
-      // Transform the query to map rule.* to kibana.alert.rule.*
-      const transformedQuery = submittedQuery ? transformQueryForAlerts(submittedQuery) : null;
+      // Use SearchSource to match Discovery's behavior - this handles fields API, date formats, etc.
+      const searchSource = await dataService.search.searchSource.create();
 
-      const esQuery = buildEsQuery(
-        alertsDataView || undefined,
-        transformedQuery ? [transformedQuery] : [],
-        []
-      );
-      const searchQuery = {
-        bool: {
-          must: esQuery.bool.must || [],
-          filter: [
-            ...(esQuery.bool.filter || []),
-            {
-              range: {
-                '@timestamp': {
-                  gte: timeRange.from,
-                  lte: timeRange.to,
-                },
-              },
+      // Set the index pattern
+      const dataView = await dataService.dataViews.create({
+        title: `.alerts-*-${spaceId}`,
+        timeFieldName: '@timestamp',
+      });
+      searchSource.setField('index', dataView);
+
+      // Set query
+      if (submittedQuery) {
+        searchSource.setField('query', {
+          query: submittedQuery,
+          language: 'kuery',
+        });
+      }
+
+      // Set time range filter with proper format (matching Discovery)
+      const timeFilter: Filter = {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: timeRange.from,
+              lte: timeRange.to,
+              format: 'strict_date_optional_time',
             },
-          ],
-          should: esQuery.bool.should || [],
-          must_not: esQuery.bool.must_not || [],
-        },
-      };
-
-      const request = {
-        params: {
-          index: `.alerts-*-${spaceId}`,
-          body: {
-            query: searchQuery,
-            size: 50,
-            sort: [{ '@timestamp': { order: 'desc' } }],
           },
         },
+        meta: {
+          type: 'custom',
+        },
       };
 
-      const response = await services.data.search.search(request).pipe(take(1)).toPromise();
+      // Set filters
+      searchSource.setField('filter', [...filters, timeFilter]);
+
+      // Set sort (matching Discovery's format)
+      // Using type assertion because unmapped_type is a valid ES parameter
+      // but not included in SearchSource's EsQuerySortValue type
+      const sortWithUnmappedType = [
+        {
+          '@timestamp': {
+            order: SortDirection.desc,
+            format: 'strict_date_optional_time||epoch_millis',
+            unmapped_type: 'boolean',
+          },
+        },
+        {
+          _doc: {
+            order: SortDirection.desc,
+            unmapped_type: 'boolean',
+          },
+        },
+      ] as estypes.SortCombinations[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      searchSource.setField('sort', sortWithUnmappedType as any);
+
+      // Set size and track_total_hits (matching Discovery)
+      searchSource.setField('size', 50);
+      searchSource.setField('trackTotalHits', false);
+
+      // Fetch using SearchSource (this will use fields API like Discovery)
+      const response = await searchSource.fetch$().pipe(take(1)).toPromise();
 
       if (
         response &&
@@ -187,16 +168,7 @@ export const WorkflowExecuteEventForm = ({
     } finally {
       setAlertsLoading(false);
     }
-  }, [
-    services.data,
-    setErrors,
-    submittedQuery,
-    timeRange.from,
-    timeRange.to,
-    spaceId,
-    alertsDataView,
-    transformQueryForAlerts,
-  ]);
+  }, [dataService, setErrors, submittedQuery, timeRange.from, timeRange.to, spaceId, filters]);
 
   useEffect(() => {
     if (spaceId) {
@@ -223,8 +195,14 @@ export const WorkflowExecuteEventForm = ({
   };
 
   const handleQueryChange = useCallback(
-    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
-      if (newQuery) {
+    ({
+      query: newQuery,
+      dateRange,
+    }: {
+      query?: string;
+      dateRange: { from: string; to: string };
+    }) => {
+      if (newQuery !== undefined) {
         setQuery(newQuery);
       }
       setTimeRange(dateRange);
@@ -233,9 +211,15 @@ export const WorkflowExecuteEventForm = ({
   );
 
   const handleQuerySubmit = useCallback(
-    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+    ({
+      query: newQuery,
+      dateRange,
+    }: {
+      query?: string;
+      dateRange: { from: string; to: string };
+    }) => {
       // Update both draft and submitted query on submit
-      if (newQuery) {
+      if (newQuery !== undefined) {
         setQuery(newQuery);
         setSubmittedQuery(newQuery);
       }
@@ -244,6 +228,10 @@ export const WorkflowExecuteEventForm = ({
     },
     []
   );
+
+  const handleFiltersUpdated = useCallback((newFilters: Filter[]) => {
+    setFilters(newFilters);
+  }, []);
 
   const fmt = services.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE);
 
@@ -279,19 +267,25 @@ export const WorkflowExecuteEventForm = ({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <SearchBar
+        <AlertsSearchBar
           appName="workflow_management"
           showDatePicker
           onQueryChange={handleQueryChange}
           onQuerySubmit={handleQuerySubmit}
+          onFiltersUpdated={handleFiltersUpdated}
           query={query}
-          indexPatterns={alertsDataView ? [alertsDataView] : undefined}
-          dateRangeFrom={timeRange.from}
-          dateRangeTo={timeRange.to}
+          filters={filters}
+          rangeFrom={timeRange.from}
+          rangeTo={timeRange.to}
           showFilterBar={false}
           showSubmitButton={true}
-          placeholder="Filter your data using KQL syntax"
-          data-test-subj="workflow-query-input"
+          placeholder="Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)"
+          ruleTypeIds={[]}
+          http={http}
+          toasts={notifications.toasts}
+          unifiedSearchBar={unifiedSearch.ui.SearchBar}
+          dataService={dataService}
+          fetchUnifiedAlertsFields={true}
         />
       </EuiFlexItem>
       <EuiFlexItem>
