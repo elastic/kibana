@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Criteria, EuiSearchBarProps } from '@elastic/eui';
+import type { Criteria, EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import { EuiLink, EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -60,7 +60,7 @@ export const RuleMonitorsTable = () => {
     },
   ];
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     box: {
       incremental: true,
       schema: true,

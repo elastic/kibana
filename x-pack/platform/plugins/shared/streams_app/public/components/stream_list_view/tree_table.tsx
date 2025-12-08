@@ -6,7 +6,11 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Direction, EuiSearchBarProps, CriteriaWithPagination } from '@elastic/eui';
+import type {
+  Direction,
+  CriteriaWithPagination,
+  EuiInMemoryTableSearchBarProps,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -116,7 +120,7 @@ export function StreamsTreeTable({
     [allRows, flattenTreeWithCollapse, sortField]
   );
 
-  const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
+  const handleQueryChange: EuiInMemoryTableSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query.text);
   };
 

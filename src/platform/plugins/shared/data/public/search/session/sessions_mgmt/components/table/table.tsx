@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -190,7 +190,7 @@ export function SearchSessionsMgmtTable({
   }, [columns, tableData, appId]);
 
   // table config: search / filters
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     box: { incremental: true },
     filters,
     toolsRight: hideRefreshButton ? undefined : (

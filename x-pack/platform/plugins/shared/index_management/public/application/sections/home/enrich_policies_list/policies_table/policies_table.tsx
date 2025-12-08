@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import { EuiInMemoryTable, EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -65,7 +65,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     toolsRight.push(createBtn);
   }
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     toolsRight,
     box: {
       incremental: true,

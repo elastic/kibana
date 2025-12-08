@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
 
-import type { CriteriaWithPagination, EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiInMemoryTableSearchBarOnChangeArgs } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -452,7 +452,10 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+    const handleOnChange = ({
+      queryText,
+      error: searchError,
+    }: EuiInMemoryTableSearchBarOnChangeArgs) => {
       if (!searchError) {
         setQuery(queryText);
         setQueryError(null);
@@ -534,7 +537,7 @@ export const WatchListPage = () => {
               </>
             )
           }
-          message={
+          noItemsMessage={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
               defaultMessage="No watches to show"

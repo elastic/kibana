@@ -16,7 +16,7 @@ import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 
 import type {
-  EuiSearchBarProps,
+  EuiInMemoryTableSearchBarProps,
   EuiTableFieldDataColumnType,
   IconType,
   SearchFilterConfig,
@@ -361,7 +361,7 @@ class SavedObjectFinderUiClass extends React.Component<
         name: metaData.name,
       })),
     };
-    const search: EuiSearchBarProps = {
+    const search: EuiInMemoryTableSearchBarProps = {
       onChange: ({ query }) => {
         this.setState({ query: query ?? Query.parse('') }, this.fetchItems);
       },
@@ -406,7 +406,7 @@ class SavedObjectFinderUiClass extends React.Component<
             items={this.state.items}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
-            message={this.props.noItemsMessage}
+            noItemsMessage={this.props.noItemsMessage}
             search={search}
             pagination={pagination}
             sorting={!!this.state.query?.text ? undefined : sorting}

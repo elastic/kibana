@@ -8,7 +8,7 @@
 import React, { type FC, type MouseEventHandler, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { EuiSearchBarProps } from '@elastic/eui';
+import type { EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -333,7 +333,7 @@ export const TransformList: FC<TransformListProps> = ({
     </EuiFlexGroup>
   );
 
-  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+  const handleSearchOnChange: EuiInMemoryTableSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
       setSearchError(search.error.message);
       return;

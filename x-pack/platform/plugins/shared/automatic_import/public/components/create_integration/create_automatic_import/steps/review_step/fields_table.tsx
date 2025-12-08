@@ -15,7 +15,7 @@ import {
   EuiToken,
   EuiToolTip,
   type EuiBasicTableColumn,
-  type EuiSearchBarProps,
+  type EuiInMemoryTableSearchBarProps,
 } from '@elastic/eui';
 
 interface FieldObject {
@@ -81,7 +81,7 @@ const columns: Array<EuiBasicTableColumn<FieldObject>> = [
   },
 ];
 
-const search: EuiSearchBarProps = {
+const search: EuiInMemoryTableSearchBarProps = {
   box: {
     incremental: true,
     schema: true,

@@ -6,7 +6,11 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { CriteriaWithPagination, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiInMemoryTableSearchBarProps,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
@@ -123,7 +127,7 @@ export const FieldsSelectorTable = ({
 
   let debounceTimeoutId: ReturnType<typeof setTimeout>;
 
-  const onQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
+  const onQueryChange: EuiInMemoryTableSearchBarProps['onChange'] = ({ query }) => {
     clearTimeout(debounceTimeoutId);
 
     debounceTimeoutId = setTimeout(() => {
@@ -171,7 +175,7 @@ export const FieldsSelectorTable = ({
     return '';
   }, [dataView]);
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     onChange: onQueryChange,
     box: {
       incremental: true,

@@ -8,7 +8,11 @@
 import React from 'react';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn, EuiSearchBarProps, SearchFilterConfig } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  EuiInMemoryTableSearchBarProps,
+  SearchFilterConfig,
+} from '@elastic/eui';
 import { EuiInMemoryTable, EuiButtonEmpty } from '@elastic/eui';
 
 import type { CanvasTemplate } from '../../../../types';
@@ -89,7 +93,7 @@ export const WorkpadTemplates = ({ templates, onCreateWorkpad }: Props) => {
     },
   ];
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     box: {
       incremental: true,
       schema: true,

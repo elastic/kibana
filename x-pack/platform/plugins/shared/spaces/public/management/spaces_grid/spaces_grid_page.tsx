@@ -13,11 +13,11 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiInMemoryTable,
+  type EuiInMemoryTableSearchBarOnChangeArgs,
   EuiLink,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiPageSection,
-  type EuiSearchBarOnChangeArgs,
   EuiSpacer,
 } from '@elastic/eui';
 import { debounce } from 'lodash';
@@ -118,7 +118,7 @@ export class SpacesGridPage extends Component<Props, State> {
     );
   }
 
-  public onQueryChange = ({ query }: EuiSearchBarOnChangeArgs) => {
+  public onQueryChange = ({ query }: EuiInMemoryTableSearchBarOnChangeArgs) => {
     const text = query?.text?.toLowerCase() || '';
 
     this.setState({ loading: true });
@@ -182,7 +182,7 @@ export class SpacesGridPage extends Component<Props, State> {
             },
           }}
           loading={this.state.loading}
-          message={
+          noItemsMessage={
             this.state.loading ? (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.loadingTitle"

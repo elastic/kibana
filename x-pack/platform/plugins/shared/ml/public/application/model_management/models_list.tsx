@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { HorizontalAlignment, SearchFilterConfig } from '@elastic/eui';
+import type {
+  EuiInMemoryTableSearchBarProps,
+  HorizontalAlignment,
+  SearchFilterConfig,
+} from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -20,7 +24,6 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
-  type EuiSearchBarProps,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
@@ -539,7 +542,7 @@ export const ModelsList: FC<Props> = ({
     true
   );
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     query: searchQueryText,
     onChange: (searchChange) => {
       if (searchChange.error !== null) {

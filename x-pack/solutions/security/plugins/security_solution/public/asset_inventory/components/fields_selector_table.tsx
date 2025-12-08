@@ -9,7 +9,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
-  type EuiSearchBarProps,
+  type EuiInMemoryTableSearchBarProps,
   EuiButtonEmpty,
   EuiCheckbox,
   EuiContextMenuItem,
@@ -140,7 +140,7 @@ export const FieldsSelectorTable = ({
 
   let debounceTimeoutId: ReturnType<typeof setTimeout>;
 
-  const onQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
+  const onQueryChange: EuiInMemoryTableSearchBarProps['onChange'] = ({ query }) => {
     clearTimeout(debounceTimeoutId);
 
     debounceTimeoutId = setTimeout(() => {
@@ -184,7 +184,7 @@ export const FieldsSelectorTable = ({
     return '';
   }, [dataView]);
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     onChange: onQueryChange,
     box: {
       incremental: true,

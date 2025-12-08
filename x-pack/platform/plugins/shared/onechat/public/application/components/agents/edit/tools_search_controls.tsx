@@ -6,7 +6,11 @@
  */
 
 import React from 'react';
-import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
+import type {
+  EuiInMemoryTableSearchBarOnChangeArgs,
+  EuiInMemoryTableSearchBarProps,
+  Search,
+} from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
@@ -42,7 +46,7 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
   const searchConfig: Search = React.useMemo(() => {
     const matchesByTag = countBy(displayTools.flatMap((tool) => tool.tags));
 
-    const config: EuiSearchBarProps = {
+    const config: EuiInMemoryTableSearchBarProps = {
       box: {
         incremental: true,
         placeholder: labels.tools.searchToolsPlaceholder,
@@ -62,7 +66,7 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
           autoSortOptions: false,
         },
       ],
-      onChange: ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+      onChange: ({ queryText, error: searchError }: EuiInMemoryTableSearchBarOnChangeArgs) => {
         if (searchError) {
           return;
         }
@@ -78,7 +82,7 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
     <EuiFlexGroup alignItems="center" gutterSize="m">
       {Object.keys(searchConfig).length > 0 && (
         <EuiFlexItem>
-          <EuiSearchBar {...(searchConfig as EuiSearchBarProps)} />
+          <EuiSearchBar {...(searchConfig as EuiInMemoryTableSearchBarProps)} />
         </EuiFlexItem>
       )}
       {onShowActiveOnlyChange && (

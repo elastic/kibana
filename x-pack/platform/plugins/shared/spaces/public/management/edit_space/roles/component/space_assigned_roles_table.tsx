@@ -25,7 +25,7 @@ import type {
   CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiInMemoryTableProps,
-  EuiSearchBarProps,
+  EuiInMemoryTableSearchBarProps,
   EuiTableFieldDataColumnType,
   EuiTableSelectionType,
 } from '@elastic/eui';
@@ -277,7 +277,9 @@ export const SpaceAssignedRolesTable = ({
     setRolesInView(sortedRoles);
   }, [assignedRoles]);
 
-  const onSearchQueryChange = useCallback<NonNullable<NonNullable<EuiSearchBarProps['onChange']>>>(
+  const onSearchQueryChange = useCallback<
+    NonNullable<NonNullable<EuiInMemoryTableSearchBarProps['onChange']>>
+  >(
     ({ query }) => {
       const assignedRolesTransformed = Array.from(assignedRoles.values());
       const sortedAssignedRolesTransformed = assignedRolesTransformed.sort(sortRolesForListing);
@@ -295,7 +297,7 @@ export const SpaceAssignedRolesTable = ({
     [assignedRoles]
   );
 
-  const searchElementDefinition = useMemo<EuiSearchBarProps>(() => {
+  const searchElementDefinition = useMemo<EuiInMemoryTableSearchBarProps>(() => {
     return {
       box: {
         fullWidth: false,
