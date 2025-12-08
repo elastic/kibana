@@ -7,7 +7,34 @@
 
 import { useState, useEffect } from 'react';
 import { useCloudConnectedAppContext } from '../../app_context';
-import type { ClusterDetails } from '../../../types';
+import type { ClusterDetails, ServiceType } from '../../../types';
+
+/**
+ * Creates a new ClusterDetails object with an updated service enabled state.
+ *
+ * This is a pure function that performs an immutable update, preserving all
+ * other properties of the ClusterDetails object and the specific service.
+ */
+export const updateServiceEnabled = (
+  clusterDetails: ClusterDetails | null,
+  serviceKey: ServiceType,
+  enabled: boolean
+): ClusterDetails | null => {
+  if (!clusterDetails || !clusterDetails.services[serviceKey]) {
+    return clusterDetails;
+  }
+
+  return {
+    ...clusterDetails,
+    services: {
+      ...clusterDetails.services,
+      [serviceKey]: {
+        ...clusterDetails.services[serviceKey],
+        enabled,
+      },
+    },
+  };
+};
 
 /**
  * Hook to manage the cluster connection state and related actions.
@@ -45,20 +72,8 @@ export const useClusterConnection = () => {
    * Optimistically updates a service's enabled state.
    * Called after a successful API call to immediately reflect the change in the UI.
    */
-  const handleServiceUpdate = (serviceKey: string, enabled: boolean) => {
-    setClusterDetails((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        services: {
-          ...prev.services,
-          [serviceKey]: {
-            ...prev.services[serviceKey as keyof typeof prev.services],
-            enabled,
-          },
-        },
-      };
-    });
+  const handleServiceUpdate = (serviceKey: ServiceType, enabled: boolean) => {
+    setClusterDetails((prev) => updateServiceEnabled(prev, serviceKey, enabled));
   };
 
   /**
