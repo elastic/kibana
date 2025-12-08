@@ -13,8 +13,10 @@ import type {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import type { LockManagerService } from '@kbn/lock-manager';
+import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
@@ -22,24 +24,21 @@ import {
   getAncestors,
   getParentId,
 } from '@kbn/streams-schema';
-import type { LockManagerService } from '@kbn/lock-manager';
-import type { Condition } from '@kbn/streamlang';
-import { MAX_STREAM_NAME_LENGTH } from '../../../common/constants';
 import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
+import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
-import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
-import type { StreamsStorageClient } from './storage/streams_storage_client';
-import { State } from './state_management/state';
-import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import type { FeatureClient } from './feature/feature_client';
-import type { AttachmentClient } from './attachments/attachment_client';
+import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
+import { State } from './state_management/state';
+import type { StreamsStorageClient } from './storage/streams_storage_client';
+import { checkAccess, checkAccessBulk } from './stream_crud';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
