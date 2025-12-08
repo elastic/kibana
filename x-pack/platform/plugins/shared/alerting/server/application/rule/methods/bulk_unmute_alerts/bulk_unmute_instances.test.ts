@@ -103,6 +103,34 @@ describe('bulkUnmuteInstances', () => {
     });
   });
 
+  test('should re-throw an error if authorization fails', async () => {
+    const ruleId = 'rule-1';
+    const alertInstanceIds = ['instance-1', 'instance-2'];
+    const expectedError = new Error('Not authorized');
+
+    bulkGetRulesSoMock.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: ruleId,
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: {
+            alertTypeId: 'test',
+            consumer: 'test',
+            name: 'test rule',
+          },
+          references: [],
+        },
+      ],
+    });
+    authorizationMock.bulkEnsureAuthorized.mockRejectedValue(expectedError);
+
+    await expect(
+      bulkUnmuteInstances(context, { rules: [{ id: ruleId, alertInstanceIds }] })
+    ).rejects.toThrowError(expectedError);
+
+    expect(unmuteAlertInstancesMock).not.toHaveBeenCalled();
+  });
+
   test('should re-throw an error if alertsService.unmuteAlertInstances fails', async () => {
     const ruleId = 'rule-1';
     const alertInstanceIds = ['instance-1', 'instance-2'];
@@ -129,5 +157,27 @@ describe('bulkUnmuteInstances', () => {
     await expect(
       bulkUnmuteInstances(context, { rules: [{ id: ruleId, alertInstanceIds }] })
     ).rejects.toThrowError(expectedError);
+  });
+
+  test('should throw error if rules are not found', async () => {
+    const ruleId = 'rule-1';
+    const alertInstanceIds = ['instance-1', 'instance-2'];
+
+    bulkGetRulesSoMock.mockResolvedValueOnce({
+      saved_objects: [],
+    });
+
+    await expect(
+      bulkUnmuteInstances(context, { rules: [{ id: ruleId, alertInstanceIds }] })
+    ).rejects.toThrowError(`Rules not found: ["${ruleId}"]`);
+  });
+
+  test('should do nothing if an empty rules array is provided', async () => {
+    await bulkUnmuteInstances(context, { rules: [] });
+
+    expect(bulkGetRulesSoMock).not.toHaveBeenCalled();
+    expect(authorizationMock.bulkEnsureAuthorized).not.toHaveBeenCalled();
+    expect(bulkUpdateRuleSoMock).not.toHaveBeenCalled();
+    expect(unmuteAlertInstancesMock).not.toHaveBeenCalled();
   });
 });

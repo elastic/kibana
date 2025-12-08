@@ -44,11 +44,24 @@ export async function bulkUnmuteInstances(
   );
 }
 
+const EMPTY_RESULT = {
+  apiKeysToInvalidate: [],
+  resultSavedObjects: [],
+  errors: [],
+  rules: [],
+  skipped: [],
+};
+
 async function bulkUnmuteInstancesWithOCC(
   context: RulesClientContext,
   params: BulkMuteUnmuteAlertsParams
 ): Promise<BulkEditOperationResult> {
   let bulkUpdateRes: SavedObjectsBulkUpdateResponse<RawRule>;
+
+  if (params.rules.length === 0) {
+    return EMPTY_RESULT;
+  }
+
   const rules = await bulkGetRulesSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     ids: params.rules.map((p) => p.id),
@@ -58,6 +71,11 @@ async function bulkUnmuteInstancesWithOCC(
     const rulesSavedObjects: Array<SavedObject<RawRule>> = [];
     const ruleTypeIdConsumersPairs: BulkEnsureAuthorizedOpts['ruleTypeIdConsumersPairs'] = [];
     const ruleTypeIds = new Set<string>();
+
+    if (rules.saved_objects.length === 0) {
+      throw Boom.badRequest(`Rules not found: ${JSON.stringify(params.rules.map((r) => r.id))}`);
+    }
+
     rules.saved_objects.forEach((rule) => {
       if (rule.error) {
         return;
@@ -112,13 +130,14 @@ async function bulkUnmuteInstancesWithOCC(
         error,
       })
     );
+    context.logger.error(`Error while bulk unmuting alerts: ${error.message}`);
 
     throw error;
   }
 
   return {
     apiKeysToInvalidate: [],
-    resultSavedObjects: bulkUpdateRes.saved_objects,
+    resultSavedObjects: bulkUpdateRes?.saved_objects ?? [],
     errors: [],
     rules: [],
     skipped: [],
