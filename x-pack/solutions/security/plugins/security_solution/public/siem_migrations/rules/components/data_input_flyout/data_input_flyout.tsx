@@ -31,21 +31,12 @@ import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { useMigrationSteps } from '../../hooks/use_migration_steps';
-import type { QradarStep, SplunkStep } from './types';
+import { STEP_COMPONENTS } from '../../configs';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
   migrationStats?: RuleMigrationStats;
   migrationSource?: MigrationSource;
-}
-
-type StepToRender = SplunkStep | QradarStep;
-
-function StepRenderer({ step }: { step: StepToRender }) {
-  const Component = step.Component as React.ComponentType<typeof step.props | {}>;
-
-  return step.props ? <Component {...step.props} /> : <Component />;
 }
 
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
@@ -119,14 +110,6 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       }
     }, [migrationStats, showStartMigrationModal]);
 
-    const steps = useMigrationSteps({
-      onMigrationCreated,
-      dataInputStep,
-      migrationSource,
-      migrationStats,
-      setMigrationDataInputStep,
-    });
-
     return (
       <>
         {startMigrationModal}
@@ -159,9 +142,14 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 />
               </EuiFlexItem>
               <>
-                {steps?.map((step) => (
+                {STEP_COMPONENTS[migrationSource]?.map((step) => (
                   <EuiFlexItem key={step.id}>
-                    <StepRenderer step={step} />
+                    <step.Component
+                      dataInputStep={dataInputStep}
+                      migrationSource={migrationSource}
+                      onMigrationCreated={onMigrationCreated}
+                      setMigrationDataInputStep={setMigrationDataInputStep}
+                    />
                   </EuiFlexItem>
                 )) ?? <CenteredLoadingSpinner />}
               </>

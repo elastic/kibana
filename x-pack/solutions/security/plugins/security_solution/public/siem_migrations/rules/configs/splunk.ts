@@ -9,9 +9,9 @@ import { SplunkDataInputStepId } from '../components/data_input_flyout/steps/con
 import { LookupsDataInput } from '../components/data_input_flyout/steps/lookups/lookups_data_input';
 import { MacrosDataInput } from '../components/data_input_flyout/steps/macros/macros_data_input';
 import { RulesDataInput } from '../components/data_input_flyout/steps/rules/rules_data_input';
-import type { SplunkMigrationSteps } from '../components/data_input_flyout/types';
+import type { Steps } from '../components/data_input_flyout/types';
 
-export const SPLUNK_MIGRATION_STEPS: SplunkMigrationSteps = [
+export const SPLUNK_MIGRATION_STEPS: Steps = [
   { id: SplunkDataInputStepId.Rules, Component: RulesDataInput },
   { id: SplunkDataInputStepId.Macros, Component: MacrosDataInput },
   { id: SplunkDataInputStepId.Lookups, Component: LookupsDataInput },

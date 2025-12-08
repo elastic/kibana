@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RulesDataInput } from './rules_data_input';
-import { SplunkDataInputStep } from '../constants';
+import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { MigrationSource } from '../../../../types';
 
@@ -16,17 +16,18 @@ describe('RulesDataInput', () => {
   const defaultProps = {
     migrationStats: undefined,
     onMigrationCreated: jest.fn(),
-    onMissingResourcesFetched: jest.fn(),
+    dataInputStep: {
+      [MigrationSource.SPLUNK]: SplunkDataInputStep.Rules,
+      [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
+    },
+    migrationSource: MigrationSource.SPLUNK,
+    setMigrationDataInputStep: jest.fn(),
   };
 
   it('renders the step number', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput
-          {...defaultProps}
-          dataInputStep={SplunkDataInputStep.Rules}
-          migrationSource={MigrationSource.SPLUNK}
-        />
+        <RulesDataInput {...defaultProps} migrationSource={MigrationSource.SPLUNK} />
       </TestProviders>
     );
 
@@ -37,11 +38,7 @@ describe('RulesDataInput', () => {
   it('renders the title', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput
-          {...defaultProps}
-          dataInputStep={SplunkDataInputStep.Rules}
-          migrationSource={MigrationSource.SPLUNK}
-        />
+        <RulesDataInput {...defaultProps} migrationSource={MigrationSource.SPLUNK} />
       </TestProviders>
     );
 
@@ -52,11 +49,7 @@ describe('RulesDataInput', () => {
   it('renders sub-steps when the step is current', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput
-          {...defaultProps}
-          dataInputStep={SplunkDataInputStep.Rules}
-          migrationSource={MigrationSource.SPLUNK}
-        />
+        <RulesDataInput {...defaultProps} migrationSource={MigrationSource.SPLUNK} />
       </TestProviders>
     );
 
@@ -68,7 +61,10 @@ describe('RulesDataInput', () => {
       <TestProviders>
         <RulesDataInput
           {...defaultProps}
-          dataInputStep={SplunkDataInputStep.Macros}
+          dataInputStep={{
+            [MigrationSource.SPLUNK]: SplunkDataInputStep.Macros,
+            [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
+          }}
           migrationSource={MigrationSource.SPLUNK}
         />
       </TestProviders>

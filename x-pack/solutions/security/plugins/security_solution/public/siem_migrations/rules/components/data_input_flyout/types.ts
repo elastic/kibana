@@ -8,14 +8,12 @@
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import type { MigrationSource, RuleMigrationStats } from '../../types';
 import type {
+  DataInputStep,
   QradarDataInputStep,
   QradarDataInputStepId,
   SplunkDataInputStep,
   SplunkDataInputStepId,
 } from './steps/constants';
-import type { LookupsDataInput } from './steps/lookups/lookups_data_input';
-import type { MacrosDataInput } from './steps/macros/macros_data_input';
-import type { RulesDataInput } from './steps/rules/rules_data_input';
 
 export type OnMigrationCreated = (migrationStats: RuleMigrationStats) => void;
 export type OnResourcesCreated = () => void;
@@ -23,26 +21,27 @@ export type OnMissingResourcesFetched = (missingResources: SiemMigrationResource
 
 type DataInputStepId = SplunkDataInputStepId | QradarDataInputStepId;
 
-export interface Step<Props, C extends React.ComponentType<Props>> {
-  id: DataInputStepId;
-  Component: C;
-  props?: Props;
+export interface UseMigrationStepsProps {
+  dataInputStep: DataInputStep;
+  migrationSource: MigrationSource;
+  migrationStats?: RuleMigrationStats;
+  onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
+  onMissingResourcesFetched?: OnMissingResourcesFetched;
+  setMigrationDataInputStep: (step: SplunkDataInputStep | QradarDataInputStep) => void;
 }
 
-type RulesStep = Step<React.ComponentProps<typeof RulesDataInput>, typeof RulesDataInput>;
+export interface Step<
+  Props = UseMigrationStepsProps,
+  C extends React.ComponentType<Props> = React.ComponentType<Props>
+> {
+  id: DataInputStepId;
+  Component: C;
+}
 
-type MacrosStep = Step<React.ComponentProps<typeof MacrosDataInput>, typeof MacrosDataInput>;
-
-type LookupsStep = Step<React.ComponentProps<typeof LookupsDataInput>, typeof LookupsDataInput>;
-
-export type SplunkStep = RulesStep | MacrosStep | LookupsStep;
-export type QradarStep = RulesStep;
-
-export type SplunkMigrationSteps = Array<SplunkStep>;
-export type QradarMigrationSteps = Array<QradarStep>;
+export type Steps = Array<Step>;
 
 export interface RulesDataInputSubStepsProps {
-  dataInputStep: SplunkDataInputStep | QradarDataInputStep;
+  dataInputStep: DataInputStep;
   migrationSource: MigrationSource;
   migrationStats?: RuleMigrationStats;
   onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;

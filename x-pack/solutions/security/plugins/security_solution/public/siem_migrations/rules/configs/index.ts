@@ -7,16 +7,13 @@
 
 import { MigrationSource } from '../types';
 
-import type {
-  QradarMigrationSteps,
-  SplunkMigrationSteps,
-} from '../components/data_input_flyout/types';
+import type { Steps } from '../components/data_input_flyout/types';
 import { SPLUNK_MIGRATION_STEPS } from './splunk';
 import { QRADAR_MIGRATION_STEPS } from './qradar';
 
 export const STEP_COMPONENTS: {
-  [MigrationSource.SPLUNK]: SplunkMigrationSteps;
-  [MigrationSource.QRADAR]: QradarMigrationSteps;
+  [MigrationSource.SPLUNK]: Steps;
+  [MigrationSource.QRADAR]: Steps;
 } = {
   [MigrationSource.SPLUNK]: SPLUNK_MIGRATION_STEPS,
   [MigrationSource.QRADAR]: QRADAR_MIGRATION_STEPS,

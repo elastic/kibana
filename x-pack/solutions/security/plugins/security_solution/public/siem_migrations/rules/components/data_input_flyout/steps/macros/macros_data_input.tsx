@@ -12,29 +12,33 @@ import { SubSteps } from '../../../../../common/components';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnResourcesCreated, OnMissingResourcesFetched } from '../../types';
+import type {
+  OnResourcesCreated,
+  OnMissingResourcesFetched,
+  UseMigrationStepsProps,
+} from '../../types';
 import * as i18n from './translations';
 import { SplunkDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
+import { useMissingResources } from '../hooks/use_missing_resources';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingMacros: string[];
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
-interface MacrosDataInputProps
-  extends Omit<MacrosDataInputSubStepsProps, 'migrationStats' | 'missingMacros'> {
-  dataInputStep: SplunkDataInputStep;
-  migrationStats?: RuleMigrationTaskStats;
-  missingMacros?: string[];
-}
-export const MacrosDataInput = React.memo<MacrosDataInputProps>(
-  ({ dataInputStep, migrationStats, missingMacros, onMissingResourcesFetched }) => {
+
+export const MacrosDataInput = React.memo<UseMigrationStepsProps>(
+  ({ dataInputStep, migrationStats, migrationSource, setMigrationDataInputStep }) => {
+    const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
+      setMigrationDataInputStep,
+    });
+    const missingMacros = useMemo(() => missingResourcesIndexed?.macros, [missingResourcesIndexed]);
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(SplunkDataInputStep.Macros, dataInputStep),
-      [dataInputStep]
+      () => getEuiStepStatus(SplunkDataInputStep.Macros, dataInputStep[migrationSource]),
+      [dataInputStep, migrationSource]
     );
 
     return (

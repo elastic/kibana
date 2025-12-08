@@ -23,28 +23,33 @@ import { SubSteps } from '../../../../../common/components';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnResourcesCreated } from '../../types';
+import type { OnResourcesCreated, UseMigrationStepsProps } from '../../types';
 import * as i18n from './translations';
 import { SplunkDataInputStep } from '../constants';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
+import { useMissingResources } from '../hooks/use_missing_resources';
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingLookups: string[];
   onAllLookupsCreated: OnResourcesCreated;
 }
-interface LookupsDataInputProps
-  extends Omit<LookupsDataInputSubStepsProps, 'migrationStats' | 'missingLookups'> {
-  dataInputStep: SplunkDataInputStep;
-  migrationStats?: RuleMigrationTaskStats;
-  missingLookups?: string[];
-}
-export const LookupsDataInput = React.memo<LookupsDataInputProps>(
-  ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
+
+export const LookupsDataInput = React.memo<UseMigrationStepsProps>(
+  ({ dataInputStep, migrationSource, migrationStats, setMigrationDataInputStep }) => {
+    const { missingResourcesIndexed } = useMissingResources({ setMigrationDataInputStep });
+    const missingLookups = useMemo(
+      () => missingResourcesIndexed?.lookups,
+      [missingResourcesIndexed]
+    );
+    const onAllLookupsCreated = useCallback(() => {
+      setMigrationDataInputStep(SplunkDataInputStep.End);
+    }, [setMigrationDataInputStep]);
+
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(SplunkDataInputStep.Lookups, dataInputStep),
-      [dataInputStep]
+      () => getEuiStepStatus(SplunkDataInputStep.Lookups, dataInputStep[migrationSource]),
+      [dataInputStep, migrationSource]
     );
 
     return (
