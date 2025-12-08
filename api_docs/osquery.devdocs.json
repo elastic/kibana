@@ -338,7 +338,68 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.getExperimentalAllowedValues",
+        "type": "Function",
+        "tags": [],
+        "label": "getExperimentalAllowedValues",
+        "description": [],
+        "signature": [
+          "() => string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.parseExperimentalConfigValue",
+        "type": "Function",
+        "tags": [],
+        "label": "parseExperimentalConfigValue",
+        "description": [
+          "\nParses the string value used in `xpack.osquery.enableExperimental` kibana configuration,\nwhich should be an array of strings corresponding to allowedExperimentalValues keys.\nUse the `disable:` prefix to disable a feature.\n"
+        ],
+        "signature": [
+          "(configValue: string[]) => { features: ",
+          {
+            "pluginId": "osquery",
+            "scope": "common",
+            "docId": "kibOsqueryPluginApi",
+            "section": "def-common.ExperimentalFeatures",
+            "text": "ExperimentalFeatures"
+          },
+          "; invalid: string[]; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "osquery",
+            "id": "def-common.parseExperimentalConfigValue.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "configValue",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -353,6 +414,21 @@
           "\"/app/osquery\""
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.ExperimentalFeatures",
+        "type": "Type",
+        "tags": [],
+        "label": "ExperimentalFeatures",
+        "description": [],
+        "signature": [
+          "{ readonly _placeholder: boolean; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -403,6 +479,24 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.allowedExperimentalValues",
+        "type": "Object",
+        "tags": [],
+        "label": "allowedExperimentalValues",
+        "description": [
+          "\nA list of allowed values that can be used in `xpack.osquery.enableExperimental`.\nThis object is then used to validate and parse the value entered."
+        ],
+        "signature": [
+          "{ readonly _placeholder: false; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

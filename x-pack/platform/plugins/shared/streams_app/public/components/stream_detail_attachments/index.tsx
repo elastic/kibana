@@ -1,0 +1,336 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type { Streams } from '@kbn/streams-schema';
+import React, { useMemo, useState } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useAttachmentsApi } from '../../hooks/use_attachments_api';
+import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
+import { useKibana } from '../../hooks/use_kibana';
+import { AddAttachmentFlyout } from './add_attachment_flyout';
+import { AttachmentDetailsFlyout } from './attachment_details_flyout';
+import {
+  AttachmentFilters,
+  DEFAULT_ATTACHMENT_FILTERS,
+  type AttachmentFiltersState,
+} from './attachment_filters';
+import { AttachmentsTable } from './attachment_table';
+import { AttachmentsEmptyPrompt } from './attachments_empty_prompt';
+import { ConfirmAttachmentModal } from './confirm_attachment_modal';
+
+export function StreamDetailAttachments({
+  definition,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+}) {
+  const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
+  const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
+
+  const [isAddAttachmentFlyoutOpen, setIsAddAttachmentFlyoutOpen] = useState(false);
+  const [detailsAttachment, setDetailsAttachment] = useState<Attachment | null>(null);
+
+  const { core } = useKibana();
+  const {
+    application: {
+      capabilities: {
+        streams: { [STREAMS_UI_PRIVILEGES.manage]: canLinkAttachments },
+      },
+    },
+    notifications,
+  } = core;
+
+  const attachmentsFetch = useAttachmentsFetch({
+    name: definition.stream.name,
+    attachmentType: filters.type,
+  });
+  const { addAttachments, removeAttachments } = useAttachmentsApi({
+    name: definition.stream.name,
+  });
+
+  const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
+  const linkedAttachments = useMemo(() => {
+    return attachmentsFetch.value?.attachments ?? [];
+  }, [attachmentsFetch.value?.attachments]);
+
+  const filteredAttachments = useMemo(() => {
+    return linkedAttachments.filter((attachment) => {
+      const matchesQuery = attachment.title.toLowerCase().includes(filters.query.toLowerCase());
+      const matchesTags =
+        filters.tags.length === 0 || filters.tags.some((tagId) => attachment.tags?.includes(tagId));
+      return matchesQuery && matchesTags;
+    });
+  }, [linkedAttachments, filters.query, filters.tags]);
+
+  const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
+
+  const selectionPopoverId = useGeneratedHtmlId({
+    prefix: 'selectionPopover',
+  });
+
+  const hasFiltersApplied =
+    filters.type !== undefined || filters.tags.length > 0 || filters.query !== '';
+  const hasNoAttachments =
+    !attachmentsFetch.loading && linkedAttachments.length === 0 && !hasFiltersApplied;
+
+  const openAddAttachmentFlyout = () => {
+    setIsAddAttachmentFlyoutOpen(true);
+  };
+
+  const [{ loading: isLinkLoading }, handleLinkAttachments] = useAsyncFn(
+    async (attachments: Attachment[]) => {
+      await addAttachments(attachments);
+      attachmentsFetch.refresh();
+      setIsAddAttachmentFlyoutOpen(false);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.attachments.addSuccess.title', {
+          defaultMessage: 'Attachments added successfully',
+        }),
+        iconType: 'cheer',
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.streams.attachments.addSuccess.text"
+            defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} added to the {streamName} stream."
+            values={{
+              count: attachments.length,
+              streamName: <strong>{definition.stream.name}</strong>,
+            }}
+          />,
+          core
+        ),
+      });
+    },
+    [addAttachments, attachmentsFetch, notifications.toasts, definition.stream.name, core]
+  );
+
+  const [{ loading: isUnlinkLoading }, handleUnlinkAttachments] = useAsyncFn(
+    async (attachments: Attachment[]) => {
+      await removeAttachments(attachments);
+      attachmentsFetch.refresh();
+      setSelectedAttachments([]);
+      setIsSelectionPopoverOpen(false);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.attachments.removeSuccess.title', {
+          defaultMessage: 'Attachments removed',
+        }),
+        iconType: 'unlink',
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.streams.attachments.removeSuccess.text"
+            defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} removed from the {streamName} stream."
+            values={{
+              count: attachments.length,
+              streamName: <strong>{definition.stream.name}</strong>,
+            }}
+          />,
+          core
+        ),
+      });
+    },
+    [removeAttachments, attachmentsFetch, notifications.toasts, definition.stream.name, core]
+  );
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {hasNoAttachments ? (
+        <EuiFlexItem>
+          <AttachmentsEmptyPrompt
+            onAddAttachments={openAddAttachmentFlyout}
+            disabled={!canLinkAttachments}
+          />
+        </EuiFlexItem>
+      ) : (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow>
+                <AttachmentFilters
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  searchPlaceholder={i18n.translate(
+                    'xpack.streams.streamDetailAttachments.searchPlaceholder',
+                    {
+                      defaultMessage: 'Search for your attachments by name',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  data-test-subj="streamsAppStreamDetailAddAttachmentButton"
+                  disabled={!canLinkAttachments}
+                  onClick={openAddAttachmentFlyout}
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailAttachmentView.addAttachmentButtonLabel',
+                    {
+                      defaultMessage: 'Add attachment',
+                    }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  {i18n.translate('xpack.streams.streamDetailAttachments.attachmentCount', {
+                    defaultMessage: '{count} Attachments',
+                    values: { count: filteredAttachments.length },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              {selectedAttachments.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    id={selectionPopoverId}
+                    button={
+                      <EuiLink
+                        data-test-subj="streamsAppStreamDetailSelectedAttachmentsLink"
+                        onClick={() => setIsSelectionPopoverOpen(!isSelectionPopoverOpen)}
+                      >
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            {i18n.translate(
+                              'xpack.streams.streamDetailAttachments.selectedAttachmentsCount',
+                              {
+                                defaultMessage: '{count} attachments selected',
+                                values: { count: selectedAttachments.length },
+                              }
+                            )}
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon
+                              type={isSelectionPopoverOpen ? 'arrowUp' : 'arrowDown'}
+                              size="s"
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiLink>
+                    }
+                    isOpen={isSelectionPopoverOpen}
+                    closePopover={() => setIsSelectionPopoverOpen(false)}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
+                  >
+                    <EuiContextMenuPanel
+                      size="s"
+                      items={[
+                        <EuiContextMenuItem
+                          key="unlink"
+                          icon="unlink"
+                          disabled={isUnlinkLoading}
+                          onClick={() => {
+                            setAttachmentsToUnlink(selectedAttachments);
+                            setIsSelectionPopoverOpen(false);
+                          }}
+                        >
+                          {i18n.translate(
+                            'xpack.streams.streamDetailAttachments.removeAttachmentsLabel',
+                            {
+                              defaultMessage: 'Remove attachments',
+                            }
+                          )}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="cancel"
+                          icon="cross"
+                          onClick={() => {
+                            setSelectedAttachments([]);
+                            setIsSelectionPopoverOpen(false);
+                          }}
+                        >
+                          {i18n.translate(
+                            'xpack.streams.streamDetailAttachments.clearSelectionLabel',
+                            {
+                              defaultMessage: 'Clear selection',
+                            }
+                          )}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AttachmentsTable
+              entityId={definition?.stream.name}
+              attachments={filteredAttachments}
+              loading={attachmentsFetch.loading}
+              selectedAttachments={selectedAttachments}
+              setSelectedAttachments={canLinkAttachments ? setSelectedAttachments : undefined}
+              onUnlinkAttachment={
+                canLinkAttachments
+                  ? (attachment) => setAttachmentsToUnlink([attachment])
+                  : undefined
+              }
+              onViewDetails={setDetailsAttachment}
+              dataTestSubj="streamsAppStreamDetailAttachmentsTable"
+              showActions
+            />
+          </EuiFlexItem>
+        </>
+      )}
+      {definition && isAddAttachmentFlyoutOpen ? (
+        <AddAttachmentFlyout
+          linkedAttachments={linkedAttachments}
+          entityId={definition.stream.name}
+          onAddAttachments={handleLinkAttachments}
+          isLoading={isLinkLoading}
+          onClose={() => {
+            setIsAddAttachmentFlyoutOpen(false);
+          }}
+        />
+      ) : null}
+      {detailsAttachment && (
+        <AttachmentDetailsFlyout
+          attachment={detailsAttachment}
+          onClose={() => setDetailsAttachment(null)}
+          onUnlink={
+            canLinkAttachments
+              ? () => {
+                  setAttachmentsToUnlink([detailsAttachment]);
+                }
+              : undefined
+          }
+        />
+      )}
+      {attachmentsToUnlink.length > 0 && (
+        <ConfirmAttachmentModal
+          attachments={attachmentsToUnlink}
+          isLoading={isUnlinkLoading}
+          onCancel={() => setAttachmentsToUnlink([])}
+          onConfirm={async () => {
+            await handleUnlinkAttachments(attachmentsToUnlink);
+            setAttachmentsToUnlink([]);
+            setDetailsAttachment(null);
+          }}
+        />
+      )}
+    </EuiFlexGroup>
+  );
+}

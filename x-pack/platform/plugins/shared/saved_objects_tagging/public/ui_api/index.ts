@@ -14,6 +14,7 @@ import {
   replaceTagReferences,
   convertTagNameToId,
   getTag,
+  tagIdToReference,
 } from '../../common';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
@@ -50,6 +51,7 @@ export const getUiApi = ({
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
     getTagIdsFromReferences,
+    tagIdToReference,
     getTagIdFromName: (tagName: string) => convertTagNameToId(tagName, cache.getState()),
     updateTagsReferences: replaceTagReferences,
     getTag: (tagId: string) => getTag(tagId, cache.getState()),

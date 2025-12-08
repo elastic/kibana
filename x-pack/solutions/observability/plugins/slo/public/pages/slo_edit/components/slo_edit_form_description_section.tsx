@@ -32,6 +32,7 @@ export function SloEditFormDescriptionSection() {
 
   const { suggestions } = useFetchSLOSuggestions();
   const { services } = useKibana();
+  const { uiActions } = services;
 
   return (
     <EuiPanel
@@ -163,7 +164,7 @@ export function SloEditFormDescriptionSection() {
           defaultValue={undefined}
           render={({ field }) => (
             <DashboardsSelector
-              contentManagement={services.contentManagement}
+              uiActions={uiActions}
               dashboardsFormData={field.value ?? []}
               placeholder={DASHBOARDS_COMBOBOX_PLACEHOLDER}
               onChange={(selected) => field.onChange(selected.map((d) => ({ id: d.value })))}

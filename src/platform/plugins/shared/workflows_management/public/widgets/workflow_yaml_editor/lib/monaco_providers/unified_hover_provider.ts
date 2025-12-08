@@ -7,155 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type YAML from 'yaml';
-import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type { HoverContext, ProviderConfig } from './provider_interfaces';
+import type {
+  HoverContext,
+  ParameterContext,
+  ProviderConfig,
+  StepContext,
+} from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
+import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
+import { getInterceptedHover } from '../hover/get_intercepted_hover';
+
+export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
 /**
  * Unified hover provider that delegates to connector-specific handlers
  * Replaces individual ES/Kibana hover providers with a single extensible system
  */
 export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
+  __providerId: string = UNIFIED_HOVER_PROVIDER_ID;
+
   private readonly getYamlDocument: () => YAML.Document | null;
-  // private readonly options: Record<string, any>;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
-    // this.options = config.options || {};
   }
 
-  /**
-   * Setup keyboard shortcuts for Monaco actions
-   * Consolidates functionality from elasticsearch_step_context_menu_provider.ts
-   */
-  public setupKeyboardShortcuts(editor: monaco.editor.IStandaloneCodeEditor): monaco.IDisposable[] {
-    const disposables: monaco.IDisposable[] = [];
-
-    // Add "Copy as Console" shortcut (Ctrl+K, C)
-    const copyAsConsoleAction = editor.addAction({
-      id: 'unified.copyAsConsole',
-      label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyAsConsole', {
-        defaultMessage: 'Copy step as Console format',
-      }),
-      keybindings: [
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyC),
-      ],
-      run: async () => {
-        await this.runActionAtCurrentPosition(editor, 'copy-as-console');
-      },
-    });
-    disposables.push(copyAsConsoleAction);
-
-    // Add "Copy as cURL" shortcut (Ctrl+K, U)
-    const copyAsCurlAction = editor.addAction({
-      id: 'unified.copyAsCurl',
-      label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyAsCurl', {
-        defaultMessage: 'Copy step as cURL command',
-      }),
-      keybindings: [
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyU),
-      ],
-      run: async () => {
-        await this.runActionAtCurrentPosition(editor, 'copy-as-curl');
-      },
-    });
-    disposables.push(copyAsCurlAction);
-
-    // Add "Copy Step" shortcut (Ctrl+K, S)
-    const copyStepAction = editor.addAction({
-      id: 'unified.copyStep',
-      label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyStep', {
-        defaultMessage: 'Copy workflow step',
-      }),
-      keybindings: [
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyS),
-      ],
-      run: async () => {
-        await this.runActionAtCurrentPosition(editor, 'copy-step');
-      },
-    });
-    disposables.push(copyStepAction);
-
-    return disposables;
-  }
-
-  /**
-   * Run a specific action at the current cursor position
-   */
-  private async runActionAtCurrentPosition(
-    editor: monaco.editor.IStandaloneCodeEditor,
-    actionId: string
-  ): Promise<void> {
-    try {
-      const model = editor.getModel();
-      const position = editor.getPosition();
-
-      if (!model || !position) {
-        return;
-      }
-
-      const yamlDocument = this.getYamlDocument();
-      if (!yamlDocument) {
-        return;
-      }
-
-      // Build context
-      const context = await this.buildActionContext(model, position, yamlDocument, editor);
-      if (!context) {
-        return;
-      }
-
-      // Find handler
-      const handler = getMonacoConnectorHandler(context.connectorType);
-      if (!handler) {
-        return;
-      }
-
-      // Get actions and find the requested one
-      const actions = await handler.generateActions(context);
-      const action = actions.find((a) => a.id === actionId);
-
-      if (action) {
-        await action.handler();
-      }
-    } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error running action', error);
-    }
-  }
-
-  /**
-   * Build action context (similar to hover context but includes editor)
-   */
-  private async buildActionContext(
+  async provideHover(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
-    yamlDocument: YAML.Document,
-    editor: monaco.editor.IStandaloneCodeEditor
-  ): Promise<any> {
-    const hoverContext = await this.buildHoverContext(model, position, yamlDocument);
-    if (!hoverContext) {
-      return null;
+    cancellationToken: monaco.CancellationToken
+  ): Promise<monaco.languages.Hover | null> {
+    const customHover = await this.provideCustomHover(model, position);
+    if (customHover) {
+      return customHover;
     }
-
-    return {
-      ...hoverContext,
-      editor,
-    };
+    return getInterceptedHover(model, position, cancellationToken);
   }
-
   /**
    * Provide hover information for the current position
    */
-  async provideHover(
+  async provideCustomHover(
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.Hover | null> {
@@ -183,6 +78,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         //  endCol: m.endColumn,
         //  currentCol: position.column
         // })));
+        return null;
+      }
+
+      // Second: check for decorations at this position, e.g. we don't want to show generic hover content over variables (valid or invalid)
+      const decorations = model
+        .getLineDecorations(position.lineNumber)
+        .filter((decoration) => decoration.options.hoverMessage);
+      if (decorations.length > 0) {
         return null;
       }
 
@@ -271,7 +174,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       }
 
       // Detect connector type and step context
-      const stepContext = this.detectStepContext(yamlDocument, yamlPath, position);
+      const stepContext = this.detectStepContext(model.getValue(), position);
       if (!stepContext?.stepType) {
         // console.log('🔍 buildHoverContext: No stepContext found for path:', yamlPath);
         return null;
@@ -364,79 +267,35 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     }
   }
 
-  /**
-   * Detect step context from YAML path and document
-   */
-  private detectStepContext(
-    yamlDocument: YAML.Document,
-    yamlPath: (string | number)[],
-    position: monaco.Position
-  ): any {
-    // Look for steps in the path
-    const stepsIndex = yamlPath.findIndex((segment) => segment === 'steps');
-    if (stepsIndex === -1) {
+  private detectStepContext(yamlString: string, position: monaco.Position): StepContext | null {
+    const computedData = performComputation(yamlString);
+    if (!computedData.workflowLookup) {
       return null;
     }
 
-    // Get step index
-    const stepIndex = parseInt(String(yamlPath[stepsIndex + 1]), 10);
-    if (isNaN(stepIndex)) {
+    const stepInfo = Object.values(computedData.workflowLookup.steps).find(
+      (step) => step.lineStart <= position.lineNumber && position.lineNumber <= step.lineEnd
+    );
+    if (!stepInfo) {
       return null;
     }
-
-    try {
-      // Get step node - handle being inside 'with' block
-      let stepPath = yamlPath.slice(0, stepsIndex + 2);
-
-      // If we're deeper in the path (e.g., in 'with' block), still get the step node
-      if (yamlPath.length > stepsIndex + 2) {
-        stepPath = yamlPath.slice(0, stepsIndex + 2);
-      }
-
-      const stepNode = yamlDocument.getIn(stepPath, true);
-      if (!stepNode) {
-        // console.log('🔍 detectStepContext: No stepNode found for stepPath:', stepPath);
-        return null;
-      }
-
-      // Extract step information
-      const stepName = (stepNode as any)?.get?.('name')?.value || `step_${stepIndex}`;
-      const typeNode = (stepNode as any)?.get?.('type', true);
-      const stepType = typeNode?.value;
-
-      // console.log('🔍 detectStepContext debug:', {
-      //   stepName,
-      //   stepType,
-      //   typeNode: typeNode?.value,
-      //   stepNodeType: typeof stepNode,
-      // });
-
-      if (!stepType) {
-        // console.log('❌ No stepType found, returning null');
-        return null;
-      }
-
-      // Check if we're in the 'with' block
-      const isInWithBlock = yamlPath.some((segment) => segment === 'with');
-
-      return {
-        stepName,
-        stepType,
-        stepIndex,
-        isInWithBlock,
-        stepNode,
-        typeNode,
-      };
-    } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error detecting step context', error);
-      return null;
-    }
+    // console.log('🔍 detectStepContext: Step info:', stepInfo);
+    return {
+      stepName: stepInfo.stepId,
+      stepType: stepInfo.stepType,
+      isInWithBlock: false,
+      stepNode: stepInfo.stepYamlNode,
+      typeNode: stepInfo.propInfos.type.valueNode,
+    };
   }
 
   /**
    * Detect parameter context if we're inside a parameter
    */
-  private detectParameterContext(yamlPath: (string | number)[], stepContext: any): any {
+  private detectParameterContext(
+    yamlPath: (string | number)[],
+    stepContext: StepContext
+  ): ParameterContext | null {
     if (!stepContext?.isInWithBlock) {
       return null;
     }
@@ -471,8 +330,8 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // If we have a step context and are hovering over the type, use the type node range
       if (context.stepContext?.typeNode && context.yamlPath.includes('type')) {
         const typeNode = context.stepContext.typeNode;
-        if (typeNode.value?.range) {
-          const [startOffset, , endOffset] = typeNode.value.range;
+        if (typeNode?.range) {
+          const [startOffset, , endOffset] = typeNode.range;
           const startPos = model.getPositionAt(startOffset);
           const endPos = model.getPositionAt(endOffset);
 
@@ -485,24 +344,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         }
       }
 
-      // Default to word range at position
-      const word = model.getWordAtPosition(position);
-      if (word) {
-        return new monaco.Range(
-          position.lineNumber,
-          word.startColumn,
-          position.lineNumber,
-          word.endColumn
-        );
-      }
-
-      // Fallback to single character range
-      return new monaco.Range(
-        position.lineNumber,
-        position.column,
-        position.lineNumber,
-        position.column + 1
-      );
+      return null;
     } catch (error) {
       // console.warn('UnifiedHoverProvider: Error calculating range', error);
       return null;

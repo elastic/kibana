@@ -26,7 +26,7 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
-import type { LensApiState } from '../schema';
+import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 import type { LensApiFilterType } from '../schema/filter';
@@ -165,7 +165,7 @@ describe('buildDatasourceStates', () => {
         "layers": Object {
           "textBased": Object {
             "layers": Object {
-              "layer_0": Object {
+              "metric_0": Object {
                 "columns": Array [
                   Object {
                     "columnId": "test",
@@ -182,7 +182,7 @@ describe('buildDatasourceStates', () => {
           },
         },
         "usedDataviews": Object {
-          "layer_0": Object {
+          "metric_0": Object {
             "index": "test",
             "timeFieldName": "@timestamp",
             "type": "adHocDataView",
@@ -370,7 +370,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_1', options);
 
@@ -389,7 +389,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_0', options);
 
@@ -435,9 +435,7 @@ describe('filtersAndQueryToLensState', () => {
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
     expect(result.filters).toHaveLength(2);
     for (const [index, filter] of Object.entries(result.filters ?? [])) {
-      expect(filter).toEqual(
-        expect.objectContaining({ query: apiState.filters?.[index as unknown as number] })
-      );
+      expect(filter).toEqual({ meta: {}, ...apiState.filters?.[index as unknown as number] });
     }
   });
 
@@ -463,7 +461,6 @@ describe('filtersAndQueryToLensState', () => {
     const result = filtersAndQueryToLensState(apiState);
 
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
-    expect(result).not.toHaveProperty('filters');
   });
 });
 
@@ -492,12 +489,10 @@ describe('filtersAndQueryToApiFormat', () => {
         "filters": Array [
           Object {
             "language": "kuery",
-            "meta": Object {},
             "query": "category: \\"electronics\\"",
           },
           Object {
             "language": "lucene",
-            "meta": Object {},
             "query": "price:[100 TO *]",
           },
         ],

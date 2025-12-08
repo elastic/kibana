@@ -9,16 +9,22 @@
 
 import type { ESQLControlVariable } from '@kbn/esql-types';
 
+/**
+ * Service to manage ESQL variables for controls
+ * The service allows adding, retrieving and clearing variables
+ * and enables/disables the creation of control suggestions based on variables.
+ */
+
 export class EsqlVariablesService {
   esqlVariables: ESQLControlVariable[] = [];
-  areSuggestionsEnabled: boolean = false;
+  isCreateControlSuggestionEnabled: boolean = false;
 
-  enableSuggestions() {
-    this.areSuggestionsEnabled = true;
+  enableCreateControlSuggestion() {
+    this.isCreateControlSuggestionEnabled = true;
   }
 
-  disableSuggestions() {
-    this.areSuggestionsEnabled = false;
+  disableCreateControlSuggestion() {
+    this.isCreateControlSuggestionEnabled = false;
   }
 
   addVariable(variable: ESQLControlVariable): void {

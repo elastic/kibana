@@ -12,7 +12,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const AppNotFound = () => (
-  <EuiPageTemplate data-test-subj="appNotFoundPageContent">
+  <EuiPageTemplate grow={false} data-test-subj="appNotFoundPageContent">
     <EuiPageTemplate.EmptyPrompt
       iconType="warning"
       iconColor="danger"

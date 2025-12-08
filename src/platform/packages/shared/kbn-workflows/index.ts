@@ -8,15 +8,19 @@
  */
 
 export * from './spec/lib/generate_yaml_schema_from_connectors';
-export * from './spec/lib/get_json_schema_from_yaml_schema';
+export * from './spec/lib/get_workflow_json_schema';
+export { getElasticsearchConnectors } from './spec/elasticsearch';
+export { getKibanaConnectors } from './spec/kibana';
 export * from './spec/schema';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
 export * from './common/privileges';
+export * from './common/utils';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
-export * from './common/connector_utils';
+export * from './server/constants';
+export * from './server/repositories/workflow_repository';
 
 // Export specific types that are commonly used
 export type { BuiltInStepType, TriggerType } from './spec/schema';

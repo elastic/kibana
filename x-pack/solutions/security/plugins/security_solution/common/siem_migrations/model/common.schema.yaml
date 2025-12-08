@@ -41,6 +41,7 @@ components:
       description: The vendor identifier.
       enum:
         - splunk
+        - qradar
 
     MigrationComment:
       type: object
@@ -234,12 +235,11 @@ components:
           type: integer
           description: The number of items that have failed migration.
 
+    ## should be combination of SplunkResourceType and QradarResourceType types in vendor folder
     SiemMigrationResourceType:
-      type: string
-      description: The type of the resource
-      enum:
-        - macro
-        - lookup
+      oneOf:
+        - $ref: './vendor/common/splunk.schema.yaml#/components/schemas/SplunkResourceType'
+        - $ref: './vendor/common/qradar.schema.yaml#/components/schemas/QradarResourceType'
 
     SiemMigrationResourceBase:
       type: object

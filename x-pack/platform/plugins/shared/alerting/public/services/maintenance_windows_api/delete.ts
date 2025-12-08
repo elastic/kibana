@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpSetup } from '@kbn/core/public';
-import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../../common';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '@kbn/maintenance-windows-plugin/common';
 
 export const deleteMaintenanceWindow = async ({
   http,

@@ -20,7 +20,7 @@ jest.mock('lodash', () => ({
   debounce: jest.fn((fn) => fn),
 }));
 
-describe('AxesSettingsPopover', () => {
+describe('Axis settings', () => {
   let defaultProps: Props;
   beforeEach(() => {
     defaultProps = {

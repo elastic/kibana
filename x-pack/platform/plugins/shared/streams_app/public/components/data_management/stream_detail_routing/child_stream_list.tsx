@@ -24,6 +24,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import { NestedView } from '../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
@@ -78,6 +79,10 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
+  const scrollToSuggestions = useScrollToActive(!!suggestions);
+  const isEditingOrReorderingStreams =
+    routingSnapshot.matches({ ready: 'editingRule' }) ||
+    routingSnapshot.matches({ ready: 'reorderingRules' });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -109,12 +114,13 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           `}
           wrap
         >
-          {aiFeatures && aiFeatures.enabled && (
+          {aiFeatures && aiFeatures.enabled && !suggestions && (
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
                 onClick={getSuggestionsForStream}
                 isLoading={isLoadingSuggestions}
+                isDisabled={isEditingOrReorderingStreams}
                 aiFeatures={aiFeatures}
               >
                 {i18n.translate(
@@ -214,7 +220,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         </EuiDragDropContext>
 
         {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
-          <>
+          <div ref={scrollToSuggestions}>
             <EuiSpacer size="m" />
             {suggestions ? (
               isEmpty(suggestions) ? (
@@ -223,6 +229,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   isLoadingSuggestions={isLoadingSuggestions}
                   onDismiss={resetForm}
                   onRegenerate={getSuggestionsForStream}
+                  isDisabled={isEditingOrReorderingStreams}
                 />
               ) : (
                 <ReviewSuggestionsForm
@@ -239,11 +246,11 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 />
               )
             ) : null}
-          </>
+          </div>
         )}
       </EuiFlexItem>
 
-      {shouldDisplayCreateButton && !suggestions && renderCreateButton()}
+      {shouldDisplayCreateButton && renderCreateButton()}
     </EuiFlexGroup>
   );
 }

@@ -2275,7 +2275,7 @@ describe('update()', () => {
         ],
       });
 
-      taskManager.runSoon.mockReturnValueOnce(Promise.resolve({ id: alertId }));
+      taskManager.runSoon.mockReturnValueOnce(Promise.resolve({ id: alertId, forced: false }));
     }
 
     test('updating the alert schedule should call taskManager.bulkUpdateSchedules', async () => {
@@ -4103,7 +4103,9 @@ describe('update()', () => {
             ],
           },
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Cannot use the same system action twice]`);
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot use action system_action-id more than once for this rule]`
+      );
     });
 
     test('should throw an error if the default action does not contain the group', async () => {

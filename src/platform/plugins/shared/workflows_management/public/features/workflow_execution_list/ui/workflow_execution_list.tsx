@@ -133,6 +133,7 @@ export const WorkflowExecutionList = ({
               <EuiFlexItem grow={false}>
                 <WorkflowExecutionListItem
                   status={execution.status}
+                  isTestRun={execution.isTestRun}
                   startedAt={new Date(execution.startedAt)}
                   duration={execution.duration}
                   selected={execution.id === selectedId}
@@ -201,6 +202,7 @@ const componentStyles = {
       padding: euiTheme.size.m,
       height: '100%',
       overflow: 'hidden',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
   scrollableWrapper: css({
     minHeight: 0,

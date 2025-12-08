@@ -651,9 +651,6 @@
         },
         "type": "nested"
       },
-      "total_observables": {
-        "type": "integer"
-      },
       "owner": {
         "type": "keyword"
       },
@@ -691,6 +688,9 @@
         "type": "integer"
       },
       "total_events": {
+        "type": "integer"
+      },
+      "total_observables": {
         "type": "integer"
       },
       "updated_at": {
@@ -2083,6 +2083,26 @@
       }
     }
   },
+  "gap_auto_fill_scheduler": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "ruleTypeConsumerPairs": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "graph-workspace": {
     "properties": {
       "description": {
@@ -2636,6 +2656,10 @@
         "index": false,
         "type": "boolean"
       },
+      "ilm_migration_status": {
+        "dynamic": false,
+        "properties": {}
+      },
       "output_secret_storage_requirements_met": {
         "type": "boolean"
       },
@@ -2643,6 +2667,9 @@
         "type": "boolean"
       },
       "secret_storage_requirements_met": {
+        "type": "boolean"
+      },
+      "ssl_secret_storage_requirements_met": {
         "type": "boolean"
       },
       "use_space_awareness_migration_started_at": {
@@ -3266,6 +3293,9 @@
     "properties": {
       "createdBy": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },

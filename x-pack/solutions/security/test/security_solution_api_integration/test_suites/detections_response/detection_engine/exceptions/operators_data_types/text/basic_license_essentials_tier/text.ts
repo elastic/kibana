@@ -8,14 +8,6 @@
 import expect from '@kbn/expect';
 
 import {
-  createListsIndex,
-  deleteAllExceptions,
-  deleteListsIndex,
-  importFile,
-  importTextFile,
-} from '../../../../../../lists_and_exception_lists/utils';
-import { createRuleWithExceptionEntries } from '../../../../../utils';
-import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
@@ -24,7 +16,15 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import {
+  createListsIndex,
+  deleteAllExceptions,
+  deleteListsIndex,
+  importFile,
+  importTextFile,
+} from '../../../../../../lists_and_exception_lists/utils';
+import { createRuleWithExceptionEntries } from '../../../../../utils';
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

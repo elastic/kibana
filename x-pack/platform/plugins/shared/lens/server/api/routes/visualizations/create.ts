@@ -25,7 +25,7 @@ import { getLensRequestConfig, getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const createRoute = router.post({
     path: `${LENS_VIS_API_PATH}/{id?}`,
@@ -89,7 +89,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 
       try {
         // Note: these types are to enforce loose param typings of client methods
-        const { references, ...data } = getLensRequestConfig(req.body);
+        const { references, ...data } = getLensRequestConfig(builder, req.body);
         const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
         const { result } = await client.create(data, options);
 
@@ -97,7 +97,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
           throw result.item.error;
         }
 
-        const responseItem = getLensResponseItem(result.item);
+        const responseItem = getLensResponseItem(builder, result.item);
         return res.created<LensCreateResponseBody>({
           body: responseItem,
         });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   getESQLAdHocDataview,
@@ -23,7 +24,8 @@ import {
 export async function getOrCreateDataViewByIndexPattern(
   dataViews: DataViewsContract,
   query: string,
-  currentDataView: DataView | undefined
+  currentDataView: DataView | undefined,
+  http: HttpStart
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query);
   const newTimeField = getTimeFieldFromESQLQuery(query);
@@ -35,7 +37,11 @@ export async function getOrCreateDataViewByIndexPattern(
     (newTimeField !== currentDataView?.timeFieldName &&
       indexPatternFromQuery === currentDataView?.getIndexPattern())
   ) {
-    return await getESQLAdHocDataview(query, dataViews);
+    return await getESQLAdHocDataview({
+      dataViewsService: dataViews,
+      query,
+      http,
+    });
   }
   return currentDataView;
 }

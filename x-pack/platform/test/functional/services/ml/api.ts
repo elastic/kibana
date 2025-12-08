@@ -1412,7 +1412,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     ) {
       const { body, status } = await kbnSupertest
         .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_jobs_spaces`)
-        .set(getCommonRequestHeader('1'))
+        .set(getCommonRequestHeader('2023-10-31'))
         .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove });
       this.assertResponseStatusCode(200, status, body);
 
@@ -1447,7 +1447,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     ) {
       const { body, status } = await kbnSupertest
         .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_trained_models_spaces`)
-        .set(getCommonRequestHeader('1'))
+        .set(getCommonRequestHeader('2023-10-31'))
         .send({ modelIds: [modelId], spacesToAdd, spacesToRemove });
       this.assertResponseStatusCode(200, status, body);
 

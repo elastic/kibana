@@ -271,6 +271,11 @@ export class HeadlessChromiumDriver {
 
     const { boundingClientRect, scroll } = elementPosition;
 
+    layout.setPdfImageSize({
+      height: boundingClientRect.height,
+      width: boundingClientRect.width,
+    });
+
     const screenshot = await this.page.screenshot({
       clip: {
         x: boundingClientRect.left + scroll.x,
@@ -410,7 +415,9 @@ export class HeadlessChromiumDriver {
             headers,
           });
         } catch (err) {
-          logger.error(`Failed to complete a request using headers: ${err.message}`);
+          logger.error(`Failed to complete a request using headers: ${err.message}`, {
+            error: { stack_trace: err.stack },
+          });
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
@@ -418,7 +425,9 @@ export class HeadlessChromiumDriver {
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
-          logger.error(`Failed to complete a request: ${err.message}`);
+          logger.error(`Failed to complete a request: ${err.message}`, {
+            error: { stack_trace: err.stack },
+          });
         }
       }
 

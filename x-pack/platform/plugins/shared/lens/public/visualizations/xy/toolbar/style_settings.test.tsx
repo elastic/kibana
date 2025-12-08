@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { AxisSettingsPopover } from './axis_settings';
 import type {
   FramePublicAPI,
   DatasourcePublicAPI,
   VisualizationToolbarProps,
 } from '@kbn/lens-common';
-import type { State, XYState, XYDataLayerConfig } from '../types';
+import type { XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -21,11 +20,12 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { XyStyleSettings } from './style_settings';
+import { XyAxisSettings } from './axis_settings';
 
 describe('xy style settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): State {
+  function testState(): XYState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -190,14 +190,14 @@ describe('xy style settings', () => {
       );
 
       expect(
-        component.find(AxisSettingsPopover).at(0).prop('setCurrentTimeMarkerVisibility')
+        component.find(XyAxisSettings).at(0).prop('setCurrentTimeMarkerVisibility')
       ).toBeFalsy();
       expect(
-        component.find(AxisSettingsPopover).at(1).prop('setCurrentTimeMarkerVisibility')
+        component.find(XyAxisSettings).at(1).prop('setCurrentTimeMarkerVisibility')
       ).toBeTruthy();
-      expect(component.find(AxisSettingsPopover).at(1).prop('currentTimeMarkerVisible')).toBe(true);
+      expect(component.find(XyAxisSettings).at(1).prop('currentTimeMarkerVisible')).toBe(true);
       expect(
-        component.find(AxisSettingsPopover).at(2).prop('setCurrentTimeMarkerVisibility')
+        component.find(XyAxisSettings).at(2).prop('setCurrentTimeMarkerVisibility')
       ).toBeFalsy();
     });
 

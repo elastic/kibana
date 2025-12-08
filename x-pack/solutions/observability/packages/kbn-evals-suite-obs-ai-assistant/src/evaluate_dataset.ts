@@ -14,7 +14,7 @@ import {
 } from '@kbn/evals';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
+import type { ChatClient } from './clients/chat';
 
 interface ObservabilityAIAssistantDatasetExample extends Example {
   input: {
@@ -43,7 +43,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
-  chatClient: ObservabilityAIAssistantEvaluationChatClient;
+  chatClient: ChatClient;
 }): EvaluateObservabilityAIAssistantDataset {
   return async function evaluateObservabilityAIAssistantDataset({
     dataset: { name, description, examples },
@@ -70,7 +70,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
       {
         dataset,
         task: async ({ input, output, metadata }) => {
-          const response = await chatClient.complete({
+          const response = await chatClient.converse({
             messages: input.question,
             scope: input.scope,
           });
@@ -88,7 +88,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
               },
               output: {
                 messages: [response.messages[response.messages.length - 1]].map((message) => ({
-                  message: message.content ?? '',
+                  message: message.content,
                 })),
                 steps: response.messages,
               },

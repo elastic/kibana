@@ -9,7 +9,7 @@
 
 import { parse } from '..';
 import { EsqlQuery } from '../../query';
-import type { ESQLAstQueryExpression } from '../../types';
+import type { ESQLForkParens } from '../../types';
 import { Walker } from '../../walker';
 
 describe('FORK', () => {
@@ -24,9 +24,9 @@ describe('FORK', () => {
 
       expect(ast[1].args).toHaveLength(3);
       expect(ast[1].args).toMatchObject([
-        { type: 'query', commands: [{ name: 'where' }] },
-        { type: 'query', commands: [{ name: 'sort' }] },
-        { type: 'query', commands: [{ name: 'limit' }] },
+        { type: 'parens', child: { type: 'query', commands: [{ name: 'where' }] } },
+        { type: 'parens', child: { type: 'query', commands: [{ name: 'sort' }] } },
+        { type: 'parens', child: { type: 'query', commands: [{ name: 'limit' }] } },
       ]);
     });
 
@@ -36,12 +36,12 @@ describe('FORK', () => {
           | FORK (WHERE bytes > 1 | LIMIT 10) (SORT bytes ASC) (LIMIT 100)`;
       const { ast } = EsqlQuery.fromSrc(text);
       const fork = Walker.match(ast, { type: 'command', name: 'fork' })!;
-      const firstQuery = Walker.match(fork, { type: 'query' })!;
+      const firstParens = Walker.match(fork, { type: 'parens' })!;
 
       expect(text.slice(fork.location.min, fork.location.max + 1)).toBe(
         'FORK (WHERE bytes > 1 | LIMIT 10) (SORT bytes ASC) (LIMIT 100)'
       );
-      expect(text.slice(firstQuery.location.min, firstQuery.location.max + 1)).toBe(
+      expect(text.slice(firstParens.location.min, firstParens.location.max + 1)).toBe(
         '(WHERE bytes > 1 | LIMIT 10)'
       );
     });
@@ -55,8 +55,17 @@ describe('FORK', () => {
 
       expect(ast[1].args).toHaveLength(2);
       expect(ast[1].args).toMatchObject([
-        { type: 'query', commands: [{ name: 'where' }, { name: 'sort' }, { name: 'limit' }] },
-        { type: 'query', commands: [{ name: 'where' }, { name: 'limit' }] },
+        {
+          type: 'parens',
+          child: {
+            type: 'query',
+            commands: [{ name: 'where' }, { name: 'sort' }, { name: 'limit' }],
+          },
+        },
+        {
+          type: 'parens',
+          child: { type: 'query', commands: [{ name: 'where' }, { name: 'limit' }] },
+        },
       ]);
     });
   });
@@ -78,7 +87,11 @@ describe('FORK', () => {
       const { root } = parse(text);
 
       expect(root.commands[1].args).toHaveLength(1);
-      expect((root.commands[1].args[0] as ESQLAstQueryExpression).commands[0]).toMatchObject({
+      const parens = root.commands[1].args[0] as ESQLForkParens;
+
+      expect(parens.type).toBe('parens');
+      expect(parens.child.type).toBe('query');
+      expect(parens.child.commands[0]).toMatchObject({
         name: type,
       });
     });

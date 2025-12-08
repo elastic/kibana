@@ -6,7 +6,43 @@
  */
 
 import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 
-export const maxConversationWidthStyles = css`
+const maxConversationWidthStyles = css`
   max-width: 800px;
+`;
+
+export const conversationElementPaddingStyles = css`
+  padding: 0px 16px 16px;
+`;
+
+// Ensures the conversation element is always 100% of it's parent or 800px, whichever is smaller.
+export const conversationElementWidthStyles = css`
+  width: 100%;
+  ${maxConversationWidthStyles}
+`;
+
+export const fullWidthAndHeightStyles = css`
+  width: 100%;
+  height: 100%;
+`;
+
+const ROUNDED_BORDER_RADIUS = '6px';
+export const ROUNDED_BORDER_RADIUS_LARGE = '12px';
+const ROUNDED_BORDER_RADIUS_EXTRA_LARGE = '16px';
+
+export const roundedBorderRadiusStyles = css`
+  border-radius: ${ROUNDED_BORDER_RADIUS};
+`;
+export const borderRadiusXlStyles = css`
+  border-radius: ${ROUNDED_BORDER_RADIUS_EXTRA_LARGE};
+`;
+
+export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  background: linear-gradient(
+    180deg,
+    ${euiTheme.colors.backgroundBasePlain} 21.09%,
+    ${euiTheme.colors.backgroundBaseSubdued} 51.44%,
+    ${euiTheme.colors.backgroundBasePlain} 87.98%
+  );
 `;

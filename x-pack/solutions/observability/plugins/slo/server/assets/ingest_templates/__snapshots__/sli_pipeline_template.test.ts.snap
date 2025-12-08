@@ -6,7 +6,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -63,9 +63,9 @@ Object {
           "ISO8601",
           "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
         ],
-        "date_rounding": "M",
+        "date_rounding": "d",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.5.",
+        "index_name_prefix": ".slo-observability.sli-v3.6.",
       },
     },
     Object {
@@ -85,6 +85,14 @@ Object {
     },
     Object {
       "pipeline": Object {
+        "description": "Global custom pipeline for all SLO rollup data",
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-rollup-global@custom",
+      },
+    },
+    Object {
+      "pipeline": Object {
         "ignore_failure": true,
         "ignore_missing_pipeline": true,
         "name": "slo-irrelevant@custom",
@@ -100,7 +108,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -157,9 +165,9 @@ Object {
           "ISO8601",
           "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
         ],
-        "date_rounding": "M",
+        "date_rounding": "d",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.5.",
+        "index_name_prefix": ".slo-observability.sli-v3.6.",
       },
     },
     Object {
@@ -175,6 +183,14 @@ Object {
         "description": "Generated the instanceId field based on the groupings field",
         "field": "slo.instanceId",
         "value": "{{{slo.groupings.host.name}}},{{{slo.groupings.some.labelId}}}",
+      },
+    },
+    Object {
+      "pipeline": Object {
+        "description": "Global custom pipeline for all SLO rollup data",
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-rollup-global@custom",
       },
     },
     Object {

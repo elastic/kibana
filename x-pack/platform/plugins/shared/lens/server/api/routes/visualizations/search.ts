@@ -21,7 +21,7 @@ import { getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const searchRoute = router.get({
     path: LENS_VIS_API_PATH,
@@ -100,7 +100,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
         return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
           body: {
             data: hits.map((item) => {
-              return getLensResponseItem(item);
+              return getLensResponseItem(builder, item);
             }),
             meta: {
               page,

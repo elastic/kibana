@@ -10,7 +10,7 @@
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
@@ -49,8 +49,7 @@ export function buildAutocompleteContext({
   const absoluteOffset = model.getOffsetAt(position);
   const { lineNumber } = position;
   const line = model.getLineContent(lineNumber);
-  const wordUntil = model.getWordUntilPosition(position);
-  const word = model.getWordAtPosition(position) || wordUntil;
+  const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
   const { startColumn, endColumn } = word;
 
   const focusedStepInfo: StepInfo | null = focusedStepId
@@ -60,12 +59,6 @@ export function buildAutocompleteContext({
 
   if (!yamlDocument) {
     return null;
-  }
-
-  // variables
-  let shouldUseCurlyBraces = true;
-  if (completionContext.triggerCharacter === '@' && focusedYamlPair) {
-    shouldUseCurlyBraces = focusedYamlPair.keyNode.value !== 'foreach';
   }
 
   let range: monaco.IRange;
@@ -91,7 +84,6 @@ export function buildAutocompleteContext({
   const path = getPathAtOffset(yamlDocument, absoluteOffset);
   const yamlNode = yamlDocument.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
-  const shouldBeQuoted = scalarType === null || scalarType === 'PLAIN';
 
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
@@ -131,19 +123,19 @@ export function buildAutocompleteContext({
     lineUpToCursor,
     lineParseResult: parseResult,
 
+    // position of the cursor
+    path,
+    range,
+    absoluteOffset,
+    focusedStepInfo,
+    focusedYamlPair,
+    // TODO: add currentTriggerInfo
+
     // context
     contextSchema,
     contextScopedToPath,
     yamlDocument,
     scalarType,
-
-    // position of the cursor
-    path,
-    range,
-    absoluteOffset,
-    // currentStepInfo
-    focusedStepInfo,
-    // TODO: add currentTriggerInfo
 
     // kind of ast info
     isInLiquidBlock,
@@ -153,9 +145,5 @@ export function buildAutocompleteContext({
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
-
-    // formatting
-    shouldUseCurlyBraces,
-    shouldBeQuoted,
   };
 }

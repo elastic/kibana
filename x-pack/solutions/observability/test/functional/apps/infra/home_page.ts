@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
-import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   INVENTORY_PATH,
@@ -606,19 +606,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraSavedViews.createView('view2');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
+
           await pageObjects.infraSavedViews.pressEsc();
 
           await pageObjects.infraSavedViews.clickSavedViewsButton();
           await pageObjects.infraSavedViews.updateView('view3');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
-          await pageObjects.infraSavedViews.pressEsc();
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
         });
       });
     });

@@ -8,7 +8,7 @@
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import type { Condition } from '../../../types/conditions';
 import type { StreamlangStep } from '../../../types/streamlang';
-import { isWhereBlockSchema } from '../../../types/streamlang';
+import { isWhereBlock } from '../../../types/streamlang';
 
 /**
  * Helper to combine two conditions as an "and" logical condition.
@@ -30,7 +30,7 @@ export function flattenSteps(
 ): StreamlangProcessorDefinition[] {
   return steps.flatMap((step) => {
     // Handle where blocks (conditional execution)
-    if (isWhereBlockSchema(step)) {
+    if (isWhereBlock(step)) {
       const conditionWithSteps = step.where;
       // Strip steps for the resursive call, everything left is the condition.
       const { steps: nestedSteps, ...rest } = conditionWithSteps;

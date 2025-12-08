@@ -13,8 +13,7 @@ import {
 } from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
 
-// Failing: See https://github.com/elastic/kibana/issues/240815
-describe.skip('Endpoint exceptions - preserving behaviour without `endpointExceptionsMovedUnderManagement` feature flag', () => {
+describe('Endpoint exceptions - preserving behaviour without `endpointExceptionsMovedUnderManagement` feature flag', () => {
   describe('ESS', { tags: ['@ess'] }, () => {
     const loginWithReadAccess = () => {
       login.withCustomKibanaPrivileges({
@@ -47,7 +46,8 @@ describe.skip('Endpoint exceptions - preserving behaviour without `endpointExcep
 
   describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
     it('should not display Endpoint Exceptions in Assets side panel ', () => {
-      // testing with t3_analyst with WRITE access, as we don't support custom roles on serverless yet
+      // instead of testing with the lowest access (READ), we're testing with t3_analyst with WRITE access,
+      // as we neither have any role with READ access, nor custom roles on serverless yet
       login(ROLE.t3_analyst);
       cy.visit(APP_PATH);
 

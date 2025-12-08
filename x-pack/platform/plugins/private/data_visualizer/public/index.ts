@@ -15,13 +15,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type { DataVisualizerPluginStart } from './plugin';
 
 export type {
-  FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
   DataDriftSpec,
 } from './application';
-export type {
-  GetAdditionalLinksParams,
-  ResultLink,
-  GetAdditionalLinks,
-} from './application/common/components/results_links';
+
+export { getFieldsStatsGrid } from './application/common/components/fields_stats_grid';

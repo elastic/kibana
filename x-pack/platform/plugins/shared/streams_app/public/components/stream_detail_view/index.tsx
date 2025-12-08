@@ -16,7 +16,7 @@ import type { StreamsFeatures } from '../../hooks/use_streams_privileges';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
-import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
+import { StreamDetailAttachments } from '../stream_detail_attachments';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamDescription } from './description';
@@ -47,7 +47,7 @@ const getStreamDetailTabs = ({
         path: { key: definition.stream.name, tab: 'dashboards' },
       }),
       background: true,
-      content: <StreamDetailDashboardsView definition={definition} />,
+      content: <StreamDetailAttachments definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
       }),

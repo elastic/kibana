@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 
 import axios from 'axios';
-import type { ActionTypeConfigType, TorqActionType } from '.';
+import type { TorqConnectorType } from '.';
 import { getActionType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
@@ -19,6 +19,7 @@ import type { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ConnectorTypeConfigType } from '@kbn/connector-schemas/torq';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -36,7 +37,7 @@ axios.create = jest.fn(() => axios);
 
 const services: Services = actionsMock.createServices();
 
-let actionType: TorqActionType;
+let actionType: TorqConnectorType;
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
@@ -181,7 +182,7 @@ describe('execute Torq action', () => {
   });
 
   test('execute with token happy flow', async () => {
-    const config: ActionTypeConfigType = {
+    const config: ConnectorTypeConfigType = {
       webhookIntegrationUrl: 'https://hooks.torq.io/v1/test',
     };
     await actionType.executor({

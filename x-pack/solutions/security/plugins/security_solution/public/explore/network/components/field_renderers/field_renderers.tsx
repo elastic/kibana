@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { Fragment } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {
   AutonomousSystem,
@@ -20,7 +21,6 @@ import { CellActionsRenderer } from '../../../../common/components/cell_actions/
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ReputationLink, WhoIsLink } from '../../../../common/components/links';
 import * as i18n from '../details/translations';
-import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { FlyoutLink } from '../../../../flyout/shared/components/flyout_link';
 
 export const IpOverviewId = 'ip-overview';
@@ -126,7 +126,7 @@ export const hostIdRenderer = ({
 };
 
 interface HostNameRendererTypes {
-  scopeId: SourcererScopeName;
+  scopeId: PageScope;
   host: HostEcs;
   ipFilter?: string;
   isFlyoutOpen: boolean;

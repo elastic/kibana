@@ -7,3 +7,5 @@
 
 export const publicApiPath = `/api/agent_builder`;
 export const internalApiPath = `/internal/agent_builder`;
+
+export const ONECHAT_PLUGIN_ID = 'onechat';

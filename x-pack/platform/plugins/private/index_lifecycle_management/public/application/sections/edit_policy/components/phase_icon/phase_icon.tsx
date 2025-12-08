@@ -10,17 +10,12 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { Phases } from '../../../../../../common/types';
+import { usePhaseColors } from '../../../../lib';
 
 const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
   const { euiTheme } = useEuiTheme();
 
-  const phaseIconColors = {
-    hot: euiTheme.colors.vis.euiColorVis6,
-    warm: euiTheme.colors.vis.euiColorVis9,
-    cold: euiTheme.colors.vis.euiColorVis2,
-    frozen: euiTheme.colors.vis.euiColorVis4,
-    delete: euiTheme.colors.darkShade,
-  };
+  const phaseIconColors = usePhaseColors();
 
   return {
     container: css`
@@ -30,14 +25,15 @@ const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
       justify-content: center;
       align-items: center;
       border-radius: 50%;
-      background-color: ${phase === 'delete'
-        ? euiTheme.colors.lightShade
-        : euiTheme.colors.lightestShade};
+      background-color: ${!enabled
+        ? euiTheme.colors.backgroundBaseFormsPrepend
+        : phaseIconColors[phase as keyof typeof phaseIconColors]};
       ${!enabled && `margin: ${euiTheme.size.s};`}
     `,
-    icon: css`
-      fill: ${phaseIconColors[phase as keyof typeof phaseIconColors]};
-    `,
+    icon:
+      phase === 'delete'
+        ? euiTheme.colors.backgroundFilledText
+        : euiTheme.colors.backgroundBasePlain,
   };
 };
 interface Props {
@@ -50,11 +46,7 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
   return (
     <div css={styles.container}>
       {enabled ? (
-        <EuiIcon
-          css={styles.icon}
-          type={phase === 'delete' ? 'trash' : 'checkInCircleFilled'}
-          size={phase === 'delete' ? 'm' : 'l'}
-        />
+        <EuiIcon color={styles.icon} type={phase === 'delete' ? 'trash' : 'check'} />
       ) : (
         <EuiIcon type={'dot'} size={'s'} />
       )}

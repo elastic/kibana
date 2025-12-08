@@ -10,7 +10,6 @@
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import { LanguageDocumentationPopoverContent } from './popover_content';
 
 describe('###Documentation popover content', () => {
@@ -26,15 +25,15 @@ describe('###Documentation popover content', () => {
         items: [
           {
             label: 'Section two item 1',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 1 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 1 description `,
+            },
           },
           {
             label: 'Section two item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 2 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 2 description `,
+            },
           },
         ],
       },
@@ -59,6 +58,7 @@ describe('###Documentation popover content', () => {
   });
 
   test('Documentation component should list all sections that match the search input when title matches', () => {
+    jest.useFakeTimers();
     const component = mountWithIntl(
       <LanguageDocumentationPopoverContent language="test" sections={sections} />
     );
@@ -69,14 +69,21 @@ describe('###Documentation popover content', () => {
       } as React.ChangeEvent<HTMLInputElement>);
     });
 
-    component.update();
+    // Fast-forward time to let the debounce complete
+    act(() => {
+      jest.advanceTimersByTime(250);
+    });
 
+    component.update();
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(1);
     expect(sectionsLabels.text()).toEqual('Section one');
+
+    jest.useRealTimers();
   });
 
   test('Documentation component should list all sections that match the search input when description matches', () => {
+    jest.useFakeTimers();
     const component = mountWithIntl(
       <LanguageDocumentationPopoverContent
         language="test"
@@ -91,9 +98,16 @@ describe('###Documentation popover content', () => {
       } as React.ChangeEvent<HTMLInputElement>);
     });
 
+    // Fast-forward time to let the debounce complete
+    act(() => {
+      jest.advanceTimersByTime(250);
+    });
+
     component.update();
 
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(1);
+
+    jest.useRealTimers();
   });
 });

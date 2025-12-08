@@ -290,6 +290,50 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Cancel a pending action on the host',
     }),
   },
+  memoryDump: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
+      defaultMessage: 'Generate a memory dump on the host',
+    }),
+    kernelArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.kernelArgAbout',
+      {
+        defaultMessage: 'Generates a kernel memory dump',
+      }
+    ),
+    processArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.processArgAbout',
+      {
+        defaultMessage: 'Generates memory dump for a process',
+      }
+    ),
+    pidArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.pidArgAbout', {
+      defaultMessage:
+        'Process ID to generate a memory dump for. Valid only when "--process" is used',
+    }),
+    entityIdArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.entityIdArgAbout',
+      {
+        defaultMessage:
+          'Process Entity ID to generate a memory dump for. Valid only when "--process" is used',
+      }
+    ),
+    agentResultMissing: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.agentResultMissing',
+      { defaultMessage: 'Agent result missing' }
+    ),
+    resultFileLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileLabel',
+      { defaultMessage: 'File' }
+    ),
+    resultFileSizeLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileSizeLabel',
+      { defaultMessage: 'Size' }
+    ),
+    resultRemainingFreeDiskSpaceLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
+      { defaultMessage: 'Disk free space' }
+    ),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {
@@ -339,8 +383,10 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
       defaultMessage: 'Run Script',
     }),
-    helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: `Command Examples for Running Scripts:
+    helpExample: i18n.translate(
+      'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about',
+      {
+        defaultMessage: `Command Examples for Running Scripts:
 
 1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
 
@@ -359,7 +405,8 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
    runscript --HostPath="C:\\temp\\LocalScript.ps1" --CommandLine="-Verbose true"
 
 `,
-    }),
+      }
+    ),
     privileges: i18n.translate(
       'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
       {
@@ -391,7 +438,7 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       },
     },
 
-    helpUsage: i18n.translate(
+    helpExample: i18n.translate(
       'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.about',
       {
         defaultMessage: `Command Examples for Running Scripts:
@@ -445,3 +492,20 @@ export const ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE = (count: 
       'This artifact is associated with {count} {count, plural, =1 {policy that is} other {policies that are}} not accessible in active space',
     values: { count },
   });
+
+/**
+ * Labels for the response action status (as defined in ResponseActionStatus)
+ */
+export const RESPONSE_ACTION_STATUS = Object.freeze({
+  failedMessage: i18n.translate('xpack.securitySolution.responseActionStatus.failed', {
+    defaultMessage: 'Action failed',
+  }),
+
+  pendingMessage: i18n.translate('xpack.securitySolution.responseActionStatus.pending', {
+    defaultMessage: 'Action pending',
+  }),
+
+  successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
+    defaultMessage: 'Action successful',
+  }),
+});

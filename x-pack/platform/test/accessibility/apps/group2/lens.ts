@@ -151,8 +151,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('lens XY chart with multiple layers', async () => {
       await lens.createLayer();
+      await lens.ensureLayerTabIsActive(1);
 
-      await lens.switchToVisualization('area');
+      await lens.switchToVisualization('area', undefined, 1);
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -192,6 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should focus the added layer', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
+        await timePicker.ensureHiddenNoDataPopover();
         await lens.createLayer();
         expect(await hasFocus('lns-layerPanel-1')).to.be(true);
       });

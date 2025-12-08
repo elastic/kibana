@@ -6,13 +6,14 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import type { ConfigType } from '../common/config';
+import type { ConfigSchemaType } from '../common/config';
 import { ConfigSchema } from '../common/config';
 
-export const config: PluginConfigDescriptor<ConfigType> = {
+export const config: PluginConfigDescriptor<ConfigSchemaType> = {
   schema: ConfigSchema,
   exposeToBrowser: {
     actionEnabled: true,
+    enableExperimental: true,
   },
 };
 export async function plugin(initializerContext: PluginInitializerContext) {

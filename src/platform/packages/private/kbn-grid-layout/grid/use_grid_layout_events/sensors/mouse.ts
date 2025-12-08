@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScrollContainer } from '../../utils/scroll_container';
+import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 import type { UserInteractionEvent } from '../types';
 import { handleAutoscroll, startAutoScroll, stopAutoScroll } from './autoscroll';
 

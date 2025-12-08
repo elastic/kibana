@@ -22,10 +22,6 @@ import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
 import '@xyflow/react/dist/style.css';
 import { selectWorkflowGraph } from '../../entities/workflows/store';
 
-export interface ExecutionGraphProps {
-  workflowYaml: string | undefined;
-}
-
 const nodeTypes = [...mainScopeNodes, ...secondaryScopeNodes, ...atomicNodes].reduce(
   (acc, nodeType) => {
     acc[nodeType] = ExecutionGraphNode;
@@ -82,7 +78,7 @@ const ReactFlowWrapper: React.FC<{
   );
 };
 
-export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) => {
+export const ExecutionGraph: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const workflowGraph = useSelector(selectWorkflowGraph);
 
