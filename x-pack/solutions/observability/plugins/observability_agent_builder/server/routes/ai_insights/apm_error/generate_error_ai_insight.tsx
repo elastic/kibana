@@ -13,6 +13,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../../types';
@@ -24,7 +25,6 @@ const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   Output structure (concise, Markdown):
   - Error summary (1-2 sentences): What is observed and why it matters.
   - Failure pinpoint: Whether failure is in application code vs dependency. Name the likely failing component/endpoint. Reference specific fields or key frames if available.
-  - Timeline of significant events: Chronological bullets of key events around the error. Use bold timestamps. Explicitly relate events (Preceded by / Coinciding with / Followed by). Cite services and span/transaction names.
   - Impact: Scope and severity (services/endpoints and the extent of the error if evident).
   - Immediate actions (2-4): Ordered, concrete steps (config/network checks, retries/backoff, circuit breakers, targeted tracing/logging).
   - Open questions: Short list of unknowns and the quickest queries to resolve them, if any (this is strictly optional and should not be present if there are no open questions).
@@ -53,7 +53,7 @@ const buildUserPrompt = (errorContext: string) => {
     </ErrorContext>
 
     I am investigating an error and have retrieved related signals (logs, metrics, and traces) leading up to this error.
-    Please analyze this error context and generate a summary of the error and a timeline of significant events.
+    Please analyze this error context and generate a summary of the error.
 
     Follow your system instructions. Ensure the analysis is specific to error investigation, grounded in the provided context, and concise.
   `);
@@ -64,6 +64,7 @@ export interface GenerateErrorAiInsightParams {
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   connectorId?: string;
   errorId: string;
   serviceName: string;
@@ -78,6 +79,7 @@ export interface GenerateErrorAiInsightParams {
 
 export async function generateErrorAiInsight({
   core,
+  plugins,
   connectorId: initialConnectorId,
   errorId,
   serviceName,
@@ -102,6 +104,7 @@ export async function generateErrorAiInsight({
 
   const errorContext = await fetchApmErrorContext({
     core,
+    plugins,
     dataRegistry,
     request,
     serviceName,

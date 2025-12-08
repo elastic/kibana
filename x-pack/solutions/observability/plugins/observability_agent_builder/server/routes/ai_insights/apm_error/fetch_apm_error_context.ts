@@ -10,18 +10,22 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../../types';
 import { getFilteredLogCategories } from '../../../tools/get_log_categories/get_log_categories';
 import { getLogsIndices } from '../../../utils/get_logs_indices';
+import { getApmIndices } from '../../../utils/get_apm_indices';
 import { parseDatemath } from '../../../utils/time';
+import { fetchTraceContext } from './fetch_trace_context';
 
 export interface FetchApmErrorContextParams {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
   serviceName: string;
@@ -34,6 +38,7 @@ export interface FetchApmErrorContextParams {
 
 export async function fetchApmErrorContext({
   core,
+  plugins,
   dataRegistry,
   request,
   serviceName,
@@ -92,48 +97,50 @@ export async function fetchApmErrorContext({
 
   const traceId = details?.error?.trace?.id;
   if (traceId) {
+    const [coreStart] = await core.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asScoped(request);
+    const parsedStart = parseDatemath(start);
+    const parsedEnd = parseDatemath(end, { roundUp: true });
+
     try {
       // Fetch the trace details for the error (trace items, aggregated services for the trace, trace errors)
-      const traces = await dataRegistry.getData('apmTraceDetails', {
-        request,
+      const apmIndices = await getApmIndices({ core, plugins, logger });
+      const traceContext = await fetchTraceContext({
+        esClient,
+        apmIndices,
         traceId,
-        start,
-        end,
+        start: parsedStart,
+        end: parsedEnd,
+        logger,
       });
 
-      if (traces?.traceItems?.length) {
+      if (traceContext.traceItems.length) {
         contextParts.push(
-          `<TraceItems>\n${JSON.stringify(traces.traceItems.slice(0, 100), null, 2)}\n</TraceItems>`
+          `<TraceItems>\n${JSON.stringify(traceContext.traceItems, null, 2)}\n</TraceItems>`
         );
       }
 
-      if (traces?.traceErrors?.length) {
+      if (traceContext.traceErrors.length) {
         contextParts.push(
-          `<TraceErrors>\n${JSON.stringify(
-            traces.traceErrors.slice(0, 100),
-            null,
-            2
-          )}\n</TraceErrors>`
+          `<TraceErrors>\n${JSON.stringify(traceContext.traceErrors, null, 2)}\n</TraceErrors>`
         );
       }
 
-      if (traces?.traceServiceAggregates?.length) {
+      if (traceContext.traceServiceAggregates.length) {
         contextParts.push(
           `<TraceServices>\n${JSON.stringify(
-            traces.traceServiceAggregates.slice(0, 25),
+            traceContext.traceServiceAggregates,
             null,
             2
           )}\n</TraceServices>`
         );
       }
     } catch (error) {
-      logger.debug(`Error AI insight: apmTraces failed: ${error}`);
+      logger.debug(`Error AI insight: Failed to fetch trace context for ${traceId}: ${error}`);
     }
 
     try {
       // Fetch log categories for the trace
-      const [coreStart] = await core.getStartServices();
-      const esClient = coreStart.elasticsearch.client.asScoped(request);
       const logsIndices = await getLogsIndices({ core, logger });
 
       const logCategories = await getFilteredLogCategories({
@@ -146,8 +153,8 @@ export async function fetchApmErrorContext({
             {
               range: {
                 '@timestamp': {
-                  gte: parseDatemath(start),
-                  lte: parseDatemath(end, { roundUp: true }),
+                  gte: parsedStart,
+                  lte: parsedEnd,
                 },
               },
             },

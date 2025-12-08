@@ -182,11 +182,4 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<ChangePointGrouping[]>;
-
-  apmTraceDetails: (params: {
-    request: KibanaRequest;
-    traceId: string;
-    start: string;
-    end: string;
-  }) => Promise<APMTraceDetails>;
 }

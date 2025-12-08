@@ -32,13 +32,14 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         connectorId: t.union([t.string, t.undefined, t.null]),
       }),
     }),
-    handler: async ({ request, core, dataRegistry, params, logger }) => {
+    handler: async ({ request, core, plugins, dataRegistry, params, logger }) => {
       const { errorId, serviceName, start, end, environment = '', connectorId } = params.body;
 
       const [_, pluginsStart] = await core.getStartServices();
 
       const { summary, context } = await generateErrorAiInsight({
         core,
+        plugins,
         connectorId: connectorId ?? undefined,
         errorId,
         serviceName,
