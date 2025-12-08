@@ -102,7 +102,7 @@ export class CsvSearchSourceExportType extends ExportType<
       cancellationToken,
       logger,
       stream,
-      this.isServerless
+      this.isServerless,
       jobId
     );
     return await csv.generateData();
