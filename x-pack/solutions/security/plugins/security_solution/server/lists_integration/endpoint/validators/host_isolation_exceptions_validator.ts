@@ -74,10 +74,12 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     return this.validateHasPrivilege('canReadHostIsolationExceptions');
   }
 
-  async validatePreImport(items: PromiseFromStreams): Promise<PromiseFromStreams> {
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
     await this.validateHasWritePrivilege();
 
-    return items;
+    await this.validatePreImportItems(items, async (item) => {
+      await this.validateCreateOwnerSpaceIds(item);
+    });
   }
 
   async validatePreCreateItem(
