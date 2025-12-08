@@ -64,9 +64,7 @@ export class CloudConnectedPlugin
       },
     });
 
-    return {
-      cloudUrl: this.config.cloudUrl,
-    };
+    return {};
   }
 
   public start() {
