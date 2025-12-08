@@ -21,6 +21,7 @@ import {
   forceStartDatafeeds,
   forceStopAndCloseJob,
   setupMlModulesWithRetry,
+  waitForJobsToBeStarted,
 } from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
@@ -85,6 +86,7 @@ describe(
           cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
           setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
           forceStartDatafeeds({ jobIds: [jobId] });
+          waitForJobsToBeStarted({ jobIds: [jobId] });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
         });
 

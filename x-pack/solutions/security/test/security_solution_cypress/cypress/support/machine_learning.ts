@@ -7,6 +7,7 @@
 
 import { recurse } from 'cypress-recurse';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
+import { isJobStarted } from '@kbn/security-solution-plugin/common/machine_learning/helpers';
 import { rootRequest } from '../tasks/api_calls/common';
 
 /**
@@ -108,3 +109,67 @@ export const forceStopAndCloseJob = ({ jobId }: { jobId: string }) =>
       jobId,
     },
   });
+
+/**
+ * Fetches the job summary for the given job IDs
+ * @param jobIds the job IDs to fetch summaries for
+ * @returns the job summaries
+ */
+const getJobsSummary = ({ jobIds }: { jobIds: string[] }) =>
+  rootRequest<Array<{ id: string; jobState: string; datafeedState: string }>>({
+    headers: {
+      'elastic-api-version': 1,
+    },
+    method: 'POST',
+    url: '/internal/ml/jobs/jobs_summary',
+    failOnStatusCode: true,
+    body: JSON.stringify({ jobIds }),
+  });
+
+/**
+ * Waits for the specified ML jobs to be started (job opened and datafeed started).
+ * This is necessary because forceStartDatafeeds returns immediately but jobs may take
+ * time to actually start. The UI caches job status for 5 minutes, so we need to ensure
+ * jobs are started before the UI loads to avoid stale cache issues.
+ *
+ * @param jobIds the job IDs to wait for
+ * @param timeout maximum time to wait in milliseconds (default: 120000 = 2 minutes)
+ * @returns a promise that resolves when all jobs are started
+ */
+export const waitForJobsToBeStarted = ({
+  jobIds,
+  timeout = 120000,
+}: {
+  jobIds: string[];
+  timeout?: number;
+}) => {
+  const startTime = Date.now();
+  const checkInterval = 2000; // Check every 2 seconds
+
+  return recurse(
+    () => {
+      const elapsed = Date.now() - startTime;
+      if (elapsed > timeout) {
+        throw new Error(
+          `Timeout waiting for jobs to start: ${jobIds.join(', ')}. Elapsed: ${elapsed}ms`
+        );
+      }
+      return getJobsSummary({ jobIds });
+    },
+    (response) => {
+      const jobs = response.body;
+      const allJobsStarted = jobIds.every((jobId) => {
+        const job = jobs.find((j) => j.id === jobId);
+        if (!job) {
+          return false;
+        }
+        return isJobStarted(job.jobState, job.datafeedState);
+      });
+      return allJobsStarted;
+    },
+    {
+      delay: checkInterval,
+      limit: Math.ceil(timeout / checkInterval),
+    }
+  );
+};
