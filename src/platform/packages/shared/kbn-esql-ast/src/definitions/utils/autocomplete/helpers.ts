@@ -592,6 +592,8 @@ export function getLookupIndexCreateSuggestion(
 
     sortText: '0',
 
+    category: SuggestionCategory.CUSTOM_ACTION,
+
     command: {
       id: `esql.lookup_index.create`,
 

@@ -31,19 +31,15 @@ export const VirusTotalConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  authTypes: [
-    {
-      type: 'api_key_header',
-      defaults: {
-        headerField: 'x-apikey',
+  auth: {
+    types: [
+      {
+        type: 'api_key_header',
+        defaults: { headerField: 'x-apikey' },
+        overrides: { meta: { 'x-apikey': { placeholder: 'vt-...' } } },
       },
-      overrides: {
-        meta: {
-          'x-apikey': { placeholder: 'vt-...' },
-        },
-      },
-    },
-  ],
+    ],
+  },
 
   actions: {
     scanFileHash: {
