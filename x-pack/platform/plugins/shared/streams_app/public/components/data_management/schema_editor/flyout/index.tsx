@@ -88,10 +88,10 @@ export const SchemaEditorFlyout = ({
 
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
-    ({
-      ...prev,
-      ...updated,
-    } as SchemaField),
+      ({
+        ...prev,
+        ...updated,
+      } as SchemaField),
     initialField
   );
 
