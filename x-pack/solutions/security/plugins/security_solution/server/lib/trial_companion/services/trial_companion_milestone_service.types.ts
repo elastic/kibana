@@ -11,23 +11,31 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { DetectorF } from '../types';
 
 export interface TrialCompanionMilestoneServiceSetup {
   taskManager: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
   enabled: boolean;
 }
 
 export interface TrialCompanionMilestoneServiceStart {
   taskManager: TaskManagerStartContract;
-  packageService: PackageService;
-  savedObjects: SavedObjectsServiceStart;
-  esClient: ElasticsearchClient;
+  detectors: DetectorF[];
+  repo: TrialCompanionMilestoneRepository;
 }
 
 export interface TrialCompanionMilestoneService {
   setup(setup: TrialCompanionMilestoneServiceSetup): void;
   start(start: TrialCompanionMilestoneServiceStart): Promise<void>;
 }
+
+export type TrialCompanionMilestoneServiceDepsF = (
+  logger: Logger,
+  taskManager: TaskManagerStartContract,
+  packageService: PackageService,
+  savedObjects: SavedObjectsServiceStart,
+  esClient: ElasticsearchClient,
+  usageCollection?: UsageCollectionSetup
+) => TrialCompanionMilestoneServiceStart;

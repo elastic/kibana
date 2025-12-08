@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -14,6 +14,7 @@ import type {
   CollectorFetchContext,
   UsageCollectionSetup,
 } from '@kbn/usage-collection-plugin/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
   savedDiscoverySessionsM2,
@@ -25,6 +26,7 @@ import {
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
 import type {
   TrialCompanionMilestoneService,
+  TrialCompanionMilestoneServiceDepsF,
   TrialCompanionMilestoneServiceSetup,
   TrialCompanionMilestoneServiceStart,
 } from './trial_companion_milestone_service.types';
@@ -39,10 +41,50 @@ const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const INTERVAL = '1m'; // testing purposes
 const TIMEOUT = '10m';
 
+export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneServiceDepsF = (
+  logger: Logger,
+  taskManager: TaskManagerStartContract,
+  packageService: PackageService,
+  savedObjects: SavedObjectsServiceStart,
+  esClient: ElasticsearchClient,
+  usageCollection?: UsageCollectionSetup
+) => {
+  const soClient = savedObjects.getUnsafeInternalClient();
+
+  const detectors: DetectorF[] = [];
+
+  const usageCollectorDeps: UsageCollectorDeps | undefined = usageCollection
+    ? {
+        logger,
+        collectorContext: {
+          esClient,
+          soClient,
+        } as CollectorFetchContext,
+        usageCollection,
+      }
+    : undefined;
+
+  // order matters
+  detectors.push(installedPackagesM1(logger, packageService));
+  if (usageCollectorDeps) {
+    detectors.push(
+      savedDiscoverySessionsM2(usageCollectorDeps),
+      detectionRulesInstalledM3(usageCollectorDeps),
+      casesM7(usageCollectorDeps)
+    );
+  }
+  detectors.push(allSetM7(logger));
+  const repo: TrialCompanionMilestoneRepository = new TrialCompanionMilestoneRepositoryImpl(
+    logger,
+    soClient
+  );
+
+  return { taskManager, detectors, repo };
+};
+
 export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilestoneService {
   private readonly logger: Logger;
   private repo?: TrialCompanionMilestoneRepository | null;
-  private usageCollection?: UsageCollectionSetup;
   private enabled: boolean = false;
 
   private detectors: DetectorF[] = [];
@@ -55,7 +97,6 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
   public setup(setup: TrialCompanionMilestoneServiceSetup) {
     this.logger.info(`Setting up TrialCompanionMilestoneService: ${setup.enabled}`);
     this.enabled = setup.enabled;
-    this.usageCollection = setup.usageCollection;
     this.registerTask(setup.taskManager);
   }
 
@@ -65,30 +106,8 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
       this.logger.info('TrialCompanionMilestoneService is disabled, skipping start');
       return;
     }
-    const soClient = start.savedObjects.getUnsafeInternalClient();
-
-    const usageCollectorDeps: UsageCollectorDeps | undefined = this.usageCollection
-      ? {
-          logger: this.logger,
-          collectorContext: {
-            esClient: start.esClient,
-            soClient,
-          } as CollectorFetchContext,
-          usageCollection: this.usageCollection,
-        }
-      : undefined;
-
-    // order matters
-    this.detectors.push(installedPackagesM1(this.logger, start.packageService));
-    if (usageCollectorDeps) {
-      this.detectors.push(
-        savedDiscoverySessionsM2(usageCollectorDeps),
-        detectionRulesInstalledM3(usageCollectorDeps),
-        casesM7(usageCollectorDeps)
-      );
-    }
-    this.detectors.push(allSetM7(this.logger));
-    this.repo = new TrialCompanionMilestoneRepositoryImpl(this.logger, soClient);
+    this.repo = start.repo;
+    this.detectors = start.detectors;
     await this.scheduleTask(start.taskManager);
   }
 
