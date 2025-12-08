@@ -87,9 +87,7 @@ export type VisualizeUserContent = VisualizationListItem &
     };
   };
 
-export const toTableListViewSavedObject = (
-  savedObject: Record<string, unknown>
-): VisualizeUserContent => {
+const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
   return {
     id: savedObject.id as string,
     updatedAt: savedObject.updatedAt as string,

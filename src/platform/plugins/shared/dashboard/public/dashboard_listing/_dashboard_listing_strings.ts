@@ -53,57 +53,6 @@ export const dashboardListingTableStrings = {
     }),
 };
 
-export const dashboardListingTabStrings = {
-  // Dashboard tab
-  getDashboardTabName: () =>
-    i18n.translate('dashboard.listing.table.dashboardTabName', {
-      defaultMessage: 'Dashboards',
-    }),
-  getDashboardEmptyPromptBody: () =>
-    i18n.translate('dashboard.listing.table.dashboardEmptyPromptBody', {
-      defaultMessage: 'Create a dashboard to get started.',
-    }),
-  // Visualization tab entity names
-  getVisualizationTabName: () =>
-    i18n.translate('dashboard.listing.table.visualizationTabName', {
-      defaultMessage: 'Visualizations',
-    }),
-  getVisualizationEntityName: () =>
-    i18n.translate('dashboard.listing.table.visualizationEntityName', {
-      defaultMessage: 'visualization',
-    }),
-  getVisualizationEntityNamePlural: () =>
-    i18n.translate('dashboard.listing.table.visualizationEntityNamePlural', {
-      defaultMessage: 'visualizations',
-    }),
-  getVisualizationEmptyPromptBody: () =>
-    i18n.translate('dashboard.listing.table.visualizationEmptyPromptBody', {
-      defaultMessage: 'Create a visualization to get started.',
-    }),
-  // Annotation group tab entity names
-  getAnnotationGroupTabName: () =>
-    i18n.translate('dashboard.listing.table.annotationGroupTabName', {
-      defaultMessage: 'Annotation groups',
-    }),
-  getAnnotationGroupEntityName: () =>
-    i18n.translate('dashboard.listing.table.annotationGroupEntityName', {
-      defaultMessage: 'annotation group',
-    }),
-  getAnnotationGroupEntityNamePlural: () =>
-    i18n.translate('dashboard.listing.table.annotationGroupEntityNamePlural', {
-      defaultMessage: 'annotation groups',
-    }),
-  getAnnotationGroupEmptyPromptBody: () =>
-    i18n.translate('dashboard.listing.table.annotationGroupEmptyPromptBody', {
-      defaultMessage:
-        'Create and save annotations for use across multiple visualizations in the Lens editor.',
-    }),
-  getAnnotationEntityName: () =>
-    i18n.translate('dashboard.listing.table.annotationEntityName', {
-      defaultMessage: 'annotation',
-    }),
-};
-
 export const noItemsStrings = {
   getReadonlyTitle: () =>
     i18n.translate('dashboard.listing.readonlyNoItemsTitle', {
