@@ -253,7 +253,7 @@ export class TaskPool {
       try {
         this.logger.debug(`Cancelling task ${task.toString()}.`);
         this.tasksInPool.delete(task.taskExecutionId);
-        await task.cancel();
+        const result = await task.cancel();
       } catch (err) {
         this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
       }
