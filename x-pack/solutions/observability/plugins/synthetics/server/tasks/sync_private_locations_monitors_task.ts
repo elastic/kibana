@@ -57,6 +57,7 @@ export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
 };
 
 export class SyncPrivateLocationMonitorsTask {
+  taskState: TaskState | null = null;
   constructor(
     public serverSetup: SyntheticsServerSetup,
     public taskManager: TaskManagerSetupContract,
@@ -67,12 +68,31 @@ export class SyncPrivateLocationMonitorsTask {
         title: 'Synthetics Sync Global Params Task',
         description:
           'This task is executed so that we can sync private location monitors for example when global params are updated',
-        timeout: '5m',
+        timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
           return {
             run: async () => {
               return this.runTask({ taskInstance });
+            },
+            cancel: async () => {
+              const newState = {
+                ...(taskInstance.state ?? {}),
+                ...(this.taskState ?? {}),
+              };
+              try {
+                // timeout is to allow the task to fully cancel before updating the state
+                setTimeout(async () => {
+                  await this.serverSetup.pluginsStart.taskManager.bulkUpdateState(
+                    [PRIVATE_LOCATIONS_SYNC_TASK_ID],
+                    (_state) => newState
+                  );
+                }, 10_000);
+              } catch (error) {
+                this.serverSetup.logger.error(`Error updating state on cancel: ${error.message}`, {
+                  error,
+                });
+              }
             },
           };
         },
@@ -85,7 +105,7 @@ export class SyncPrivateLocationMonitorsTask {
   }: {
     taskInstance: CustomTaskInstance;
   }): Promise<{ state: TaskState; error?: Error; schedule?: IntervalSchedule | RruleSchedule }> {
-    this.debugLog(
+    this.serverSetup.logger.info(
       `Syncing private location monitors, current task state is ${JSON.stringify(
         taskInstance.state
       )}`
@@ -100,7 +120,7 @@ export class SyncPrivateLocationMonitorsTask {
       taskInstance.state.lastStartedAt || moment().subtract(10, 'minute').toISOString();
     const startedAt = taskInstance.startedAt || new Date();
 
-    const taskState = {
+    this.taskState = {
       lastStartedAt: startedAt.toISOString(),
       lastTotalParams: taskInstance.state.lastTotalParams || 0,
       lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
@@ -113,13 +133,17 @@ export class SyncPrivateLocationMonitorsTask {
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
 
-      const { performSync } = await this.cleanUpDuplicatedPackagePolicies(soClient, taskState);
+      const { performSync } = await this.cleanUpDuplicatedPackagePolicies(soClient, this.taskState);
 
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
       const { hasDataChanged } = await this.hasAnyDataChanged({
         soClient,
-        taskState,
         lastStartedAt,
+        taskState: this.taskState,
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 5000);
       });
 
       if (hasDataChanged || performSync) {
@@ -148,14 +172,14 @@ export class SyncPrivateLocationMonitorsTask {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
       return {
         error,
-        state: taskState,
+        state: this.taskState,
         schedule: {
           interval: TASK_SCHEDULE,
         },
       };
     }
     return {
-      state: taskState,
+      state: this.taskState,
       schedule: {
         interval: TASK_SCHEDULE,
       },
@@ -504,9 +528,7 @@ export class SyncPrivateLocationMonitorsTask {
 
       if (packagePoliciesToDelete.length > 0) {
         logger.info(
-          ` [PrivateLocationCleanUpTask] Found ${
-            packagePoliciesToDelete.length
-          } duplicate package policies to delete: ${packagePoliciesToDelete.join(', ')}`
+          ` [PrivateLocationCleanUpTask] Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`
         );
         await fleet.packagePolicyService.delete(soClient, esClient, packagePoliciesToDelete, {
           force: true,
