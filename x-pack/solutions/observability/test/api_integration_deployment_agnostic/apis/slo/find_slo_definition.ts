@@ -138,16 +138,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(createdSlo).to.not.be(undefined);
       expect(createdSlo?.health).to.not.be(undefined);
 
-      // Verify overall health
       expect(createdSlo?.health?.isProblematic).eql(false);
 
-      // Verify rollup health
       expect(createdSlo?.health?.rollup.isProblematic).eql(false);
       expect(createdSlo?.health?.rollup.missing).eql(false);
       expect(createdSlo?.health?.rollup.status).eql('healthy');
       expect(['started', 'indexing']).to.contain(createdSlo?.health?.rollup.state);
 
-      // Verify summary health
       expect(createdSlo?.health?.summary.isProblematic).eql(false);
       expect(createdSlo?.health?.summary.missing).eql(false);
       expect(createdSlo?.health?.summary.status).eql('healthy');
