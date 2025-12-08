@@ -17,7 +17,10 @@ const root: EmotionFn = (useEuiTheme) =>
     grid-area: application;
 
     height: calc(100% - ${layoutVar('application.marginBottom')});
-    width: calc(100% - ${layoutVar('application.marginRight')});
+    width: calc(
+      100% - ${layoutVar('application.marginLeft')} - ${layoutVar('application.marginRight')}
+    );
+    margin-left: ${layoutVar('application.marginLeft')};
     margin-bottom: ${layoutVar('application.marginBottom')};
     margin-right: ${layoutVar('application.marginRight')};
 

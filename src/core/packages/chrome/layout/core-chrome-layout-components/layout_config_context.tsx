@@ -26,7 +26,7 @@ export type LayoutConfig = Pick<
   | 'applicationBottomBarHeight'
   | 'applicationMarginRight'
   | 'applicationMarginBottom'
-  | 'navigationMarginRight'
+  | 'applicationMarginLeft'
 >;
 
 /**
