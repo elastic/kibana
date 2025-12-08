@@ -121,10 +121,12 @@ export class TrustedDeviceValidator extends BaseValidator {
   }
 
   async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasWritePrivilege();
 
     await this.validatePreImportItems(items, async (item) => {
       await this.validateCreateOwnerSpaceIds(item);
+      await this.validateCanCreateGlobalArtifacts(item);
     });
   }
 
