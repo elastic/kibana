@@ -145,4 +145,5 @@ query-filters:
       id: js/kibana/unbounded-record-in-route
 packs:
   - githubsecuritylab/codeql-javascript-queries
-  - ./.github/codeql/custom-queries
+queries:
+  - uses: ./.github/codeql/custom-queries
