@@ -79,7 +79,8 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "onechat"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -90,7 +91,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "onechat"
     ],
     "extraPublicDirs": [
       "common"

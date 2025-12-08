@@ -68,7 +68,7 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
       >
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{input}</EuiText>
+            <EuiText size="m">{input}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
