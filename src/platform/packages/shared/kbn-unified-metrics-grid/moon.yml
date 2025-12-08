@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/react-hooks'
   - '@kbn/data-grid-in-table-search'
-  - '@kbn/es-query'
   - '@kbn/discover-utils'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/shared-ux-button-toolbar'
@@ -46,6 +45,7 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/esql-types'
   - '@kbn/presentation-panel-plugin'
+  - '@kbn/expressions-plugin'
 tags:
   - shared-browser
   - package
