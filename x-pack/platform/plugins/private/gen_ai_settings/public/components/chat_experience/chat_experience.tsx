@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal';
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
@@ -37,7 +37,7 @@ export const ChatExperience: React.FC = () => {
 
   // Show confirmation modal for AI Agents selection
   useEffect(() => {
-    const unsavedChatExperience = unsavedChanges[AI_ASSISTANT_CHAT_EXPERIENCE_TYPE];
+    const unsavedChatExperience = unsavedChanges[AI_CHAT_EXPERIENCE_TYPE];
     if (
       unsavedChatExperience?.unsavedValue === AIChatExperience.Agent &&
       !isConfirmModalOpen &&
@@ -61,7 +61,7 @@ export const ChatExperience: React.FC = () => {
   const handleCancelAgent = useCallback(() => {
     setConfirmModalOpen(false);
     // Clear the unsaved change by passing undefined
-    handleFieldChange(AI_ASSISTANT_CHAT_EXPERIENCE_TYPE, undefined);
+    handleFieldChange(AI_CHAT_EXPERIENCE_TYPE, undefined);
   }, [handleFieldChange]);
 
   // Don't render if AI Agents feature is disabled
@@ -69,7 +69,7 @@ export const ChatExperience: React.FC = () => {
     return null;
   }
 
-  const field = fields[AI_ASSISTANT_CHAT_EXPERIENCE_TYPE];
+  const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   if (!field) return null;
 
   const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
@@ -85,7 +85,7 @@ export const ChatExperience: React.FC = () => {
           field={field}
           isSavingEnabled={!!canEditAdvancedSettings}
           onFieldChange={handleFieldChange}
-          unsavedChange={unsavedChanges[AI_ASSISTANT_CHAT_EXPERIENCE_TYPE]}
+          unsavedChange={unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]}
         />
       </FieldRowProvider>
 

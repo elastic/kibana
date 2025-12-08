@@ -17,7 +17,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
-  AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+  AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 
 // Mock the context hook
@@ -37,7 +37,7 @@ describe('GenAiSettingsApp', () => {
       value: false,
       type: 'boolean',
     },
-    [AI_ASSISTANT_CHAT_EXPERIENCE_TYPE]: {
+    [AI_CHAT_EXPERIENCE_TYPE]: {
       value: AIChatExperience.Classic,
       type: 'select',
       options: [AIChatExperience.Classic, AIChatExperience.Agent],
@@ -253,7 +253,7 @@ describe('GenAiSettingsApp', () => {
       expect(visibilityField).toBeInTheDocument();
 
       const chatExperienceField = await screen.findByTestId(
-        `management-settings-editField-${AI_ASSISTANT_CHAT_EXPERIENCE_TYPE}`
+        `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
       );
       expect(chatExperienceField).toBeInTheDocument();
 

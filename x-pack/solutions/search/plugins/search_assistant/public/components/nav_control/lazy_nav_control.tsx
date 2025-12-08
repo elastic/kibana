@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import type { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/types';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
 const LazyNavControlWithProvider = dynamic(() =>
   import('.').then((m) => ({ default: m.NavControlWithProvider }))
@@ -28,7 +28,7 @@ export const NavControlInitiator = ({ coreStart, pluginsStart }: NavControlIniti
 
   useEffect(() => {
     const sub = coreStart.settings.client
-      .get$<AIChatExperience>(AI_ASSISTANT_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
+      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
       .subscribe((chatExperience) => {
         setIsClassicExperience(chatExperience === AIChatExperience.Classic);
       });

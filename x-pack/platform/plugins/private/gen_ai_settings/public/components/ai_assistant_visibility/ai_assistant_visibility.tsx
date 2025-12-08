@@ -9,7 +9,7 @@ import React from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
-  AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+  AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useSettingsContext } from '../../contexts/settings_context';
@@ -22,12 +22,12 @@ export const AIAssistantVisibility: React.FC = () => {
   } = useKibana();
 
   const field = fields[AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE];
-  const chatExperienceField = fields[AI_ASSISTANT_CHAT_EXPERIENCE_TYPE];
+  const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
 
   if (!field) return null;
 
   const currentChatExperience =
-    unsavedChanges[AI_ASSISTANT_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
+    unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??
     AIChatExperience.Classic;
 
