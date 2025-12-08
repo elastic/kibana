@@ -67,6 +67,13 @@ export const registerPatchUpdateScriptRoute = (
         authz: { requiredPrivileges: ['securitySolution'] },
         authc: { enabled: true },
       },
+      options: {
+        body: {
+          accepts: ['multipart/form-data'],
+          output: 'stream',
+          maxBytes: endpointContext.serverConfig.maxEndpointScriptFileSize,
+        },
+      },
     })
     .addVersion(
       {
