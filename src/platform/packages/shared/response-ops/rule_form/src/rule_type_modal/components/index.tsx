@@ -8,7 +8,7 @@
  */
 
 import { countBy } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
@@ -29,6 +29,7 @@ export interface RuleTypeModalComponentProps {
 }
 
 const EMPTY_ARRAY: string[] = [];
+const DEBOUNCE_OPTIONS = { wait: 300 };
 
 export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   http,
@@ -81,12 +82,14 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   // Debounce search string for template API calls to avoid excessive requests
   const [debouncedSearchString, setDebouncedSearchString] = useState(searchString);
 
+  const updateSearchAndResetPage = useCallback((value: string) => {
+    setDebouncedSearchString(value);
+    setCurrentPage(1); // Reset to first page when search changes
+  }, []);
+
   const { run: updateDebouncedSearch } = useDebounceFn(
-    (value: string) => {
-      setDebouncedSearchString(value);
-      setCurrentPage(1); // Reset to first page when search changes
-    },
-    { wait: 300 }
+    updateSearchAndResetPage,
+    DEBOUNCE_OPTIONS
   );
 
   useEffect(() => {
