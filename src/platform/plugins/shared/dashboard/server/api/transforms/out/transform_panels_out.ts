@@ -33,7 +33,6 @@ export function transformPanelsOut(
 
   JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
     const panelReferences = getPanelReferences(containerReferences ?? [], panel);
-    // const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
     const { sectionId } = panel.gridData;
     if (sectionId) {
       sectionsMap[sectionId].panels.push(
