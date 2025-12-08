@@ -62,6 +62,10 @@ function isTinymathFunction(node: TinymathAST): node is TinymathFunction {
 function convertTinymathToESQL(node: TinymathAST): ESQLAstItem {
   // Handle numeric literals
   if (typeof node === 'number') {
+    if (Number.isInteger(node)) {
+      // Note: 1000.0 is also considered an integer (in tinymath as well)
+      return Builder.expression.literal.integer(node);
+    }
     return Builder.expression.literal.decimal(node);
   }
 

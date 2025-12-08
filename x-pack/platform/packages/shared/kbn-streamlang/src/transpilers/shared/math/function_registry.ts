@@ -94,6 +94,7 @@ export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   // Constants (0-arity functions)
   // ============================================
   pi: { esql: 'PI', painless: 'Math.PI', arity: 0, isConstant: true },
+  e: { esql: 'E', painless: 'Math.E', arity: 0, isConstant: true },
 };
 
 /**

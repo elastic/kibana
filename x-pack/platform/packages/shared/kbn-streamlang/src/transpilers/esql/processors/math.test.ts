@@ -26,8 +26,8 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // ES|QL Builder formats decimal literals with .0 suffix
-      expect(result).toBe('EVAL result = 2.0 + 2.0');
+      // Whole numbers are rendered as integers (no .0 suffix)
+      expect(result).toBe('EVAL result = 2 + 2');
     });
 
     it('should transpile numeric subtraction: "10 - 5"', () => {
@@ -37,8 +37,8 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // ES|QL Builder formats decimal literals with .0 suffix
-      expect(result).toBe('EVAL result = 10.0 - 5.0');
+      // Whole numbers are rendered as integers (no .0 suffix)
+      expect(result).toBe('EVAL result = 10 - 5');
     });
 
     it('should transpile numeric multiplication: "3 * 4"', () => {
@@ -48,7 +48,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL result = 3.0 * 4.0');
+      expect(result).toBe('EVAL result = 3 * 4');
     });
 
     it('should transpile numeric division: "20 / 4"', () => {
@@ -58,8 +58,8 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // ES|QL Builder formats decimal literals with .0 suffix
-      expect(result).toBe('EVAL result = 20.0 / 4.0');
+      // Whole numbers are rendered as integers (no .0 suffix)
+      expect(result).toBe('EVAL result = 20 / 4');
     });
   });
 
@@ -171,8 +171,8 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // ES|QL Builder formats negative decimals with .0 suffix
-      expect(result).toBe('EVAL result = -5.0 + a');
+      // Negative whole numbers are rendered as integers
+      expect(result).toBe('EVAL result = -5 + a');
     });
 
     it('should handle negative field subtraction: "a - -10"', () => {
@@ -182,7 +182,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL result = a - -10.0');
+      expect(result).toBe('EVAL result = a - -10');
     });
   });
 
@@ -224,7 +224,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'diff',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL diff = ABS(price - 10.0)');
+      expect(result).toBe('EVAL diff = ABS(price - 10)');
     });
 
     it('should transpile sqrt(): "sqrt(variance)"', () => {
@@ -326,7 +326,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'rounded',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL rounded = ROUND(price, 2.0)');
+      expect(result).toBe('EVAL rounded = ROUND(price, 2)');
     });
 
     it('should transpile log() with single arg (natural log): "log(value)"', () => {
@@ -347,7 +347,7 @@ describe('convertMathProcessorToESQL', () => {
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
       // ES|QL uses LOG(base, value), so args are swapped
-      expect(result).toBe('EVAL log_base_10 = LOG(10.0, value)');
+      expect(result).toBe('EVAL log_base_10 = LOG(10, value)');
     });
   });
 
@@ -359,7 +359,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'squared',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL squared = POW(base, 2.0)');
+      expect(result).toBe('EVAL squared = POW(base, 2)');
     });
   });
 
@@ -371,7 +371,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'remainder',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL remainder = total % 10.0');
+      expect(result).toBe('EVAL remainder = total % 10');
     });
   });
 
@@ -383,7 +383,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'is_cheap',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL is_cheap = price < 100.0');
+      expect(result).toBe('EVAL is_cheap = price < 100');
     });
 
     it('should transpile gt(): "gt(a, b)" -> "a > b"', () => {
@@ -393,7 +393,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'is_expensive',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL is_expensive = price > 100.0');
+      expect(result).toBe('EVAL is_expensive = price > 100');
     });
 
     it('should transpile eq(): "eq(a, b)" -> "a == b"', () => {
@@ -403,7 +403,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'is_active',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL is_active = status == 1.0');
+      expect(result).toBe('EVAL is_active = status == 1');
     });
 
     it('should transpile neq(): "neq(a, b)" -> "a != b"', () => {
@@ -413,7 +413,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'is_not_zero',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL is_not_zero = status != 0.0');
+      expect(result).toBe('EVAL is_not_zero = status != 0');
     });
 
     it('should transpile lte(): "lte(a, b)" -> "a <= b"', () => {
@@ -423,7 +423,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'in_budget',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL in_budget = price <= 50.0');
+      expect(result).toBe('EVAL in_budget = price <= 50');
     });
 
     it('should transpile gte(): "gte(a, b)" -> "a >= b"', () => {
@@ -434,7 +434,7 @@ describe('convertMathProcessorToESQL', () => {
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
       // Note: BasicPrettyPrinter adds backticks to field names in comparison context
-      expect(result).toBe('EVAL passed = `score` >= 60.0');
+      expect(result).toBe('EVAL passed = `score` >= 60');
     });
 
     it('should handle comparison with dotted fields', () => {
@@ -456,7 +456,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'is_expensive',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL is_expensive = price > 100.0');
+      expect(result).toBe('EVAL is_expensive = price > 100');
     });
 
     it('should handle infix comparison syntax: "a == b"', () => {
@@ -466,7 +466,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'is_active',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL is_active = status == 1.0');
+      expect(result).toBe('EVAL is_active = status == 1');
     });
   });
 
@@ -478,7 +478,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'circumference',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL circumference = radius * 2.0 * PI()');
+      expect(result).toBe('EVAL circumference = radius * 2 * PI()');
     });
   });
 
@@ -490,7 +490,7 @@ describe('convertMathProcessorToESQL', () => {
         to: 'hypotenuse',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL hypotenuse = SQRT(POW(a, 2.0) + POW(b, 2.0))');
+      expect(result).toBe('EVAL hypotenuse = SQRT(POW(a, 2) + POW(b, 2))');
     });
 
     it('should handle deeply nested: "ceil(abs(floor(x)))"', () => {
@@ -511,7 +511,7 @@ describe('convertMathProcessorToESQL', () => {
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
       expect(result).toBe(
-        'EVAL `attributes.distance` = SQRT(POW(`attributes.x`, 2.0) + POW(`attributes.y`, 2.0))'
+        'EVAL `attributes.distance` = SQRT(POW(`attributes.x`, 2) + POW(`attributes.y`, 2))'
       );
     });
   });
@@ -647,7 +647,7 @@ describe('convertMathProcessorToESQL', () => {
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
       // No fields to check, no CASE wrapper needed
-      expect(result).toBe('EVAL tau_value = PI() * 2.0');
+      expect(result).toBe('EVAL tau_value = PI() * 2');
     });
 
     it('should deduplicate repeated field references', () => {
@@ -697,7 +697,7 @@ describe('convertMathProcessorToESQL', () => {
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
       expect(result).toBe(
-        'EVAL distance = CASE(valid == TRUE AND type == "point" AND NOT(x IS NULL) AND NOT(y IS NULL), SQRT(POW(x, 2.0) + POW(y, 2.0)), distance)'
+        'EVAL distance = CASE(valid == TRUE AND type == "point" AND NOT(x IS NULL) AND NOT(y IS NULL), SQRT(POW(x, 2) + POW(y, 2)), distance)'
       );
     });
   });
