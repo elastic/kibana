@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { MigrationStepProps } from '../../../../../common/types';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
 import { useParseFileInput } from '../../../../../common/hooks/use_parse_file_input';
@@ -30,13 +31,7 @@ import { QradarDataInputStep } from '../constants';
 import * as i18n from './translations';
 import { EnhancementType, QRADAR_ENHANCEMENT_OPTS, type AddedEnhancement } from './types';
 
-export interface EnhancementsDataInputProps {
-  dataInputStep: QradarDataInputStep;
-  migrationStats?: RuleMigrationTaskStats;
-  onEnhancementsDone: () => void;
-}
-
-export const EnhancementsDataInput = React.memo<EnhancementsDataInputProps>(
+export const EnhancementsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats }) => {
     const dataInputStatus = useMemo(
       () => getEuiStepStatus(QradarDataInputStep.Enhancements, dataInputStep),
