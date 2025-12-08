@@ -38,6 +38,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const [_, pluginsStart] = await core.getStartServices();
 
       const { summary, context } = await generateErrorAiInsight({
+        core,
         connectorId: connectorId ?? undefined,
         errorId,
         serviceName,

@@ -129,13 +129,6 @@ interface APMTraceDetails {
   traceErrors: APMTraceError[];
 }
 
-interface LogCategory {
-  errorCategory: string;
-  docCount: number;
-  sampleMessage: string;
-  downstreamServiceResource?: string;
-}
-
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -196,11 +189,4 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<APMTraceDetails>;
-
-  apmLogCategoriesByTrace: (params: {
-    request: KibanaRequest;
-    traceId: string;
-    start: string;
-    end: string;
-  }) => Promise<LogCategory[]>;
 }

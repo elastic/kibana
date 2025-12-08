@@ -7,9 +7,21 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreSetup } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
+import type {
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../../types';
+import { getFilteredLogCategories } from '../../../tools/get_log_categories/get_log_categories';
+import { getLogsIndices } from '../../../utils/get_logs_indices';
+import { parseDatemath } from '../../../utils/time';
 
 export interface FetchApmErrorContextParams {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
   serviceName: string;
@@ -21,6 +33,7 @@ export interface FetchApmErrorContextParams {
 }
 
 export async function fetchApmErrorContext({
+  core,
   dataRegistry,
   request,
   serviceName,
@@ -118,25 +131,42 @@ export async function fetchApmErrorContext({
     }
 
     try {
-      // Fetch categorized logs tied to this trace (trace.id or services in the trace)
-      const logCategories = await dataRegistry.getData('apmLogCategoriesByTrace', {
-        request,
-        traceId,
-        start,
-        end,
+      // Fetch log categories for the trace
+      const [coreStart] = await core.getStartServices();
+      const esClient = coreStart.elasticsearch.client.asScoped(request);
+      const logsIndices = await getLogsIndices({ core, logger });
+
+      const logCategories = await getFilteredLogCategories({
+        esClient,
+        logsIndices,
+        boolQuery: {
+          filter: [
+            { term: { 'trace.id': traceId } },
+            { exists: { field: 'message' } },
+            {
+              range: {
+                '@timestamp': {
+                  gte: parseDatemath(start),
+                  lte: parseDatemath(end, { roundUp: true }),
+                },
+              },
+            },
+          ],
+        },
+        logger,
+        categoryCount: 10,
+        terms: { 'trace.id': traceId },
       });
 
-      if (logCategories?.length) {
+      if (logCategories?.categories?.length) {
         contextParts.push(
-          `<TraceLogCategories>\n${JSON.stringify(
-            logCategories.slice(0, 10),
-            null,
-            2
-          )}\n</TraceLogCategories>`
+          `<TraceLogCategories>\n${JSON.stringify(logCategories, null, 2)}\n</TraceLogCategories>`
         );
       }
     } catch (error) {
-      logger.debug(`Error AI insight: apmLogCategoriesByTrace failed: ${error}`);
+      logger.debug(
+        `Error AI insight: Failed to fetch log categories for trace ${traceId}: ${error}`
+      );
     }
   }
 

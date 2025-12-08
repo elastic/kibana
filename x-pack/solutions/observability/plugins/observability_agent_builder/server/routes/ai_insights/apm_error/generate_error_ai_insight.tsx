@@ -6,11 +6,16 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
+import type {
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../../types';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
 
 const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
@@ -55,6 +60,10 @@ const buildUserPrompt = (errorContext: string) => {
 };
 
 export interface GenerateErrorAiInsightParams {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   connectorId?: string;
   errorId: string;
   serviceName: string;
@@ -68,6 +77,7 @@ export interface GenerateErrorAiInsightParams {
 }
 
 export async function generateErrorAiInsight({
+  core,
   connectorId: initialConnectorId,
   errorId,
   serviceName,
@@ -91,6 +101,7 @@ export async function generateErrorAiInsight({
   }
 
   const errorContext = await fetchApmErrorContext({
+    core,
     dataRegistry,
     request,
     serviceName,

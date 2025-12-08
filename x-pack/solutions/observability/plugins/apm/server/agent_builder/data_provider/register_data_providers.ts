@@ -6,11 +6,8 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { WaterfallSpan, WaterfallTransaction } from '../../../common/waterfall/typings';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
-import { getTypedSearch } from '../../utils/create_typed_es_client';
-import { TRACE_ID } from '../../../common/es_fields/apm';
 import { getTraceItems, type TraceDoc } from '../../routes/traces/get_trace_items';
 import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
@@ -293,95 +290,6 @@ export function registerDataProviders({
         traceServiceAggregates,
         traceErrors,
       };
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'apmLogCategoriesByTrace',
-    async ({ request, traceId, start, end }) => {
-      const { esClient, soClient } = await buildApmToolResources({
-        core,
-        plugins,
-        request,
-        logger,
-      });
-
-      const [_, pluginStart] = await core.getStartServices();
-      const logSourcesService =
-        await pluginStart.logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
-          soClient
-        );
-
-      const index = await logSourcesService.getFlattenedLogSources();
-      const typedSearch = getTypedSearch(esClient.asCurrentUser);
-
-      const timeRange = {
-        gte: parseDatemath(start),
-        lte: parseDatemath(end),
-      };
-
-      const query = {
-        bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            { exists: { field: 'message' } },
-            {
-              range: {
-                '@timestamp': timeRange,
-              },
-            },
-          ],
-        },
-      };
-
-      const categorizedLogsResponse = await typedSearch({
-        index,
-        size: 1,
-        _source: ['service.name'],
-        track_total_hits: 0,
-        query,
-        aggs: {
-          sampling: {
-            random_sampler: {
-              probability: 1,
-            },
-            aggs: {
-              categories: {
-                categorize_text: {
-                  field: 'message',
-                  size: 10,
-                },
-                aggs: {
-                  sample: {
-                    top_hits: {
-                      sort: { '@timestamp': 'desc' as const },
-                      size: 1,
-                      fields: ['message', TRACE_ID, 'service.name'],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const buckets = categorizedLogsResponse.aggregations?.sampling.categories?.buckets ?? [];
-
-      const logCategories = buckets.map(({ doc_count: docCount, key, sample }) => {
-        const hit = sample?.hits?.hits?.[0];
-        const fields = hit?.fields ?? {};
-        const event = unflattenKnownApmEventFields(fields) ?? {};
-        const sampleMessage = String((event as any).message ?? '');
-
-        return {
-          errorCategory: key,
-          docCount,
-          sampleMessage,
-        };
-      });
-
-      return logCategories;
     }
   );
 }
