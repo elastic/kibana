@@ -28,7 +28,7 @@ import { useSendMessage } from '../../../../../context/send_message/send_message
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
+import { selectorListStyles } from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
 
 const selectableAriaLabel = i18n.translate(
@@ -62,12 +62,11 @@ const ConnectorPopoverButton: React.FC<{
   onClick: () => void;
   disabled: boolean;
 }> = ({ isPopoverOpen, onClick, disabled }) => {
-  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
-      iconType="sparkles"
+      iconType="compute"
       onClick={onClick}
       aria-labelledby={connectorSelectId}
       data-test-subj="agentBuilderConnectorSelectorButton"
