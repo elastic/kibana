@@ -60,7 +60,7 @@ describe('<TableSection />', () => {
   it('should render correctly', async () => {
     const { getByTestId } = render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -180,7 +180,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -202,7 +202,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
