@@ -53,6 +53,7 @@ export class ContextService {
         location: this.currentLocation,
         app_id: this.currentAppId,
       },
+      hidden: true,
     };
 
     return [timerangeAttachment, appContext];

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AttachmentType, timeRangeAttachmentDataSchema } from '@kbn/onechat-common/attachments';
+import {
+  AttachmentType,
+  timeRangeAttachmentDataSchema,
+} from '@kbn/onechat-common/attachments/attachment_types';
 import type { TimerangeAttachmentData } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 

@@ -7,7 +7,10 @@
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import type { EsqlAttachmentData } from '@kbn/onechat-common/attachments';
-import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/onechat-common/attachments';
+import {
+  AttachmentType,
+  esqlAttachmentDataSchema,
+} from '@kbn/onechat-common/attachments/attachment_types';
 import { platformCoreTools } from '@kbn/onechat-common/tools';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';

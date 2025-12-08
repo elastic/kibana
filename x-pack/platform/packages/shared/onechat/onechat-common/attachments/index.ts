@@ -16,10 +16,6 @@ export type {
 } from './attachments';
 export {
   AttachmentType,
-  textAttachmentDataSchema,
-  esqlAttachmentDataSchema,
-  applicationContextAttachmentDataSchema,
-  timeRangeAttachmentDataSchema,
   type TextAttachmentData,
   type ApplicationContextAttachmentData,
   type EsqlAttachmentData,

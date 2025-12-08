@@ -8,7 +8,7 @@
 import {
   AttachmentType,
   applicationContextAttachmentDataSchema,
-} from '@kbn/onechat-common/attachments';
+} from '@kbn/onechat-common/attachments/attachment_types';
 import type { ApplicationContextAttachmentData } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 
