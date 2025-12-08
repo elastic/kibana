@@ -84,43 +84,51 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     history,
   } = useAppContext();
   const pendingFieldsRef = useRef<HTMLDivElement>(null);
+  const state = useMappingsState();
+  const dispatch = useDispatch();
+  const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
 
   const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsPlatinumLicense(license.isActive && license.hasAtLeast('platinum'));
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
-
-  const { enableSemanticText: isSemanticTextEnabled } = config;
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<
     Record<string, string | undefined>
   >({});
+  const [hasSavedFields, setHasSavedFields] = useState<boolean>(false);
+  const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
+  const [isAddingFields, setAddingFields] = useState<boolean>(false);
+  const [previousState, setPreviousState] = useState<State>(state);
+  const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
+  const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
 
+  const { enableSemanticText: isSemanticTextEnabled } = config;
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
-
   const semanticTextInfo = {
     isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
   };
-
-  const state = useMappingsState();
   const hasMappings = state.mappingViewFields.rootLevelFields.length > 0;
-  const dispatch = useDispatch();
-
   const indexName = index.name;
-
   const pendingFieldListId = useGeneratedHtmlId({
     prefix: 'pendingFieldListId',
   });
-
   const hasSemanticText = hasSemanticTextField(state.fields);
+  const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
 
-  const [isAddingFields, setAddingFields] = useState<boolean>(false);
+  const newFieldsLength = useMemo(() => {
+    return Object.keys(state.fields.byId).length;
+  }, [state.fields.byId]);
+
+  const previousStateSelectedDataTypes: string[] = useMemo(() => {
+    return previousState.filter.selectedOptions
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+  }, [previousState.filter.selectedOptions]);
+
+  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
+    () => parseMappings(jsonData),
+    [jsonData]
+  );
 
   useUnsavedChangesPrompt({
     titleText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptTitle', {
@@ -137,34 +145,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     navigateToUrl,
   });
 
-  const newFieldsLength = useMemo(() => {
-    return Object.keys(state.fields.byId).length;
-  }, [state.fields.byId]);
+  useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
 
-  const [previousState, setPreviousState] = useState<State>(state);
-
-  const previousStateSelectedDataTypes: string[] = useMemo(() => {
-    return previousState.filter.selectedOptions
-      .filter((option) => option.checked === 'on')
-      .map((option) => option.label);
-  }, [previousState.filter.selectedOptions]);
-
-  const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
-  const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const onToggleChange = () => {
     setIsJSONVisible(!isJSONVisible);
   };
-
-  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
-    () => parseMappings(jsonData),
-    [jsonData]
-  );
-
-  const [hasSavedFields, setHasSavedFields] = useState<boolean>(false);
-  const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
-
-  useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
-  const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
 
   const onCancelAddingNewFields = useCallback(() => {
     setAddingFields(!isAddingFields);
@@ -206,19 +191,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       },
     });
   }, [dispatch, isAddingFields, state]);
-
-  useEffect(() => {
-    if (!isSemanticTextEnabled || !hasMLPermissions) {
-      return;
-    }
-
-    const fetchData = async () => {
-      await fetchInferenceToModelIdMap();
-    };
-
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSemanticTextEnabled, hasMLPermissions]);
 
   const updateMappings = useCallback(
     async (forceSaveMappings?: boolean) => {
@@ -310,8 +282,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       },
     });
   }, [previousState]);
-
-  const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
 
   const jsonBlock = (
     <EuiCodeBlock
@@ -414,6 +384,27 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       />
     </EuiButton>
   );
+
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsPlatinumLicense(license.isActive && license.hasAtLeast('platinum'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
+
+  useEffect(() => {
+    if (!isSemanticTextEnabled || !hasMLPermissions) {
+      return;
+    }
+
+    const fetchData = async () => {
+      await fetchInferenceToModelIdMap();
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSemanticTextEnabled, hasMLPermissions]);
 
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
