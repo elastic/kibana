@@ -6,32 +6,37 @@
  */
 
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import { buildHeadersFromSecrets } from './auth_helpers';
 
 describe('buildHeadersFromSecrets', () => {
   const baseConfig: MCPConnectorConfig = {
-    service: {
-      http: {
-        url: 'https://example.com',
-      },
-      authType: 'none',
-    },
+    url: 'https://example.com',
+    hasAuth: true,
   };
 
-  describe('none auth type', () => {
+  const emptySecrets: MCPConnectorSecrets = {};
+
+  describe('no auth', () => {
+    it('should return empty headers when hasAuth is false', () => {
+      const config: MCPConnectorConfig = {
+        ...baseConfig,
+        hasAuth: false,
+      };
+
+      const headers = buildHeadersFromSecrets(emptySecrets, config);
+
+      expect(headers).toEqual({});
+    });
+
     it('should return empty headers when authType is none', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'none',
-        },
-      };
-      const secrets: MCPConnectorSecrets = {
-        authType: 'none',
+        hasAuth: true,
+        authType: MCPAuthType.None,
       };
 
-      const headers = buildHeadersFromSecrets(secrets, config);
+      const headers = buildHeadersFromSecrets(emptySecrets, config);
 
       expect(headers).toEqual({});
     });
@@ -41,13 +46,9 @@ describe('buildHeadersFromSecrets', () => {
     it('should return Authorization header with Bearer token when token is provided', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'bearer',
-        },
+        authType: MCPAuthType.Bearer,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'bearer',
         token: 'test-token-123',
       };
 
@@ -61,32 +62,21 @@ describe('buildHeadersFromSecrets', () => {
     it('should return empty headers when token is missing', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'bearer',
-        },
-      };
-      const secrets: MCPConnectorSecrets = {
-        authType: 'bearer',
-        // @ts-expect-error - testing missing token
-        token: undefined,
+        authType: MCPAuthType.Bearer,
       };
 
-      const headers = buildHeadersFromSecrets(secrets, config);
+      const headers = buildHeadersFromSecrets(emptySecrets, config);
 
       expect(headers).toEqual({});
     });
 
-    it('should return empty headers when secrets authType does not match config', () => {
+    it('should return empty headers when token is empty string', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'bearer',
-        },
+        authType: MCPAuthType.Bearer,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'none',
+        token: '',
       };
 
       const headers = buildHeadersFromSecrets(secrets, config);
@@ -99,13 +89,9 @@ describe('buildHeadersFromSecrets', () => {
     it('should return X-API-Key header with API key when using default header name', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'apiKey',
-        },
+        authType: MCPAuthType.ApiKey,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'apiKey',
         apiKey: 'test-api-key-456',
       };
 
@@ -119,14 +105,10 @@ describe('buildHeadersFromSecrets', () => {
     it('should return custom header name when apiKeyHeaderName is specified', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'apiKey',
-          apiKeyHeaderName: 'X-Custom-API-Key',
-        },
+        authType: MCPAuthType.ApiKey,
+        apiKeyHeaderName: 'X-Custom-API-Key',
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'apiKey',
         apiKey: 'test-api-key-789',
       };
 
@@ -140,35 +122,10 @@ describe('buildHeadersFromSecrets', () => {
     it('should return empty headers when apiKey is missing', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'apiKey',
-        },
-      };
-      const secrets: MCPConnectorSecrets = {
-        authType: 'apiKey',
-        // @ts-expect-error - testing missing apiKey
-        apiKey: undefined,
+        authType: MCPAuthType.ApiKey,
       };
 
-      const headers = buildHeadersFromSecrets(secrets, config);
-
-      expect(headers).toEqual({});
-    });
-
-    it('should return empty headers when secrets authType does not match config', () => {
-      const config: MCPConnectorConfig = {
-        ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'apiKey',
-        },
-      };
-      const secrets: MCPConnectorSecrets = {
-        authType: 'none',
-      };
-
-      const headers = buildHeadersFromSecrets(secrets, config);
+      const headers = buildHeadersFromSecrets(emptySecrets, config);
 
       expect(headers).toEqual({});
     });
@@ -178,14 +135,10 @@ describe('buildHeadersFromSecrets', () => {
     it('should return Authorization header with Basic auth when username and password are provided', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'basic',
-        },
+        authType: MCPAuthType.Basic,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'basic',
-        username: 'testuser',
+        user: 'testuser',
         password: 'testpass',
       };
 
@@ -198,18 +151,12 @@ describe('buildHeadersFromSecrets', () => {
       });
     });
 
-    it('should return empty headers when username is missing', () => {
+    it('should return empty headers when user is missing', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'basic',
-        },
+        authType: MCPAuthType.Basic,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'basic',
-        // @ts-expect-error - testing missing username
-        username: undefined,
         password: 'testpass',
       };
 
@@ -221,16 +168,10 @@ describe('buildHeadersFromSecrets', () => {
     it('should return empty headers when password is missing', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'basic',
-        },
+        authType: MCPAuthType.Basic,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'basic',
-        username: 'testuser',
-        // @ts-expect-error - testing missing password
-        password: undefined,
+        user: 'testuser',
       };
 
       const headers = buildHeadersFromSecrets(secrets, config);
@@ -241,14 +182,10 @@ describe('buildHeadersFromSecrets', () => {
     it('should correctly encode special characters in credentials', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'basic',
-        },
+        authType: MCPAuthType.Basic,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'basic',
-        username: 'user@example.com',
+        user: 'user@example.com',
         password: 'p@ss:w0rd!',
       };
 
@@ -260,16 +197,14 @@ describe('buildHeadersFromSecrets', () => {
       });
     });
 
-    it('should return empty headers when secrets authType does not match config', () => {
+    it('should return empty headers when both user and password are empty strings', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'basic',
-        },
+        authType: MCPAuthType.Basic,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'none',
+        user: '',
+        password: '',
       };
 
       const headers = buildHeadersFromSecrets(secrets, config);
@@ -278,22 +213,17 @@ describe('buildHeadersFromSecrets', () => {
     });
   });
 
-  describe('customHeaders auth type', () => {
-    it('should return all custom headers when headers array is provided', () => {
+  describe('secret headers', () => {
+    it('should include secret headers in the result', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'customHeaders',
-        },
+        hasAuth: true,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'customHeaders',
-        headers: [
-          { name: 'X-Custom-Header-1', value: 'value1' },
-          { name: 'X-Custom-Header-2', value: 'value2' },
-          { name: 'Authorization', value: 'Custom auth value' },
-        ],
+        secretHeaders: {
+          'X-Custom-Header-1': 'value1',
+          'X-Custom-Header-2': 'value2',
+        },
       };
 
       const headers = buildHeadersFromSecrets(secrets, config);
@@ -301,145 +231,71 @@ describe('buildHeadersFromSecrets', () => {
       expect(headers).toEqual({
         'X-Custom-Header-1': 'value1',
         'X-Custom-Header-2': 'value2',
-        Authorization: 'Custom auth value',
       });
     });
 
-    it('should return empty headers when headers array is missing', () => {
+    it('should merge secret headers with auth headers', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'customHeaders',
-        },
+        authType: MCPAuthType.Bearer,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'customHeaders',
-        // @ts-expect-error - testing missing headers
-        headers: undefined,
-      };
-
-      const headers = buildHeadersFromSecrets(secrets, config);
-
-      expect(headers).toEqual({});
-    });
-
-    it('should return empty headers when secrets authType does not match config', () => {
-      const config: MCPConnectorConfig = {
-        ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'customHeaders',
+        token: 'my-token',
+        secretHeaders: {
+          'X-Extra-Header': 'extra-value',
         },
-      };
-      const secrets: MCPConnectorSecrets = {
-        authType: 'none',
-      };
-
-      const headers = buildHeadersFromSecrets(secrets, config);
-
-      expect(headers).toEqual({});
-    });
-
-    it('should handle single custom header', () => {
-      const config: MCPConnectorConfig = {
-        ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'customHeaders',
-        },
-      };
-      const secrets: MCPConnectorSecrets = {
-        authType: 'customHeaders',
-        headers: [{ name: 'X-Single-Header', value: 'single-value' }],
       };
 
       const headers = buildHeadersFromSecrets(secrets, config);
 
       expect(headers).toEqual({
-        'X-Single-Header': 'single-value',
+        Authorization: 'Bearer my-token',
+        'X-Extra-Header': 'extra-value',
       });
     });
-  });
 
-  describe('error handling', () => {
-    it('should throw error for unsupported auth type', () => {
-      const config = {
+    it('should return empty headers when secretHeaders is undefined', () => {
+      const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'unsupported' as MCPConnectorConfig['service']['authType'],
-        },
-      } as MCPConnectorConfig;
-      const secrets: MCPConnectorSecrets = {
-        authType: 'none',
+        hasAuth: true,
       };
 
-      expect(() => buildHeadersFromSecrets(secrets, config)).toThrow(
-        'Unsupported auth type: unsupported'
-      );
+      const headers = buildHeadersFromSecrets(emptySecrets, config);
+
+      expect(headers).toEqual({});
     });
   });
 
   describe('edge cases', () => {
-    it('should handle empty string values in custom headers', () => {
+    it('should handle undefined authType with hasAuth true', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'customHeaders',
-        },
+        hasAuth: true,
+        // authType is undefined
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'customHeaders',
-        headers: [
-          { name: 'X-Empty-Value', value: '' },
-          { name: 'X-Normal-Value', value: 'normal' },
-        ],
+        secretHeaders: {
+          'X-Header': 'value',
+        },
       };
 
+      // Should still include secret headers even without a specific auth type
       const headers = buildHeadersFromSecrets(secrets, config);
 
       expect(headers).toEqual({
-        'X-Empty-Value': '',
-        'X-Normal-Value': 'normal',
+        'X-Header': 'value',
       });
     });
 
-    it('should handle empty bearer token string', () => {
+    it('should handle empty secretHeaders object', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'bearer',
-        },
+        hasAuth: true,
       };
       const secrets: MCPConnectorSecrets = {
-        authType: 'bearer',
-        token: '',
+        secretHeaders: {},
       };
 
-      // Empty string is falsy, so it should return empty headers
-      const headers = buildHeadersFromSecrets(secrets, config);
-
-      expect(headers).toEqual({});
-    });
-
-    it('should handle empty basic auth credentials', () => {
-      const config: MCPConnectorConfig = {
-        ...baseConfig,
-        service: {
-          ...baseConfig.service,
-          authType: 'basic',
-        },
-      };
-      const secrets: MCPConnectorSecrets = {
-        authType: 'basic',
-        username: '',
-        password: '',
-      };
-
-      // Empty strings are falsy, so it should return empty headers
       const headers = buildHeadersFromSecrets(secrets, config);
 
       expect(headers).toEqual({});

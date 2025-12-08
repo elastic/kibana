@@ -9,19 +9,28 @@
 
 export * from './constants';
 
-// Export old simple schemas (for backward compatibility)
-export { ConfigSchema, SecretsSchema } from './schemas/latest';
-export type { Config, Secrets } from './types/latest';
-
-// Export new comprehensive schemas (for multi-auth support)
+// Schemas
 export {
   MCPConnectorConfigSchema,
   MCPConnectorSecretsSchema,
-  MCPConnectorHTTPServiceConfigSchema,
-  MCPConnectorSecretsNoneSchema,
-  MCPConnectorSecretsBearerSchema,
-  MCPConnectorSecretsApiKeySchema,
-  MCPConnectorSecretsBasicSchema,
-  MCPConnectorSecretsCustomHeadersSchema,
+  MCPAuthType,
+  // Sub-action schemas
+  TestConnectorRequestSchema,
+  ListToolsRequestSchema,
+  CallToolRequestSchema,
+  MCPExecutorParamsSchema,
+  // Legacy aliases
+  ConfigSchema,
+  SecretsSchema,
 } from './schemas/latest';
-export type { MCPConnectorConfig, MCPConnectorSecrets } from './types/latest';
+
+// Types
+export type {
+  MCPConnectorConfig,
+  MCPConnectorSecrets,
+  // Legacy aliases
+  Config,
+  Secrets,
+} from './types/latest';
+
+export type { MCPAuthTypeName } from './schemas/latest';

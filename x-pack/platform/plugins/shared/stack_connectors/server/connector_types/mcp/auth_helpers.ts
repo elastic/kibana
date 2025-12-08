@@ -6,12 +6,13 @@
  */
 
 import type { MCPConnectorSecrets, MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 
 /**
- * Builds HTTP headers from MCP connector secrets based on the authentication type.
+ * Builds HTTP headers from MCP connector config and secrets based on the authentication type.
  *
- * @param secrets - The MCP connector secrets (discriminated union)
- * @param config - The MCP connector config (contains authType and optional apiKeyHeaderName)
+ * @param secrets - The MCP connector secrets (flat structure)
+ * @param config - The MCP connector config (contains hasAuth, authType, and optional apiKeyHeaderName)
  * @returns Record of HTTP headers to use for authentication
  */
 export function buildHeadersFromSecrets(
@@ -19,48 +20,43 @@ export function buildHeadersFromSecrets(
   config: MCPConnectorConfig
 ): Record<string, string> {
   const headers: Record<string, string> = {};
-  const authType = config.service.authType;
+
+  // If no authentication is configured, return empty headers
+  if (!config.hasAuth || config.authType === MCPAuthType.None) {
+    return headers;
+  }
+
+  const authType = config.authType;
 
   switch (authType) {
-    case 'none':
-      // No authentication headers needed
-      break;
-
-    case 'bearer':
-      if (secrets.authType === 'bearer' && secrets.token) {
+    case MCPAuthType.Bearer:
+      if (secrets.token) {
         headers.Authorization = `Bearer ${secrets.token}`;
       }
       break;
 
-    case 'apiKey':
-      if (secrets.authType === 'apiKey' && secrets.apiKey) {
-        const headerName = config.service.apiKeyHeaderName || 'X-API-Key';
+    case MCPAuthType.ApiKey:
+      if (secrets.apiKey) {
+        const headerName = config.apiKeyHeaderName || 'X-API-Key';
         headers[headerName] = secrets.apiKey;
       }
       break;
 
-    case 'basic':
-      if (secrets.authType === 'basic' && secrets.username && secrets.password) {
-        // Basic auth is handled by the MCP client transport, but we can set it here if needed
-        // For now, we'll encode it as a header
-        const credentials = Buffer.from(`${secrets.username}:${secrets.password}`).toString(
-          'base64'
-        );
+    case MCPAuthType.Basic:
+      if (secrets.user && secrets.password) {
+        const credentials = Buffer.from(`${secrets.user}:${secrets.password}`).toString('base64');
         headers.Authorization = `Basic ${credentials}`;
       }
       break;
 
-    case 'customHeaders':
-      if (secrets.authType === 'customHeaders' && secrets.headers) {
-        for (const header of secrets.headers) {
-          headers[header.name] = header.value;
-        }
-      }
-      break;
-
     default:
-      // TypeScript should catch this, but adding for safety
-      throw new Error(`Unsupported auth type: ${authType}`);
+      // No specific auth type configured - this is valid when hasAuth is false
+      break;
+  }
+
+  // Add any secret headers
+  if (secrets.secretHeaders) {
+    Object.assign(headers, secrets.secretHeaders);
   }
 
   return headers;

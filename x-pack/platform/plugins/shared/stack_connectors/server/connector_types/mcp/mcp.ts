@@ -49,8 +49,14 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
 
-    // Build headers from secrets based on authType
-    const headers = buildHeadersFromSecrets(this.secrets, this.config);
+    // Build auth headers from secrets based on authType
+    const authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
+
+    // Merge non-secret headers from config with auth headers (auth headers take precedence)
+    const headers: Record<string, string> = {
+      ...(this.config.headers ?? {}),
+      ...authHeaders,
+    };
 
     // Build client options
     const clientOptions: McpClientOptions = {
@@ -58,11 +64,11 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       // Use default reconnection options from McpClient
     };
 
-    // Create client details using connector ID and server URL from new schema structure
+    // Create client details using connector ID and server URL
     const clientDetails: ClientDetails = {
       name: `kibana-mcp-connector-${this.connector.id}`,
       version: MCP_CLIENT_VERSION,
-      url: this.config.service.http.url,
+      url: this.config.url,
     };
 
     // Initialize the single MCP Client instance for this connector

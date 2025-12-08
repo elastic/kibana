@@ -79,6 +79,10 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
 
+  if (experimentalFeatures.agentBuilderExternalMcpOn) {
+    actions.registerSubActionConnectorType(getMcpConnectorType());
+  }
+
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
   }
@@ -87,9 +91,6 @@ export function registerConnectorTypes({
   }
   if (!experimentalFeatures.inferenceConnectorOff) {
     actions.registerSubActionConnectorType(getInferenceConnectorType());
-  }
-  if (experimentalFeatures.agentBuilderExternalMcpOn) {
-    actions.registerSubActionConnectorType(getMcpConnectorType());
   }
   actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
 }

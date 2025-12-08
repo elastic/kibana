@@ -9,138 +9,83 @@
 
 import { z } from '@kbn/zod';
 
-export const ConfigSchema = z
-  .object({
-    serverUrl: z.string(),
-    tools: z.array(
-      // TODO: determine if we want to store all tools or just the enabled ones
-      z.object({
-        name: z.string(),
-        enabled: z.boolean(),
-      })
-    ),
-  })
-  .strict();
-
-export const SecretsSchema = z
-  .object({
-    headers: z.string().optional(), // JSON string (will likely change)
-  })
-  .strict();
-
 /**
- * Schema for MCP connector HTTP service configuration.
- *
- * Contains only non-sensitive metadata. Credentials are validated separately
- * via MCPConnectorSecretsSchema.
+ * Authentication types supported by the MCP connector.
  */
-export const MCPConnectorHTTPServiceConfigSchema = z.object({
-  http: z.object({
-    url: z.string(),
-  }),
-  /**
-   * Authentication type selector (required).
-   *
-   * Determines which authentication method to use. The actual credentials
-   * are stored in the secrets object and must match this type.
-   */
-  authType: z.union([
-    z.literal('none'),
-    z.literal('bearer'),
-    z.literal('apiKey'),
-    z.literal('basic'),
-    z.literal('customHeaders'),
-  ]),
-  /**
-   * Optional custom header name for API key authentication.
-   *
-   * Only used when authType is 'apiKey'. Defaults to 'X-API-Key' if not specified.
-   */
-  apiKeyHeaderName: z.string().min(1).optional(),
-});
+export const MCPAuthType = {
+  None: 'none',
+  Bearer: 'bearer',
+  ApiKey: 'apiKey',
+  Basic: 'basic',
+} as const;
+
+export type MCPAuthTypeName = (typeof MCPAuthType)[keyof typeof MCPAuthType];
 
 /**
  * Schema for MCP connector configuration.
  *
- * Top-level configuration object containing only non-sensitive metadata.
+ * Flat structure following standard Kibana connector patterns.
  */
 export const MCPConnectorConfigSchema = z.object({
-  uniqueId: z.string().min(1).optional(),
-  description: z.string().optional(),
-  version: z.string().optional(),
-  service: MCPConnectorHTTPServiceConfigSchema,
-});
-
-/**
- * Schema for no authentication secrets.
- *
- * Used when authType is 'none'.
- */
-export const MCPConnectorSecretsNoneSchema = z.object({
-  authType: z.literal('none'),
-});
-
-/**
- * Schema for Bearer token authentication secrets.
- *
- * Used when authType is 'bearer'.
- */
-export const MCPConnectorSecretsBearerSchema = z.object({
-  authType: z.literal('bearer'),
-  token: z.string().min(1),
-});
-
-/**
- * Schema for API key authentication secrets.
- *
- * Used when authType is 'apiKey'.
- */
-export const MCPConnectorSecretsApiKeySchema = z.object({
-  authType: z.literal('apiKey'),
-  apiKey: z.string().min(1),
-});
-
-/**
- * Schema for Basic authentication secrets.
- *
- * Used when authType is 'basic'.
- */
-export const MCPConnectorSecretsBasicSchema = z.object({
-  authType: z.literal('basic'),
-  username: z.string().min(1),
-  password: z.string().min(1),
-});
-
-/**
- * Schema for custom headers authentication secrets.
- *
- * Used when authType is 'customHeaders'.
- */
-export const MCPConnectorSecretsCustomHeadersSchema = z.object({
-  authType: z.literal('customHeaders'),
-  headers: z
-    .array(
-      z.object({
-        name: z.string().min(1),
-        value: z.string(),
-      })
-    )
-    .min(1),
+  /**
+   * The URL of the MCP server endpoint.
+   */
+  url: z.string(),
+  /**
+   * Whether authentication is required. Defaults to true.
+   */
+  hasAuth: z.boolean().default(true),
+  /**
+   * Authentication type to use when hasAuth is true.
+   */
+  authType: z
+    .enum([MCPAuthType.None, MCPAuthType.Bearer, MCPAuthType.ApiKey, MCPAuthType.Basic])
+    .optional(),
+  /**
+   * Custom header name for API key authentication.
+   * Defaults to 'X-API-Key' if not specified.
+   * Only used when authType is 'apiKey'.
+   */
+  apiKeyHeaderName: z.string().min(1).optional(),
+  /**
+   * Non-sensitive HTTP headers to include in requests.
+   */
+  headers: z.record(z.string(), z.string()).optional(),
 });
 
 /**
  * Schema for MCP connector secrets.
  *
- * Discriminated union that validates credentials based on authType.
- * The authType discriminator must match config.service.authType.
+ * Flat structure with optional fields based on auth type.
  */
-export const MCPConnectorSecretsSchema = z.union([
-  MCPConnectorSecretsNoneSchema,
-  MCPConnectorSecretsBearerSchema,
-  MCPConnectorSecretsApiKeySchema,
-  MCPConnectorSecretsBasicSchema,
-  MCPConnectorSecretsCustomHeadersSchema,
-]);
+export const MCPConnectorSecretsSchema = z.object({
+  /**
+   * Bearer token for 'bearer' auth type.
+   */
+  token: z.string().optional(),
+  /**
+   * API key for 'apiKey' auth type.
+   */
+  apiKey: z.string().optional(),
+  /**
+   * Username for 'basic' auth type.
+   */
+  user: z.string().optional(),
+  /**
+   * Password for 'basic' auth type.
+   */
+  password: z.string().optional(),
+  /**
+   * Sensitive HTTP headers to include in requests.
+   */
+  secretHeaders: z.record(z.string(), z.string()).optional(),
+});
+
+// Legacy aliases for backward compatibility during migration
+export const ConfigSchema = MCPConnectorConfigSchema;
+export const SecretsSchema = MCPConnectorSecretsSchema;
+
+// Sub-action schemas
 
 export const TestConnectorRequestSchema = z.object({}).strict();
 
@@ -153,7 +98,6 @@ const MCPListToolsParamsSchema = z.object({
   subActionParams: ListToolsRequestSchema,
 });
 
-// Schema for just the CallToolRequest params
 export const CallToolRequestSchema = z.object({
   name: z.string(),
   arguments: z.record(z.string(), z.any()).optional(),

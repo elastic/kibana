@@ -63,15 +63,10 @@ export const getMcpConnectorType = (): SubActionConnectorType<
 
 const configValidator = (config: MCPConnectorConfig, validatorServices: ValidatorServices) => {
   // Validate that the URL is allowed
-  // urlAllowListValidator uses lodash get() which supports nested paths like 'service.http.url'
-  urlAllowListValidator('service.http.url')(config, validatorServices);
+  urlAllowListValidator('url')(config, validatorServices);
 };
 
-const secretsValidator = (secrets: MCPConnectorSecrets) => {
-  // The schema validation ensures the discriminated union is correct
+const secretsValidator = (_secrets: MCPConnectorSecrets) => {
+  // Schema validation handles all secret field validation
   // Additional validation can be added here if needed
-  // The schema already enforces min(1) for customHeaders, so this check is redundant but kept for clarity
-  if (secrets.authType === 'customHeaders' && secrets.headers.length === 0) {
-    throw new Error('customHeaders auth type requires at least one header');
-  }
 };

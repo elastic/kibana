@@ -8,17 +8,12 @@
  */
 
 import type { z } from '@kbn/zod';
-import type {
-  ConfigSchema,
-  SecretsSchema,
-  MCPConnectorConfigSchema,
-  MCPConnectorSecretsSchema,
-} from '../schemas/v1';
+import type { MCPConnectorConfigSchema, MCPConnectorSecretsSchema } from '../schemas/v1';
 
-// Legacy types (for backward compatibility during migration)
-export type Config = z.input<typeof ConfigSchema>;
-export type Secrets = z.infer<typeof SecretsSchema>;
-
-// New types (for multi-auth support)
+// Main types
 export type MCPConnectorConfig = z.input<typeof MCPConnectorConfigSchema>;
 export type MCPConnectorSecrets = z.infer<typeof MCPConnectorSecretsSchema>;
+
+// Legacy aliases for backward compatibility
+export type Config = MCPConnectorConfig;
+export type Secrets = MCPConnectorSecrets;

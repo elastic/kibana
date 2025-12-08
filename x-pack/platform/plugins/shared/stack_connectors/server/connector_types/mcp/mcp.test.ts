@@ -79,17 +79,11 @@ describe('McpConnector', () => {
   let connectorUsageCollector: ConnectorUsageCollector;
 
   const defaultConfig = {
-    service: {
-      http: {
-        url: 'https://example.com/mcp',
-      },
-      authType: 'none' as const,
-    },
+    url: 'https://example.com/mcp',
+    hasAuth: false,
   };
 
-  const defaultSecrets = {
-    authType: 'none' as const,
-  };
+  const defaultSecrets = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
