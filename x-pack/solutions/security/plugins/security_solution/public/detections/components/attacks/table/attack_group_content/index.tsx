@@ -14,6 +14,7 @@ import {
 
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 
+export const ATTACK_GROUP_TEST_ID_SUFFIX = '-group-renderer' as const;
 export const ATTACK_TITLE_TEST_ID_SUFFIX = '-title' as const;
 export const ATTACK_DESCRIPTION_TEST_ID_SUFFIX = '-description' as const;
 
@@ -46,7 +47,7 @@ export const AttackGroupContent = React.memo<{
 
   return (
     <EuiFlexGroup
-      data-test-subj={`${dataTestSubj}-group-renderer`}
+      data-test-subj={`${dataTestSubj}${ATTACK_GROUP_TEST_ID_SUFFIX}`}
       direction="column"
       gutterSize="s"
     >

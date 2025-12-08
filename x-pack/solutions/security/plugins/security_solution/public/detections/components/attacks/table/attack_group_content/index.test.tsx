@@ -13,6 +13,7 @@ import {
   AttackGroupContent,
   ATTACK_DESCRIPTION_TEST_ID_SUFFIX,
   ATTACK_TITLE_TEST_ID_SUFFIX,
+  ATTACK_GROUP_TEST_ID_SUFFIX,
 } from '.';
 
 jest.mock(
@@ -32,7 +33,7 @@ describe('AttackGroupContent', () => {
       <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" />
     );
 
-    expect(getByTestId('test_id-group-renderer')).toBeInTheDocument();
+    expect(getByTestId(`test_id${ATTACK_GROUP_TEST_ID_SUFFIX}`)).toBeInTheDocument();
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Unix1 Malware and Credential Theft'
     );
