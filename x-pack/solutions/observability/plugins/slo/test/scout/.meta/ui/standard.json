@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:04:02.310Z",
-  "sha1": "d07852fd0c952af54aab6116167d0fe4dee56d3e",
+  "lastModified": "2025-12-08T16:58:37.117Z",
+  "sha1": "bf0aa4087bc3474f73e1703271bfa2af80018f45",
   "tests": [
     {
       "id": "27cb3cfb52afaa0-d4057e4746e6d25",
@@ -90,7 +90,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slos_overview.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 7
       }
     }
