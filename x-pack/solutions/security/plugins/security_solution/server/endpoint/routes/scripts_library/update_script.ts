@@ -40,11 +40,9 @@ export const getPatchUpdateScriptRequestHandler = (
     try {
       const spaceId = (await context.securitySolution).getSpaceId();
       const user = (await context.core).security.authc.getCurrentUser();
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const scriptsClient = endpointAppServices.getScriptsLibraryClient(
         spaceId,
-        user?.username || 'unknown',
-        esClient
+        user?.username || 'unknown'
       );
       const response: EndpointScriptApiResponse = {
         data: await scriptsClient.update({ ...req.body, id: req.params.script_id }),

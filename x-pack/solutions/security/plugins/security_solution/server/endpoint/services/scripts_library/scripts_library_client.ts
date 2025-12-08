@@ -52,8 +52,6 @@ export interface ScriptsLibraryClientOptions {
   spaceId: string;
   username: string;
   endpointService: EndpointAppContextService;
-  // FIXME:PT remove this once we have updated the privileges for kibana_system account
-  esClient?: ElasticsearchClient;
 }
 
 export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
@@ -66,7 +64,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   constructor(options: ScriptsLibraryClientOptions) {
     this.logger = options.endpointService.createLogger('ScriptsLibraryClient');
     this.username = options.username;
-    this.esClient = options.esClient || options.endpointService.getInternalEsClient();
+    this.esClient = options.endpointService.getInternalEsClient();
     this.soClient = options.endpointService.savedObjects.createInternalScopedSoClient({
       spaceId: options.spaceId,
       readonly: false,
