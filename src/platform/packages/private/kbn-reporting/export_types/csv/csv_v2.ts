@@ -148,7 +148,8 @@ export class CsvV2ExportType extends ExportType<
         clients,
         cancellationToken,
         logger,
-        stream
+        stream,
+        jobId
       );
       return await csv.generateData();
     }
@@ -176,6 +177,7 @@ export class CsvV2ExportType extends ExportType<
       logger,
       stream,
       this.isServerless
+      jobId
     );
     return await csv.generateData();
   };

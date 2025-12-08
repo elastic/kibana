@@ -59,6 +59,8 @@ const createMockJob = (baseObj: Partial<JobParamsCSV> = {}): JobParamsCSV =>
   } as JobParamsCSV);
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
+const jobId = 'mock-job-id';
+
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: ISearchClient;
@@ -184,7 +186,9 @@ describe('CsvGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      false, // isServerless
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchSnapshot();
@@ -221,7 +225,9 @@ describe('CsvGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      false, // isServerless
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchSnapshot();
@@ -261,7 +267,9 @@ describe('CsvGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      false, // isServerless
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(false);
@@ -312,7 +320,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       const csvResult = await generateCsv.generateData();
       expect(csvResult.max_size_reached).toBe(true);
@@ -371,7 +381,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       const csvResult = await generateCsv.generateData();
       expect(csvResult.warnings).toEqual([]);
@@ -451,7 +463,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       await generateCsv.generateData();
       expect(content).toMatchSnapshot();
@@ -481,7 +495,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
 
       await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
@@ -495,7 +511,6 @@ describe('CsvGenerator', () => {
               "rows": 0,
             },
           },
-          "user_error": undefined,
           "warnings": Array [
             "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
           ],
@@ -533,7 +548,9 @@ describe('CsvGenerator', () => {
           },
           new CancellationToken(),
           mockLogger,
-          stream
+          stream,
+          false, // isServerless
+          jobId
         );
 
         await generateCsv.generateData();
@@ -569,7 +586,9 @@ describe('CsvGenerator', () => {
           },
           new CancellationToken(),
           mockLogger,
-          stream
+          stream,
+          false, // isServerless
+          jobId
         );
 
         await generateCsv.generateData();
@@ -667,7 +686,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(timeFromNowInMs);
@@ -751,7 +772,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(requestDuration);
@@ -840,7 +863,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       const csvResult = await generateCsv.generateData();
       expect(csvResult.max_size_reached).toBe(true);
@@ -865,7 +890,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       const csvResult = await generateCsv.generateData();
       expect(csvResult.warnings).toEqual([]);
@@ -936,7 +963,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       await generateCsv.generateData();
       expect(content).toMatchSnapshot();
@@ -974,7 +1003,9 @@ describe('CsvGenerator', () => {
           },
           new CancellationToken(),
           mockLogger,
-          stream
+          stream,
+          false, // isServerless
+          jobId
         );
 
         await generateCsv.generateData();
@@ -1000,7 +1031,9 @@ describe('CsvGenerator', () => {
           },
           new CancellationToken(),
           mockLogger,
-          stream
+          stream,
+          false, // isServerless
+          jobId
         );
 
         await generateCsv.generateData();
@@ -1041,7 +1074,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       await generateCsv.generateData();
 
@@ -1089,7 +1124,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -1144,7 +1181,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -1187,7 +1226,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       await generateCsv.generateData();
 
@@ -1226,7 +1267,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       await generateCsv.generateData();
 
@@ -1265,7 +1308,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
       await generateCsv.generateData();
 
@@ -1306,7 +1351,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -1345,7 +1392,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -1389,7 +1438,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -1419,7 +1470,9 @@ describe('CsvGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      false, // isServerless
+      jobId
     );
 
     await generateCsv.generateData();
@@ -1451,84 +1504,6 @@ describe('CsvGenerator', () => {
         transport: { maxRetries: 0, requestTimeout: '30s' },
       }
     );
-  });
-
-  it('will return warning and user_error if search results does not match expected total', async () => {
-    const mockJobUsingPitPaging = createMockJob({
-      columns: ['date', 'ip', 'message'],
-      pagingStrategy: 'pit',
-    });
-    mockDataClient.search = jest
-      .fn()
-      .mockImplementationOnce(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            range(0, (HITS_TOTAL - 20) / 10).map(
-              () =>
-                ({
-                  fields: {
-                    date: ['2020-12-31T00:14:28.000Z'],
-                    ip: ['110.135.176.89'],
-                    message: ['hit from the initial search'],
-                  },
-                } as unknown as estypes.SearchHit)
-            ),
-            HITS_TOTAL
-          ),
-        })
-      )
-      .mockImplementation(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            range(0, HITS_TOTAL / 10).map(
-              () =>
-                ({
-                  fields: {
-                    date: ['2020-12-31T00:14:28.000Z'],
-                    ip: ['110.135.176.89'],
-                    message: ['hit from a subsequent scroll'],
-                  },
-                } as unknown as estypes.SearchHit)
-            )
-          ),
-        })
-      );
-
-    const generateCsv = new CsvGenerator(
-      mockJobUsingPitPaging,
-      mockConfig,
-      mockTaskInstanceFields,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      mockLogger,
-      stream
-    );
-    const csvResult = await generateCsv.generateData();
-    expect(csvResult).toMatchInlineSnapshot(`
-      Object {
-        "content_type": "text/csv",
-        "csv_contains_formulas": false,
-        "error_code": undefined,
-        "max_size_reached": false,
-        "metrics": Object {
-          "csv": Object {
-            "rows": 108,
-          },
-        },
-        "user_error": true,
-        "warnings": Array [
-          "Encountered an error with the number of CSV rows generated from the search: expected 100, received 108.",
-        ],
-      }
-    `);
   });
 
   it('will return partial data and a warning if search results exceed the max rows', async () => {
@@ -1589,7 +1564,9 @@ describe('CsvGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      false, // isServerless
+      jobId
     );
     const warnLogSpy = jest.spyOn(mockLogger, 'warn');
     const csvResult = await generateCsv.generateData();
@@ -1674,7 +1651,8 @@ describe('CsvGenerator', () => {
       new CancellationToken(),
       mockLogger,
       stream,
-      true // isServerless
+      true, // isServerless
+      jobId
     );
     const warnLogSpy = jest.spyOn(mockLogger, 'warn');
     const csvResult = await generateCsv.generateData();
@@ -1724,7 +1702,9 @@ describe('CsvGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      false, // isServerless
+      jobId
     );
     await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
       Object {
@@ -1737,7 +1717,6 @@ describe('CsvGenerator', () => {
             "rows": 0,
           },
         },
-        "user_error": undefined,
         "warnings": Array [
           "Received a 500 response from Elasticsearch: my error",
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",
@@ -1747,10 +1726,12 @@ describe('CsvGenerator', () => {
     expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "CSV export search error: ResponseError: my error",
-        ],
-        Array [
-          [ResponseError: my error],
+          [ResponseError: CSV export search error: my error],
+          Object {
+            "tags": Array [
+              "mock-job-id",
+            ],
+          },
         ],
       ]
     `);
@@ -1776,7 +1757,9 @@ describe('CsvGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      false, // isServerless
+      jobId
     );
 
     await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
@@ -1790,9 +1773,8 @@ describe('CsvGenerator', () => {
             "rows": 0,
           },
         },
-        "user_error": undefined,
         "warnings": Array [
-          "Encountered an unknown error: An unknown error",
+          "Encountered an unknown error: CSV export search error: An unknown error",
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",
         ],
       }
@@ -1804,7 +1786,7 @@ describe('CsvGenerator', () => {
         ],
         Array [
           "
-      \\"Encountered an unknown error: An unknown error\\"
+      \\"Encountered an unknown error: CSV export search error: An unknown error\\"
       \\"Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.\\"",
         ],
       ]
@@ -1850,7 +1832,9 @@ describe('CsvGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        false, // isServerless
+        jobId
       );
 
       const { error_code: errorCode, warnings } = await generateCsv.generateData();
@@ -1865,10 +1849,12 @@ describe('CsvGenerator', () => {
       expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "CSV export search error: ResponseError: Response Error",
-          ],
-          Array [
-            [ResponseError: Response Error],
+            [ResponseError: CSV export search error: Response Error],
+            Object {
+              "tags": Array [
+                "mock-job-id",
+              ],
+            },
           ],
         ]
       `);

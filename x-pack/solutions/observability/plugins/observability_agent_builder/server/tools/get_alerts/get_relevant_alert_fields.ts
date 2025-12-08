@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { groupBy, uniq } from 'lodash';
 import type { ModelProvider } from '@kbn/onechat-server';
-import type { ObservabilityAgentPluginStartDependencies } from '../../types';
+import type { ObservabilityAgentBuilderPluginStartDependencies } from '../../types';
 import { selectRelevantAlertFields } from './select_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
 import { getTypedSearch } from '../../utils/get_typed_search';
@@ -29,7 +29,7 @@ export async function getRelevantAlertFields({
   start?: string;
   end?: string;
   coreStart: CoreStart;
-  pluginStart: ObservabilityAgentPluginStartDependencies;
+  pluginStart: ObservabilityAgentBuilderPluginStartDependencies;
   request: KibanaRequest;
   modelProvider: ModelProvider;
   logger: Logger;
