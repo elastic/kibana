@@ -158,12 +158,21 @@ describe('Indices Metadata - MetadataReceiver', () => {
       expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
         name: '*',
         expand_wildcards: ['open', 'hidden'],
-        filter_path: ['data_streams.name', 'data_streams.indices'],
+        filter_path: [
+          'data_streams.name',
+          'data_streams.indices',
+          'data_streams.lifecycle.enabled',
+          'data_streams.lifecycle.data_retention',
+        ],
       });
 
       expect(result).toEqual([
         {
           datastream_name: 'test-datastream',
+          dsl: {
+            enabled: false,
+            data_retention: undefined,
+          },
           indices: [
             {
               index_name: 'test-index-1',
@@ -203,6 +212,10 @@ describe('Indices Metadata - MetadataReceiver', () => {
       expect(result).toEqual([
         {
           datastream_name: 'test-datastream',
+          dsl: {
+            enabled: false,
+            data_retention: undefined,
+          },
           indices: [],
         },
       ]);
