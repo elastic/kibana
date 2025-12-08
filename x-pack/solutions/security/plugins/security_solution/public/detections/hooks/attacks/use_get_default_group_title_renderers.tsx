@@ -18,10 +18,24 @@ import { AttackGroupContent } from '../../components/attacks/table/attack_group_
 
 const EMPTY_ARRAY: AttackDiscoveryAlert[] = [];
 
+/**
+ * Props for the useGetDefaultGroupTitleRenderers hook
+ */
 export interface UseGetDefaultGroupTitleRenderersProps {
+  /** Optional array of attack IDs to pre-fetch and cache for rendering */
   attackIds?: string[];
 }
 
+/**
+ * Pre-caches attack discovery documents using the provided attack IDs and returns
+ * a renderer function that uses these cached documents for individual group component rendering.
+ * This hook optimizes performance by fetching all required attack data upfront rather than
+ * on-demand during rendering.
+ *
+ * @param props - The hook props
+ * @param props.attackIds - Optional array of attack IDs to pre-fetch and cache
+ * @returns An object containing the defaultGroupTitleRenderers function for rendering group titles
+ */
 export const useGetDefaultGroupTitleRenderers = ({
   attackIds,
 }: UseGetDefaultGroupTitleRenderersProps) => {
