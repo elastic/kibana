@@ -596,7 +596,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 

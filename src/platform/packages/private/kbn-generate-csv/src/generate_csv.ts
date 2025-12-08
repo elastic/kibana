@@ -68,7 +68,7 @@ export class CsvGenerator {
     private cancellationToken: CancellationToken,
     private logger: Logger,
     private stream: Writable,
-    private isServerless: boolean = false
+    private isServerless: boolean = false,
     private jobId: string
   ) {}
   /*
