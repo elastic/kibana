@@ -9,9 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderDataRegistryTypes } from './data_registry_types';
 
 export class ObservabilityAgentBuilderDataRegistry {
-  private readonly providers: Partial<{
-    [K in keyof ObservabilityAgentBuilderDataRegistryTypes]: ObservabilityAgentBuilderDataRegistryTypes[K];
-  }> = {};
+  private readonly providers = new Map<string, (...args: any[]) => Promise<any>>();
 
   constructor(private readonly logger: Logger) {}
 
@@ -19,32 +17,26 @@ export class ObservabilityAgentBuilderDataRegistry {
     id: K,
     provider: ObservabilityAgentBuilderDataRegistryTypes[K]
   ): void {
-    if (this.providers[id]) {
+    if (this.providers.has(id)) {
       this.logger.warn(`Overwriting data provider for key: ${id}`);
     } else {
       this.logger.debug(`Registered data provider for key: ${id}`);
     }
 
-    this.providers[id] = provider;
+    this.providers.set(id, provider);
   }
 
   public async getData<K extends keyof ObservabilityAgentBuilderDataRegistryTypes>(
     id: K,
     params: Parameters<ObservabilityAgentBuilderDataRegistryTypes[K]>[0]
   ): Promise<ReturnType<ObservabilityAgentBuilderDataRegistryTypes[K]> | undefined> {
-    const provider = this.providers[id] as
-      | ObservabilityAgentBuilderDataRegistryTypes[K]
-      | undefined;
+    const provider = this.providers.get(id);
 
     if (!provider) {
       this.logger.error(`No data provider registered for key: ${id}`);
       return;
     }
 
-    const fn = this.providers[id] as unknown as (
-      args: Parameters<ObservabilityAgentBuilderDataRegistryTypes[K]>[0]
-    ) => Promise<ReturnType<ObservabilityAgentBuilderDataRegistryTypes[K]>>;
-
-    return fn(params);
+    return provider(params) as Promise<ReturnType<ObservabilityAgentBuilderDataRegistryTypes[K]>>;
   }
 }
