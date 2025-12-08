@@ -50,7 +50,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
         err.stack = error.stack;
       } else {
         if (report.error && report.error instanceof Error) {
-          errorLogger(logger, 'Error executing report', report.error);
+          errorLogger(this.logger, 'Error executing report', report.error);
         }
         err = new QueueTimeoutError(
           `Max attempts reached (${maxAttempts}). Queue timeout reached.`
