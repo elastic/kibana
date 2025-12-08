@@ -10,7 +10,7 @@ import type { ObservabilityAgentBuilderDataRegistryTypes } from './data_registry
 
 export class ObservabilityAgentBuilderDataRegistry {
   private readonly providers: Partial<{
-    [K in keyof ObservabilityAgentDataRegistryTypes]: ObservabilityAgentDataRegistryTypes[K];
+    [K in keyof ObservabilityAgentBuilderDataRegistryTypes]: ObservabilityAgentBuilderDataRegistryTypes[K];
   }> = {};
 
   constructor(private readonly logger: Logger) {}

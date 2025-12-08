@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import dedent from 'dedent';
-import type { ObservabilityAgentDataRegistry } from '../../../data_registry/data_registry';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
 
 const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
@@ -64,7 +64,7 @@ export interface GenerateErrorAiInsightParams {
   logger: Logger;
   request: KibanaRequest;
   inferenceStart: InferenceServerStart;
-  dataRegistry: ObservabilityAgentDataRegistry;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
 export async function generateErrorAiInsight({

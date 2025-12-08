@@ -7,10 +7,10 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ObservabilityAgentDataRegistry } from '../../../data_registry/data_registry';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 
 export interface FetchApmErrorContextParams {
-  dataRegistry: ObservabilityAgentDataRegistry;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
   serviceName: string;
   environment?: string;

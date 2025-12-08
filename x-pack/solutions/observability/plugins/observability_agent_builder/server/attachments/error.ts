@@ -12,10 +12,10 @@ import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
-import type { ObservabilityAgentDataRegistry } from '../data_registry/data_registry';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 
 export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
@@ -35,9 +35,12 @@ export function createErrorAttachmentType({
   logger,
   dataRegistry,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
-  dataRegistry: ObservabilityAgentDataRegistry;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID, ErrorAttachmentData> {
   return {
     id: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
