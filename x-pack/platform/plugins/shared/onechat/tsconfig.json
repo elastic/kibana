@@ -93,6 +93,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/ai-assistant-common",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/ai-assistant-management-plugin"
   ]
 }
