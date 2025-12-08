@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { adHocRunStatus } from '../../common/constants';
+import { adHocRunStatus, backfillInitiator } from '../../common/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
   SavedObject,
@@ -132,7 +132,7 @@ function getMockAdHocRunAttributes({
 } = {}): AdHocRunSO {
   // @ts-expect-error
   return {
-    initiator: 'user',
+    initiator: backfillInitiator.USER,
     ...(omitApiKey ? {} : { apiKeyId: '123', apiKeyToUse: 'MTIzOmFiYw==' }),
     createdAt: '2024-01-30T00:00:00.000Z',
     duration: '12h',
@@ -2180,6 +2180,7 @@ describe('BackfillClient', () => {
         logger,
         backfillClient,
         actionsClient,
+        initiator: backfillInitiator.USER,
       });
       expect(updateGaps).toHaveBeenNthCalledWith(2, {
         backfillSchedule: mockAttributes.schedule,
@@ -2192,6 +2193,7 @@ describe('BackfillClient', () => {
         logger,
         backfillClient,
         actionsClient,
+        initiator: backfillInitiator.USER,
       });
     });
 
@@ -2263,6 +2265,7 @@ describe('BackfillClient', () => {
         logger,
         backfillClient,
         actionsClient,
+        initiator: backfillInitiator.USER,
       });
     });
   });
