@@ -46,6 +46,8 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
   const hasApplicationTopBar = !!slots.ApplicationTopBar;
   const hasApplicationBottomBar = !!slots.ApplicationBottomBar;
 
+  const navigationWidth = hasNavigation ? layoutConfig.navigationWidth ?? 0 : 0;
+
   const layoutState: LayoutState = {
     hasBanner,
     bannerHeight: hasBanner ? layoutConfig.bannerHeight ?? 0 : 0,
@@ -54,7 +56,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     hasHeader,
     headerHeight: hasHeader ? layoutConfig.headerHeight ?? 0 : 0,
     hasNavigation,
-    navigationWidth: hasNavigation ? layoutConfig.navigationWidth ?? 0 : 0,
+    navigationWidth,
     hasSidebar,
     sidebarWidth: hasSidebar ? layoutConfig.sidebarWidth ?? 0 : 0,
     hasApplicationTopBar,
@@ -65,6 +67,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
       : 0,
     applicationMarginRight: layoutConfig.applicationMarginRight ?? 0,
     applicationMarginBottom: layoutConfig.applicationMarginBottom ?? 0,
+    isNavigationExpanded: navigationWidth > 0,
   };
 
   return <LayoutStateContext.Provider value={layoutState}>{children}</LayoutStateContext.Provider>;

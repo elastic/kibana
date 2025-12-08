@@ -24,6 +24,8 @@ export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
   children: Slot;
 }
 
+const DEFAULT_GRID_COLUMN_GAP = '8px';
+
 /**
  * The chrome layout component that composes slots together.
  *
@@ -78,7 +80,7 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
         style={{
           display: 'grid',
           gridTemplateColumns: `${layoutState.navigationWidth}px 1fr`,
-          columnGap: '8px',
+          columnGap: layoutState.isNavigationExpanded ? DEFAULT_GRID_COLUMN_GAP : '0px',
           gridArea: 'navigation-application',
         }}
       >
