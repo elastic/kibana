@@ -22,7 +22,7 @@ const storageSettings = {
       executionId: types.keyword({}),
       agentId: types.keyword({}),
       spaceId: types.keyword({}),
-      params: types.object({ dynamic: false }),
+      agentParams: types.object({ dynamic: false }),
     },
   },
 } satisfies IndexStorageSettings;

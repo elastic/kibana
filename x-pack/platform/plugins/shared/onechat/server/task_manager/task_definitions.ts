@@ -37,6 +37,7 @@ export const registerTaskDefinitions = ({
         return {
           run: async () => {
             // TODO: we need to call the executor here.
+            console.log('****** INSIDE THE RUN FN');
           },
           cancel: async () => {
             abortController.abort();

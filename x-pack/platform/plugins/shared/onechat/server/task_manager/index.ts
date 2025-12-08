@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createRepository as createAgentExecutionRepository } from './agent_execution';
-export { createRepository as createExecutionEventRepository } from './agent_execution_events';
+export { AgentExecutor } from './executor';

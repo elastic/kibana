@@ -30,6 +30,7 @@ import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { AgentExecutor } from '../task_manager';
 
 export function registerChatRoutes({
   router,
@@ -430,6 +431,30 @@ export function registerChatRoutes({
               attachmentsService,
             })
           : [];
+
+        // POC START
+        const [{ elasticsearch }, { taskManager }] = await coreSetup.getStartServices();
+
+        const executor = new AgentExecutor({
+          logger,
+          taskManager,
+          elasticsearch,
+        });
+
+        await executor.executeAgent({
+          request,
+          agentId: payload.agent_id ?? oneChatDefaultAgentId,
+          conversationId: payload.conversation_id,
+          agentParams: {
+            nextInput: {
+              message: payload.input,
+              attachments,
+            },
+          },
+        });
+
+        return response.ok();
+        // POC END
 
         const chatEvents$ = callConverse({
           payload,

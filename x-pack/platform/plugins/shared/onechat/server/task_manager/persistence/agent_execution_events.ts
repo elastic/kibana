@@ -11,7 +11,7 @@ import { types } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { AgentExecution } from '../types';
+import type { AgentExecutionEvent } from '../types';
 
 export const agentExecutionEventsIndexName = chatSystemIndex('agent-execution-events');
 
@@ -23,7 +23,7 @@ const storageSettings = {
       agentId: types.keyword({}),
       executionId: types.keyword({}),
       spaceId: types.keyword({}),
-      event: types.object({ dynamic: false }),
+      event: types.object({ dynamic: false, properties: {} }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -59,6 +59,7 @@ export const createStorage = ({
 
 export interface AgentExecutionEventsRepository {
   // TODO: API
+  storeEvents(opts: { agentId: string; executionId: string; spaceId: string; events: any[] });
 }
 
 export const createRepository = ({
@@ -71,6 +72,9 @@ export const createRepository = ({
   const storage = createStorage({ logger, esClient });
 
   return {
-    // TODO: implem
+    storeEvents(opts) {
+      const { agentId, executionId, spaceId, events } = opts;
+      // TODO: store events
+    },
   };
 };

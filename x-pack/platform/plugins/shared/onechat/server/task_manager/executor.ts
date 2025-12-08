@@ -12,7 +12,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AgentParams } from '@kbn/onechat-server/agents/provider';
 import { taskTypes } from './task_definitions';
-import { createAgentExecutionRepository } from './persistence';
+import { createAgentExecutionRepository, createExecutionEventRepository } from './persistence';
 import type { AgentExecution } from './types';
 
 export class AgentExecutor {
@@ -47,7 +47,7 @@ export class AgentExecutor {
     agentParams: AgentParams;
     defaultConnectorId?: string;
   }) => {
-    // TODO: get space from requesr
+    // TODO: get space from request
     const spaceId = 'default';
 
     const executionRepository = createAgentExecutionRepository({
@@ -71,6 +71,13 @@ export class AgentExecutor {
       request,
       taskManager: this.taskManager,
     });
+
+    const eventRepository = createExecutionEventRepository({
+      logger: this.logger,
+      esClient: this.elasticsearch.client.asInternalUser,
+    });
+
+    // TODO: follow events
   };
 }
 
@@ -97,3 +104,4 @@ export const scheduleExecution = async ({
     { request }
   );
 };
+
