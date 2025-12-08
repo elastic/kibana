@@ -7,7 +7,9 @@
 
 import {
   QradarDataInputStep,
+  QradarDataInputStepId,
   SplunkDataInputStep,
+  SplunkDataInputStepId,
 } from '../components/data_input_flyout/steps/constants';
 import type { UseMigrationStepsProps } from './use_migration_steps';
 import { useMigrationSteps } from './use_migration_steps';
@@ -46,15 +48,15 @@ describe('useMigrationSteps', () => {
       useMigrationSteps({ ...props, migrationSource: MigrationSource.SPLUNK })
     );
     expect(result.current?.length).toEqual(3);
-    expect(result.current?.[0].id).toBe(SplunkDataInputStep.Rules);
-    expect(result.current?.[1].id).toBe(SplunkDataInputStep.Macros);
-    expect(result.current?.[2].id).toBe(SplunkDataInputStep.Lookups);
+    expect(result.current?.[0].id).toBe(SplunkDataInputStepId.Rules);
+    expect(result.current?.[1].id).toBe(SplunkDataInputStepId.Macros);
+    expect(result.current?.[2].id).toBe(SplunkDataInputStepId.Lookups);
   });
   it('should return Qradar migration steps when migration source is Qradar', () => {
     const { result } = renderHook(() =>
       useMigrationSteps({ ...props, migrationSource: MigrationSource.QRADAR })
     );
     expect(result.current?.length).toEqual(1);
-    expect(result.current?.[0].id).toBe(QradarDataInputStep.Rules);
+    expect(result.current?.[0].id).toBe(QradarDataInputStepId.Rules);
   });
 });
