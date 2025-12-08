@@ -6,37 +6,9 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
-import { roundedBorderRadiusStyles } from '../../conversation.styles';
-
-export const usePopoverButtonStyles = ({
-  open,
-  disabled = false,
-}: {
-  open: boolean;
-  disabled?: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const popoverButtonStyles = css`
-    transition-property: none;
-    min-inline-size: 0;
-    ${roundedBorderRadiusStyles}
-  `;
-  const closedPopoverStyles = css`
-    &:not(:hover) {
-      border-color: transparent;
-    }
-  `;
-  const disabledStyles = css`
-    cursor: default;
-    background-color: transparent;
-    color: ${euiTheme.colors.textParagraph};
-  `;
-  return [popoverButtonStyles, !open && closedPopoverStyles, disabled && disabledStyles];
-};
 
 export const InputPopoverButton: React.FC<
   PropsWithChildren<{
@@ -56,12 +28,11 @@ export const InputPopoverButton: React.FC<
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
 }) => {
-  const popoverButtonStyles = usePopoverButtonStyles({ open, disabled });
   return (
     <EuiButtonEmpty
       color="text"
-      css={popoverButtonStyles}
       iconSide="left"
+      flush="both"
       iconType={iconType}
       onClick={() => {
         if (!disabled) {
