@@ -180,6 +180,11 @@ const ESQLEditorInternal = function ESQLEditor({
   const [abortController, setAbortController] = useState(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useState(false);
 
+  // Refs for dynamic dependencies that commands need to access
+  const esqlVariablesRef = useRef(esqlVariables);
+  const controlsContextRef = useRef(controlsContext);
+  const isVisorOpenRef = useRef(isVisorOpen);
+
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -211,7 +216,6 @@ const ESQLEditorInternal = function ESQLEditor({
           setCodeStateOnSubmission(currentValue);
         }
 
-        // TODO: add rest of options
         if (currentValue) {
           telemetryService.trackQuerySubmitted({
             source,
@@ -302,6 +306,13 @@ const ESQLEditorInternal = function ESQLEditor({
       variablesService?.disableCreateControlSuggestion();
     }
   }, [variablesService, controlsContext, esqlVariables]);
+
+  // Update refs used for the custom commands
+  useEffect(() => {
+    esqlVariablesRef.current = esqlVariables;
+    controlsContextRef.current = controlsContext;
+    isVisorOpenRef.current = isVisorOpen;
+  }, [esqlVariables, controlsContext, isVisorOpen]);
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
@@ -779,6 +790,10 @@ const ESQLEditorInternal = function ESQLEditor({
     ]
   );
 
+  const toggleVisor = useCallback(() => {
+    setIsVisorOpen(!isVisorOpenRef.current);
+  }, []);
+
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
       // forces refresh
@@ -1080,15 +1095,15 @@ const ESQLEditorInternal = function ESQLEditor({
                       getCurrentQuery: () =>
                         fixESQLQueryWithVariables(
                           editorRef.current?.getValue() || '',
-                          esqlVariables
+                          esqlVariablesRef.current
                         ),
-                      esqlVariables,
-                      controlsContext,
+                      esqlVariables: esqlVariablesRef,
+                      controlsContext: controlsContextRef,
                       openTimePickerPopover,
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, setIsVisorOpen, isVisorOpen);
+                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;
