@@ -11,6 +11,17 @@ import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import type { ObservabilityAgentDataRegistry } from '../../data_registry/data_registry';
 
+/**
+ * These types are derived from the generated alerts-as-data schemas:
+ * - `AlertSchema` in `kbn-alerts-as-data-utils` (see `alert_schema.ts`) which defines
+ *   `kibana.alert.start` and other technical fields.
+ * - `ObservabilityApmAlertSchema` in `observability_apm_schema.ts`, which adds
+ *   the APM-specific fields like `service.*` and `transaction.*`.
+ *
+ * We only rely on these well-known keys; all other properties are treated as
+ * opaque via the index signature below so this type can safely represent any
+ * Observability alert document.
+ */
 export interface AlertDocForInsight {
   'service.name'?: string;
   'service.environment'?: string;
@@ -66,10 +77,9 @@ async function fetchAlertContext({
   const serviceEnvironment = alertDoc?.['service.environment'] ?? '';
   const transactionType = alertDoc?.['transaction.type'];
   const transactionName = alertDoc?.['transaction.name'];
-  const alertStartedAt = alertDoc?.['kibana.alert.start'];
 
-  const alertTime = new Date(String(alertStartedAt)).getTime();
-  const alertEnd = new Date(alertTime).toISOString();
+  const alertTime = new Date(String(alertDoc?.['kibana.alert.start'])).getTime();
+  const alertStart = new Date(alertTime).toISOString();
 
   // Time ranges for different data providers
   const serviceSummaryStart = new Date(alertTime - 5 * 60 * 1000).toISOString(); // 5 min before
@@ -87,7 +97,7 @@ async function fetchAlertContext({
         serviceName,
         serviceEnvironment,
         start: serviceSummaryStart,
-        end: alertEnd,
+        end: alertStart,
         transactionType,
       });
       if (apmServiceSummary) {
@@ -106,7 +116,7 @@ async function fetchAlertContext({
         serviceName,
         serviceEnvironment,
         start: downstreamStart,
-        end: alertEnd,
+        end: alertStart,
       });
       if (apmDownstreamDependencies && apmDownstreamDependencies.length > 0) {
         contextParts.push(
@@ -128,7 +138,7 @@ async function fetchAlertContext({
         serviceName,
         serviceEnvironment,
         start: errorsStart,
-        end: alertEnd,
+        end: alertStart,
       });
       if (apmErrors && apmErrors.length > 0) {
         contextParts.push(`<APMErrors>\n${JSON.stringify(apmErrors, null, 2)}\n</APMErrors>`);
@@ -146,7 +156,7 @@ async function fetchAlertContext({
         transactionType,
         transactionName,
         start: changePointsStart,
-        end: alertEnd,
+        end: alertStart,
       });
       if (serviceChangePoints && serviceChangePoints.length > 0) {
         contextParts.push(
@@ -168,7 +178,7 @@ async function fetchAlertContext({
         serviceName,
         serviceEnvironment,
         start: changePointsStart,
-        end: alertEnd,
+        end: alertStart,
       });
       if (exitSpanChangePoints && exitSpanChangePoints.length > 0) {
         contextParts.push(
