@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
-  EuiIconTip,
   EuiSuperSelect,
   EuiTextArea,
   EuiText,
@@ -81,8 +80,9 @@ import {
   SELECT_OS_LABEL,
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
-  PROCESS_DESCENDANTS_TRUSTED_APP,
+  TRUSTED_APPS_PROCESS_DESCENDANTS,
   TRUSTED_APPLICATIONS,
+  TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS,
 } from '../translations';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
@@ -111,6 +111,7 @@ import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { ProcessDescendantsIconTip } from '../../../../components/process_descendant_icontip';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -715,21 +716,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           id: 'descendants',
           label: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiText size="s">{PROCESS_DESCENDANTS_TRUSTED_APP}</EuiText>
-              <EuiIconTip
-                content={
-                  <EuiText size="s">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.securitySolution.trustedApps.filterProcessDescendants.tooltip"
-                        defaultMessage="When enabled, all child processes of a trusted parent process also become Trusted Applications. Supported by Elastic Agent v9.2+."
-                      />
-                    </p>
-                  </EuiText>
-                }
+              <EuiText size="s">{TRUSTED_APPS_PROCESS_DESCENDANTS}</EuiText>
+              <ProcessDescendantsIconTip
+                tooltipText={TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS.tooltipText}
+                versionInfo={TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS.versionInfo}
                 data-test-subj="trustedAppsProcessDescendantsTooltip"
-                iconProps={{ 'data-test-subj': 'trustedAppsProcessDescendantsTooltipIcon' }}
-                type="info"
               />
             </EuiFlexGroup>
           ),

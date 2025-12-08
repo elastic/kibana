@@ -14,12 +14,10 @@ export class AnomalyDetectionPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/anomaly-detection`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('apmMainContainer');
 
     // Wait for the page content to load
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   async getCreateJobButton() {

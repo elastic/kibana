@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isOnechatError, OnechatErrorCode } from '@kbn/onechat-common';
+import { isOnechatError, OnechatErrorCode, isAgentExecutionError } from '@kbn/onechat-common';
 
 /**
  * Normalize error type/code from error object
@@ -17,6 +17,18 @@ export function normalizeErrorType(error: unknown): string {
   }
 
   return 'other';
+}
+
+/**
+ * Extract the AgentExecutionErrorCode sub-type from an agentExecutionError.
+ * Returns undefined if the error is not an agentExecutionError or doesn't have a sub-code.
+ * @param error - Error object
+ */
+export function getAgentExecutionErrorCode(error: unknown): string | undefined {
+  if (isAgentExecutionError(error)) {
+    return error.meta?.errCode;
+  }
+  return undefined;
 }
 
 /**
