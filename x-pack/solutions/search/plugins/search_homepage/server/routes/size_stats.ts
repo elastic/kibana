@@ -33,7 +33,7 @@ export const registerStatsRoutes = (
     async (context, _request, response) => {
       const client = (await context.core).elasticsearch.client;
 
-      const stats = fetchSizeStats(client, isServerless);
+      const stats = await fetchSizeStats(client, isServerless);
       return response.ok({
         headers: { 'content-type': 'application/json' },
         body: stats,
