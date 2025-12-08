@@ -6,25 +6,54 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type {
-  ESQLControlVariable,
-  IndexAutocompleteItem,
-  RecommendedQuery,
-  RecommendedField,
-  InferenceEndpointsAutocompleteResult,
-  ESQLSourceResult,
-} from '@kbn/esql-types';
-import type { ILicense } from '@kbn/licensing-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { ILicense } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { RecommendedField, RecommendedQuery } from './extensions_autocomplete_types';
+import type { ESQLSourceResult, IndexAutocompleteItem } from './sources_autocomplete_types';
+import type { ESQLControlVariable } from './variables_types';
+import type { InferenceEndpointsAutocompleteResult } from './inference_endpoint_autocomplete_types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
 /**
+ * All supported field types in ES|QL. This is all the types
+ * that can come back in the table from a query.
+ */
+export const esqlFieldTypes: readonly string[] = [
+  'boolean',
+  'date',
+  'double',
+  'ip',
+  'keyword',
+  'integer',
+  'long',
+  'text',
+  'unsigned_long',
+  'version',
+  'cartesian_point',
+  'cartesian_shape',
+  'geo_point',
+  'geo_shape',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
+  'unsupported',
+  'date_nanos',
+  'function_named_parameters',
+  'aggregate_metric_double',
+  'dense_vector',
+  'histogram',
+  'exponential_histogram',
+  'tdigest',
+] as const;
+
+export type EsqlFieldType = (typeof esqlFieldTypes)[number];
+
+/**
  *  Partial fields metadata client, used to avoid circular dependency with @kbn/monaco
-/** @internal **/
+ **/
 export interface PartialFieldsMetadataClient {
   find: ({ fieldNames, attributes }: { fieldNames?: string[]; attributes: string[] }) => Promise<{
     fields: Record<
@@ -36,6 +65,17 @@ export interface PartialFieldsMetadataClient {
       }
     >;
   }>;
+}
+
+export interface ESQLFieldWithMetadata {
+  name: string;
+  type: EsqlFieldType;
+  userDefined: false;
+  isEcs?: boolean;
+  hasConflict?: boolean;
+  metadata?: {
+    description?: string;
+  };
 }
 
 export interface ESQLCallbacks {
