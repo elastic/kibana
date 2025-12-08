@@ -29,7 +29,11 @@ export type EmbeddableTransforms<
    *                                                   Parameter provided to allow embeddables to extract by-value panel references from container references for BWC
    * @returns EmbeddableState
    */
-  transformOut?: (storedState: StoredEmbeddableState, references?: Reference[]) => EmbeddableState;
+  transformOut?: (
+    storedState: StoredEmbeddableState,
+    panelReferences?: Reference[],
+    containerReferences?: Reference[]
+  ) => EmbeddableState;
   /**
    * Converts EmbeddableState into StoredEmbeddableState and extracts references
    */
