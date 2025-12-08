@@ -1254,6 +1254,8 @@
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/platform/plugins/shared/ingest_pipelines/*"],
       "@kbn/ingest-pipelines-shared": ["x-pack/platform/packages/shared/ingest-pipelines"],
       "@kbn/ingest-pipelines-shared/*": ["x-pack/platform/packages/shared/ingest-pipelines/*"],
+      "@kbn/ink": ["x-pack/platform/packages/shared/kbn-ink"],
+      "@kbn/ink/*": ["x-pack/platform/packages/shared/kbn-ink/*"],
       "@kbn/input-control-vis-plugin": ["src/platform/plugins/private/input_control_vis"],
       "@kbn/input-control-vis-plugin/*": ["src/platform/plugins/private/input_control_vis/*"],
       "@kbn/inspect-component-plugin": ["src/platform/plugins/private/inspect_component"],

@@ -13,7 +13,9 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+
 import type {
+  AgentsServiceStartContract,
   AttachmentServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/onechat-browser';
@@ -65,6 +67,10 @@ export interface OnechatPluginSetup {}
  * Public start contract for the browser-side onechat plugin.
  */
 export interface OnechatPluginStart {
+  /**
+   * Agent service contract, can be used to list agents.
+   */
+  agents: AgentsServiceStartContract;
   /**
    * Attachment service contract, can be used to register and retrieve attachment UI definitions.
    */
