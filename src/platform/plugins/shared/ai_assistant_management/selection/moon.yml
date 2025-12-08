@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/ai-assistant-icon'
   - '@kbn/ai-assistant-common'
   - '@kbn/ai-agent-confirmation-modal'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

@@ -22,21 +22,17 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import {
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-} from '../common/ui_setting_keys';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 import { NavControlInitiator } from './components/navigation_control/lazy_nav_control';
+import type { AIExperienceSelection } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
-  chatExperience$: Observable<AIChatExperience>;
-  openChat$: Observable<{ chatExperience: AIChatExperience; assistant: AIAssistantType }>;
+  openChat$: Observable<AIExperienceSelection>;
   completeOpenChat(): void;
 }
 
@@ -66,7 +62,6 @@ export class AIAssistantManagementPlugin
   private registeredAiAssistantManagementSelectionApp?: ManagementApp;
   private licensingSubscription?: Subscription;
   private aiAssistantTypeSubscription?: Subscription;
-  private chatExperienceSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
@@ -158,13 +153,8 @@ export class AIAssistantManagementPlugin
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
       AIAssistantType.Default
     );
-    const preferredChatExperience: AIChatExperience = coreStart.settings.client.get(
-      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-      AIChatExperience.Classic
-    );
 
     const aiAssistantType$ = new BehaviorSubject<AIAssistantType>(preferredAIAssistantType);
-    const chatExperience$ = new BehaviorSubject<AIChatExperience>(preferredChatExperience);
 
     // Keep aiAssistantType$ in sync with UI setting without page reload
     this.aiAssistantTypeSubscription = coreStart.settings.client
@@ -173,25 +163,9 @@ export class AIAssistantManagementPlugin
         aiAssistantType$.next(nextValue);
       });
 
-    // Keep chatExperience$ in sync with UI setting without page reload
-    this.chatExperienceSubscription = coreStart.settings.client
-      .get$<AIChatExperience>(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, AIChatExperience.Classic)
-      .subscribe((nextValue) => {
-        chatExperience$.next(nextValue);
-      });
-
-    const openChatSubject = new BehaviorSubject<{
-      chatExperience: AIChatExperience;
-      assistant: AIAssistantType;
-    }>({
-      chatExperience: AIChatExperience.Classic,
-      assistant: AIAssistantType.Default,
-    });
+    const openChatSubject = new BehaviorSubject<AIExperienceSelection>(AIAssistantType.Default);
     const completeOpenChat = () => {
-      openChatSubject.next({
-        chatExperience: AIChatExperience.Classic,
-        assistant: AIAssistantType.Default,
-      });
+      openChatSubject.next(AIAssistantType.Default);
     };
 
     // Check which assistants the user has access to
@@ -219,7 +193,6 @@ export class AIAssistantManagementPlugin
 
     return {
       aiAssistantType$: aiAssistantType$.asObservable(),
-      chatExperience$: chatExperience$.asObservable(),
       openChat$: openChatSubject.asObservable(),
       completeOpenChat,
     };
@@ -227,10 +200,7 @@ export class AIAssistantManagementPlugin
 
   private registerNavControl(
     coreStart: CoreStart,
-    openChatSubject: BehaviorSubject<{
-      chatExperience: AIChatExperience;
-      assistant: AIAssistantType;
-    }>,
+    openChatSubject: BehaviorSubject<AIExperienceSelection>,
     spaces?: SpacesPluginStart
   ) {
     const isObservabilityAIAssistantEnabled =
@@ -255,10 +225,9 @@ export class AIAssistantManagementPlugin
                 isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
                 isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
                 coreStart={coreStart}
-                triggerOpenChat={(event: {
-                  chatExperience: AIChatExperience;
-                  assistant: AIAssistantType;
-                }) => openChatSubject.next(event)}
+                triggerOpenChat={(selection: AIExperienceSelection) =>
+                  openChatSubject.next(selection)
+                }
                 spaces={spaces}
               />
             ),
@@ -278,6 +247,5 @@ export class AIAssistantManagementPlugin
   public stop() {
     this.licensingSubscription?.unsubscribe();
     this.aiAssistantTypeSubscription?.unsubscribe();
-    this.chatExperienceSubscription?.unsubscribe();
   }
 }

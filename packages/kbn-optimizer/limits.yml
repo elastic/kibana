@@ -1,7 +1,8 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 10000
+  agentBuilderPlatform: 64202
+  aiAssistantManagementSelection: 13590
   aiops: 15359
   alerting: 26932
   apm: 38573
@@ -73,7 +74,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 187942
-  genAiSettings: 5003
+  genAiSettings: 5507
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -113,7 +114,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 14703
+  navigation: 18999
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797

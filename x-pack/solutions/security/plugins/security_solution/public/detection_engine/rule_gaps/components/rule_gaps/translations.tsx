@@ -231,6 +231,14 @@ export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_DESCRIPTION = i18n.translate(
   }
 );
 
+export const GAPS_FAILED_AUTO_FILL_ATTEMPTS_TOOLTIP = (failedAutoFillAttempts: number) =>
+  i18n.translate('xpack.securitySolution.gaps.failedAutoFillAttemptsTooltip', {
+    defaultMessage: 'Auto fill failed attempts: {failedAutoFillAttempts}',
+    values: {
+      failedAutoFillAttempts,
+    },
+  });
+
 export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_NOTIFY = i18n.translate(
   'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastNotifyLabel',
   {

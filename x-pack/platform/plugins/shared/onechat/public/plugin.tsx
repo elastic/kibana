@@ -14,9 +14,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
-
+import { AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
@@ -25,13 +23,16 @@ import { OnechatNavControlInitiator } from './components/nav_control/lazy_onecha
 import {
   AgentBuilderAccessChecker,
   AgentService,
+  AttachmentsService,
   ChatService,
   ConversationsService,
   NavigationService,
   ToolsService,
   type OnechatInternalService,
 } from './services';
+import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
+import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -69,11 +70,6 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
-    );
-
     const navigationService = new NavigationService({
       management: deps.management.locator,
       licenseManagement: deps.licenseManagement?.locator,
@@ -81,20 +77,18 @@ export class OnechatPlugin
 
     this.setupServices = { navigationService };
 
-    if (isAgentBuilderEnabled) {
-      registerApp({
-        core,
-        getServices: () => {
-          if (!this.internalServices) {
-            throw new Error('getServices called before plugin start');
-          }
-          return this.internalServices;
-        },
-      });
+    registerApp({
+      core,
+      getServices: () => {
+        if (!this.internalServices) {
+          throw new Error('getServices called before plugin start');
+        }
+        return this.internalServices;
+      },
+    });
 
-      registerAnalytics({ analytics: core.analytics });
-      registerLocators(deps.share);
-    }
+    registerAnalytics({ analytics: core.analytics });
+    registerLocators(deps.share);
 
     try {
       core.getStartServices().then(([coreStart]) => {
@@ -116,6 +110,7 @@ export class OnechatPlugin
     docLinks.setDocLinks(core.docLinks.links);
 
     const agentService = new AgentService({ http });
+    const attachmentsService = new AttachmentsService();
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
@@ -129,6 +124,7 @@ export class OnechatPlugin
 
     const internalServices: OnechatInternalService = {
       agentService,
+      attachmentsService,
       chatService,
       conversationsService,
       navigationService,
@@ -140,6 +136,8 @@ export class OnechatPlugin
     this.internalServices = internalServices;
 
     const onechatService: OnechatPluginStart = {
+      agents: createPublicAgentsContract({ agentService }),
+      attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // set config until flyout is next opened
@@ -181,40 +179,33 @@ export class OnechatPlugin
       },
     };
 
-    getIsAiAgentsEnabled(core)
-      .then((flagEnabled) => {
-        if (!flagEnabled) {
-          this.logger.debug(
-            `Skipping Onechat nav control registration: feature flag AI_AGENTS_FEATURE_FLAG disabled`
-          );
-          return;
-        }
-
-        core.chrome.navControls.registerRight({
-          mount: (element) => {
-            ReactDOM.render(
-              <OnechatNavControlInitiator
-                coreStart={core}
-                pluginsStart={startDependencies}
-                onechatService={onechatService}
-              />,
-              element,
-              () => {}
-            );
-
-            return () => {
-              ReactDOM.unmountComponentAtNode(element);
-            };
-          },
-          // right before the user profile
-          order: 1001,
-        });
-      })
-      .catch((error) => {
-        this.logger.debug(
-          `Skipping Onechat nav control registration: feature flag read failed (${String(error)})`
+    core.chrome.navControls.registerRight({
+      mount: (element) => {
+        ReactDOM.render(
+          <OnechatNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            onechatService={onechatService}
+          />,
+          element,
+          () => {}
         );
-      });
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+      // right before the user profile
+      order: 1001,
+    });
+
+    // open AI Agent flyout when chosen in modal
+    startDependencies.aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIChatExperience.Agent) {
+        onechatService.openConversationFlyout();
+        startDependencies.aiAssistantManagementSelection.completeOpenChat();
+      }
+    });
 
     return onechatService;
   }

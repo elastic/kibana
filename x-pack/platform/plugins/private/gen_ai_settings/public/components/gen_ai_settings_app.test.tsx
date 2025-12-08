@@ -14,10 +14,10 @@ import { GenAiSettingsApp } from './gen_ai_settings_app';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { SettingsContextProvider } from '../contexts/settings_context';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
-  AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+  AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 
 // Mock the context hook
@@ -37,10 +37,10 @@ describe('GenAiSettingsApp', () => {
       value: false,
       type: 'boolean',
     },
-    [AI_ASSISTANT_CHAT_EXPERIENCE_TYPE]: {
+    [AI_CHAT_EXPERIENCE_TYPE]: {
       value: AIChatExperience.Classic,
       type: 'select',
-      options: [AIChatExperience.Classic, AIChatExperience.Agents],
+      options: [AIChatExperience.Classic, AIChatExperience.Agent],
     },
     [AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE]: {
       value: 'default',
@@ -253,7 +253,7 @@ describe('GenAiSettingsApp', () => {
       expect(visibilityField).toBeInTheDocument();
 
       const chatExperienceField = await screen.findByTestId(
-        `management-settings-editField-${AI_ASSISTANT_CHAT_EXPERIENCE_TYPE}`
+        `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
       );
       expect(chatExperienceField).toBeInTheDocument();
 
@@ -261,15 +261,15 @@ describe('GenAiSettingsApp', () => {
 
       const chatExperienceSelect = Array.from(allSelects).find((select) => {
         const options = Array.from(select.querySelectorAll('option'));
-        return options.some((opt) => opt.value === AIChatExperience.Agents);
+        return options.some((opt) => opt.value === AIChatExperience.Agent);
       });
 
       expect(chatExperienceSelect).toBeTruthy();
 
-      // Change the select value to Agents
-      fireEvent.change(chatExperienceSelect!, { target: { value: AIChatExperience.Agents } });
+      // Change the select value to Agent
+      fireEvent.change(chatExperienceSelect!, { target: { value: AIChatExperience.Agent } });
 
-      // After changing to Agents, the AI Assistant Visibility field should be hidden
+      // After changing to Agent, the AI Assistant Visibility field should be hidden
       await waitFor(() => {
         expect(
           screen.queryByTestId(

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLFieldWithMetadata } from '../../types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 
 // from https://github.com/elastic/elasticsearch/blob/da50c723a43262a9f46228ca36099647706c90dd/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/plan/logical/show/ShowInfo.java#L56-L58
 export const SHOW_INFO_FIELDS: ESQLFieldWithMetadata[] = [

@@ -25,7 +25,7 @@ const configSchema = schema.object({
     { defaultValue: AIAssistantType.Default }
   ),
   preferredChatExperience: schema.oneOf(
-    [schema.literal(AIChatExperience.Classic), schema.literal(AIChatExperience.Agents)],
+    [schema.literal(AIChatExperience.Classic), schema.literal(AIChatExperience.Agent)],
     { defaultValue: AIChatExperience.Classic }
   ),
 });
