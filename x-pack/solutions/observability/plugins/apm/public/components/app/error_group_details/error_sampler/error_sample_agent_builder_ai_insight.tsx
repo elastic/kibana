@@ -13,7 +13,7 @@ import { useConnectorSelection } from '@kbn/onechat-plugin/public';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
-} from '../../../../../common/agent_builder/attachment_ids';
+} from '@kbn/observability-agent-builder-plugin/common';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';

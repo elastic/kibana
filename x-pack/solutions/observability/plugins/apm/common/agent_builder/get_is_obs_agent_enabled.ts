@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   OBSERVABILITY_AGENT_FEATURE_FLAG,
   OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
-} from './feature_flag';
+} from '@kbn/observability-agent-builder-plugin/common';
 
 export function getIsObservabilityAgentEnabled(coreStart: CoreStart): boolean {
   return coreStart.featureFlags.getBooleanValue(

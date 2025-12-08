@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../../../common/agent_builder/attachment_ids';
+import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/common';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
