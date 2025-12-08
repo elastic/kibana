@@ -32,8 +32,8 @@ export const ASK_AI_ASSISTANT = i18n.translate(
     defaultMessage: 'Ask AI Assistant',
   }
 );
-export const EVENT = i18n.translate('xpack.securitySolution.ease.flyout.right.footer.event', {
-  defaultMessage: 'Event',
+export const EVENT = i18n.translate('xpack.securitySolution.flyout.right.footer.event', {
+  defaultMessage: 'Security Event',
 });
 
 interface PanelFooterProps {
