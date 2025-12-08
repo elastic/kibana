@@ -562,13 +562,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             stream.end();
 
-                this.logger.debug(`Begin waiting for the stream's pending callbacks...`, {
-                  tags: [jobId],
-                });
-                await finishedWithNoPendingCallbacks(stream);
-                this.logger.info(`The stream's pending callbacks have completed.`, {
-                  tags: [jobId],
-                });
+            this.logger.debug(`Begin waiting for the stream's pending callbacks...`, {
+              tags: [jobId],
+            });
+            await finishedWithNoPendingCallbacks(stream);
+            this.logger.info(`The stream's pending callbacks have completed.`, {
+              tags: [jobId],
+            });
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
@@ -579,13 +579,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               byteSize,
             });
 
-                if (output) {
-                  this.logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
-                  // Update the job status to "completed"
-                  report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
-                    ...output,
-                    size: byteSize,
-                  });
+            if (output) {
+              this.logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
+              // Update the job status to "completed"
+              report = await this.completeJob(report, {
+                ...output,
+                size: byteSize,
+              });
 
               await this.notify(
                 report,
@@ -597,38 +597,23 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               );
             }
 
-                // untrack the report for concurrency awareness
-                this.logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
-              },
-            });
+            // untrack the report for concurrency awareness
+            this.logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
           } catch (failedToExecuteErr) {
             eventLog.logError(failedToExecuteErr);
 
-            await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
-              (failedToSaveError) => {
-                errorLogger(
-                  this.logger,
-                  `Error in saving execution error ${jobId}`,
-                  failedToSaveError,
-                  [jobId]
-                );
-              }
-            );
+            await this.saveExecutionError(report, failedToExecuteErr).catch((failedToSaveError) => {
+              errorLogger(
+                this.logger,
+                `Error in saving execution error ${jobId}`,
+                failedToSaveError,
+                [jobId]
+              );
+            });
 
             cancellationToken.cancel();
 
-            if (isLastAttempt) {
-              this.logger.info(
-                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`,
-                { tags: [jobId] }
-              );
-            } else {
-              this.logger.info(
-                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`,
-                { tags: [jobId] }
-              );
-            }
-
+            const error = mapToReportingError(failedToExecuteErr);
             throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
             this.opts.reporting.untrackReport(jobId);
