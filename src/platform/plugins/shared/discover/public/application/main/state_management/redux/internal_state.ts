@@ -303,23 +303,11 @@ export const internalStateSlice = createSlice({
         dataViewId: string;
       }>
     ) => {
-      state.tabs.byId = Object.fromEntries(
-        Object.entries(state.tabs.byId).map(([tabId, tab]) => {
-          if (tab.uiState.fieldListExistingFieldsInfo?.dataViewId === action.payload.dataViewId) {
-            return [
-              tabId,
-              {
-                ...tab,
-                uiState: {
-                  ...tab.uiState,
-                  fieldListExistingFieldsInfo: undefined,
-                },
-              },
-            ];
-          }
-          return [tabId, tab];
-        })
-      );
+      Object.values(state.tabs.byId).forEach((tab) => {
+        if (tab.uiState.fieldListExistingFieldsInfo?.dataViewId === action.payload.dataViewId) {
+          tab.uiState.fieldListExistingFieldsInfo = undefined;
+        }
+      });
     },
 
     setLayoutUiState: (
