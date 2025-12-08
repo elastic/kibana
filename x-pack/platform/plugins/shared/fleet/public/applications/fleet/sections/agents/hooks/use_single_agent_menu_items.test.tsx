@@ -201,7 +201,7 @@ describe('useSingleAgentMenuItems', () => {
       expect(upgradeManagement?.children).toBeDefined();
     });
 
-    it('should NOT include Upgrade management submenu when agent is not upgradeable', () => {
+    it('should NOT include Upgrade management submenu when agent is not upgradeable and not stuck in updating', () => {
       const { result } = renderer.renderHook(() =>
         useSingleAgentMenuItems({
           agent: createMockAgent({
@@ -214,6 +214,24 @@ describe('useSingleAgentMenuItems', () => {
 
       const upgradeManagement = result.current.find((item) => item.id === 'upgrade-management');
       expect(upgradeManagement).toBeUndefined();
+    });
+
+    it('should include Upgrade management submenu when agent is actively upgrading', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({
+            status: 'updating',
+            upgrade_started_at: new Date().toISOString(),
+            local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: false } } },
+          }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const upgradeManagement = result.current.find((item) => item.id === 'upgrade-management');
+      expect(upgradeManagement).toBeDefined();
+      expect(upgradeManagement?.children).toBeDefined();
     });
 
     it('should include Maintenance and diagnostics submenu', () => {

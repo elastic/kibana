@@ -14,6 +14,7 @@ import {
   isAgentEligibleForMigration,
   isAgentEligibleForPrivilegeLevelChange,
   isAgentRequestDiagnosticsSupported,
+  isAgentUpgrading,
 } from '../../../../../../common/services';
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 
@@ -131,8 +132,8 @@ export function useSingleAgentMenuItems({
       );
     }
 
-    // Upgrade management submenu - conditionally shown if the user has privileges and is the agent is upgradeable
-    if (hasFleetAllPrivileges && isAgentUpgradeable(agent)) {
+    // Upgrade management submenu - conditionally shown if the user has privileges and the agent is upgradeable or actively upgrading
+    if (hasFleetAllPrivileges && (isAgentUpgradeable(agent) || isAgentUpgrading(agent))) {
       items.push({
         id: 'upgrade-management',
         name: (
