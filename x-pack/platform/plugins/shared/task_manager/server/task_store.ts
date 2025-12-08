@@ -208,13 +208,32 @@ export class TaskStore {
     }
   }
 
-  private getSoClient(options: ApiKeyOptions) {
+  private getSoClientForCreate(options: ApiKeyOptions) {
     if (options.request && this.getIsSecurityEnabled()) {
       return this.savedObjectsService.getScopedClient(options.request, {
         includedHiddenTypes: [TASK_SO_NAME],
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       });
     }
+    return this.savedObjectsRepository;
+  }
+
+  private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
+    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    if (options?.request && !hasEncryptedFields) {
+      this.logger.debug(
+        'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+      );
+    }
+
+    // Return scoped client if request is defined AND at least one document has encrypted fields
+    if (options?.request && this.getIsSecurityEnabled() && hasEncryptedFields) {
+      return this.savedObjectsService.getScopedClient(options.request, {
+        includedHiddenTypes: [TASK_SO_NAME],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      });
+    }
+
     return this.savedObjectsRepository;
   }
 
@@ -330,7 +349,7 @@ export class TaskStore {
       (await this.getApiKeyFromRequest([taskInstance], options?.request)) || new Map();
     const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
 
-    const soClient = this.getSoClient(options || {});
+    const soClient = this.getSoClientForCreate(options || {});
 
     let savedObject;
     try {
@@ -388,7 +407,7 @@ export class TaskStore {
     const apiKeyAndUserScopeMap =
       (await this.getApiKeyFromRequest(taskInstances, options?.request)) || new Map();
 
-    const soClient = this.getSoClient(options || {});
+    const soClient = this.getSoClientForCreate(options || {});
 
     const objects = taskInstances.reduce(
       (acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>, taskInstance) => {
@@ -521,7 +540,8 @@ export class TaskStore {
     docs: ConcreteTaskInstance[],
     { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
-    const soClientToUse = this.getSoClient(options || {});
+    const soClientToUpdate = this.getSoClientForUpdate(docs, options);
+
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -552,7 +572,7 @@ export class TaskStore {
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
-        await soClientToUse.bulkUpdate<SerializedConcreteTaskInstance>(
+        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
           Array.from(newDocs.values()),
           {
             refresh: false,

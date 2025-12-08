@@ -1315,13 +1315,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should bulk update schedules tasks with API keys if request is provided', async () => {
-      const rruleScheduleExample = {
-        rrule: {
-          freq: 3, // Daily
-          interval: 1,
-          tzid: 'UTC',
-        },
-      };
       let queryResult = await supertest
         .post('/internal/security/api_key/_query')
         .send({})
@@ -1336,12 +1329,10 @@ export default function ({ getService }: FtrProviderContext) {
         params: {},
         schedule: { interval: '5m' },
       });
+      const initialTime = Date.now();
 
       await retry.try(async () => {
-        const updates = await bulkUpdateSchedulesWithApiKey(
-          [scheduledTask.id],
-          rruleScheduleExample
-        );
+        const updates = await bulkUpdateSchedulesWithApiKey([scheduledTask.id], { interval: '1m' });
         expect(updates.tasks.length).to.be(1);
         expect(updates.errors.length).to.be(0);
       });
@@ -1352,16 +1343,25 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
+      // Verify the task runs successfully with the new schedule
       await retry.try(async () => {
-        const result = await currentTask('test-task-for-sample-task-plugin-to-test-task-api-key');
+        const task = await currentTask<{ count: number }>(
+          'test-task-for-sample-task-plugin-to-test-task-api-key'
+        );
 
+        expect(task.state.count).to.be(1);
+        expect(task.schedule).to.eql({ interval: '1m' });
+        expect(Date.parse(task.runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'minutes').asMilliseconds()
+        );
         expect(
           queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
-            return apiKey.id === result.userScope?.apiKeyId;
+            return apiKey.id === task.userScope?.apiKeyId;
           }).length
         ).eql(1);
-
         expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+
+        // delete the task and ensure the API key is removed
         await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
 
         queryResult = await supertest
@@ -1372,7 +1372,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(
           queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
-            return apiKey.id === result.userScope?.apiKeyId;
+            return apiKey.id === task.userScope?.apiKeyId;
           }).length
         ).eql(0);
 
@@ -1381,13 +1381,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should bulk update schedules tasks with fake request if request is provided', async () => {
-      const rruleScheduleExample24h = {
-        rrule: {
-          freq: 3, // Daily
-          interval: 1,
-          tzid: 'UTC',
-        },
-      };
       let queryResult = await supertest
         .post('/internal/security/api_key/_query')
         .send({})
@@ -1437,18 +1430,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiKeysAfterSchedule = queryResult.body.apiKeys.length;
       await retry.try(async () => {
-        const updates = await bulkUpdateSchedulesWithFakeRequest(taskIds, rruleScheduleExample24h);
+        const updates = await bulkUpdateSchedulesWithFakeRequest(taskIds, { interval: '1m' });
         expect(updates.tasks.length).to.be(2);
         expect(updates.errors.length).to.be(0);
       });
 
+      // Verify the tasks run successfully with the new schedule
       await retry.try(async () => {
         const updatedTasks = (await currentTasks()).docs;
         updatedTasks.forEach((task) => {
-          expect(task.schedule).to.eql(rruleScheduleExample24h);
-          // should be scheduled to run in 1 hour
+          expect(task.schedule).to.eql({ interval: '1m' });
           expect(Date.parse(task.runAt) - initialTime).to.be.greaterThan(
-            moment.duration(1, 'hours').asMilliseconds()
+            moment.duration(1, 'minutes').asMilliseconds()
           );
           expect(task.apiKey).not.empty();
           expect(task.userScope?.apiKeyCreatedByUser).to.be(true);
