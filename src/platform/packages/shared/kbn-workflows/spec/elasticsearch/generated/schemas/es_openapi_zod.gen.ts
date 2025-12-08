@@ -26682,10 +26682,11 @@ export const async_search_submit_keep_on_completion = z.boolean().register(z.glo
 });
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const async_search_submit_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -26703,10 +26704,10 @@ export const async_search_submit_analyzer = z.string().register(z.globalRegistry
 });
 
 /**
- * Specify whether wildcard and prefix queries should be analyzed (default: false)
+ * Specify whether wildcard and prefix queries should be analyzed
  */
 export const async_search_submit_analyze_wildcard = z.boolean().register(z.globalRegistry, {
-    description: 'Specify whether wildcard and prefix queries should be analyzed (default: false)'
+    description: 'Specify whether wildcard and prefix queries should be analyzed'
 });
 
 /**
@@ -26742,7 +26743,7 @@ export const async_search_submit_df = z.string().register(z.globalRegistry, {
 export const async_search_submit_docvalue_fields = types_fields;
 
 /**
- * Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * Whether to expand wildcard expression to concrete indices that are open, closed or both
  */
 export const async_search_submit_expand_wildcards = types_expand_wildcards;
 
@@ -26775,17 +26776,18 @@ export const async_search_submit_lenient = z.boolean().register(z.globalRegistry
 });
 
 /**
- * The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests
+ * The number of concurrent shard requests per node this search executes concurrently.
+ * This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests
  */
 export const async_search_submit_max_concurrent_shard_requests = z.number().register(z.globalRegistry, {
-    description: 'The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
+    description: 'The number of concurrent shard requests per node this search executes concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
 });
 
 /**
- * Specify the node or shard the operation should be performed on (default: random)
+ * Specify the node or shard the operation should be performed on
  */
 export const async_search_submit_preference = z.string().register(z.globalRegistry, {
-    description: 'Specify the node or shard the operation should be performed on (default: random)'
+    description: 'Specify the node or shard the operation should be performed on'
 });
 
 /**
@@ -26842,10 +26844,10 @@ export const async_search_submit_suggest_text = z.string().register(z.globalRegi
 });
 
 /**
- * The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.
+ * The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early
  */
 export const async_search_submit_terminate_after = z.number().register(z.globalRegistry, {
-    description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.'
+    description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early'
 });
 
 /**
@@ -26854,7 +26856,8 @@ export const async_search_submit_terminate_after = z.number().register(z.globalR
 export const async_search_submit_timeout = types_duration;
 
 /**
- * Indicate if the number of documents that match the query should be tracked. A number can also be specified, to accurately track the total hit count up to the number.
+ * Indicate if the number of documents that match the query should be tracked.
+ * A number can also be specified, to accurately track the total hit count up to the number.
  */
 export const async_search_submit_track_total_hits = global_search_types_track_hits;
 
@@ -26916,17 +26919,17 @@ export const async_search_submit_q = z.string().register(z.globalRegistry, {
 });
 
 /**
- * Number of hits to return (default: 10)
+ * Number of hits to return
  */
 export const async_search_submit_size = z.number().register(z.globalRegistry, {
-    description: 'Number of hits to return (default: 10)'
+    description: 'Number of hits to return'
 });
 
 /**
- * Starting offset (default: 0)
+ * Starting offset
  */
 export const async_search_submit_from = z.number().register(z.globalRegistry, {
-    description: 'Starting offset (default: 0)'
+    description: 'Starting offset'
 });
 
 /**
@@ -27731,10 +27734,10 @@ export const cluster_get_component_template_settings_filter = z.union([
 ]);
 
 /**
- * Return all default configurations for the component template (default: false)
+ * Return all default configurations for the component template
  */
 export const cluster_get_component_template_include_defaults = z.boolean().register(z.globalRegistry, {
-    description: 'Return all default configurations for the component template (default: false)'
+    description: 'Return all default configurations for the component template'
 });
 
 /**
@@ -27849,7 +27852,7 @@ export const cluster_put_component_template_cause = z.string().register(z.global
 export const cluster_put_component_template_master_timeout = types_duration;
 
 /**
- * Limit the information returned to the specified metrics
+ * Limit the information returned to the specified metrics.
  */
 export const cluster_state_metric = cluster_state_cluster_state_metrics;
 
@@ -27859,22 +27862,23 @@ export const cluster_state_metric = cluster_state_cluster_state_metrics;
 export const cluster_state_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const cluster_state_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
- * Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * Whether to expand wildcard expression to concrete indices that are open, closed or both
  */
 export const cluster_state_expand_wildcards = types_expand_wildcards;
 
 /**
- * Return settings in flat format (default: false)
+ * Return settings in flat format
  */
 export const cluster_state_flat_settings = z.boolean().register(z.globalRegistry, {
-    description: 'Return settings in flat format (default: false)'
+    description: 'Return settings in flat format'
 });
 
 /**
@@ -27885,12 +27889,12 @@ export const cluster_state_ignore_unavailable = z.boolean().register(z.globalReg
 });
 
 /**
- * Return local information, do not retrieve the state from master node (default: false)
+ * Return local information, do not retrieve the state from master node
  *
  * @deprecated
  */
 export const cluster_state_local = z.boolean().register(z.globalRegistry, {
-    description: 'Return local information, do not retrieve the state from master node (default: false)'
+    description: 'Return local information, do not retrieve the state from master node'
 });
 
 /**
@@ -28152,10 +28156,11 @@ export const enrich_get_policy_master_timeout = types_duration;
 export const eql_search_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const eql_search_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -28989,10 +28994,11 @@ export const indices_flush_wait_if_ongoing = z.boolean().register(z.globalRegist
 export const indices_forcemerge_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const indices_forcemerge_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -29001,10 +29007,10 @@ export const indices_forcemerge_allow_no_indices = z.boolean().register(z.global
 export const indices_forcemerge_expand_wildcards = types_expand_wildcards;
 
 /**
- * Specify whether the index should be flushed after performing the operation (default: true)
+ * Specify whether the index should be flushed after performing the operation
  */
 export const indices_forcemerge_flush = z.boolean().register(z.globalRegistry, {
-    description: 'Specify whether the index should be flushed after performing the operation (default: true)'
+    description: 'Specify whether the index should be flushed after performing the operation'
 });
 
 /**
@@ -29015,10 +29021,10 @@ export const indices_forcemerge_ignore_unavailable = z.boolean().register(z.glob
 });
 
 /**
- * The number of segments the index should be merged into (default: dynamic)
+ * The number of segments the index should be merged into (defayult: dynamic)
  */
 export const indices_forcemerge_max_num_segments = z.number().register(z.globalRegistry, {
-    description: 'The number of segments the index should be merged into (default: dynamic)'
+    description: 'The number of segments the index should be merged into (defayult: dynamic)'
 });
 
 /**
@@ -29029,10 +29035,10 @@ export const indices_forcemerge_only_expunge_deletes = z.boolean().register(z.gl
 });
 
 /**
- * Should the request wait until the force merge is completed.
+ * Should the request wait until the force merge is completed
  */
 export const indices_forcemerge_wait_for_completion = z.boolean().register(z.globalRegistry, {
-    description: 'Should the request wait until the force merge is completed.'
+    description: 'Should the request wait until the force merge is completed'
 });
 
 /**
@@ -29369,14 +29375,15 @@ export const indices_put_index_template_create = z.boolean().register(z.globalRe
 export const indices_put_index_template_master_timeout = types_duration;
 
 /**
- * User defined reason for creating/updating the index template
+ * User defined reason for creating or updating the index template
  */
 export const indices_put_index_template_cause = z.string().register(z.globalRegistry, {
-    description: 'User defined reason for creating/updating the index template'
+    description: 'User defined reason for creating or updating the index template'
 });
 
 /**
- * A comma-separated list of index names the mapping should be added to (supports wildcards); use `_all` or omit to add the mapping on all indices.
+ * A comma-separated list of index names the mapping should be added to (supports wildcards).
+ * Use `_all` or omit to add the mapping on all indices.
  */
 export const indices_put_mapping_index = types_indices;
 
@@ -29520,10 +29527,10 @@ export const indices_put_template_order = z.number().register(z.globalRegistry, 
 });
 
 /**
- * User defined reason for creating/updating the index template
+ * User defined reason for creating or updating the index template
  */
 export const indices_put_template_cause = z.string().register(z.globalRegistry, {
-    description: 'User defined reason for creating/updating the index template'
+    description: 'User defined reason for creating or updating the index template'
 });
 
 /**
@@ -29604,10 +29611,11 @@ export const indices_refresh_ignore_unavailable = z.boolean().register(z.globalR
 export const indices_reload_search_analyzers_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const indices_reload_search_analyzers_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -29888,7 +29896,7 @@ export const indices_split_timeout = types_duration;
 export const indices_split_wait_for_active_shards = types_wait_for_active_shards;
 
 /**
- * Limit the information returned the specific metrics.
+ * Limit the information returned the specific metrics
  */
 export const indices_stats_metric = types_common_stats_flags;
 
@@ -30147,10 +30155,10 @@ export const ingest_get_pipeline_id = types_id;
 export const ingest_get_pipeline_master_timeout = types_duration;
 
 /**
- * Return pipelines without their definitions (default: false)
+ * Return pipelines without their definitions
  */
 export const ingest_get_pipeline_summary = z.boolean().register(z.globalRegistry, {
-    description: 'Return pipelines without their definitions (default: false)'
+    description: 'Return pipelines without their definitions'
 });
 
 /**
@@ -31301,7 +31309,7 @@ export const nodes_hot_threads_timeout = types_duration;
 export const nodes_hot_threads_type = types_thread_type;
 
 /**
- * The sort order for 'cpu' type (default: total)
+ * The sort order for 'cpu' type
  */
 export const nodes_hot_threads_sort = types_thread_type;
 
@@ -31344,7 +31352,7 @@ export const nodes_reload_secure_settings_timeout = types_duration;
 export const nodes_stats_node_id = types_node_ids;
 
 /**
- * Limit the information returned to the specified metrics
+ * Limits the information returned to the specific metrics.
  */
 export const nodes_stats_metric = nodes_stats_node_stats_metrics;
 
@@ -31407,7 +31415,8 @@ export const nodes_stats_include_unloaded_segments = z.boolean().register(z.glob
 });
 
 /**
- * A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
+ * A comma-separated list of node IDs or names to limit the returned information.
+ * Use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes.
  */
 export const nodes_usage_node_id = types_node_ids;
 
@@ -31543,7 +31552,7 @@ export const scroll_scroll_id = types_scroll_id;
 export const scroll_scroll = types_duration;
 
 /**
- * The scroll ID for scrolled search
+ * The scroll ID
  *
  * @deprecated
  */
@@ -31939,27 +31948,36 @@ export const search_application_search_typed_keys = z.boolean().register(z.globa
 });
 
 /**
- * Comma-separated list of data streams, indices, or aliases to search
+ * A list of indices, data streams, or aliases to search.
+ * It supports wildcards (`*`).
+ * To search all data streams and indices, omit this parameter or use `*` or `_all`.
+ * To search a remote cluster, use the `<cluster>:<target>` syntax.
  */
 export const search_mvt_index = types_indices;
 
 /**
- * Field containing geospatial data to return
+ * A field that contains the geospatial data to return.
+ * It must be a `geo_point` or `geo_shape` field.
+ * The field must have doc values enabled. It cannot be a nested field.
+ *
+ * NOTE: Vector tiles do not natively support geometry collections.
+ * For `geometrycollection` values in a `geo_shape` field, the API returns a hits layer feature for each element of the collection.
+ * This behavior may change in a future release.
  */
 export const search_mvt_field = types_field;
 
 /**
- * Zoom level for the vector tile to search
+ * The zoom level of the vector tile to search. It accepts `0` to `29`.
  */
 export const search_mvt_zoom = global_search_mvt_types_zoom_level;
 
 /**
- * X coordinate for the vector tile to search
+ * The X coordinate for the vector tile to search.
  */
 export const search_mvt_x = global_search_mvt_types_coordinate;
 
 /**
- * Y coordinate for the vector tile to search
+ * The Y coordinate for the vector tile to search.
  */
 export const search_mvt_y = global_search_mvt_types_coordinate;
 
@@ -32203,15 +32221,16 @@ export const searchable_snapshots_cache_stats_master_timeout = types_duration;
 export const searchable_snapshots_clear_cache_index = types_indices;
 
 /**
- * Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * Whether to expand wildcard expression to concrete indices that are open, closed or both
  */
 export const searchable_snapshots_clear_cache_expand_wildcards = types_expand_wildcards;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const searchable_snapshots_clear_cache_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -32270,7 +32289,7 @@ export const security_create_service_token_service = types_service;
 export const security_create_service_token_name = types_name;
 
 /**
- * If `true` then refresh the affected shards to make this operation visible to search, if `wait_for` (the default) then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.
+ * If `true` (the default) then refresh the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.
  */
 export const security_create_service_token_refresh = types_refresh;
 
@@ -32508,7 +32527,7 @@ export const simulate_ingest_pipeline = types_pipeline_name;
 export const simulate_ingest_merge_type2 = simulate_ingest_merge_type;
 
 /**
- * Comma-separated list of snapshot lifecycle policies to retrieve
+ * A comma-separated list of snapshot lifecycle policy identifiers.
  */
 export const slm_get_lifecycle_policy_id = types_names;
 
@@ -33011,14 +33030,14 @@ export const watcher_put_watch_active = z.boolean().register(z.globalRegistry, {
 });
 
 /**
- * only update the watch if the last operation that has changed the watch has the specified primary term
+ * Only update the watch if the last operation that has changed the watch has the specified primary term
  */
 export const watcher_put_watch_if_primary_term = z.number().register(z.globalRegistry, {
-    description: 'only update the watch if the last operation that has changed the watch has the specified primary term'
+    description: 'Only update the watch if the last operation that has changed the watch has the specified primary term'
 });
 
 /**
- * only update the watch if the last operation that has changed the watch has the specified sequence number
+ * Only update the watch if the last operation that has changed the watch has the specified sequence number
  */
 export const watcher_put_watch_if_seq_no = types_sequence_number;
 
@@ -35391,7 +35410,7 @@ export const cluster_put_settings_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         master_timeout: z.optional(types_duration),
         timeout: z.optional(types_duration)
@@ -35536,17 +35555,17 @@ export const cluster_state_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return local information, do not retrieve the state from master node (default: false)'
+            description: 'Return local information, do not retrieve the state from master node'
         })),
         master_timeout: z.optional(types_duration),
         wait_for_metadata_version: z.optional(types_version_number),
@@ -35563,17 +35582,17 @@ export const cluster_state1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return local information, do not retrieve the state from master node (default: false)'
+            description: 'Return local information, do not retrieve the state from master node'
         })),
         master_timeout: z.optional(types_duration),
         wait_for_metadata_version: z.optional(types_version_number),
@@ -35591,17 +35610,17 @@ export const cluster_state2_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return local information, do not retrieve the state from master node (default: false)'
+            description: 'Return local information, do not retrieve the state from master node'
         })),
         master_timeout: z.optional(types_duration),
         wait_for_metadata_version: z.optional(types_version_number),
@@ -37438,7 +37457,7 @@ export const indices_explain_data_lifecycle_request = z.object({
     }),
     query: z.optional(z.object({
         include_defaults: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'indicates if the API should return the default values the system uses for the index\'s lifecycle'
+            description: 'Indicates if the API should return the default values the system uses for the index\'s lifecycle'
         })),
         master_timeout: z.optional(types_duration)
     }))
@@ -37564,23 +37583,23 @@ export const indices_forcemerge_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flush: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether the index should be flushed after performing the operation (default: true)'
+            description: 'Specify whether the index should be flushed after performing the operation'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         max_num_segments: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of segments the index should be merged into (default: dynamic)'
+            description: 'The number of segments the index should be merged into (defayult: dynamic)'
         })),
         only_expunge_deletes: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify whether the operation should only expunge deleted documents'
         })),
         wait_for_completion: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Should the request wait until the force merge is completed.'
+            description: 'Should the request wait until the force merge is completed'
         }))
     }))
 });
@@ -37594,23 +37613,23 @@ export const indices_forcemerge1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flush: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether the index should be flushed after performing the operation (default: true)'
+            description: 'Specify whether the index should be flushed after performing the operation'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         max_num_segments: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of segments the index should be merged into (default: dynamic)'
+            description: 'The number of segments the index should be merged into (defayult: dynamic)'
         })),
         only_expunge_deletes: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify whether the operation should only expunge deleted documents'
         })),
         wait_for_completion: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Should the request wait until the force merge is completed.'
+            description: 'Should the request wait until the force merge is completed'
         }))
     }))
 });
@@ -37845,7 +37864,7 @@ export const indices_reload_search_analyzers_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
@@ -37866,7 +37885,7 @@ export const indices_reload_search_analyzers1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
@@ -38933,7 +38952,7 @@ export const license_post_start_basic_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         acknowledge: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'whether the user has acknowledged acknowledge messages (default: false)'
+            description: 'Whether the user has acknowledged acknowledge messages'
         })),
         master_timeout: z.optional(types_duration),
         timeout: z.optional(types_duration)
@@ -38956,10 +38975,10 @@ export const license_post_start_trial_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         acknowledge: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'whether the user has acknowledged acknowledge messages (default: false)'
+            description: 'Whether the user has acknowledged acknowledge messages'
         })),
         type: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The type of trial license to generate (default: "trial")'
+            description: 'The type of trial license to generate'
         })),
         master_timeout: z.optional(types_duration)
     }))
@@ -41601,7 +41620,7 @@ export const searchable_snapshots_clear_cache_request = z.object({
     query: z.optional(z.object({
         expand_wildcards: z.optional(types_expand_wildcards),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
@@ -41619,7 +41638,7 @@ export const searchable_snapshots_clear_cache1_request = z.object({
     query: z.optional(z.object({
         expand_wildcards: z.optional(types_expand_wildcards),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
@@ -44239,7 +44258,7 @@ export const xpack_info_request = z.object({
             description: 'A comma-separated list of the information categories to include in the response.\nFor example, `build,license,features`.'
         })),
         accept_enterprise: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If this param is used it must be set to true'
+            description: 'If used, this otherwise ignored parameter must be set to true'
         })),
         human: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Defines whether additional human-readable information is included in the response.\nIn particular, it adds descriptions and a tag line.'
@@ -44319,7 +44338,7 @@ export const async_search_submit_request = z.object({
             description: 'If `true`, results are stored for later retrieval when the search completes within the `wait_for_completion_timeout`.'
         })),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Indicate if an error should be returned if there is a partial search failure or timeout'
@@ -44328,7 +44347,7 @@ export const async_search_submit_request = z.object({
             description: 'The analyzer to use for the query string'
         })),
         analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether wildcard and prefix queries should be analyzed (default: false)'
+            description: 'Specify whether wildcard and prefix queries should be analyzed'
         })),
         batched_reduce_size: z.optional(z.number().register(z.globalRegistry, {
             description: 'Affects how often partial results become available, which happens whenever shard results are reduced.\nA partial reduction is performed every time the coordinating node has received a certain number of new shard responses (5 by default).'
@@ -44355,10 +44374,10 @@ export const async_search_submit_request = z.object({
             description: 'Specify whether format-based query failures (such as providing text to a numeric field) should be ignored'
         })),
         max_concurrent_shard_requests: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
+            description: 'The number of concurrent shard requests per node this search executes concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
         })),
         preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Specify the node or shard the operation should be performed on (default: random)'
+            description: 'Specify the node or shard the operation should be performed on'
         })),
         request_cache: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify if request cache should be used for this request or not, defaults to true'
@@ -44378,7 +44397,7 @@ export const async_search_submit_request = z.object({
             description: 'The source text for which the suggestions should be returned.'
         })),
         terminate_after: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.'
+            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early'
         })),
         timeout: z.optional(types_duration),
         track_total_hits: z.optional(global_search_types_track_hits),
@@ -44404,10 +44423,10 @@ export const async_search_submit_request = z.object({
             description: 'Query in the Lucene query string syntax'
         })),
         size: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Number of hits to return (default: 10)'
+            description: 'Number of hits to return'
         })),
         from: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Starting offset (default: 0)'
+            description: 'Starting offset'
         })),
         sort: z.optional(z.union([
             z.string(),
@@ -44430,7 +44449,7 @@ export const async_search_submit1_request = z.object({
             description: 'If `true`, results are stored for later retrieval when the search completes within the `wait_for_completion_timeout`.'
         })),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Indicate if an error should be returned if there is a partial search failure or timeout'
@@ -44439,7 +44458,7 @@ export const async_search_submit1_request = z.object({
             description: 'The analyzer to use for the query string'
         })),
         analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether wildcard and prefix queries should be analyzed (default: false)'
+            description: 'Specify whether wildcard and prefix queries should be analyzed'
         })),
         batched_reduce_size: z.optional(z.number().register(z.globalRegistry, {
             description: 'Affects how often partial results become available, which happens whenever shard results are reduced.\nA partial reduction is performed every time the coordinating node has received a certain number of new shard responses (5 by default).'
@@ -44466,10 +44485,10 @@ export const async_search_submit1_request = z.object({
             description: 'Specify whether format-based query failures (such as providing text to a numeric field) should be ignored'
         })),
         max_concurrent_shard_requests: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
+            description: 'The number of concurrent shard requests per node this search executes concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
         })),
         preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Specify the node or shard the operation should be performed on (default: random)'
+            description: 'Specify the node or shard the operation should be performed on'
         })),
         request_cache: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify if request cache should be used for this request or not, defaults to true'
@@ -44489,7 +44508,7 @@ export const async_search_submit1_request = z.object({
             description: 'The source text for which the suggestions should be returned.'
         })),
         terminate_after: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.'
+            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early'
         })),
         timeout: z.optional(types_duration),
         track_total_hits: z.optional(global_search_types_track_hits),
@@ -44515,10 +44534,10 @@ export const async_search_submit1_request = z.object({
             description: 'Query in the Lucene query string syntax'
         })),
         size: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Number of hits to return (default: 10)'
+            description: 'Number of hits to return'
         })),
         from: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Starting offset (default: 0)'
+            description: 'Starting offset'
         })),
         sort: z.optional(z.union([
             z.string(),
@@ -44821,7 +44840,7 @@ export const cluster_get_component_template1_request = z.object({
             z.array(z.string())
         ])),
         include_defaults: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return all default configurations for the component template (default: false)'
+            description: 'Return all default configurations for the component template'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request retrieves information from the local node only.\nIf `false`, information is retrieved from the master node.'
@@ -44882,7 +44901,7 @@ export const cluster_get_component_template_request = z.object({
             z.array(z.string())
         ])),
         include_defaults: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return all default configurations for the component template (default: false)'
+            description: 'Return all default configurations for the component template'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request retrieves information from the local node only.\nIf `false`, information is retrieved from the master node.'
@@ -45302,7 +45321,7 @@ export const eql_search_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If true, returns partial results if there are shard failures. If false, returns an error with no partial results.'
@@ -45334,7 +45353,7 @@ export const eql_search1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If true, returns partial results if there are shard failures. If false, returns an error with no partial results.'
@@ -46372,7 +46391,7 @@ export const indices_put_index_template1_request = z.object({
         })),
         master_timeout: z.optional(types_duration),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -46390,7 +46409,7 @@ export const indices_put_index_template_request = z.object({
         })),
         master_timeout: z.optional(types_duration),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -46429,7 +46448,7 @@ export const indices_put_template1_request = z.object({
             description: 'Order in which Elasticsearch applies this template if index\nmatches multiple templates.\n\nTemplates with lower \'order\' values are merged first. Templates with higher\n\'order\' values are merged later, overriding templates with lower values.'
         })),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -46450,7 +46469,7 @@ export const indices_put_template_request = z.object({
             description: 'Order in which Elasticsearch applies this template if index\nmatches multiple templates.\n\nTemplates with lower \'order\' values are merged first. Templates with higher\n\'order\' values are merged later, overriding templates with lower values.'
         })),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -47475,7 +47494,7 @@ export const ingest_get_pipeline1_request = z.object({
     query: z.optional(z.object({
         master_timeout: z.optional(types_duration),
         summary: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return pipelines without their definitions (default: false)'
+            description: 'Return pipelines without their definitions'
         }))
     }))
 });
@@ -47520,7 +47539,7 @@ export const ingest_get_pipeline_request = z.object({
     query: z.optional(z.object({
         master_timeout: z.optional(types_duration),
         summary: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return pipelines without their definitions (default: false)'
+            description: 'Return pipelines without their definitions'
         }))
     }))
 });
@@ -51467,7 +51486,7 @@ export const watcher_put_watch1_request = z.object({
             description: 'The initial state of the watch.\nThe default value is `true`, which means the watch is active by default.'
         })),
         if_primary_term: z.optional(z.number().register(z.globalRegistry, {
-            description: 'only update the watch if the last operation that has changed the watch has the specified primary term'
+            description: 'Only update the watch if the last operation that has changed the watch has the specified primary term'
         })),
         if_seq_no: z.optional(types_sequence_number),
         version: z.optional(types_version_number)
@@ -51492,7 +51511,7 @@ export const watcher_put_watch_request = z.object({
             description: 'The initial state of the watch.\nThe default value is `true`, which means the watch is active by default.'
         })),
         if_primary_term: z.optional(z.number().register(z.globalRegistry, {
-            description: 'only update the watch if the last operation that has changed the watch has the specified primary term'
+            description: 'Only update the watch if the last operation that has changed the watch has the specified primary term'
         })),
         if_seq_no: z.optional(types_sequence_number),
         version: z.optional(types_version_number)

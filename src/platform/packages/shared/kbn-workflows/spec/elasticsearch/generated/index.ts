@@ -10,8 +10,8 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/12d3761).
- * Generated at: 2025-12-08T08:58:51.721Z
+ * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/6566f69).
+ * Generated at: 2025-12-08T09:07:02.910Z
  * Source: elasticsearch-specification repository (577 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
