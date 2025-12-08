@@ -27,7 +27,7 @@ Kibana uses three main validation libraries for API routes:
 
 ### UnboundedStringInRoute.ql
 - **ID**: `js/kibana/unbounded-string-in-route`
-- **Severity**: Warning (5.5)
+- **Severity**: Warning (6.0)
 - **Description**: Detects `schema.string()` in request bodies without `maxLength`
 - **Fix**: Add `{ maxLength: N }` option:
   ```typescript
@@ -164,6 +164,6 @@ codeql database analyze kibana-db \
 
 ## References
 
-- [@kbn/config-schema README](../../src/platform/packages/shared/kbn-config-schema/README.md)
+- [@kbn/config-schema README](../../../packages/kbn-config-schema/README.md)
 - [CodeQL for JavaScript](https://codeql.github.com/docs/codeql-language-guides/codeql-for-javascript/)
 
