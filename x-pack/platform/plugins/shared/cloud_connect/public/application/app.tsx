@@ -15,13 +15,12 @@ import {
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { OnboardingPage } from './components/onboarding';
 import { ConnectedServicesPage, useClusterConnection } from './components/connected_services';
-import { apiService } from '../lib/api';
 
 export const CloudConnectedAppMain: React.FC = () => {
   useBreadcrumbs();
   const appContext = useCloudConnectedAppContext();
 
-  const { notifications } = appContext;
+  const { notifications, apiService } = appContext;
   const { data: config, isLoading: isConfigLoading } = apiService.useLoadConfig();
   const {
     clusterDetails,

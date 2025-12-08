@@ -69,7 +69,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   subscriptionRequired = false,
   hasActiveSubscription = true,
 }) => {
-  const { hasConfigurePermission, telemetryClient } = useCloudConnectedAppContext();
+  const { hasConfigurePermission, telemetryService } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = () => setIsPopoverOpen(false);
@@ -237,7 +237,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 onClick={(e) => {
                   // Track telemetry for opening service
                   if (serviceKey) {
-                    telemetryClient.trackLinkClicked({
+                    telemetryService.trackLinkClicked({
                       destination_type: 'service_portal',
                       service_type: serviceKey,
                     });
@@ -342,7 +342,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 onClick={() => {
                   // Track telemetry for learn more link
                   if (serviceKey) {
-                    telemetryClient.trackLinkClicked({
+                    telemetryService.trackLinkClicked({
                       destination_type: 'service_documentation',
                       service_type: serviceKey,
                     });

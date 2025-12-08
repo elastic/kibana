@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { CloudConnectTelemetryClient } from './client';
+import { CloudConnectTelemetryService as CloudConnectTelemetryClient } from './client';
 import {
   clusterConnectedEventType,
   clusterDisconnectedEventType,

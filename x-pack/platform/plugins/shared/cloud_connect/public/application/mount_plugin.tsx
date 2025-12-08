@@ -10,9 +10,9 @@ import ReactDOM from 'react-dom';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { CloudConnectedAppContextProvider } from './app_context';
 import { CloudConnectedAppMain } from './app';
-import { apiService } from '../lib/api';
 import type { CloudConnectedAppComponentProps } from '../types';
-import type { CloudConnectTelemetryClient } from '../telemetry/client';
+import type { CloudConnectTelemetryService } from '../telemetry/client';
+import type { CloudConnectApiService } from '../lib/api';
 
 const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   chrome,
@@ -22,7 +22,8 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   notifications,
   history,
   cloudUrl,
-  telemetryClient,
+  telemetryService,
+  apiService,
 }) => {
   return (
     <CloudConnectedAppContextProvider
@@ -34,7 +35,8 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
         notifications,
         history,
         cloudUrl,
-        telemetryClient,
+        telemetryService,
+        apiService,
       }}
     >
       <CloudConnectedAppMain />
@@ -46,10 +48,9 @@ export const CloudConnectedApp = (
   core: CoreStart,
   params: AppMountParameters,
   cloudUrl: string,
-  telemetryClient: CloudConnectTelemetryClient
+  telemetryService: CloudConnectTelemetryService,
+  apiService: CloudConnectApiService
 ) => {
-  apiService.setup(core.http);
-
   ReactDOM.render(
     core.rendering.addContext(
       <CloudConnectedAppComponent
@@ -60,7 +61,8 @@ export const CloudConnectedApp = (
         notifications={core.notifications}
         history={params.history}
         cloudUrl={cloudUrl}
-        telemetryClient={telemetryClient}
+        telemetryService={telemetryService}
+        apiService={apiService}
       />
     ),
     params.element

@@ -8,7 +8,6 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../../app_context';
-import { apiService } from '../../../../lib/api';
 import type { CloudService, ServiceType } from '../../../../types';
 
 interface DisableModalService {
@@ -25,7 +24,7 @@ interface UseServiceActionsParams {
 }
 
 export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActionsParams) => {
-  const { notifications, telemetryClient } = useCloudConnectedAppContext();
+  const { notifications, telemetryService, apiService } = useCloudConnectedAppContext();
 
   // Tracks which service is currently being updated (for loading spinner)
   const [loadingService, setLoadingService] = useState<string | null>(null);
@@ -90,9 +89,9 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     };
 
     if (enabled) {
-      telemetryClient.trackServiceEnabled(telemetryProps);
+      telemetryService.trackServiceEnabled(telemetryProps);
     } else {
-      telemetryClient.trackServiceDisabled(telemetryProps);
+      telemetryService.trackServiceDisabled(telemetryProps);
     }
 
     setLoadingService(null);
@@ -122,7 +121,7 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
 
   const handleEnableServiceByUrl = (serviceKey: string, url: string) => {
     // Track telemetry for external link click to enable service
-    telemetryClient.trackLinkClicked({
+    telemetryService.trackLinkClicked({
       destination_type: 'service_enable_url',
       service_type: serviceKey as ServiceType,
     });

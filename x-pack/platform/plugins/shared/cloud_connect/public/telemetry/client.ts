@@ -15,7 +15,7 @@ import {
 } from './constants';
 import type { ServiceToggledProps, LinkClickedProps } from './types';
 
-export class CloudConnectTelemetryClient {
+export class CloudConnectTelemetryService {
   constructor(private readonly analytics: AnalyticsServiceSetup) {}
 
   public trackClusterConnected() {

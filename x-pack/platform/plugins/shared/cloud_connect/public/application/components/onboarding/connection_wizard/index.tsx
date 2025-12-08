@@ -18,7 +18,6 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { useCloudConnectedAppContext } from '../../../app_context';
-import { apiService } from '../../../../lib/api';
 import {
   STEP_1_TITLE,
   STEP_1_DESCRIPTION_1,
@@ -39,7 +38,8 @@ interface ConnectionWizardProps {
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, clusterConfig, cloudUrl, telemetryClient } = useCloudConnectedAppContext();
+  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService } =
+    useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +63,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     }
 
     if (data?.success) {
-      telemetryClient.trackClusterConnected();
+      telemetryService.trackClusterConnected();
       onConnect();
     }
 
@@ -71,13 +71,13 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
   };
 
   const handleSignUpClick = () => {
-    telemetryClient.trackLinkClicked({
+    telemetryService.trackLinkClicked({
       destination_type: 'cloud_signup',
     });
   };
 
   const handleLoginClick = () => {
-    telemetryClient.trackLinkClicked({
+    telemetryService.trackLinkClicked({
       destination_type: 'cloud_login',
     });
   };

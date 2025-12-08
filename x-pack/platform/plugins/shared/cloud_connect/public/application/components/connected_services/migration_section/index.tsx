@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useCloudConnectedAppContext } from '../../../app_context';
 
 export const MigrationSection: React.FC = () => {
-  const { docLinks, telemetryClient } = useCloudConnectedAppContext();
+  const { docLinks, telemetryService } = useCloudConnectedAppContext();
 
   const benefits = [
     {
@@ -99,7 +99,7 @@ export const MigrationSection: React.FC = () => {
             iconSide="right"
             onClick={() => {
               // Track telemetry for migration learn more link
-              telemetryClient.trackLinkClicked({
+              telemetryService.trackLinkClicked({
                 destination_type: 'migration_docs',
               });
             }}

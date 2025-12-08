@@ -40,14 +40,14 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
   onConfirm,
   isLoading,
 }) => {
-  const { telemetryClient } = useCloudConnectedAppContext();
+  const { telemetryService } = useCloudConnectedAppContext();
   const [confirmationText, setConfirmationText] = useState('');
   const isConfirmationValid = confirmationText === clusterName;
 
   const handleConfirm = async () => {
     if (isConfirmationValid) {
       await onConfirm();
-      telemetryClient.trackClusterDisconnected();
+      telemetryService.trackClusterDisconnected();
     }
   };
 

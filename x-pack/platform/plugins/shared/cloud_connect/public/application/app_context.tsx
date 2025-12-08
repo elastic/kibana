@@ -8,7 +8,8 @@
 import React, { createContext, useContext } from 'react';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { CloudConnectApiConfig } from '../types';
-import type { CloudConnectTelemetryClient } from '../telemetry/client';
+import type { CloudConnectTelemetryService } from '../telemetry/client';
+import type { CloudConnectApiService } from '../lib/api';
 
 export interface CloudConnectedAppContextValue {
   chrome: CoreStart['chrome'];
@@ -18,7 +19,8 @@ export interface CloudConnectedAppContextValue {
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
   cloudUrl: string;
-  telemetryClient: CloudConnectTelemetryClient;
+  telemetryService: CloudConnectTelemetryService;
+  apiService: CloudConnectApiService;
   clusterConfig?: CloudConnectApiConfig;
   hasConfigurePermission?: boolean;
 }

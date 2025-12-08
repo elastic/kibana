@@ -11,11 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConnectionWizard } from '.';
 import { useCloudConnectedAppContext } from '../../../app_context';
-import { apiService } from '../../../../lib/api';
 import type { CloudConnectedAppContextValue } from '../../../app_context';
 
 jest.mock('../../../app_context');
-jest.mock('../../../../lib/api');
 
 const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
   typeof useCloudConnectedAppContext
@@ -38,6 +36,13 @@ describe('ConnectionWizard', () => {
     trackServiceDisabled: jest.fn(),
     trackLinkClicked: jest.fn(),
   };
+  const mockApiService = {
+    authenticate: jest.fn(),
+    useLoadConfig: jest.fn(),
+    useLoadClusterDetails: jest.fn(),
+    updateServices: jest.fn(),
+    disconnectCluster: jest.fn(),
+  };
   const mockContext: CloudConnectedAppContextValue = {
     chrome: {} as any,
     application: {} as any,
@@ -52,7 +57,8 @@ describe('ConnectionWizard', () => {
       },
     } as any,
     cloudUrl: 'https://cloud.elastic.co',
-    telemetryClient: mockTelemetryClient as any,
+    telemetryService: mockTelemetryClient as any,
+    apiService: mockApiService as any,
     clusterConfig: {
       hasEncryptedSOEnabled: true,
       license: { type: 'platinum', uid: 'license-123' },
@@ -156,7 +162,6 @@ describe('ConnectionWizard', () => {
   });
 
   it('should display error callout when authentication fails', async () => {
-    const mockApiService = apiService as jest.Mocked<typeof apiService>;
     mockApiService.authenticate = jest.fn().mockResolvedValue({
       data: null,
       error: { message: 'Invalid API key' },
@@ -178,7 +183,6 @@ describe('ConnectionWizard', () => {
   });
 
   it('should show loading state during authentication', async () => {
-    const mockApiService = apiService as jest.Mocked<typeof apiService>;
     let resolveAuthenticate: any;
     const authenticatePromise = new Promise((resolve) => {
       resolveAuthenticate = resolve;
@@ -207,7 +211,6 @@ describe('ConnectionWizard', () => {
   });
 
   it('should call onConnect callback on successful authentication', async () => {
-    const mockApiService = apiService as jest.Mocked<typeof apiService>;
     mockApiService.authenticate = jest.fn().mockResolvedValue({
       data: { success: true, cluster_id: 'cluster-123', organization_id: 'org-123' },
       error: null,

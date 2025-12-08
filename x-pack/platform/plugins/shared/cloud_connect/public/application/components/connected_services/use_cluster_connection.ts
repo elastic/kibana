@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { apiService } from '../../../lib/api';
+import { useCloudConnectedAppContext } from '../../app_context';
 import type { ClusterDetails } from '../../../types';
 
 /**
@@ -22,6 +22,7 @@ import type { ClusterDetails } from '../../../types';
  * for API refetches, providing a smoother user experience.
  */
 export const useClusterConnection = () => {
+  const { apiService } = useCloudConnectedAppContext();
   const {
     data: initialClusterDetails,
     isLoading,

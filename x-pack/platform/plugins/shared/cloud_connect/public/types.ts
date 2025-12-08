@@ -8,7 +8,8 @@
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { CloudConnectTelemetryClient } from './telemetry/client';
+import type { CloudConnectTelemetryService } from './telemetry/client';
+import type { CloudConnectApiService } from './lib/api';
 
 export interface CloudConnectedPluginSetup {
   cloudUrl?: string;
@@ -47,7 +48,8 @@ export interface CloudConnectedAppComponentProps {
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
   cloudUrl: string;
-  telemetryClient: CloudConnectTelemetryClient;
+  telemetryService: CloudConnectTelemetryService;
+  apiService: CloudConnectApiService;
 }
 
 export interface ServiceMetadata {

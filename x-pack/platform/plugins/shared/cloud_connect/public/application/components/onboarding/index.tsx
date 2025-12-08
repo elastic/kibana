@@ -28,7 +28,8 @@ interface OnboardingPageProps {
 }
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
-  const { http, docLinks, hasConfigurePermission, telemetryClient } = useCloudConnectedAppContext();
+  const { http, docLinks, hasConfigurePermission, telemetryService } =
+    useCloudConnectedAppContext();
 
   return (
     <EuiPageSection restrictWidth={1200}>
@@ -56,7 +57,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
                       rel="noopener noreferrer"
                       onClick={() => {
                         // Track telemetry for onboarding learn more link
-                        telemetryClient.trackLinkClicked({
+                        telemetryService.trackLinkClicked({
                           destination_type: 'onboarding_docs',
                         });
                       }}

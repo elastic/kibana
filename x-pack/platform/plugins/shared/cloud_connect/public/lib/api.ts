@@ -35,27 +35,17 @@ export interface DisconnectClusterResponse {
   message: string;
 }
 
-export class ApiService {
-  private client: HttpSetup | undefined;
+export class CloudConnectApiService {
+  constructor(private readonly client: HttpSetup) {}
 
   private useRequest<R = any, E = any>(config: UseRequestConfig) {
-    if (!this.client) {
-      throw new Error('API service has not been initialized.');
-    }
     return _useRequest<R, E>(this.client, config);
   }
 
   private async sendRequest<R = any, E = any>(
     config: SendRequestConfig
   ): Promise<SendRequestResponse<R, E>> {
-    if (!this.client) {
-      throw new Error('API service has not been initialized.');
-    }
     return await _sendRequest<R, E>(this.client, config);
-  }
-
-  public setup(httpClient: HttpSetup): void {
-    this.client = httpClient;
   }
 
   public useLoadConfig() {
@@ -95,5 +85,3 @@ export class ApiService {
     });
   }
 }
-
-export const apiService = new ApiService();

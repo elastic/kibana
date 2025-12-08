@@ -26,7 +26,6 @@ import { OverviewSection } from './overview_section';
 import { ServicesSection } from './services_section';
 import { MigrationSection } from './migration_section';
 import { DisconnectClusterModal } from './disconnect_cluster_modal';
-import { apiService } from '../../../lib/api';
 import type { ClusterDetails } from '../../../types';
 
 export { useClusterConnection } from './use_cluster_connection';
@@ -43,7 +42,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications, hasConfigurePermission, docLinks, telemetryClient } =
+  const { notifications, hasConfigurePermission, docLinks, telemetryClient, apiService } =
     useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);

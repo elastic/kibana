@@ -20,6 +20,7 @@ import type {
   CloudConnectConfig,
 } from './types';
 import { CloudConnectTelemetryService } from './telemetry/service';
+import { CloudConnectApiService } from './lib/api';
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 
@@ -45,7 +46,7 @@ export class CloudConnectedPlugin
 
     // Register the app in the management section
     const cloudUrl = this.config.cloudUrl;
-    const telemetryClient = this.telemetry.getClient();
+    const telemetryService = this.telemetry.getClient();
 
     core.application.register({
       id: 'cloud_connect',
@@ -57,8 +58,9 @@ export class CloudConnectedPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
+        const apiService = new CloudConnectApiService(coreStart.http);
         const { CloudConnectedApp } = await import('./application/mount_plugin');
-        return CloudConnectedApp(coreStart, params, cloudUrl, telemetryClient);
+        return CloudConnectedApp(coreStart, params, cloudUrl, telemetryService, apiService);
       },
     });
 

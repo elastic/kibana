@@ -26,7 +26,7 @@ const renderWithIntl = (component: React.ReactElement) => {
       <CloudConnectedAppContextProvider
         value={
           {
-            telemetryClient: mockTelemetryClient,
+            telemetryService: mockTelemetryClient,
           } as any
         }
       >
@@ -167,7 +167,7 @@ describe('DisconnectClusterModal', () => {
           <CloudConnectedAppContextProvider
             value={
               {
-                telemetryClient: mockTelemetryClient,
+                telemetryService: mockTelemetryClient,
               } as any
             }
           >
