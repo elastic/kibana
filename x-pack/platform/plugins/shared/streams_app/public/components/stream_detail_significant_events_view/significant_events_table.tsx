@@ -23,6 +23,7 @@ import { SignificantEventsHistogramChart } from './significant_events_histogram'
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
+import { SeverityBadge } from './severity_badge';
 
 export function SignificantEventsTable({
   definition,
@@ -123,6 +124,15 @@ export function SignificantEventsTable({
         }
 
         return <EuiCodeBlock paddingSize="none">{JSON.stringify(query.kql.query)}</EuiCodeBlock>;
+      },
+    },
+    {
+      field: 'query',
+      name: i18n.translate('xpack.streams.significantEventsTable.severityColumnTitle', {
+        defaultMessage: 'Severity',
+      }),
+      render: (query: StreamQuery) => {
+        return <SeverityBadge score={query.severity_score} />;
       },
     },
     {
