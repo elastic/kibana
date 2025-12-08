@@ -27,10 +27,20 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
       [
         'first milestone',
         {
-          saved_objects: [{ id: 'abc', attributes: { milestoneId: 1 } }],
+          saved_objects: [
+            {
+              id: 'abc',
+              attributes: { milestoneId: 1 },
+              score: 0,
+              references: [],
+              type: NBA_SAVED_OBJECT_TYPE,
+            },
+          ],
           total: 1,
+          per_page: 0,
+          page: 0,
         },
-        { saved_objects: [], total: 0 },
+        { saved_objects: [], total: 0, per_page: 0, page: 0 },
         Milestone.M1,
       ],
       [
@@ -38,35 +48,106 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
         {
           saved_objects: [],
           total: 0,
+          per_page: 0,
+          page: 0,
         },
-        { saved_objects: [], total: 0 },
+        { saved_objects: [], total: 0, per_page: 0, page: 0 },
         undefined,
       ],
       [
         'first milestone seen',
         {
-          saved_objects: [{ id: 'abc', attributes: { milestoneId: 1 } }],
+          saved_objects: [
+            {
+              id: 'abc',
+              attributes: { milestoneId: 1 },
+              score: 0,
+              references: [],
+              type: NBA_SAVED_OBJECT_TYPE,
+            },
+          ],
           total: 1,
+          per_page: 0,
+          page: 0,
         },
-        { saved_objects: [{ attributes: { milestoneIds: [1] } }], total: 1 },
+        {
+          saved_objects: [
+            {
+              id: '123',
+              attributes: { milestoneIds: [1] },
+              score: 0,
+              references: [],
+              type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+            },
+          ],
+          total: 1,
+          per_page: 0,
+          page: 0,
+        },
         undefined,
       ],
       [
         'M6 milestone',
         {
-          saved_objects: [{ id: 'abc', attributes: { milestoneId: 6 } }],
+          saved_objects: [
+            {
+              id: 'abc',
+              attributes: { milestoneId: 6 },
+              score: 0,
+              references: [],
+              type: NBA_SAVED_OBJECT_TYPE,
+            },
+          ],
           total: 1,
+          per_page: 0,
+          page: 0,
         },
-        { saved_objects: [{ attributes: { milestoneIds: [1, 2, 3, 4, 5] } }], total: 1 },
+        {
+          saved_objects: [
+            {
+              id: '123',
+              attributes: { milestoneIds: [1, 2, 3, 4, 5] },
+              score: 0,
+              references: [],
+              type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+            },
+          ],
+          total: 1,
+          per_page: 0,
+          page: 0,
+        },
         Milestone.M6,
       ],
       [
         'M6 seen',
         {
-          saved_objects: [{ id: 'abc', attributes: { milestoneId: 6 } }],
+          saved_objects: [
+            {
+              id: 'abc',
+              attributes: { milestoneId: 6 },
+              score: 0,
+              references: [],
+              type: NBA_SAVED_OBJECT_TYPE,
+            },
+          ],
           total: 1,
+          per_page: 0,
+          page: 0,
         },
-        { saved_objects: [{ attributes: { milestoneIds: [1, 2, 3, 4, 5, 6] } }], total: 1 },
+        {
+          saved_objects: [
+            {
+              id: '123',
+              attributes: { milestoneIds: [1, 2, 3, 4, 5, 6] },
+              score: 0,
+              references: [],
+              type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+            },
+          ],
+          total: 1,
+          per_page: 0,
+          page: 0,
+        },
         undefined,
       ],
       [
@@ -74,8 +155,23 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
         {
           saved_objects: [],
           total: 0,
+          per_page: 0,
+          page: 0,
         },
-        { saved_objects: [{ attributes: { milestoneIds: [1, 2, 3, 4, 5] } }], total: 1 },
+        {
+          saved_objects: [
+            {
+              id: '123',
+              attributes: { milestoneIds: [1, 2, 3, 4, 5] },
+              score: 0,
+              references: [],
+              type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+            },
+          ],
+          total: 1,
+          per_page: 0,
+          page: 0,
+        },
         undefined,
       ],
     ])('should return correct next NBA milestone: %s', async (_title, nbaSO, userSO, expected) => {
@@ -99,8 +195,18 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
 
     it('should propagate error from user nba so', async () => {
       soClient.find.mockResolvedValueOnce({
-        saved_objects: [{ id: 'abc', attributes: { milestoneId: 6 } }],
+        saved_objects: [
+          {
+            id: 'abc',
+            attributes: { milestoneId: 6 },
+            score: 0,
+            references: [],
+            type: NBA_SAVED_OBJECT_TYPE,
+          },
+        ],
         total: 1,
+        per_page: 0,
+        page: 0,
       });
       soClient.find.mockRejectedValueOnce(new Error('test error'));
       const userId = 'user-id';
@@ -117,7 +223,7 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
   describe('markAsSeen', () => {
     it('should create new user so', async () => {
       const userId = 'user-id';
-      soClient.find.mockResolvedValueOnce({ saved_objects: [], total: 0 });
+      soClient.find.mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 0, page: 0 });
       const actual = await sut.markAsSeen(Milestone.M2, userId);
       expect(soClient.create).toHaveBeenCalledWith(NBA_USER_SEEN_SAVED_OBJECT_TYPE, {
         userId,
@@ -130,8 +236,18 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
     it('should update existing user so', async () => {
       const userId = 'user-id';
       soClient.find.mockResolvedValueOnce({
-        saved_objects: [{ id: '123', attributes: { milestoneIds: [1], userId } }],
+        saved_objects: [
+          {
+            id: '123',
+            attributes: { milestoneIds: [1], userId },
+            score: 0,
+            references: [],
+            type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+          },
+        ],
         total: 1,
+        per_page: 0,
+        page: 0,
       });
       const actual = await sut.markAsSeen(Milestone.M2, userId);
       expect(soClient.update).toHaveBeenCalledWith(NBA_USER_SEEN_SAVED_OBJECT_TYPE, '123', {
@@ -145,8 +261,18 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
     it('should not update so if milestone already seen', async () => {
       const userId = 'user-id';
       soClient.find.mockResolvedValueOnce({
-        saved_objects: [{ id: '123', attributes: { milestoneIds: [1, 2], userId } }],
+        saved_objects: [
+          {
+            id: '123',
+            attributes: { milestoneIds: [1, 2], userId },
+            score: 0,
+            references: [],
+            type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+          },
+        ],
         total: 1,
+        per_page: 0,
+        page: 0,
       });
       const actual = await sut.markAsSeen(Milestone.M2, userId);
       expect(actual).toBeUndefined();
@@ -163,8 +289,18 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
     it('should propagate error if update fails', async () => {
       const userId = 'user-id';
       soClient.find.mockResolvedValueOnce({
-        saved_objects: [{ id: '123', attributes: { milestoneIds: [1], userId } }],
+        saved_objects: [
+          {
+            id: '123',
+            attributes: { milestoneIds: [1], userId },
+            score: 0,
+            references: [],
+            type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
+          },
+        ],
         total: 1,
+        per_page: 0,
+        page: 0,
       });
       soClient.update.mockRejectedValue(new Error('test error'));
       await expect(sut.markAsSeen(Milestone.M2, userId)).rejects.toThrow('test error');
@@ -175,6 +311,8 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
       soClient.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 0,
+        per_page: 0,
+        page: 0,
       });
       soClient.create.mockRejectedValue(new Error('test error'));
       await expect(sut.markAsSeen(Milestone.M2, userId)).rejects.toThrow('test error');

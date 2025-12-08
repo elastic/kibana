@@ -29,7 +29,12 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
     it('should return so id', async () => {
       const id: Milestone = Milestone.M2;
       const savedObjectId = 'abc';
-      soClient.create.mockResolvedValue({ id: savedObjectId, attributes: { milestoneId: 2 } });
+      soClient.create.mockResolvedValue({
+        id: savedObjectId,
+        type: NBA_SAVED_OBJECT_TYPE,
+        attributes: { milestoneId: 2 },
+        references: [],
+      });
       const result = await repository.create(id);
       expect(result).toEqual({
         milestoneId: id,
@@ -46,7 +51,7 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
 
   describe('getCurrent', () => {
     it('should return undefined if no saved objects', async () => {
-      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 });
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 0, page: 0 });
       const result = await repository.getCurrent();
       expect(result).toBeUndefined();
       expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
@@ -62,10 +67,24 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
       const savedObjectId = 'abc';
       soClient.find.mockResolvedValue({
         saved_objects: [
-          { id: savedObjectId, attributes: { milestoneId: 2 } },
-          { id: '123', attributes: { milestoneId: 3 } },
+          {
+            id: savedObjectId,
+            attributes: { milestoneId: 2 },
+            score: 0,
+            references: [],
+            type: NBA_SAVED_OBJECT_TYPE,
+          },
+          {
+            id: '123',
+            attributes: { milestoneId: 3 },
+            score: 0,
+            references: [],
+            type: NBA_SAVED_OBJECT_TYPE,
+          },
         ],
         total: 2,
+        per_page: 0,
+        page: 0,
       });
       const result = await repository.getCurrent();
       expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
@@ -77,7 +96,12 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
     it('should update milestoneId', async () => {
       const milestoneId = Milestone.M2;
       const savedObjectId = 'abc';
-      soClient.update.mockResolvedValue({ id: savedObjectId, attributes: { milestoneId } });
+      soClient.update.mockResolvedValue({
+        id: savedObjectId,
+        attributes: { milestoneId },
+        type: NBA_SAVED_OBJECT_TYPE,
+        references: [],
+      });
       await repository.update({ milestoneId, savedObjectId });
       expect(soClient.update).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, savedObjectId, {
         milestoneId,
