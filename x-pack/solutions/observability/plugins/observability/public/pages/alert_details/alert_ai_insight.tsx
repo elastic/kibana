@@ -8,15 +8,16 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiInsight } from '@kbn/observability-agent-builder';
-import {
-  OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-  OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
-  OBSERVABILITY_AGENT_FEATURE_FLAG,
-  OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
-} from '@kbn/observability-agent-plugin/common/constants';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
+
+// Keep in sync with constants in the observability_agent plugin:
+// x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts
+const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
+const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
+const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
+const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
 export function AlertAiInsight({ alert }: { alert: AlertData }) {
   const {
