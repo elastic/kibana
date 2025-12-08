@@ -3660,7 +3660,7 @@
     },
     {
       "groupName": "CodeQL",
-      "matchDepNames": [
+      "matchPackageNames": [
         "github/codeql-action/analyze",
         "github/codeql-action/init"
       ],
