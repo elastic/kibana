@@ -33,6 +33,7 @@
     "@kbn/restorable-state",
     "@kbn/esql-types",
     "@kbn/presentation-panel-plugin",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/ebt-tools"
   ]
 }
