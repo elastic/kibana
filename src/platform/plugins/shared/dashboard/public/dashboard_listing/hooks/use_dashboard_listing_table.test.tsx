@@ -143,7 +143,7 @@ describe('useDashboardListingTable', () => {
       createItem: expect.any(Function),
       deleteItems: expect.any(Function),
       editItem: expect.any(Function),
-      emptyPrompt: expect.any(Object),
+      noItemsMessage: expect.any(Object),
       entityName: 'Dashboard',
       entityNamePlural: 'Dashboards',
       findItems: expect.any(Function),

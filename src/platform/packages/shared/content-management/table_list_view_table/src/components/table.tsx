@@ -32,6 +32,7 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import {
   cssFavoriteHoverWithinEuiTableRow,
   useFavorites,
+  FavoritesEmptyState,
 } from '@kbn/content-management-favorites-public';
 
 import { useServices } from '../services';
@@ -85,7 +86,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
-  emptyPrompt?: JSX.Element;
+  noItemsMessage?: JSX.Element;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -117,7 +118,7 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
-  emptyPrompt,
+  noItemsMessage,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
@@ -312,10 +313,9 @@ export function Table<T extends UserContentCommonSchema>({
     );
   }, [entityNamePlural]);
 
-  // Check if we have active filters (favorites or createdBy)
-  const hasActiveFilters = React.useMemo(() => {
-    return tableFilter.favorites || tableFilter?.createdBy?.length > 0;
-  }, [tableFilter]);
+  // Check if we have active filters or search query
+  const hasActiveFilters =
+    Boolean(searchQuery.text) || tableFilter.favorites || tableFilter?.createdBy?.length > 0;
 
   const emptyPromptActions = useMemo(() => {
     return renderCreateButton({ fill: !hasActiveFilters });
@@ -396,8 +396,18 @@ export function Table<T extends UserContentCommonSchema>({
           noItemsMessage={
             isFetchingItems ? (
               <></>
-            ) : emptyPrompt && items.length === 0 && !hasActiveFilters ? (
-              emptyPrompt
+            ) : noItemsMessage && items.length === 0 && !hasActiveFilters ? (
+              noItemsMessage
+            ) : tableFilter.favorites ? (
+              <FavoritesEmptyState
+                emptyStateType={
+                  Boolean(searchQuery.text) || tableFilter?.createdBy?.length > 0
+                    ? 'noMatchingItems'
+                    : 'noItems'
+                }
+                entityName={entityName}
+                entityNamePlural={entityNamePlural}
+              />
             ) : (
               <EuiEmptyPrompt
                 title={<h3>{emptyPromptTitle}</h3>}
