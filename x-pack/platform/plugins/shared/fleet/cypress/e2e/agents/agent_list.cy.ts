@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
+
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+
 import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
 
 import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
-import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
 import { setUISettings } from '../../tasks/ui_settings';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { request } from '../../tasks/common';
 import { login } from '../../tasks/login';
 
@@ -379,7 +381,7 @@ describe('View agents list', () => {
       // Trigger a bulk upgrade
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Assign to new policy').click();
-      cy.get('.euiModalBody select').select('Agent policy 4');
+      cy.get('.euiModalBody input').type('{backspace}{downArrow}{enter}');
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
       waitForLoading();
       assertTableIsEmpty();
@@ -394,7 +396,7 @@ describe('View agents list', () => {
       // Trigger a bulk upgrade
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Assign to new policy').click();
-      cy.get('.euiModalBody select').select('Agent policy 3');
+      cy.get('.euiModalBody input').type('{downArrow}{enter}');
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
     });
   });
