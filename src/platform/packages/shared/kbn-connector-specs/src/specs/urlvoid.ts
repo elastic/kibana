@@ -32,14 +32,9 @@ export const URLVoidConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  authTypes: [
-    {
-      type: 'api_key_header',
-      defaults: {
-        headerField: 'X-Api-Key',
-      },
-    },
-  ],
+  auth: {
+    types: [{ type: 'api_key_header', defaults: { headerField: 'X-Api-Key' } }],
+  },
 
   actions: {
     scanDomain: {

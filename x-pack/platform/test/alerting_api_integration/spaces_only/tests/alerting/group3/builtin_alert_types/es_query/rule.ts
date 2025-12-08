@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
@@ -42,7 +42,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  describe('testtest rule', () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
