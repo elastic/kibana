@@ -1143,7 +1143,7 @@ const derivDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the derivative over time of a numeric field using linear regression.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -1179,7 +1179,7 @@ const derivDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| WHERE pod == "three"\n| STATS max_deriv = MAX(DERIV(network.cost)) BY time_bucket = BUCKET(@timestamp,5minute), pod',
+    'TS datenanos-k8s\n| WHERE pod == "three"\n| STATS max_deriv = MAX(DERIV(network.cost)) BY time_bucket = BUCKET(@timestamp,5minute), pod',
   ],
 };
 
