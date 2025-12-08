@@ -6,9 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-// import type { WaterfallSpan, WaterfallTransaction } from '../../../common/waterfall/typings';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
-// import { getTraceItems, type TraceDoc } from '../../routes/traces/get_trace_items';
 import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
 import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
@@ -19,27 +17,6 @@ import {
 } from '../../routes/assistant_functions/get_changepoints';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
-// import type { APMConfig } from '../..';
-
-// interface TraceItem {
-//   timestamp: string;
-//   serviceName?: string;
-//   traceId?: string;
-//   transactionId?: string;
-//   spanId?: string;
-//   transactionName?: string;
-//   spanName?: string;
-//   transactionType?: string;
-//   spanType?: string;
-//   spanSubtype?: string;
-//   eventOutcome?: string;
-//   statusCode?: number | string;
-//   transactionDurationUs?: number;
-//   spanDurationUs?: number;
-//   httpUrl?: string;
-//   parentId?: string;
-//   downstreamServiceResource?: string;
-// }
 
 export function registerDataProviders({
   core,
@@ -169,127 +146,4 @@ export function registerDataProviders({
       });
     }
   );
-
-  // observabilityAgentBuilder.registerDataProvider(
-  //   'apmTraceDetails',
-  //   async ({ request, traceId, start, end }) => {
-  //     const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-
-  //     const { traceDocs, errorDocs } = await getTraceItems({
-  //       apmEventClient,
-  //       traceId,
-  //       start: parseDatemath(start),
-  //       end: parseDatemath(end),
-  //       config: { ui: { maxTraceItems: 100 } } as unknown as APMConfig,
-  //       logger,
-  //     });
-
-  //     const items: TraceItem[] = [];
-
-  //     for (const doc of traceDocs as TraceDoc[]) {
-  //       const timestamp = new Date(Math.floor(doc.timestamp.us / 1000)).toISOString();
-
-  //       const baseTraceItem: {
-  //         timestamp: string;
-  //         serviceName?: string;
-  //         traceId?: string;
-  //         eventOutcome?: string;
-  //         parentId?: string;
-  //       } = {
-  //         timestamp,
-  //         serviceName: doc.service?.name,
-  //         traceId: doc.trace?.id,
-  //         eventOutcome: doc.event?.outcome,
-  //         parentId: doc.parent?.id,
-  //       };
-
-  //       if (doc.processor.event === 'transaction') {
-  //         const transactionDoc = doc as WaterfallTransaction;
-
-  //         items.push({
-  //           ...baseTraceItem,
-  //           transactionId: transactionDoc.transaction?.id,
-  //           transactionName: transactionDoc.transaction?.name,
-  //           transactionType: transactionDoc.transaction?.type,
-  //           transactionDurationUs: transactionDoc.transaction?.duration?.us,
-  //           spanId: transactionDoc.span?.id,
-  //         });
-  //       } else {
-  //         const spanDoc = doc as WaterfallSpan;
-
-  //         items.push({
-  //           ...baseTraceItem,
-  //           transactionId: spanDoc.transaction?.id,
-  //           spanId: spanDoc.span?.id,
-  //           spanName: spanDoc.span?.name,
-  //           spanType: spanDoc.span?.type,
-  //           spanSubtype: spanDoc.span?.subtype,
-  //           spanDurationUs: spanDoc.span?.duration.us,
-  //           downstreamServiceResource: spanDoc.span?.destination?.service?.resource,
-  //         });
-  //       }
-  //     }
-
-  //     // Sort items by timestamp
-  //     const traceItems = items.sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1)).slice(0, 100);
-
-  //     const serviceAggregatesMap = new Map<
-  //       string,
-  //       {
-  //         serviceName: string;
-  //         count: number;
-  //         errorCount: number;
-  //       }
-  //     >();
-
-  //     for (const item of traceItems) {
-  //       const serviceName = item?.serviceName ?? 'unknown';
-  //       const agg = serviceAggregatesMap.get(serviceName) ?? {
-  //         serviceName,
-  //         count: 0,
-  //         errorCount: 0,
-  //       };
-
-  //       agg.count += 1;
-
-  //       const outcome = item?.eventOutcome;
-  //       if (outcome === 'failure') {
-  //         agg.errorCount += 1;
-  //       }
-  //       serviceAggregatesMap.set(serviceName, agg);
-  //     }
-
-  //     const traceServiceAggregates = Array.from(serviceAggregatesMap.values())
-  //       .map((value) => ({
-  //         serviceName: value.serviceName,
-  //         count: value.count,
-  //         errorCount: value.errorCount,
-  //       }))
-  //       .sort((a, b) => b.count - a.count);
-
-  //     const traceErrors = errorDocs
-  //       .map((e) => {
-  //         const exception = e.error?.exception?.[0];
-  //         return {
-  //           timestamp: new Date(Math.floor(e.timestamp.us / 1000)).toISOString(),
-  //           traceId: e.trace?.id,
-  //           transactionId: e.transaction?.id,
-  //           spanId: e.span?.id,
-  //           serviceName: e.service?.name,
-  //           errorExceptionType: exception?.type,
-  //           errorExceptionMessage: exception?.message,
-  //           errorLogMessage: e.error?.log?.message,
-  //         };
-  //       })
-  //       .filter((error) => error.timestamp)
-  //       .sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1))
-  //       .slice(0, 100);
-
-  //     return {
-  //       traceItems,
-  //       traceServiceAggregates,
-  //       traceErrors,
-  //     };
-  //   }
-  // );
 }

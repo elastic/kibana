@@ -84,51 +84,6 @@ interface APMTransaction {
   };
 }
 
-interface APMTraceItem {
-  timestamp: string;
-  serviceName?: string;
-  traceId?: string;
-  transactionId?: string;
-  spanId?: string;
-  transactionName?: string;
-  spanName?: string;
-  transactionType?: string;
-  spanType?: string;
-  spanSubtype?: string;
-  eventOutcome?: string;
-  statusCode?: number | string;
-  transactionDurationUs?: number;
-  spanDurationUs?: number;
-  httpUrl?: string;
-  parentId?: string;
-  downstreamServiceResource?: string;
-}
-
-interface APMTraceServiceAggregate {
-  serviceName: string;
-  count: number;
-  errorCount: number;
-}
-
-interface APMTraceError {
-  timestamp?: string;
-  timestampUs?: number;
-  traceId?: string;
-  transactionId?: string;
-  spanId?: string;
-  serviceName?: string;
-  errorExceptionType?: string;
-  errorExceptionMessage?: string;
-  errorLogMessage?: string;
-  errorCulprit?: string;
-}
-
-interface APMTraceDetails {
-  traceItems: APMTraceItem[];
-  traceServiceAggregates: APMTraceServiceAggregate[];
-  traceErrors: APMTraceError[];
-}
-
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
