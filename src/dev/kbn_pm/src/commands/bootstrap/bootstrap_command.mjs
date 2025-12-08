@@ -51,6 +51,7 @@ export const command = {
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
+    --no-cache           Turns caches off on involved processes (Moon).
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -67,6 +68,7 @@ export const command = {
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
+    const noCache = args.getBooleanValue('no-cache') ?? false;
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
@@ -115,7 +117,7 @@ export const command = {
         'yarn',
         ['kbn', 'build-shared']
           .concat(quiet ? ['--quiet'] : [])
-          .concat(forceInstall ? ['--no-cache'] : [])
+          .concat(forceInstall || noCache ? ['--no-cache'] : [])
           .concat(allowRoot ? ['--allow-root'] : []),
         {
           pipe: true,

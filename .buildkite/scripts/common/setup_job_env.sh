@@ -10,6 +10,10 @@ fi
 
 source .buildkite/scripts/common/util.sh
 
+# Moon takes a long while to warm up before starting to execute anything.
+# If we want to use for setup/sync actions, we have to change this
+export MOON_NO_ACTIONS=true
+
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
