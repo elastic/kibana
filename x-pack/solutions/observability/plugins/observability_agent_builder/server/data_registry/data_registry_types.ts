@@ -136,7 +136,7 @@ interface LogCategory {
   downstreamServiceResource?: string;
 }
 
-export interface ObservabilityAgentDataRegistryTypes {
+export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
     serviceName: string;

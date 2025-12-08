@@ -23,15 +23,15 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ObservabilityAgentDataRegistry } from './data_registry/data_registry';
+import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
-export interface ObservabilityAgentPluginSetup {
-  registerDataProvider: ObservabilityAgentDataRegistry['registerDataProvider'];
+export interface ObservabilityAgentBuilderPluginSetup {
+  registerDataProvider: ObservabilityAgentBuilderDataRegistry['registerDataProvider'];
 }
 
-export type ObservabilityAgentPluginStart = Record<string, never>;
+export type ObservabilityAgentBuilderPluginStart = Record<string, never>;
 
-export interface ObservabilityAgentPluginSetupDependencies {
+export interface ObservabilityAgentBuilderPluginSetupDependencies {
   onechat: OnechatPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
@@ -41,7 +41,7 @@ export interface ObservabilityAgentPluginSetupDependencies {
   ml?: MlPluginSetup;
 }
 
-export interface ObservabilityAgentPluginStartDependencies {
+export interface ObservabilityAgentBuilderPluginStartDependencies {
   onechat: OnechatPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
