@@ -11,7 +11,8 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.MemberExpression} MemberExpression */
 
-const ERROR_MSG = 'Only one describe block is allowed per test type (apiTest, test, or spaceTest).';
+const ERROR_MSG =
+  'Only one describe block is allowed per test type (apiTest, test, or spaceTest). This is required for auto-skip functionality in CI.';
 
 const TEST_FIXTURES = new Set(['apiTest', 'test', 'spaceTest']);
 

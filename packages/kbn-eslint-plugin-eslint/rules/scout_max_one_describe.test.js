@@ -11,7 +11,8 @@ const { RuleTester } = require('eslint');
 const rule = require('./scout_max_one_describe');
 const dedent = require('dedent');
 
-const ERROR_MSG = 'Only one describe block is allowed per test type (apiTest, test, or spaceTest).';
+const ERROR_MSG =
+  'Only one describe block is allowed per test type (apiTest, test, or spaceTest). This is required for auto-skip functionality in CI.';
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -80,26 +81,17 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
         });
       `,
     },
-    // Nested describe blocks (only one at top level per type)
-    {
-      code: dedent`
-        test.describe('outer suite', () => {
-          describe('inner suite', () => {
-            test('should work', () => {
-              expect(true).toBe(true);
-            });
-          });
-        });
-      `,
-    },
-    // Regular describe() without test type prefix
+    // Multiple bare describe() calls are allowed - rule only checks fixture methods
     {
       code: dedent`
         describe('my test suite', () => {
-          describe('nested suite', () => {
-            test('should work', () => {
-              expect(true).toBe(true);
-            });
+          test('should work', () => {
+            expect(true).toBe(true);
+          });
+        });
+        describe('my test suite', () => {
+          test('should work', () => {
+            expect(true).toBe(true);
           });
         });
       `,
