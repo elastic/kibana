@@ -32,6 +32,7 @@ paths-ignore:
   - '**/test_helpers/**'
   - '**/test-helpers/**'
   - '**/test_utils/**'
+  - '.github/codeql/custom-queries/**'
   - api_docs
   - dev_docs
   - docs
