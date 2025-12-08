@@ -32,7 +32,9 @@ export class ObservabilityAgentBuilderDataRegistry {
     id: K,
     params: Parameters<ObservabilityAgentBuilderDataRegistryTypes[K]>[0]
   ): Promise<ReturnType<ObservabilityAgentBuilderDataRegistryTypes[K]> | undefined> {
-    const provider = this.providers[id] as ObservabilityAgentBuilderDataRegistryTypes[K] | undefined;
+    const provider = this.providers[id] as
+      | ObservabilityAgentBuilderDataRegistryTypes[K]
+      | undefined;
 
     if (!provider) {
       this.logger.error(`No data provider registered for key: ${id}`);
