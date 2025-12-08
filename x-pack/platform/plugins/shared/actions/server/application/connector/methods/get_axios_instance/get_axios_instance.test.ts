@@ -124,6 +124,7 @@ describe('getAxiosInstance()', () => {
         id: defaultConnectorTypeId,
         isSystemActionType: true,
         supportedFeatureIds: ['workflows'],
+        globalAuthHeaders: { foo: 'bar' },
         validate: {
           config: { schema: z.object({}) },
           secrets: { schema: z.object({ foobar: z.boolean() }) },
@@ -156,13 +157,14 @@ describe('getAxiosInstance()', () => {
     getEventLogClient.mockResolvedValue(eventLogClient);
   });
 
-  it('calls the getAxiosInstanceWithAuth with the connector secrets', async () => {
+  it('calls getAxiosInstanceWithAuth with the correct params', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
     await actionsClient.getAxiosInstance(defaultConnectorId);
     expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith({
       connectorId: defaultConnectorId,
       connectorTokenClient,
       secrets: { foobar: true },
+      additionalHeaders: { foo: 'bar' },
     });
   });
 
