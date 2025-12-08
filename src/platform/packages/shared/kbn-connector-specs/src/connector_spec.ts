@@ -24,7 +24,7 @@
 import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -239,7 +239,10 @@ export interface AuthTypeDef {
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
-  authTypes?: Array<string | AuthTypeDef>;
+  auth?: {
+    types: Array<string | AuthTypeDef>;
+    headers?: Record<string, AxiosHeaderValue>;
+  };
 
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })
