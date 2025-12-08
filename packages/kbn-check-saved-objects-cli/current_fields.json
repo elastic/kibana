@@ -91,7 +91,12 @@
   "alerting_rule_template": [
     "name",
     "ruleTypeId",
-    "tags"
+    "tags",
+    "description",
+    "artifacts",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
+    "artifacts.dashboards"
   ],
   "api_key_pending_invalidation": [
     "apiKeyId",

@@ -13,7 +13,15 @@ import { Superuser } from '../../security_and_spaces/scenarios';
 
 export async function createRuleTemplateSO(
   ftrProvider: FtrProviderContext,
-  { space = 'default' }: { space?: string } = {}
+  { 
+    space = 'default',
+    description,
+    artifacts,
+  }: { 
+    space?: string,
+    description?: string; 
+    artifacts?: Record<string, any>;
+  } = {}
 ) {
   return await ftrProvider.getService('es').index({
     index: '.kibana_alerting_cases',
@@ -22,6 +30,8 @@ export async function createRuleTemplateSO(
       alerting_rule_template: {
         name: 'Sample alerting rule template v2',
         tags: ['Testing'],
+        ...(description && { description }),
+        ...(artifacts && { artifacts }),
         ruleTypeId: '.index-threshold',
         schedule: {
           interval: '1m',

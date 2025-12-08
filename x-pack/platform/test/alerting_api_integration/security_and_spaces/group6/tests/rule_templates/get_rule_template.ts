@@ -43,6 +43,24 @@ export default (ftrProvider: FtrProviderContext): void => {
       expect(ruleTemplate.body).to.eql(getRuleTemplateResponse('sample-alerting-rule'));
     });
 
+    it('should return rule template with description and artifacts', async () => {
+      const myArtifacts = { dashboards: ['dash-1'] };
+      const myDescription = 'Test Description';
+
+      await createRuleTemplateSO(ftrProvider, { 
+        description: myDescription,
+        artifacts: myArtifacts
+      });
+
+      const response = await getRuleTemplate({ supertest, templateId: 'sample-alerting-rule' });
+
+      expect(response.body).to.eql({
+        ...getRuleTemplateResponse('sample-alerting-rule'),
+        description: myDescription,
+        artifacts: myArtifacts
+      });
+});
+
     it('unhappy path - 404s when rule template do not exists', async () => {
       await supertest
         .get(`/internal/alerting/rule_template/fake-id`)
