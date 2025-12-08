@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
@@ -82,18 +84,24 @@ const AgentPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
   const manageAgentsHref = createOnechatUrl(appPaths.agents.list);
   return (
     <EuiPopoverTitle paddingSize="s">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={true}>{search}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiButtonEmpty
             iconType="plus"
             color="text"
             aria-label={createAgentAriaLabel}
             href={createAgentHref}
-          />
+          >
+            <FormattedMessage
+              id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
+              defaultMessage="New"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            size="m"
             iconType="gear"
             color="text"
             aria-label={manageAgentsAriaLabel}
