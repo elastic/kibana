@@ -2245,7 +2245,8 @@
     {
       "groupName": "search-ui ai dependency",
       "matchDepNames": [
-        "ai"
+        "ai",
+        "@ai-sdk/langchain"
       ],
       "reviewers": [
         "team:search-kibana"
