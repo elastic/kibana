@@ -37,7 +37,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
             buttonContent={
               <strong>
                 {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
+                  'xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.ignoredFieldsFailure.title',
                   { defaultMessage: 'Malformed fields detected.' }
                 )}
               </strong>
@@ -46,7 +46,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
             <EuiText component="p" size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                  id="xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.ignoredFieldsFailure.fieldsList"
                   defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
                   values={{
                     fields: errors.ignoredFields.map((field) => (
