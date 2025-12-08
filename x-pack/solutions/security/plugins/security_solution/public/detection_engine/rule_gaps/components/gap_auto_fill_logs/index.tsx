@@ -170,120 +170,122 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
         setPageSize(page.size);
       }
     },
-    [setPageIndex, setPageSize]
+    []
   );
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <>
-      {isOpen && (
-        <EuiFlyout
-          ownFocus
-          onClose={onClose}
-          size="l"
-          aria-labelledby="gapAutoFillLogs"
-          data-test-subj="gap-auto-fill-logs"
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2 id="gapAutoFillLogs">{i18n.GAP_AUTO_FILL_LOGS_TITLE}</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <CallOutSwitcher
-              namespace="detections"
-              condition={true}
-              message={{
-                type: 'primary',
-                id: 'gap-auto-fill-logs',
-                title: i18n.GAP_AUTO_FILL_LOGS_CALLOUT_TITLE,
-                description: (
-                  <div>
+      <EuiFlyout
+        ownFocus
+        onClose={onClose}
+        size="l"
+        aria-labelledby="gapAutoFillLogs"
+        data-test-subj="gap-auto-fill-logs"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id="gapAutoFillLogs">{i18n.GAP_AUTO_FILL_LOGS_TITLE}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <CallOutSwitcher
+            namespace="detections"
+            condition={true}
+            message={{
+              type: 'primary',
+              id: 'gap-auto-fill-logs',
+              title: i18n.GAP_AUTO_FILL_LOGS_CALLOUT_TITLE,
+              description: (
+                <div>
+                  <FormattedMessage
+                    id="xpack.securitySolution.gapAutoFillLogs.caloutDescription"
+                    defaultMessage="The gap fill scheduler automatically checks for gaps in run executions and schedules backfills to cover them. The scheduler logs which gaps were scheduled to be filled, and whether they succeeded or failed. "
+                  />
+                  <EuiSpacer size="s" />
+                </div>
+              ),
+            }}
+          />
+          <EuiSpacer size="m" />
+          <EuiPanel hasBorder>
+            <EuiFlexGroup gutterSize="xl">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+                  <EuiText>
+                    <b>{i18n.GAP_AUTO_FILL_STATUS_PANEL_TITLE}</b>
+                  </EuiText>
+
+                  <EuiBadge color={color} iconType={iconType}>
+                    {enabled ? i18n.GAP_AUTO_FILL_ON_LABEL : i18n.GAP_AUTO_FILL_OFF_LABEL}
+                  </EuiBadge>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+                  <EuiText>
+                    <b>{i18n.GAP_AUTO_FILL_SCHEDULE_PANEL_TITLE}</b>
+                  </EuiText>
+                  <EuiBadge iconType="clockCounter" color="hollow">
                     <FormattedMessage
-                      id="xpack.securitySolution.gapAutoFillLogs.caloutDescription"
-                      defaultMessage="The gap fill scheduler automatically checks for gaps in run executions and schedules backfills to cover them. The scheduler logs which gaps were scheduled to be filled, and whether they succeeded or failed. "
+                      id="xpack.securitySolution.gapAutoFillLogs.runsEveryLabel"
+                      defaultMessage="Runs every {interval}"
+                      values={{
+                        interval: scheduler?.schedule?.interval ?? '—',
+                      }}
                     />
-                    <EuiSpacer size="s" />
-                  </div>
-                ),
+                  </EuiBadge>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPanel hasBorder>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>{i18n.GAP_AUTO_FILL_LOGS_TITLE}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup>
+                  <MultiselectFilter
+                    data-test-subj="gap-auto-fill-logs-status-filter"
+                    title={i18n.GAP_AUTO_FILL_STATUS_FILTER_TITLE}
+                    items={statuses}
+                    selectedItems={selectedStatuses}
+                    onSelectionChange={(items) => setSelectedStatuses(items)}
+                    renderItem={(s: string) => getStatusLabel(s)}
+                    width={200}
+                  />
+                </EuiFilterGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            <EuiBasicTable
+              loading={isLogsLoading}
+              items={logsData?.data ?? []}
+              itemId="id"
+              columns={columns as EuiBasicTableColumn<SchedulerLog>[]}
+              pagination={{
+                pageIndex,
+                pageSize,
+                totalItemCount: logsData?.total ?? 0,
+                pageSizeOptions: [10, 25, 50],
               }}
+              onChange={handlePaginationChange}
+              itemIdToExpandedRowMap={expandedRowMap}
+              data-test-subj="gap-auto-fill-logs-table"
             />
-            <EuiSpacer size="m" />
-            <EuiPanel hasBorder>
-              <EuiFlexGroup gutterSize="xl">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-                    <EuiText>
-                      <b>{i18n.GAP_AUTO_FILL_STATUS_PANEL_TITLE}</b>
-                    </EuiText>
-
-                    <EuiBadge color={color} iconType={iconType}>
-                      {enabled ? i18n.GAP_AUTO_FILL_ON_LABEL : i18n.GAP_AUTO_FILL_OFF_LABEL}
-                    </EuiBadge>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-                    <EuiText>
-                      <b>{i18n.GAP_AUTO_FILL_SCHEDULE_PANEL_TITLE}</b>
-                    </EuiText>
-                    <EuiBadge iconType="clockCounter" color="hollow">
-                      <FormattedMessage
-                        id="xpack.securitySolution.gapAutoFillLogs.runsEveryLabel"
-                        defaultMessage="Runs every {interval}"
-                        values={{
-                          interval: scheduler?.schedule?.interval ?? '—',
-                        }}
-                      />
-                    </EuiBadge>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-            <EuiSpacer size="m" />
-            <EuiPanel hasBorder>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>{i18n.GAP_AUTO_FILL_LOGS_TITLE}</h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFilterGroup>
-                    <MultiselectFilter
-                      data-test-subj="gap-auto-fill-logs-status-filter"
-                      title={i18n.GAP_AUTO_FILL_STATUS_FILTER_TITLE}
-                      items={statuses}
-                      selectedItems={selectedStatuses}
-                      onSelectionChange={(items) => setSelectedStatuses(items)}
-                      renderItem={(s: string) => getStatusLabel(s)}
-                      width={200}
-                    />
-                  </EuiFilterGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiSpacer size="m" />
-
-              <EuiBasicTable
-                loading={isLogsLoading}
-                items={logsData?.data ?? []}
-                itemId="id"
-                columns={columns as EuiBasicTableColumn<SchedulerLog>[]}
-                pagination={{
-                  pageIndex,
-                  pageSize,
-                  totalItemCount: logsData?.total ?? 0,
-                  pageSizeOptions: [10, 25, 50],
-                }}
-                onChange={handlePaginationChange}
-                itemIdToExpandedRowMap={expandedRowMap}
-                data-test-subj="gap-auto-fill-logs-table"
-              />
-            </EuiPanel>
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
+          </EuiPanel>
+        </EuiFlyoutBody>
+      </EuiFlyout>
     </>
   );
 };
