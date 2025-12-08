@@ -190,16 +190,14 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
   },
 };
 
-const expectedDashboardsResponse = {
-  dashboards: [
-    {
-      id: TEST_DASHBOARD_ID,
-      redirectId: TEST_DASHBOARD_ID,
-      title: 'dashboard-4-panels',
-      type: 'dashboard',
-      tags: [],
-    },
-  ],
+const expectedDashboard = {
+  id: TEST_DASHBOARD_ID,
+  redirectId: TEST_DASHBOARD_ID,
+  title: 'dashboard-4-panels',
+  type: 'dashboard',
+  tags: [],
+  description: '',
+  streamNames: [TEST_STREAM_NAME],
 };
 
 const expectedQueriesResponse = {
@@ -404,7 +402,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       );
       expect(response.status).to.eql(200);
-      expect(response.body.attachments).to.eql(expectedDashboardsResponse.dashboards);
+      expect(response.body.attachments).to.have.length(1);
+      const { createdAt, updatedAt, ...rest } = response.body.attachments[0];
+      expect(rest).to.eql(expectedDashboard);
+      expect(createdAt).to.be.a('string');
+      expect(updatedAt).to.be.a('string');
     });
 
     it('should read expected queries for classic stream', async () => {

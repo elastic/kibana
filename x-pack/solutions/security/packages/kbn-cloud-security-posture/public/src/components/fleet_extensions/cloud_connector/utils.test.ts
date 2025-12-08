@@ -15,6 +15,9 @@ import {
   getCloudConnectorRemoteRoleTemplate,
   getKibanaComponentId,
   getDeploymentIdFromUrl,
+  getCloudConnectorNameError,
+  isCloudConnectorNameValid,
+  CLOUD_CONNECTOR_NAME_MAX_LENGTH,
 } from './utils';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import type {
@@ -1403,5 +1406,98 @@ describe('getDeploymentIdFromUrl', () => {
     const url = 'https://cloud.elastic.co/deployments/deployment-abc-123-xyz';
     const result = getDeploymentIdFromUrl(url);
     expect(result).toBe('deployment-abc-123-xyz');
+  });
+});
+
+describe('Cloud Connector Name Validation', () => {
+  describe('CLOUD_CONNECTOR_NAME_MAX_LENGTH', () => {
+    it('should be 255', () => {
+      expect(CLOUD_CONNECTOR_NAME_MAX_LENGTH).toBe(255);
+    });
+  });
+
+  describe('isCloudConnectorNameValid', () => {
+    it('should return false for undefined name', () => {
+      expect(isCloudConnectorNameValid(undefined)).toBe(false);
+    });
+
+    it('should return false for empty string', () => {
+      expect(isCloudConnectorNameValid('')).toBe(false);
+    });
+
+    it('should return false for whitespace-only string', () => {
+      expect(isCloudConnectorNameValid('   ')).toBe(false);
+      expect(isCloudConnectorNameValid('\t\n')).toBe(false);
+    });
+
+    it('should return true for valid name', () => {
+      expect(isCloudConnectorNameValid('my-connector')).toBe(true);
+      expect(isCloudConnectorNameValid('Test Connector 123')).toBe(true);
+    });
+
+    it('should return true for name with exactly 255 characters', () => {
+      const exactly255Chars = 'a'.repeat(255);
+      expect(isCloudConnectorNameValid(exactly255Chars)).toBe(true);
+    });
+
+    it('should return false for name exceeding 255 characters', () => {
+      const chars256 = 'a'.repeat(256);
+      expect(isCloudConnectorNameValid(chars256)).toBe(false);
+    });
+
+    it('should handle boundary cases correctly', () => {
+      expect(isCloudConnectorNameValid('a'.repeat(254))).toBe(true);
+      expect(isCloudConnectorNameValid('a'.repeat(255))).toBe(true);
+      expect(isCloudConnectorNameValid('a'.repeat(256))).toBe(false);
+      expect(isCloudConnectorNameValid('a'.repeat(257))).toBe(false);
+    });
+
+    it('should handle special characters', () => {
+      expect(isCloudConnectorNameValid('my-connector_123!@#')).toBe(true);
+    });
+
+    it('should handle unicode characters', () => {
+      expect(isCloudConnectorNameValid('connector-中文-名称')).toBe(true);
+    });
+  });
+
+  describe('getCloudConnectorNameError', () => {
+    it('should return required error for undefined name', () => {
+      expect(getCloudConnectorNameError(undefined)).toBe('Cloud Connector Name is required');
+    });
+
+    it('should return required error for empty string', () => {
+      expect(getCloudConnectorNameError('')).toBe('Cloud Connector Name is required');
+    });
+
+    it('should return required error for whitespace-only string', () => {
+      expect(getCloudConnectorNameError('   ')).toBe('Cloud Connector Name is required');
+      expect(getCloudConnectorNameError('\t\n')).toBe('Cloud Connector Name is required');
+    });
+
+    it('should return undefined for valid name', () => {
+      expect(getCloudConnectorNameError('my-connector')).toBeUndefined();
+      expect(getCloudConnectorNameError('Test Connector 123')).toBeUndefined();
+    });
+
+    it('should return undefined for name with exactly 255 characters', () => {
+      const exactly255Chars = 'a'.repeat(255);
+      expect(getCloudConnectorNameError(exactly255Chars)).toBeUndefined();
+    });
+
+    it('should return length error for name exceeding 255 characters', () => {
+      const chars256 = 'a'.repeat(256);
+      expect(getCloudConnectorNameError(chars256)).toBe(
+        'Cloud Connector Name must be 255 characters or less'
+      );
+    });
+
+    it('should handle boundary cases correctly', () => {
+      expect(getCloudConnectorNameError('a'.repeat(254))).toBeUndefined();
+      expect(getCloudConnectorNameError('a'.repeat(255))).toBeUndefined();
+      expect(getCloudConnectorNameError('a'.repeat(256))).toBe(
+        'Cloud Connector Name must be 255 characters or less'
+      );
+    });
   });
 });

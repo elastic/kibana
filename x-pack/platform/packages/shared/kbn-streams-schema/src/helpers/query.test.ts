@@ -19,6 +19,7 @@ describe('buildEsqlQuery', () => {
     feature: {
       name: 'irrelevant',
       filter: featureFilter,
+      type: 'system',
     },
     kql: {
       query: kqlQuery,
