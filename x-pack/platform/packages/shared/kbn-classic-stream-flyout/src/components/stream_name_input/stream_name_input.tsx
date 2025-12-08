@@ -8,95 +8,12 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ValidationErrorType } from '../../utils';
-
-/*
- * PatternSegment is a segment of the index pattern that is either a static text or a wildcard.
- * It is used to create the input groups.
- */
-interface PatternSegment {
-  type: 'static' | 'wildcard';
-  value: string;
-  index?: number;
-}
-
-/**
- * Groups segments into input groups where each group has:
- * - prepend: static text before the wildcard (if any)
- * - wildcardIndex: the index of the wildcard
- * - append: static text after the wildcard (if any, and only if it's the last wildcard)
- */
-interface InputGroup {
-  prepend?: string;
-  wildcardIndex: number;
-  append?: string;
-  isFirst: boolean;
-  isLast: boolean;
-}
-
-const parseIndexPattern = (pattern: string): PatternSegment[] => {
-  if (!pattern) return [];
-
-  const segments: PatternSegment[] = [];
-  let currentSegment = '';
-  let wildcardIndex = 0;
-
-  for (let i = 0; i < pattern.length; i++) {
-    const char = pattern[i];
-    if (char === '*') {
-      if (currentSegment) {
-        segments.push({ type: 'static', value: currentSegment });
-        currentSegment = '';
-      }
-      segments.push({ type: 'wildcard', value: '*', index: wildcardIndex });
-      wildcardIndex++;
-    } else {
-      currentSegment += char;
-    }
-  }
-
-  if (currentSegment) {
-    segments.push({ type: 'static', value: currentSegment });
-  }
-
-  return segments;
-};
-
-const createInputGroups = (segments: PatternSegment[]): InputGroup[] => {
-  const groups: InputGroup[] = [];
-  let pendingPrepend: string | undefined;
-  const wildcardCount = segments.filter((s) => s.type === 'wildcard').length;
-  let currentWildcardNum = 0;
-
-  for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i];
-
-    if (segment.type === 'static') {
-      // Check if next segment is a wildcard
-      const nextSegment = segments[i + 1];
-      if (nextSegment?.type === 'wildcard') {
-        // This static text becomes the prepend for the next wildcard
-        pendingPrepend = segment.value;
-      } else {
-        // This is trailing static text - append to the last group
-        if (groups.length > 0) {
-          groups[groups.length - 1].append = segment.value;
-        }
-      }
-    } else if (segment.type === 'wildcard') {
-      currentWildcardNum++;
-      groups.push({
-        prepend: pendingPrepend,
-        wildcardIndex: segment.index ?? 0,
-        isFirst: currentWildcardNum === 1,
-        isLast: currentWildcardNum === wildcardCount,
-      });
-      pendingPrepend = undefined;
-    }
-  }
-
-  return groups;
-};
+import {
+  parseIndexPattern,
+  createInputGroups,
+  type ValidationErrorType,
+  countWildcards,
+} from '../../utils';
 
 export interface StreamNameInputProps {
   /** The index pattern containing wildcards (e.g., "*-logs-*-*") */
@@ -182,11 +99,24 @@ export const StreamNameInput = ({
     row-gap: ${euiTheme.size.xs};
   `;
 
+  // If there are no wildcards, show the index pattern as a read-only field
+  if (countWildcards(indexPattern) === 0) {
+    return (
+      <EuiFieldText
+        value={indexPattern}
+        readOnly
+        fullWidth
+        data-test-subj={`${dataTestSubj}-readonly`}
+      />
+    );
+  }
+
   // For single wildcard, use simple prepend/append
   if (!hasMultipleWildcards && inputGroups.length === 1) {
     const group = inputGroups[0];
     return (
       <EuiFieldText
+        autoFocus
         value={parts[group.wildcardIndex] ?? ''}
         onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
         placeholder="*"
@@ -218,6 +148,7 @@ export const StreamNameInput = ({
             css={getConnectedInputStyles(isFirst, isLast)}
           >
             <EuiFieldText
+              autoFocus={isFirst}
               value={parts[group.wildcardIndex] ?? ''}
               onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
               placeholder="*"

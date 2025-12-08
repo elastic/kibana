@@ -97,6 +97,13 @@ export const Default: Story = {
 };
 
 /**
+ * No wildcards - the index pattern is read-only
+ */
+export const NoWildcards: Story = {
+  render: () => <StreamNameInputWithPreview indexPattern="logs-apache.access" />,
+};
+
+/**
  * Single wildcard at the end - the most common pattern
  */
 export const SingleWildcard: Story = {

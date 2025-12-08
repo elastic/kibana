@@ -30,7 +30,7 @@ import { type StreamNameValidator, buildStreamName, countWildcards } from '../..
 import { useStreamValidation } from './hooks/use_stream_validation';
 import { formReducer, initialFormState } from './reducers/form_reducer';
 
-enum ClassicStreamStep {
+export enum ClassicStreamStep {
   SELECT_TEMPLATE = 'select_template',
   NAME_AND_CONFIRM = 'name_and_confirm',
 }

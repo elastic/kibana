@@ -20,6 +20,18 @@ describe('StreamNameInput', () => {
     jest.clearAllMocks();
   });
 
+  describe('no wildcards', () => {
+    it('renders a read-only field for pattern with no wildcards', () => {
+      const { getByTestId } = render(
+        <StreamNameInput {...defaultProps} indexPattern="logs-apache.access" />
+      );
+      const input = getByTestId('streamNameInput-readonly');
+      expect(input).toBeInTheDocument();
+      expect(input).toHaveAttribute('readonly');
+      expect(input).toHaveValue('logs-apache.access');
+    });
+  });
+
   describe('single wildcard patterns', () => {
     it('renders a single input for pattern with one wildcard', () => {
       const { getByTestId } = render(<StreamNameInput {...defaultProps} />);

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { ValidationErrorType } from '../../../../utils';
 import { StreamNameInput } from '../../../stream_name_input';
+import type { NameStreamSectionProps } from './types';
 
 const getValidationErrorMessage = (
   validationError: ValidationErrorType,
@@ -23,6 +24,16 @@ const getValidationErrorMessage = (
       {
         defaultMessage:
           'Please supply a valid text string for all wildcards within the selected index pattern.',
+      }
+    );
+  }
+
+  if (validationError === 'invalidFormat') {
+    return i18n.translate(
+      'xpack.createClassicStreamFlyout.nameAndConfirmStep.invalidFormatValidationError',
+      {
+        defaultMessage:
+          'Stream name cannot include \\, /, *, ?, ", <, >, |, comma, #, colon, or spaces. It cannot start with -, _, +, or .ds-. It also cannot be . or ..',
       }
     );
   }
@@ -51,16 +62,6 @@ const getValidationErrorMessage = (
 
   return undefined;
 };
-
-interface NameStreamSectionProps {
-  indexPatterns: string[];
-  selectedIndexPattern: string;
-  streamNameParts: string[];
-  onIndexPatternChange: (pattern: string) => void;
-  onStreamNamePartsChange: (parts: string[]) => void;
-  validationError: ValidationErrorType;
-  conflictingIndexPattern?: string;
-}
 
 export const NameStreamSection = ({
   indexPatterns,
