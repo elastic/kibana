@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ProcessorType } from '../../types/processors';
 
 export interface ActionExample {
   description: string;
@@ -20,7 +21,11 @@ export interface ActionMetadata {
   tips?: string[];
 }
 
-export const ACTION_METADATA_MAP: Record<string, ActionMetadata> = {
+/**
+ * Metadata for all processor actions. This map is strongly typed to ensure
+ * every ProcessorType has a corresponding entry.
+ */
+export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
   grok: {
     name: i18n.translate('xpack.streamlang.actionMetadata.grok.name', {
       defaultMessage: 'Grok',
@@ -357,6 +362,141 @@ export const ACTION_METADATA_MAP: Record<string, ActionMetadata> = {
         yaml: `- action: remove
   from: attributes.debug`,
       },
+    ],
+  },
+
+  drop_document: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.dropDocument.name', {
+      defaultMessage: 'Drop Document',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.dropDocument.description', {
+      defaultMessage: 'Discard the entire document from the pipeline',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.dropDocument.usage', {
+      defaultMessage: 'Drops documents matching the condition. The documents will not be indexed.',
+    }),
+    examples: [
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.dropDocument.examples.healthCheck',
+          {
+            defaultMessage: 'Drop health check requests',
+          }
+        ),
+        yaml: `- condition:
+    field: request.path
+    eq: "/health"
+  steps:
+    - action: drop_document`,
+      },
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.dropDocument.examples.testData',
+          {
+            defaultMessage: 'Filter out test environment data',
+          }
+        ),
+        yaml: `- condition:
+    field: environment
+    eq: "test"
+  steps:
+    - action: drop_document`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.dropDocument.tips.irreversible', {
+        defaultMessage: 'Dropped documents are permanently discarded and will not be indexed',
+      }),
+    ],
+  },
+
+  replace: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.replace.name', {
+      defaultMessage: 'Replace',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.replace.description', {
+      defaultMessage: 'Replace text in a field using a regular expression pattern',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.replace.usage', {
+      defaultMessage:
+        'Provide `from` for the source field, `pattern` for the regex to match, and `replacement` for the substitution text. Use capture groups for complex replacements.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.replace.examples.mask', {
+          defaultMessage: 'Mask sensitive data',
+        }),
+        yaml: `- action: replace
+  from: email
+  pattern: "^(.{2}).*@"
+  replacement: "$1***@"`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.replace.examples.normalize', {
+          defaultMessage: 'Normalize whitespace',
+        }),
+        yaml: `- action: replace
+  from: message
+  pattern: "\\s+"
+  replacement: " "`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.replace.tips.regex', {
+        defaultMessage: 'Uses Java regular expression syntax',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.replace.tips.captureGroups', {
+        defaultMessage: 'Reference capture groups in the replacement with $1, $2, etc.',
+      }),
+    ],
+  },
+
+  manual_ingest_pipeline: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
+      defaultMessage: 'Manual Ingest Pipeline',
+    }),
+    description: i18n.translate(
+      'xpack.streamlang.actionMetadata.manualIngestPipeline.description',
+      {
+        defaultMessage: 'Execute raw Elasticsearch ingest processors directly',
+      }
+    ),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.usage', {
+      defaultMessage:
+        'Provide an array of `processors` containing native Elasticsearch ingest processor definitions. Use this for advanced processing not covered by other Streamlang actions.',
+    }),
+    examples: [
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.manualIngestPipeline.examples.script',
+          {
+            defaultMessage: 'Run a Painless script',
+          }
+        ),
+        yaml: `- action: manual_ingest_pipeline
+  processors:
+    - script:
+        source: "ctx.total = ctx.price * ctx.quantity"`,
+      },
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.manualIngestPipeline.examples.geoip',
+          {
+            defaultMessage: 'Enrich with GeoIP data',
+          }
+        ),
+        yaml: `- action: manual_ingest_pipeline
+  processors:
+    - geoip:
+        field: client_ip
+        target_field: geo`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.tips.docs', {
+        defaultMessage:
+          'Try to use native Streamlang actions first before falling back to the manual ingest pipeline action',
+      }),
     ],
   },
 };

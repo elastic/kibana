@@ -17,7 +17,7 @@ export interface ActionHoverContext {
   /** YAML path segments to the current position */
   yamlPath: string[];
   /** Current value at the cursor position */
-  currentValue: any;
+  currentValue: string;
   /** Monaco editor position */
   position: monaco.Position;
   /** Monaco editor model */

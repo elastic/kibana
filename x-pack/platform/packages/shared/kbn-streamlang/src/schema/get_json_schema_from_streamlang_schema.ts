@@ -282,7 +282,11 @@ function enhanceActionSchema(actionUnionSchema: any, streamType?: StreamType): v
     if (!actionName) {
       return;
     }
-    const metadata = ACTION_METADATA_MAP[actionName];
+    // Check if actionName is a known processor type
+    const metadata =
+      actionName in ACTION_METADATA_MAP
+        ? ACTION_METADATA_MAP[actionName as keyof typeof ACTION_METADATA_MAP]
+        : undefined;
     option.title = metadata?.name ?? actionName;
     if (metadata?.description) {
       option.description = metadata.description;
