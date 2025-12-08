@@ -45,6 +45,12 @@ export const TemplateList: React.FC<TemplateListProps> = ({
       hasBorder
       title={tpl.name}
       onClick={() => onSelectTemplate(tpl.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelectTemplate(tpl.id);
+        }
+      }}
       description=""
       style={{ marginRight: '8px', flexGrow: 0 }}
       data-test-subj={`${tpl.id}-SelectOption`}
