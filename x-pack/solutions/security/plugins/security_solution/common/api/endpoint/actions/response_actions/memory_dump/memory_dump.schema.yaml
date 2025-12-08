@@ -9,9 +9,7 @@ paths:
       operationId: EndpointGenerateMemoryDump
       description: Generates memory dumps on the targeted host.
       x-codegen-enabled: false
-#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-#      x-labels: [ ess, serverless ]
-      x-labels: []
+      x-labels: [ ess, serverless ]
       requestBody:
         required: true
         content:
