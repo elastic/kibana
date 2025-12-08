@@ -133,6 +133,7 @@ export async function getUnifiedTraceItems({
           minimum_should_match: 1,
         },
       },
+      collapse: { field: SPAN_ID },
       fields: [...fields, ...optionalFields],
       sort: [
         { _score: 'asc' },
