@@ -8,8 +8,10 @@
  */
 
 import type { EnterContinueNode } from '@kbn/workflows/graph';
+import type { EsWorkflowStepExecution } from '@kbn/workflows/types/v1';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
 import { EnterContinueNodeImpl } from '../enter_continue_node_impl';
 
 describe('EnterContinueNodeImpl', () => {
@@ -17,6 +19,9 @@ describe('EnterContinueNodeImpl', () => {
   let node: EnterContinueNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
+  let fakeFailedContext: StepExecutionRuntime;
+  let fakeFailedContextManager: jest.Mocked<StepExecutionRuntime['contextManager']>;
+  let fakeStepExecutionDoc: Partial<EsWorkflowStepExecution>;
 
   beforeEach(() => {
     node = {
@@ -24,6 +29,9 @@ describe('EnterContinueNodeImpl', () => {
       type: 'enter-continue',
       stepId: 'continueStep1',
       stepType: 'continue',
+      configuration: {
+        condition: '${{error.type == "NetworkError"}}',
+      },
       exitNodeId: 'exitContinue(continueStep1)',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
@@ -31,6 +39,23 @@ describe('EnterContinueNodeImpl', () => {
     workflowLogger.logDebug = jest.fn();
     workflowLogger.logError = jest.fn();
     underTest = new EnterContinueNodeImpl(node, workflowRuntime, workflowLogger);
+    fakeStepExecutionDoc = {
+      id: 'stepExec1',
+      stepId: 'someStep',
+      error: {
+        type: 'NetworkError',
+        message: 'Failed to connect to server',
+      },
+    };
+
+    fakeFailedContextManager = jest.mocked({
+      evaluateBooleanExpressionInContext: jest.fn(),
+    } as unknown as StepExecutionRuntime['contextManager']);
+    fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
+    fakeFailedContext = {
+      stepExecution: fakeStepExecutionDoc,
+      contextManager: fakeFailedContextManager,
+    } as unknown as StepExecutionRuntime;
   });
 
   describe('run', () => {
@@ -50,19 +75,58 @@ describe('EnterContinueNodeImpl', () => {
       workflowRuntime.setWorkflowError = jest.fn();
     });
 
-    it('should log debug message about error caught', async () => {
-      await underTest.catchError();
-      expect(workflowLogger.logDebug).toHaveBeenCalledWith(`Error caught, continuing execution.`);
+    describe('when condition is not met', () => {
+      beforeEach(() => {
+        fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(false);
+      });
+
+      it('should call evaluateBooleanExpressionInContext with correct parameters', async () => {
+        await underTest.catchError(fakeFailedContext);
+        expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).toHaveBeenCalledWith(
+          node.configuration.condition,
+          {
+            error: fakeFailedContext.stepExecution?.error,
+          }
+        );
+      });
+
+      it('should not clear workflow error', async () => {
+        await underTest.catchError(fakeFailedContext);
+        expect(workflowRuntime.setWorkflowError).not.toHaveBeenCalled();
+      });
+
+      it('should log debug message about condition not met', async () => {
+        await underTest.catchError(fakeFailedContext);
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          `Condition for continue step not met, propagating error.`
+        );
+      });
+
+      it('should not navigate to exit continue node', async () => {
+        await underTest.catchError(fakeFailedContext);
+        expect(workflowRuntime.navigateToNode).not.toHaveBeenCalled();
+      });
     });
 
-    it('should go to exit continue node', async () => {
-      await underTest.catchError();
-      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.exitNodeId);
-    });
+    describe('when condition is met', () => {
+      beforeEach(() => {
+        fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
+      });
 
-    it('should clear workflow error', async () => {
-      await underTest.catchError();
-      expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(undefined);
+      it('should log debug message about error caught', async () => {
+        await underTest.catchError(fakeFailedContext);
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(`Error caught, continuing execution.`);
+      });
+
+      it('should go to exit continue node', async () => {
+        await underTest.catchError(fakeFailedContext);
+        expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.exitNodeId);
+      });
+
+      it('should clear workflow error', async () => {
+        await underTest.catchError(fakeFailedContext);
+        expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(undefined);
+      });
     });
   });
 });

@@ -36,6 +36,7 @@ import {
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
   CANCEL_ROUTE,
+  MEMORY_DUMP_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -82,6 +83,7 @@ import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 import type { EndpointAppContext } from '../../types';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -1669,6 +1671,108 @@ describe('Response actions', () => {
         'microsoft_defender_endpoint',
         expect.anything()
       );
+    });
+  });
+
+  describe('memory dump response action route', () => {
+    let testSetup: HttpApiTestSetupMock;
+    let httpRequestMock: ReturnType<HttpApiTestSetupMock['createRequestMock']>;
+    let httpHandlerContextMock: HttpApiTestSetupMock['httpHandlerContextMock'];
+    let httpResponseMock: HttpApiTestSetupMock['httpResponseMock'];
+    let callHandler: () => ReturnType<RequestHandler>;
+
+    beforeEach(async () => {
+      testSetup = createHttpApiTestSetupMock();
+
+      // @ts-expect-error
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsEndpointMemoryDump =
+        true;
+
+      ({ httpHandlerContextMock, httpResponseMock } = testSetup);
+      httpRequestMock = testSetup.createRequestMock();
+
+      httpHandlerContextMock.actions = Promise.resolve({
+        getActionsClient: () => actionsClientMock.create(),
+      } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
+
+      // Set the esClient to be used in the handler context
+      // eslint-disable-next-line require-atomic-updates
+      httpHandlerContextMock.core = Promise.resolve(
+        set(
+          await httpHandlerContextMock.core,
+          'elasticsearch.client.asInternalUser',
+          responseActionsClientMock.createConstructorOptions().esClient
+        )
+      );
+
+      httpRequestMock = testSetup.createRequestMock({
+        body: {
+          endpoint_ids: ['123-456'],
+          agent_type: 'endpoint',
+          parameters: {
+            type: 'kernel',
+          },
+        },
+      });
+      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+
+      const handler = testSetup.getRegisteredVersionedRoute('post', MEMORY_DUMP_ROUTE, '2023-10-31')
+        .routeHandler as RequestHandler;
+
+      callHandler = () => handler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should error if feature flag is disabled', async () => {
+      // @ts-expect-error
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsEndpointMemoryDump =
+        false;
+      await callHandler();
+
+      expect(httpResponseMock.customError).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          message: '[request body.agent_type]: feature is disabled',
+        }),
+        statusCode: 400,
+      });
+    });
+
+    it('should error if agentType is not Endpoint', async () => {
+      httpRequestMock.body.agent_type = 'sentinel_one';
+      await callHandler();
+
+      expect(httpResponseMock.customError).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          message: '[request body.agent_type]: feature is disabled',
+        }),
+        statusCode: 400,
+      });
+    });
+
+    it('should call memory dump client method', async () => {
+      const mockEndpointCLient = { memoryDump: jest.fn().mockResolvedValue({}) };
+      (getResponseActionsClientMock as jest.Mock).mockReturnValue(mockEndpointCLient);
+      await callHandler();
+
+      expect(mockEndpointCLient.memoryDump).toHaveBeenCalledWith({
+        agent_type: 'endpoint',
+        endpoint_ids: ['123-456'],
+        parameters: { type: 'kernel' },
+      });
+    });
+
+    it('should error if user does not have permissions to perform action', async () => {
+      (
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+      ).mockResolvedValue({
+        canExecuteActions: false,
+      });
+      await callHandler();
+
+      expect(httpResponseMock.forbidden).toHaveBeenCalled();
     });
   });
 });

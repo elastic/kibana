@@ -6,13 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn } from '@kbn/onechat-server';
+import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
@@ -23,6 +24,7 @@ export interface OnechatSetupDependencies {
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -92,6 +94,12 @@ export interface OnechatPluginSetup {
  * Start contract of the onechat plugin.
  */
 export interface OnechatPluginStart {
+  /**
+   * Agents service, to execute agents.
+   */
+  agents: {
+    runAgent: RunAgentFn;
+  };
   /**
    * Tools service, to manage or execute tools.
    */

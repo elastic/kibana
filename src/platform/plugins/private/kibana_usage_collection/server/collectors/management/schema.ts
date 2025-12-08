@@ -42,6 +42,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:defaultValueReportMinutes': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportRate': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportTitle': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'xpackReporting:customPdfLogo': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -515,6 +527,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'dataConnectors:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'workflows:ui:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -684,10 +700,22 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable significant events in streams.',
     },
   },
+  'observability:streamsEnableSignificantEventsAnalyzer': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable the Significant events analyzer in Streams.',
+    },
+  },
   'observability:streamsEnableGroupStreams': {
     type: 'boolean',
     _meta: {
       description: 'Enable Group streams in Streams',
+    },
+  },
+  'observability:streamsEnableAttachments': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams attachments tab.',
     },
   },
   'observability:streamsEnableContentPacks': {

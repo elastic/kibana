@@ -545,8 +545,12 @@ export class GlobalVisitorContext<
         return this.visitQuery(parent, expressionNode, input as any);
       }
       case 'parens': {
-        if (!this.methods.visitParensExpression) break;
-        return this.visitParensExpression(parent, expressionNode, input as any);
+        if (this.methods.visitParensExpression) {
+          const result = this.visitParensExpression(parent, expressionNode, input as any);
+          if (result) return result;
+        }
+        // Parens wraps subqueries: can return null to let comments attach to nodes inside the subquery
+        break;
       }
     }
     return this.visitExpressionGeneric(parent, expressionNode, input as any);

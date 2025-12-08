@@ -12,6 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [require.resolve('./tests')],
+    testConfigCategory: xPackAPITestsConfig.get('testConfigCategory'),
     servers: xPackAPITestsConfig.get('servers'),
     services: xPackAPITestsConfig.get('services'),
     junit: {

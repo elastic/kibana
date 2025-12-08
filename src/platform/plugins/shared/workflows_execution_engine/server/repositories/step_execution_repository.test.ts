@@ -205,19 +205,6 @@ describe('StepExecutionRepository', () => {
       });
     });
 
-    it('should ensure index exists before upserting', async () => {
-      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1' }];
-
-      esClient.bulk.mockResolvedValue({
-        errors: false,
-        items: [{ update: { _id: 'step-1', status: 200 } }],
-      });
-
-      await underTest.bulkUpsert(stepExecutions as any);
-
-      expect(esClient.indices.exists).toHaveBeenCalled();
-    });
-
     it('should handle single step execution', async () => {
       const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1', status: 'completed' }];
 
@@ -241,7 +228,7 @@ describe('StepExecutionRepository', () => {
           id: 'step-1',
           stepId: 'test-step-1',
           status: 'completed',
-          completedAt: '2025-10-28T10:00:00Z',
+          finishedAt: '2025-10-28T10:00:00Z',
           executionTimeMs: 5000,
           output: { result: 'success' },
         },

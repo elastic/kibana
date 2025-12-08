@@ -11,7 +11,7 @@
         "label": "ToolbarSelector",
         "description": [],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubj, \"data-selected-value\": dataSelectedValue, buttonLabel, popoverContentBelowSearch, popoverTitle, options, searchable, optionMatcher, onChange, singleSelection, hasArrow, disabled, }: ",
+          "({ \"data-test-subj\": dataTestSubj, \"data-selected-value\": dataSelectedValue, buttonLabel, popoverContentBelowSearch, popoverTitle, options, searchable, optionMatcher, onChange, singleSelection, hasArrow, disabled, fullWidth, }: ",
           {
             "pluginId": "@kbn/shared-ux-toolbar-selector",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.ToolbarSelector.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  'data-test-subj': dataTestSubj,\n  'data-selected-value': dataSelectedValue,\n  buttonLabel,\n  popoverContentBelowSearch,\n  popoverTitle,\n  options,\n  searchable,\n  optionMatcher,\n  onChange,\n  singleSelection,\n  hasArrow = true,\n  disabled = false,\n}",
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  'data-selected-value': dataSelectedValue,\n  buttonLabel,\n  popoverContentBelowSearch,\n  popoverTitle,\n  options,\n  searchable,\n  optionMatcher,\n  onChange,\n  singleSelection,\n  hasArrow = true,\n  disabled = false,\n  fullWidth = false,\n}",
             "description": [],
             "signature": [
               {
@@ -210,6 +210,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.fullWidth",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fullWidth",
             "description": [],
             "signature": [
               "boolean | undefined"

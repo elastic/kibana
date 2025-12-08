@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
@@ -21,18 +20,19 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
-import { WebhookMethods } from '../../../common/auth/constants';
-import type {
-  ActionParamsType,
-  WebhookConnectorType,
-  WebhookConnectorTypeExecutorOptions,
-} from './types';
+import { SecretConfigurationSchema, WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import type { ActionParamsType } from '@kbn/connector-schemas/webhook';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/webhook';
+import type { WebhookConnectorType, WebhookConnectorTypeExecutorOptions } from './types';
 import type { Result } from '../lib/result_type';
 
-import { SecretConfigurationSchema } from '../../../common/auth/schema';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { isOk, promiseResult } from '../lib/result_type';
-import { ConfigSchema, ParamsSchema } from './schema';
 import { getAxiosConfig } from './get_axios_config';
 import { validateConnectorTypeConfig } from './validations';
 import {
@@ -44,17 +44,14 @@ import {
   retryResultSeconds,
 } from './errors';
 
-export const ConnectorTypeId = '.webhook';
 const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 
 // connector type definition
 export function getConnectorType(): WebhookConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.webhook.title', {
-      defaultMessage: 'Webhook',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

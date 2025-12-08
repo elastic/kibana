@@ -6,72 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLNumericLiteralType } from '../types';
 import type { Location } from '../commands_registry/types';
-
-/**
- * All supported field types in ES|QL. This is all the types
- * that can come back in the table from a query.
- */
-export const fieldTypes: readonly string[] = [
-  'boolean',
-  'date',
-  'double',
-  'ip',
-  'keyword',
-  'integer',
-  'long',
-  'text',
-  'unsigned_long',
-  'version',
-  'cartesian_point',
-  'cartesian_shape',
-  'geo_point',
-  'geo_shape',
-  'counter_integer',
-  'counter_long',
-  'counter_double',
-  'unsupported',
-  'date_nanos',
-  'function_named_parameters',
-  'aggregate_metric_double',
-  'dense_vector',
-] as const;
-
-export type FieldType = (typeof fieldTypes)[number];
-
-/**
- * All supported field types in ES|QL. This is all the types
- * that can come back in the table from a query.
- */
-export const userDefinedTypes = [
-  'boolean',
-  'date',
-  'double',
-  'ip',
-  'keyword',
-  'integer',
-  'long',
-  'text',
-  'unsigned_long',
-  'version',
-  'cartesian_point',
-  'cartesian_shape',
-  'geo_point',
-  'geo_shape',
-  'counter_integer',
-  'counter_long',
-  'counter_double',
-  'unsupported',
-  'date_nanos',
-  'function_named_parameters',
-  'null',
-  'time_duration',
-  'date_period',
-  'param', // Defines a named param such as ?value or ??field
-] as const;
 
 /**
  * This is the list of all data types that are supported in ES|QL.
@@ -84,7 +23,7 @@ export const userDefinedTypes = [
  * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
  */
 export const dataTypes: readonly string[] = [
-  ...fieldTypes,
+  ...esqlFieldTypes,
   'null',
   'time_duration',
   'date_period',
@@ -149,8 +88,8 @@ export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFun
  */
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
-export const isFieldType = (str: string | undefined): str is FieldType =>
-  str !== undefined && fieldTypes.includes(str);
+export const isFieldType = (str: string | undefined): str is EsqlFieldType =>
+  str !== undefined && esqlFieldTypes.includes(str);
 
 export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
   str !== undefined &&
@@ -204,6 +143,7 @@ export interface ElasticsearchSettingsDefinition {
   preview: boolean;
   snapshotOnly: boolean;
   description: string;
+  ignoreAsSuggestion?: boolean;
 }
 
 /**
@@ -396,6 +336,14 @@ export interface ValidationErrors {
     type: {};
   };
   forkTooFewBranches: {
+    message: string;
+    type: {};
+  };
+  forkNotAllowedWithSubqueries: {
+    message: string;
+    type: {};
+  };
+  inlineStatsNotAllowedAfterLimit: {
     message: string;
     type: {};
   };

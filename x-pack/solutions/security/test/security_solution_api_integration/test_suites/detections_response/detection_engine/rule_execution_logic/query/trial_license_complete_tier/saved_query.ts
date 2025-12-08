@@ -16,13 +16,13 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { getAlerts } from '../../../../utils';
 import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { getAlerts } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

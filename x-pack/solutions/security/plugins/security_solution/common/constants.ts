@@ -9,7 +9,10 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
-export { SecurityPageName } from '@kbn/security-solution-navigation';
+export {
+  SecurityPageName,
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+} from '@kbn/security-solution-navigation';
 /**
  * as const
  *
@@ -97,7 +100,13 @@ export const REPORTS_PATH = '/reports' as const;
 export const AI_VALUE_PATH = `${REPORTS_PATH}/ai_value` as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
+
+// TODO: https://github.com/elastic/kibana/issues/242434
+// Investigate possibility of using `detections` instead
 export const ALERTS_PATH = '/alerts' as const;
+export const ATTACKS_PATH = '/attacks' as const;
+export const ALERT_DETECTIONS = '/alert_detections' as const;
+
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
@@ -127,6 +136,7 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
+export const SCRIPTS_LIBRARY_PATH = `${MANAGEMENT_PATH}/scripts_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
@@ -151,6 +161,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
+export const APP_SCRIPTS_LIBRARY_PATH = `${APP_PATH}${SCRIPTS_LIBRARY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
@@ -184,22 +195,6 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 
 /** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
-
-/** Feature flag for the default AI connector setting */
-export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
-  'aiAssistant.defaultLlmSettingEnabled' as const;
-
-/** The default value for the default AI connector setting */
-export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
-
-/** This Kibana Advanced Setting sets a default AI value report minutes per alert */
-export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReportMinutes' as const;
-
-/** This Kibana Advanced Setting sets a default AI value report hourly analyst rate */
-export const DEFAULT_VALUE_REPORT_RATE = 'securitySolution:defaultValueReportRate' as const;
-
-/** This Kibana Advanced Setting sets a default title for the AI value report page */
-export const DEFAULT_VALUE_REPORT_TITLE = 'securitySolution:defaultValueReportTitle' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
@@ -315,6 +310,14 @@ export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
 export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
+
+/**
+ * Extended alerts routes
+ */
+export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/unified_alerts` as const;
+export const DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/search` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -472,6 +475,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
+  DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -520,6 +524,7 @@ export const VIEW_SELECTION = {
 
 export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
   ALERTS_PAGE: `${APP_ID}-alerts-page`,
+  ATTACKS_PAGE: `${APP_ID}-attacks-page`,
   RULE_DETAILS: `${APP_ID}-rule-details`,
   CASE: `${APP_ID}-case`,
   RISK_INPUTS: `${APP_ID}-risk-inputs`,
@@ -567,3 +572,151 @@ export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live
   'Promotion: External Alerts',
 ];
+
+/**
+ * Essential fields to return for security alerts to reduce context window usage.
+ * These fields contain the most relevant information for security analysis.
+ */
+export const ESSENTIAL_ALERT_FIELDS: string[] = [
+  '_id',
+  '@timestamp',
+  'message',
+
+  /* Host */
+  'host.name',
+  'host.ip',
+  'host.os.name',
+  'host.os.version',
+  'host.asset.criticality',
+  'host.risk.calculated_level',
+  'host.risk.calculated_score_norm',
+
+  /* User */
+  'user.name',
+  'user.domain',
+  'user.asset.criticality',
+  'user.risk.calculated_level',
+  'user.risk.calculated_score_norm',
+  'user.target.name',
+
+  /* Service */
+  'service.name',
+  'service.id',
+
+  /* Entity */
+  'entity.id',
+  'entity.name',
+  'entity.type',
+  'entity.sub_type',
+
+  /* Agent */
+  'agent.id',
+
+  /* Process */
+  'process.name',
+  'process.pid',
+  'process.args',
+  'process.command_line',
+  'process.executable',
+  'process.exit_code',
+  'process.working_directory',
+  'process.pe.original_file_name',
+  'process.hash.md5',
+  'process.hash.sha1',
+  'process.hash.sha256',
+  'process.code_signature.exists',
+  'process.code_signature.signing_id',
+  'process.code_signature.status',
+  'process.code_signature.subject_name',
+  'process.code_signature.trusted',
+
+  /* Process parent */
+  'process.parent.name',
+  'process.parent.args',
+  'process.parent.args_count',
+  'process.parent.command_line',
+  'process.parent.executable',
+  'process.parent.code_signature.exists',
+  'process.parent.code_signature.status',
+  'process.parent.code_signature.subject_name',
+  'process.parent.code_signature.trusted',
+
+  /* File */
+  'file.name',
+  'file.path',
+  'file.Ext.original.path',
+  'file.hash.sha256',
+
+  /* Groups */
+  'group.id',
+  'group.name',
+
+  /* Cloud */
+  'cloud.provider',
+  'cloud.account.name',
+  'cloud.service.name',
+  'cloud.region',
+  'cloud.availability_zone',
+
+  /* Network / DNS */
+  'source.ip',
+  'destination.ip',
+  'network.protocol',
+  'dns.question.name',
+  'dns.question.type',
+
+  /* Event */
+  'event.category',
+  'event.action',
+  'event.type',
+  'event.code',
+  'event.dataset',
+  'event.module',
+  'event.outcome',
+
+  /* Rule (generic) */
+  'rule.name',
+  'rule.reference',
+
+  /* Kibana alert fields */
+  'kibana.alert.uuid',
+  'kibana.alert.original_time',
+  'kibana.alert.severity',
+  'kibana.alert.start',
+  'kibana.alert.workflow_status',
+  'kibana.alert.reason',
+  'kibana.alert.risk_score',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.rule_id',
+  'kibana.alert.rule.description',
+  'kibana.alert.rule.category',
+  'kibana.alert.rule.references',
+  'kibana.alert.rule.threat.framework',
+  'kibana.alert.rule.threat.tactic.id',
+  'kibana.alert.rule.threat.tactic.name',
+  'kibana.alert.rule.threat.tactic.reference',
+  'kibana.alert.rule.threat.technique.id',
+  'kibana.alert.rule.threat.technique.name',
+  'kibana.alert.rule.threat.technique.reference',
+  'kibana.alert.rule.threat.technique.subtechnique.id',
+  'kibana.alert.rule.threat.technique.subtechnique.name',
+  'kibana.alert.rule.threat.technique.subtechnique.reference',
+
+  /* Threat (top-level) */
+  'threat.framework',
+  'threat.tactic.id',
+  'threat.tactic.name',
+  'threat.tactic.reference',
+  'threat.technique.id',
+  'threat.technique.name',
+  'threat.technique.reference',
+  'threat.technique.subtechnique.id',
+  'threat.technique.subtechnique.name',
+  'threat.technique.subtechnique.reference',
+] as const;
+
+export enum SecurityAgentBuilderAttachments {
+  alert = 'security.alert',
+  entity = 'security.entity',
+  rule = 'security.rule',
+}

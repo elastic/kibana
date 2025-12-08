@@ -13,7 +13,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../state_management/redux';
 import { getDiscoverStateContainer } from '../../state_management/discover_state';
 import {
   RuntimeStateProvider,
@@ -112,6 +112,7 @@ export const SingleTabView = ({
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks,
+        services,
       });
 
       return dispatch(

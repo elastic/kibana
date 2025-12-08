@@ -12,11 +12,9 @@ import type { SettingsProps } from '@elastic/charts';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import { v4 as uuidv4 } from 'uuid';
 import styled from '@emotion/styled';
 import deepEqual from 'fast-deep-equal';
 
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
 import { useThrottledResizeObserver } from '../utils';
 import { hasValueToDisplay } from '../../utils/validators';
@@ -193,9 +191,6 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
       barChart != null && stackByField != null
         ? barChart.map((d) => ({
             color: d.color,
-            dataProviderId: escapeDataProviderId(
-              `draggable-legend-item-${uuidv4()}-${stackByField}-${d.key}`
-            ),
             scopeId,
             field: stackByField,
             value: d.key,

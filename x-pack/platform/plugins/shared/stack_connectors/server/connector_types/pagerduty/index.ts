@@ -6,7 +6,6 @@
  */
 
 import { isUndefined, pick, omitBy } from 'lodash';
-import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type {
@@ -19,14 +18,27 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  PAGER_DUTY_API_URL,
+  EVENT_ACTION_TRIGGER,
+  EVENT_ACTION_ACKNOWLEDGE,
+  EVENT_ACTION_RESOLVE,
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/pagerduty';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/pagerduty';
+import { convertTimestamp } from '@kbn/connector-schemas/common/utils';
 import { postPagerduty } from './post_pagerduty';
-import { convertTimestamp } from '../lib/convert_timestamp';
-
-// uses the PagerDuty Events API v2
-// https://v2.developer.pagerduty.com/docs/events-api-v2
-const PAGER_DUTY_API_URL = 'https://events.pagerduty.com/v2/enqueue';
 
 export type PagerDutyConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -40,123 +52,17 @@ export type PagerDutyConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions
   ActionParamsType
 >;
 
-// config definition
-
-export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
-
-const configSchemaProps = {
-  apiUrl: z.string().nullable().default(null),
-};
-const ConfigSchema = z.object(configSchemaProps).strict();
-// secrets definition
-
-export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
-
-const SecretsSchema = z
-  .object({
-    routingKey: z.string(),
-  })
-  .strict();
-
-// params definition
-
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-
-const EVENT_ACTION_TRIGGER = 'trigger';
-const EVENT_ACTION_RESOLVE = 'resolve';
-const EVENT_ACTION_ACKNOWLEDGE = 'acknowledge';
-const EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY = new Set([
-  EVENT_ACTION_RESOLVE,
-  EVENT_ACTION_ACKNOWLEDGE,
-]);
-
-const EventActionSchema = z.enum([
-  EVENT_ACTION_TRIGGER,
-  EVENT_ACTION_RESOLVE,
-  EVENT_ACTION_ACKNOWLEDGE,
-]);
-
-const PayloadSeveritySchema = z.enum(['critical', 'error', 'warning', 'info']);
-
-const LinksSchema = z.array(z.object({ href: z.string(), text: z.string() }).strict());
-const customDetailsSchema = z.record(z.string(), z.any());
-
-export const ParamsSchema = z
-  .object({
-    eventAction: EventActionSchema.optional(),
-    dedupKey: z.string().max(255).optional(),
-    summary: z.string().max(1024).optional(),
-    source: z.string().optional(),
-    severity: PayloadSeveritySchema.optional(),
-    timestamp: z.string().optional(),
-    component: z.string().optional(),
-    group: z.string().optional(),
-    class: z.string().optional(),
-    links: LinksSchema.optional(),
-    customDetails: customDetailsSchema.optional(),
-  })
-  .strict()
-  .superRefine((paramsObject, ctx) => {
-    const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-    const convertedTimestamp = convertTimestamp(timestamp);
-    if (convertedTimestamp != null) {
-      try {
-        const date = moment(convertedTimestamp);
-        if (!date.isValid()) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.invalid_date,
-            message: i18n.translate(
-              'xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage',
-              {
-                defaultMessage: `error parsing timestamp "{timestamp}"`,
-                values: {
-                  timestamp,
-                },
-              }
-            ),
-          });
-          return;
-        }
-      } catch (err) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.invalid_date,
-          message: i18n.translate(
-            'xpack.stackConnectors.pagerduty.timestampParsingFailedErrorMessage',
-            {
-              defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
-              values: {
-                timestamp,
-                message: err.message,
-              },
-            }
-          ),
-        });
-      }
-    }
-    if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: i18n.translate('xpack.stackConnectors.pagerduty.missingDedupkeyErrorMessage', {
-          defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
-          values: { eventAction },
-        }),
-      });
-    }
-  });
-
-export const ConnectorTypeId = '.pagerduty';
 // connector type definition
 export function getConnectorType(): PagerDutyConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.pagerduty.title', {
-      defaultMessage: 'PagerDuty',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

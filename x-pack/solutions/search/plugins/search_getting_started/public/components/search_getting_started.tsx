@@ -25,16 +25,16 @@ export const SearchGettingStartedPage: React.FC = () => {
 
   return (
     <SearchGettingStartedPageTemplate>
-      <EuiPageTemplate.Section paddingSize="xl" grow={false}>
+      <EuiPageTemplate.Section data-test-subj="gettingStartedHeader" paddingSize="xl" grow={false}>
         <SearchGettingStartedHeader />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section paddingSize="xl">
+      <EuiPageTemplate.Section data-test-subj="gettingStartedConsoleTutorials" paddingSize="xl">
         <ConsoleTutorialsGroup />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section data-test-subj="gettingStartedCodeExamples">
         <SearchGettingStartedConnectCode />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section>
+      <EuiPageTemplate.Section data-test-subj="gettingStartedFooter">
         <GettingStartedFooter />
       </EuiPageTemplate.Section>
     </SearchGettingStartedPageTemplate>

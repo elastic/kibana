@@ -34,6 +34,7 @@ const root: TraceItem = {
   duration: 1000,
   serviceName: 'svcA',
   errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 const child1: TraceItem = {
   id: '2',
@@ -44,6 +45,7 @@ const child1: TraceItem = {
   duration: 400,
   serviceName: 'svcB',
   errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 const child2: TraceItem = {
   id: '3',
@@ -54,6 +56,7 @@ const child2: TraceItem = {
   duration: 100,
   serviceName: 'svcC',
   errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 const grandchild: TraceItem = {
   id: '4',
@@ -64,6 +67,7 @@ const grandchild: TraceItem = {
   duration: 50,
   serviceName: 'svcD',
   errors: [],
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 };
 
 describe('getFlattenedTraceWaterfall', () => {
@@ -170,6 +174,77 @@ describe('getFlattenedTraceWaterfall', () => {
     expect(result[1].id).toBe('4');
     expect(result[1].depth).toBe(1);
   });
+
+  it('errors when it encounters invalid trace documents', () => {
+    // We have a duplicate span id, that is both a root span and a child span
+    // This indicates an instrumentation error. We should never be hitting this
+    // particular case in normal/correctly configured tracing.
+    const invalidSpans: TraceItem[] = [
+      {
+        id: 'b5',
+        timestampUs: 1761915724030561,
+        name: 'GET /a/{b}',
+        traceId: 'dd31',
+        duration: 22750,
+        status: { fieldName: 'event.outcome', value: 'success' },
+        errors: [],
+        serviceName: 'svcA',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: 'd8',
+        timestampUs: 1761915725590821,
+        name: 'a/2',
+        traceId: 'dd31',
+        duration: 140000,
+        status: { fieldName: 'event.outcome', value: 'unknown' },
+        errors: [],
+        serviceName: 'svcb',
+        parentId: 'b5',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: '9d',
+        timestampUs: 1761915725590821,
+        name: 'Redirect',
+        traceId: 'dd31',
+        duration: 54000,
+        status: { fieldName: 'event.outcome', value: 'unknown' },
+        errors: [],
+        parentId: 'd8',
+        serviceName: 'svcb',
+        type: 'browser-timing',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+      {
+        id: 'b5',
+        timestampUs: 1761915725645821,
+        name: 'Request',
+        traceId: 'dd31',
+        duration: 24000,
+        status: { fieldName: 'event.outcome', value: 'unknown' },
+        errors: [],
+        parentId: 'd8',
+        serviceName: 'svcb',
+        type: 'browser-timing',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      },
+    ];
+
+    const invalidMap = getTraceParentChildrenMap(invalidSpans, false);
+
+    const { orphans, rootItem } = getRootItemOrFallback(invalidMap, invalidSpans);
+
+    expect(() =>
+      getTraceWaterfall({
+        rootItem: rootItem!,
+        parentChildMap: invalidMap,
+        orphans: orphans!,
+        colorMap: serviceColorsMap,
+        colorBy: WaterfallLegendType.ServiceName,
+      })
+    ).toThrowError('Duplicate span id detected');
+  });
 });
 
 describe('getLegends', () => {
@@ -186,6 +261,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -195,6 +271,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcB',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -204,6 +281,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcC',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '4',
@@ -214,6 +292,7 @@ describe('getLegends', () => {
         serviceName: 'svcC',
         type: 'db',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '5',
@@ -224,6 +303,7 @@ describe('getLegends', () => {
         serviceName: 'svcC',
         type: 'http',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '6',
@@ -234,6 +314,7 @@ describe('getLegends', () => {
         serviceName: 'svcC',
         type: 'cache',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -259,6 +340,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -268,6 +350,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -277,6 +360,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcB',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '5',
@@ -287,6 +371,7 @@ describe('getLegends', () => {
         serviceName: 'svcB',
         type: 'http',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '6',
@@ -297,6 +382,7 @@ describe('getLegends', () => {
         serviceName: 'svcB',
         type: 'http',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -324,6 +410,7 @@ describe('getLegends', () => {
       duration: 1,
       serviceName: `svc${i}`,
       errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     }));
 
     const result = getLegends(traceItems);
@@ -346,6 +433,7 @@ describe('getColorByType', () => {
       duration: 1,
       serviceName: 'svcA',
       errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
     {
       id: '2',
@@ -355,6 +443,7 @@ describe('getColorByType', () => {
       duration: 1,
       serviceName: 'svcB',
       errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
     {
       id: '3',
@@ -364,6 +453,7 @@ describe('getColorByType', () => {
       duration: 1,
       serviceName: 'svcC',
       errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
     {
       id: '4',
@@ -374,6 +464,7 @@ describe('getColorByType', () => {
       serviceName: 'svcC',
       type: 'db',
       errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
     {
       id: '5',
@@ -384,6 +475,7 @@ describe('getColorByType', () => {
       serviceName: 'svcC',
       type: 'http',
       errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
     {
       id: '6',
@@ -394,6 +486,7 @@ describe('getColorByType', () => {
       serviceName: 'svcC',
       type: 'cache',
       errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
   ];
 
@@ -450,6 +543,7 @@ describe('getTraceParentChildrenMap', () => {
         duration: 100,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -460,6 +554,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcB',
         parentId: '1',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -470,6 +565,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcC',
         parentId: '1',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '4',
@@ -480,6 +576,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcD',
         parentId: '2',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -503,6 +600,7 @@ describe('getTraceParentChildrenMap', () => {
         duration: 100,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -522,6 +620,7 @@ describe('getTraceParentChildrenMap', () => {
         duration: 100,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -531,6 +630,7 @@ describe('getTraceParentChildrenMap', () => {
         duration: 100,
         serviceName: 'svcB',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -550,6 +650,7 @@ describe('getTraceParentChildrenMap', () => {
         duration: 100,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -560,6 +661,7 @@ describe('getTraceParentChildrenMap', () => {
         duration: 100,
         serviceName: 'svcB',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -645,6 +747,7 @@ describe('getTraceWaterfallDuration', () => {
         color: 'red',
         errors: [],
         isOrphan: false,
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -659,6 +762,7 @@ describe('getTraceWaterfallDuration', () => {
         color: 'blue',
         errors: [],
         isOrphan: false,
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -673,6 +777,7 @@ describe('getTraceWaterfallDuration', () => {
         color: 'green',
         errors: [],
         isOrphan: false,
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
     expect(getTraceWaterfallDuration(items)).toBe(155);

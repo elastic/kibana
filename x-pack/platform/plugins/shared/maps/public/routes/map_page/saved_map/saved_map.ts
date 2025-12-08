@@ -13,7 +13,12 @@ import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
 import type { AdhocDataView, MapAttributes } from '../../../../server';
-import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import {
+  APP_ID,
+  MAP_PATH,
+  MAP_SAVED_OBJECT_TYPE,
+  SOURCE_TYPES,
+} from '../../../../common/constants';
 import type { MapStore, MapStoreState } from '../../../reducers/store';
 import { createMapStore } from '../../../reducers/store';
 import type { MapSettings } from '../../../../common/descriptor_types';
@@ -540,9 +545,12 @@ export class SavedMap {
 
   private async _getAdHocDataViews() {
     const dataViewIds: string[] = [];
-    getLayerList(this._store.getState()).forEach((layer) => {
-      dataViewIds.push(...layer.getIndexPatternIds());
-    });
+    getLayerList(this._store.getState())
+      // exclude adhoc data views from ESQL sources
+      .filter((layer) => layer.getDescriptor().sourceDescriptor?.type !== SOURCE_TYPES.ESQL)
+      .forEach((layer) => {
+        dataViewIds.push(...layer.getIndexPatternIds());
+      });
 
     const dataViews = await getIndexPatternsFromIds(_.uniq(dataViewIds));
     return dataViews

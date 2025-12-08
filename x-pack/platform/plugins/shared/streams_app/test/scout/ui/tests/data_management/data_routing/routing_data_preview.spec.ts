@@ -13,8 +13,7 @@ import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     // Generate logs data only
     await logsSynthtraceEsClient.clean();
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
@@ -24,12 +23,12 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoPartitioningTab('logs');
     await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
+    await pageObjects.streams.switchToColumnsView();
   });
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ logsSynthtraceEsClient }) => {
     // Clear synthtrace data
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should show preview during rule creation', async ({ pageObjects }) => {
@@ -96,67 +95,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     }
   });
 
-  test('should allow updating the condition manually by syntax editor', async ({ pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('preview-test');
-
-    // Enable syntax editor
-    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-    // Set condition that should match the test data
-    await pageObjects.streams.fillConditionEditorWithSyntax(
-      JSON.stringify(
-        {
-          field: 'severity_text',
-          eq: 'info',
-        },
-        null,
-        2
-      )
-    );
-
-    // Verify preview panel shows matching documents
-    await pageObjects.streams.expectPreviewPanelVisible();
-    const rows = await pageObjects.streams.getPreviewTableRows();
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-      });
-    }
-
-    // Change condition to match a different value
-    await pageObjects.streams.fillConditionEditorWithSyntax(
-      JSON.stringify(
-        {
-          and: [
-            {
-              field: 'severity_text',
-              eq: 'warn',
-            },
-            {
-              field: 'body.text',
-              contains: 'log',
-            },
-          ],
-        },
-        null,
-        2
-      )
-    );
-
-    // Verify preview panel updated documents
-    await pageObjects.streams.expectPreviewPanelVisible();
-    const updatedRows = await pageObjects.streams.getPreviewTableRows();
-    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'warn',
-      });
-    }
-  });
-
   test('should show no matches when condition matches nothing', async ({ page, pageObjects }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('no-matches');
@@ -169,7 +107,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     });
 
     // Should show no matching documents
-    await expect(page.getByText('No documents to preview')).toBeVisible();
+    await expect(page.getByTestId('streamsAppRoutingPreviewEmptyPromptTitle')).toBeVisible();
   });
 
   test('should show document filter controls when there is data by default', async ({
@@ -213,53 +151,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('%');
   });
 
-  test('should switch between matched and unmatched documents', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('filter-switch-test');
-
-    await pageObjects.streams.fillConditionEditor({
-      field: 'severity_text',
-      operator: 'equals',
-      value: 'info',
-    });
-
-    await pageObjects.streams.expectPreviewPanelVisible();
-    const initialRows = await pageObjects.streams.getPreviewTableRows();
-
-    // Verify all initial rows match the condition
-    for (let rowIndex = 0; rowIndex < initialRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-      });
-    }
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('50%');
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('50%');
-
-    await page.getByTestId('routingPreviewUnmatchedFilterButton').click();
-
-    await pageObjects.streams.expectPreviewPanelVisible();
-
-    // Verify unmatched filter is now selected
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-
-    // Verify unmatched documents are shown (should not contain 'info')
-    const unmatchedRows = await pageObjects.streams.getPreviewTableRows();
-    for (let rowIndex = 0; rowIndex < unmatchedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-        invertCondition: true,
-      });
-    }
-  });
-
   test('should maintain filter state when condition changes', async ({ page, pageObjects }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('filter-state-test');
@@ -297,62 +188,58 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     );
   });
 
-  test('should handle filter controls with complex conditions', async ({ page, pageObjects }) => {
+  test('should handle "no data" when date range has no documents', async ({
+    page,
+    pageObjects,
+  }) => {
     await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('complex-filter-test');
+    await pageObjects.streams.fillRoutingRuleName('no-data-test');
 
-    // Enable syntax editor and set complex condition
-    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-    await pageObjects.streams.fillConditionEditorWithSyntax(
-      JSON.stringify(
-        {
-          and: [
-            {
-              field: 'severity_text',
-              eq: 'info',
-            },
-            {
-              field: 'body.text',
-              contains: 'will never match',
-            },
-          ],
-        },
-        null,
-        2
-      )
-    );
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('0%');
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('100%');
-  });
-
-  test('should disable filter controls when no condition is set', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('no-condition-test');
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
-  });
-
-  test('should show filter tooltip', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-
-    const tooltipIcon = page.getByTestId('routingPreviewFilterControlsTooltip');
-    await expect(tooltipIcon).toBeVisible();
-  });
-
-  test('should handle error states', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('error-test');
-
-    // Set a condition that might cause issues without field
     await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
       operator: 'equals',
       value: 'info',
     });
 
-    // Verify filter controls are present and disabled
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
+    // Set date range to far future where no data exists
+    await pageObjects.datePicker.setAbsoluteRange({
+      from: 'Jan 1, 2099 @ 00:00:00.000',
+      to: 'Jan 2, 2099 @ 00:00:00.000',
+    });
+
+    // Should show no documents message
+    await expect(page.getByTestId('streamsAppRoutingPreviewEmptyPromptTitle')).toBeVisible();
+  });
+
+  test('should display child stream count badge for nested routing rules', async ({
+    page,
+    apiServices,
+    pageObjects,
+  }) => {
+    // Create a parent stream with a child
+    await apiServices.streams.forkStream('logs', 'logs.parent', {
+      field: 'service.name',
+      eq: 'parent',
+    });
+
+    // Create a child under the parent
+    await apiServices.streams.forkStream('logs.parent', 'logs.parent.child1', {
+      field: 'severity_text',
+      eq: 'info',
+    });
+
+    await apiServices.streams.forkStream('logs.parent', 'logs.parent.child2', {
+      field: 'severity_text',
+      eq: 'warn',
+    });
+
+    await pageObjects.streams.gotoPartitioningTab('logs');
+
+    // Should see +2 badge on logs.parent indicating it has 2 children
+    const childCountBadge = page
+      .locator('[data-test-subj="routingRule-logs.parent"]')
+      .getByTestId('streamsAppRoutingRuleChildCountBadge');
+    await expect(childCountBadge).toBeVisible();
+    await expect(childCountBadge).toHaveText('+2');
   });
 });

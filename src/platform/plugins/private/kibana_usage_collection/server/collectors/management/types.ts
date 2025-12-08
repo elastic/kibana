@@ -52,6 +52,7 @@ export interface UsageStats {
   'agentBuilder:enabled': boolean;
   'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
+  'dataConnectors:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
@@ -77,6 +78,9 @@ export interface UsageStats {
   'securitySolution:enableEsqlRiskScoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
+  'securitySolution:defaultValueReportMinutes': string;
+  'securitySolution:defaultValueReportRate': string;
+  'securitySolution:defaultValueReportTitle': string;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -178,8 +182,10 @@ export interface UsageStats {
   'cases:incrementalIdDisplay:enabled': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
+  'observability:streamsEnableSignificantEventsAnalyzer': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableGroupStreams': boolean;
+  'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
 }

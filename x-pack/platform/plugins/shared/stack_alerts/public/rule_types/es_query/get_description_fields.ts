@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import { isOfQueryType } from '@kbn/es-query';
 import type {
   EsQueryRuleParams,
@@ -22,42 +21,46 @@ export const getDescriptionFields: GetDescriptionFieldsFn<EsQueryRuleParams> = (
 
   if (rule.params.searchType === 'esQuery') {
     const params = rule.params as OnlyEsQueryRuleParams;
-    return [
-      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN](params.index),
-      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](params.esQuery),
-    ];
+    return [prebuildFields.indexPattern(params.index), prebuildFields.customQuery(params.esQuery)];
   }
 
   if (rule.params.searchType === 'esqlQuery') {
     const params = rule.params as OnlyEsqlQueryRuleParams;
-    return [prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY](params.esqlQuery.esql)];
+    return [prebuildFields.esqlQuery(params.esqlQuery.esql)];
   }
 
   if (rule.params.searchType === 'searchSource' && rule.params.searchConfiguration) {
     const params = rule.params as OnlySearchSourceRuleParams;
     const searchConfig = params.searchConfiguration;
-    const queryField = [];
+    const fields = [];
+
+    if (searchConfig?.index && typeof searchConfig.index === 'string') {
+      fields.push(prebuildFields.dataViewIndexPattern(searchConfig.index));
+    }
 
     if (
       searchConfig?.query &&
       isOfQueryType(searchConfig.query) &&
       typeof searchConfig.query.query === 'string'
     ) {
-      queryField.push(
-        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](searchConfig.query.query)
+      fields.push(prebuildFields.customQuery(searchConfig.query.query));
+    }
+
+    if (
+      searchConfig?.filter &&
+      Array.isArray(searchConfig.filter) &&
+      searchConfig.filter.length &&
+      typeof searchConfig.index === 'string'
+    ) {
+      fields.push(
+        prebuildFields.queryFilters({
+          filters: searchConfig.filter,
+          dataViewId: searchConfig.index,
+        })
       );
     }
 
-    return [
-      ...(searchConfig?.index && typeof searchConfig.index === 'string'
-        ? [
-            prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](
-              searchConfig.index
-            ),
-          ]
-        : []),
-      ...queryField,
-    ];
+    return [...fields];
   }
 
   return [];

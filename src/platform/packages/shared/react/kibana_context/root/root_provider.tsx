@@ -13,7 +13,10 @@ import React from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import type { CoreEnv } from '@kbn/core-base-browser-internal';
 import { SharedUXRouterContext } from '@kbn/shared-ux-router';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
@@ -30,6 +33,8 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
   /** The `ExecutionContextStart` API from `CoreStart`. */
   executionContext?: ExecutionContextStart;
+  /** `CoreEnv` from core */
+  coreEnv?: CoreEnv;
 }
 
 /**
@@ -54,9 +59,13 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
   const rootContextProvider = (
-    <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
-      <i18n.Context>{children}</i18n.Context>
-    </SharedUXRouterContext.Provider>
+    <KibanaErrorBoundaryProvider analytics={props.analytics}>
+      <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
+        <i18n.Context>
+          <CoreEnvContextProvider value={props.coreEnv}>{children}</CoreEnvContextProvider>
+        </i18n.Context>
+      </SharedUXRouterContext.Provider>
+    </KibanaErrorBoundaryProvider>
   );
 
   if (hasEuiProvider) {

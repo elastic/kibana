@@ -70,6 +70,7 @@ class DocumentationService {
   private updateExistingDS: string = '';
   private enrichIngestData: string = '';
   private mappingReference: string = '';
+  private elasticInferenceService: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -127,12 +128,13 @@ class DocumentationService {
     this.mappingTypesRemoval = links.elasticsearch.mappingTypesRemoval;
     this.percolate = links.query.percolate;
     this.runtimeFields = links.runtimeFields.overview;
-    this.indicesComponentTemplate = links.apis.putComponentTemplate;
-    this.bulkIndexAlias = links.apis.bulkIndexAlias;
+    this.indicesComponentTemplate = links.indexManagement.componentTemplate;
+    this.bulkIndexAlias = links.indexManagement.indexAlias;
     this.indexStats = links.apis.indexStats;
     this.bulkApi = links.enterpriseSearch.bulkApi;
     this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
     this.enrichIngestData = links.ingest.enrich;
+    this.elasticInferenceService = links.enterpriseSearch.elasticInferenceService;
   }
 
   public getEsDocsBase() {
@@ -371,6 +373,10 @@ class DocumentationService {
 
   public getEnrichIngestDataLink() {
     return this.enrichIngestData;
+  }
+
+  public getEisDocumentationLink() {
+    return this.elasticInferenceService;
   }
 
   public getWellKnownTextLink() {

@@ -10,6 +10,7 @@ import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
@@ -33,6 +34,7 @@ export const useStreamDescriptionApi = ({
     dependencies: {
       start: { streams },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const { timeState } = useTimefilter();
@@ -47,13 +49,29 @@ export const useStreamDescriptionApi = ({
   const save = useCallback(
     async (nextDescription: string) => {
       setIsUpdating(true);
+
+      let stream;
+      if (Streams.GroupStream.Definition.is(definition.stream)) {
+        stream = omit(definition.stream, ['name', 'updated_at']);
+      } else {
+        stream = {
+          ...omit(definition.stream, ['name', 'updated_at']),
+          ingest: {
+            ...definition.stream.ingest,
+            processing: {
+              ...omit(definition.stream.ingest.processing, ['updated_at']),
+            },
+          },
+        };
+      }
+
       updateStream(
         Streams.all.UpsertRequest.parse({
           dashboards: definition.dashboards,
           queries: definition.queries,
           rules: definition.rules,
           stream: {
-            ...omit(definition.stream, 'name'),
+            ...stream,
             description: nextDescription,
           },
         })
@@ -117,8 +135,14 @@ export const useStreamDescriptionApi = ({
         },
       })
       .subscribe({
-        next({ description: generatedDescription }) {
+        next({ description: generatedDescription, tokensUsed }) {
           setDescription(generatedDescription);
+          telemetryClient.trackStreamDescriptionGenerated({
+            stream_name: definition.stream.name,
+            stream_type: getStreamTypeFromDefinition(definition.stream),
+            input_tokens_used: tokensUsed.prompt,
+            output_tokens_used: tokensUsed.completion,
+          });
         },
         complete() {
           setIsGenerating(false);
@@ -135,12 +159,13 @@ export const useStreamDescriptionApi = ({
         },
       });
   }, [
-    definition.stream.name,
+    aiFeatures?.genAiConnectors.selectedConnector,
     streams.streamsRepositoryClient,
+    signal,
+    definition.stream,
     timeState.asAbsoluteTimeRange.from,
     timeState.asAbsoluteTimeRange.to,
-    aiFeatures?.genAiConnectors.selectedConnector,
-    signal,
+    telemetryClient,
     notifications.toasts,
   ]);
 

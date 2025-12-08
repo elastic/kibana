@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-function extractTextAndMarkTags(html: string) {
+export function extractTextAndMarkTags(html: string) {
   const markTags: string[] = [];
   const cleanText = html.replace(/<\/?mark[^>]*>/g, (match) => {
     markTags.push(match);

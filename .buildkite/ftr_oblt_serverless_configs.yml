@@ -1,12 +1,7 @@
 disabled:
   # Base config files, only necessary to inform config finding script
-  - x-pack/solutions/observability/test/serverless/functional/test_suites/cypress/oblt_config.base.ts
   - x-pack/platform/test/serverless/functional/config.oblt.base.ts
   - x-pack/platform/test/serverless/functional/config.logs_essentials.base.ts
-
-  # Cypress configs, for now these are still run manually
-  - x-pack/solutions/observability/test/serverless/functional/test_suites/cypress/config_headless.ts
-  - x-pack/solutions/observability/test/serverless/functional/test_suites/cypress/config_runner.ts
 
   # Observability AI Assistant local-only tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts
@@ -51,3 +46,4 @@ enabled:
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_agent.serverless.config.ts

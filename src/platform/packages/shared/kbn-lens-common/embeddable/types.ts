@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject } from 'rxjs';
-
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import type {
   AggregateQuery,
   ExecutionContextSearch,
@@ -31,23 +28,10 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
-  HasEditCapabilities,
-  HasLibraryTransforms,
-  HasSupportedTriggers,
-  PublishesBlockingError,
-  PublishesDataLoading,
   PublishesDataViews,
-  PublishesDisabledActionIds,
-  PublishesRendered,
-  PublishesSavedObjectId,
-  PublishesUnifiedSearch,
-  PublishesViewMode,
-  PublishesWritableDescription,
-  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
   ViewMode,
-  useSearchApi,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type {
@@ -59,8 +43,6 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
@@ -249,7 +231,7 @@ export interface LensSharedProps {
   esqlVariables?: ESQLControlVariable[];
 }
 
-interface LensRequestHandlersProps {
+export interface LensRequestHandlersProps {
   /**
    * Custom abort controller to be used for the ES client
    */
@@ -265,7 +247,7 @@ interface LensRequestHandlersProps {
  * * Panel settings
  * * other props from the embeddable
  */
-type LensSerializedSharedState = Simplify<
+export type LensSerializedSharedState = Simplify<
   LensOverrides &
     LensWithReferences &
     LensUnifiedSearchContext &
@@ -376,42 +358,6 @@ export interface LensInspectorAdapters {
   // needs to be updated on data changes
   adapters$: PublishingSubject<Adapters>;
 }
-
-export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedState> &
-    // This is used by actions to operate the edit action
-    HasEditCapabilities &
-    // for blocking errors leverage the embeddable panel UI
-    PublishesBlockingError &
-    // This is used by dashboard/container to show filters/queries on the panel
-    PublishesUnifiedSearch &
-    // Forward the search session id
-    PublishesSearchSession &
-    // Let the container know the loading state
-    PublishesDataLoading &
-    // Let the container know when the rendering has completed rendering
-    PublishesRendered &
-    // Let the container know the used data views
-    PublishesDataViews &
-    // Let the container operate on panel title/description
-    PublishesWritableTitle &
-    PublishesWritableDescription &
-    // This embeddable can narrow down specific triggers usage
-    HasSupportedTriggers &
-    PublishesDisabledActionIds &
-    // Offers methods to operate from/on the linked saved object
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
-    // Let the container know the view mode
-    PublishesViewMode &
-    // Let the container know the saved object id
-    PublishesSavedObjectId &
-    // Lens specific API methods:
-    // Let the container know when the data has been loaded/updated
-    LensInspectorAdapters &
-    LensRequestHandlersProps &
-    LensApiCallbacks &
-    LensHasEditPanel
->;
 
 // This is an API only used internally to the embeddable but not exported elsewhere
 // there's some overlapping between this and the LensApi but they are shared references
@@ -528,33 +474,9 @@ export type LensByValueInput = Omit<LensRendererPrivateProps, 'savedObjectId'>;
 export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
-export type LensEmbeddableOutput = LensApi;
 
 export interface ESQLVariablesCompatibleDashboardApi {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
-
-type SearchApi = ReturnType<typeof useSearchApi>;
-
-interface GeneralLensApi {
-  searchSessionId$: BehaviorSubject<string | undefined>;
-  disabledActionIds$: BehaviorSubject<string[] | undefined>;
-  setDisabledActionIds: (ids: string[] | undefined) => void;
-  viewMode$: BehaviorSubject<ViewMode | undefined>;
-  settings: {
-    syncColors$: BehaviorSubject<boolean>;
-    syncCursor$: BehaviorSubject<boolean>;
-    syncTooltips$: BehaviorSubject<boolean>;
-  };
-  forceDSL?: boolean;
-  esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
-  hideTitle$: BehaviorSubject<boolean | undefined>;
-  reload$: BehaviorSubject<void>;
-}
-
-export type LensParentApi = SearchApi &
-  LensRuntimeState &
-  GeneralLensApi &
-  HasSerializedChildState<LensSerializedState>;

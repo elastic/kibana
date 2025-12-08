@@ -6,6 +6,7 @@
  */
 
 import { type CoreSetup, AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { WORKPLACE_AI_APP_ID } from '../../common/features';
 import type { WorkplaceAIAppPluginStartDependencies } from '../types';
 import type { WorkplaceAIServices } from '../services';
@@ -23,7 +24,9 @@ export const registerApp = ({
     category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     euiIconType: 'logoElasticsearch',
     status: AppStatus.accessible,
-    title: 'Workplace AI',
+    title: i18n.translate('xpack.workplaceai.appTitle', {
+      defaultMessage: 'Workplace AI',
+    }),
     updater$: undefined,
     visibleIn: ['sideNav', 'globalSearch'],
     async mount({ element, history }) {

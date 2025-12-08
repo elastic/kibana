@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-ast';
 
 export function getESQLWithSafeLimit(esql: string, limit: number): string {
-  const { ast } = parse(esql);
-  const sourceCommand = ast.find(({ name }) => ['from', 'ts'].includes(name));
+  const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
   if (!sourceCommand) {
     return esql;
   }
 
   let sortCommandIndex = -1;
-  const sortCommand = ast.find(({ name }, index) => {
+  const sortCommand = root.commands.find(({ name }, index) => {
     sortCommandIndex = index;
     return name === 'sort';
   });

@@ -6,8 +6,9 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
+import type { AnswerAgentAction, ResearchAgentAction } from './actions';
 
 export const StateAnnotation = Annotation.Root({
   // inputs
@@ -24,14 +25,23 @@ export const StateAnnotation = Annotation.Root({
     reducer: (a, b) => b,
     default: () => 0,
   }),
-  nextMessage: Annotation<AIMessage>(),
-  maxCycleReached: Annotation<boolean>(),
-  handoverNote: Annotation<string>(),
-  // outputs
-  addedMessages: Annotation<BaseMessage[]>({
-    reducer: messagesStateReducer,
+  // counter to keep track of the number of successive errors
+  errorCount: Annotation<number>({
+    reducer: (a, b) => b,
+    default: () => 0,
+  }),
+  // list of actions/steps performed by the main agent
+  mainActions: Annotation<ResearchAgentAction[]>({
+    reducer: (a, b) => [...a, ...b],
     default: () => [],
   }),
+  // list of actions/steps performed by the answer agent
+  answerActions: Annotation<AnswerAgentAction[]>({
+    reducer: (a, b) => [...a, ...b],
+    default: () => [],
+  }),
+  // outputs
+  finalAnswer: Annotation<string>(),
 });
 
 export type StateType = typeof StateAnnotation.State;

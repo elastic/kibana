@@ -17,7 +17,6 @@ export type {
 } from './types';
 export { InvalidEmailReason, isActionTypeExecutorResult } from './types';
 export {
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryEsIndexConnectorId,
   buildAlertHistoryDocument,
@@ -48,6 +47,7 @@ export {
   GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   EndpointSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
   AlertingConnectorFeature,
   CasesConnectorFeature,
   UptimeConnectorFeature,
@@ -56,6 +56,7 @@ export {
   GenerativeAIForObservabilityFeature,
   GenerativeAIForSearchPlaygroundFeature,
   EndpointSecurityConnectorFeature,
+  WorkflowsConnectorFeature,
   areValidFeatures,
   getConnectorFeatureName,
   getConnectorCompatibility,

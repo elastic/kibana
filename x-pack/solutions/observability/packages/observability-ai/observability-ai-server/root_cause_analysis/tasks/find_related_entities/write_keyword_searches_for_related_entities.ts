@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldPatternResultWithChanges, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { FieldPatternResultWithChanges, FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import type { InferenceClient } from '@kbn/inference-common';
 import { RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
@@ -122,7 +122,7 @@ export async function writeKeywordSearchForRelatedEntities({
   connectorId: string;
   inferenceClient: InferenceClient;
   entity: Record<string, string>;
-  analysis: TruncatedDocumentAnalysis;
+  analysis: FormattedDocumentAnalysis;
   ownPatterns: FieldPatternResultWithChanges[];
   context: string;
   kbEntries: ScoredKnowledgeBaseEntry[];

@@ -97,4 +97,56 @@ describe('HeaderPageAnnouncer', () => {
 
     expect(skipLink.focus).toHaveBeenCalledTimes(1);
   });
+
+  it('does not focus skip link when Tab is pressed and focus is already within main content', () => {
+    const { getByTestId, getByText } = render(
+      <>
+        <HeaderPageAnnouncer
+          breadcrumbs$={createBreadcrumbs$([{ text: 'Test' }])}
+          customBranding$={createBranding$({})}
+        />
+        <main>
+          <button>Button in main</button>
+        </main>
+      </>
+    );
+
+    const skipLink = getByTestId('skipToMainButton');
+    const mainButton = getByText('Button in main');
+
+    // Focus an element within main content
+    mainButton.focus();
+
+    skipLink.focus = jest.fn();
+    fireEvent.keyDown(window, { key: 'Tab' });
+
+    // Skip link should NOT be focused when already within main content
+    expect(skipLink.focus).not.toHaveBeenCalled();
+  });
+
+  it('does not focus skip link when Tab is pressed and focus is within role="main"', () => {
+    const { getByTestId, getByText } = render(
+      <>
+        <HeaderPageAnnouncer
+          breadcrumbs$={createBreadcrumbs$([{ text: 'Test' }])}
+          customBranding$={createBranding$({})}
+        />
+        <div role="main">
+          <button>Button in main</button>
+        </div>
+      </>
+    );
+
+    const skipLink = getByTestId('skipToMainButton');
+    const mainButton = getByText('Button in main');
+
+    // Focus an element within main content
+    mainButton.focus();
+
+    skipLink.focus = jest.fn();
+    fireEvent.keyDown(window, { key: 'Tab' });
+
+    // Skip link should NOT be focused when already within main content
+    expect(skipLink.focus).not.toHaveBeenCalled();
+  });
 });

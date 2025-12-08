@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import type { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstForkCommand } from '../../types';
 import { CommandVisitorContext, WhereCommandVisitorContext } from '../contexts';
 import { Visitor } from '../visitor';
 
@@ -57,7 +57,11 @@ test('a query can have a parent fork command', () => {
   new Visitor()
     .on('visitCommand', (ctx) => {
       if (ctx.node.name === 'fork') {
-        ctx.node.args.forEach((subQuery) => ctx.visitSubQuery(subQuery as ESQLAstQueryExpression));
+        const forkCommand = ctx.node as ESQLAstForkCommand;
+
+        forkCommand.args.forEach((parens) => {
+          ctx.visitSubQuery(parens.child);
+        });
       }
     })
     .on('visitQuery', (ctx) => {

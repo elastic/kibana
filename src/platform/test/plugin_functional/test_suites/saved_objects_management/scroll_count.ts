@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import type TestAgent from 'supertest/lib/agent';
+import equal from 'fast-deep-equal';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
-  const supertest = getService('supertest');
+  const server = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
+  const headers = { 'kbn-xsrf': 'true' };
 
   describe('scroll_count', () => {
     describe('saved objects with hidden type', () => {
@@ -36,9 +38,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
 
       it('only counts hidden types that are importableAndExportable', async () => {
-        const res = await supertest
+        const { body: actualCount } = await server
           .post(apiUrl)
-          .set('kbn-xsrf', 'true')
+          .set(headers)
           .send({
             typesToInclude: [
               'test-hidden-non-importable-exportable',
@@ -47,11 +49,52 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           })
           .expect(200);
 
-        expect(res.body).to.eql({
-          'test-hidden-importable-exportable': 1,
-          'test-hidden-non-importable-exportable': 0,
+        await expectCountMatches({
+          expectedCount: {
+            'test-hidden-importable-exportable': 1,
+            'test-hidden-non-importable-exportable': 0,
+          },
+          actualCount,
+          server,
+          headers,
         });
       });
     });
   });
+}
+
+interface ExpectCountMatchesParams {
+  expectedCount: Record<string, number>;
+  actualCount: Record<string, number>;
+  server: TestAgent;
+  headers: Record<string, string>;
+}
+
+async function expectCountMatches({
+  expectedCount,
+  actualCount,
+  server,
+  headers,
+}: ExpectCountMatchesParams) {
+  if (!equal(actualCount, expectedCount)) {
+    const mismatchingTypes = Object.keys(expectedCount).filter(
+      (key) => expectedCount[key] !== actualCount[key]
+    );
+    const { body: savedObjects } = await server
+      .get(`/api/kibana/management/saved_objects/_find?type=${mismatchingTypes}&perPage=100`)
+      .set(headers)
+      .send();
+
+    const msg = `The counts for the following object types do not match:
+
+      ${mismatchingTypes
+        .map((type) => `- ${type}. Expected: ${expectedCount[type]}; Found: ${actualCount[type]}`)
+        .join('\n')}
+
+    Objects on SO index:
+
+${JSON.stringify(savedObjects, null, 2)}`;
+
+    throw new Error(msg);
+  }
 }

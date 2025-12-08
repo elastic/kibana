@@ -20,7 +20,6 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  GraphNodeUnion,
   HttpGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
@@ -31,6 +30,7 @@ import {
   isExitWorkflowTimeoutZone,
 } from '@kbn/workflows/graph';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { CustomStepImpl } from './custom_step_impl';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
@@ -64,29 +64,27 @@ import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class NodesFactory {
   constructor(
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowTaskManager: WorkflowTaskManager,
     private urlValidator: UrlValidator,
     private workflowGraph: WorkflowGraph,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    private dependencies: ContextDependencies
   ) {}
 
-  // eslint-disable-next-line complexity
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
-    const node = stepExecutionRuntime.node;
-    const stepLogger = stepExecutionRuntime.stepLogger;
+    const { node } = stepExecutionRuntime;
 
     // Handle elasticsearch.* and kibana.* actions
     if (node.stepType && node.stepType.startsWith('elasticsearch.')) {
-      this.workflowLogger.logInfo(`Creating Elasticsearch action step: ${node.stepType}`, {
+      this.workflowLogger.logDebug(`Creating Elasticsearch action step: ${node.stepType}`, {
         event: { action: 'internal-action-creation', outcome: 'success' },
         tags: ['step-factory', 'elasticsearch', 'internal-action'],
       });
@@ -100,7 +98,7 @@ export class NodesFactory {
     }
 
     if (node.stepType && node.stepType.startsWith('kibana.')) {
-      this.workflowLogger.logInfo(`Creating Kibana action step: ${node.stepType}`, {
+      this.workflowLogger.logDebug(`Creating Kibana action step: ${node.stepType}`, {
         event: { action: 'internal-action-creation', outcome: 'success' },
         tags: ['step-factory', 'kibana', 'internal-action'],
       });
@@ -113,6 +111,32 @@ export class NodesFactory {
       );
     }
 
+    // Check for custom registered step types first
+    const { workflowsExtensions } = this.dependencies;
+    if (node.stepType && workflowsExtensions.hasStepDefinition(node.stepType)) {
+      const stepDefinition = workflowsExtensions.getStepDefinition(node.stepType);
+      if (stepDefinition) {
+        this.workflowLogger.logDebug(`Creating custom registered step: ${node.stepType}`, {
+          event: { action: 'custom-step-creation', outcome: 'success' },
+          tags: ['step-handler', 'custom-step', 'extension'],
+        });
+        return new CustomStepImpl(
+          node as AtomicGraphNode,
+          stepDefinition,
+          stepExecutionRuntime,
+          this.connectorExecutor,
+          this.workflowRuntime,
+          this.workflowLogger
+        );
+      }
+    }
+
+    return this.createGenericStepNode(stepExecutionRuntime);
+  }
+
+  private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
+    const node = stepExecutionRuntime.node;
+    const stepLogger = stepExecutionRuntime.stepLogger;
     switch (node.type) {
       case 'enter-foreach':
         return new EnterForeachNodeImpl(
@@ -133,7 +157,6 @@ export class NodesFactory {
           node as EnterRetryNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          this.workflowTaskManager,
           stepLogger
         );
       case 'exit-retry':
@@ -216,8 +239,7 @@ export class NodesFactory {
           node as any,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger,
-          this.workflowTaskManager
+          stepLogger
         );
       case 'atomic':
         // Default atomic step (connector-based)
@@ -237,7 +259,7 @@ export class NodesFactory {
           this.workflowRuntime
         );
       default:
-        throw new Error(`Unknown node type: ${(node as GraphNodeUnion).stepType}`);
+        throw new Error(`Unknown node type: ${node.stepType}`);
     }
   }
 }

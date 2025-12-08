@@ -9,20 +9,24 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { useEffect } from 'react';
+import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
 
-import { monaco } from '@kbn/monaco';
+export const WORKFLOWS_MONACO_EDITOR_THEME = 'workflows-theme';
 
 export function useWorkflowsMonacoTheme() {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode, ...rest } = useEuiTheme();
+  const themeBase = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID]({
+    colorMode,
+    euiTheme,
+    ...rest,
+  });
   useEffect(() => {
-    monaco.editor.defineTheme('workflows-subdued', {
-      base: 'vs',
-      inherit: true,
-      rules: [],
+    monaco.editor.defineTheme(WORKFLOWS_MONACO_EDITOR_THEME, {
+      ...themeBase,
       colors: {
+        ...themeBase.colors,
         'list.hoverForeground': euiTheme.colors.textPrimary,
         'list.hoverBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
-        'editor.background': euiTheme.colors.backgroundBaseSubdued,
         'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
         'editorSuggestWidget.background': euiTheme.colors.backgroundBasePlain,
         'editorSuggestWidget.selectedForeground': euiTheme.colors.textPrimary,
@@ -32,7 +36,15 @@ export function useWorkflowsMonacoTheme() {
         'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
         'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
         'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
+        'editorLineNumber.foreground': euiTheme.colors.textPrimary,
+        'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
+        'editorIndentGuide.background1': euiTheme.colors.backgroundLightText,
+        'editorIndentGuide.activeBackground1': euiTheme.colors.borderBaseDisabled,
+        // Transparent backgrounds, they are set by the styles of the editor container behind.
+        'editor.background': '#00000000',
+        'editorGutter.background': '#00000000',
+        'minimap.background': '#00000000',
       },
     });
-  }, [euiTheme]);
+  }, [themeBase, euiTheme]);
 }

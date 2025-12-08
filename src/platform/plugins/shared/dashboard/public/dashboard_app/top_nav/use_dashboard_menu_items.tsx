@@ -20,12 +20,13 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { showAddMenu } from './add_menu/show_add_menu';
 import { ShowShareModal } from './share/show_share_modal';
+import { showSaveMenu } from './save_menu/show_save_menu';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -54,6 +55,7 @@ export const useDashboardMenuItems = ({
       dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
+  const isCreatingNewDashboard = viewMode === 'edit' && !lastSavedId;
 
   /**
    * Show the Dashboard app's share menu
@@ -158,24 +160,41 @@ export const useDashboardMenuItems = ({
         id: 'quick-save',
         iconType: 'save',
         emphasize: true,
-        isLoading: isSaveInProgress,
+        fill: true,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !hasUnsavedChanges,
+        disableButton: disableTopNav || isResetting,
         run: () => quickSaveDashboard(),
+        splitButtonProps: {
+          run: (anchorElement: HTMLElement) => {
+            showSaveMenu({
+              dashboardApi,
+              anchorElement,
+              resetChanges,
+              isResetting,
+              isSaveInProgress,
+              dashboardInteractiveSave,
+              coreServices,
+            });
+          },
+          isMainButtonLoading: isSaveInProgress,
+          isMainButtonDisabled: !hasUnsavedChanges,
+          secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
+          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonFill: true,
+          isSecondaryButtonDisabled: isSaveInProgress,
+        },
       } as TopNavMenuData,
 
       interactiveSave: {
         disableButton: disableTopNav,
-        emphasize: !Boolean(lastSavedId),
+        emphasize: isCreatingNewDashboard,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: lastSavedId ? undefined : 'save',
         run: dashboardInteractiveSave,
-        label:
-          viewMode === 'view'
-            ? topNavStrings.viewModeInteractiveSave.label
-            : Boolean(lastSavedId)
-            ? topNavStrings.editModeInteractiveSave.label
-            : topNavStrings.quickSave.label,
+        label: isCreatingNewDashboard
+          ? topNavStrings.quickSave.label
+          : topNavStrings.viewModeInteractiveSave.label,
         description:
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description
@@ -199,7 +218,8 @@ export const useDashboardMenuItems = ({
         testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
           dataService.search.showSearchSessionsFlyout({
-            appId,
+            appId: appId!,
+            trackingProps: { openedFrom: 'background search button' },
           }),
       } as TopNavMenuData,
 
@@ -251,6 +271,7 @@ export const useDashboardMenuItems = ({
     disableTopNav,
     isSaveInProgress,
     hasUnsavedChanges,
+    isCreatingNewDashboard,
     lastSavedId,
     dashboardInteractiveSave,
     viewMode,
@@ -355,11 +376,7 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
-      editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
-
-      if (showResetChange) {
-        editModeItems.push(resetChangesMenuItem);
-      }
+      editModeItems.push(menuItems.switchToViewMode);
 
       editModeItems.push(menuItems.add, menuItems.quickSave);
     } else {
@@ -389,8 +406,6 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     hasExportIntegration,
     lastSavedId,
-    showResetChange,
-    resetChangesMenuItem,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

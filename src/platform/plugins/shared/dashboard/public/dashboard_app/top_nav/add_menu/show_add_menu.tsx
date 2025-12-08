@@ -15,11 +15,17 @@ import {
   type EuiContextMenuPanelDescriptor,
   EuiContextMenu,
   EuiWrappingPopover,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { DefaultControlApi } from '@kbn/controls-plugin/public';
-import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
+import {
+  ControlTriggerSource,
+  ESQLVariableType,
+  EsqlControlType,
+  apiPublishesESQLVariables,
+} from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { apiHasType, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -210,6 +216,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
                   closePopover();
                 },
                 onCancelControl: closePopover,
+                triggerSource: ControlTriggerSource.ADD_CONTROL_BTN,
               });
             } catch (e) {
               // eslint-disable-next-line no-console
@@ -263,6 +270,9 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
       button={anchorElement}
       panelPaddingSize="none"
       repositionOnScroll
+      attachToAnchor
+      anchorPosition="downLeft"
+      panelStyle={{ maxWidth: 200 }}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiWrappingPopover>
@@ -275,15 +285,19 @@ export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMe
     return;
   }
 
+  const theme = coreServices.theme.getTheme();
+
   isOpen = true;
   document.body.appendChild(container);
   ReactDOM.render(
     <KibanaContextProvider services={coreServices}>
-      <AddMenu
-        dashboardApi={dashboardApi}
-        anchorElement={anchorElement}
-        coreServices={coreServices}
-      />
+      <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
+        <AddMenu
+          dashboardApi={dashboardApi}
+          anchorElement={anchorElement}
+          coreServices={coreServices}
+        />
+      </EuiThemeProvider>
     </KibanaContextProvider>,
     container
   );

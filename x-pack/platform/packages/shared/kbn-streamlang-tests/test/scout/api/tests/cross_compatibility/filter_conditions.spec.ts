@@ -472,6 +472,10 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       { attributes: { service_name: 'prefix-synth-service-2-suffix' } },
       { attributes: { service_name: 'synth-service-1' } },
       { attributes: { service_name: 'other-service' } },
+      // Test case-insensitive matching
+      { attributes: { service_name: 'SYNTH-SERVICE-2' } },
+      { attributes: { service_name: 'prefix-Synth-Service-2-suffix' } },
+      { attributes: { service_name: 'SyNtH-sErViCe-2' } },
     ];
 
     await testBed.ingest('ingest-contains', docs, processors);
@@ -491,6 +495,19 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     );
     expect(ingestResult[2].attributes).not.toHaveProperty('matched');
     expect(ingestResult[3].attributes).not.toHaveProperty('matched');
+    // Case-insensitive matches
+    expect(ingestResult[4].attributes).toStrictEqual(
+      expect.objectContaining({ service_name: 'SYNTH-SERVICE-2', matched: 'matched' })
+    );
+    expect(ingestResult[5].attributes).toStrictEqual(
+      expect.objectContaining({
+        service_name: 'prefix-Synth-Service-2-suffix',
+        matched: 'matched',
+      })
+    );
+    expect(ingestResult[6].attributes).toStrictEqual(
+      expect.objectContaining({ service_name: 'SyNtH-sErViCe-2', matched: 'matched' })
+    );
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -514,6 +531,25 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       expect.objectContaining({
         'attributes.service_name': 'other-service',
         'attributes.matched': null,
+      })
+    );
+    // Case-insensitive matches for ES|QL
+    expect(esqlResult.documentsOrdered[5]).toStrictEqual(
+      expect.objectContaining({
+        'attributes.service_name': 'SYNTH-SERVICE-2',
+        'attributes.matched': 'matched',
+      })
+    );
+    expect(esqlResult.documentsOrdered[6]).toStrictEqual(
+      expect.objectContaining({
+        'attributes.service_name': 'prefix-Synth-Service-2-suffix',
+        'attributes.matched': 'matched',
+      })
+    );
+    expect(esqlResult.documentsOrdered[7]).toStrictEqual(
+      expect.objectContaining({
+        'attributes.service_name': 'SyNtH-sErViCe-2',
+        'attributes.matched': 'matched',
       })
     );
   });

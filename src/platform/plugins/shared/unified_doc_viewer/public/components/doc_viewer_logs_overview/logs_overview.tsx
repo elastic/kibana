@@ -123,7 +123,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             dataView={dataView}
           />
 
-          <div>{renderFlyoutStreamField && renderFlyoutStreamField({ doc: hit })}</div>
+          <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
 
           <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
           {isStacktraceAvailable && (

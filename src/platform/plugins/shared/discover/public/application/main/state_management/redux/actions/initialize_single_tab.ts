@@ -16,14 +16,11 @@ import {
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import {
-  getInitialState,
-  type AppStateUrl,
-  type DiscoverAppState,
-} from '../../discover_app_state_container';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
+import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
 import { appendAdHocDataViews, setDataView } from './data_views';
-import { cleanupUrlState } from '../../utils/cleanup_url_state';
+import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { getEsqlDataView } from '../../utils/get_esql_data_view';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
@@ -81,15 +78,15 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
     const tabState = selectTab(getState(), tabId);
 
-    if (tabState?.globalState) {
+    if (tabState.globalState) {
       tabInitialGlobalState = cloneDeep(tabState.globalState);
     }
 
-    if (tabState?.initialAppState) {
-      tabInitialAppState = cloneDeep(tabState.initialAppState);
+    if (tabState.appState) {
+      tabInitialAppState = cloneDeep(tabState.appState);
     }
 
-    if (tabState?.initialInternalState) {
+    if (tabState.initialInternalState) {
       tabInitialInternalState = cloneDeep(tabState.initialInternalState);
     }
 
@@ -209,7 +206,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
     // Get the initial app state based on a combo of the URL and persisted tab saved search,
     // then get an updated copy of the saved search with the applied initial state
-    const initialAppState = getInitialState({
+    const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
       savedSearch: persistedTabSavedSearch,
       overrideDataView: dataView,
@@ -289,9 +286,8 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       stateContainer.savedSearchState.set(savedSearch);
     }
 
-    // Make sure app state container is completely reset
-    stateContainer.appState.resetToState(initialAppState);
-    stateContainer.appState.resetInitialState();
+    // Make sure app state is completely reset
+    dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
     stateContainer$.next(stateContainer);

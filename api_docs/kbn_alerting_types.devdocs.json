@@ -495,7 +495,7 @@
             "label": "categoryIds",
             "description": [],
             "signature": [
-              "(\"observability\" | \"management\" | \"securitySolution\")[]"
+              "(\"observability\" | \"securitySolution\" | \"management\")[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
             "deprecated": false,
@@ -1150,6 +1150,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Flapping.enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/alerting-types",
             "id": "def-common.Flapping.lookBackWindow",
@@ -3165,7 +3179,7 @@
             "label": "categoryIds",
             "description": [],
             "signature": [
-              "(\"observability\" | \"management\" | \"securitySolution\")[]"
+              "(\"observability\" | \"securitySolution\" | \"management\")[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,

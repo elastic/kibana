@@ -16,11 +16,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import type {
-  ActionDetailsStrategyResponse,
-  ActionResultsStrategyResponse,
-  Direction,
-} from '../../../common/search_strategy';
+import type { ActionResultsStrategyResponse, Direction } from '../../../common/search_strategy';
 
 /**
  * Creates a mock Osquery application context for testing.
@@ -70,37 +66,6 @@ export const createMockRouter = () => {
 
   return httpService.createRouter();
 };
-
-/**
- * Factory to create mock action details response.
- *
- * @param agents - Array of agent IDs
- * @param queries - Optional array of query-specific actions with their agents
- * @returns Mocked ActionDetailsStrategyResponse
- */
-export const createMockActionDetailsResponse = (
-  agents: string[],
-  queries?: Array<{ action_id: string; agents: string[] }>
-): ActionDetailsStrategyResponse =>
-  ({
-    actionDetails: {
-      _id: 'test-action-id',
-      _index: '.logs-osquery_manager.actions',
-      _source: {
-        action_id: 'test-action-id',
-        expiration: '2025-01-21T00:00:00.000Z',
-        '@timestamp': '2025-01-20T00:00:00.000Z',
-        agent_all: false,
-        agent_ids: agents,
-        agent_platforms: ['linux'],
-        agent_platforoms: [],
-        agent_policy_ids: ['policy-1'],
-        agents,
-        queries,
-      },
-    },
-    rawResponse: {},
-  } as unknown as ActionDetailsStrategyResponse);
 
 /**
  * Factory to create mock action results response.
@@ -191,25 +156,17 @@ export const createMockRequest = (params: {
   });
 
 /**
- * Helper to create mock search strategy that responds to different query types.
+ * Helper to create mock search strategy that responds to action results queries.
  *
- * @param actionDetailsResponse - Optional response for action details queries
  * @param actionResultsResponse - Optional response for action results queries
  * @returns Jest mock function that returns appropriate responses based on query type
  */
-export const createMockSearchStrategy = (
-  actionDetailsResponse?: ActionDetailsStrategyResponse,
-  actionResultsResponse?: ActionResultsStrategyResponse
-) =>
+export const createMockSearchStrategy = (actionResultsResponse?: ActionResultsStrategyResponse) =>
   jest.fn(
     (
       request: { factoryQueryType: string; [key: string]: unknown },
       options: { abortSignal?: AbortSignal; strategy: string }
     ) => {
-      if (request.factoryQueryType === OsqueryQueries.actionDetails) {
-        return of(actionDetailsResponse || createMockActionDetailsResponse(['agent-1', 'agent-2']));
-      }
-
       if (request.factoryQueryType === OsqueryQueries.actionResults) {
         return of(actionResultsResponse || createMockActionResultsResponse());
       }

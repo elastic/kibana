@@ -404,14 +404,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('time based tabs', () => {
       const adHocWithTimeRange = 'log';
       const adHocWithoutTimeRange = 'logs';
-      const persistedWithoutTimeRange = 'logst*';
+      const persistedWithoutTimeRange = 'logstas*';
 
       before(async () => {
         // Create saved data view without time range
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
         await dataViews.createFromSearchBar({
-          name: 'logst',
+          name: 'logstas',
           adHoc: false,
           hasTimeField: false,
         });

@@ -285,3 +285,12 @@ describe('commands', () => {
     });
   });
 });
+
+describe('subqueries (parens)', () => {
+  test('can print comments in complex subqueries', () => {
+    const query =
+      'FROM index1, /* before subquery */ (/* inside start */ FROM index2 /* after source */ | WHERE a > 10 /* after where */ | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10) /* after first subquery */, index3, (FROM index4 | STATS COUNT(*)) /* after second */ | WHERE d > 10 | STATS max = MAX(*) BY e | SORT max DESC';
+
+    assertPrint(query);
+  });
+});

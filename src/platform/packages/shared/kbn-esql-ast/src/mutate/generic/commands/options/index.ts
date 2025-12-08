@@ -8,7 +8,12 @@
  */
 
 import { Builder } from '../../../../builder';
-import type { ESQLAstQueryExpression, ESQLCommand, ESQLCommandOption } from '../../../../types';
+import type {
+  ESQLAstItem,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLCommandOption,
+} from '../../../../types';
 import { Visitor } from '../../../../visitor';
 import type { Predicate } from '../../../types';
 import * as commands from '..';
@@ -107,7 +112,7 @@ export const remove = (ast: ESQLAstQueryExpression, option: ESQLCommandOption): 
         return false;
       }
 
-      const index = ctx.node.args.indexOf(target);
+      const index = (ctx.node.args as ESQLAstItem[]).indexOf(target);
 
       if (index === -1) {
         return false;

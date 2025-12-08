@@ -689,16 +689,15 @@ describe('InferenceChatModel', () => {
       });
       chatComplete.mockReturnValue(response);
 
-      const output = await chatModel.stream('Some question');
-
       const allChunks: AIMessageChunk[] = [];
       await expect(async () => {
+        const output = await chatModel.stream('Some question');
         for await (const chunk of output) {
           allChunks.push(chunk);
         }
       }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
 
-      expect(allChunks.length).toBe(2);
+      expect(allChunks.length).toBe(0);
     });
   });
 

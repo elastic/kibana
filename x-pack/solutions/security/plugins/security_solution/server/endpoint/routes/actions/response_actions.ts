@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { MemoryDumpActionRequestSchema } from '../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -32,6 +33,7 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  MEMORY_DUMP_ROUTE,
   RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
@@ -360,6 +362,29 @@ export function registerResponseActionRoutes(
         createCancelActionAdditionalChecks(endpointContext)
       )
     );
+
+  router.versioned
+    .post({
+      access: 'public',
+      path: MEMORY_DUMP_ROUTE,
+      security: {
+        authz: { requiredPrivileges: ['securitySolution'] },
+        authc: { enabled: true },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: MemoryDumpActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'memory-dump')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -382,7 +407,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       // Note:  because our API schemas are defined as module static variables (as opposed to a
       //        `getter` function), we need to include this additional validation here, since
       //        `agent_type` is included in the schema independent of the feature flag
-      if (isThirdPartyFeatureDisabled(req.body.agent_type, command, experimentalFeatures)) {
+      if (isResponseActionDisabled(req.body.agent_type, command, experimentalFeatures)) {
         return errorHandler(
           logger,
           res,
@@ -422,7 +447,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   };
 }
 
-function isThirdPartyFeatureDisabled(
+function isResponseActionDisabled(
   agentType: ResponseActionAgentType | undefined,
   command: ResponseActionsApiCommandNames,
   experimentalFeatures: EndpointAppContext['experimentalFeatures']
@@ -431,6 +456,13 @@ function isThirdPartyFeatureDisabled(
     agentType === 'sentinel_one' &&
     command === 'runscript' &&
     !experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
+  ) {
+    return true;
+  }
+
+  if (
+    command === 'memory-dump' &&
+    (agentType !== 'endpoint' || !experimentalFeatures.responseActionsEndpointMemoryDump)
   ) {
     return true;
   }

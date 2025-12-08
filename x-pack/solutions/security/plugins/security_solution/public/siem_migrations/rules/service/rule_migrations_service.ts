@@ -72,7 +72,9 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   ): Promise<string> {
     const rulesCount = data.length;
     if (rulesCount === 0) {
-      throw new Error(i18n.EMPTY_RULES_ERROR);
+      const emptyRulesError = new Error(i18n.EMPTY_RULES_ERROR);
+      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error: emptyRulesError });
+      throw emptyRulesError;
     }
 
     try {
@@ -83,10 +85,10 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
 
       await this.addRulesToMigration(migrationId, data);
 
-      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
+      this.telemetry.reportSetupMigrationCreated({ migrationId, count: rulesCount });
       return migrationId;
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
+      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error });
       throw error;
     }
   }

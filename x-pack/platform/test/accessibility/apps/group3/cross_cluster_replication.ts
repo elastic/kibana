@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
 
-  // github.com/elastic/kibana/issues/153599
-  describe.skip('cross cluster replication - a11y tests', () => {
+  describe('cross cluster replication - a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('crossClusterReplication');
     });

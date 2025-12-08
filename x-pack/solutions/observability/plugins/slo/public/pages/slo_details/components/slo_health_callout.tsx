@@ -6,23 +6,21 @@
  */
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import kbnRison from '@kbn/rison';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
+import React from 'react';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useActionModal } from '../../../context/action_modal';
-import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
-import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
-import { ContentWithResetCta } from './health_callout/content_with_reset_cta';
+import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ContentWithInspectCta } from './health_callout/content_with_inspect_cta';
+import { ContentWithResetCta } from './health_callout/content_with_reset_cta';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
-  const { isLoading, isError, data: resultData } = useFetchSloHealth({ list: [slo] });
-  const { data } = resultData ?? {};
+  const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
 
   const {
     share: {
@@ -53,46 +51,22 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     );
   };
 
-  const rollupTransformId = useMemo(
-    () => getSLOTransformId(slo.id, slo.revision),
-    [slo.id, slo.revision]
-  );
-
-  const summaryTransformId = useMemo(
-    () => getSLOSummaryTransformId(slo.id, slo.revision),
-    [slo.id, slo.revision]
-  );
-
-  const rollupUrl = getUrl(rollupTransformId);
-  const summaryUrl = getUrl(summaryTransformId);
-
   if (isLoading || isError || data === undefined || data?.length !== 1) {
     return null;
   }
 
   const health = data[0].health;
-  if (health.overall === 'healthy') {
+  if (!health.isProblematic) {
     return null;
   }
 
-  const unhealthyRollup = health.rollup.status === 'unhealthy';
-  const unhealthySummary = health.summary.status === 'unhealthy';
-  const missingRollup = health.rollup.status === 'missing';
-  const missingSummary = health.summary.status === 'missing';
+  const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+  const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
 
-  const unhealthyRollupContent = `${rollupTransformId} (unhealthy)`;
-  const unhealthySummaryContent = `${summaryTransformId} (unhealthy)`;
-  const missingRollupContent = `${rollupTransformId} (missing)`;
-  const missingSummaryContent = `${summaryTransformId} (missing)`;
+  const rollupUrl = getUrl(rollupTransformId);
+  const summaryUrl = getUrl(summaryTransformId);
 
-  const count = [unhealthyRollup, unhealthySummary, missingRollup, missingSummary].filter(
-    Boolean
-  ).length;
-
-  const stateText = getSloHealthStateText(
-    unhealthyRollup || unhealthySummary,
-    missingRollup || missingSummary
-  );
+  const count = [health.rollup.isProblematic, health.summary.isProblematic].filter(Boolean).length;
 
   return (
     <EuiCallOut
@@ -106,42 +80,53 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         <EuiFlexItem>
           <FormattedMessage
             id="xpack.slo.sloDetails.healthCallout.description"
-            defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state. You can inspect {count, plural, it {one} other {each one}} here:"
-            values={{ count, stateText }}
+            defaultMessage="The following {count, plural, one {transform needs} other {transforms need}} attention. You can inspect {count, plural, it {one} other {each one}} here:"
+            values={{ count }}
           />
           <ul>
-            {health.rollup.status === 'unhealthy' && !!rollupUrl && (
-              <li key={`${slo.id}-rollup-unhealthy`}>
-                <ContentWithInspectCta
-                  textSize="s"
-                  content={unhealthyRollupContent}
-                  url={rollupUrl}
-                />
-              </li>
-            )}
-            {health.summary.status === 'unhealthy' && !!summaryUrl && (
-              <li key={`${slo.id}-summary-unhealthy`}>
-                <ContentWithInspectCta
-                  textSize="s"
-                  content={unhealthySummaryContent}
-                  url={summaryUrl}
-                />
-              </li>
-            )}
-            {health.rollup.status === 'missing' && (
-              <li key={`${slo.id}-rollup-missing`}>
+            {(health.rollup.status === 'unhealthy' || health.rollup.stateMatches === false) &&
+              !!rollupUrl && (
+                <li>
+                  <ContentWithInspectCta
+                    textSize="s"
+                    content={
+                      health.rollup.status === 'unhealthy'
+                        ? getUnhealthyText(rollupTransformId)
+                        : getStateConflictText(rollupTransformId, slo.enabled)
+                    }
+                    url={rollupUrl}
+                  />
+                </li>
+              )}
+            {health.rollup.missing && (
+              <li>
                 <ContentWithResetCta
                   textSize="s"
-                  content={missingRollupContent}
+                  content={getMissingText(rollupTransformId)}
                   handleReset={handleReset}
                 />
               </li>
             )}
-            {health.summary.status === 'missing' && (
-              <li key={`${slo.id}-summary-missing`}>
+
+            {(health.summary.status === 'unhealthy' || health.summary.stateMatches === false) &&
+              !!summaryUrl && (
+                <li>
+                  <ContentWithInspectCta
+                    textSize="s"
+                    content={
+                      health.summary.status === 'unhealthy'
+                        ? getUnhealthyText(summaryTransformId)
+                        : getStateConflictText(summaryTransformId, slo.enabled)
+                    }
+                    url={summaryUrl}
+                  />
+                </li>
+              )}
+            {health.summary.missing && (
+              <li>
                 <ContentWithResetCta
                   textSize="s"
-                  content={missingSummaryContent}
+                  content={getMissingText(summaryTransformId)}
                   handleReset={handleReset}
                 />
               </li>
@@ -152,3 +137,27 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     </EuiCallOut>
   );
 }
+
+const getUnhealthyText = (transformId: string) =>
+  i18n.translate('xpack.slo.sloDetails.healthCallout.unhealthyTransformText', {
+    defaultMessage: '{transformId} (unhealthy)',
+    values: { transformId },
+  });
+
+const getStateConflictText = (transformId: string, sloEnabled: boolean) => {
+  return sloEnabled
+    ? i18n.translate('xpack.slo.sloDetails.healthCallout.transformStateConflictStartedText', {
+        defaultMessage: '{transformId} (conflicting state: should be started)',
+        values: { transformId },
+      })
+    : i18n.translate('xpack.slo.sloDetails.healthCallout.transformStateConflictStoppedText', {
+        defaultMessage: '{transformId} (conflicting state: should be stopped)',
+        values: { transformId },
+      });
+};
+
+const getMissingText = (transformId: string) =>
+  i18n.translate('xpack.slo.sloDetails.healthCallout.missingTransformText', {
+    defaultMessage: '{transformId} (missing)',
+    values: { transformId },
+  });

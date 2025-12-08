@@ -114,7 +114,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         id: 'Synthetics:Sync-Private-Location-Monitors-single-instance',
         state: {},
         schedule: {
-          interval: '10m',
+          interval: '60m',
         },
         taskType: 'Synthetics:Sync-Private-Location-Monitors',
         params: {},
@@ -151,7 +151,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state).toEqual({
         disableAutoSync: false,
         hasAlreadyDoneCleanup: false,
-        startedAt: expect.anything(),
         lastStartedAt: expect.anything(),
         lastTotalParams: 1,
         lastTotalMWs: 1,
@@ -197,7 +196,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         maxCleanUpRetries: 2,
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
-        startedAt: expect.anything(),
       });
     });
 
@@ -239,6 +237,30 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         maxCleanUpRetries: 2,
       });
     });
+
+    it('should update lastStartedAt to the current startedAt value', async () => {
+      const initialLastStartedAt = '2023-01-01T12:00:00.000Z';
+      const startedAt = new Date('2024-06-01T10:00:00.000Z');
+      const taskInstance = {
+        ...getMockTaskInstance({ lastStartedAt: initialLastStartedAt }),
+        startedAt,
+      };
+      jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
+        hasDataChanged: false,
+      });
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
+    });
   });
 
   describe('hasAnyDataChanged', () => {
@@ -254,6 +276,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasAnyDataChanged({
         taskState: taskState as any,
         soClient: mockSoClient as any,
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasDataChanged).toBe(true);
@@ -272,6 +295,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasAnyDataChanged({
         taskState: { lastTotalParams: 1, lastTotalMWs: 1 } as any,
         soClient: mockSoClient as any,
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasDataChanged).toBe(true);
@@ -290,6 +314,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasAnyDataChanged({
         taskState: taskState as any,
         soClient: mockSoClient as any,
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasDataChanged).toBe(false);

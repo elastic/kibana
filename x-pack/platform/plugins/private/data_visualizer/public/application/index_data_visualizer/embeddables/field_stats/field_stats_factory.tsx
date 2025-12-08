@@ -167,7 +167,11 @@ export const getFieldStatsChartEmbeddableFactory = (
       let initialDataView: DataView | undefined;
       try {
         const dataView = isESQLQuery(state.query)
-          ? await getESQLAdHocDataview(state.query.esql, deps.data.dataViews)
+          ? await getESQLAdHocDataview({
+              dataViewsService: deps.data.dataViews,
+              query: state.query.esql,
+              http: deps.http,
+            })
           : validDataViewId
           ? await deps.data.dataViews.get(validDataViewId)
           : undefined;

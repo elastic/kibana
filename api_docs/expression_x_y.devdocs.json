@@ -770,7 +770,7 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"time\" | \"ordinal\" | \"linear\""
+              "\"time\" | \"linear\" | \"ordinal\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -2012,7 +2012,7 @@
               "AxisStyle",
               ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
               "Position",
-              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+              " | undefined; domain?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2022,7 +2022,7 @@
               },
               "<",
               "YDomainRange",
-              " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+              " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2032,7 +2032,7 @@
               },
               "<Partial<",
               "GridLineStyle",
-              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -2054,7 +2054,7 @@
               "MakeOverridesSerializable",
               "<",
               "ExternalPointerEventsSettings",
-              " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+              " | undefined>; pointBuffer?: ",
               "MarkBuffer",
               " | undefined; pointerUpdateTrigger?: ",
               "PointerUpdateTrigger",
@@ -2253,7 +2253,7 @@
           "AxisStyle",
           ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          " | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2263,7 +2263,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2287,7 +2287,7 @@
           "AxisStyle",
           ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          " | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2297,7 +2297,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2321,7 +2321,7 @@
           "AxisStyle",
           ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          " | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2331,7 +2331,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -3503,7 +3503,7 @@
         "label": "XScaleType",
         "description": [],
         "signature": [
-          "\"time\" | \"ordinal\" | \"linear\""
+          "\"time\" | \"linear\" | \"ordinal\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

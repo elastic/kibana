@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import type { AnalyzeLogPatternOutput } from '../analyze_log_patterns';
 import type { RelatedEntityDescription } from '../find_related_entities/extract_related_entities';
 import type { RelatedEntityKeywordSearch } from '../find_related_entities/write_keyword_searches_for_related_entities';
@@ -17,7 +17,7 @@ export interface EntityInvestigation {
   summary: string;
   relatedEntities: RelatedEntityDescription[];
   attachments: {
-    analysis: TruncatedDocumentAnalysis;
+    analysis: FormattedDocumentAnalysis;
     slos: Array<
       Record<string, any> & {
         status: 'VIOLATED' | 'DEGRADED' | 'HEALTHY' | 'NO_DATA';

@@ -7,7 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { BoundOptions, InferenceClient, InferenceConnector } from '@kbn/inference-common';
-import { createInferenceRequestError } from '@kbn/inference-common';
+import { createInferenceRequestError, createInferenceInternalError } from '@kbn/inference-common';
 import { createChatCompleteRestApi } from './chat_complete';
 import { createPromptRestApi } from './prompt';
 import { createOutputApi } from '../output';
@@ -23,6 +23,9 @@ export function createInferenceRestClient({
   const chatComplete = createChatCompleteRestApi({ fetch, signal });
 
   const client: InferenceClient = {
+    on: () => {
+      throw createInferenceInternalError(`on() is not supported on inference rest client`);
+    },
     bindTo: (options: BoundOptions) => {
       return bindClient(client, options);
     },

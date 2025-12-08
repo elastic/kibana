@@ -23,7 +23,10 @@ import { useForm, FormProvider, useController } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
 import { useSelector } from '@xstate5/react';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
-import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useStreamEnrichmentSelector,
+  type StreamEnrichmentContextType,
+} from '../../../state_management/stream_enrichment_state_machine';
 import type { WhereBlockFormState } from '../../../types';
 import {
   getFormStateFromWhereStep,
@@ -31,6 +34,7 @@ import {
 } from '../../../utils';
 import { discardChangesPromptOptions, deleteConditionPromptOptions } from './prompt_options';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
+import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 interface WhereBlockConfigurationProps {
   stepRef: StreamEnrichmentContextType['stepRefs'][number];
@@ -45,6 +49,10 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
     const isConfigured = useSelector(stepRef, (snapshot) => snapshot.matches('configured'));
     const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
     const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
+
+    const streamType = useStreamEnrichmentSelector((snapshot) =>
+      selectStreamType(snapshot.context)
+    );
 
     const [defaultValues] = useState(() =>
       getFormStateFromWhereStep(step as StreamlangWhereBlockWithUIAttributes)
@@ -103,6 +111,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
               <div>
                 <EuiButton
                   data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
+                  data-stream-type={streamType}
                   color="danger"
                   onClick={handleDelete}
                   size="s"
@@ -116,10 +125,11 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" wrap={true}>
               <div>
                 <EuiButtonEmpty
                   data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
+                  data-stream-type={streamType}
                   onClick={handleCancel}
                   size="s"
                 >
@@ -132,6 +142,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
               <div>
                 <EuiButton
                   data-test-subj="streamsAppConditionConfigurationSaveConditionButton"
+                  data-stream-type={streamType}
                   size="s"
                   fill
                   onClick={methods.handleSubmit(handleSubmit)}
@@ -144,7 +155,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
                       )
                     : i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.confirmCreateCondition',
-                        { defaultMessage: 'Create condition' }
+                        { defaultMessage: 'Create' }
                       )}
                 </EuiButton>
               </div>

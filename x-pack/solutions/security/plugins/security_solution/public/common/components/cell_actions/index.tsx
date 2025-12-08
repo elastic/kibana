@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CellActions, useDataGridColumnsCellActions } from '@kbn/cell-actions';
 import type {
   CellActionsProps,
   UseDataGridColumnsCellActions,
   UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
+import { CellActions, useDataGridColumnsCellActions } from '@kbn/cell-actions';
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 import { useDataViewId } from '../../hooks/use_data_view_id';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -40,7 +40,7 @@ export interface SecurityCellActionsData {
 
 export interface SecurityCellActionsProps
   extends Omit<CellActionsProps, 'data' | 'metadata' | 'disabledActionTypes' | 'triggerId'> {
-  sourcererScopeId?: SourcererScopeName;
+  sourcererScopeId?: PageScope;
   data: SecurityCellActionsData | SecurityCellActionsData[];
   triggerId: SecurityCellActionsTrigger;
   disabledActionTypes?: SecurityCellActionType[];
@@ -60,7 +60,7 @@ export const useDataGridColumnsSecurityCellActions: UseDataGridColumnsCellAction
   useDataGridColumnsCellActions;
 
 export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
-  sourcererScopeId = SourcererScopeName.default,
+  sourcererScopeId = PageScope.default,
   data,
   metadata,
   children,

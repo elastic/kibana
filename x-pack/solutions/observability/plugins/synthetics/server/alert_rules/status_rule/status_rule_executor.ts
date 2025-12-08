@@ -37,8 +37,10 @@ import {
   getMonitorAlertDocument,
   getMonitorSummary,
   getUngroupedReasonMessage,
+  formatStepInformation,
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
+import { getStepInformation, type StepInformation } from './queries/get_step_information';
 import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import type { SyntheticsServerSetup } from '../../types';
 import type { SyntheticsEsClient } from '../../lib';
@@ -98,6 +100,22 @@ export class StatusRuleExecutor {
 
   debug(message: string) {
     this.logger.debug(`[Status Rule Executor][${this.ruleName}] ${message}`);
+  }
+
+  async getStepInformationForBrowserMonitor(
+    checkGroup: string,
+    monitorType: string
+  ): Promise<StepInformation | null> {
+    if (monitorType !== 'browser') {
+      return null;
+    }
+
+    try {
+      return await getStepInformation(this.esClient, checkGroup, monitorType);
+    } catch (error) {
+      this.debug(`Failed to fetch step information for check group ${checkGroup}: ${error}`);
+      return null;
+    }
   }
 
   async init() {
@@ -296,18 +314,18 @@ export class StatusRuleExecutor {
     return staleConfigs;
   }
 
-  schedulePendingAlertPerConfigIdPerLocation({
+  async schedulePendingAlertPerConfigIdPerLocation({
     pendingConfigs,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
   }) {
-    Object.entries(pendingConfigs).forEach(([idWithLocation, statusConfig]) => {
+    for (const [idWithLocation, statusConfig] of Object.entries(pendingConfigs)) {
       const alertId = idWithLocation;
       const monitorSummary = this.getMonitorPendingSummary({
         statusConfig,
       });
 
-      this.scheduleAlert({
+      await this.scheduleAlert({
         idWithLocation,
         alertId,
         monitorSummary,
@@ -315,10 +333,10 @@ export class StatusRuleExecutor {
         locationNames: [monitorSummary.locationName],
         locationIds: [statusConfig.locationId],
       });
-    });
+    }
   }
 
-  schedulePendingAlertPerConfigId({
+  async schedulePendingAlertPerConfigId({
     pendingConfigs,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
@@ -330,7 +348,7 @@ export class StatusRuleExecutor {
       const monitorSummary = this.getUngroupedPendingSummary({
         statusConfigs: configs,
       });
-      this.scheduleAlert({
+      await this.scheduleAlert({
         idWithLocation: configId,
         alertId,
         monitorSummary,
@@ -343,25 +361,29 @@ export class StatusRuleExecutor {
     }
   }
 
-  handlePendingMonitorAlert = ({
+  handlePendingMonitorAlert = async ({
     pendingConfigs,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
   }) => {
     if (this.params.condition?.alertOnNoData) {
       if (this.params.condition?.groupBy && this.params.condition.groupBy !== 'locationId') {
-        this.schedulePendingAlertPerConfigId({
+        await this.schedulePendingAlertPerConfigId({
           pendingConfigs,
         });
       } else {
-        this.schedulePendingAlertPerConfigIdPerLocation({
+        await this.schedulePendingAlertPerConfigIdPerLocation({
           pendingConfigs,
         });
       }
     }
   };
 
-  handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: AlertStatusConfigs }) => {
+  handleDownMonitorThresholdAlert = async ({
+    downConfigs,
+  }: {
+    downConfigs: AlertStatusConfigs;
+  }) => {
     const { useTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
@@ -369,10 +391,10 @@ export class StatusRuleExecutor {
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
     if (groupBy === 'locationId' && locationsThreshold === 1) {
-      Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
+      for (const [idWithLocation, statusConfig] of Object.entries(downConfigs)) {
         // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
         if (recoveryStrategy === 'firstUp' && (statusConfig.latestPing.summary?.up ?? 0) > 0) {
-          return;
+          continue;
         }
 
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
@@ -387,7 +409,7 @@ export class StatusRuleExecutor {
             statusConfig,
           });
 
-          this.scheduleAlert({
+          await this.scheduleAlert({
             idWithLocation,
             alertId,
             monitorSummary,
@@ -398,7 +420,7 @@ export class StatusRuleExecutor {
             locationIds: [statusConfig.latestPing.observer.name!],
           });
         }
-      });
+      }
     } else {
       const downConfigsById = getConfigsByIds(downConfigs);
 
@@ -425,11 +447,15 @@ export class StatusRuleExecutor {
           const monitorSummary = this.getUngroupedDownSummary({
             statusConfigs: configs,
           });
-          this.scheduleAlert({
+          await this.scheduleAlert({
             idWithLocation: configId,
             alertId,
             monitorSummary,
-            statusConfig: configs[0],
+            downConfigs: configs.reduce(
+              (acc, conf) => ({ ...acc, [`${conf.configId}-${conf.locationId}`]: conf }),
+              {}
+            ),
+            configId,
             downThreshold,
             useLatestChecks,
             locationNames: configs.map((c) => c.latestPing.observer.geo?.name!),
@@ -472,6 +498,7 @@ export class StatusRuleExecutor {
   getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
     const { latestPing: ping, configId, checks } = sampleConfig;
+
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       reason: 'down',
@@ -520,7 +547,7 @@ export class StatusRuleExecutor {
     return baseSummary;
   }
 
-  scheduleAlert(
+  async scheduleAlert(
     params: {
       idWithLocation: string;
       alertId: string;
@@ -531,18 +558,20 @@ export class StatusRuleExecutor {
     } & (
       | { statusConfig: AlertPendingStatusMetaData }
       | { statusConfig: AlertStatusMetaData; downThreshold: number }
+      | { downConfigs: AlertStatusConfigs; downThreshold: number; configId: string }
     )
   ) {
     const {
       idWithLocation,
       alertId,
       monitorSummary,
-      statusConfig,
       useLatestChecks = false,
       locationNames,
       locationIds,
     } = params;
-    const { configId, locationId } = statusConfig;
+    const { configId } = 'statusConfig' in params ? params.statusConfig : params;
+    const locationId = 'statusConfig' in params ? params.statusConfig.locationId : undefined;
+
     const { spaceId, startedAt } = this.options;
     const { alertsClient } = this.options.services;
     const { basePath } = this.server;
@@ -556,11 +585,15 @@ export class StatusRuleExecutor {
 
     let relativeViewInAppUrl = '';
     if (monitorSummary.stateId) {
-      relativeViewInAppUrl = getRelativeViewInAppUrl({
-        configId,
-        locationId,
-        stateId: monitorSummary.stateId,
-      });
+      // For ungrouped monitors with downConfigs, use the first location ID
+      const effectiveLocationId = locationId || locationIds[0];
+      if (effectiveLocationId) {
+        relativeViewInAppUrl = getRelativeViewInAppUrl({
+          configId,
+          locationId: effectiveLocationId,
+          stateId: monitorSummary.stateId,
+        });
+      }
     }
 
     const grouping: Record<string, unknown> = {
@@ -590,12 +623,72 @@ export class StatusRuleExecutor {
       context.downThreshold = params.downThreshold;
     }
 
-    if ('checks' in statusConfig) {
-      context.checks = statusConfig.checks;
+    if ('statusConfig' in params && 'checks' in params.statusConfig) {
+      context.checks = params.statusConfig.checks;
+    } else if ('downConfigs' in params) {
+      // For ungrouped alerts with downConfigs, get checks from the first config
+      const configsArray = Object.values(params.downConfigs);
+      if (configsArray.length > 0 && 'checks' in configsArray[0]) {
+        context.checks = configsArray[0].checks;
+      }
     }
 
+    // Fetch step information for browser monitors synchronously before creating alert
+    let failedStepInfo = '';
+    let failedStepName: string | undefined;
+    let failedStepNumber: number | undefined;
+    // Get monitor type directly from saved object attributes
+    const monitor = this.monitors.find((m) => m.id === configId);
+    const monitorType = monitor?.attributes.type;
+
+    if (monitorType === 'browser') {
+      let allConfigs: Array<AlertStatusMetaData | AlertPendingStatusMetaData> = [];
+      if ('statusConfig' in params) {
+        allConfigs = [params.statusConfig];
+      } else if ('downConfigs' in params) {
+        allConfigs = getConfigsByIds(params.downConfigs).get(params.configId) || [];
+      }
+
+      const stepInfoPromises = allConfigs.map(async (config) => {
+        if ('latestPing' in config && config.latestPing) {
+          const checkGroup = config.latestPing.monitor?.check_group;
+          if (checkGroup) {
+            try {
+              return await this.getStepInformationForBrowserMonitor(checkGroup, 'browser');
+            } catch (error) {
+              this.debug(`Failed to fetch step information for alert ${alertId}: ${error}`);
+            }
+          }
+        }
+        return null;
+      });
+      const stepInfoResults = await Promise.all(stepInfoPromises);
+      const validStepInfos = stepInfoResults.filter(
+        (info): info is StepInformation => info !== null
+      );
+
+      // Format step information for the alert body
+      const formattedStepInfos = validStepInfos.map((info) => formatStepInformation(info));
+      failedStepInfo = formattedStepInfos.filter((info) => info).join('\n');
+
+      // Extract first step name and number for the email subject
+      if (validStepInfos.length > 0) {
+        const firstStep = validStepInfos[0];
+        failedStepName = firstStep.stepName;
+        failedStepNumber = firstStep.stepNumber;
+      }
+    }
+
+    // Update monitor summary with step info
+    const updatedMonitorSummary = {
+      ...monitorSummary,
+      failedStepInfo,
+      failedStepName,
+      failedStepNumber,
+    };
+
     const alertDocument = getMonitorAlertDocument(
-      monitorSummary,
+      updatedMonitorSummary,
       locationNames,
       locationIds,
       useLatestChecks,
@@ -603,10 +696,18 @@ export class StatusRuleExecutor {
       grouping
     );
 
+    // Update context with step info if available
+    const updatedContext = {
+      ...context,
+      ...(failedStepInfo ? { failedStepInfo } : {}),
+      ...(failedStepName ? { failedStepName } : {}),
+      ...(failedStepNumber !== undefined ? { failedStepNumber } : {}),
+    };
+
     alertsClient.setAlertData({
       id: alertId,
       payload: alertDocument,
-      context,
+      context: updatedContext,
     });
   }
 

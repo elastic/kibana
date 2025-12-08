@@ -36,6 +36,7 @@ import { LinkOptionsComponent } from './link_options';
 import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
 import type { LinkOptions } from '../../../server';
+import { getOptions } from '../../../common/embeddable/transforms/get_options';
 
 export const LinkEditor = ({
   link,
@@ -170,7 +171,7 @@ export const LinkEditor = ({
                     type: selectedLinkType,
                     id: link?.id ?? uuidv4(),
                     destination: linkDestination,
-                    options: linkOptions,
+                    options: getOptions(selectedLinkType, linkOptions),
                     title: defaultLinkLabel ?? '',
                     description: linkDescription,
                   });

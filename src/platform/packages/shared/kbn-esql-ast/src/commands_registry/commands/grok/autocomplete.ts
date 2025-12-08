@@ -30,7 +30,7 @@ export async function autocomplete(
   // If cursor is inside a string literal, don't suggest anything
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-  const { node } = findAstPosition(root.commands, innerText.length);
+  const { node } = findAstPosition(root, innerText.length);
 
   if (node?.type === 'literal' && node.literalType === 'keyword') {
     return [];

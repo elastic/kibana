@@ -12,7 +12,7 @@ import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
 import type { SavedObjectsModelVersionMap, SavedObject } from '@kbn/core-saved-objects-server';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { createType } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 import {

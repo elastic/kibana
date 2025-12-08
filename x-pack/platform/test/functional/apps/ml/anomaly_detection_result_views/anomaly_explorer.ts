@@ -6,11 +6,6 @@
  */
 
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
-import { stringHash } from '@kbn/ml-string-hash';
-import { SWIMLANE_TYPE } from '@kbn/ml-plugin/server/embeddable/schemas';
-import type { AnomalySwimlaneEmbeddableStateViewBy } from '@kbn/ml-plugin/public/embeddables/anomaly_swimlane/types';
-import { USER } from '../../../services/ml/security_common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // @ts-expect-error not full interface
@@ -478,102 +473,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await ml.commonUI.waitForDatePickerIndicatorLoaded();
             });
 
-            it('attaches swim lane embeddable to a case', async () => {
-              await ml.anomalyExplorer.attachSwimLaneToCase('viewBy', {
-                title: 'ML Test case',
-                description: 'Case with an anomaly swim lane',
-                tag: 'ml_swim_lane_case',
-              });
-
-              const attachmentData: Omit<AnomalySwimlaneEmbeddableStateViewBy, 'id'> = {
-                swimlaneType: SWIMLANE_TYPE.VIEW_BY,
-                viewBy: 'airline',
-                jobIds: [testData.jobConfig.job_id],
-                timeRange: {
-                  from: '2016-02-07T00:00:00.000Z',
-                  to: '2016-02-11T23:59:54.000Z',
-                },
-              };
-
-              const expectedAttachment: AnomalySwimLaneEmbeddableState = {
-                ...attachmentData,
-                id: stringHash(JSON.stringify(attachmentData)).toString(),
-              };
-
-              await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
-                {
-                  title: 'ML Test case',
-                  description: 'Case with an anomaly swim lane',
-                  tag: 'ml_swim_lane_case',
-                  reporter: USER.ML_POWERUSER,
-                },
-                expectedAttachment,
-                {
-                  yAxisLabelCount: 10,
-                }
-              );
-            });
-
             it('adds swim lane embeddable to a dashboard', async () => {
               await ml.testExecution.logTestStep(
                 'should allow to attach anomaly swim lane embeddable to the dashboard'
               );
               await ml.anomalyExplorer.openAddToDashboardControl();
               await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
-            });
-          });
-
-          describe('Anomaly Charts as embeddable', function () {
-            beforeEach(async () => {
-              await ml.navigation.navigateToAnomalyExplorer(
-                testData.jobConfig.job_id,
-                {
-                  from: '2016-02-07T00%3A00%3A00.000Z',
-                  to: '2016-02-11T23%3A59%3A54.000Z',
-                },
-                () => elasticChart.setNewChartUiDebugFlag(true)
-              );
-
-              await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-              await ml.commonUI.waitForDatePickerIndicatorLoaded();
-
-              await ml.testExecution.logTestStep('clicks on the Overall swim lane cell');
-              const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
-              await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
-                x: sampleCell.x + cellSize,
-                y: sampleCell.y + cellSize,
-              });
-              await ml.swimLane.waitForSwimLanesToLoad();
-            });
-
-            it('attaches an embeddable to a case', async () => {
-              await ml.anomalyExplorer.attachAnomalyChartsToCase({
-                title: 'ML Charts Test case',
-                description: 'Case with an anomaly charts attachment',
-                tag: 'ml_anomaly_charts',
-              });
-
-              const expectedAttachment = {
-                jobIds: [testData.jobConfig.job_id],
-                maxSeriesToPlot: 6,
-              };
-
-              // @ts-expect-error Setting id to be undefined here
-              // since time range expected is of the chart plotEarliest/plotLatest, not of the global time range
-              // but, chart time range might vary depends on the time of the test
-              // we don't know the hashed string id for sure
-              expectedAttachment.id = undefined;
-
-              await ml.cases.assertCaseWithAnomalyChartsAttachment(
-                {
-                  title: 'ML Charts Test case',
-                  description: 'Case with an anomaly charts attachment',
-                  tag: 'ml_anomaly_charts',
-                  reporter: USER.ML_POWERUSER,
-                },
-                expectedAttachment,
-                6
-              );
             });
           });
 

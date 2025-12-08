@@ -15,6 +15,7 @@ import { useAssistantAvailability } from '../../../assistant/use_assistant_avail
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
 import type { StartServices } from '../../../types';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
 // Mock dependencies
 jest.mock('../../../common/lib/kibana', () => ({
@@ -42,6 +43,10 @@ jest.mock('../../hooks/use_find_cost_savings_prompts', () => ({
   useFindCostSavingsPrompts: jest.fn(),
 }));
 
+jest.mock('../../hooks/use_signal_index_with_default', () => ({
+  useSignalIndexWithDefault: jest.fn(),
+}));
+
 // Mock VisualizationEmbeddable
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
@@ -52,6 +57,9 @@ const mockLicenseService = licenseService as jest.Mocked<typeof licenseService>;
 const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
 const mockUseFindCostSavingsPrompts = useFindCostSavingsPrompts as jest.MockedFunction<
   typeof useFindCostSavingsPrompts
+>;
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+  typeof useSignalIndexWithDefault
 >;
 
 const defaultProps = {
@@ -112,6 +120,7 @@ describe('CostSavingsTrend', () => {
       part1: 'Test prompt part 1',
       part2: 'Test prompt part 2',
     });
+    mockUseSignalIndexWithDefault.mockReturnValue('.alerts-security.alerts-default');
   });
 
   it('renders CostSavingsTrend panel', () => {
@@ -135,5 +144,10 @@ describe('CostSavingsTrend', () => {
       }),
       {}
     );
+  });
+
+  it('calls useSignalIndexWithDefault hook', () => {
+    render(<CostSavingsTrend {...defaultProps} />, { wrapper });
+    expect(mockUseSignalIndexWithDefault).toHaveBeenCalled();
   });
 });

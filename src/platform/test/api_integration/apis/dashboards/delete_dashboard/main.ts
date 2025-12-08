@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'A dashboard with saved object ID non-existent-dashboard was not found.',
+        message: 'A dashboard with ID non-existent-dashboard was not found.',
       });
     });
 
