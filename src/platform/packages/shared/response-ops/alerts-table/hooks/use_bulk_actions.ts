@@ -21,6 +21,7 @@ import type {
   BulkActionsState,
   BulkActionsReducerAction,
   TimelineItem,
+  BulkEditTagsFlyoutState,
 } from '../types';
 import { BulkActionsVerbs } from '../types';
 import type { CasesService, PublicAlertsDataGridProps } from '../types';
@@ -28,11 +29,13 @@ import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
+  EDIT_TAGS,
   MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
 } from '../translations';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
+import { useTagsAction } from '../components/tags/use_tags_action';
 
 interface BulkActionsProps {
   ruleTypeIds?: string[];
@@ -55,6 +58,7 @@ export interface UseBulkActions {
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
   updateBulkActionsState: React.Dispatch<BulkActionsReducerAction>;
+  bulkEditTagsFlyoutState: BulkEditTagsFlyoutState;
 }
 
 type UseBulkAddToCaseActionsProps = Pick<
@@ -70,6 +74,29 @@ type UseBulkUntrackActionsProps = Pick<
   Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
     isAllSelected: boolean;
   };
+
+type UseBulkTagsActionsProps = Pick<BulkActionsProps, 'refresh'> &
+  Pick<UseBulkActions, 'clearSelection'>;
+
+const noCapabilitiesForAction = (capabilities: ApplicationStart['capabilities']) => {
+  const hasApmPermission = capabilities?.apm?.['alerting:show'];
+  const hasInfrastructurePermission = capabilities?.infrastructure?.show;
+  const hasLogsPermission = capabilities?.logs?.show;
+  const hasUptimePermission = capabilities?.uptime?.show;
+  const hasSloPermission = capabilities?.slo?.show;
+  const hasObservabilityPermission = capabilities?.observability?.show;
+
+  const conditions = [
+    hasApmPermission,
+    hasInfrastructurePermission,
+    hasLogsPermission,
+    hasUptimePermission,
+    hasSloPermission,
+    hasObservabilityPermission,
+  ];
+
+  return conditions.every((condition) => !condition);
+};
 
 const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
   alerts.filter(
@@ -222,12 +249,6 @@ export const useBulkUntrackActions = ({
     notifications,
   });
 
-  const hasApmPermission = application?.capabilities.apm?.['alerting:show'];
-  const hasInfrastructurePermission = application?.capabilities.infrastructure?.show;
-  const hasLogsPermission = application?.capabilities.logs?.show;
-  const hasUptimePermission = application?.capabilities.uptime?.show;
-  const hasSloPermission = application?.capabilities.slo?.show;
-  const hasObservabilityPermission = application?.capabilities.observability?.show;
   const onClick = useCallback(
     async (alerts?: TimelineItem[]) => {
       if (!alerts) return;
@@ -258,16 +279,7 @@ export const useBulkUntrackActions = ({
 
   return useMemo(() => {
     // Check if at least one Observability feature is enabled
-    if (!application?.capabilities) return [];
-    if (
-      !hasApmPermission &&
-      !hasInfrastructurePermission &&
-      !hasLogsPermission &&
-      !hasUptimePermission &&
-      !hasSloPermission &&
-      !hasObservabilityPermission
-    )
-      return [];
+    if (noCapabilitiesForAction(application?.capabilities)) return [];
     return [
       {
         label: MARK_AS_UNTRACKED,
@@ -278,16 +290,27 @@ export const useBulkUntrackActions = ({
         onClick,
       },
     ];
-  }, [
-    application?.capabilities,
-    hasApmPermission,
-    hasInfrastructurePermission,
-    hasLogsPermission,
-    hasUptimePermission,
-    hasSloPermission,
-    hasObservabilityPermission,
-    onClick,
-  ]);
+  }, [application?.capabilities, onClick]);
+};
+
+export const useBulkTagsActions = ({ refresh, clearSelection }: UseBulkTagsActionsProps) => {
+  const onActionSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const onActionError = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const tagsAction = useTagsAction({
+    onActionSuccess,
+    onActionError,
+    isDisabled: false,
+  });
+
+  return { tagsAction };
 };
 
 const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
@@ -337,10 +360,43 @@ export function useBulkActions({
     http,
     notifications,
   });
+  const { tagsAction } = useBulkTagsActions({
+    refresh,
+    clearSelection,
+  });
+
+  const tagsBulkActions = useMemo(() => {
+    return noCapabilitiesForAction(application?.capabilities)
+      ? []
+      : [
+          {
+            label: EDIT_TAGS,
+            key: 'edit-tags',
+            disableOnQuery: true,
+            disabledLabel: EDIT_TAGS,
+            'data-test-subj': 'edit-tags',
+            onClick: (alerts?: TimelineItem[]) => {
+              if (!alerts) return;
+              const alertsForFlyout = alerts.map((alert) => {
+                return {
+                  _id: alert._id,
+                  _index: alert._index as string,
+                };
+              });
+              const action = tagsAction.getAction(alertsForFlyout);
+              action.onClick();
+            },
+          },
+        ];
+  }, [tagsAction, application?.capabilities]);
 
   const initialItems = useMemo(() => {
-    return [...caseBulkActions, ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions)];
-  }, [caseBulkActions, ruleTypeIds, untrackBulkActions]);
+    return [
+      ...caseBulkActions,
+      ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions),
+      ...(ruleTypeIds?.some(isSiemRuleType) ? [] : tagsBulkActions),
+    ];
+  }, [caseBulkActions, ruleTypeIds, untrackBulkActions, tagsBulkActions]);
 
   const bulkActions = useMemo(() => {
     if (hideBulkActions) {
@@ -364,6 +420,14 @@ export function useBulkActions({
     });
   }, [alertsCount, updateBulkActionsState]);
 
+  const bulkEditTagsFlyoutState = useMemo(() => {
+    return {
+      isFlyoutOpen: tagsAction.isFlyoutOpen,
+      onClose: tagsAction.onClose,
+      onSaveTags: tagsAction.onSaveTags,
+    };
+  }, [tagsAction]);
+
   return useMemo(() => {
     return {
       isBulkActionsColumnActive,
@@ -372,6 +436,7 @@ export function useBulkActions({
       setIsBulkActionsLoading,
       clearSelection,
       updateBulkActionsState,
+      bulkEditTagsFlyoutState,
     };
   }, [
     bulkActions,
@@ -380,5 +445,6 @@ export function useBulkActions({
     isBulkActionsColumnActive,
     setIsBulkActionsLoading,
     updateBulkActionsState,
+    bulkEditTagsFlyoutState,
   ]);
 }
