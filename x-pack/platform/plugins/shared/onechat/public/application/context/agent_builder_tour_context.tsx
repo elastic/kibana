@@ -57,44 +57,44 @@ const tourConfig = {
 
 const labels = {
   agentSelector: {
-    title: i18n.translate('xpack.onechat.agentBuilderTour.step1', {
+    title: i18n.translate('xpack.onechat.agentBuilderTour.agentSelector.title', {
       defaultMessage: 'Meet your active agent 🕵️‍♂️',
     }),
-    content: i18n.translate('xpack.onechat.agentBuilderTour.step1Content', {
+    content: i18n.translate('xpack.onechat.agentBuilderTour.agentSelector.content', {
       defaultMessage:
         'I’m here to help with your questions. Pick a different agent or customize a new one anytime.',
     }),
   },
   llmSelector: {
-    title: i18n.translate('xpack.onechat.agentBuilderTour.step2', {
+    title: i18n.translate('xpack.onechat.agentBuilderTour.llmSelector.title', {
       defaultMessage: 'You’re using this model 🧠',
     }),
-    content: i18n.translate('xpack.onechat.agentBuilderTour.step2Content', {
+    content: i18n.translate('xpack.onechat.agentBuilderTour.llmSelector.content', {
       defaultMessage: 'I’ll answer using this LLM. Switch to another model you have setup.',
     }),
   },
   // TODO: Add prompts step once we have prompts.
   // prompts: {
-  //   title: i18n.translate('xpack.onechat.agentBuilderTour.step3', {
+  //   title: i18n.translate('xpack.onechat.agentBuilderTour.prompts.title', {
   //     defaultMessage: 'Reuse your prompts ✍️',
   //   }),
-  //   content: i18n.translate('xpack.onechat.agentBuilderTour.step3Content', {
+  //   content: i18n.translate('xpack.onechat.agentBuilderTour.prompts.content', {
   //     defaultMessage: 'Store your favorite queries here. Pick one to drop it into the chat.',
   //   }),
   // },
   conversationsHistory: {
-    title: i18n.translate('xpack.onechat.agentBuilderTour.step3', {
+    title: i18n.translate('xpack.onechat.agentBuilderTour.conversationsHistory.title', {
       defaultMessage: 'Your conversations 💬',
     }),
-    content: i18n.translate('xpack.onechat.agentBuilderTour.step3Content', {
+    content: i18n.translate('xpack.onechat.agentBuilderTour.conversationsHistory.content', {
       defaultMessage: 'Come back to earlier chats or jump between them from here.',
     }),
   },
   conversationActions: {
-    title: i18n.translate('xpack.onechat.agentBuilderTour.step4', {
+    title: i18n.translate('xpack.onechat.agentBuilderTour.conversationActions.title', {
       defaultMessage: 'Additional actions ⚙️',
     }),
-    content: i18n.translate('xpack.onechat.agentBuilderTour.step4Content', {
+    content: i18n.translate('xpack.onechat.agentBuilderTour.conversationActions.content', {
       defaultMessage:
         'Access conversation actions, agent controls, and management settings from here.',
     }),
