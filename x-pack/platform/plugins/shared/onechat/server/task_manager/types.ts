@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { AgentCapabilities } from '@kbn/onechat-common';
 import type { AgentParams } from '@kbn/onechat-server/agents/provider';
 
 export interface AgentExecution {
   executionId: string;
   agentId: string;
-  spaceId: string;
   conversationId?: string;
-  params: AgentParams; // TODO: conversationId in there
+  spaceId: string;
+  agentParams: AgentParams; // TODO: conversationId in there
+  capabilities?: AgentCapabilities;
+  defaultConnectorId?: string;
+  // TODO: browserApiTools?
 }

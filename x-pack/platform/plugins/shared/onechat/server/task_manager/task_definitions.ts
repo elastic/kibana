@@ -11,6 +11,10 @@ export const taskTypes = {
   runAgent: 'agent-builder:run-agent',
 };
 
+interface RunAgentTaskParams {
+  executionId: string;
+}
+
 export const registerTaskDefinitions = ({
   taskManager,
 }: {
@@ -28,7 +32,7 @@ export const registerTaskDefinitions = ({
         }
         const abortController = new AbortController();
 
-        const params = taskInstance.params;
+        const { executionId } = taskInstance.params as RunAgentTaskParams;
 
         return {
           run: async () => {
