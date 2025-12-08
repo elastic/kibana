@@ -49,7 +49,7 @@ Expr getChainRoot(Expr e) {
 predicate hasMaxConstraint(ZodArrayCall arrayCall) {
   exists(MethodCallExpr chainedCall |
     // The chained call has a bounding method name
-    chainedCall.getMethodName() = ["max", "length", "nonempty", "refine"] and
+    chainedCall.getMethodName() = ["max", "length", "refine"] and
     // The array call is the root of the method chain
     getChainRoot(chainedCall) = arrayCall
   )
