@@ -23,12 +23,7 @@ export const InputSchema = z.object({
   prompt: z.string(),
   connectorId: z.string().optional(),
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  outputSchema: z
-    .object({
-      content: z.union([z.string(), z.record(z.string(), z.any())]),
-      response_metadata: z.record(z.string(), z.any()),
-    })
-    .optional(),
+  outputSchema: z.any().optional(),
   temperature: z.number().min(0).max(1).optional(),
 });
 
@@ -36,7 +31,10 @@ export const InputSchema = z.object({
  * Output schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
  */
-export const OutputSchema = z.any();
+export const OutputSchema = z.object({
+  content: z.any(),
+  response_metadata: z.record(z.string(), z.any()).optional(),
+});
 
 export type AiPromptStepInputSchema = typeof InputSchema;
 export type AiPromptStepOutputSchema = typeof OutputSchema;

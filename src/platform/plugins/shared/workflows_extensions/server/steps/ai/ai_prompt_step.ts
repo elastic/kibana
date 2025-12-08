@@ -34,48 +34,47 @@ export const aiPromptStepDefinition = (
           temperature: context.input.temperature,
         },
       });
-
       const modelInput = [
-        ...(context.input.outputSchema
-          ? [getStructuredOutputPrompt(context.input.outputSchema)]
-          : []),
         {
           role: 'user',
           content: context.input.prompt,
         },
       ];
 
-      const response = await chatModel.invoke(modelInput, {
+      if (context.input.outputSchema) {
+        const modelResponse = await chatModel
+          .withStructuredOutput({
+            type: 'object',
+            properties: {
+              // withStructuredOutput fails if outputSchema is not an object.
+              // for example, if the user expects an array, we wrap it into an object here
+              // and then unwrap it below
+              response: context.input.outputSchema,
+            },
+          })
+          .invoke(modelInput, {
+            signal: context.abortSignal,
+          });
+        return {
+          // We modify the output to match the expected schema
+          // For now, structured output flow does not output response_metadata,
+          // so we only return the content here, but looking ahead we might have response_metadata returned,
+          // so we keep the same output structure with potential response_metadata addition in the future.
+          output: {
+            content: modelResponse.response,
+          },
+        };
+      }
+
+      const modelResponse = await chatModel.invoke(modelInput, {
         signal: context.abortSignal,
       });
 
       return {
         output: {
-          content: context.input.outputSchema
-            ? JSON.parse(response.content as string)
-            : response.content,
-          response_metadata: response.response_metadata,
+          content: modelResponse.content,
+          response_metadata: modelResponse.response_metadata,
         },
       };
     },
   });
-
-function getStructuredOutputPrompt(outputSchema: unknown) {
-  return {
-    role: 'system',
-    content: `
-You are an assistant that responds strictly in JSON format.
-
-Rules:
-1. Your entire response MUST be a single valid JSON object.
-2. The JSON MUST conform to the schema provided below.
-3. Do not include explanations, comments, markdown, code fences, or text outside the JSON.
-4. Output RAW JSON only — no formatting other than what makes it valid JSON.
-
-JSON schema:
-\`\`\`json
-${JSON.stringify(outputSchema)}
-\`\`\`
-`,
-  };
-}
