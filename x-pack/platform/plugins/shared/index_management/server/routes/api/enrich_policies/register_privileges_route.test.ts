@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 
@@ -16,6 +16,8 @@ import { registerPrivilegesRoute } from './register_privileges_route';
 jest.mock('../../../services/index_data_enricher');
 
 const httpService = httpServiceMock.createSetupContract();
+
+const mockLogger = loggingSystemMock.createLogger();
 
 const mockedIndexDataEnricher = new IndexDataEnricher();
 
@@ -45,6 +47,7 @@ describe('GET privileges', () => {
 
     registerPrivilegesRoute({
       router,
+      logger: mockLogger,
       config: {
         isSecurityEnabled: () => true,
         isLegacyTemplatesEnabled: true,
@@ -119,6 +122,7 @@ describe('GET privileges', () => {
 
       registerPrivilegesRoute({
         router,
+        logger: mockLogger,
         config: {
           isSecurityEnabled: () => false,
           isLegacyTemplatesEnabled: true,
