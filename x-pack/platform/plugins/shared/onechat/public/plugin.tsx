@@ -200,8 +200,8 @@ export class OnechatPlugin
     });
 
     // open AI Agent flyout when chosen in modal
-    startDependencies.aiAssistantManagementSelection.openChat$.subscribe((event) => {
-      if (event.chatExperience === AIChatExperience.Agent) {
+    startDependencies.aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIChatExperience.Agent) {
         onechatService.openConversationFlyout();
         startDependencies.aiAssistantManagementSelection.completeOpenChat();
       }

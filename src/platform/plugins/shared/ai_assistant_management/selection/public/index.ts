@@ -23,6 +23,7 @@ export {
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../common/ui_setting_keys';
 
+export type { AIExperienceSelection } from './types';
 export type {
   AIAssistantManagementSelectionPluginPublicSetup,
   AIAssistantManagementSelectionPluginPublicStart,

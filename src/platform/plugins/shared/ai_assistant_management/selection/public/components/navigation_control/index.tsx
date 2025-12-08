@@ -38,19 +38,13 @@ import {
 } from '../../../common/ui_setting_keys';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
+import type { AIExperienceSelection } from '../../types';
 
 interface AIAssistantHeaderButtonProps {
   coreStart: CoreStart;
   isSecurityAIAssistantEnabled: boolean;
   isObservabilityAIAssistantEnabled: boolean;
-  triggerOpenChat: (event: {
-    chatExperience: AIChatExperience;
-    assistant: AIAssistantType;
-  }) => void;
-}
-
-interface SelectedType {
-  selectedType: AIAssistantType | AIChatExperience.Agent;
+  triggerOpenChat: (selection: AIExperienceSelection) => void;
 }
 
 export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = ({
@@ -76,7 +70,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       });
   }, [coreStart]);
 
-  const [selectedType, setSelectedType] = useState<SelectedType>(AIAssistantType.Default);
+  const [selectedType, setSelectedType] = useState<AIExperienceSelection>(AIAssistantType.Default);
 
   const onModalClose = useCallback(() => {
     setModalOpen(false);
@@ -85,7 +79,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   const modalTitleId = useGeneratedHtmlId({ prefix: 'aiAssistantModalTitle' });
 
   const handleOpenModal = useCallback(() => setModalOpen(true), []);
-  const handleSelect = useCallback((type: SelectedType) => setSelectedType(type), []);
+  const handleSelect = useCallback((type: AIExperienceSelection) => setSelectedType(type), []);
 
   const applySelection = useCallback(async () => {
     const chatExperience =
@@ -98,10 +92,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
         coreStart.settings.client.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, assistant),
         coreStart.settings.client.set(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, chatExperience),
       ]);
-      triggerOpenChat({
-        chatExperience,
-        assistant,
-      });
+      triggerOpenChat(selectedType);
     } catch (error) {
       toasts.addError(new Error(error.body?.message || error.message || 'Unknown error occurred'), {
         title: i18n.translate(

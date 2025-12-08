@@ -14,6 +14,10 @@ import { AIAssistantHeaderButton } from '.';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
+import {
+  AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
+  AI_CHAT_EXPERIENCE_TYPE,
+} from '@kbn/management-settings-ids';
 
 jest.mock('@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled');
 jest.mock('@kbn/ai-assistant-icon', () => ({
@@ -233,10 +237,7 @@ describe('AIAssistantHeaderButton', () => {
 
       await waitFor(() => {
         expect(mockCoreStart.settings.client.set).toHaveBeenCalled();
-        expect(mockTriggerOpenChat).toHaveBeenCalledWith({
-          chatExperience: AIChatExperience.Agent,
-          assistant: AIAssistantType.Default,
-        });
+        expect(mockTriggerOpenChat).toHaveBeenCalledWith(AIChatExperience.Agent);
       });
     });
   });
@@ -257,17 +258,14 @@ describe('AIAssistantHeaderButton', () => {
 
       await waitFor(() => {
         expect(mockCoreStart.settings.client.set).toHaveBeenCalledWith(
-          'aiAssistant:preferredAIAssistantType',
+          AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
           AIAssistantType.Observability
         );
         expect(mockCoreStart.settings.client.set).toHaveBeenCalledWith(
-          'aiAssistant:preferredChatExperience',
+          AI_CHAT_EXPERIENCE_TYPE,
           AIChatExperience.Classic
         );
-        expect(mockTriggerOpenChat).toHaveBeenCalledWith({
-          chatExperience: AIChatExperience.Classic,
-          assistant: AIAssistantType.Observability,
-        });
+        expect(mockTriggerOpenChat).toHaveBeenCalledWith(AIAssistantType.Observability);
       });
     });
   });

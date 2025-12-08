@@ -11,9 +11,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useIsNavControlVisible } from '../../hooks/use_is_nav_control_visible';
-import type { AIAssistantType } from '../../../common/ai_assistant_type';
+import type { AIExperienceSelection } from '../../types';
 
 const LazyNavControl = dynamic(() =>
   import('.').then((m) => ({ default: m.AIAssistantHeaderButton }))
@@ -29,10 +28,7 @@ export const NavControlInitiator = ({
   coreStart: CoreStart;
   isSecurityAIAssistantEnabled: boolean;
   isObservabilityAIAssistantEnabled: boolean;
-  triggerOpenChat: (event: {
-    assistant: AIAssistantType;
-    chatExperience: AIChatExperience;
-  }) => void;
+  triggerOpenChat: (selection: AIExperienceSelection) => void;
   spaces?: SpacesPluginStart;
 }) => {
   const { isVisible } = useIsNavControlVisible(coreStart, spaces);
