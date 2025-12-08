@@ -362,7 +362,7 @@ describe('CreateClassicStreamFlyout', () => {
   });
 
   describe('name and confirm step', () => {
-    it('renders the name and confirm step', () => {
+    it('renders the name and confirm step with template details', () => {
       const { getByTestId, getByText } = renderFlyout();
 
       // Select template and navigate to second step
@@ -371,8 +371,15 @@ describe('CreateClassicStreamFlyout', () => {
       // Check step content is rendered
       expect(getByTestId('nameAndConfirmStep')).toBeInTheDocument();
 
-      // Check section title
+      // Check section titles
       expect(getByText('Name classic stream')).toBeInTheDocument();
+      expect(getByText('Confirm index template details')).toBeInTheDocument();
+
+      // Check template details are displayed
+      expect(getByTestId('templateDetails')).toBeInTheDocument();
+      expect(getByText('Index mode')).toBeInTheDocument();
+      expect(getByText('Standard')).toBeInTheDocument();
+      expect(getByText('Component templates')).toBeInTheDocument();
     });
 
     it('displays the index pattern prefix as prepend text', () => {
@@ -403,6 +410,39 @@ describe('CreateClassicStreamFlyout', () => {
       // Change the input value
       fireEvent.change(streamNameInput, { target: { value: 'my-stream' } });
       expect(streamNameInput).toHaveValue('my-stream');
+    });
+
+    it('displays component templates as separate lines', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // template-1 has composedOf: ['logs@mappings', 'logs@settings']
+      // Component templates are displayed as block elements (each on its own line)
+      expect(getByText('logs@mappings')).toBeInTheDocument();
+      expect(getByText('logs@settings')).toBeInTheDocument();
+    });
+
+    it('displays correct index mode for different templates', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template-2 and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-2');
+
+      // template-2 has indexMode: 'logsdb'
+      expect(getByText('Logsdb')).toBeInTheDocument();
+    });
+
+    it('displays version when available', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // multi-pattern-template has version: 12
+      expect(getByText('Version')).toBeInTheDocument();
+      expect(getByText('12')).toBeInTheDocument();
     });
 
     describe('multiple index patterns', () => {

@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NameStreamSection } from './name_stream_section';
 import type { NameAndConfirmStepProps } from './types';
+import { ConfirmTemplateDetailsSection } from './confirm_template_details_section';
 
 export const NameAndConfirmStep = ({
   template,
@@ -18,20 +19,27 @@ export const NameAndConfirmStep = ({
   onStreamNamePartsChange,
   validationError = null,
   conflictingIndexPattern,
+  getIlmPolicy,
 }: NameAndConfirmStepProps) => {
   const indexPatterns = template.indexPatterns ?? [];
 
   return (
     <EuiFlexGroup data-test-subj="nameAndConfirmStep" direction="column" gutterSize="none">
-      <NameStreamSection
-        indexPatterns={indexPatterns}
-        selectedIndexPattern={selectedIndexPattern}
-        streamNameParts={streamNameParts}
-        onIndexPatternChange={onIndexPatternChange}
-        onStreamNamePartsChange={onStreamNamePartsChange}
-        validationError={validationError}
-        conflictingIndexPattern={conflictingIndexPattern}
-      />
+      <EuiFlexItem grow={false}>
+        <NameStreamSection
+          indexPatterns={indexPatterns}
+          selectedIndexPattern={selectedIndexPattern}
+          streamNameParts={streamNameParts}
+          onIndexPatternChange={onIndexPatternChange}
+          onStreamNamePartsChange={onStreamNamePartsChange}
+          validationError={validationError}
+          conflictingIndexPattern={conflictingIndexPattern}
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <ConfirmTemplateDetailsSection template={template} getIlmPolicy={getIlmPolicy} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

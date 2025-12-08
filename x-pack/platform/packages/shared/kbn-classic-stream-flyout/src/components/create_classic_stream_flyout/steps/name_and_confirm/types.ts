@@ -6,7 +6,7 @@
  */
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 
-import type { ValidationErrorType } from '../../../../utils';
+import type { IlmPolicyFetcher, ValidationErrorType } from '../../../../utils';
 
 export interface NameAndConfirmBaseProps {
   selectedIndexPattern: string;
@@ -19,6 +19,7 @@ export interface NameAndConfirmBaseProps {
 
 export interface NameAndConfirmStepProps extends NameAndConfirmBaseProps {
   template: TemplateDeserialized;
+  getIlmPolicy?: IlmPolicyFetcher;
 }
 
 export interface NameStreamSectionProps extends NameAndConfirmBaseProps {
