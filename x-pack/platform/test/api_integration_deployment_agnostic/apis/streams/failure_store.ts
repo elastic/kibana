@@ -13,6 +13,7 @@ import type {
   WiredIngestStreamEffectiveFailureStore,
 } from '@kbn/streams-schema';
 import { Streams, emptyAssets, isEnabledFailureStore } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -48,6 +49,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: parsedDef.stream.description || '',
           ingest: {
             ...parsedDef.stream.ingest,
+            processing: omit(parsedDef.stream.ingest.processing, ['updated_at']),
             failure_store: failureStore,
           },
         },
@@ -60,6 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: parsedDef.stream.description || '',
           ingest: {
             ...parsedDef.stream.ingest,
+            processing: omit(parsedDef.stream.ingest.processing, ['updated_at']),
             failure_store: failureStore,
           },
         },
@@ -146,6 +149,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              processing: omit(
+                (rootDefinition as Streams.WiredStream.GetResponse).stream.ingest.processing,
+                ['updated_at']
+              ),
               failure_store: {
                 lifecycle: { enabled: { data_retention: '60d' } },
               },
@@ -162,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await expectFailureStore(['logs'], {
-          lifecycle: { enabled: { data_retention: '60d' } },
+          lifecycle: { enabled: { data_retention: '60d', is_default_retention: false } },
           from: 'logs',
         });
       });
@@ -194,6 +201,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              processing: omit(
+                (rootDefinition as Streams.WiredStream.GetResponse).stream.ingest.processing,
+                ['updated_at']
+              ),
               failure_store: {
                 lifecycle: { enabled: { data_retention: '45d' } },
               },
@@ -205,7 +216,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Child should inherit parent's failure store configuration
         await expectFailureStore(['logs.inherits-fs'], {
-          lifecycle: { enabled: { data_retention: '45d' } },
+          lifecycle: { enabled: { data_retention: '45d', is_default_retention: false } },
           from: 'logs',
         });
       });
@@ -245,6 +256,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              processing: omit(
+                (rootDefinition as Streams.WiredStream.GetResponse).stream.ingest.processing,
+                ['updated_at']
+              ),
               failure_store: {
                 lifecycle: { enabled: { data_retention: '90d' } },
               },
@@ -254,13 +269,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Inheriting streams should get root's config
         await expectFailureStore(['logs.fs-inherits', 'logs.fs-inherits.child'], {
-          lifecycle: { enabled: { data_retention: '90d' } },
+          lifecycle: { enabled: { data_retention: '90d', is_default_retention: false } },
           from: 'logs',
         });
 
         // Overriding streams should keep their own config
         await expectFailureStore(['logs.fs-overrides', 'logs.fs-overrides.child'], {
-          lifecycle: { enabled: { data_retention: '15d' } },
+          lifecycle: { enabled: { data_retention: '15d', is_default_retention: false } },
           from: 'logs.fs-overrides',
         });
       });
@@ -293,7 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.fs-30d.fs-60d.inherits', wiredPutBody);
 
         await expectFailureStore(['logs.fs-30d.fs-60d.inherits'], {
-          lifecycle: { enabled: { data_retention: '60d' } },
+          lifecycle: { enabled: { data_retention: '60d', is_default_retention: false } },
           from: 'logs.fs-30d.fs-60d',
         });
 
@@ -322,7 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectFailureStore(
           ['logs.fs-30d', 'logs.fs-30d.fs-60d', 'logs.fs-30d.fs-60d.inherits'],
           {
-            lifecycle: { enabled: { data_retention: '30d' } },
+            lifecycle: { enabled: { data_retention: '30d', is_default_retention: false } },
             from: 'logs.fs-30d',
           }
         );
@@ -347,7 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await expectFailureStore(['logs.fs-enabled-with-lifecycle'], {
-          lifecycle: { enabled: { data_retention: '7d' } },
+          lifecycle: { enabled: { data_retention: '7d', is_default_retention: false } },
           from: 'logs.fs-enabled-with-lifecycle',
         });
       });
@@ -372,7 +387,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await expectFailureStore([streamName], {
-          lifecycle: { enabled: { data_retention: '10d' } },
+          lifecycle: { enabled: { data_retention: '10d', is_default_retention: false } },
           from: streamName,
         });
 
@@ -394,7 +409,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await expectFailureStore([streamName], {
-          lifecycle: { enabled: { data_retention: '20d' } },
+          lifecycle: { enabled: { data_retention: '20d', is_default_retention: false } },
           from: streamName,
         });
       });
@@ -626,7 +641,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await expectFailureStore([indexName], { lifecycle: { enabled: { data_retention: '5d' } } });
+        await expectFailureStore([indexName], {
+          lifecycle: { enabled: { data_retention: '5d', is_default_retention: false } },
+        });
 
         // Inherit resets to default disabled state
         await putStream(apiClient, indexName, classicPutBody);
@@ -653,7 +670,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await expectFailureStore([indexName], {
-          lifecycle: { enabled: { data_retention: '10d' } },
+          lifecycle: { enabled: { data_retention: '10d', is_default_retention: false } },
         });
       });
 
@@ -692,7 +709,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectFailureStore([indexName], { lifecycle: { enabled: { data_retention: '7d' } } });
+        await expectFailureStore([indexName], {
+          lifecycle: { enabled: { data_retention: '7d', is_default_retention: false } },
+        });
 
         await putStream(apiClient, indexName, {
           ...emptyAssets,
@@ -708,7 +727,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await expectFailureStore([indexName], {
-          lifecycle: { enabled: { data_retention: '30d' } },
+          lifecycle: { enabled: { data_retention: '30d', is_default_retention: false } },
         });
       });
 
@@ -775,6 +794,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              processing: omit(
+                (rootDefinition as Streams.WiredStream.GetResponse).stream.ingest.processing,
+                ['updated_at']
+              ),
               failure_store: {
                 lifecycle: { enabled: { data_retention: '120d' } },
               },
@@ -804,6 +827,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+                  processing: omit(
+                    (rootDefinition as Streams.WiredStream.GetResponse).stream.ingest.processing,
+                    ['updated_at']
+                  ),
                   failure_store: {
                     lifecycle: { disabled: {} },
                   },
@@ -821,6 +848,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              processing: omit(
+                (rootDefinition as Streams.WiredStream.GetResponse).stream.ingest.processing,
+                ['updated_at']
+              ),
               failure_store: {
                 lifecycle: { disabled: {} },
               },

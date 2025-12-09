@@ -6,6 +6,7 @@
  */
 
 import type { Conversation, ConversationRound } from '@kbn/onechat-common';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 
 export const newConversationId = 'new';
@@ -26,14 +27,16 @@ export const pendingRoundId = '__pending__';
 
 export const createNewRound = ({
   userMessage,
+  attachments,
   roundId = pendingRoundId,
 }: {
   userMessage: string;
+  attachments?: Attachment[];
   roundId?: string;
 }): ConversationRound => {
   return {
     id: roundId,
-    input: { message: userMessage },
+    input: { message: userMessage, attachments },
     response: { message: '' },
     steps: [],
     started_at: new Date().toISOString(),

@@ -15,6 +15,7 @@ import type {
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { EisPromotionalCallout } from '@kbn/search-api-panels';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
@@ -31,6 +32,7 @@ import { DeleteAction } from './render_table_columns/render_actions/actions/dele
 import { useKibana } from '../../hooks/use_kibana';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
+import { docLinks } from '../../../common/doc_links';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -38,7 +40,7 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const {
-    services: { notifications },
+    services: { notifications, cloud },
   } = useKibana();
   const toasts = notifications?.toasts;
   const [showDeleteAction, setShowDeleteAction] = useState(false);
@@ -124,7 +126,13 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           endpointInfo: InferenceInferenceEndpointInfo
         ) => {
           if (inferenceId) {
-            return <EndpointInfo inferenceId={inferenceId} endpointInfo={endpointInfo} />;
+            return (
+              <EndpointInfo
+                inferenceId={inferenceId}
+                endpointInfo={endpointInfo}
+                isCloudEnabled={cloud?.isCloudEnabled ?? false}
+              />
+            );
           }
 
           return null;
@@ -194,7 +202,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionitem, displayInferenceFlyout]
+    [copyContent, displayDeleteActionitem, displayInferenceFlyout, cloud?.isCloudEnabled]
   );
 
   const handleTableChange = useCallback(
@@ -218,6 +226,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   return (
     <>
       <EuiFlexGroup direction="column">
+        <EisPromotionalCallout
+          promoId="inferenceEndpointManagement"
+          isCloudEnabled={cloud?.isCloudEnabled ?? false}
+          ctaLink={docLinks.elasticInferenceService}
+          direction="row"
+        />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem style={{ width: '400px' }} grow={false}>
@@ -248,6 +262,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             pagination={pagination}
             sorting={sorting}
             data-test-subj="inferenceEndpointTable"
+            tableCaption={i18n.INFERENCE_ENDPOINTS_TABLE_CAPTION}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

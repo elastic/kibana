@@ -103,7 +103,7 @@
             "label": "waitForTourEnd",
             "description": [],
             "signature": [
-              "() => Promise<\"skipped\" | \"completed\">"
+              "() => Promise<\"completed\" | \"skipped\">"
             ],
             "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
             "deprecated": false,

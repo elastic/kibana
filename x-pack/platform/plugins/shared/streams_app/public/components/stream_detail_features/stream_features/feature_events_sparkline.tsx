@@ -6,27 +6,35 @@
  */
 
 import type { Streams, Feature } from '@kbn/streams-schema';
+import type { AbsoluteTimeRange } from '@kbn/es-query';
 import React, { useMemo } from 'react';
 import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
 
 export const FeatureEventsSparkline = ({
   feature,
   definition,
+  hideAxis = true,
+  height = 100,
+  timeRange,
 }: {
   feature: Feature;
   definition: Streams.all.Definition;
+  hideAxis?: boolean;
+  height?: number;
+  timeRange?: AbsoluteTimeRange;
 }) => {
   const query = useMemo(
     () => ({
       feature: {
         name: feature.name,
         filter: feature.filter,
+        type: feature.type,
       },
       kql: { query: '' },
       id: 'feature-events-sparkline',
       title: feature.name,
     }),
-    [feature.name, feature.filter]
+    [feature.name, feature.filter, feature.type]
   );
 
   return (
@@ -35,8 +43,30 @@ export const FeatureEventsSparkline = ({
       definition={definition}
       isQueryValid={true}
       query={query}
-      hideAxis={true}
-      height={100}
+      hideAxis={hideAxis}
+      height={height}
+      timeRange={timeRange}
+    />
+  );
+};
+
+export const FeatureEventsSparklineLast24hrs = ({
+  feature,
+  definition,
+}: {
+  feature: Feature;
+  definition: Streams.all.Definition;
+}) => {
+  const now = Date.now();
+  return (
+    <FeatureEventsSparkline
+      feature={feature}
+      definition={definition}
+      timeRange={{
+        from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+        to: new Date(now).toISOString(),
+        mode: 'absolute',
+      }}
     />
   );
 };

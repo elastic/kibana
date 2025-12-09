@@ -102,6 +102,7 @@ export const StreamFeaturesFlyout = ({
                   defaultMessage: 'Close flyout',
                 }
               )}
+              data-test-subj="feature_identification_close_flyout_button"
             >
               <FormattedMessage
                 id="xpack.streams.streamFeaturesFlyout.closeButton"
@@ -156,6 +157,7 @@ function LoadingState({ closeFlyout }: { closeFlyout: () => void }) {
           aria-label={i18n.translate('xpack.streams.streamFeaturesFlyout.stopButtonAriaLabel', {
             defaultMessage: 'Stop feature identification',
           })}
+          data-test-subj="feature_identification_stop_identification_button"
         >
           <FormattedMessage
             id="xpack.streams.streamFeaturesFlyout.stopButton"

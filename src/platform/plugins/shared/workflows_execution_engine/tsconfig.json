@@ -26,6 +26,7 @@
     "@kbn/core-data-streams-server",
     "@kbn/data-streams",
     "@kbn/es-mappings",
+    "@kbn/workflows-extensions",
   ],
   "exclude": [
     "target/**/*"

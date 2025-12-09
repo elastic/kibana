@@ -119,9 +119,9 @@ export class ScheduledReportsService {
     }
 
     try {
-      const { title, schedule } = updateParams;
+      const { title, schedule, notification } = updateParams;
 
-      await this._updateScheduledReportSavedObject({ id, title, schedule });
+      await this._updateScheduledReportSavedObject({ id, title, schedule, notification });
       await this._updateScheduledReportTaskSchedule({ id, schedule });
 
       const updatedReport = await this.savedObjectsClient.get<ScheduledReportType>(
@@ -148,10 +148,12 @@ export class ScheduledReportsService {
     user,
     page = 1,
     size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
+    search,
   }: {
     user: ReportingUser;
     page: number;
     size: number;
+    search?: string;
   }): Promise<ListScheduledReportsApiResponse> {
     try {
       const username = this._getUsername(user);
@@ -160,6 +162,8 @@ export class ScheduledReportsService {
         type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         page,
         perPage: size,
+        search,
+        searchFields: ['title', 'created_by'],
         ...(!this.userCanManageReporting
           ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
           : {}),
@@ -469,6 +473,7 @@ export class ScheduledReportsService {
     id,
     title,
     schedule,
+    notification,
   }: { id: string } & UpdateScheduledReportParams) {
     await this.savedObjectsClient.update<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
@@ -476,6 +481,7 @@ export class ScheduledReportsService {
       {
         title,
         schedule,
+        notification,
       }
     );
   }
