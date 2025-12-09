@@ -55,7 +55,7 @@ export class CloudConnectClient {
 
       if (!roleAssignments || roleAssignments.length === 0) {
         return {
-          isHappyPath: false,
+          isClusterScoped: false,
           hasValidScope: false,
           errorMessage: 'API key does not have cloud_connected_resource role assignments',
         };
@@ -92,7 +92,7 @@ export class CloudConnectClient {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           return {
-            isHappyPath: false,
+            isClusterScoped: false,
             hasValidScope: false,
             errorMessage: 'Invalid or expired API key',
           };
@@ -100,7 +100,7 @@ export class CloudConnectClient {
       }
 
       return {
-        isHappyPath: false,
+        isClusterScoped: false,
         hasValidScope: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
       };

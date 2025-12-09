@@ -42,7 +42,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications, hasConfigurePermission, docLinks, telemetryClient, apiService } =
+  const { notifications, hasConfigurePermission, docLinks, telemetryService, apiService } =
     useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
@@ -148,7 +148,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
                   external
                   onClick={() => {
                     // Track telemetry for learn more documentation link
-                    telemetryClient.trackLinkClicked({
+                    telemetryService.trackLinkClicked({
                       destination_type: 'cloud_connect_docs',
                     });
                   }}
