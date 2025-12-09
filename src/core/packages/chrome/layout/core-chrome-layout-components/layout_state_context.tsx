@@ -66,7 +66,6 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     applicationBottomBarHeight: hasApplicationBottomBar
       ? layoutConfig.applicationBottomBarHeight ?? 0
       : 0,
-    isNavigationExpanded: navigationWidth > 0,
     isSidePanelOpen,
   };
 
