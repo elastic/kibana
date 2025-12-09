@@ -391,7 +391,7 @@ describe('getFormattedFunctionSignature', () => {
       const resultWithoutFiltering = getFormattedFunctionSignature(functionDef);
 
       expect(resultWithoutFiltering).toBe(`TEST_FUNCTION(
-  input: integer | keyword
+  input:integer | keyword
 ): integer | keyword`);
     });
 
