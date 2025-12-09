@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext } from 'react';
 import type { ChromeLayoutSlots, LayoutState } from './layout.types';
 import { useLayoutConfig } from './layout_config_context';
 

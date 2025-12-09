@@ -23,12 +23,6 @@ const cssProp = css`
 
   display: grid;
 
-  // Debug borders for grid cells
-  > * {
-    outline: 2px solid red;
-    outline-offset: -2px;
-  }
-
   grid-template-areas:
     'banner banner'
     'header header'
@@ -38,7 +32,7 @@ const cssProp = css`
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
-  const { navigationWidth, sidebarWidth, bannerHeight, headerHeight, footerHeight } = layoutState;
+  const { sidebarWidth, bannerHeight, headerHeight, footerHeight } = layoutState;
 
   const style = {
     gridTemplateColumns: `
