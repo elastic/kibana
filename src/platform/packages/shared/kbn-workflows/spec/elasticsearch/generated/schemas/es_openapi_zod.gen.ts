@@ -1710,7 +1710,7 @@ export const types_minimum_should_match = z.union([
 export const types_query_dsl_query_base = z.object({
     boost: z.optional(z.number().register(z.globalRegistry, {
         description: 'Floating point number used to decrease or increase the relevance scores of the query.\nBoost values are relative to the default value of 1.0.\nA boost value between 0 and 1.0 decreases the relevance score.\nA value greater than 1.0 increases the relevance score.'
-    })).default(1),
+    })),
     _name: z.optional(z.string())
 });
 
@@ -1736,7 +1736,7 @@ export const types_query_dsl_combined_fields_query = types_query_dsl_query_base.
     }),
     auto_generate_synonyms_phrase_query: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, match phrase queries are automatically created for multi-term synonyms.'
-    })).default(true),
+    })),
     operator: z.optional(types_query_dsl_combined_fields_operator),
     minimum_should_match: z.optional(types_minimum_should_match),
     zero_terms_query: z.optional(types_query_dsl_combined_fields_zero_terms)
@@ -1848,7 +1848,7 @@ export const types_query_dsl_field_value_factor_score_function = z.object({
     field: types_field,
     factor: z.optional(z.number().register(z.globalRegistry, {
         description: 'Optional factor to multiply the field value with.'
-    })).default(1),
+    })),
     missing: z.optional(z.number().register(z.globalRegistry, {
         description: 'Value used if the document doesn’t have that field.\nThe modifier and factor are still applied to it as though it were read from the document.'
     })),
@@ -2005,7 +2005,7 @@ export const global_search_types_learning_to_rank = z.object({
 export const types_mapping_chunk_rescorer_chunking_settings = z.object({
     strategy: z.optional(z.string().register(z.globalRegistry, {
         description: 'The chunking strategy: `sentence`, `word`, `none` or `recursive`.\n\n * If `strategy` is set to `recursive`, you must also specify:\n\n- `max_chunk_size`\n- either `separators` or`separator_group`\n\nLearn more about different chunking strategies in the linked documentation.'
-    })).default('sentence'),
+    })),
     separator_group: z.optional(z.string().register(z.globalRegistry, {
         description: 'Only applicable to the `recursive` strategy and required when using it.\n\nSets a predefined list of separators in the saved chunking settings based on the selected text type.\nValues can be `markdown` or `plaintext`.\n\nUsing this parameter is an alternative to manually specifying a custom `separators` list.'
     })),
@@ -2014,13 +2014,13 @@ export const types_mapping_chunk_rescorer_chunking_settings = z.object({
     })),
     max_chunk_size: z.number().register(z.globalRegistry, {
         description: 'The maximum size of a chunk in words.\nThis value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy).\nThis value should not exceed the window size for the associated model.'
-    }).default(250),
+    }),
     overlap: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of overlapping words for chunks.\nIt is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.'
-    })).default(100),
+    })),
     sentence_overlap: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of overlapping sentences for chunks.\nIt is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.'
-    })).default(1)
+    }))
 });
 
 export const types_chunk_rescorer = z.object({
@@ -2111,14 +2111,14 @@ export const types_fuzziness = z.union([
 export const types_query_dsl_fuzzy_query = types_query_dsl_query_base.and(z.object({
     max_expansions: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of variations created.'
-    })).default(50),
+    })),
     prefix_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'Number of beginning characters left unchanged when creating expansions.'
-    })).default(0),
+    })),
     rewrite: z.optional(types_multi_term_query_rewrite),
     transpositions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether edits include transpositions of two adjacent characters (for example `ab` to `ba`).'
-    })).default(true),
+    })),
     fuzziness: z.optional(types_fuzziness),
     value: z.union([
         z.string(),
@@ -2140,7 +2140,7 @@ export const types_query_dsl_geo_bounding_box_query = types_query_dsl_query_base
     validation_method: z.optional(types_query_dsl_geo_validation_method),
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
-    })).default(false)
+    }))
 }));
 
 export const types_query_dsl_geo_distance_query = types_query_dsl_query_base.and(z.object({
@@ -2149,7 +2149,7 @@ export const types_query_dsl_geo_distance_query = types_query_dsl_query_base.and
     validation_method: z.optional(types_query_dsl_geo_validation_method),
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
-    })).default(false)
+    }))
 }));
 
 export const types_query_dsl_geo_grid_query = types_query_dsl_query_base.and(z.object({
@@ -2166,7 +2166,7 @@ export const types_query_dsl_geo_polygon_query = types_query_dsl_query_base.and(
 export const types_query_dsl_geo_shape_query = types_query_dsl_query_base.and(z.object({
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
-    })).default(false)
+    }))
 }));
 
 export const types_query_dsl_child_score_mode = z.enum([
@@ -2195,13 +2195,13 @@ export const types_query_dsl_intervals_fuzzy = z.object({
     fuzziness: z.optional(types_fuzziness),
     prefix_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'Number of beginning characters left unchanged when creating expansions.'
-    })).default(0),
+    })),
     term: z.string().register(z.globalRegistry, {
         description: 'The term to match.'
     }),
     transpositions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether edits include transpositions of two adjacent characters (for example, `ab` to `ba`).'
-    })).default(true),
+    })),
     use_field: z.optional(types_field)
 });
 
@@ -2266,24 +2266,24 @@ export const types_query_dsl_match_query = z.union([
         })),
         auto_generate_synonyms_phrase_query: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, match phrase queries are automatically created for multi-term synonyms.'
-        })).default(true),
+        })),
         cutoff_frequency: z.optional(z.number()),
         fuzziness: z.optional(types_fuzziness),
         fuzzy_rewrite: z.optional(types_multi_term_query_rewrite),
         fuzzy_transpositions: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, edits for fuzzy matching include transpositions of two adjacent characters (for example, `ab` to `ba`).'
-        })).default(true),
+        })),
         lenient: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, format-based errors, such as providing a text query value for a numeric field, are ignored.'
-        })).default(false),
+        })),
         max_expansions: z.optional(z.number().register(z.globalRegistry, {
             description: 'Maximum number of terms to which the query will expand.'
-        })).default(50),
+        })),
         minimum_should_match: z.optional(types_minimum_should_match),
         operator: z.optional(types_query_dsl_operator),
         prefix_length: z.optional(z.number().register(z.globalRegistry, {
             description: 'Number of beginning characters left unchanged for fuzzy matching.'
-        })).default(0),
+        })),
         query: z.union([
             z.string(),
             z.number(),
@@ -2303,15 +2303,15 @@ export const types_query_dsl_match_bool_prefix_query = types_query_dsl_query_bas
     fuzzy_rewrite: z.optional(types_multi_term_query_rewrite),
     fuzzy_transpositions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, edits for fuzzy matching include transpositions of two adjacent characters (for example, `ab` to `ba`).\nCan be applied to the term subqueries constructed for all terms but the final term.'
-    })).default(true),
+    })),
     max_expansions: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of terms to which the query will expand.\nCan be applied to the term subqueries constructed for all terms but the final term.'
-    })).default(50),
+    })),
     minimum_should_match: z.optional(types_minimum_should_match),
     operator: z.optional(types_query_dsl_operator),
     prefix_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'Number of beginning characters left unchanged for fuzzy matching.\nCan be applied to the term subqueries constructed for all terms but the final term.'
-    })).default(0),
+    })),
     query: z.string().register(z.globalRegistry, {
         description: 'Terms you wish to find in the provided field.\nThe last term is used in a prefix query.'
     })
@@ -2328,7 +2328,7 @@ export const types_query_dsl_match_phrase_query = types_query_dsl_query_base.and
     }),
     slop: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of positions allowed between matching tokens.'
-    })).default(0),
+    })),
     zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
 }));
 
@@ -2338,13 +2338,13 @@ export const types_query_dsl_match_phrase_prefix_query = types_query_dsl_query_b
     })),
     max_expansions: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of terms to which the last provided term of the query value will expand.'
-    })).default(50),
+    })),
     query: z.string().register(z.globalRegistry, {
         description: 'Text you wish to find in the provided field.'
     }),
     slop: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of positions allowed between matching tokens.'
-    })).default(0),
+    })),
     zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
 }));
 
@@ -2433,16 +2433,16 @@ export const types_query_dsl_more_like_this_query = types_query_dsl_query_base.a
     })),
     boost_terms: z.optional(z.number().register(z.globalRegistry, {
         description: 'Each term in the formed query could be further boosted by their tf-idf score.\nThis sets the boost factor to use when using this feature.\nDefaults to deactivated (0).'
-    })).default(0),
+    })),
     fail_on_unsupported_field: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Controls whether the query should fail (throw an exception) if any of the specified fields are not of the supported types (`text` or `keyword`).'
-    })).default(true),
+    })),
     fields: z.optional(z.array(types_field).register(z.globalRegistry, {
         description: 'A list of fields to fetch and analyze the text from.\nDefaults to the `index.query.default_field` index setting, which has a default value of `*`.'
     })),
     include: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the input documents should also be included in the search results returned.'
-    })).default(false),
+    })),
     like: z.union([
         types_query_dsl_like,
         z.array(types_query_dsl_like)
@@ -2452,20 +2452,20 @@ export const types_query_dsl_more_like_this_query = types_query_dsl_query_base.a
     })),
     max_query_terms: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of query terms that can be selected.'
-    })).default(25),
+    })),
     max_word_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum word length above which the terms are ignored.\nDefaults to unbounded (`0`).'
-    })).default(0),
+    })),
     min_doc_freq: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum document frequency below which the terms are ignored from the input document.'
-    })).default(5),
+    })),
     minimum_should_match: z.optional(types_minimum_should_match),
     min_term_freq: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum term frequency below which the terms are ignored from the input document.'
-    })).default(2),
+    })),
     min_word_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum word length below which the terms are ignored.'
-    })).default(0),
+    })),
     routing: z.optional(types_routing),
     stop_words: z.optional(types_analysis_stop_words),
     unlike: z.optional(z.union([
@@ -2491,34 +2491,34 @@ export const types_query_dsl_multi_match_query = types_query_dsl_query_base.and(
     })),
     auto_generate_synonyms_phrase_query: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, match phrase queries are automatically created for multi-term synonyms.'
-    })).default(true),
+    })),
     cutoff_frequency: z.optional(z.number()),
     fields: z.optional(types_fields),
     fuzziness: z.optional(types_fuzziness),
     fuzzy_rewrite: z.optional(types_multi_term_query_rewrite),
     fuzzy_transpositions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, edits for fuzzy matching include transpositions of two adjacent characters (for example, `ab` to `ba`).\nCan be applied to the term subqueries constructed for all terms but the final term.'
-    })).default(true),
+    })),
     lenient: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, format-based errors, such as providing a text query value for a numeric field, are ignored.'
-    })).default(false),
+    })),
     max_expansions: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of terms to which the query will expand.'
-    })).default(50),
+    })),
     minimum_should_match: z.optional(types_minimum_should_match),
     operator: z.optional(types_query_dsl_operator),
     prefix_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'Number of beginning characters left unchanged for fuzzy matching.'
-    })).default(0),
+    })),
     query: z.string().register(z.globalRegistry, {
         description: 'Text, number, boolean value or date you wish to find in the provided field.'
     }),
     slop: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of positions allowed between matching tokens.'
-    })).default(0),
+    })),
     tie_breaker: z.optional(z.number().register(z.globalRegistry, {
         description: 'Determines how scores for each per-term blended query and scores across groups are combined.'
-    })).default(0),
+    })),
     type: z.optional(types_query_dsl_text_query_type),
     zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
 }));
@@ -2527,7 +2527,7 @@ export const types_query_dsl_parent_id_query = types_query_dsl_query_base.and(z.
     id: z.optional(types_id),
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether to ignore an unmapped `type` and not return any documents instead of an error.'
-    })).default(false),
+    })),
     type: z.optional(types_relation_name)
 }));
 
@@ -2563,7 +2563,7 @@ export const types_query_dsl_prefix_query = types_query_dsl_query_base.and(z.obj
     }),
     case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Allows ASCII case insensitive matching of the value with the indexed field values when set to `true`.\nDefault is `false` which means the case sensitivity of matching depends on the underlying field’s mapping.'
-    })).default(false)
+    }))
 }));
 
 export const types_time_zone = z.string();
@@ -2571,46 +2571,46 @@ export const types_time_zone = z.string();
 export const types_query_dsl_query_string_query = types_query_dsl_query_base.and(z.object({
     allow_leading_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the wildcard characters `*` and `?` are allowed as the first character of the query string.'
-    })).default(true),
+    })),
     analyzer: z.optional(z.string().register(z.globalRegistry, {
         description: 'Analyzer used to convert text in the query string into tokens.'
     })),
     analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the query attempts to analyze wildcard terms in the query string.'
-    })).default(false),
+    })),
     auto_generate_synonyms_phrase_query: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, match phrase queries are automatically created for multi-term synonyms.'
-    })).default(true),
+    })),
     default_field: z.optional(types_field),
     default_operator: z.optional(types_query_dsl_operator),
     enable_position_increments: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, enable position increments in queries constructed from a `query_string` search.'
-    })).default(true),
-    escape: z.optional(z.boolean()).default(false),
+    })),
+    escape: z.optional(z.boolean()),
     fields: z.optional(z.array(types_field).register(z.globalRegistry, {
         description: 'Array of fields to search. Supports wildcards (`*`).'
     })),
     fuzziness: z.optional(types_fuzziness),
     fuzzy_max_expansions: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of terms to which the query expands for fuzzy matching.'
-    })).default(50),
+    })),
     fuzzy_prefix_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'Number of beginning characters left unchanged for fuzzy matching.'
-    })).default(0),
+    })),
     fuzzy_rewrite: z.optional(types_multi_term_query_rewrite),
     fuzzy_transpositions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, edits for fuzzy matching include transpositions of two adjacent characters (for example, `ab` to `ba`).'
-    })).default(true),
+    })),
     lenient: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, format-based errors, such as providing a text value for a numeric field, are ignored.'
-    })).default(false),
+    })),
     max_determinized_states: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of automaton states required for the query.'
-    })).default(10000),
+    })),
     minimum_should_match: z.optional(types_minimum_should_match),
     phrase_slop: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of positions allowed between matching tokens for phrases.'
-    })).default(0),
+    })),
     query: z.string().register(z.globalRegistry, {
         description: 'Query string you wish to parse and use for search.'
     }),
@@ -2749,13 +2749,13 @@ export const types_query_dsl_rank_feature_query = types_query_dsl_query_base.and
 export const types_query_dsl_regexp_query = types_query_dsl_query_base.and(z.object({
     case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Allows case insensitive matching of the regular expression value with the indexed field values when set to `true`.\nWhen `false`, case sensitivity of matching depends on the underlying field’s mapping.'
-    })).default(false),
+    })),
     flags: z.optional(z.string().register(z.globalRegistry, {
         description: 'Enables optional operators for the regular expression.'
     })),
     max_determinized_states: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of automaton states required for the query.'
-    })).default(10000),
+    })),
     rewrite: z.optional(types_multi_term_query_rewrite),
     value: z.string().register(z.globalRegistry, {
         description: 'Regular expression for terms you wish to find in the provided field.'
@@ -2816,10 +2816,10 @@ export const types_query_dsl_simple_query_string_query = types_query_dsl_query_b
     })),
     analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the query attempts to analyze wildcard terms in the query string.'
-    })).default(false),
+    })),
     auto_generate_synonyms_phrase_query: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the parser creates a match_phrase query for each multi-position token.'
-    })).default(true),
+    })),
     default_operator: z.optional(types_query_dsl_operator),
     fields: z.optional(z.array(types_field).register(z.globalRegistry, {
         description: 'Array of fields you wish to search.\nAccepts wildcard expressions.\nYou also can boost relevance scores for matches to particular fields using a caret (`^`) notation.\nDefaults to the `index.query.default_field index` setting, which has a default value of `*`.'
@@ -2827,16 +2827,16 @@ export const types_query_dsl_simple_query_string_query = types_query_dsl_query_b
     flags: z.optional(types_query_dsl_simple_query_string_flags),
     fuzzy_max_expansions: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of terms to which the query expands for fuzzy matching.'
-    })).default(50),
+    })),
     fuzzy_prefix_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'Number of beginning characters left unchanged for fuzzy matching.'
-    })).default(0),
+    })),
     fuzzy_transpositions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, edits for fuzzy matching include transpositions of two adjacent characters (for example, `ab` to `ba`).'
     })),
     lenient: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, format-based errors, such as providing a text value for a numeric field, are ignored.'
-    })).default(false),
+    })),
     minimum_should_match: z.optional(types_minimum_should_match),
     query: z.string().register(z.globalRegistry, {
         description: 'Query string in the simple query string syntax you wish to parse and use for search.'
@@ -2860,13 +2860,13 @@ export const types_query_dsl_span_term_query = types_query_dsl_query_base.and(z.
 export const types_token_pruning_config = z.object({
     tokens_freq_ratio_threshold: z.optional(z.number().register(z.globalRegistry, {
         description: 'Tokens whose frequency is more than this threshold times the average frequency of all tokens in the specified field are considered outliers and pruned.'
-    })).default(5),
+    })),
     tokens_weight_threshold: z.optional(z.number().register(z.globalRegistry, {
         description: 'Tokens whose weight is less than this threshold are considered nonsignificant and pruned.'
-    })).default(0.4),
+    })),
     only_score_pruned_tokens: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Whether to only score pruned tokens, vs only scoring kept tokens.'
-    })).default(false)
+    }))
 });
 
 export const types_query_dsl_sparse_vector_query = types_query_dsl_query_base.and(z.object({
@@ -2893,7 +2893,7 @@ export const types_query_dsl_term_query = z.union([
         value: types_field_value,
         case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Allows ASCII case insensitive matching of the value with the indexed field values when set to `true`.\nWhen `false`, the case sensitivity of matching depends on the underlying field’s mapping.'
-        })).default(false)
+        }))
     }))
 ]);
 
@@ -3073,13 +3073,13 @@ export const types_aggregations_categorize_text_aggregation = types_aggregations
     field: types_field,
     max_unique_tokens: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of unique tokens at any position up to max_matched_tokens. Must be larger than 1.\nSmaller values use less memory and create fewer categories. Larger values will use more memory and\ncreate narrower categories. Max allowed value is 100.'
-    })).default(50),
+    })),
     max_matched_tokens: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of token positions to match on before attempting to merge categories. Larger\nvalues will use more memory and create narrower categories. Max allowed value is 100.'
-    })).default(5),
+    })),
     similarity_threshold: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum percentage of tokens that must match for text to be added to the category bucket. Must\nbe between 1 and 100. The larger the value the narrower the categories. Larger values will increase memory\nusage and create narrower categories.'
-    })).default(50),
+    })),
     categorization_filters: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'This property expects an array of regular expressions. The expressions are used to filter out matching\nsequences from the categorization field values. You can use this functionality to fine tune the categorization\nby excluding sequences from consideration when categories are defined. For example, you can exclude SQL\nstatements that appear in your log files. This property cannot be used at the same time as categorization_analyzer.\nIf you only want to define simple regular expression filters that are applied prior to tokenization, setting\nthis property is the easiest method. If you also want to customize the tokenizer or post-tokenization filtering,\nuse the categorization_analyzer property instead and include the filters as pattern_replace character filters.'
     })),
@@ -3089,7 +3089,7 @@ export const types_aggregations_categorize_text_aggregation = types_aggregations
     })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of buckets to return.'
-    })).default(10),
+    })),
     min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum number of documents in a bucket to be returned to the results.'
     })),
@@ -3271,7 +3271,7 @@ export const types_aggregations_geo_hash_grid_aggregation = types_aggregations_b
     })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of geohash buckets to return.'
-    })).default(10000)
+    }))
 }));
 
 export const types_aggregations_geo_line_point = z.object({
@@ -3291,7 +3291,7 @@ export const types_aggregations_geo_line_aggregation = z.object({
     sort_order: z.optional(types_sort_order),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum length of the line represented in the aggregation.\nValid sizes are between 1 and 10000.'
-    })).default(10000)
+    }))
 });
 
 export const types_geo_tile_precision = z.number();
@@ -3304,7 +3304,7 @@ export const types_aggregations_geo_tile_grid_aggregation = types_aggregations_b
     })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of buckets to return.'
-    })).default(10000),
+    })),
     bounds: z.optional(types_geo_bounds)
 }));
 
@@ -3312,11 +3312,11 @@ export const types_aggregations_geohex_grid_aggregation = types_aggregations_buc
     field: types_field,
     precision: z.optional(z.number().register(z.globalRegistry, {
         description: 'Integer zoom of the key used to defined cells or buckets\nin the results. Value should be between 0-15.'
-    })).default(6),
+    })),
     bounds: z.optional(types_geo_bounds),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of buckets to return.'
-    })).default(10000),
+    })),
     shard_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Number of buckets returned from each shard.'
     }))
@@ -3361,23 +3361,23 @@ export const types_aggregations_ip_prefix_aggregation = types_aggregations_bucke
     }),
     is_ipv6: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Defines whether the prefix applies to IPv6 addresses.'
-    })).default(false),
+    })),
     append_prefix_length: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Defines whether the prefix length is appended to IP address keys in the response.'
-    })).default(false),
+    })),
     keyed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Defines whether buckets are returned as a hash rather than an array in the response.'
     })),
     min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'Minimum number of documents in a bucket for it to be included in the response.'
-    })).default(1)
+    }))
 }));
 
 export const ml_types_regression_inference_options = z.object({
     results_field: z.optional(types_field),
     num_top_feature_importance_values: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies the maximum number of feature importance values per document.'
-    })).default(0)
+    }))
 });
 
 export const ml_types_classification_inference_options = z.object({
@@ -3386,7 +3386,7 @@ export const ml_types_classification_inference_options = z.object({
     })),
     num_top_feature_importance_values: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies the maximum number of feature importance values per document.'
-    })).default(0),
+    })),
     prediction_field_type: z.optional(z.string().register(z.globalRegistry, {
         description: 'Specifies the type of the predicted field to write. Acceptable values are: string, number, boolean. When boolean is provided 1.0 is transformed to true and 0.0 to false.'
     })),
@@ -3510,7 +3510,7 @@ export const types_aggregations_moving_percentiles_aggregation = types_aggregati
     })),
     shift: z.optional(z.number().register(z.globalRegistry, {
         description: 'By default, the window consists of the last n values excluding the current bucket.\nIncreasing `shift` by 1, moves the starting window position by 1 to the right.'
-    })).default(0),
+    })),
     keyed: z.optional(z.boolean())
 }));
 
@@ -3520,7 +3520,7 @@ export const types_aggregations_moving_function_aggregation = types_aggregations
     })),
     shift: z.optional(z.number().register(z.globalRegistry, {
         description: 'By default, the window consists of the last n values excluding the current bucket.\nIncreasing `shift` by 1, moves the starting window position by 1 to the right.'
-    })).default(0),
+    })),
     window: z.optional(z.number().register(z.globalRegistry, {
         description: 'The size of window to "slide" across the histogram.'
     }))
@@ -3538,19 +3538,19 @@ export const types_aggregations_multi_terms_aggregation = types_aggregations_buc
     order: z.optional(types_aggregations_aggregate_order),
     min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum number of documents in a bucket for it to be returned.'
-    })).default(1),
+    })),
     shard_min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum number of documents in a bucket on each shard for it to be returned.'
-    })).default(1),
+    })),
     shard_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of candidate terms produced by each shard.\nBy default, `shard_size` will be automatically estimated based on the number of shards and the `size` parameter.'
     })),
     show_term_doc_count_error: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Calculates the doc count error on per term basis.'
-    })).default(false),
+    })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of term buckets should be returned out of the overall terms list.'
-    })).default(10),
+    })),
     terms: z.array(types_aggregations_multi_term_lookup).register(z.globalRegistry, {
         description: 'The field from which to generate sets of terms.'
     })
@@ -3602,11 +3602,11 @@ export const types_aggregations_rare_terms_aggregation = types_aggregations_buck
     include: z.optional(types_aggregations_terms_include),
     max_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of documents a term should appear in.'
-    })).default(1),
+    })),
     missing: z.optional(types_aggregations_missing),
     precision: z.optional(z.number().register(z.globalRegistry, {
         description: 'The precision of the internal CuckooFilters.\nSmaller precision leads to better approximation, but higher memory usage.'
-    })).default(0.001),
+    })),
     value_type: z.optional(z.string())
 }));
 
@@ -3631,7 +3631,7 @@ export const types_aggregations_random_sampler_aggregation = types_aggregations_
 export const types_aggregations_sampler_aggregation = types_aggregations_bucket_aggregation_base.and(z.object({
     shard_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Limits how many top-scoring documents are collected in the sample processed on each shard.'
-    })).default(100)
+    }))
 }));
 
 export const types_aggregations_serial_differencing_aggregation = types_aggregations_pipeline_aggregation_base.and(z.object({
@@ -3677,7 +3677,7 @@ export const types_aggregations_p_value_heuristic = z.object({
     background_is_superset: z.optional(z.boolean()),
     normalize_above: z.optional(z.number().register(z.globalRegistry, {
         description: 'Should the results be normalized when above the given value.\nAllows for consistent significance results at various scales.\nNote: `0` is a special value which means no normalization'
-    })).default(0)
+    }))
 });
 
 export const types_aggregations_stats_bucket_aggregation = types_aggregations_pipeline_aggregation_base.and(z.record(z.string(), z.unknown()));
@@ -3687,7 +3687,7 @@ export const types_aggregations_sum_bucket_aggregation = types_aggregations_pipe
 export const types_aggregations_time_series_aggregation = types_aggregations_bucket_aggregation_base.and(z.object({
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of results to return.'
-    })).default(10000),
+    })),
     keyed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to associate a unique string key with each bucket and returns the ranges as a hash rather than an array.'
     }))
@@ -3735,7 +3735,7 @@ export const global_bulk_write_operation = global_bulk_operation_base.and(z.obje
     })),
     require_alias: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request\'s actions must target an index alias.'
-    })).default(false)
+    }))
 }));
 
 export const global_bulk_index_operation = global_bulk_write_operation.and(z.record(z.string(), z.unknown()));
@@ -3745,7 +3745,7 @@ export const global_bulk_create_operation = global_bulk_write_operation.and(z.re
 export const global_bulk_update_operation = global_bulk_operation_base.and(z.object({
     require_alias: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request\'s actions must target an index alias.'
-    })).default(false),
+    })),
     retry_on_conflict: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of times an update should be retried in the case of a version conflict.'
     }))
@@ -7535,7 +7535,7 @@ export const indices_types_retention_lease = z.object({
 export const indices_types_soft_deletes = z.object({
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether soft deletes are enabled on the index.'
-    })).default(true),
+    })),
     retention_lease: z.optional(indices_types_retention_lease)
 });
 
@@ -7661,7 +7661,7 @@ export const indices_types_settings_analyze = z.object({
 });
 
 export const indices_types_settings_highlight = z.object({
-    max_analyzed_offset: z.optional(z.number()).default(1000000)
+    max_analyzed_offset: z.optional(z.number())
 });
 
 export const indices_types_index_routing_allocation_options = z.enum([
@@ -7721,14 +7721,14 @@ export const indices_types_index_settings_lifecycle = z.object({
     indexing_complete: z.optional(spec_utils_stringifiedboolean),
     origination_date: z.optional(z.number().register(z.globalRegistry, {
         description: 'If specified, this is the timestamp used to calculate the index age for its phase transitions. Use this setting\nif you create a new index that contains old data and want to use the original creation date to calculate the index\nage. Specified as a Unix epoch value in milliseconds.'
-    })).default(0),
+    })),
     parse_origination_date: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to true to parse the origination date from the index name. This origination date is used to calculate the index age\nfor its phase transitions. The index name must match the pattern ^.*-{date_format}-\\\\d+, where the date_format is\nyyyy.MM.dd and the trailing digits are optional. An index that was rolled over would normally match the full format,\nfor example logs-2016.10.31-000002). If the index name doesn’t match the pattern, index creation fails.'
     })),
     step: z.optional(indices_types_index_settings_lifecycle_step),
     rollover_alias: z.optional(z.string().register(z.globalRegistry, {
         description: 'The index alias to update when the index rolls over. Specify when using a policy that contains a rollover action.\nWhen the index rolls over, the alias is updated to reflect that the index is no longer the write index. For more\ninformation about rolling indices, see Rollover.'
-    })).default(''),
+    })),
     prefer_ilm: z.optional(z.union([
         z.boolean(),
         z.string()
@@ -7797,7 +7797,7 @@ export const types_analysis_fingerprint_analyzer = z.object({
     version: z.optional(types_version_string),
     max_output_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum token size to emit. Tokens larger than this size will be discarded.\nDefaults to `255`'
-    })).default(255),
+    })),
     separator: z.optional(z.string().register(z.globalRegistry, {
         description: 'The character to use to concatenate the terms.\nDefaults to a space.'
     })),
@@ -7834,10 +7834,10 @@ export const types_analysis_pattern_analyzer = z.object({
     })),
     lowercase: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Should terms be lowercased or not.\nDefaults to `true`.'
-    })).default(true),
+    })),
     pattern: z.optional(z.string().register(z.globalRegistry, {
         description: 'A Java regular expression.\nDefaults to `\\W+`.'
-    })).default('\\W+'),
+    })),
     stopwords: z.optional(types_analysis_stop_words),
     stopwords_path: z.optional(z.string().register(z.globalRegistry, {
         description: 'The path to a file containing stop words.'
@@ -7853,7 +7853,7 @@ export const types_analysis_standard_analyzer = z.object({
     type: z.enum(['standard']),
     max_token_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum token length. If a token is seen that exceeds this length then it is split at `max_token_length` intervals.\nDefaults to `255`.'
-    })).default(255),
+    })),
     stopwords: z.optional(types_analysis_stop_words),
     stopwords_path: z.optional(z.string().register(z.globalRegistry, {
         description: 'The path to a file containing stop words.'
@@ -9116,12 +9116,12 @@ export const types_analysis_edge_n_gram_tokenizer = types_analysis_tokenizer_bas
     custom_token_chars: z.optional(z.string()),
     max_gram: z.optional(z.number()),
     min_gram: z.optional(z.number()),
-    token_chars: z.optional(z.array(types_analysis_token_char)).default([])
+    token_chars: z.optional(z.array(types_analysis_token_char))
 }));
 
 export const types_analysis_keyword_tokenizer = types_analysis_tokenizer_base.and(z.object({
     type: z.enum(['keyword']),
-    buffer_size: z.optional(z.number()).default(256)
+    buffer_size: z.optional(z.number())
 }));
 
 export const types_analysis_letter_tokenizer = types_analysis_tokenizer_base.and(z.object({
@@ -9137,7 +9137,7 @@ export const types_analysis_n_gram_tokenizer = types_analysis_tokenizer_base.and
     custom_token_chars: z.optional(z.string()),
     max_gram: z.optional(z.number()),
     min_gram: z.optional(z.number()),
-    token_chars: z.optional(z.array(types_analysis_token_char)).default([])
+    token_chars: z.optional(z.array(types_analysis_token_char))
 }));
 
 export const types_analysis_path_hierarchy_tokenizer = types_analysis_tokenizer_base.and(z.object({
@@ -9372,19 +9372,19 @@ export const indices_types_mapping_limit_settings_total_fields = z.object({
 export const indices_types_mapping_limit_settings_depth = z.object({
     limit: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum depth for a field, which is measured as the number of inner objects. For instance, if all fields are defined\nat the root object level, then the depth is 1. If there is one object mapping, then the depth is 2, etc.'
-    })).default(20)
+    }))
 });
 
 export const indices_types_mapping_limit_settings_nested_fields = z.object({
     limit: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of distinct nested mappings in an index. The nested type should only be used in special cases, when\narrays of objects need to be queried independently of each other. To safeguard against poorly designed mappings, this\nsetting limits the number of unique nested types per index.'
-    })).default(50)
+    }))
 });
 
 export const indices_types_mapping_limit_settings_nested_objects = z.object({
     limit: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps\nto prevent out of memory errors when a document contains too many nested objects.'
-    })).default(10000)
+    }))
 });
 
 export const indices_types_mapping_limit_settings_field_name_length = z.object({
@@ -9873,15 +9873,15 @@ export const types_mapping_dense_vector_index_options = z.object({
     })),
     ef_construction: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of candidates to track while assembling the list of nearest neighbors for each new node.\n\nOnly applicable to `hnsw`, `int8_hnsw`, `bbq_hnsw`, and `int4_hnsw` index types.'
-    })).default(100),
+    })),
     m: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of neighbors each node will be connected to in the HNSW graph.\n\nOnly applicable to `hnsw`, `int8_hnsw`, `bbq_hnsw`, and `int4_hnsw` index types.'
-    })).default(16),
+    })),
     type: types_mapping_dense_vector_index_options_type,
     rescore_vector: z.optional(types_mapping_dense_vector_index_options_rescore_vector),
     on_disk_rescore: z.optional(z.boolean().register(z.globalRegistry, {
         description: '`true` if vector rescoring should be done on-disk\n\nOnly applicable to `bbq_disk`, `bbq_hnsw`, `int4_hnsw`, `int8_hnsw`'
-    })).default(false)
+    }))
 });
 
 export const types_mapping_dense_vector_similarity = z.enum([
@@ -9914,7 +9914,7 @@ export const types_mapping_semantic_text_index_options = z.object({
 export const types_mapping_chunking_settings = z.object({
     strategy: z.string().register(z.globalRegistry, {
         description: 'The chunking strategy: `sentence`, `word`, `none` or `recursive`.\n\n * If `strategy` is set to `recursive`, you must also specify:\n\n- `max_chunk_size`\n- either `separators` or`separator_group`\n\nLearn more about different chunking strategies in the linked documentation.'
-    }).default('sentence'),
+    }),
     separator_group: z.optional(z.string().register(z.globalRegistry, {
         description: 'Only applicable to the `recursive` strategy and required when using it.\n\nSets a predefined list of separators in the saved chunking settings based on the selected text type.\nValues can be `markdown` or `plaintext`.\n\nUsing this parameter is an alternative to manually specifying a custom `separators` list.'
     })),
@@ -9923,13 +9923,13 @@ export const types_mapping_chunking_settings = z.object({
     })),
     max_chunk_size: z.number().register(z.globalRegistry, {
         description: 'The maximum size of a chunk in words.\nThis value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy).\nThis value should not exceed the window size for the associated model.'
-    }).default(250),
+    }),
     overlap: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of overlapping words for chunks.\nIt is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.'
-    })).default(100),
+    })),
     sentence_overlap: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of overlapping sentences for chunks.\nIt is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.'
-    })).default(1)
+    }))
 });
 
 export const types_mapping_suggest_context = z.object({
@@ -10022,21 +10022,20 @@ export const indices_types_downsampling_round = z.object({
     fixed_interval: types_duration_large
 });
 
-export const indices_types_data_stream_lifecycle_downsampling = z.object({
-    rounds: z.array(indices_types_downsampling_round).register(z.globalRegistry, {
-        description: 'The list of downsampling rounds to execute as part of this downsampling configuration'
-    })
-});
+export const indices_types_sampling_method = z.enum(['aggregate', 'last_value']);
 
 /**
  * Data stream lifecycle denotes that a data stream is managed by the data stream lifecycle and contains the configuration.
  */
 export const indices_types_data_stream_lifecycle = z.object({
     data_retention: z.optional(types_duration),
-    downsampling: z.optional(indices_types_data_stream_lifecycle_downsampling),
+    downsampling: z.optional(z.array(indices_types_downsampling_round).register(z.globalRegistry, {
+        description: 'The list of downsampling rounds to execute as part of this downsampling configuration'
+    })),
+    downsampling_method: z.optional(indices_types_sampling_method),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
-    })).default(true)
+    }))
 }).register(z.globalRegistry, {
     description: 'Data stream lifecycle denotes that a data stream is managed by the data stream lifecycle and contains the configuration.'
 });
@@ -10060,7 +10059,7 @@ export const indices_types_failure_store_lifecycle_template = z.object({
     ])),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
-    })).default(true)
+    }))
 }).register(z.globalRegistry, {
     description: 'Template equivalent of FailureStoreLifecycle that allows nullable values.'
 });
@@ -12192,13 +12191,13 @@ export const graph_types_vertex_definition = z.object({
     })),
     min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies how many documents must contain a pair of terms before it is considered to be a useful connection.\nThis setting acts as a certainty threshold.'
-    })).default(3),
+    })),
     shard_min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'Controls how many documents on a particular shard have to contain a pair of terms before the connection is returned for global consideration.'
-    })).default(2),
+    })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies the maximum number of vertex terms returned for each field.'
-    })).default(5)
+    }))
 });
 
 export const graph_types_sample_diversity = z.object({
@@ -12210,7 +12209,7 @@ export const graph_types_explore_controls = z.object({
     sample_diversity: z.optional(graph_types_sample_diversity),
     sample_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Each hop considers a sample of the best-matching documents on each shard.\nUsing samples improves the speed of execution and keeps exploration focused on meaningfully-connected terms.\nVery small values (less than 50) might not provide sufficient weight-of-evidence to identify significant connections between terms.\nVery large sample sizes can dilute the quality of the results and increase execution times.'
-    })).default(100),
+    })),
     timeout: z.optional(types_duration),
     use_significance: z.boolean().register(z.globalRegistry, {
         description: 'Filters associated terms so only those that are significantly associated with your query are included.'
@@ -12719,8 +12718,6 @@ export const types_data_stream_names = z.union([
     z.array(types_data_stream_name)
 ]);
 
-export const indices_types_sampling_method = z.enum(['aggregate', 'last_value']);
-
 export const indices_types_downsample_config = z.object({
     fixed_interval: types_duration_large,
     sampling_method: z.optional(indices_types_sampling_method)
@@ -12815,7 +12812,7 @@ export const indices_types_failure_store_lifecycle = z.object({
     data_retention: z.optional(types_duration),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
-    })).default(true)
+    }))
 }).register(z.globalRegistry, {
     description: 'The failure store lifecycle configures the data stream lifecycle configuration for failure indices.'
 });
@@ -12826,7 +12823,7 @@ export const indices_types_failure_store_lifecycle = z.object({
 export const indices_types_data_stream_failure_store = z.object({
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If defined, it turns the failure store on/off (`true`/`false`) for this data stream. A data stream failure store\nthat\'s disabled (enabled: `false`) will redirect no new failed indices to the failure store; however, it will\nnot remove any existing data from the failure store.'
-    })).default(true),
+    })),
     lifecycle: z.optional(indices_types_failure_store_lifecycle)
 }).register(z.globalRegistry, {
     description: 'Data stream failure store contains the configuration of the failure store for a given data stream.'
@@ -12850,10 +12847,10 @@ export const indices_get_data_stream_options_data_stream_with_options = z.object
 export const indices_types_index_template_data_stream_configuration = z.object({
     hidden: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the data stream is hidden.'
-    })).default(false),
+    })),
     allow_custom_routing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the data stream supports custom routing.'
-    })).default(false)
+    }))
 });
 
 export const indices_get_migrate_reindex_status_status_in_progress = z.object({
@@ -13414,7 +13411,7 @@ export const indices_update_aliases_remove_action = z.object({
     indices: z.optional(types_indices),
     must_exist: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the alias must exist to perform the action.'
-    })).default(false)
+    }))
 });
 
 export const indices_update_aliases_remove_index_action = z.object({
@@ -13422,7 +13419,7 @@ export const indices_update_aliases_remove_index_action = z.object({
     indices: z.optional(types_indices),
     must_exist: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the alias must exist to perform the action.'
-    })).default(false)
+    }))
 });
 
 export const indices_validate_query_indices_validation_explanation = z.object({
@@ -13622,13 +13619,13 @@ export const inference_types_delete_inference_endpoint_result = types_acknowledg
 export const inference_types_inference_chunking_settings = z.object({
     max_chunk_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum size of a chunk in words.\nThis value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy).\nThis value should not exceed the window size for the associated model.'
-    })).default(250),
+    })),
     overlap: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of overlapping words for chunks.\nIt is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.'
-    })).default(100),
+    })),
     sentence_overlap: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of overlapping sentences for chunks.\nIt is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.'
-    })).default(1),
+    })),
     separator_group: z.optional(z.string().register(z.globalRegistry, {
         description: 'Only applicable to the `recursive` strategy and required when using it.\n\nSets a predefined list of separators in the saved chunking settings based on the selected text type.\nValues can be `markdown` or `plaintext`.\n\nUsing this parameter is an alternative to manually specifying a custom `separators` list.'
     })),
@@ -13637,7 +13634,7 @@ export const inference_types_inference_chunking_settings = z.object({
     })),
     strategy: z.optional(z.string().register(z.globalRegistry, {
         description: 'The chunking strategy: `sentence`, `word`, `none` or `recursive`.\n\n * If `strategy` is set to `recursive`, you must also specify:\n\n- `max_chunk_size`\n- either `separators` or`separator_group`\n\nLearn more about different chunking strategies in the linked documentation.'
-    })).default('sentence')
+    }))
 }).register(z.globalRegistry, {
     description: 'Chunking configuration object'
 });
@@ -13850,7 +13847,7 @@ export const inference_types_amazon_bedrock_service_settings = z.object({
 export const inference_types_amazon_bedrock_task_settings = z.object({
     max_new_tokens: z.optional(z.number().register(z.globalRegistry, {
         description: 'For a `completion` task, it sets the maximum number for the output tokens to be generated.'
-    })).default(64),
+    })),
     temperature: z.optional(z.number().register(z.globalRegistry, {
         description: 'For a `completion` task, it is a number between 0.0 and 1.0 that controls the apparent creativity of the results.\nAt temperature 0.0 the model is most deterministic, at temperature 1.0 most random.\nIt should not be used if `top_p` or `top_k` is specified.'
     })),
@@ -13908,7 +13905,7 @@ export const inference_types_amazon_sage_maker_service_settings = z.object({
     })),
     batch_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of inputs in each batch. This value is used by inference ingestion pipelines\nwhen processing semantic values. It correlates to the number of times the SageMaker endpoint is\ninvoked (one per batch of input).'
-    })).default(256),
+    })),
     dimensions: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of dimensions returned by the text embedding models. If this value is not provided, then\nit is guessed by making invoking the endpoint for the `text_embedding` task.'
     }))
@@ -13996,7 +13993,7 @@ export const inference_types_azure_ai_studio_service_settings = z.object({
         description: 'The target URL of your Azure AI Studio model deployment.\nThis can be found on the overview page for your deployment in the management section of your Azure AI Studio account.'
     }),
     provider: z.string().register(z.globalRegistry, {
-        description: 'The model provider for your deployment.\nNote that some providers may support only certain task types.\nSupported providers include:\n\n* `cohere` - available for `text_embedding` and `completion` task types\n* `databricks` - available for `completion` task type only\n* `meta` - available for `completion` task type only\n* `microsoft_phi` - available for `completion` task type only\n* `mistral` - available for `completion` task type only\n* `openai` - available for `text_embedding` and `completion` task types'
+        description: 'The model provider for your deployment.\nNote that some providers may support only certain task types.\nSupported providers include:\n\n* `cohere` - available for `text_embedding`, `rerank` and `completion` task types\n* `databricks` - available for `completion` task type only\n* `meta` - available for `completion` task type only\n* `microsoft_phi` - available for `completion` task type only\n* `mistral` - available for `completion` task type only\n* `openai` - available for `text_embedding` and `completion` task types'
     }),
     rate_limit: z.optional(inference_types_rate_limit_setting)
 });
@@ -14007,7 +14004,7 @@ export const inference_types_azure_ai_studio_task_settings = z.object({
     })),
     max_new_tokens: z.optional(z.number().register(z.globalRegistry, {
         description: 'For a `completion` task, provide a hint for the maximum number of output tokens to be generated.'
-    })).default(64),
+    })),
     temperature: z.optional(z.number().register(z.globalRegistry, {
         description: 'For a `completion` task, control the apparent creativity of generated completions with a sampling temperature.\nIt must be a number in the range of 0.0 to 2.0.\nIt should not be used if `top_p` is specified.'
     })),
@@ -14167,7 +14164,7 @@ export const inference_types_contextual_ai_task_settings = z.object({
     })),
     return_documents: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Whether to return the source documents in the response.\nOnly for the `rerank` task type.'
-    })).default(false),
+    })),
     top_k: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of most relevant documents to return.\nIf not specified, the reranking results of all documents will be returned.\nOnly for the `rerank` task type.'
     }))
@@ -14278,7 +14275,7 @@ export const inference_types_elasticsearch_service_type = z.enum(['elasticsearch
 export const inference_types_adaptive_allocations = z.object({
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Turn on `adaptive_allocations`.'
-    })).default(false),
+    })),
     max_number_of_allocations: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of allocations to scale to.\nIf set, it must be greater than or equal to `min_number_of_allocations`.'
     })),
@@ -14312,7 +14309,7 @@ export const inference_types_elasticsearch_service_settings = z.object({
 export const inference_types_elasticsearch_task_settings = z.object({
     return_documents: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'For a `rerank` task, return the document instead of only the index.'
-    })).default(true)
+    }))
 });
 
 export const inference_types_task_type_elasticsearch = z.enum([
@@ -14642,7 +14639,7 @@ export const inference_types_open_ai_service_settings = z.object({
     rate_limit: z.optional(inference_types_rate_limit_setting),
     url: z.optional(z.string().register(z.globalRegistry, {
         description: 'The URL endpoint to use for the requests.\nIt can be changed for testing purposes.'
-    })).default('https://api.openai.com/v1/embeddings.')
+    }))
 });
 
 export const inference_types_open_ai_task_settings = z.object({
@@ -14745,13 +14742,13 @@ export const inference_types_voyage_ai_task_settings = z.object({
     })),
     return_documents: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Whether to return the source documents in the response.\nOnly for the `rerank` task type.'
-    })).default(false),
+    })),
     top_k: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of most relevant documents to return.\nIf not specified, the reranking results of all documents will be returned.\nOnly for the `rerank` task type.'
     })),
     truncation: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Whether to truncate the input texts to fit within the context length.'
-    })).default(true)
+    }))
 });
 
 export const inference_types_task_type_voyage_ai = z.enum(['text_embedding', 'rerank']);
@@ -14981,16 +14978,16 @@ export const ingest_types_inference_config_regression = z.object({
     results_field: z.optional(types_field),
     num_top_feature_importance_values: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies the maximum number of feature importance values per document.'
-    })).default(0)
+    }))
 });
 
 export const ingest_types_inference_config_classification = z.object({
     num_top_classes: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies the number of top class predictions to return.'
-    })).default(0),
+    })),
     num_top_feature_importance_values: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies the maximum number of feature importance values per document.'
-    })).default(0),
+    })),
     results_field: z.optional(types_field),
     top_classes_results_field: z.optional(types_field),
     prediction_field_type: z.optional(z.string().register(z.globalRegistry, {
@@ -15295,7 +15292,7 @@ export const ml_types_filter_ref = z.object({
 export const ml_types_detection_rule = z.object({
     actions: z.optional(z.array(ml_types_rule_action).register(z.globalRegistry, {
         description: 'The set of actions to be triggered when the rule applies. If more than one action is specified the effects of all actions are combined.'
-    })).default(['skip_result']),
+    })),
     conditions: z.optional(z.array(ml_types_rule_condition).register(z.globalRegistry, {
         description: 'An array of numeric conditions when the rule applies. A rule must either have a non-empty scope or at least one condition. Multiple conditions are combined together with a logical AND.'
     })),
@@ -15331,7 +15328,7 @@ export const ml_types_detector = z.object({
     partition_field_name: z.optional(types_field),
     use_null: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Defines whether a new series is used as the null series when there is no value for the by or partition fields.'
-    })).default(false)
+    }))
 });
 
 export const ml_types_per_partition_categorization = z.object({
@@ -15599,7 +15596,7 @@ export const ml_types_dataframe_analysis = z.object({
     })),
     early_stopping_enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Advanced configuration option. Specifies whether the training process should finish if it is not finding any better performing models. If disabled, the training process can take significantly longer and the chance of finding a better performing model is unremarkable.'
-    })).default(true),
+    })),
     eta: z.optional(z.number().register(z.globalRegistry, {
         description: 'Advanced configuration option. The shrinkage applied to the weights. Smaller values result in larger forests which have a better generalization error. However, larger forests cause slower training. By default, this value is calculated during hyperparameter optimization. It must be a value between 0.001 and 1.'
     })),
@@ -15626,7 +15623,7 @@ export const ml_types_dataframe_analysis = z.object({
     })),
     num_top_feature_importance_values: z.optional(z.number().register(z.globalRegistry, {
         description: 'Advanced configuration option. Specifies the maximum number of feature importance values per document to return. By default, no feature importance calculation occurs.'
-    })).default(0),
+    })),
     prediction_field_name: z.optional(types_field),
     randomize_seed: z.optional(z.number().register(z.globalRegistry, {
         description: 'Defines the seed for the random generator that is used to pick training data. By default, it is randomly generated. Set it to a specific value to use the same training data each time you start a job (assuming other related parameters such as `source` and `analyzed_fields` are the same).'
@@ -15644,19 +15641,19 @@ export const ml_types_dataframe_analysis_classification = ml_types_dataframe_ana
     class_assignment_objective: z.optional(z.string()),
     num_top_classes: z.optional(z.number().register(z.globalRegistry, {
         description: 'Defines the number of categories for which the predicted probabilities are reported. It must be non-negative or -1. If it is -1 or greater than the total number of categories, probabilities are reported for all categories; if you have a large number of categories, there could be a significant effect on the size of your destination index. NOTE: To use the AUC ROC evaluation method, `num_top_classes` must be set to -1 or a value greater than or equal to the total number of categories.'
-    })).default(2)
+    }))
 }));
 
 export const ml_types_dataframe_analysis_outlier_detection = z.object({
     compute_feature_influence: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the feature influence calculation is enabled.'
-    })).default(true),
+    })),
     feature_influence_threshold: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum outlier score that a document needs to have in order to calculate its feature influence score. Value range: 0-1.'
-    })).default(0.1),
+    })),
     method: z.optional(z.string().register(z.globalRegistry, {
         description: 'The method that outlier detection uses. Available methods are `lof`, `ldof`, `distance_kth_nn`, `distance_knn`, and `ensemble`. The default value is ensemble, which means that outlier detection uses an ensemble of different methods and normalises and combines their individual outlier scores to obtain the overall outlier score.'
-    })).default('ensemble'),
+    })),
     n_neighbors: z.optional(z.number().register(z.globalRegistry, {
         description: 'Defines the value for how many nearest neighbors each method of outlier detection uses to calculate its outlier score. When the value is not set, different values are used for different ensemble members. This default behavior helps improve the diversity in the ensemble; only override it if you are confident that the value you choose is appropriate for the data set.'
     })),
@@ -15665,13 +15662,13 @@ export const ml_types_dataframe_analysis_outlier_detection = z.object({
     })),
     standardization_enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the following operation is performed on the columns before computing outlier scores: `(x_i - mean(x_i)) / sd(x_i)`.'
-    })).default(true)
+    }))
 });
 
 export const ml_types_dataframe_analysis_regression = ml_types_dataframe_analysis.and(z.object({
     loss_function: z.optional(z.string().register(z.globalRegistry, {
         description: 'The loss function used during regression. Available options are `mse` (mean squared error), `msle` (mean squared logarithmic error), `huber` (Pseudo-Huber loss).'
-    })).default('mse'),
+    })),
     loss_function_parameter: z.optional(z.number().register(z.globalRegistry, {
         description: 'A positive number that is used as a parameter to the `loss_function`.'
     }))
@@ -15714,10 +15711,10 @@ export const ml_types_dataframe_analytics_memory_estimation = z.object({
 export const ml_types_page = z.object({
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'Skips the specified number of items.'
-    })).default(0),
+    })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies the maximum number of items to obtain.'
-    })).default(10000)
+    }))
 });
 
 export const types_duration_value_unit_seconds = types_unit_seconds;
@@ -15782,10 +15779,10 @@ export const ml_types_calendar_event = z.object({
     start_time: types_date_time,
     skip_result: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When true the model will not create results for this calendar period.'
-    })).default(true),
+    })),
     skip_model_update: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When true the model will not be updated for this calendar period.'
-    })).default(true),
+    })),
     force_time_shift: z.optional(z.number().register(z.globalRegistry, {
         description: 'Shift time by this many seconds. For example adjust time for daylight savings changes'
     }))
@@ -15925,10 +15922,10 @@ export const ml_types_dataframe_analytics_stats_hyperparameters = z.object({
 export const ml_types_outlier_detection_parameters = z.object({
     compute_feature_influence: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the feature influence calculation is enabled.'
-    })).default(true),
+    })),
     feature_influence_threshold: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum outlier score that a document needs to have in order to calculate its feature influence score.\nValue range: 0-1'
-    })).default(0.1),
+    })),
     method: z.optional(z.string().register(z.globalRegistry, {
         description: 'The method that outlier detection uses.\nAvailable methods are `lof`, `ldof`, `distance_kth_nn`, `distance_knn`, and `ensemble`.\nThe default value is ensemble, which means that outlier detection uses an ensemble of different methods and normalises and combines their individual outlier scores to obtain the overall outlier score.'
     })),
@@ -15940,7 +15937,7 @@ export const ml_types_outlier_detection_parameters = z.object({
     })),
     standardization_enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the following operation is performed on the columns before computing outlier scores: (x_i - mean(x_i)) / sd(x_i).'
-    })).default(true)
+    }))
 });
 
 export const ml_types_dataframe_analytics_stats_outlier_detection = z.object({
@@ -16131,10 +16128,10 @@ export const types_indices_options = z.object({
     expand_wildcards: z.optional(types_expand_wildcards),
     ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, missing or closed indices are not included in the response.'
-    })).default(false),
+    })),
     ignore_throttled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, concrete, expanded or aliased indices are ignored when frozen.'
-    })).default(true)
+    }))
 }).register(z.globalRegistry, {
     description: 'Controls how to deal with unavailable concrete indices (closed or missing), how wildcard expressions are expanded\nto actual indices (all, closed or open indices) and how to deal with wildcard expressions that resolve to no indices.'
 });
@@ -16273,7 +16270,7 @@ export const ml_types_job_stats = z.object({
 export const ml_types_analysis_limits = z.object({
     categorization_examples_limit: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of examples stored per category in memory and in the results data store. If you increase this value, more examples are available, however it requires that you have more storage available. If you set this value to 0, no examples are stored. NOTE: The `categorization_examples_limit` applies only to analysis that uses categorization.'
-    })).default(4),
+    })),
     model_memory_limit: z.optional(types_byte_size)
 });
 
@@ -16302,17 +16299,17 @@ export const ml_types_data_description = z.object({
     time_field: z.optional(types_field),
     time_format: z.optional(z.string().register(z.globalRegistry, {
         description: 'The time format, which can be `epoch`, `epoch_ms`, or a custom pattern. The value `epoch` refers to UNIX or Epoch time (the number of seconds since 1 Jan 1970). The value `epoch_ms` indicates that time is measured in milliseconds since the epoch. The `epoch` and `epoch_ms` time formats accept either integer or real values. Custom patterns must conform to the Java DateTimeFormatter class. When you use date-time formatting patterns, it is recommended that you provide the full date, time and time zone. For example: `yyyy-MM-dd\'T\'HH:mm:ssX`. If the pattern that you specify is not sufficient to produce a complete timestamp, job creation fails.'
-    })).default('epoch'),
+    })),
     field_delimiter: z.optional(z.string())
 });
 
 export const ml_types_model_plot_config = z.object({
     annotations_enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, enables calculation and storage of the model change annotations for each entity that is being analyzed.'
-    })).default(true),
+    })),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, enables calculation and storage of the model bounds for each entity that is being analyzed.'
-    })).default(false),
+    })),
     terms: z.optional(types_field)
 });
 
@@ -16610,17 +16607,17 @@ export const ml_types_tokenization_truncate = z.enum([
 export const ml_types_common_tokenization_config = z.object({
     do_lower_case: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Should the tokenizer lower case the text'
-    })).default(false),
+    })),
     max_sequence_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum input sequence length for the model'
-    })).default(512),
+    })),
     span: z.optional(z.number().register(z.globalRegistry, {
         description: 'Tokenization spanning options. Special value of -1 indicates no spanning takes place'
-    })).default(-1),
+    })),
     truncate: z.optional(ml_types_tokenization_truncate),
     with_special_tokens: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Is tokenization completed with special tokens'
-    })).default(true)
+    }))
 });
 
 /**
@@ -16634,7 +16631,7 @@ export const ml_types_nlp_bert_tokenization_config = ml_types_common_tokenizatio
 export const ml_types_nlp_roberta_tokenization_config = ml_types_common_tokenization_config.and(z.object({
     add_prefix_space: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Should the tokenizer prefix input with a space character'
-    })).default(false)
+    }))
 }));
 
 export const ml_types_xlm_roberta_tokenization_config = ml_types_common_tokenization_config.and(z.record(z.string(), z.unknown()));
@@ -16682,7 +16679,7 @@ export const ml_types_zero_shot_classification_inference_options = z.object({
     tokenization: z.optional(ml_types_tokenization_config_container),
     hypothesis_template: z.optional(z.string().register(z.globalRegistry, {
         description: 'Hypothesis template used when tokenizing labels for prediction'
-    })).default('"This example is {}."'),
+    })),
     classification_labels: z.array(z.string()).register(z.globalRegistry, {
         description: 'The zero shot classification labels indicating entailment, neutral, and contradiction\nMust contain exactly and only entailment, neutral, and contradiction'
     }),
@@ -16691,7 +16688,7 @@ export const ml_types_zero_shot_classification_inference_options = z.object({
     })),
     multi_label: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates if more than one true label exists.'
-    })).default(false),
+    })),
     labels: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'The labels to predict.'
     }))
@@ -17255,7 +17252,7 @@ export const ml_types_detector_read = z.object({
     partition_field_name: z.optional(types_field),
     use_null: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Defines whether a new series is used as the null series when there is no value for the by or partition fields.'
-    })).default(false)
+    }))
 });
 
 export const ml_put_trained_model_frequency_encoding_preprocessor = z.object({
@@ -17388,22 +17385,22 @@ export const global_termvectors_filter = z.object({
     })),
     max_num_terms: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of terms that must be returned per field.'
-    })).default(25),
+    })),
     max_term_freq: z.optional(z.number().register(z.globalRegistry, {
         description: 'Ignore words with more than this frequency in the source doc.\nIt defaults to unbounded.'
     })),
     max_word_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum word length above which words will be ignored.\nDefaults to unbounded.'
-    })).default(0),
+    })),
     min_doc_freq: z.optional(z.number().register(z.globalRegistry, {
         description: 'Ignore terms which do not occur in at least this many docs.'
-    })).default(1),
+    })),
     min_term_freq: z.optional(z.number().register(z.globalRegistry, {
         description: 'Ignore words with less than this frequency in the source doc.'
-    })).default(1),
+    })),
     min_word_length: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum word length below which words will be ignored.'
-    })).default(0)
+    }))
 });
 
 export const global_mtermvectors_operation = z.object({
@@ -17415,21 +17412,21 @@ export const global_mtermvectors_operation = z.object({
     fields: z.optional(types_fields),
     field_statistics: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes the document count, sum of document frequencies, and sum of total term frequencies.'
-    })).default(true),
+    })),
     filter: z.optional(global_termvectors_filter),
     offsets: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes term offsets.'
-    })).default(true),
+    })),
     payloads: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes term payloads.'
-    })).default(true),
+    })),
     positions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes term positions.'
-    })).default(true),
+    })),
     routing: z.optional(types_routing),
     term_statistics: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the response includes term frequency and document frequency.'
-    })).default(false),
+    })),
     version: z.optional(types_version_number),
     version_type: z.optional(types_version_type)
 });
@@ -18617,13 +18614,13 @@ export const global_rank_eval_document_rating = z.object({
 export const global_rank_eval_rank_eval_metric_base = z.object({
     k: z.optional(z.number().register(z.globalRegistry, {
         description: 'Sets the maximum number of documents retrieved per query. This value will act in place of the usual size parameter in the query.'
-    })).default(10)
+    }))
 });
 
 export const global_rank_eval_rank_eval_metric_rating_treshold = global_rank_eval_rank_eval_metric_base.and(z.object({
     relevant_rating_threshold: z.optional(z.number().register(z.globalRegistry, {
         description: 'Sets the rating threshold above which documents are considered to be "relevant".'
-    })).default(1)
+    }))
 }));
 
 /**
@@ -18632,7 +18629,7 @@ export const global_rank_eval_rank_eval_metric_rating_treshold = global_rank_eva
 export const global_rank_eval_rank_eval_metric_precision = global_rank_eval_rank_eval_metric_rating_treshold.and(z.object({
     ignore_unlabeled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Controls how unlabeled documents in the search results are counted. If set to true, unlabeled documents are ignored and neither count as relevant or irrelevant. Set to false (the default), they are treated as irrelevant.'
-    })).default(false)
+    }))
 }));
 
 /**
@@ -18651,7 +18648,7 @@ export const global_rank_eval_rank_eval_metric_mean_reciprocal_rank = global_ran
 export const global_rank_eval_rank_eval_metric_discounted_cumulative_gain = global_rank_eval_rank_eval_metric_base.and(z.object({
     normalize: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If set to true, this metric will calculate the Normalized DCG.'
-    })).default(false)
+    }))
 }));
 
 /**
@@ -19252,7 +19249,7 @@ export const security_types_replication_access = z.object({
     ]),
     allow_restricted_indices: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'This needs to be set to true if the patterns in the names field should cover system indices.'
-    })).default(false)
+    }))
 });
 
 export const security_create_service_token_token = z.object({
@@ -19515,18 +19512,18 @@ export const slm_types_invocation = z.object({
 export const slm_types_configuration = z.object({
     ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If false, the snapshot fails if any data stream or index in indices is missing or closed. If true, the snapshot ignores missing or closed data streams and indices.'
-    })).default(false),
+    })),
     indices: z.optional(types_indices),
     include_global_state: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the current global state is included in the snapshot.'
-    })).default(true),
+    })),
     feature_states: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'A list of feature states to be included in this snapshot. A list of features available for inclusion in the snapshot and their descriptions be can be retrieved using the get features API.\nEach feature state includes one or more system indices containing data necessary for the function of that feature. Providing an empty array will include no feature states in the snapshot, regardless of the value of include_global_state. By default, all available feature states will be included in the snapshot if include_global_state is true, or no feature states if include_global_state is false.'
     })),
     metadata: z.optional(types_metadata),
     partial: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If false, the entire snapshot will fail if one or more indices included in the snapshot do not have all primary shards available.'
-    })).default(false)
+    }))
 });
 
 export const slm_types_retention = z.object({
@@ -19641,7 +19638,7 @@ export const snapshot_types_repository_settings_base = z.object({
     chunk_size: z.optional(types_byte_size),
     compress: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When set to `true`, metadata files are stored in compressed format.\nThis setting doesn\'t affect index files that are already compressed by default.'
-    })).default(true),
+    })),
     max_restore_bytes_per_sec: z.optional(types_byte_size),
     max_snapshot_bytes_per_sec: z.optional(types_byte_size)
 });
@@ -19652,22 +19649,22 @@ export const snapshot_types_azure_repository_settings = snapshot_types_repositor
     })),
     client: z.optional(z.string().register(z.globalRegistry, {
         description: 'The name of the Azure repository client to use.'
-    })).default('default'),
+    })),
     container: z.optional(z.string().register(z.globalRegistry, {
         description: 'The Azure container.'
-    })).default('elasticsearch-snapshots'),
+    })),
     delete_objects_max_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maxmimum batch size, between 1 and 256, used for `BlobBatch` requests.\nDefaults to 256 which is the maximum number supported by the Azure blob batch API.'
-    })).default(256),
+    })),
     location_mode: z.optional(z.string().register(z.globalRegistry, {
         description: 'Either `primary_only` or `secondary_only`.\nNote that if you set it to `secondary_only`, it will force `readonly` to `true`.'
-    })).default('primary_only'),
+    })),
     max_concurrent_batch_deletes: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of concurrent batch delete requests that will be submitted for any individual bulk delete with `BlobBatch`.\nNote that the effective number of concurrent deletes is further limited by the Azure client connection and event loop thread limits.\nDefaults to 10, minimum is 1, maximum is 100.'
-    })).default(10),
+    })),
     readonly: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the repository is read-only.\nThe cluster can retrieve and restore snapshots from the repository but not write to the repository or create snapshots in it.\n\nOnly a cluster with write access can create snapshots in the repository.\nAll other clusters connected to the repository should have the `readonly` parameter set to `true`.\nIf `false`, the cluster can write to the repository and create snapshots in it.\n\nIMPORTANT: If you register the same snapshot repository with multiple clusters, only one cluster should have write access to the repository.\nHaving multiple clusters write to the repository at the same time risks corrupting the contents of the repository.'
-    })).default(false)
+    }))
 }));
 
 export const snapshot_types_repository_base = z.object({
@@ -19693,10 +19690,10 @@ export const snapshot_types_gcs_repository_settings = snapshot_types_repository_
     })),
     client: z.optional(z.string().register(z.globalRegistry, {
         description: 'The name of the client to use to connect to Google Cloud Storage.'
-    })).default('default'),
+    })),
     readonly: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the repository is read-only.\nThe cluster can retrieve and restore snapshots from the repository but not write to the repository or create snapshots in it.\n\nOnly a cluster with write access can create snapshots in the repository.\nAll other clusters connected to the repository should have the `readonly` parameter set to `true`.\n\nIf `false`, the cluster can write to the repository and create snapshots in it.\n\nIMPORTANT: If you register the same snapshot repository with multiple clusters, only one cluster should have write access to the repository.\nHaving multiple clusters write to the repository at the same time risks corrupting the contents of the repository.'
-    })).default(false)
+    }))
 }));
 
 export const snapshot_types_gcs_repository = snapshot_types_repository_base.and(z.object({
@@ -19716,29 +19713,29 @@ export const snapshot_types_s3_repository_settings = snapshot_types_repository_s
     buffer_size: z.optional(types_byte_size),
     canned_acl: z.optional(z.string().register(z.globalRegistry, {
         description: 'The S3 repository supports all S3 canned ACLs: `private`, `public-read`, `public-read-write`, `authenticated-read`, `log-delivery-write`, `bucket-owner-read`, `bucket-owner-full-control`.\nYou could specify a canned ACL using the `canned_acl` setting.\nWhen the S3 repository creates buckets and objects, it adds the canned ACL into the buckets and objects.'
-    })).default('private'),
+    })),
     client: z.optional(z.string().register(z.globalRegistry, {
         description: 'The name of the S3 client to use to connect to S3.'
-    })).default('default'),
+    })),
     delete_objects_max_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maxmimum batch size, between 1 and 1000, used for `DeleteObjects` requests.\nDefaults to 1000 which is the maximum number supported by the  AWS DeleteObjects API.'
-    })).default(1000),
+    })),
     get_register_retry_delay: z.optional(types_duration),
     max_multipart_parts: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of parts that Elasticsearch will write during a multipart upload of a single object.\nFiles which are larger than `buffer_size × max_multipart_parts` will be chunked into several smaller objects.\nElasticsearch may also split a file across multiple objects to satisfy other constraints such as the `chunk_size` limit.\nDefaults to `10000` which is the maximum number of parts in a multipart upload in AWS S3.'
-    })).default(10000),
+    })),
     max_multipart_upload_cleanup_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of possibly-dangling multipart uploads to clean up in each batch of snapshot deletions.\nDefaults to 1000 which is the maximum number supported by the AWS ListMultipartUploads API.\nIf set to `0`, Elasticsearch will not attempt to clean up dangling multipart uploads.'
-    })).default(1000),
+    })),
     readonly: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the repository is read-only.\nThe cluster can retrieve and restore snapshots from the repository but not write to the repository or create snapshots in it.\n\nOnly a cluster with write access can create snapshots in the repository.\nAll other clusters connected to the repository should have the `readonly` parameter set to `true`.\n\nIf `false`, the cluster can write to the repository and create snapshots in it.\n\nIMPORTANT: If you register the same snapshot repository with multiple clusters, only one cluster should have write access to the repository.\nHaving multiple clusters write to the repository at the same time risks corrupting the contents of the repository.'
-    })).default(false),
+    })),
     server_side_encryption: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When set to `true`, files are encrypted on server side using an AES256 algorithm.'
-    })).default(false),
+    })),
     storage_class: z.optional(z.string().register(z.globalRegistry, {
         description: 'The S3 storage class for objects written to the repository.\nValues may be `standard`, `reduced_redundancy`, `standard_ia`, `onezone_ia`, and `intelligent_tiering`.'
-    })).default('standard'),
+    })),
     'throttled_delete_retry.delay_increment': z.optional(types_duration),
     'throttled_delete_retry.maximum_delay': z.optional(types_duration),
     'throttled_delete_retry.maximum_number_of_retries': z.optional(z.number().register(z.globalRegistry, {
@@ -19759,10 +19756,10 @@ export const snapshot_types_shared_file_system_repository_settings = snapshot_ty
     }),
     max_number_of_snapshots: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of snapshots the repository can contain.\nThe default is `Integer.MAX_VALUE`, which is 2^31-1 or `2147483647`.'
-    })).default(2147483647),
+    })),
     readonly: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the repository is read-only.\nThe cluster can retrieve and restore snapshots from the repository but not write to the repository or create snapshots in it.\n\nOnly a cluster with write access can create snapshots in the repository.\nAll other clusters connected to the repository should have the `readonly` parameter set to `true`.\n\nIf `false`, the cluster can write to the repository and create snapshots in it.\n\nIMPORTANT: If you register the same snapshot repository with multiple clusters, only one cluster should have write access to the repository.\nHaving multiple clusters write to the repository at the same time risks corrupting the contents of the repository.'
-    })).default(false)
+    }))
 }));
 
 export const snapshot_types_shared_file_system_repository = snapshot_types_repository_base.and(z.object({
@@ -19775,11 +19772,11 @@ export const snapshot_types_shared_file_system_repository = snapshot_types_repos
 export const snapshot_types_read_only_url_repository_settings = snapshot_types_repository_settings_base.and(z.object({
     http_max_retries: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of retries for HTTP and HTTPS URLs.'
-    })).default(5),
+    })),
     http_socket_timeout: z.optional(types_duration),
     max_number_of_snapshots: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of snapshots the repository can contain.\nThe default is `Integer.MAX_VALUE`, which is 2^31-1 or `2147483647`.'
-    })).default(2147483647),
+    })),
     url: z.string().register(z.globalRegistry, {
         description: 'The URL location of the root of the shared filesystem repository.\nThe following protocols are supported:\n\n* `file`\n* `ftp`\n* `http`\n* `https`\n* `jar`\n\nURLs using the HTTP, HTTPS, or FTP protocols must be explicitly allowed with the `repositories.url.allowed_urls` cluster setting.\nThis setting supports wildcards in the place of a host, path, query, or fragment in the URL.\n\nURLs using the file protocol must point to the location of a shared filesystem accessible to all master and data nodes in the cluster.\nThis location must be registered in the `path.repo` setting.\nYou don\'t need to register URLs using the FTP, HTTP, HTTPS, or JAR protocols in the `path.repo` setting.'
     })
@@ -19798,10 +19795,10 @@ export const snapshot_types_source_only_repository_settings = snapshot_types_rep
     })),
     max_number_of_snapshots: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of snapshots the repository can contain.\nThe default is `Integer.MAX_VALUE`, which is 2^31-1 or `2147483647`.'
-    })).default(2147483647),
+    })),
     read_only: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the repository is read-only.\nThe cluster can retrieve and restore snapshots from the repository but not write to the repository or create snapshots in it.\n\nOnly a cluster with write access can create snapshots in the repository.\nAll other clusters connected to the repository should have the `readonly` parameter set to `true`.\n\nIf `false`, the cluster can write to the repository and create snapshots in it.\n\nIMPORTANT: If you register the same snapshot repository with multiple clusters, only one cluster should have write access to the repository.\nHaving multiple clusters write to the repository at the same time risks corrupting the contents of the repository.'
-    })).default(false)
+    }))
 }));
 
 export const snapshot_types_source_only_repository = snapshot_types_repository_base.and(z.object({
@@ -20160,17 +20157,17 @@ export const text_structure_test_grok_pattern_matched_text = z.object({
     fields: z.optional(z.record(z.string(), z.array(text_structure_test_grok_pattern_matched_field)))
 });
 
-export const transform_get_node_stats_transform_node_stats_details = z.object({
+export const transform_get_node_stats_transform_scheduler_stats = z.object({
     registered_transform_count: z.number(),
     peek_transform: z.optional(z.string())
 });
 
-export const transform_get_node_stats_scheduler = z.object({
-    scheduler: transform_get_node_stats_transform_node_stats_details
+export const transform_get_node_stats_transform_node_stats = z.object({
+    scheduler: transform_get_node_stats_transform_scheduler_stats
 });
 
-export const transform_get_node_stats_transform_node_stats = z.object({
-    total: transform_get_node_stats_scheduler
+export const transform_get_node_stats_transform_node_full_stats = z.object({
+    total: transform_get_node_stats_transform_node_stats
 });
 
 export const ml_types_transform_authorization = z.object({
@@ -20205,25 +20202,25 @@ export const transform_types_retention_policy_container = z.object({
 export const transform_types_settings = z.object({
     align_checkpoints: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the transform checkpoint ranges should be optimized for performance. Such optimization can align\ncheckpoint ranges with the date histogram interval when date histogram is specified as a group source in the\ntransform config. As a result, less document updates in the destination index will be performed thus improving\noverall performance.'
-    })).default(true),
+    })),
     dates_as_epoch_millis: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Defines if dates in the ouput should be written as ISO formatted string or as millis since epoch. epoch_millis was\nthe default for transforms created before version 7.11. For compatible output set this value to `true`.'
-    })).default(false),
+    })),
     deduce_mappings: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the transform should deduce the destination index mappings from the transform configuration.'
-    })).default(true),
+    })),
     docs_per_second: z.optional(z.number().register(z.globalRegistry, {
         description: 'Specifies a limit on the number of input documents per second. This setting throttles the transform by adding a\nwait time between search requests. The default value is null, which disables throttling.'
     })),
     max_page_search_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Defines the initial page size to use for the composite aggregation for each checkpoint. If circuit breaker\nexceptions occur, the page size is dynamically adjusted to a lower value. The minimum value is `10` and the\nmaximum is `65,536`.'
-    })).default(500),
+    })),
     use_point_in_time: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the transform checkpoint will use the Point In Time API while searching over the source index.\nIn general, Point In Time is an optimization that will reduce pressure on the source index by reducing the amount\nof refreshes and merges, but it can be expensive if a large number of Point In Times are opened and closed for a\ngiven index. The benefits and impact depend on the data being searched, the ingest rate into the source index, and\nthe amount of other consumers searching the same source index.'
-    })).default(true),
+    })),
     unattended: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the transform runs in unattended mode. In unattended mode, the transform retries indefinitely in case\nof an error which means the transform never fails. Setting the number of retries other than infinite fails in\nvalidation.'
-    })).default(false)
+    }))
 }).register(z.globalRegistry, {
     description: 'The source of the data for the transform.'
 });
@@ -20423,10 +20420,10 @@ export const watcher_types_array_compare_condition = z.object({
 export const watcher_types_never_condition = z.record(z.string(), z.unknown());
 
 export const watcher_types_search_template_request_body = z.object({
-    explain: z.optional(z.boolean()).default(false),
+    explain: z.optional(z.boolean()),
     id: z.optional(types_id),
     params: z.optional(z.record(z.string(), z.record(z.string(), z.unknown()))),
-    profile: z.optional(z.boolean()).default(false),
+    profile: z.optional(z.boolean()),
     source: z.optional(z.string().register(z.globalRegistry, {
         description: 'An inline search template. Supports the same parameters as the search API\'s\nrequest body. Also supports Mustache variables. If no id is specified, this\nparameter is required.'
     }))
@@ -20509,7 +20506,7 @@ export const watcher_types_http_email_attachment = z.object({
 export const watcher_types_reporting_email_attachment = z.object({
     url: z.string(),
     inline: z.optional(z.boolean()),
-    retries: z.optional(z.number()).default(40),
+    retries: z.optional(z.number()),
     interval: z.optional(types_duration),
     request: z.optional(watcher_types_http_input_request_definition)
 });
@@ -21894,7 +21891,7 @@ export const types_query_dsl_dis_max_query = types_query_dsl_query_base.and(z.ob
     }),
     tie_breaker: z.optional(z.number().register(z.globalRegistry, {
         description: 'Floating point number between 0 and 1.0 used to increase the relevance scores of documents matching multiple query clauses.'
-    })).default(0)
+    }))
 }));
 
 export const types_query_dsl_function_score_query = types_query_dsl_query_base.and(z.lazy(() => z.object({
@@ -21960,13 +21957,13 @@ export const global_search_types_search_request_body = z.object({
     },
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request returns detailed information about score computation as part of a hit.'
-    })).default(false),
+    })),
     ext: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
         description: 'Configuration of search extensions defined by Elasticsearch plugins.'
     })),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'The starting document offset, which must be non-negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(0),
+    })),
     get highlight() {
         return z.optional(z.lazy((): any => global_search_types_highlight));
     },
@@ -21988,7 +21985,7 @@ export const global_search_types_search_request_body = z.object({
     post_filter: z.optional(types_query_dsl_query_container),
     profile: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to return detailed timing information about the execution of individual components in a search request.\nNOTE: This is a debugging tool and adds significant overhead to search execution.'
-    })).default(false),
+    })),
     query: z.optional(types_query_dsl_query_container),
     rescore: z.optional(z.union([
         z.lazy((): any => global_search_types_rescore),
@@ -22005,7 +22002,7 @@ export const global_search_types_search_request_body = z.object({
     search_after: z.optional(types_sort_results),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return, which must not be negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` property.'
-    })).default(10),
+    })),
     slice: z.optional(types_sliced_scroll),
     get sort() {
         return z.optional(z.lazy((): any => types_sort));
@@ -22017,16 +22014,16 @@ export const global_search_types_search_request_body = z.object({
     suggest: z.optional(global_search_types_suggester),
     terminate_after: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of documents to collect for each shard.\nIf a query reaches this limit, Elasticsearch terminates the query early.\nElasticsearch collects documents before sorting.\n\nIMPORTANT: Use with caution.\nElasticsearch applies this property to each shard handling the request.\nWhen possible, let Elasticsearch perform early termination automatically.\nAvoid specifying this property for requests that target data streams with backing indices across multiple data tiers.\n\nIf set to `0` (default), the query does not terminate early.'
-    })).default(0),
+    })),
     timeout: z.optional(z.string().register(z.globalRegistry, {
         description: 'The period of time to wait for a response from each shard.\nIf no response is received before the timeout expires, the request fails and returns an error.\nDefaults to no timeout.'
     })),
     track_scores: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, calculate and return document scores, even if the scores are not used for sorting.'
-    })).default(false),
+    })),
     version: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request returns the document version as part of a hit.'
-    })).default(false),
+    })),
     seq_no_primary_term: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request returns sequence number and primary term of the last modification of each hit.'
     })),
@@ -22058,10 +22055,10 @@ export const global_search_types_inner_hits = z.object({
     name: z.optional(types_name),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of hits to return per `inner_hits`.'
-    })).default(3),
+    })),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'Inner hit starting document offset.'
-    })).default(0),
+    })),
     collapse: z.optional(global_search_types_field_collapse),
     docvalue_fields: z.optional(z.array(types_query_dsl_field_and_format)),
     explain: z.optional(z.boolean()),
@@ -22079,7 +22076,7 @@ export const global_search_types_inner_hits = z.object({
     },
     _source: z.optional(global_search_types_source_config),
     stored_fields: z.optional(types_fields),
-    track_scores: z.optional(z.boolean()).default(false),
+    track_scores: z.optional(z.boolean()),
     version: z.optional(z.boolean())
 });
 
@@ -22100,19 +22097,19 @@ export const global_search_types_highlight_base = z.object({
     type: z.optional(global_search_types_highlighter_type),
     boundary_chars: z.optional(z.string().register(z.globalRegistry, {
         description: 'A string that contains each boundary character.'
-    })).default('.,!? \\t\\n'),
+    })),
     boundary_max_scan: z.optional(z.number().register(z.globalRegistry, {
         description: 'How far to scan for boundary characters.'
-    })).default(20),
+    })),
     boundary_scanner: z.optional(global_search_types_boundary_scanner),
     boundary_scanner_locale: z.optional(z.string().register(z.globalRegistry, {
         description: 'Controls which locale is used to search for sentence and word boundaries.\nThis parameter takes a form of a language tag, for example: `"en-US"`, `"fr-FR"`, `"ja-JP"`.'
-    })).default('Locale.ROOT'),
+    })),
     force_source: z.optional(z.boolean()),
     fragmenter: z.optional(global_search_types_highlighter_fragmenter),
     fragment_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The size of the highlighted fragment in characters.'
-    })).default(100),
+    })),
     highlight_filter: z.optional(z.boolean()),
     highlight_query: z.optional(types_query_dsl_query_container),
     max_fragment_length: z.optional(z.number()),
@@ -22121,15 +22118,15 @@ export const global_search_types_highlight_base = z.object({
     })),
     no_match_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The amount of text you want to return from the beginning of the field if there are no matching fragments to highlight.'
-    })).default(0),
+    })),
     number_of_fragments: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of fragments to return.\nIf the number of fragments is set to `0`, no fragments are returned.\nInstead, the entire field contents are highlighted and returned.\nThis can be handy when you need to highlight short texts such as a title or address, but fragmentation is not required.\nIf `number_of_fragments` is `0`, `fragment_size` is ignored.'
-    })).default(5),
+    })),
     options: z.optional(z.record(z.string(), z.record(z.string(), z.unknown()))),
     order: z.optional(global_search_types_highlighter_order),
     phrase_limit: z.optional(z.number().register(z.globalRegistry, {
         description: 'Controls the number of matching phrases in a document that are considered.\nPrevents the `fvh` highlighter from analyzing too many phrases and consuming too much memory.\nWhen using `matched_fields`, `phrase_limit` phrases per matched field are considered. Raising the limit increases query time and consumes more memory.\nOnly supported by the `fvh` highlighter.'
-    })).default(256),
+    })),
     post_tags: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'Use in conjunction with `pre_tags` to define the HTML tags to use for the highlighted text.\nBy default, highlighted text is wrapped in `<em>` and `</em>` tags.'
     })),
@@ -22138,7 +22135,7 @@ export const global_search_types_highlight_base = z.object({
     })),
     require_field_match: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'By default, only fields that contains a query match are highlighted.\nSet to `false` to highlight all fields.'
-    })).default(true),
+    })),
     tags_schema: z.optional(global_search_types_highlighter_tags_schema)
 });
 
@@ -22239,10 +22236,10 @@ export const global_search_types_rescore_query = z.object({
     rescore_query: types_query_dsl_query_container,
     query_weight: z.optional(z.number().register(z.globalRegistry, {
         description: 'Relative importance of the original query versus the rescore query.'
-    })).default(1),
+    })),
     rescore_query_weight: z.optional(z.number().register(z.globalRegistry, {
         description: 'Relative importance of the rescore query versus the original query.'
-    })).default(1),
+    })),
     score_mode: z.optional(global_search_types_score_mode)
 });
 
@@ -22355,7 +22352,7 @@ export const types_rrf_retriever_component = z.object({
     retriever: types_retriever_container,
     weight: z.optional(z.number().register(z.globalRegistry, {
         description: 'Weight multiplier for this retriever\'s contribution to the RRF score. Higher values increase influence. Defaults to 1.0 if not specified. Must be non-negative.'
-    })).default(1)
+    }))
 }).register(z.globalRegistry, {
     description: 'Wraps a retriever with an optional weight for RRF scoring.'
 });
@@ -22464,7 +22461,7 @@ export const types_mapping_runtime_field = z.object({
 export const types_query_dsl_has_child_query = types_query_dsl_query_base.and(z.object({
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether to ignore an unmapped `type` and not return any documents instead of an error.'
-    })).default(false),
+    })),
     inner_hits: z.optional(global_search_types_inner_hits),
     max_children: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of child documents that match the query allowed for a returned parent document.\nIf the parent document exceeds this limit, it is excluded from the search results.'
@@ -22480,13 +22477,13 @@ export const types_query_dsl_has_child_query = types_query_dsl_query_base.and(z.
 export const types_query_dsl_has_parent_query = types_query_dsl_query_base.and(z.object({
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether to ignore an unmapped `parent_type` and not return any documents instead of an error.\nYou can use this parameter to query multiple indices that may not contain the `parent_type`.'
-    })).default(false),
+    })),
     inner_hits: z.optional(global_search_types_inner_hits),
     parent_type: types_relation_name,
     query: types_query_dsl_query_container,
     score: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether the relevance score of a matching parent document is aggregated into its child documents.'
-    })).default(false)
+    }))
 }));
 
 export const types_query_dsl_intervals_query = types_query_dsl_query_base.and(z.lazy(() => z.object({
@@ -22514,10 +22511,10 @@ export const types_query_dsl_intervals_all_of = z.object({
     },
     max_gaps: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of positions between the matching terms.\nIntervals produced by the rules further apart than this are not considered matches.'
-    })).default(-1),
+    })),
     ordered: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, intervals produced by the rules should appear in the order in which they are specified.'
-    })).default(false),
+    })),
     get filter() {
         return z.optional(z.lazy((): any => types_query_dsl_intervals_filter));
     }
@@ -22565,10 +22562,10 @@ export const types_query_dsl_intervals_match = z.object({
     })),
     max_gaps: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of positions between the matching terms.\nTerms further apart than this are not considered matches.'
-    })).default(-1),
+    })),
     ordered: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, matching terms must appear in their specified order.'
-    })).default(false),
+    })),
     query: z.string().register(z.globalRegistry, {
         description: 'Text you wish to find in the provided field.'
     }),
@@ -22602,7 +22599,7 @@ export const types_knn_query = types_query_dsl_query_base.and(z.object({
 export const types_query_dsl_nested_query = types_query_dsl_query_base.and(z.object({
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether to ignore an unmapped path and not return any documents instead of an error.'
-    })).default(false),
+    })),
     inner_hits: z.optional(global_search_types_inner_hits),
     path: types_field,
     query: types_query_dsl_query_container,
@@ -22716,10 +22713,10 @@ export const types_query_dsl_span_not_query = types_query_dsl_query_base.and(z.o
     include: types_query_dsl_span_query,
     post: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of tokens after the include span that can’t have overlap with the exclude span.'
-    })).default(0),
+    })),
     pre: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of tokens before the include span that can’t have overlap with the exclude span.'
-    })).default(0)
+    }))
 }));
 
 export const types_query_dsl_span_or_query = types_query_dsl_query_base.and(z.object({
@@ -22745,7 +22742,7 @@ export const types_query_dsl_terms_set_query = types_query_dsl_query_base.and(z.
 export const types_aggregations_auto_date_histogram_aggregation = types_aggregations_bucket_aggregation_base.and(z.object({
     buckets: z.optional(z.number().register(z.globalRegistry, {
         description: 'The target number of buckets.'
-    })).default(10),
+    })),
     field: z.optional(types_field),
     format: z.optional(z.string().register(z.globalRegistry, {
         description: 'The date format used to format `key_as_string` in the response.\nIf no `format` is specified, the first date format specified in the field mapping is used.'
@@ -22801,7 +22798,7 @@ export const types_aggregations_bucket_sort_aggregation = types_aggregations_agg
 export const types_aggregations_cardinality_aggregation = types_aggregations_metric_aggregation_base.and(z.object({
     precision_threshold: z.optional(z.number().register(z.globalRegistry, {
         description: 'A unique count below which counts are expected to be close to accurate.\nThis allows to trade memory for accuracy.'
-    })).default(3000),
+    })),
     rehash: z.optional(z.boolean()),
     execution_hint: z.optional(types_aggregations_cardinality_execution_mode)
 }));
@@ -22814,7 +22811,7 @@ export const types_aggregations_composite_aggregation = types_aggregations_bucke
     after: z.optional(types_aggregations_composite_aggregate_key),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of composite buckets that should be returned.'
-    })).default(10),
+    })),
     get sources() {
         return z.optional(z.array(z.record(z.string(), z.lazy((): any => types_aggregations_composite_aggregation_source))).register(z.globalRegistry, {
             description: 'The value sources used to build composite buckets.\nKeys are returned in the order of the `sources` definition.'
@@ -22893,11 +22890,11 @@ export const types_aggregations_diversified_sampler_aggregation = types_aggregat
     execution_hint: z.optional(types_aggregations_sampler_aggregation_execution_hint),
     max_docs_per_value: z.optional(z.number().register(z.globalRegistry, {
         description: 'Limits how many documents are permitted per choice of de-duplicating value.'
-    })).default(1),
+    })),
     script: z.optional(types_script),
     shard_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'Limits how many top-scoring documents are collected in the sample processed on each shard.'
-    })).default(100),
+    })),
     field: z.optional(types_field)
 }));
 
@@ -22913,13 +22910,13 @@ export const types_aggregations_frequent_item_sets_aggregation = z.object({
     }),
     minimum_set_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum size of one item set.'
-    })).default(1),
+    })),
     minimum_support: z.optional(z.number().register(z.globalRegistry, {
         description: 'The minimum support of one item set.'
-    })).default(0.1),
+    })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of top item sets to return.'
-    })).default(10),
+    })),
     filter: z.optional(types_query_dsl_query_container)
 });
 
@@ -22932,10 +22929,10 @@ export const types_aggregations_filters_aggregation = types_aggregations_bucket_
     })),
     other_bucket_key: z.optional(z.string().register(z.globalRegistry, {
         description: 'The key with which the other bucket is returned.'
-    })).default('_other_'),
+    })),
     keyed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'By default, the named filters aggregation returns the buckets as an object.\nSet to `false` to return the buckets as an array of objects.'
-    })).default(true)
+    }))
 })));
 
 /**
@@ -22950,7 +22947,7 @@ export const types_aggregations_buckets_query_container = z.union([
 export const types_aggregations_geo_bounds_aggregation = types_aggregations_metric_aggregation_base.and(z.object({
     wrap_longitude: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the bounding box should be allowed to overlap the international date line.'
-    })).default(true)
+    }))
 }));
 
 export const types_aggregations_geo_centroid_aggregation = types_aggregations_metric_aggregation_base.and(z.object({
@@ -22979,7 +22976,7 @@ export const types_aggregations_histogram_aggregation = types_aggregations_bucke
     format: z.optional(z.string()),
     keyed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, returns buckets as a hash instead of an array, keyed by the bucket keys.'
-    })).default(false)
+    }))
 }));
 
 export const types_aggregations_max_aggregation = types_aggregations_format_metric_aggregation_base.and(z.record(z.string(), z.unknown()));
@@ -22987,7 +22984,7 @@ export const types_aggregations_max_aggregation = types_aggregations_format_metr
 export const types_aggregations_median_absolute_deviation_aggregation = types_aggregations_format_metric_aggregation_base.and(z.object({
     compression: z.optional(z.number().register(z.globalRegistry, {
         description: 'Limits the maximum number of nodes used by the underlying TDigest algorithm to `20 * compression`, enabling control of memory usage and approximation error.'
-    })).default(1000),
+    })),
     execution_hint: z.optional(types_aggregations_t_digest_execution_hint)
 }));
 
@@ -22996,7 +22993,7 @@ export const types_aggregations_min_aggregation = types_aggregations_format_metr
 export const types_aggregations_percentile_ranks_aggregation = types_aggregations_format_metric_aggregation_base.and(z.object({
     keyed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'By default, the aggregation associates a unique string key with each bucket and returns the ranges as a hash rather than an array.\nSet to `false` to disable this behavior.'
-    })).default(true),
+    })),
     values: z.optional(z.union([
         z.array(z.number()),
         z.string(),
@@ -23009,7 +23006,7 @@ export const types_aggregations_percentile_ranks_aggregation = types_aggregation
 export const types_aggregations_percentiles_aggregation = types_aggregations_format_metric_aggregation_base.and(z.object({
     keyed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'By default, the aggregation associates a unique string key with each bucket and returns the ranges as a hash rather than an array.\nSet to `false` to disable this behavior.'
-    })).default(true),
+    })),
     percents: z.optional(z.union([
         z.number(),
         z.array(z.number())
@@ -23059,7 +23056,7 @@ export const types_aggregations_significant_terms_aggregation = types_aggregatio
     jlh: z.optional(types_empty_object),
     min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'Only return terms that are found in more than `min_doc_count` hits.'
-    })).default(3),
+    })),
     mutual_information: z.optional(types_aggregations_mutual_information_heuristic),
     percentage: z.optional(types_aggregations_percentage_score_heuristic),
     get script_heuristic() {
@@ -23095,7 +23092,7 @@ export const types_aggregations_significant_text_aggregation = types_aggregation
     jlh: z.optional(types_empty_object),
     min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'Only return values that are found in more than `min_doc_count` hits.'
-    })).default(3),
+    })),
     mutual_information: z.optional(types_aggregations_mutual_information_heuristic),
     percentage: z.optional(types_aggregations_percentage_score_heuristic),
     script_heuristic: z.optional(types_aggregations_scripted_heuristic),
@@ -23116,7 +23113,7 @@ export const types_aggregations_stats_aggregation = types_aggregations_format_me
 export const types_aggregations_string_stats_aggregation = types_aggregations_metric_aggregation_base.and(z.object({
     show_distribution: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Shows the probability distribution for all characters.'
-    })).default(false)
+    }))
 }));
 
 export const types_aggregations_sum_aggregation = types_aggregations_format_metric_aggregation_base.and(z.record(z.string(), z.unknown()));
@@ -23129,7 +23126,7 @@ export const types_aggregations_terms_aggregation = types_aggregations_bucket_ag
     include: z.optional(types_aggregations_terms_include),
     min_doc_count: z.optional(z.number().register(z.globalRegistry, {
         description: 'Only return values that are found in more than `min_doc_count` hits.'
-    })).default(1),
+    })),
     missing: z.optional(types_aggregations_missing),
     missing_order: z.optional(types_aggregations_missing_order),
     missing_bucket: z.optional(z.boolean()),
@@ -23149,7 +23146,7 @@ export const types_aggregations_terms_aggregation = types_aggregations_bucket_ag
     })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of buckets returned out of the overall terms list.'
-    })).default(10),
+    })),
     format: z.optional(z.string())
 }));
 
@@ -23159,29 +23156,29 @@ export const types_aggregations_top_hits_aggregation = types_aggregations_metric
     })),
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, returns detailed information about score computation as part of a hit.'
-    })).default(false),
+    })),
     fields: z.optional(z.array(types_query_dsl_field_and_format).register(z.globalRegistry, {
         description: 'Array of wildcard (*) patterns. The request returns values for field names\nmatching these patterns in the hits.fields property of the response.'
     })),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'Starting document offset.'
-    })).default(0),
+    })),
     highlight: z.optional(global_search_types_highlight),
     script_fields: z.optional(z.record(z.string(), types_script_field).register(z.globalRegistry, {
         description: 'Returns the result of one or more script evaluations for each hit.'
     })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of top matching hits to return per bucket.'
-    })).default(3),
+    })),
     sort: z.optional(types_sort),
     _source: z.optional(global_search_types_source_config),
     stored_fields: z.optional(types_fields),
     track_scores: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, calculates and returns document scores, even if the scores are not used for sorting.'
-    })).default(false),
+    })),
     version: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, returns document version as part of a hit.'
-    })).default(false),
+    })),
     seq_no_primary_term: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, returns sequence number and primary term of the last modification of each hit.'
     }))
@@ -23210,7 +23207,7 @@ export const types_aggregations_top_metrics_aggregation = types_aggregations_met
     ])),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of top documents from which to return metrics.'
-    })).default(1),
+    })),
     sort: z.optional(types_sort)
 }));
 
@@ -23245,7 +23242,7 @@ export const types_aggregations_variable_width_histogram_aggregation = z.object(
     field: z.optional(types_field),
     buckets: z.optional(z.number().register(z.globalRegistry, {
         description: 'The target number of buckets.'
-    })).default(10),
+    })),
     shard_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of buckets that the coordinating node will request from each shard.\nDefaults to `buckets * 50`.'
     })),
@@ -23258,17 +23255,17 @@ export const types_aggregations_variable_width_histogram_aggregation = z.object(
 export const global_bulk_update_action = z.object({
     detect_noop: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the `result` in the response is set to \'noop\' when no changes to the document occur.'
-    })).default(true),
+    })),
     doc: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
         description: 'A partial update to an existing document.'
     })),
     doc_as_upsert: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to use the contents of `doc` as the value of `upsert`.'
-    })).default(false),
+    })),
     script: z.optional(types_script),
     scripted_upsert: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to run the script whether or not the document exists.'
-    })).default(false),
+    })),
     _source: z.optional(global_search_types_source_config),
     upsert: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
         description: 'If the document does not already exist, the contents of `upsert` are inserted as a new document.\nIf the document exists, the `script` is run.'
@@ -23296,9 +23293,9 @@ export const indices_types_index_settings = z.object({
     ])),
     number_of_routing_shards: z.optional(z.number()),
     check_on_startup: z.optional(indices_types_index_check_on_startup),
-    codec: z.optional(z.string()).default('LZ4'),
+    codec: z.optional(z.string()),
     routing_partition_size: z.optional(spec_utils_stringifiedinteger),
-    load_fixed_bitset_filters_eagerly: z.optional(z.boolean()).default(true),
+    load_fixed_bitset_filters_eagerly: z.optional(z.boolean()),
     hidden: z.optional(z.union([
         z.boolean(),
         z.string()
@@ -23310,19 +23307,19 @@ export const indices_types_index_settings = z.object({
     merge: z.optional(indices_types_merge),
     search: z.optional(indices_types_settings_search),
     refresh_interval: z.optional(types_duration),
-    max_result_window: z.optional(z.number()).default(10000),
-    max_inner_result_window: z.optional(z.number()).default(100),
-    max_rescore_window: z.optional(z.number()).default(10000),
-    max_docvalue_fields_search: z.optional(z.number()).default(100),
-    max_script_fields: z.optional(z.number()).default(32),
-    max_ngram_diff: z.optional(z.number()).default(1),
-    max_shingle_diff: z.optional(z.number()).default(3),
+    max_result_window: z.optional(z.number()),
+    max_inner_result_window: z.optional(z.number()),
+    max_rescore_window: z.optional(z.number()),
+    max_docvalue_fields_search: z.optional(z.number()),
+    max_script_fields: z.optional(z.number()),
+    max_ngram_diff: z.optional(z.number()),
+    max_shingle_diff: z.optional(z.number()),
     blocks: z.optional(indices_types_index_setting_blocks),
     max_refresh_listeners: z.optional(z.number()),
     analyze: z.optional(indices_types_settings_analyze),
     highlight: z.optional(indices_types_settings_highlight),
-    max_terms_count: z.optional(z.number()).default(65536),
-    max_regex_length: z.optional(z.number()).default(1000),
+    max_terms_count: z.optional(z.number()),
+    max_regex_length: z.optional(z.number()),
     routing: z.optional(indices_types_index_routing),
     gc_deletes: z.optional(types_duration),
     default_pipeline: z.optional(types_pipeline_name),
@@ -24133,7 +24130,7 @@ export const types_mapping_dense_vector_property = types_mapping_property_base.a
     element_type: z.optional(types_mapping_dense_vector_element_type),
     index: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, you can search this field using the kNN search API.'
-    })).default(true),
+    })),
     index_options: z.optional(types_mapping_dense_vector_index_options),
     similarity: z.optional(types_mapping_dense_vector_similarity)
 }));
@@ -24318,7 +24315,7 @@ export const types_mapping_number_property_base = types_mapping_doc_values_prope
     time_series_metric: z.optional(types_mapping_time_series_metric_type),
     time_series_dimension: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'For internal use by Elastic only. Marks the field as a time series dimension. Defaults to false.'
-    })).default(false)
+    }))
 }));
 
 export const types_mapping_double_number_property = types_mapping_number_property_base.and(z.object({
@@ -24424,7 +24421,7 @@ export const indices_types_alias_definition = z.object({
     })),
     is_write_index: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the index is the write index for the alias.'
-    })).default(false),
+    })),
     routing: z.optional(z.string().register(z.globalRegistry, {
         description: 'Value used to route indexing and search operations to a specific shard.'
     })),
@@ -24433,7 +24430,7 @@ export const indices_types_alias_definition = z.object({
     })),
     is_hidden: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the alias is hidden.\nAll indices for the alias must have the same `is_hidden` value.'
-    })).default(false)
+    }))
 });
 
 export const indices_types_index_state = z.object({
@@ -24452,10 +24449,10 @@ export const indices_types_alias = z.object({
     index_routing: z.optional(types_routing),
     is_hidden: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the alias is hidden.\nAll indices for the alias must have the same `is_hidden` value.'
-    })).default(false),
+    })),
     is_write_index: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the index is the write index for the alias.'
-    })).default(false),
+    })),
     routing: z.optional(types_routing),
     search_routing: z.optional(types_routing)
 });
@@ -24531,7 +24528,7 @@ export const indices_create_from_create_from = z.object({
     settings_override: z.optional(indices_types_index_settings),
     remove_index_blocks: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If index blocks should be removed when creating destination index (optional)'
-    })).default(true)
+    }))
 });
 
 export const indices_get_alias_types_index_aliases = z.object({
@@ -24790,7 +24787,7 @@ export const indices_update_aliases_add_action = z.object({
     index_routing: z.optional(types_routing),
     is_hidden: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the alias is hidden.'
-    })).default(false),
+    })),
     is_write_index: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, sets the write index or data stream for the alias.'
     })),
@@ -24798,7 +24795,7 @@ export const indices_update_aliases_add_action = z.object({
     search_routing: z.optional(types_routing),
     must_exist: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the alias must exist to perform the action.'
-    })).default(false)
+    }))
 });
 
 export const ingest_types_pipeline = z.object({
@@ -24818,7 +24815,7 @@ export const ingest_types_pipeline = z.object({
     version: z.optional(types_version_number),
     deprecated: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Marks this ingest pipeline as deprecated.\nWhen a deprecated ingest pipeline is referenced as the default or final pipeline when creating or updating a non-deprecated index template, Elasticsearch will emit a deprecation warning.'
-    })).default(false),
+    })),
     _meta: z.optional(types_metadata),
     created_date: z.optional(types_date_time),
     created_date_millis: z.optional(types_epoch_time_unit_millis),
@@ -24974,7 +24971,7 @@ export const ingest_types_append_processor = z.lazy((): any => ingest_types_proc
     copy_from: z.optional(types_field),
     allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `false`, the processor does not append values already present in the field.'
-    })).default(true)
+    }))
 }));
 
 export const ingest_types_processor_base = z.object({
@@ -24997,10 +24994,10 @@ export const ingest_types_attachment_processor = ingest_types_processor_base.and
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and field does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     indexed_chars: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of chars being used for extraction to prevent huge fields.\nUse `-1` for no limit.'
-    })).default(100000),
+    })),
     indexed_chars_field: z.optional(types_field),
     properties: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'Array of properties to select to be stored.\nCan be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`.'
@@ -25008,7 +25005,7 @@ export const ingest_types_attachment_processor = ingest_types_processor_base.and
     target_field: z.optional(types_field),
     remove_binary: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the binary field will be removed from the document'
-    })).default(false),
+    })),
     resource_name: z.optional(z.string().register(z.globalRegistry, {
         description: 'Field containing the name of the resource to decode.\nIf specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection.'
     }))
@@ -25018,7 +25015,7 @@ export const ingest_types_bytes_processor = ingest_types_processor_base.and(z.ob
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field)
 }));
 
@@ -25029,7 +25026,7 @@ export const ingest_types_circle_processor = ingest_types_processor_base.and(z.o
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     shape_type: ingest_types_shape_type,
     target_field: z.optional(types_field)
 }));
@@ -25046,17 +25043,17 @@ export const ingest_types_community_id_processor = ingest_types_processor_base.a
     target_field: z.optional(types_field),
     seed: z.optional(z.number().register(z.globalRegistry, {
         description: 'Seed for the community ID hash. Must be between 0 and 65535 (inclusive). The\nseed can prevent hash collisions between network domains, such as a staging\nand production network that use the same addressing scheme.'
-    })).default(0),
+    })),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true and any required fields are missing, the processor quietly exits\nwithout modifying the document.'
-    })).default(true)
+    }))
 }));
 
 export const ingest_types_convert_processor = ingest_types_processor_base.and(z.object({
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field),
     type: ingest_types_convert_type
 }));
@@ -25071,10 +25068,10 @@ export const ingest_types_csv_processor = ingest_types_processor_base.and(z.obje
     })),
     quote: z.optional(z.string().register(z.globalRegistry, {
         description: 'Quote used in CSV, has to be single character string.'
-    })).default('"'),
+    })),
     separator: z.optional(z.string().register(z.globalRegistry, {
         description: 'Separator used in CSV, has to be single character string.'
-    })).default(','),
+    })),
     target_fields: types_fields,
     trim: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Trim whitespaces in unquoted fields.'
@@ -25088,14 +25085,14 @@ export const ingest_types_date_processor = ingest_types_processor_base.and(z.obj
     }),
     locale: z.optional(z.string().register(z.globalRegistry, {
         description: 'The locale to use when parsing the date, relevant when parsing month names or week days.\nSupports template snippets.'
-    })).default('ENGLISH'),
+    })),
     target_field: z.optional(types_field),
     timezone: z.optional(z.string().register(z.globalRegistry, {
         description: 'The timezone to use when parsing the date.\nSupports template snippets.'
-    })).default('UTC'),
+    })),
     output_format: z.optional(z.string().register(z.globalRegistry, {
         description: 'The format to use when writing the date to target_field. Must be a valid\njava time pattern.'
-    })).default('yyyy-MM-dd\'T\'HH:mm:ss.SSSXXX')
+    }))
 }));
 
 export const ingest_types_date_index_name_processor = ingest_types_processor_base.and(z.object({
@@ -25108,26 +25105,26 @@ export const ingest_types_date_index_name_processor = ingest_types_processor_bas
     field: types_field,
     index_name_format: z.optional(z.string().register(z.globalRegistry, {
         description: 'The format to be used when printing the parsed date into the index name.\nA valid java time pattern is expected here.\nSupports template snippets.'
-    })).default('yyyy-MM-dd'),
+    })),
     index_name_prefix: z.optional(z.string().register(z.globalRegistry, {
         description: 'A prefix of the index name to be prepended before the printed date.\nSupports template snippets.'
     })),
     locale: z.optional(z.string().register(z.globalRegistry, {
         description: 'The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days.'
-    })).default('ENGLISH'),
+    })),
     timezone: z.optional(z.string().register(z.globalRegistry, {
         description: 'The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.'
-    })).default('UTC')
+    }))
 }));
 
 export const ingest_types_dissect_processor = ingest_types_processor_base.and(z.object({
     append_separator: z.optional(z.string().register(z.globalRegistry, {
         description: 'The character(s) that separate the appended fields.'
-    })).default('""'),
+    })),
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     pattern: z.string().register(z.globalRegistry, {
         description: 'The pattern to apply to the field.'
     })
@@ -25137,7 +25134,7 @@ export const ingest_types_dot_expander_processor = ingest_types_processor_base.a
     field: types_field,
     override: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Controls the behavior when there is already an existing nested object that conflicts with the expanded field.\nWhen `false`, the processor will merge conflicts by combining the old and the new values into an array.\nWhen `true`, the value from the expanded field will overwrite the existing value.'
-    })).default(false),
+    })),
     path: z.optional(z.string().register(z.globalRegistry, {
         description: 'The field that contains the field to expand.\nOnly required if the field to expand is part another object field, because the `field` option can only understand leaf fields.'
     }))
@@ -25149,13 +25146,13 @@ export const ingest_types_enrich_processor = ingest_types_processor_base.and(z.o
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     max_matches: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of matched documents to include under the configured target field.\nThe `target_field` will be turned into a json array if `max_matches` is higher than 1, otherwise `target_field` will become a json object.\nIn order to avoid documents getting too large, the maximum allowed value is 128.'
-    })).default(1),
+    })),
     override: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If processor will update fields with pre-existing non-null-valued field.\nWhen set to `false`, such fields will not be touched.'
-    })).default(true),
+    })),
     policy_name: z.string().register(z.globalRegistry, {
         description: 'The name of the enrich policy to use.'
     }),
@@ -25178,28 +25175,28 @@ export const ingest_types_fingerprint_processor = ingest_types_processor_base.an
     method: z.optional(ingest_types_fingerprint_digest),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, the processor ignores any missing fields. If all fields are\nmissing, the processor silently exits without modifying the document.'
-    })).default(false)
+    }))
 }));
 
 export const ingest_types_foreach_processor = ingest_types_processor_base.and(z.object({
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the processor silently exits without changing the document if the `field` is `null` or missing.'
-    })).default(false),
+    })),
     processor: ingest_types_processor_container
 }));
 
 export const ingest_types_ip_location_processor = ingest_types_processor_base.and(z.object({
     database_file: z.optional(z.string().register(z.globalRegistry, {
         description: 'The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.'
-    })).default('GeoLite2-City.mmdb'),
+    })),
     field: types_field,
     first_only: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, only the first found IP location data will be returned, even if the field contains an array.'
-    })).default(true),
+    })),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     properties: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'Controls what properties are added to the `target_field` based on the IP location lookup.'
     })),
@@ -25221,21 +25218,21 @@ export const ingest_types_geo_grid_processor = ingest_types_processor_base.and(z
     precision_field: z.optional(types_field),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_format: z.optional(ingest_types_geo_grid_target_format)
 }));
 
 export const ingest_types_geo_ip_processor = ingest_types_processor_base.and(z.object({
     database_file: z.optional(z.string().register(z.globalRegistry, {
         description: 'The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.'
-    })).default('GeoLite2-City.mmdb'),
+    })),
     field: types_field,
     first_only: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, only the first found geoip data will be returned, even if the field contains an array.'
-    })).default(true),
+    })),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     properties: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'Controls what properties are added to the `target_field` based on the geoip lookup.'
     })),
@@ -25248,11 +25245,11 @@ export const ingest_types_geo_ip_processor = ingest_types_processor_base.and(z.o
 export const ingest_types_grok_processor = ingest_types_processor_base.and(z.object({
     ecs_compatibility: z.optional(z.string().register(z.globalRegistry, {
         description: 'Must be disabled or v1. If v1, the processor uses patterns with Elastic\nCommon Schema (ECS) field names.'
-    })).default('disabled'),
+    })),
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     pattern_definitions: z.optional(z.record(z.string(), z.string()).register(z.globalRegistry, {
         description: 'A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor.\nPatterns matching existing names will override the pre-existing definition.'
     })),
@@ -25261,14 +25258,14 @@ export const ingest_types_grok_processor = ingest_types_processor_base.and(z.obj
     }),
     trace_match: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched.'
-    })).default(false)
+    }))
 }));
 
 export const ingest_types_gsub_processor = ingest_types_processor_base.and(z.object({
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     pattern: z.string().register(z.globalRegistry, {
         description: 'The pattern to be replaced.'
     }),
@@ -25282,7 +25279,7 @@ export const ingest_types_html_strip_processor = ingest_types_processor_base.and
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document,'
-    })).default(false),
+    })),
     target_field: z.optional(types_field)
 }));
 
@@ -25313,11 +25310,11 @@ export const ingest_types_join_processor = ingest_types_processor_base.and(z.obj
 export const ingest_types_json_processor = ingest_types_processor_base.and(z.object({
     add_to_root: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Flag that forces the parsed JSON to be added at the top level of the document.\n`target_field` must not be set when this option is chosen.'
-    })).default(false),
+    })),
     add_to_root_conflict_strategy: z.optional(ingest_types_json_processor_conflict_strategy),
     allow_duplicate_keys: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When set to `true`, the JSON parser will not fail if the JSON contains duplicate keys.\nInstead, the last encountered value for any duplicate key wins.'
-    })).default(false),
+    })),
     field: types_field,
     target_field: z.optional(types_field)
 }));
@@ -25332,16 +25329,16 @@ export const ingest_types_key_value_processor = ingest_types_processor_base.and(
     }),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     include_keys: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'List of keys to filter and insert into document.\nDefaults to including all keys.'
     })),
     prefix: z.optional(z.string().register(z.globalRegistry, {
         description: 'Prefix to be added to extracted keys.'
-    })).default('null'),
+    })),
     strip_brackets: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`. strip brackets `()`, `<>`, `[]` as well as quotes `\'` and `"` from extracted values.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field),
     trim_key: z.optional(z.string().register(z.globalRegistry, {
         description: 'String of characters to trim from extracted keys.'
@@ -25358,7 +25355,7 @@ export const ingest_types_lowercase_processor = ingest_types_processor_base.and(
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field)
 }));
 
@@ -25372,14 +25369,14 @@ export const ingest_types_network_direction_processor = ingest_types_processor_b
     internal_networks_field: z.optional(types_field),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true and any required fields are missing, the processor quietly exits\nwithout modifying the document.'
-    })).default(true)
+    }))
 }));
 
 export const ingest_types_pipeline_processor = ingest_types_processor_base.and(z.object({
     name: types_name,
     ignore_missing_pipeline: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Whether to ignore missing pipelines instead of failing.'
-    })).default(false)
+    }))
 }));
 
 export const ingest_types_redact_processor = ingest_types_processor_base.and(z.object({
@@ -25390,19 +25387,19 @@ export const ingest_types_redact_processor = ingest_types_processor_base.and(z.o
     pattern_definitions: z.optional(z.record(z.string(), z.string())),
     prefix: z.optional(z.string().register(z.globalRegistry, {
         description: 'Start a redacted section with this token'
-    })).default('<'),
+    })),
     suffix: z.optional(z.string().register(z.globalRegistry, {
         description: 'End a redacted section with this token'
-    })).default('>'),
+    })),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     skip_if_unlicensed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document'
-    })).default(false),
+    })),
     trace_redact: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` then ingest metadata `_ingest._redact._is_redacted` is set to `true` if the document has been redacted'
-    })).default(false)
+    }))
 }));
 
 export const ingest_types_registered_domain_processor = ingest_types_processor_base.and(z.object({
@@ -25410,7 +25407,7 @@ export const ingest_types_registered_domain_processor = ingest_types_processor_b
     target_field: z.optional(types_field),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true and any required fields are missing, the processor quietly exits\nwithout modifying the document.'
-    })).default(true)
+    }))
 }));
 
 export const ingest_types_remove_processor = ingest_types_processor_base.and(z.object({
@@ -25418,14 +25415,14 @@ export const ingest_types_remove_processor = ingest_types_processor_base.and(z.o
     keep: z.optional(types_fields),
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false)
+    }))
 }));
 
 export const ingest_types_rename_processor = ingest_types_processor_base.and(z.object({
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_field: types_field
 }));
 
@@ -25457,13 +25454,13 @@ export const ingest_types_set_processor = ingest_types_processor_base.and(z.obje
     field: types_field,
     ignore_empty_value: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `value` is a template snippet that evaluates to `null` or the empty string, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     media_type: z.optional(z.string().register(z.globalRegistry, {
         description: 'The media type for encoding `value`.\nApplies only when value is a template snippet.\nMust be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.'
     })),
     override: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` processor will update fields with pre-existing non-null-valued field.\nWhen set to `false`, such fields will not be touched.'
-    })).default(true),
+    })),
     value: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
         description: 'The value to be set for the field.\nSupports template snippets.\nMay specify only one of `value` or `copy_from`.'
     }))
@@ -25486,10 +25483,10 @@ export const ingest_types_split_processor = ingest_types_processor_base.and(z.ob
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     preserve_trailing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Preserves empty trailing fields, if any.'
-    })).default(false),
+    })),
     separator: z.string().register(z.globalRegistry, {
         description: 'A regex which matches the separator, for example, `,` or `\\s+`.'
     }),
@@ -25502,7 +25499,7 @@ export const ingest_types_trim_processor = ingest_types_processor_base.and(z.obj
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field)
 }));
 
@@ -25510,7 +25507,7 @@ export const ingest_types_uppercase_processor = ingest_types_processor_base.and(
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field)
 }));
 
@@ -25518,7 +25515,7 @@ export const ingest_types_url_decode_processor = ingest_types_processor_base.and
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field)
 }));
 
@@ -25526,13 +25523,13 @@ export const ingest_types_uri_parts_processor = ingest_types_processor_base.and(
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     keep_original: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the processor copies the unparsed URI to `<target_field>.original`.'
-    })).default(true),
+    })),
     remove_if_successful: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the processor removes the `field` after parsing the URI string.\nIf parsing fails, the processor does not remove the `field`.'
-    })).default(false),
+    })),
     target_field: z.optional(types_field)
 }));
 
@@ -25540,23 +25537,17 @@ export const ingest_types_user_agent_processor = ingest_types_processor_base.and
     field: types_field,
     ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
-    })).default(false),
+    })),
     regex_file: z.optional(z.string().register(z.globalRegistry, {
         description: 'The name of the file in the `config/ingest-user-agent` directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the `regexes.yaml` from uap-core it ships with.'
     })),
     target_field: z.optional(types_field),
     properties: z.optional(z.array(ingest_types_user_agent_property).register(z.globalRegistry, {
         description: 'Controls what properties are added to `target_field`.'
-    })).default([
-        'name',
-        'os',
-        'device',
-        'original',
-        'version'
-    ]),
+    })),
     extract_device_type: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Extracts device type from the user agent string on a best-effort basis.'
-    })).default(false)
+    }))
 }));
 
 export const ml_types_analysis_config = z.object({
@@ -25652,7 +25643,7 @@ export const ml_types_job = z.object({
     custom_settings: z.optional(ml_types_custom_settings),
     daily_model_snapshot_retention_after_days: z.optional(z.number().register(z.globalRegistry, {
         description: 'Advanced configuration option, which affects the automatic removal of old model snapshots for this job.\nIt specifies a period of time (in days) after which only the first snapshot per day is retained.\nThis period is relative to the timestamp of the most recent snapshot for this job.\nValid values range from 0 to `model_snapshot_retention_days`.'
-    })).default(1),
+    })),
     data_description: ml_types_data_description,
     datafeed_config: z.optional(ml_types_datafeed),
     deleting: z.optional(z.boolean().register(z.globalRegistry, {
@@ -25808,20 +25799,20 @@ export const ml_types_datafeed_config = z.object({
     })),
     scroll_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The size parameter that is used in Elasticsearch searches when the datafeed does not use aggregations. The maximum value is the value of `index.max_result_window`, which is 10,000 by default.'
-    })).default(1000)
+    }))
 });
 
 export const ml_types_job_config = z.object({
     allow_lazy_open: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Advanced configuration option. Specifies whether this job can open when there is insufficient machine learning node capacity for it to be immediately assigned to a node.'
-    })).default(false),
+    })),
     analysis_config: ml_types_analysis_config,
     analysis_limits: z.optional(ml_types_analysis_limits),
     background_persist_interval: z.optional(types_duration),
     custom_settings: z.optional(ml_types_custom_settings),
     daily_model_snapshot_retention_after_days: z.optional(z.number().register(z.globalRegistry, {
         description: 'Advanced configuration option, which affects the automatic removal of old model snapshots for this job.\nIt specifies a period of time (in days) after which only the first snapshot per day is retained.\nThis period is relative to the timestamp of the most recent snapshot for this job.'
-    })).default(1),
+    })),
     data_description: ml_types_data_description,
     datafeed_config: z.optional(ml_types_datafeed_config),
     description: z.optional(z.string().register(z.globalRegistry, {
@@ -25834,7 +25825,7 @@ export const ml_types_job_config = z.object({
     model_plot_config: z.optional(ml_types_model_plot_config),
     model_snapshot_retention_days: z.optional(z.number().register(z.globalRegistry, {
         description: 'Advanced configuration option, which affects the automatic removal of old model snapshots for this job.\nIt specifies the maximum period of time (in days) that snapshots are retained.\nThis period is relative to the timestamp of the most recent snapshot for this job.\nThe default value is `10`, which means snapshots ten days older than the newest snapshot are deleted.'
-    })).default(10),
+    })),
     renormalization_window_days: z.optional(z.number().register(z.globalRegistry, {
         description: 'Advanced configuration option.\nThe period over which adjustments to the score are applied, as new data is seen.\nThe default value is the longer of 30 days or 100 `bucket_spans`.'
     })),
@@ -25904,14 +25895,14 @@ export const global_msearch_template_request_item = z.union([
 export const global_msearch_template_template_config = z.object({
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, returns detailed information about score calculation as part of each hit.'
-    })).default(false),
+    })),
     id: z.optional(types_id),
     params: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
         description: 'Key-value pairs used to replace Mustache variables in the template.\nThe key is the variable name.\nThe value is the variable value.'
     })),
     profile: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the query execution is profiled.'
-    })).default(false),
+    })),
     source: z.optional(types_script_source)
 });
 
@@ -25986,7 +25977,7 @@ export const global_reindex_source = z.object({
     remote: z.optional(global_reindex_remote_source),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of documents to index per batch.\nUse it when you are indexing from remote to ensure that the batches fit within the on-heap buffer, which defaults to a maximum size of 100 MB.'
-    })).default(1000),
+    })),
     slice: z.optional(types_sliced_scroll),
     sort: z.optional(types_sort),
     _source: z.optional(global_search_types_source_config),
@@ -26074,7 +26065,7 @@ export const security_types_indices_privileges = z.object({
     },
     allow_restricted_indices: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` if using wildcard or regular expressions for patterns that cover restricted indices. Implicitly, restricted indices have limited privileges that can cause pattern tests to fail. If restricted indices are explicitly included in the `names` list, Elasticsearch checks privileges against these indices regardless of the value set for `allow_restricted_indices`.'
-    })).default(false)
+    }))
 });
 
 /**
@@ -26128,7 +26119,7 @@ export const security_types_remote_indices_privileges = z.object({
     query: z.optional(security_types_indices_privileges_query),
     allow_restricted_indices: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` if using wildcard or regular expressions for patterns that cover restricted indices. Implicitly, restricted indices have limited privileges that can cause pattern tests to fail. If restricted indices are explicitly included in the `names` list, Elasticsearch checks privileges against these indices regardless of the value set for `allow_restricted_indices`.'
-    })).default(false)
+    }))
 }).register(z.globalRegistry, {
     description: 'The subset of index level privileges that can be defined for remote clusters.'
 });
@@ -26153,7 +26144,7 @@ export const security_types_search_access = z.object({
     query: z.optional(security_types_indices_privileges_query),
     allow_restricted_indices: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` if using wildcard or regular expressions for patterns that cover restricted indices. Implicitly, restricted indices have limited privileges that can cause pattern tests to fail. If restricted indices are explicitly included in the `names` list, Elasticsearch checks privileges against these indices regardless of the value set for `allow_restricted_indices`.'
-    })).default(false)
+    }))
 });
 
 export const security_types_api_key = z.object({
@@ -26365,10 +26356,10 @@ export const security_query_api_keys_api_key_filters_aggregation = types_aggrega
     })),
     other_bucket_key: z.optional(z.string().register(z.globalRegistry, {
         description: 'The key with which the other bucket is returned.'
-    })).default('_other_'),
+    })),
     keyed: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'By default, the named filters aggregation returns the buckets as an object.\nSet to `false` to return the buckets as an array of objects.'
-    })).default(true)
+    }))
 })));
 
 /**
@@ -26595,7 +26586,7 @@ export const types_transform_container = z.object({
 });
 
 export const types_script_transform = z.object({
-    lang: z.optional(z.string()).default('painless'),
+    lang: z.optional(z.string()),
     params: z.optional(z.record(z.string(), z.record(z.string(), z.unknown()))),
     source: z.optional(types_script_source),
     id: z.optional(z.string())
@@ -26691,10 +26682,11 @@ export const async_search_submit_keep_on_completion = z.boolean().register(z.glo
 });
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const async_search_submit_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -26712,10 +26704,10 @@ export const async_search_submit_analyzer = z.string().register(z.globalRegistry
 });
 
 /**
- * Specify whether wildcard and prefix queries should be analyzed (default: false)
+ * Specify whether wildcard and prefix queries should be analyzed
  */
 export const async_search_submit_analyze_wildcard = z.boolean().register(z.globalRegistry, {
-    description: 'Specify whether wildcard and prefix queries should be analyzed (default: false)'
+    description: 'Specify whether wildcard and prefix queries should be analyzed'
 });
 
 /**
@@ -26751,7 +26743,7 @@ export const async_search_submit_df = z.string().register(z.globalRegistry, {
 export const async_search_submit_docvalue_fields = types_fields;
 
 /**
- * Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * Whether to expand wildcard expression to concrete indices that are open, closed or both
  */
 export const async_search_submit_expand_wildcards = types_expand_wildcards;
 
@@ -26784,17 +26776,18 @@ export const async_search_submit_lenient = z.boolean().register(z.globalRegistry
 });
 
 /**
- * The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests
+ * The number of concurrent shard requests per node this search executes concurrently.
+ * This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests
  */
 export const async_search_submit_max_concurrent_shard_requests = z.number().register(z.globalRegistry, {
-    description: 'The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
+    description: 'The number of concurrent shard requests per node this search executes concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
 });
 
 /**
- * Specify the node or shard the operation should be performed on (default: random)
+ * Specify the node or shard the operation should be performed on
  */
 export const async_search_submit_preference = z.string().register(z.globalRegistry, {
-    description: 'Specify the node or shard the operation should be performed on (default: random)'
+    description: 'Specify the node or shard the operation should be performed on'
 });
 
 /**
@@ -26851,10 +26844,10 @@ export const async_search_submit_suggest_text = z.string().register(z.globalRegi
 });
 
 /**
- * The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.
+ * The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early
  */
 export const async_search_submit_terminate_after = z.number().register(z.globalRegistry, {
-    description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.'
+    description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early'
 });
 
 /**
@@ -26863,7 +26856,8 @@ export const async_search_submit_terminate_after = z.number().register(z.globalR
 export const async_search_submit_timeout = types_duration;
 
 /**
- * Indicate if the number of documents that match the query should be tracked. A number can also be specified, to accurately track the total hit count up to the number.
+ * Indicate if the number of documents that match the query should be tracked.
+ * A number can also be specified, to accurately track the total hit count up to the number.
  */
 export const async_search_submit_track_total_hits = global_search_types_track_hits;
 
@@ -26925,17 +26919,17 @@ export const async_search_submit_q = z.string().register(z.globalRegistry, {
 });
 
 /**
- * Number of hits to return (default: 10)
+ * Number of hits to return
  */
 export const async_search_submit_size = z.number().register(z.globalRegistry, {
-    description: 'Number of hits to return (default: 10)'
+    description: 'Number of hits to return'
 });
 
 /**
- * Starting offset (default: 0)
+ * Starting offset
  */
 export const async_search_submit_from = z.number().register(z.globalRegistry, {
-    description: 'Starting offset (default: 0)'
+    description: 'Starting offset'
 });
 
 /**
@@ -27740,10 +27734,10 @@ export const cluster_get_component_template_settings_filter = z.union([
 ]);
 
 /**
- * Return all default configurations for the component template (default: false)
+ * Return all default configurations for the component template
  */
 export const cluster_get_component_template_include_defaults = z.boolean().register(z.globalRegistry, {
-    description: 'Return all default configurations for the component template (default: false)'
+    description: 'Return all default configurations for the component template'
 });
 
 /**
@@ -27858,7 +27852,7 @@ export const cluster_put_component_template_cause = z.string().register(z.global
 export const cluster_put_component_template_master_timeout = types_duration;
 
 /**
- * Limit the information returned to the specified metrics
+ * Limit the information returned to the specified metrics.
  */
 export const cluster_state_metric = cluster_state_cluster_state_metrics;
 
@@ -27868,22 +27862,23 @@ export const cluster_state_metric = cluster_state_cluster_state_metrics;
 export const cluster_state_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const cluster_state_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
- * Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * Whether to expand wildcard expression to concrete indices that are open, closed or both
  */
 export const cluster_state_expand_wildcards = types_expand_wildcards;
 
 /**
- * Return settings in flat format (default: false)
+ * Return settings in flat format
  */
 export const cluster_state_flat_settings = z.boolean().register(z.globalRegistry, {
-    description: 'Return settings in flat format (default: false)'
+    description: 'Return settings in flat format'
 });
 
 /**
@@ -27894,12 +27889,12 @@ export const cluster_state_ignore_unavailable = z.boolean().register(z.globalReg
 });
 
 /**
- * Return local information, do not retrieve the state from master node (default: false)
+ * Return local information, do not retrieve the state from master node
  *
  * @deprecated
  */
 export const cluster_state_local = z.boolean().register(z.globalRegistry, {
-    description: 'Return local information, do not retrieve the state from master node (default: false)'
+    description: 'Return local information, do not retrieve the state from master node'
 });
 
 /**
@@ -28161,10 +28156,11 @@ export const enrich_get_policy_master_timeout = types_duration;
 export const eql_search_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const eql_search_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -28998,10 +28994,11 @@ export const indices_flush_wait_if_ongoing = z.boolean().register(z.globalRegist
 export const indices_forcemerge_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const indices_forcemerge_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -29010,10 +29007,10 @@ export const indices_forcemerge_allow_no_indices = z.boolean().register(z.global
 export const indices_forcemerge_expand_wildcards = types_expand_wildcards;
 
 /**
- * Specify whether the index should be flushed after performing the operation (default: true)
+ * Specify whether the index should be flushed after performing the operation
  */
 export const indices_forcemerge_flush = z.boolean().register(z.globalRegistry, {
-    description: 'Specify whether the index should be flushed after performing the operation (default: true)'
+    description: 'Specify whether the index should be flushed after performing the operation'
 });
 
 /**
@@ -29024,10 +29021,10 @@ export const indices_forcemerge_ignore_unavailable = z.boolean().register(z.glob
 });
 
 /**
- * The number of segments the index should be merged into (default: dynamic)
+ * The number of segments the index should be merged into (defayult: dynamic)
  */
 export const indices_forcemerge_max_num_segments = z.number().register(z.globalRegistry, {
-    description: 'The number of segments the index should be merged into (default: dynamic)'
+    description: 'The number of segments the index should be merged into (defayult: dynamic)'
 });
 
 /**
@@ -29038,10 +29035,10 @@ export const indices_forcemerge_only_expunge_deletes = z.boolean().register(z.gl
 });
 
 /**
- * Should the request wait until the force merge is completed.
+ * Should the request wait until the force merge is completed
  */
 export const indices_forcemerge_wait_for_completion = z.boolean().register(z.globalRegistry, {
-    description: 'Should the request wait until the force merge is completed.'
+    description: 'Should the request wait until the force merge is completed'
 });
 
 /**
@@ -29378,14 +29375,15 @@ export const indices_put_index_template_create = z.boolean().register(z.globalRe
 export const indices_put_index_template_master_timeout = types_duration;
 
 /**
- * User defined reason for creating/updating the index template
+ * User defined reason for creating or updating the index template
  */
 export const indices_put_index_template_cause = z.string().register(z.globalRegistry, {
-    description: 'User defined reason for creating/updating the index template'
+    description: 'User defined reason for creating or updating the index template'
 });
 
 /**
- * A comma-separated list of index names the mapping should be added to (supports wildcards); use `_all` or omit to add the mapping on all indices.
+ * A comma-separated list of index names the mapping should be added to (supports wildcards).
+ * Use `_all` or omit to add the mapping on all indices.
  */
 export const indices_put_mapping_index = types_indices;
 
@@ -29529,10 +29527,10 @@ export const indices_put_template_order = z.number().register(z.globalRegistry, 
 });
 
 /**
- * User defined reason for creating/updating the index template
+ * User defined reason for creating or updating the index template
  */
 export const indices_put_template_cause = z.string().register(z.globalRegistry, {
-    description: 'User defined reason for creating/updating the index template'
+    description: 'User defined reason for creating or updating the index template'
 });
 
 /**
@@ -29613,10 +29611,11 @@ export const indices_refresh_ignore_unavailable = z.boolean().register(z.globalR
 export const indices_reload_search_analyzers_index = types_indices;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const indices_reload_search_analyzers_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -29897,7 +29896,7 @@ export const indices_split_timeout = types_duration;
 export const indices_split_wait_for_active_shards = types_wait_for_active_shards;
 
 /**
- * Limit the information returned the specific metrics.
+ * Limit the information returned the specific metrics
  */
 export const indices_stats_metric = types_common_stats_flags;
 
@@ -30156,10 +30155,10 @@ export const ingest_get_pipeline_id = types_id;
 export const ingest_get_pipeline_master_timeout = types_duration;
 
 /**
- * Return pipelines without their definitions (default: false)
+ * Return pipelines without their definitions
  */
 export const ingest_get_pipeline_summary = z.boolean().register(z.globalRegistry, {
-    description: 'Return pipelines without their definitions (default: false)'
+    description: 'Return pipelines without their definitions'
 });
 
 /**
@@ -31310,7 +31309,7 @@ export const nodes_hot_threads_timeout = types_duration;
 export const nodes_hot_threads_type = types_thread_type;
 
 /**
- * The sort order for 'cpu' type (default: total)
+ * The sort order for 'cpu' type
  */
 export const nodes_hot_threads_sort = types_thread_type;
 
@@ -31353,7 +31352,7 @@ export const nodes_reload_secure_settings_timeout = types_duration;
 export const nodes_stats_node_id = types_node_ids;
 
 /**
- * Limit the information returned to the specified metrics
+ * Limits the information returned to the specific metrics.
  */
 export const nodes_stats_metric = nodes_stats_node_stats_metrics;
 
@@ -31416,7 +31415,8 @@ export const nodes_stats_include_unloaded_segments = z.boolean().register(z.glob
 });
 
 /**
- * A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
+ * A comma-separated list of node IDs or names to limit the returned information.
+ * Use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes.
  */
 export const nodes_usage_node_id = types_node_ids;
 
@@ -31552,7 +31552,7 @@ export const scroll_scroll_id = types_scroll_id;
 export const scroll_scroll = types_duration;
 
 /**
- * The scroll ID for scrolled search
+ * The scroll ID
  *
  * @deprecated
  */
@@ -31948,27 +31948,36 @@ export const search_application_search_typed_keys = z.boolean().register(z.globa
 });
 
 /**
- * Comma-separated list of data streams, indices, or aliases to search
+ * A list of indices, data streams, or aliases to search.
+ * It supports wildcards (`*`).
+ * To search all data streams and indices, omit this parameter or use `*` or `_all`.
+ * To search a remote cluster, use the `<cluster>:<target>` syntax.
  */
 export const search_mvt_index = types_indices;
 
 /**
- * Field containing geospatial data to return
+ * A field that contains the geospatial data to return.
+ * It must be a `geo_point` or `geo_shape` field.
+ * The field must have doc values enabled. It cannot be a nested field.
+ *
+ * NOTE: Vector tiles do not natively support geometry collections.
+ * For `geometrycollection` values in a `geo_shape` field, the API returns a hits layer feature for each element of the collection.
+ * This behavior may change in a future release.
  */
 export const search_mvt_field = types_field;
 
 /**
- * Zoom level for the vector tile to search
+ * The zoom level of the vector tile to search. It accepts `0` to `29`.
  */
 export const search_mvt_zoom = global_search_mvt_types_zoom_level;
 
 /**
- * X coordinate for the vector tile to search
+ * The X coordinate for the vector tile to search.
  */
 export const search_mvt_x = global_search_mvt_types_coordinate;
 
 /**
- * Y coordinate for the vector tile to search
+ * The Y coordinate for the vector tile to search.
  */
 export const search_mvt_y = global_search_mvt_types_coordinate;
 
@@ -32212,15 +32221,16 @@ export const searchable_snapshots_cache_stats_master_timeout = types_duration;
 export const searchable_snapshots_clear_cache_index = types_indices;
 
 /**
- * Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * Whether to expand wildcard expression to concrete indices that are open, closed or both
  */
 export const searchable_snapshots_clear_cache_expand_wildcards = types_expand_wildcards;
 
 /**
- * Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * Whether to ignore if a wildcard indices expression resolves into no concrete indices.
+ * (This includes `_all` string or when no indices have been specified)
  */
 export const searchable_snapshots_clear_cache_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+    description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
 });
 
 /**
@@ -32279,7 +32289,7 @@ export const security_create_service_token_service = types_service;
 export const security_create_service_token_name = types_name;
 
 /**
- * If `true` then refresh the affected shards to make this operation visible to search, if `wait_for` (the default) then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.
+ * If `true` (the default) then refresh the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.
  */
 export const security_create_service_token_refresh = types_refresh;
 
@@ -32517,7 +32527,7 @@ export const simulate_ingest_pipeline = types_pipeline_name;
 export const simulate_ingest_merge_type2 = simulate_ingest_merge_type;
 
 /**
- * Comma-separated list of snapshot lifecycle policies to retrieve
+ * A comma-separated list of snapshot lifecycle policy identifiers.
  */
 export const slm_get_lifecycle_policy_id = types_names;
 
@@ -33020,14 +33030,14 @@ export const watcher_put_watch_active = z.boolean().register(z.globalRegistry, {
 });
 
 /**
- * only update the watch if the last operation that has changed the watch has the specified primary term
+ * Only update the watch if the last operation that has changed the watch has the specified primary term
  */
 export const watcher_put_watch_if_primary_term = z.number().register(z.globalRegistry, {
-    description: 'only update the watch if the last operation that has changed the watch has the specified primary term'
+    description: 'Only update the watch if the last operation that has changed the watch has the specified primary term'
 });
 
 /**
- * only update the watch if the last operation that has changed the watch has the specified sequence number
+ * Only update the watch if the last operation that has changed the watch has the specified sequence number
  */
 export const watcher_put_watch_if_seq_no = types_sequence_number;
 
@@ -33129,17 +33139,17 @@ export const ml_delete_expired_data = z.object({
 export const ml_get_buckets = z.object({
     anomaly_score: z.optional(z.number().register(z.globalRegistry, {
         description: 'Refer to the description for the `anomaly_score` query parameter.'
-    })).default(0),
+    })),
     desc: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `desc` query parameter.'
-    })).default(false),
+    })),
     end: z.optional(types_date_time),
     exclude_interim: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `exclude_interim` query parameter.'
-    })).default(false),
+    })),
     expand: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `expand` query parameter.'
-    })).default(false),
+    })),
     page: z.optional(ml_types_page),
     sort: z.optional(types_field),
     start: z.optional(types_date_time)
@@ -33160,7 +33170,7 @@ export const ml_get_influencers = z.object({
 export const ml_get_model_snapshots = z.object({
     desc: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `desc` query parameter.'
-    })).default(false),
+    })),
     end: z.optional(types_date_time),
     page: z.optional(ml_types_page),
     sort: z.optional(types_field),
@@ -33170,33 +33180,33 @@ export const ml_get_model_snapshots = z.object({
 export const ml_get_overall_buckets = z.object({
     allow_no_match: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `allow_no_match` query parameter.'
-    })).default(true),
+    })),
     bucket_span: z.optional(types_duration),
     end: z.optional(types_date_time),
     exclude_interim: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `exclude_interim` query parameter.'
-    })).default(false),
+    })),
     overall_score: z.optional(z.number().register(z.globalRegistry, {
         description: 'Refer to the description for the `overall_score` query parameter.'
     })),
     start: z.optional(types_date_time),
     top_n: z.optional(z.number().register(z.globalRegistry, {
         description: 'Refer to the description for the `top_n` query parameter.'
-    })).default(1)
+    }))
 });
 
 export const ml_get_records = z.object({
     desc: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `desc` query parameter.'
-    })).default(false),
+    })),
     end: z.optional(types_date_time),
     exclude_interim: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Refer to the description for the `exclude_interim` query parameter.'
-    })).default(false),
+    })),
     page: z.optional(ml_types_page),
     record_score: z.optional(z.number().register(z.globalRegistry, {
         description: 'Refer to the description for the `record_score` query parameter.'
-    })).default(0),
+    })),
     sort: z.optional(types_field),
     start: z.optional(types_date_time)
 });
@@ -33269,7 +33279,7 @@ export const security_put_user = z.object({
     })),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether the user is enabled.'
-    })).default(true)
+    }))
 });
 
 export const security_suggest_user_profiles = z.object({
@@ -33278,7 +33288,7 @@ export const security_suggest_user_profiles = z.object({
     })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of profiles to return.'
-    })).default(10),
+    })),
     data: z.optional(z.union([
         z.string(),
         z.array(z.string())
@@ -33302,15 +33312,15 @@ export const snapshot_create = z.object({
     })),
     ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request ignores data streams and indices in `indices` that are missing or closed.\nIf `false`, the request returns an error for any data stream or index that is missing or closed.'
-    })).default(false),
+    })),
     include_global_state: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the current cluster state is included in the snapshot.\nThe cluster state includes persistent cluster settings, composable index templates, legacy index templates, ingest pipelines, and ILM policies.\nIt also includes data stored in system indices, such as Watches and task records (configurable via `feature_states`).'
-    })).default(true),
+    })),
     indices: z.optional(types_indices),
     metadata: z.optional(types_metadata),
     partial: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, it enables you to restore a partial snapshot of indices with unavailable shards.\nOnly shards that were successfully included in the snapshot will be restored.\nAll missing shards will be recreated as empty.\n\nIf `false`, the entire restore operation will fail if one or more indices included in the snapshot do not have all primary shards available.'
-    })).default(false)
+    }))
 });
 
 export const snapshot_create_repository2 = snapshot_types_repository;
@@ -33328,19 +33338,19 @@ export const termvectors = z.object({
     })),
     field_statistics: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes:\n\n* The document count (how many documents contain this field).\n* The sum of document frequencies (the sum of document frequencies for all terms in this field).\n* The sum of total term frequencies (the sum of total term frequencies of each term in this field).'
-    })).default(true),
+    })),
     offsets: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes term offsets.'
-    })).default(true),
+    })),
     payloads: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes term payloads.'
-    })).default(true),
+    })),
     positions: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes term positions.'
-    })).default(true),
+    })),
     term_statistics: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes:\n\n* The total term frequency (how often a term occurs in all documents).\n* The document frequency (the number of documents containing the current term).\n\nBy default these values are not returned since term statistics can have a serious performance impact.'
-    })).default(false),
+    })),
     routing: z.optional(types_routing),
     version: z.optional(types_version_number),
     version_type: z.optional(types_version_type)
@@ -33364,13 +33374,13 @@ export const async_search_submit = z.object({
     collapse: z.optional(global_search_types_field_collapse),
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, returns detailed information about score computation as part of a hit.'
-    })).default(false),
+    })),
     ext: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
         description: 'Configuration of search extensions defined by Elasticsearch plugins.'
     })),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'Starting document offset. By default, you cannot page through more than 10,000\nhits using the from and size parameters. To page through more hits, use the\nsearch_after parameter.'
-    })).default(0),
+    })),
     highlight: z.optional(global_search_types_highlight),
     track_total_hits: z.optional(global_search_types_track_hits),
     indices_boost: z.optional(z.array(z.record(z.string(), z.number())).register(z.globalRegistry, {
@@ -33399,7 +33409,7 @@ export const async_search_submit = z.object({
     search_after: z.optional(types_sort_results),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return. By default, you cannot page through more\nthan 10,000 hits using the from and size parameters. To page through more\nhits, use the search_after parameter.'
-    })).default(10),
+    })),
     slice: z.optional(types_sliced_scroll),
     sort: z.optional(types_sort),
     _source: z.optional(global_search_types_source_config),
@@ -33409,16 +33419,16 @@ export const async_search_submit = z.object({
     suggest: z.optional(global_search_types_suggester),
     terminate_after: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of documents to collect for each shard. If a query reaches this\nlimit, Elasticsearch terminates the query early. Elasticsearch collects documents\nbefore sorting. Defaults to 0, which does not terminate query execution early.'
-    })).default(0),
+    })),
     timeout: z.optional(z.string().register(z.globalRegistry, {
         description: 'Specifies the period of time to wait for a response from each shard. If no response\nis received before the timeout expires, the request fails and returns an error.\nDefaults to no timeout.'
     })),
     track_scores: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, calculate and return document scores, even if the scores are not used for sorting.'
-    })).default(false),
+    })),
     version: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, returns document version as part of a hit.'
-    })).default(false),
+    })),
     seq_no_primary_term: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, returns sequence number and primary term of the last modification\nof each hit. See Optimistic concurrency control.'
     })),
@@ -33467,10 +33477,10 @@ export const eql_search = z.object({
     wait_for_completion_timeout: z.optional(types_duration),
     allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Allow query execution also in case of shard failures.\nIf true, the query will keep running and will return results based on the available shards.\nFor sequences, the behavior can be further refined using allow_partial_sequence_results'
-    })).default(true),
+    })),
     allow_partial_sequence_results: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'This flag applies only to sequences and has effect only if allow_partial_search_results=true.\nIf true, the sequence query will return results based on the available shards, ignoring the others.\nIf false, the sequence query will return successfully, but will always have empty results.'
-    })).default(false),
+    })),
     size: z.optional(types_uint),
     fields: z.optional(z.union([
         types_query_dsl_field_and_format,
@@ -33480,7 +33490,7 @@ export const eql_search = z.object({
     runtime_mappings: z.optional(types_mapping_runtime_fields),
     max_samples_per_key: z.optional(z.number().register(z.globalRegistry, {
         description: 'By default, the response of a sample query contains up to `10` samples, with one sample per unique set of join keys. Use the `size`\nparameter to get a smaller or larger set of samples. To retrieve more than one sample per set of join keys, use the\n`max_samples_per_key` parameter. Pipes are not supported for sample queries.'
-    })).default(1)
+    }))
 });
 
 export const explain = z.object({
@@ -33500,13 +33510,13 @@ export const fleet_search = z.object({
     collapse: z.optional(global_search_types_field_collapse),
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, returns detailed information about score computation as part of a hit.'
-    })).default(false),
+    })),
     ext: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
         description: 'Configuration of search extensions defined by Elasticsearch plugins.'
     })),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'Starting document offset. By default, you cannot page through more than 10,000\nhits using the from and size parameters. To page through more hits, use the\nsearch_after parameter.'
-    })).default(0),
+    })),
     highlight: z.optional(global_search_types_highlight),
     track_total_hits: z.optional(global_search_types_track_hits),
     indices_boost: z.optional(z.array(z.record(z.string(), z.number())).register(z.globalRegistry, {
@@ -33531,7 +33541,7 @@ export const fleet_search = z.object({
     search_after: z.optional(types_sort_results),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return. By default, you cannot page through more\nthan 10,000 hits using the from and size parameters. To page through more\nhits, use the search_after parameter.'
-    })).default(10),
+    })),
     slice: z.optional(types_sliced_scroll),
     sort: z.optional(types_sort),
     _source: z.optional(global_search_types_source_config),
@@ -33541,16 +33551,16 @@ export const fleet_search = z.object({
     suggest: z.optional(global_search_types_suggester),
     terminate_after: z.optional(z.number().register(z.globalRegistry, {
         description: 'Maximum number of documents to collect for each shard. If a query reaches this\nlimit, Elasticsearch terminates the query early. Elasticsearch collects documents\nbefore sorting. Defaults to 0, which does not terminate query execution early.'
-    })).default(0),
+    })),
     timeout: z.optional(z.string().register(z.globalRegistry, {
         description: 'Specifies the period of time to wait for a response from each shard. If no response\nis received before the timeout expires, the request fails and returns an error.\nDefaults to no timeout.'
     })),
     track_scores: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, calculate and return document scores, even if the scores are not used for sorting.'
-    })).default(false),
+    })),
     version: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, returns document version as part of a hit.'
-    })).default(false),
+    })),
     seq_no_primary_term: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If true, returns sequence number and primary term of the last modification\nof each hit. See Optimistic concurrency control.'
     })),
@@ -33583,7 +33593,7 @@ export const indices_analyze = z.object({
     })),
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response includes token attributes and additional details.'
-    })).default(false),
+    })),
     field: z.optional(types_field),
     filter: z.optional(z.array(types_analysis_token_filter).register(z.globalRegistry, {
         description: 'Array of token filters used to apply after the tokenizer.'
@@ -33654,7 +33664,7 @@ export const indices_put_mapping = z.object({
     _meta: z.optional(types_metadata),
     numeric_detection: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Automatically map strings into numeric data types for all fields.'
-    })).default(false),
+    })),
     properties: z.optional(z.record(z.string(), types_mapping_property).register(z.globalRegistry, {
         description: 'Mapping for a field. For new fields, this mapping can include:\n\n- Field name\n- Field data type\n- Mapping parameters'
     })),
@@ -33753,14 +33763,14 @@ export const ml_explain_data_frame_analytics = z.object({
     })),
     model_memory_limit: z.optional(z.string().register(z.globalRegistry, {
         description: 'The approximate maximum amount of memory resources that are permitted for\nanalytical processing. If your `elasticsearch.yml` file contains an\n`xpack.ml.max_model_memory_limit` setting, an error occurs when you try to\ncreate data frame analytics jobs that have `model_memory_limit` values\ngreater than that setting.'
-    })).default('1gb'),
+    })),
     max_num_threads: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of threads to be used by the analysis. Using more\nthreads may decrease the time necessary to complete the analysis at the\ncost of using more CPU. Note that the process may use additional threads\nfor operational functionality other than the analysis itself.'
-    })).default(1),
+    })),
     analyzed_fields: z.optional(ml_types_dataframe_analysis_analyzed_fields),
     allow_lazy_start: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Specifies whether this job can start when there is insufficient machine\nlearning node capacity for it to be immediately assigned to a node.'
-    })).default(false)
+    }))
 });
 
 export const ml_preview_data_frame_analytics = z.object({
@@ -33819,13 +33829,13 @@ export const search = z.object({
     collapse: z.optional(global_search_types_field_collapse),
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request returns detailed information about score computation as part of a hit.'
-    })).default(false),
+    })),
     ext: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
         description: 'Configuration of search extensions defined by Elasticsearch plugins.'
     })),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'The starting document offset, which must be non-negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(0),
+    })),
     highlight: z.optional(global_search_types_highlight),
     track_total_hits: z.optional(global_search_types_track_hits),
     indices_boost: z.optional(z.array(z.record(z.string(), z.number())).register(z.globalRegistry, {
@@ -33845,7 +33855,7 @@ export const search = z.object({
     post_filter: z.optional(types_query_dsl_query_container),
     profile: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to return detailed timing information about the execution of individual components in a search request.\nNOTE: This is a debugging tool and adds significant overhead to search execution.'
-    })).default(false),
+    })),
     query: z.optional(types_query_dsl_query_container),
     rescore: z.optional(z.union([
         global_search_types_rescore,
@@ -33858,7 +33868,7 @@ export const search = z.object({
     search_after: z.optional(types_sort_results),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return, which must not be negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` property.'
-    })).default(10),
+    })),
     slice: z.optional(types_sliced_scroll),
     sort: z.optional(types_sort),
     _source: z.optional(global_search_types_source_config),
@@ -33868,16 +33878,16 @@ export const search = z.object({
     suggest: z.optional(global_search_types_suggester),
     terminate_after: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of documents to collect for each shard.\nIf a query reaches this limit, Elasticsearch terminates the query early.\nElasticsearch collects documents before sorting.\n\nIMPORTANT: Use with caution.\nElasticsearch applies this property to each shard handling the request.\nWhen possible, let Elasticsearch perform early termination automatically.\nAvoid specifying this property for requests that target data streams with backing indices across multiple data tiers.\n\nIf set to `0` (default), the query does not terminate early.'
-    })).default(0),
+    })),
     timeout: z.optional(z.string().register(z.globalRegistry, {
         description: 'The period of time to wait for a response from each shard.\nIf no response is received before the timeout expires, the request fails and returns an error.\nDefaults to no timeout.'
     })),
     track_scores: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, calculate and return document scores, even if the scores are not used for sorting.'
-    })).default(false),
+    })),
     version: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request returns the document version as part of a hit.'
-    })).default(false),
+    })),
     seq_no_primary_term: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the request returns sequence number and primary term of the last modification of each hit.'
     })),
@@ -33895,24 +33905,24 @@ export const search_mvt = z.object({
     })),
     buffer: z.optional(z.number().register(z.globalRegistry, {
         description: 'The size, in pixels, of a clipping buffer outside the tile. This allows renderers\nto avoid outline artifacts from geometries that extend past the extent of the tile.'
-    })).default(5),
+    })),
     exact_bounds: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `false`, the meta layer\'s feature is the bounding box of the tile.\nIf `true`, the meta layer\'s feature is a bounding box resulting from a\n`geo_bounds` aggregation. The aggregation runs on <field> values that intersect\nthe `<zoom>/<x>/<y>` tile with `wrap_longitude` set to `false`. The resulting\nbounding box may be larger than the vector tile.'
-    })).default(false),
+    })),
     extent: z.optional(z.number().register(z.globalRegistry, {
         description: 'The size, in pixels, of a side of the tile. Vector tiles are square with equal sides.'
-    })).default(4096),
+    })),
     fields: z.optional(types_fields),
     grid_agg: z.optional(global_search_mvt_types_grid_aggregation_type),
     grid_precision: z.optional(z.number().register(z.globalRegistry, {
         description: 'Additional zoom levels available through the aggs layer. For example, if `<zoom>` is `7`\nand `grid_precision` is `8`, you can zoom in up to level 15. Accepts 0-8. If 0, results\ndon\'t include the aggs layer.'
-    })).default(8),
+    })),
     grid_type: z.optional(global_search_mvt_types_grid_type),
     query: z.optional(types_query_dsl_query_container),
     runtime_mappings: z.optional(types_mapping_runtime_fields),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of features to return in the hits layer. Accepts 0-10000.\nIf 0, results don\'t include the hits layer.'
-    })).default(10000),
+    })),
     sort: z.optional(types_sort),
     track_total_hits: z.optional(global_search_types_track_hits),
     with_labels: z.optional(z.boolean().register(z.globalRegistry, {
@@ -33923,14 +33933,14 @@ export const search_mvt = z.object({
 export const search_template = z.object({
     explain: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, returns detailed information about score calculation as part of each hit.\nIf you specify both this and the `explain` query parameter, the API uses only the query parameter.'
-    })).default(false),
+    })),
     id: z.optional(types_id),
     params: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
         description: 'Key-value pairs used to replace Mustache variables in the template.\nThe key is the variable name.\nThe value is the variable value.'
     })),
     profile: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the query execution is profiled.'
-    })).default(false),
+    })),
     source: z.optional(types_script_source)
 });
 
@@ -33996,11 +34006,11 @@ export const security_query_api_keys = z.object({
     query: z.optional(security_query_api_keys_api_key_query_container),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'The starting document offset.\nIt must not be negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(0),
+    })),
     sort: z.optional(types_sort),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return.\nIt must not be negative.\nThe `size` parameter can be set to `0`, in which case no API key matches are returned, only the aggregation results.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(10),
+    })),
     search_after: z.optional(types_sort_results)
 });
 
@@ -34008,11 +34018,11 @@ export const security_query_role = z.object({
     query: z.optional(security_query_role_role_query_container),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'The starting document offset.\nIt must not be negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(0),
+    })),
     sort: z.optional(types_sort),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return.\nIt must not be negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(10),
+    })),
     search_after: z.optional(types_sort_results)
 });
 
@@ -34020,11 +34030,11 @@ export const security_query_user = z.object({
     query: z.optional(security_query_user_user_query_container),
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'The starting document offset.\nIt must not be negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(0),
+    })),
     sort: z.optional(types_sort),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return.\nIt must not be negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
-    })).default(10),
+    })),
     search_after: z.optional(types_sort_results)
 });
 
@@ -34047,30 +34057,30 @@ export const simulate_ingest = z.object({
 export const sql_query = z.object({
     allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the response has partial results when there are shard request timeouts or shard failures.\nIf `false`, the API returns an error with no partial results.'
-    })).default(false),
+    })),
     catalog: z.optional(z.string().register(z.globalRegistry, {
         description: 'The default catalog (cluster) for queries.\nIf unspecified, the queries execute on the data in the local cluster only.'
     })),
     columnar: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the results are in a columnar fashion: one row represents all the values of a certain column from the current page of results.\nThe API supports this parameter only for CBOR, JSON, SMILE, and YAML responses.'
-    })).default(false),
+    })),
     cursor: z.optional(z.string().register(z.globalRegistry, {
         description: 'The cursor used to retrieve a set of paginated results.\nIf you specify a cursor, the API only uses the `columnar` and `time_zone` request body parameters.\nIt ignores other request body parameters.'
     })),
     fetch_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of rows (or entries) to return in one response.'
-    })).default(1000),
+    })),
     field_multi_value_leniency: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `false`, the API returns an exception when encountering multiple values for a field.\nIf `true`, the API is lenient and returns the first value from the array with no guarantee of consistent results.'
-    })).default(false),
+    })),
     filter: z.optional(types_query_dsl_query_container),
     index_using_frozen: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, the search can run on frozen indices.'
-    })).default(false),
+    })),
     keep_alive: z.optional(types_duration),
     keep_on_completion: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, Elasticsearch stores synchronous searches if you also specify the `wait_for_completion_timeout` parameter.\nIf `false`, Elasticsearch only stores async searches that don\'t finish before the `wait_for_completion_timeout`.'
-    })).default(false),
+    })),
     page_timeout: z.optional(types_duration),
     params: z.optional(z.array(z.record(z.string(), z.unknown())).register(z.globalRegistry, {
         description: 'The values for parameters in the query.'
@@ -34087,7 +34097,7 @@ export const sql_query = z.object({
 export const sql_translate = z.object({
     fetch_size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The maximum number of rows (or entries) to return in one response.'
-    })).default(1000),
+    })),
     filter: z.optional(types_query_dsl_query_container),
     query: z.string().register(z.globalRegistry, {
         description: 'The SQL query to run.'
@@ -34099,11 +34109,11 @@ export const terms_enum = z.object({
     field: types_field,
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of matching terms to return.'
-    })).default(10),
+    })),
     timeout: z.optional(types_duration),
     case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When `true`, the provided search string is matched against index terms without case sensitivity.'
-    })).default(false),
+    })),
     index_filter: z.optional(types_query_dsl_query_container),
     string: z.optional(z.string().register(z.globalRegistry, {
         description: 'The string to match at the start of indexed terms.\nIf it is not provided, all terms in the field are considered.\n\n> info\n> The prefix string cannot be larger than the largest possible keyword value, which is Lucene\'s term byte-length limit of 32766.'
@@ -34136,10 +34146,10 @@ export const watcher_execute_watch = z.object({
     })),
     ignore_condition: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When set to `true`, the watch execution uses the always condition. This can also be specified as an HTTP parameter.'
-    })).default(false),
+    })),
     record_execution: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When set to `true`, the watch record representing the watch execution result is persisted to the `.watcher-history` index for the current time.\nIn addition, the status of the watch is updated, possibly throttling subsequent runs.\nThis can also be specified as an HTTP parameter.'
-    })).default(false),
+    })),
     simulated_actions: z.optional(watcher_types_simulated_actions),
     trigger_data: z.optional(watcher_types_schedule_trigger_event),
     watch: z.optional(watcher_types_watch)
@@ -34161,10 +34171,10 @@ export const watcher_put_watch = z.object({
 export const watcher_query_watches = z.object({
     from: z.optional(z.number().register(z.globalRegistry, {
         description: 'The offset from the first result to fetch.\nIt must be non-negative.'
-    })).default(0),
+    })),
     size: z.optional(z.number().register(z.globalRegistry, {
         description: 'The number of hits to return.\nIt must be non-negative.'
-    })).default(10),
+    })),
     query: z.optional(types_query_dsl_query_container),
     sort: z.optional(types_sort),
     search_after: z.optional(types_sort_results)
@@ -34986,26 +34996,26 @@ export const ccr_put_auto_follow_pattern_request = z.object({
         leader_index_exclusion_patterns: z.optional(types_index_patterns),
         max_outstanding_read_requests: z.optional(z.number().register(z.globalRegistry, {
             description: 'The maximum number of outstanding reads requests from the remote cluster.'
-        })).default(12),
+        })),
         settings: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
             description: 'Settings to override from the leader index. Note that certain settings can not be overrode (e.g., index.number_of_shards).'
         })),
         max_outstanding_write_requests: z.optional(z.number().register(z.globalRegistry, {
             description: 'The maximum number of outstanding reads requests from the remote cluster.'
-        })).default(9),
+        })),
         read_poll_timeout: z.optional(types_duration),
         max_read_request_operation_count: z.optional(z.number().register(z.globalRegistry, {
             description: 'The maximum number of operations to pull per read from the remote cluster.'
-        })).default(5120),
+        })),
         max_read_request_size: z.optional(types_byte_size),
         max_retry_delay: z.optional(types_duration),
         max_write_buffer_count: z.optional(z.number().register(z.globalRegistry, {
             description: 'The maximum number of operations that can be queued for writing. When this limit is reached, reads from the remote cluster will be deferred until the number of queued operations goes below the limit.'
-        })).default(2147483647),
+        })),
         max_write_buffer_size: z.optional(types_byte_size),
         max_write_request_operation_count: z.optional(z.number().register(z.globalRegistry, {
             description: 'The maximum number of operations per bulk write request executed on the follower.'
-        })).default(5120),
+        })),
         max_write_request_size: z.optional(types_byte_size)
     }),
     path: z.object({
@@ -35400,7 +35410,7 @@ export const cluster_put_settings_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         master_timeout: z.optional(types_duration),
         timeout: z.optional(types_duration)
@@ -35545,17 +35555,17 @@ export const cluster_state_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return local information, do not retrieve the state from master node (default: false)'
+            description: 'Return local information, do not retrieve the state from master node'
         })),
         master_timeout: z.optional(types_duration),
         wait_for_metadata_version: z.optional(types_version_number),
@@ -35572,17 +35582,17 @@ export const cluster_state1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return local information, do not retrieve the state from master node (default: false)'
+            description: 'Return local information, do not retrieve the state from master node'
         })),
         master_timeout: z.optional(types_duration),
         wait_for_metadata_version: z.optional(types_version_number),
@@ -35600,17 +35610,17 @@ export const cluster_state2_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return settings in flat format (default: false)'
+            description: 'Return settings in flat format'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return local information, do not retrieve the state from master node (default: false)'
+            description: 'Return local information, do not retrieve the state from master node'
         })),
         master_timeout: z.optional(types_duration),
         wait_for_metadata_version: z.optional(types_version_number),
@@ -37268,9 +37278,10 @@ export const indices_put_data_lifecycle_request = z.object({
         downsampling: z.optional(z.array(indices_types_downsampling_round).register(z.globalRegistry, {
             description: 'The downsampling configuration to execute for the managed backing index after rollover.'
         })),
+        downsampling_method: z.optional(indices_types_sampling_method),
         enabled: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
-        })).default(true)
+        }))
     }),
     path: z.object({
         name: types_data_stream_names
@@ -37446,7 +37457,7 @@ export const indices_explain_data_lifecycle_request = z.object({
     }),
     query: z.optional(z.object({
         include_defaults: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'indicates if the API should return the default values the system uses for the index\'s lifecycle'
+            description: 'Indicates if the API should return the default values the system uses for the index\'s lifecycle'
         })),
         master_timeout: z.optional(types_duration)
     }))
@@ -37572,23 +37583,23 @@ export const indices_forcemerge_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flush: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether the index should be flushed after performing the operation (default: true)'
+            description: 'Specify whether the index should be flushed after performing the operation'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         max_num_segments: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of segments the index should be merged into (default: dynamic)'
+            description: 'The number of segments the index should be merged into (defayult: dynamic)'
         })),
         only_expunge_deletes: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify whether the operation should only expunge deleted documents'
         })),
         wait_for_completion: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Should the request wait until the force merge is completed.'
+            description: 'Should the request wait until the force merge is completed'
         }))
     }))
 });
@@ -37602,23 +37613,23 @@ export const indices_forcemerge1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         flush: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether the index should be flushed after performing the operation (default: true)'
+            description: 'Specify whether the index should be flushed after performing the operation'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
         })),
         max_num_segments: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of segments the index should be merged into (default: dynamic)'
+            description: 'The number of segments the index should be merged into (defayult: dynamic)'
         })),
         only_expunge_deletes: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify whether the operation should only expunge deleted documents'
         })),
         wait_for_completion: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Should the request wait until the force merge is completed.'
+            description: 'Should the request wait until the force merge is completed'
         }))
     }))
 });
@@ -37853,7 +37864,7 @@ export const indices_reload_search_analyzers_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
@@ -37874,7 +37885,7 @@ export const indices_reload_search_analyzers1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         expand_wildcards: z.optional(types_expand_wildcards),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
@@ -38941,7 +38952,7 @@ export const license_post_start_basic_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         acknowledge: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'whether the user has acknowledged acknowledge messages (default: false)'
+            description: 'Whether the user has acknowledged acknowledge messages'
         })),
         master_timeout: z.optional(types_duration),
         timeout: z.optional(types_duration)
@@ -38964,10 +38975,10 @@ export const license_post_start_trial_request = z.object({
     path: z.optional(z.never()),
     query: z.optional(z.object({
         acknowledge: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'whether the user has acknowledged acknowledge messages (default: false)'
+            description: 'Whether the user has acknowledged acknowledge messages'
         })),
         type: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The type of trial license to generate (default: "trial")'
+            description: 'The type of trial license to generate'
         })),
         master_timeout: z.optional(types_duration)
     }))
@@ -39223,10 +39234,10 @@ export const ml_close_job_request = z.object({
     body: z.optional(z.object({
         allow_no_match: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Refer to the description for the `allow_no_match` query parameter.'
-        })).default(true),
+        })),
         force: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Refer to the descriptiion for the `force` query parameter.'
-        })).default(false),
+        })),
         timeout: z.optional(types_duration)
     })),
     path: z.object({
@@ -39498,7 +39509,7 @@ export const ml_forecast_request = z.object({
         expires_in: z.optional(types_duration),
         max_model_memory: z.optional(z.string().register(z.globalRegistry, {
             description: 'Refer to the description for the `max_model_memory` query parameter.'
-        })).default('20mb')
+        }))
     })),
     path: z.object({
         job_id: types_id
@@ -40617,7 +40628,7 @@ export const ml_revert_model_snapshot_request = z.object({
     body: z.optional(z.object({
         delete_intervening_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Refer to the description for the `delete_intervening_results` query parameter.'
-        })).default(false)
+        }))
     })),
     path: z.object({
         job_id: types_id,
@@ -40724,10 +40735,10 @@ export const ml_stop_data_frame_analytics_request = z.object({
         id: z.optional(types_id),
         allow_no_match: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specifies what to do when the request:\n\n1. Contains wildcard expressions and there are no data frame analytics\njobs that match.\n2. Contains the _all string or no identifiers and there are no matches.\n3. Contains wildcard expressions and there are only partial matches.\n\nThe default value is true, which returns an empty data_frame_analytics\narray when there are no matches and the subset of results when there are\npartial matches. If this parameter is false, the request returns a 404\nstatus code when there are no matches or only partial matches.'
-        })).default(true),
+        })),
         force: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If true, the data frame analytics job is stopped forcefully.'
-        })).default(false),
+        })),
         timeout: z.optional(types_duration)
     })),
     path: z.object({
@@ -40752,10 +40763,10 @@ export const ml_stop_datafeed_request = z.object({
     body: z.optional(z.object({
         allow_no_match: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Refer to the description for the `allow_no_match` query parameter.'
-        })).default(true),
+        })),
         force: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Refer to the description for the `force` query parameter.'
-        })).default(false),
+        })),
         timeout: z.optional(types_duration)
     })),
     path: z.object({
@@ -40781,10 +40792,10 @@ export const ml_stop_trained_model_deployment_request = z.object({
         id: z.optional(types_id),
         allow_no_match: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specifies what to do when the request: contains wildcard expressions and there are no deployments that match;\ncontains the  `_all` string or no identifiers and there are no matches; or contains wildcard expressions and\nthere are only partial matches. By default, it returns an empty array when there are no matches and the subset of results when there are partial matches.\nIf `false`, the request returns a 404 status code when there are no matches or only partial matches.'
-        })).default(true),
+        })),
         force: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Forcefully stops the deployment, even if it is used by ingest pipelines. You can\'t use these pipelines until you\nrestart the model deployment.'
-        })).default(false)
+        }))
     })),
     path: z.object({
         model_id: types_id
@@ -40834,7 +40845,7 @@ export const ml_update_model_snapshot_request = z.object({
         })),
         retain: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, this snapshot will not be deleted during automatic cleanup of\nsnapshots older than `model_snapshot_retention_days`. However, this\nsnapshot will be deleted when the job is deleted.'
-        })).default(false)
+        }))
     }),
     path: z.object({
         job_id: types_id,
@@ -40852,7 +40863,7 @@ export const ml_update_trained_model_deployment_request = z.object({
     body: z.optional(z.object({
         number_of_allocations: z.optional(z.number().register(z.globalRegistry, {
             description: 'The number of model allocations on each node where the model is deployed.\nAll allocations on a node share the same copy of the model in memory but use\na separate set of threads to evaluate the model.\nIncreasing this value generally increases the throughput.\nIf this setting is greater than the number of hardware threads\nit will automatically be changed to a value less than the number of hardware threads.\nIf adaptive_allocations is enabled, do not set this value, because it’s automatically set.'
-        })).default(1),
+        })),
         adaptive_allocations: z.optional(ml_types_adaptive_allocations_settings)
     })),
     path: z.object({
@@ -41609,7 +41620,7 @@ export const searchable_snapshots_clear_cache_request = z.object({
     query: z.optional(z.object({
         expand_wildcards: z.optional(types_expand_wildcards),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
@@ -41627,7 +41638,7 @@ export const searchable_snapshots_clear_cache1_request = z.object({
     query: z.optional(z.object({
         expand_wildcards: z.optional(types_expand_wildcards),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether specified concrete indices should be ignored when unavailable (missing or closed)'
@@ -41892,7 +41903,7 @@ export const security_invalidate_api_key_request = z.object({
         name: z.optional(types_name),
         owner: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Query API keys owned by the currently authenticated user.\nThe `realm_name` or `username` parameters cannot be specified when this parameter is set to `true` as they are assumed to be the currently authenticated ones.\n\nNOTE: At least one of `ids`, `name`, `username`, and `realm_name` must be specified if `owner` is `false`.'
-        })).default(false),
+        })),
         realm_name: z.optional(z.string().register(z.globalRegistry, {
             description: 'The name of an authentication realm.\nThis parameter cannot be used with either `ids` or `name`, or when `owner` flag is set to `true`.'
         })),
@@ -43900,7 +43911,7 @@ export const transform_get_node_stats_request = z.object({
     query: z.optional(z.never())
 });
 
-export const transform_get_node_stats_response = transform_get_node_stats_transform_node_stats;
+export const transform_get_node_stats_response = transform_get_node_stats_transform_node_full_stats;
 
 export const transform_get_transform_stats_request = z.object({
     body: z.optional(z.never()),
@@ -44247,7 +44258,7 @@ export const xpack_info_request = z.object({
             description: 'A comma-separated list of the information categories to include in the response.\nFor example, `build,license,features`.'
         })),
         accept_enterprise: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If this param is used it must be set to true'
+            description: 'If used, this otherwise ignored parameter must be set to true'
         })),
         human: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Defines whether additional human-readable information is included in the response.\nIn particular, it adds descriptions and a tag line.'
@@ -44327,7 +44338,7 @@ export const async_search_submit_request = z.object({
             description: 'If `true`, results are stored for later retrieval when the search completes within the `wait_for_completion_timeout`.'
         })),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Indicate if an error should be returned if there is a partial search failure or timeout'
@@ -44336,7 +44347,7 @@ export const async_search_submit_request = z.object({
             description: 'The analyzer to use for the query string'
         })),
         analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether wildcard and prefix queries should be analyzed (default: false)'
+            description: 'Specify whether wildcard and prefix queries should be analyzed'
         })),
         batched_reduce_size: z.optional(z.number().register(z.globalRegistry, {
             description: 'Affects how often partial results become available, which happens whenever shard results are reduced.\nA partial reduction is performed every time the coordinating node has received a certain number of new shard responses (5 by default).'
@@ -44363,10 +44374,10 @@ export const async_search_submit_request = z.object({
             description: 'Specify whether format-based query failures (such as providing text to a numeric field) should be ignored'
         })),
         max_concurrent_shard_requests: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
+            description: 'The number of concurrent shard requests per node this search executes concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
         })),
         preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Specify the node or shard the operation should be performed on (default: random)'
+            description: 'Specify the node or shard the operation should be performed on'
         })),
         request_cache: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify if request cache should be used for this request or not, defaults to true'
@@ -44386,7 +44397,7 @@ export const async_search_submit_request = z.object({
             description: 'The source text for which the suggestions should be returned.'
         })),
         terminate_after: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.'
+            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early'
         })),
         timeout: z.optional(types_duration),
         track_total_hits: z.optional(global_search_types_track_hits),
@@ -44412,10 +44423,10 @@ export const async_search_submit_request = z.object({
             description: 'Query in the Lucene query string syntax'
         })),
         size: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Number of hits to return (default: 10)'
+            description: 'Number of hits to return'
         })),
         from: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Starting offset (default: 0)'
+            description: 'Starting offset'
         })),
         sort: z.optional(z.union([
             z.string(),
@@ -44438,7 +44449,7 @@ export const async_search_submit1_request = z.object({
             description: 'If `true`, results are stored for later retrieval when the search completes within the `wait_for_completion_timeout`.'
         })),
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Indicate if an error should be returned if there is a partial search failure or timeout'
@@ -44447,7 +44458,7 @@ export const async_search_submit1_request = z.object({
             description: 'The analyzer to use for the query string'
         })),
         analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Specify whether wildcard and prefix queries should be analyzed (default: false)'
+            description: 'Specify whether wildcard and prefix queries should be analyzed'
         })),
         batched_reduce_size: z.optional(z.number().register(z.globalRegistry, {
             description: 'Affects how often partial results become available, which happens whenever shard results are reduced.\nA partial reduction is performed every time the coordinating node has received a certain number of new shard responses (5 by default).'
@@ -44474,10 +44485,10 @@ export const async_search_submit1_request = z.object({
             description: 'Specify whether format-based query failures (such as providing text to a numeric field) should be ignored'
         })),
         max_concurrent_shard_requests: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The number of concurrent shard requests per node this search executes concurrently. This value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
+            description: 'The number of concurrent shard requests per node this search executes concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests'
         })),
         preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Specify the node or shard the operation should be performed on (default: random)'
+            description: 'Specify the node or shard the operation should be performed on'
         })),
         request_cache: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specify if request cache should be used for this request or not, defaults to true'
@@ -44497,7 +44508,7 @@ export const async_search_submit1_request = z.object({
             description: 'The source text for which the suggestions should be returned.'
         })),
         terminate_after: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early.'
+            description: 'The maximum number of documents to collect for each shard, upon reaching which the query execution will terminate early'
         })),
         timeout: z.optional(types_duration),
         track_total_hits: z.optional(global_search_types_track_hits),
@@ -44523,10 +44534,10 @@ export const async_search_submit1_request = z.object({
             description: 'Query in the Lucene query string syntax'
         })),
         size: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Number of hits to return (default: 10)'
+            description: 'Number of hits to return'
         })),
         from: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Starting offset (default: 0)'
+            description: 'Starting offset'
         })),
         sort: z.optional(z.union([
             z.string(),
@@ -44829,7 +44840,7 @@ export const cluster_get_component_template1_request = z.object({
             z.array(z.string())
         ])),
         include_defaults: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return all default configurations for the component template (default: false)'
+            description: 'Return all default configurations for the component template'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request retrieves information from the local node only.\nIf `false`, information is retrieved from the master node.'
@@ -44890,7 +44901,7 @@ export const cluster_get_component_template_request = z.object({
             z.array(z.string())
         ])),
         include_defaults: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return all default configurations for the component template (default: false)'
+            description: 'Return all default configurations for the component template'
         })),
         local: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request retrieves information from the local node only.\nIf `false`, information is retrieved from the master node.'
@@ -45310,7 +45321,7 @@ export const eql_search_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If true, returns partial results if there are shard failures. If false, returns an error with no partial results.'
@@ -45342,7 +45353,7 @@ export const eql_search1_request = z.object({
     }),
     query: z.optional(z.object({
         allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)'
+            description: 'Whether to ignore if a wildcard indices expression resolves into no concrete indices.\n(This includes `_all` string or when no indices have been specified)'
         })),
         allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If true, returns partial results if there are shard failures. If false, returns an error with no partial results.'
@@ -45388,15 +45399,15 @@ export const esql_async_query_request = z.object({
         })),
         include_ccs_metadata: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'When set to `true` and performing a cross-cluster/cross-project query, the response will include an extra `_clusters`\nobject with information about the clusters that participated in the search along with info such as shards\ncount.'
-        })).default(false),
+        })),
         include_execution_metadata: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'When set to `true`, the response will include an extra `_clusters`\nobject with information about the clusters that participated in the search along with info such as shards\ncount.\nThis is similar to `include_ccs_metadata`, but it also returns metadata when the query is not CCS/CPS'
-        })).default(false),
+        })),
         wait_for_completion_timeout: z.optional(types_duration),
         keep_alive: z.optional(types_duration),
         keep_on_completion: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Indicates whether the query and its results are stored in the cluster.\nIf false, the query and its results are stored in the cluster only if the request does not complete during the period set by the `wait_for_completion_timeout` parameter.'
-        })).default(false)
+        }))
     }),
     path: z.optional(z.never()),
     query: z.optional(z.object({
@@ -45436,10 +45447,10 @@ export const esql_query_request = z.object({
         })),
         include_ccs_metadata: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'When set to `true` and performing a cross-cluster/cross-project query, the response will include an extra `_clusters`\nobject with information about the clusters that participated in the search along with info such as shards\ncount.'
-        })).default(false),
+        })),
         include_execution_metadata: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'When set to `true`, the response will include an extra `_clusters`\nobject with information about the clusters that participated in the search along with info such as shards\ncount.\nThis is similar to `include_ccs_metadata`, but it also returns metadata when the query is not CCS/CPS'
-        })).default(false)
+        }))
     }),
     path: z.optional(z.never()),
     query: z.optional(z.object({
@@ -46380,7 +46391,7 @@ export const indices_put_index_template1_request = z.object({
         })),
         master_timeout: z.optional(types_duration),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -46398,7 +46409,7 @@ export const indices_put_index_template_request = z.object({
         })),
         master_timeout: z.optional(types_duration),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -46437,7 +46448,7 @@ export const indices_put_template1_request = z.object({
             description: 'Order in which Elasticsearch applies this template if index\nmatches multiple templates.\n\nTemplates with lower \'order\' values are merged first. Templates with higher\n\'order\' values are merged later, overriding templates with lower values.'
         })),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -46458,7 +46469,7 @@ export const indices_put_template_request = z.object({
             description: 'Order in which Elasticsearch applies this template if index\nmatches multiple templates.\n\nTemplates with lower \'order\' values are merged first. Templates with higher\n\'order\' values are merged later, overriding templates with lower values.'
         })),
         cause: z.optional(z.string().register(z.globalRegistry, {
-            description: 'User defined reason for creating/updating the index template'
+            description: 'User defined reason for creating or updating the index template'
         }))
     }))
 });
@@ -47483,7 +47494,7 @@ export const ingest_get_pipeline1_request = z.object({
     query: z.optional(z.object({
         master_timeout: z.optional(types_duration),
         summary: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return pipelines without their definitions (default: false)'
+            description: 'Return pipelines without their definitions'
         }))
     }))
 });
@@ -47505,7 +47516,7 @@ export const ingest_put_pipeline_request = z.object({
         version: z.optional(types_version_number),
         deprecated: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Marks this ingest pipeline as deprecated.\nWhen a deprecated ingest pipeline is referenced as the default or final pipeline when creating or updating a non-deprecated index template, Elasticsearch will emit a deprecation warning.'
-        })).default(false),
+        })),
         field_access_pattern: z.optional(ingest_types_field_access_pattern)
     }),
     path: z.object({
@@ -47528,7 +47539,7 @@ export const ingest_get_pipeline_request = z.object({
     query: z.optional(z.object({
         master_timeout: z.optional(types_duration),
         summary: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'Return pipelines without their definitions (default: false)'
+            description: 'Return pipelines without their definitions'
         }))
     }))
 });
@@ -47627,7 +47638,7 @@ export const ml_put_data_frame_analytics_request = z.object({
     body: z.object({
         allow_lazy_start: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specifies whether this job can start when there is insufficient machine\nlearning node capacity for it to be immediately assigned to a node. If\nset to `false` and a machine learning node with capacity to run the job\ncannot be immediately found, the API returns an error. If set to `true`,\nthe API does not return an error; the job waits in the `starting` state\nuntil sufficient machine learning node capacity is available. This\nbehavior is also affected by the cluster-wide\n`xpack.ml.max_lazy_ml_nodes` setting.'
-        })).default(false),
+        })),
         analysis: ml_types_dataframe_analysis_container,
         analyzed_fields: z.optional(ml_types_dataframe_analysis_analyzed_fields),
         description: z.optional(z.string().register(z.globalRegistry, {
@@ -47636,11 +47647,11 @@ export const ml_put_data_frame_analytics_request = z.object({
         dest: ml_types_dataframe_analytics_destination,
         max_num_threads: z.optional(z.number().register(z.globalRegistry, {
             description: 'The maximum number of threads to be used by the analysis. Using more\nthreads may decrease the time necessary to complete the analysis at the\ncost of using more CPU. Note that the process may use additional threads\nfor operational functionality other than the analysis itself.'
-        })).default(1),
+        })),
         _meta: z.optional(types_metadata),
         model_memory_limit: z.optional(z.string().register(z.globalRegistry, {
             description: 'The approximate maximum amount of memory resources that are permitted for\nanalytical processing. If your `elasticsearch.yml` file contains an\n`xpack.ml.max_model_memory_limit` setting, an error occurs when you try\nto create data frame analytics jobs that have `model_memory_limit` values\ngreater than that setting.'
-        })).default('1gb'),
+        })),
         source: ml_types_dataframe_analytics_source,
         headers: z.optional(types_http_headers),
         version: z.optional(types_version_string)
@@ -47709,7 +47720,7 @@ export const ml_put_datafeed_request = z.object({
         })),
         scroll_size: z.optional(z.number().register(z.globalRegistry, {
             description: 'The size parameter that is used in Elasticsearch searches when the datafeed does not use aggregations.\nThe maximum value is the value of `index.max_result_window`, which is 10,000 by default.'
-        })).default(1000),
+        })),
         headers: z.optional(types_http_headers)
     }),
     path: z.object({
@@ -47771,14 +47782,14 @@ export const ml_put_job_request = z.object({
     body: z.object({
         allow_lazy_open: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Advanced configuration option. Specifies whether this job can open when there is insufficient machine learning node capacity for it to be immediately assigned to a node. By default, if a machine learning node with capacity to run the job cannot immediately be found, the open anomaly detection jobs API returns an error. However, this is also subject to the cluster-wide `xpack.ml.max_lazy_ml_nodes` setting. If this option is set to true, the open anomaly detection jobs API does not return an error and the job waits in the opening state until sufficient machine learning node capacity is available.'
-        })).default(false),
+        })),
         analysis_config: ml_types_analysis_config,
         analysis_limits: z.optional(ml_types_analysis_limits),
         background_persist_interval: z.optional(types_duration),
         custom_settings: z.optional(ml_types_custom_settings),
         daily_model_snapshot_retention_after_days: z.optional(z.number().register(z.globalRegistry, {
             description: 'Advanced configuration option, which affects the automatic removal of old model snapshots for this job. It specifies a period of time (in days) after which only the first snapshot per day is retained. This period is relative to the timestamp of the most recent snapshot for this job. Valid values range from 0 to `model_snapshot_retention_days`.'
-        })).default(1),
+        })),
         data_description: ml_types_data_description,
         datafeed_config: z.optional(ml_types_datafeed_config),
         description: z.optional(z.string().register(z.globalRegistry, {
@@ -47791,7 +47802,7 @@ export const ml_put_job_request = z.object({
         model_plot_config: z.optional(ml_types_model_plot_config),
         model_snapshot_retention_days: z.optional(z.number().register(z.globalRegistry, {
             description: 'Advanced configuration option, which affects the automatic removal of old model snapshots for this job. It specifies the maximum period of time (in days) that snapshots are retained. This period is relative to the timestamp of the most recent snapshot for this job. By default, snapshots ten days older than the newest snapshot are deleted.'
-        })).default(10),
+        })),
         renormalization_window_days: z.optional(z.number().register(z.globalRegistry, {
             description: 'Advanced configuration option. The period over which adjustments to the score are applied, as new data is seen. The default value is the longer of 30 days or 100 bucket spans.'
         })),
@@ -48223,13 +48234,13 @@ export const ml_update_data_frame_analytics_request = z.object({
         })),
         model_memory_limit: z.optional(z.string().register(z.globalRegistry, {
             description: 'The approximate maximum amount of memory resources that are permitted for\nanalytical processing. If your `elasticsearch.yml` file contains an\n`xpack.ml.max_model_memory_limit` setting, an error occurs when you try\nto create data frame analytics jobs that have `model_memory_limit` values\ngreater than that setting.'
-        })).default('1gb'),
+        })),
         max_num_threads: z.optional(z.number().register(z.globalRegistry, {
             description: 'The maximum number of threads to be used by the analysis. Using more\nthreads may decrease the time necessary to complete the analysis at the\ncost of using more CPU. Note that the process may use additional threads\nfor operational functionality other than the analysis itself.'
-        })).default(1),
+        })),
         allow_lazy_start: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Specifies whether this job can start when there is insufficient machine\nlearning node capacity for it to be immediately assigned to a node.'
-        })).default(false)
+        }))
     }),
     path: z.object({
         id: types_id
@@ -48276,7 +48287,7 @@ export const ml_update_datafeed_request = z.object({
         })),
         scroll_size: z.optional(z.number().register(z.globalRegistry, {
             description: 'The size parameter that is used in Elasticsearch searches when the datafeed does not use aggregations.\nThe maximum value is the value of `index.max_result_window`.'
-        })).default(1000)
+        }))
     }),
     path: z.object({
         datafeed_id: types_id
@@ -48317,7 +48328,7 @@ export const ml_update_job_request = z.object({
     body: z.object({
         allow_lazy_open: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Advanced configuration option. Specifies whether this job can open when\nthere is insufficient machine learning node capacity for it to be\nimmediately assigned to a node. If `false` and a machine learning node\nwith capacity to run the job cannot immediately be found, the open\nanomaly detection jobs API returns an error. However, this is also\nsubject to the cluster-wide `xpack.ml.max_lazy_ml_nodes` setting. If this\noption is set to `true`, the open anomaly detection jobs API does not\nreturn an error and the job waits in the opening state until sufficient\nmachine learning node capacity is available.'
-        })).default(false),
+        })),
         analysis_limits: z.optional(ml_types_analysis_memory_limit),
         background_persist_interval: z.optional(types_duration),
         custom_settings: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
@@ -48331,10 +48342,10 @@ export const ml_update_job_request = z.object({
         model_prune_window: z.optional(types_duration),
         daily_model_snapshot_retention_after_days: z.optional(z.number().register(z.globalRegistry, {
             description: 'Advanced configuration option, which affects the automatic removal of old\nmodel snapshots for this job. It specifies a period of time (in days)\nafter which only the first snapshot per day is retained. This period is\nrelative to the timestamp of the most recent snapshot for this job. Valid\nvalues range from 0 to `model_snapshot_retention_days`. For jobs created\nbefore version 7.8.0, the default value matches\n`model_snapshot_retention_days`.'
-        })).default(1),
+        })),
         model_snapshot_retention_days: z.optional(z.number().register(z.globalRegistry, {
             description: 'Advanced configuration option, which affects the automatic removal of old\nmodel snapshots for this job. It specifies the maximum period of time (in\ndays) that snapshots are retained. This period is relative to the\ntimestamp of the most recent snapshot for this job.'
-        })).default(10),
+        })),
         renormalization_window_days: z.optional(z.number().register(z.globalRegistry, {
             description: 'Advanced configuration option. The period over which adjustments to the\nscore are applied, as new data is seen.'
         })),
@@ -50696,18 +50707,18 @@ export const snapshot_restore_request = z.object({
         })),
         ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request ignores any index or data stream in indices that\'s missing from the snapshot.\nIf `false`, the request returns an error for any missing index or data stream.'
-        })).default(false),
+        })),
         include_aliases: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request restores aliases for any restored data streams and indices.\nIf `false`, the request doesn’t restore aliases.'
-        })).default(true),
+        })),
         include_global_state: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, restore the cluster state. The cluster state includes:\n\n* Persistent cluster settings\n* Index templates\n* Legacy index templates\n* Ingest pipelines\n* Index lifecycle management (ILM) policies\n* Stored scripts\n* For snapshots taken after 7.12.0, feature states\n\nIf `include_global_state` is `true`, the restore operation merges the legacy index templates in your cluster with the templates contained in the snapshot, replacing any existing ones whose name matches one in the snapshot.\nIt completely removes all persistent settings, non-legacy index templates, ingest pipelines, and ILM lifecycle policies that exist in your cluster and replaces them with the corresponding items from the snapshot.\n\nUse the `feature_states` parameter to configure how feature states are restored.\n\nIf `include_global_state` is `true` and a snapshot was created without a global state then the restore request will fail.'
-        })).default(false),
+        })),
         index_settings: z.optional(indices_types_index_settings),
         indices: z.optional(types_indices),
         partial: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `false`, the entire restore operation will fail if one or more indices included in the snapshot do not have all primary shards available.\n\nIf true, it allows restoring a partial snapshot of indices with unavailable shards.\nOnly shards that were successfully included in the snapshot will be restored.\nAll missing shards will be recreated as empty.'
-        })).default(false),
+        })),
         rename_pattern: z.optional(z.string().register(z.globalRegistry, {
             description: 'A rename pattern to apply to restored data streams and indices.\nData streams and indices matching the rename pattern will be renamed according to `rename_replacement`.\n\nThe rename pattern is applied as defined by the regular expression that supports referencing the original text, according to the `appendReplacement` logic.'
         })),
@@ -51271,17 +51282,17 @@ export const update_request = z.object({
     body: z.object({
         detect_noop: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the `result` in the response is set to `noop` (no operation) when there are no changes to the document.'
-        })).default(true),
+        })),
         doc: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
             description: 'A partial update to an existing document.\nIf both `doc` and `script` are specified, `doc` is ignored.'
         })),
         doc_as_upsert: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, use the contents of \'doc\' as the value of \'upsert\'.\nNOTE: Using ingest pipelines with `doc_as_upsert` is not supported.'
-        })).default(false),
+        })),
         script: z.optional(types_script),
         scripted_upsert: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, run the script whether or not the document exists.'
-        })).default(false),
+        })),
         _source: z.optional(global_search_types_source_config),
         upsert: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
             description: 'If the document does not already exist, the contents of \'upsert\' are inserted as a new document.\nIf the document exists, the \'script\' is run.'
@@ -51475,7 +51486,7 @@ export const watcher_put_watch1_request = z.object({
             description: 'The initial state of the watch.\nThe default value is `true`, which means the watch is active by default.'
         })),
         if_primary_term: z.optional(z.number().register(z.globalRegistry, {
-            description: 'only update the watch if the last operation that has changed the watch has the specified primary term'
+            description: 'Only update the watch if the last operation that has changed the watch has the specified primary term'
         })),
         if_seq_no: z.optional(types_sequence_number),
         version: z.optional(types_version_number)
@@ -51500,7 +51511,7 @@ export const watcher_put_watch_request = z.object({
             description: 'The initial state of the watch.\nThe default value is `true`, which means the watch is active by default.'
         })),
         if_primary_term: z.optional(z.number().register(z.globalRegistry, {
-            description: 'only update the watch if the last operation that has changed the watch has the specified primary term'
+            description: 'Only update the watch if the last operation that has changed the watch has the specified primary term'
         })),
         if_seq_no: z.optional(types_sequence_number),
         version: z.optional(types_version_number)
