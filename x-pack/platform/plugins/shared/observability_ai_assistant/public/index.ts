@@ -53,6 +53,7 @@ export { FailedToLoadResponse } from './components/message_panel/failed_to_load_
 export { MessageText } from './components/message_panel/message_text';
 
 export { ElasticLlmTourCallout } from './components/tour_callout/elastic_llm_tour_callout';
+export { AIAgentTourCallout } from './components/tour_callout/ai_agent_tour_callout';
 
 export {
   type ChatActionClickHandler,

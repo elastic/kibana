@@ -18,7 +18,8 @@
       "dataViews",
       "inference",
       "llmTasks",
-      "productDocBase"
+      "productDocBase",
+      "aiAssistantManagementSelection"
     ],
     "optionalPlugins": ["cloud", "serverless", "usageCollection"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],

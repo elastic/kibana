@@ -8,7 +8,9 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
-import { map, of } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessObservabilityPublicSetup,
@@ -41,24 +43,39 @@ export class ServerlessObservabilityPlugin
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
     const { serverless, management, security } = setupDeps;
-    const navigationTree$ = (
-      setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' })
-    ).pipe(
-      map(({ status }) => {
+
+    const chatExperience$ = core.settings.client.get$<AIChatExperience>(
+      AI_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+
+    const navigationTree$ = combineLatest([
+      setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
+      chatExperience$,
+    ]).pipe(
+      map(([{ status }, chatExperience]) => {
         return createNavigationTree({
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
+          showAiAssistant: chatExperience !== AIChatExperience.Agent,
         });
       })
     );
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
+
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
+
+    const showAiAssistant =
+      core.settings.client.get<AIChatExperience>(
+        AI_CHAT_EXPERIENCE_TYPE,
+        AIChatExperience.Classic
+      ) !== AIChatExperience.Agent;
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled(),
-      aiAssistantIsEnabled
+      aiAssistantIsEnabled && showAiAssistant
         ? {
             observabilityAiAssistantManagement: {
               category: appCategories.OTHER,

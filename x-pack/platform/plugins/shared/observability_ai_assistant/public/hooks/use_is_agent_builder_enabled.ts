@@ -8,9 +8,13 @@
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { useKibana } from './use_kibana';
 
 /**
- * Hook that returns true when the chat experience is set to Agent.
+ * Hook that returns true when the Agent Builder experience is enabled.
+ * This requires:
+ * - Chat experience set to Agent
+ * - Agent Builder capability (RBAC) enabled
  */
 export const useIsAgentBuilderEnabled = (): boolean => {
   const [chatExperience] = useUiSetting$<AIChatExperience>(
@@ -18,5 +22,11 @@ export const useIsAgentBuilderEnabled = (): boolean => {
     AIChatExperience.Classic
   );
 
-  return chatExperience === AIChatExperience.Agent;
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  const hasAgentBuilderAccess = capabilities?.agentBuilder?.show === true;
+
+  return chatExperience === AIChatExperience.Agent && hasAgentBuilderAccess;
 };

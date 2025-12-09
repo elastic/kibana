@@ -25,14 +25,8 @@ import type {
   Conversation,
   ConversationAccess,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  ElasticLlmTourCallout,
-  getElasticManagedLlmConnector,
-  ElasticLlmCalloutKey,
-  useElasticLlmCalloutDismissed,
-  useObservabilityAIAssistantFlyoutStateContext,
-} from '@kbn/observability-ai-assistant-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
+import { AIAgentTourCallout } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -120,14 +114,6 @@ export function ChatHeader({
       );
     }
   };
-
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
-    ElasticLlmCalloutKey.TOUR_CALLOUT,
-    false
-  );
-
-  const { isFlyoutOpen } = useObservabilityAIAssistantFlyoutStateContext();
 
   return (
     <EuiPanel
@@ -290,23 +276,13 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                {!!elasticManagedLlm &&
-                !tourCalloutDismissed &&
-                !(isConversationApp && isFlyoutOpen) ? (
-                  <ElasticLlmTourCallout dismissTour={() => setTourCalloutDismissed(true)}>
-                    <ChatActionsMenu
-                      connectors={connectors}
-                      disabled={licenseInvalid}
-                      navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
-                    />
-                  </ElasticLlmTourCallout>
-                ) : (
+                <AIAgentTourCallout isConversationApp={isConversationApp}>
                   <ChatActionsMenu
                     connectors={connectors}
                     disabled={licenseInvalid}
                     navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
                   />
-                )}
+                </AIAgentTourCallout>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

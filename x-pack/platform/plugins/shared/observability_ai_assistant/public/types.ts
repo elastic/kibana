@@ -11,6 +11,10 @@ import type { Observable } from 'rxjs';
 import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type {
+  AIAssistantManagementSelectionPluginPublicSetup,
+  AIAssistantManagementSelectionPluginPublicStart,
+} from '@kbn/ai-assistant-management-plugin/public';
+import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
   StreamingChatResponseEventWithoutError,
@@ -137,11 +141,13 @@ export interface ConfigSchema {
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: {};
   security: SecurityPluginSetup;
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}

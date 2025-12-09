@@ -79,13 +79,13 @@ export class ObservabilityAIAssistantAppPlugin
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-        // Restrict access when the chat experience is set to AI Agents
-        const currentExperience = coreStart.settings.client.get<AIChatExperience>(
+        // Restrict access when the chat experience is set to Agent
+        const chatExperience = coreStart.settings.client.get<AIChatExperience>(
           AI_CHAT_EXPERIENCE_TYPE,
           AIChatExperience.Classic
         );
 
-        if (currentExperience === AIChatExperience.Agent) {
+        if (chatExperience === AIChatExperience.Agent) {
           coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
           return () => {};
         }
