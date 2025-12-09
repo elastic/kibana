@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
-
 /**
  * Glossary of labels that should be displayed with specific formatting.
  * Store with the exact formatting you want to display.
@@ -48,24 +46,27 @@ const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLower
 
 /**
  * Formats labels with special casing rules from the glossary.
+ * For glossary terms, applies the exact formatting from the glossary.
+ * For non-glossary terms, capitalizes only the first letter.
  *
- * @param children - The label to format
- * @returns [formatted label, isGlossaryTerm] - If isGlossaryTerm is false, the component should apply default capitalization styling
+ * @param label - The label string to format
+ * @returns formatted label string
  * @example
- * formatLabel('machine learning') // ['Machine Learning', true] - Use as-is
- * formatLabel('settings') // ['settings', false] - Apply CSS ::first-letter transformation
+ * formatLabel('machine learning') // 'Machine Learning' - Glossary term
+ * formatLabel('settings') // 'Settings' - First letter capitalized
  */
-export const formatLabel = (children: ReactNode): [ReactNode, boolean] => {
-  if (!children || typeof children !== 'string') {
-    return [children, true];
+export function formatLabel(label: string): string {
+  if (!label || typeof label !== 'string') {
+    return label;
   }
 
-  const normalized = children.toLowerCase().trim();
+  const normalized = label.toLowerCase().trim();
   const glossaryMatch = TITLE_CASE_MAP.get(normalized);
 
   if (glossaryMatch) {
-    return [glossaryMatch, true];
+    return glossaryMatch;
   }
 
-  return [children, false];
-};
+  // Capitalize first letter for non-glossary terms
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase();
+}
