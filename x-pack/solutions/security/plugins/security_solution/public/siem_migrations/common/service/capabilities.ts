@@ -9,21 +9,13 @@ import type { Capabilities } from '@kbn/core/public';
 import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { i18n } from '@kbn/i18n';
 import { CapabilitiesChecker } from '../../../common/lib/capabilities';
-import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export interface MissingCapability {
   capability: string;
   description: string;
 }
 
-const minimumCapabilities: MissingCapability[] = [
-  {
-    capability: `${SECURITY_FEATURE_ID}.show`,
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: Read' }
-    ),
-  },
+const minimumSiemMigrationCapabilities: MissingCapability[] = [
   {
     capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     description: i18n.translate(
@@ -34,13 +26,6 @@ const minimumCapabilities: MissingCapability[] = [
 ];
 
 const allCapabilities: MissingCapability[] = [
-  {
-    capability: `${SECURITY_FEATURE_ID}.crud`,
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: All' }
-    ),
-  },
   {
     capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     description: i18n.translate(
@@ -61,8 +46,8 @@ export type CapabilitiesLevel = 'minimum' | 'all';
 
 export type CapabilitiesByLevel = Record<CapabilitiesLevel, MissingCapability[]>;
 
-export const requiredSiemMigrationCapabilities: CapabilitiesByLevel = {
-  minimum: minimumCapabilities,
+export const requiredSiemMigrationCapabilities = {
+  minimum: minimumSiemMigrationCapabilities,
   all: allCapabilities,
 };
 
