@@ -149,9 +149,7 @@ export class UptimeEsClient {
 
     return res;
   }
-  async count<TParams extends { query?: QueryDslQueryContainer }>(
-    params: TParams
-  ): Promise<CountResponse> {
+  async count<TParams extends estypes.CountRequest>(params: TParams): Promise<CountResponse> {
     let res: any;
     let esError: any;
 
