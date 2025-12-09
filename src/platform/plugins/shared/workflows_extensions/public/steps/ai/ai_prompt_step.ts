@@ -32,17 +32,16 @@ export const AiPromptStepDefinition: PublicStepDefinition = {
 - name: ask_ai
   type: ${AiPromptStepTypeId}
   with:
-    connectorId: "my-ai-connector"
-    input: "What is the weather like today?"
-\`\`\``,
-
+    prompt: "What is the weather like today?"
+\`\`\`
+The default AI connector configured for the workflow will be used.`,
       `## AI prompt with dynamic input
 \`\`\`yaml
 - name: analyze_data
   type: ${AiPromptStepTypeId}
   with:
-    connectorId: "{{ workflow.connectorId }}"
-    input: "Analyze this data: {{ steps.previous_step.output }}"
+    connectorId: ai_connector
+    prompt: "Analyze this data: {{ steps.previous_step.output }}"
 \`\`\``,
 
       `## AI prompt with structured output schema
@@ -50,8 +49,8 @@ export const AiPromptStepDefinition: PublicStepDefinition = {
 - name: extract_info
   type: ${AiPromptStepTypeId}
   with:
-    connectorId: "my-ai-connector"
-    input: "Extract key information from this text: {{ workflow.input }}"
+    connectorId: my-ai-connector
+    prompt: "Extract key information from this text: {{ workflow.input }}"
     outputSchema:
       type: "object"
       properties:
@@ -69,7 +68,7 @@ export const AiPromptStepDefinition: PublicStepDefinition = {
   type: ${AiPromptStepTypeId}
   with:
     connectorId: "my-ai-connector"
-    input: "Provide a recommendation based on this data"
+    prompt: "Provide a recommendation based on this data"
 - name: process_recommendation
   type: http
   with:
