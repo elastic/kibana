@@ -46,6 +46,12 @@ export {
   type WorkflowToolDefinitionWithSchema,
 } from './types/workflow';
 export {
+  isMcpTool,
+  type McpToolConfig,
+  type McpToolDefinition,
+  type McpToolDefinitionWithSchema,
+} from './types/mcp';
+export {
   isBuiltinTool,
   type BuiltinToolConfig,
   type BuiltinToolDefinition,
