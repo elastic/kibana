@@ -65,12 +65,9 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
               })}
             >
               <EuiBasicTable
-                tableCaption={i18n.translate(
-                  'searchConnectors.syncJobs.flyout.sync.tableCaption',
-                  {
-                    defaultMessage: 'Sync job details',
-                  }
-                )}
+                tableCaption={i18n.translate('searchConnectors.syncJobs.flyout.sync.tableCaption', {
+                  defaultMessage: 'Sync job details',
+                })}
                 columns={[
                   {
                     field: 'id',

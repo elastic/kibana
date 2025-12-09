@@ -284,10 +284,13 @@ export const AnalyticsCollectionExplorerTable = () => {
   const selectedTab =
     selectedTable === null ? undefined : tabs.find(({ id }) => id === selectedTable);
   const tableCaption = selectedTab
-    ? i18n.translate('xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.tableCaption', {
-        defaultMessage: 'Table of {tabName} results',
-        values: { tabName: selectedTab.name },
-      })
+    ? i18n.translate(
+        'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.tableCaption',
+        {
+          defaultMessage: 'Table of {tabName} results',
+          values: { tabName: selectedTab.name },
+        }
+      )
     : '';
   let table = selectedTable !== null && (tableSettings[selectedTable] as TableSetting);
   if (table) {

@@ -65,13 +65,7 @@ export const InferenceErrors: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <DataPanel
-        hasBorder
-        iconType="documents"
-        title={
-          <h3>{inferenceErrorsTitle}</h3>
-        }
-      >
+      <DataPanel hasBorder iconType="documents" title={<h3>{inferenceErrorsTitle}</h3>}>
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
