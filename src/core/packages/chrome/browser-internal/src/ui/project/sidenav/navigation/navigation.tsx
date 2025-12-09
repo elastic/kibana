@@ -33,6 +33,7 @@ export interface ChromeNavigationProps {
   // sidenav state
   isCollapsed: boolean;
   setWidth: (width: number) => void;
+  onSidePanelStateChange?: (isOpen: boolean) => void;
 
   // kibana deps
   basePath: BasePath;
@@ -90,6 +91,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         }
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
+        onSidePanelStateChange={props.onSidePanelStateChange}
         activeItemId={activeItemId}
         collapseButton={props.collapseButton}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}

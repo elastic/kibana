@@ -26,7 +26,9 @@ export type LayoutConfig = Pick<
   | 'applicationBottomBarHeight'
   | 'applicationMarginRight'
   | 'applicationMarginBottom'
->;
+> & {
+  isSidePanelOpen?: boolean;
+};
 
 /**
  * Context interface including both the config and an update function

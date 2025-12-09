@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, useEffect, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -58,6 +58,10 @@ export interface NavigationProps {
    */
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /**
+   * (optional) Callback fired when the side panel (secondary nav) state changes.
+   */
+  onSidePanelStateChange?: (isOpen: boolean) => void;
+  /**
    * (optional) Content to display inside the side panel footer.
    */
   sidePanelFooter?: ReactNode;
@@ -77,6 +81,7 @@ export const Navigation = ({
   items,
   logo,
   onItemClick,
+  onSidePanelStateChange,
   setWidth,
   sidePanelFooter,
   collapseButton,
@@ -107,6 +112,11 @@ export const Navigation = ({
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
+
+  // Notify the layout when the side panel state changes
+  useEffect(() => {
+    onSidePanelStateChange?.(isSidePanelOpen);
+  }, [isSidePanelOpen, onSidePanelStateChange]);
 
   return (
     <div

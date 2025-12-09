@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { ChromeLayoutSlots, LayoutState } from './layout.types';
 import { useLayoutConfig } from './layout_config_context';
 
@@ -47,6 +47,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
   const hasApplicationBottomBar = !!slots.ApplicationBottomBar;
 
   const navigationWidth = hasNavigation ? layoutConfig.navigationWidth ?? 0 : 0;
+  const isSidePanelOpen = layoutConfig.isSidePanelOpen ?? false;
 
   const layoutState: LayoutState = {
     hasBanner,
@@ -68,6 +69,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     applicationMarginRight: layoutConfig.applicationMarginRight ?? 0,
     applicationMarginBottom: layoutConfig.applicationMarginBottom ?? 0,
     isNavigationExpanded: navigationWidth > 0,
+    isSidePanelOpen,
   };
 
   return <LayoutStateContext.Provider value={layoutState}>{children}</LayoutStateContext.Provider>;

@@ -80,7 +80,7 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
         style={{
           display: 'grid',
           gridTemplateColumns: `${layoutState.navigationWidth}px 1fr`,
-          columnGap: layoutState.isNavigationExpanded ? DEFAULT_GRID_COLUMN_GAP : '0px',
+          columnGap: layoutState.isNavigationExpanded && layoutState.isSidePanelOpen ? DEFAULT_GRID_COLUMN_GAP : '0px',
           gridArea: 'navigation-application',
         }}
       >

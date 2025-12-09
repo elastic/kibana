@@ -39,6 +39,7 @@ export interface LayoutState extends LayoutDimensions {
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
   isNavigationExpanded: boolean;
+  isSidePanelOpen: boolean;
 }
 
 /**
