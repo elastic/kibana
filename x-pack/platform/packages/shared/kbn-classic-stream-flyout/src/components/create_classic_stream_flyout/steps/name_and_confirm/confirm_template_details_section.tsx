@@ -24,11 +24,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import {
   formatDataRetention,
   getPhaseDescriptions,
   type IlmPolicyFetcher,
-  type PhaseDescription,
 } from '../../../../utils';
 
 interface ConfirmTemplateDetailsSectionProps {
@@ -43,7 +43,7 @@ export const ConfirmTemplateDetailsSection = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const [ilmPhases, setIlmPhases] = useState<PhaseDescription[] | null>(null);
+  const [ilmPolicy, setIlmPolicy] = useState<PolicyFromES | null>(null);
   const [isLoadingIlmPolicy, setIsLoadingIlmPolicy] = useState(false);
 
   const ilmPolicyName = template.ilmPolicy?.name;
@@ -61,7 +61,7 @@ export const ConfirmTemplateDetailsSection = ({
   // Fetch ILM policy details when policy name is available
   useEffect(() => {
     if (!ilmPolicyName || !getIlmPolicy) {
-      setIlmPhases(null);
+      setIlmPolicy(null);
       return;
     }
 
@@ -71,14 +71,13 @@ export const ConfirmTemplateDetailsSection = ({
     getIlmPolicy(ilmPolicyName, abortController.signal)
       .then((policy) => {
         if (!abortController.signal.aborted && policy) {
-          const phases = getPhaseDescriptions(policy.policy.phases, phaseColors);
-          setIlmPhases(phases);
+          setIlmPolicy(policy);
         }
       })
       .catch((error) => {
         // Silently fail - we'll just not show phases
         if (!abortController.signal.aborted) {
-          setIlmPhases(null);
+          setIlmPolicy(null);
         }
       })
       .finally(() => {
@@ -90,7 +89,14 @@ export const ConfirmTemplateDetailsSection = ({
     return () => {
       abortController.abort();
     };
-  }, [ilmPolicyName, getIlmPolicy, phaseColors]);
+  }, [ilmPolicyName, getIlmPolicy]);
+
+  const ilmPhases = useMemo(() => {
+    if (!ilmPolicy) {
+      return null;
+    }
+    return getPhaseDescriptions(ilmPolicy.policy.phases, phaseColors);
+  }, [ilmPolicy, phaseColors]);
 
   const templateDetails = useMemo(() => {
     const indexMode = template.indexMode ?? 'standard';
