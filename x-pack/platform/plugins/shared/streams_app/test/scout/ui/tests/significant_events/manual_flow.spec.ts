@@ -14,7 +14,7 @@ const FEATURE_NAME = 'feature-one';
 test.describe('Significant events - manual flow', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.streams.forkStream('logs', STREAM_NAME, { never: {} });
-    // create a feature so we can edit the significant event
+    // create a feature so we can edit every property of the significant event
     await apiServices.streams.upsertFeature(STREAM_NAME, {
       type: 'system',
       name: FEATURE_NAME,
