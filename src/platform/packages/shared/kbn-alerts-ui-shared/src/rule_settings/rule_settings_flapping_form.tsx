@@ -164,8 +164,15 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
             <EuiText size="s" style={{ marginRight: euiTheme.size.xs }}>
               {flappingLabel}
             </EuiText>
-            <EuiBadge color={enabled ? 'success' : 'default'} style={{ height: '100%' }}>
-              {enabled ? flappingOnLabel : flappingOffLabel}
+            <EuiBadge
+              color={enabled !== undefined ? (enabled ? 'success' : 'default') : 'success'}
+              style={{ height: '100%' }}
+            >
+              {enabled !== undefined
+                ? enabled
+                  ? flappingOnLabel
+                  : flappingOffLabel
+                : flappingOnLabel}
             </EuiBadge>
             {flappingSettings && enabled && (
               <EuiBadge color="primary" style={{ height: '100%' }}>
@@ -231,7 +238,13 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     return (
       <EuiFlexItem>
         <EuiSwitch
-          label={flappingSettings.enabled ? enabledOnLabel : enabledOffLabel}
+          label={
+            flappingSettings.enabled !== undefined
+              ? flappingSettings.enabled
+                ? enabledOnLabel
+                : enabledOffLabel
+              : enabledOnLabel
+          }
           checked={flappingSettings.enabled !== undefined ? flappingSettings.enabled : true} // default to true if flapping.enabled is undefined
           disabled={!canWriteFlappingSettingsUI}
           onChange={(e) => onEnabledChange(e.target.checked)}
