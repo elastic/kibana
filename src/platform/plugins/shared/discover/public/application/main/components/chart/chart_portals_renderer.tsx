@@ -14,11 +14,6 @@ import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogr
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import {
-  type ChartSectionConfigurationExtensionParams,
-  useProfileAccessor,
-} from '../../../../context_awareness';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -43,6 +38,7 @@ import type {
   ChartSectionConfigurationExtensionParams,
   ChartSectionConfiguration,
 } from '../../../../context_awareness/types';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -158,10 +154,8 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
       };
     }, [dispatch, stateContainer.actions.updateESQLQuery]);
 
-  const query = stateContainer.getCurrentTab().appState.query;
-  const chartSectionConfig = useMemo(() => {
-    const isEsqlMode = isOfAggregateQueryType(query);
-
+  const isEsqlMode = useIsEsqlMode();
+  const chartSectionConfig = useMemo<ChartSectionConfiguration>(() => {
     if (!isEsqlMode) {
       return {
         replaceDefaultChart: false,
@@ -171,7 +165,7 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     return getChartConfigAccessor(() => ({
       replaceDefaultChart: false,
     }))(chartSectionConfigurationExtParams);
-  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, query]);
+  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, isEsqlMode]);
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(
