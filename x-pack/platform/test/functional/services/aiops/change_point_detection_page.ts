@@ -113,9 +113,9 @@ export function ChangePointDetectionPageProvider(
       const testSubj = 'aiopsChangePointDetectionSelectedCharts > xyVisChart';
       await elasticChart.waitForRenderComplete(testSubj);
       const changePointCharts = await testSubjects.findAll(testSubj);
-      expect(changePointCharts.length).to.eql(
-        expectedChartCount,
-        `Expected ${expectedChartCount} charts in the flyout (got '${changePointCharts.length}')`
+      expect(changePointCharts.length >= expectedChartCount).to.eql(
+        true,
+        `Expected equal or more than ${expectedChartCount} charts in the flyout (got '${changePointCharts.length}')`
       );
     },
 

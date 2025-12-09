@@ -10,7 +10,7 @@
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
@@ -49,8 +49,7 @@ export function buildAutocompleteContext({
   const absoluteOffset = model.getOffsetAt(position);
   const { lineNumber } = position;
   const line = model.getLineContent(lineNumber);
-  const wordUntil = model.getWordUntilPosition(position);
-  const word = model.getWordAtPosition(position) || wordUntil;
+  const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
   const { startColumn, endColumn } = word;
 
   const focusedStepInfo: StepInfo | null = focusedStepId

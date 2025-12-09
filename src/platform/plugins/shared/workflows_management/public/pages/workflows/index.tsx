@@ -38,7 +38,7 @@ export function WorkflowsPage() {
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { euiTheme } = useEuiTheme();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
-    limit: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
+    size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
     page: 1,
     query: '',
   });

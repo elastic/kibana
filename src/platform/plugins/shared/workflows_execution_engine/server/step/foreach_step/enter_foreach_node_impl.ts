@@ -10,7 +10,7 @@
 import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
 export class EnterForeachNodeImpl implements NodeImplementation {
@@ -25,14 +25,14 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     if (!this.stepExecutionRuntime.getCurrentStepState()) {
       await this.enterForeach();
     } else {
-      await this.advanceIteration();
+      this.advanceIteration();
     }
   }
 
   private async enterForeach(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
+    this.stepExecutionRuntime.startStep();
     let foreachState = this.stepExecutionRuntime.getCurrentStepState();
-    await this.stepExecutionRuntime.setInput({
+    this.stepExecutionRuntime.setInput({
       foreach: this.node.configuration.foreach,
     });
     const evaluatedItems = this.getItems();
@@ -44,11 +44,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
           workflow: { step_id: this.node.stepId },
         }
       );
-      await this.stepExecutionRuntime.setCurrentStepState({
+      this.stepExecutionRuntime.setCurrentStepState({
         items: [],
         total: 0,
       });
-      await this.stepExecutionRuntime.finishStep();
+      this.stepExecutionRuntime.finishStep();
       this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
       return;
     }
@@ -68,14 +68,14 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       total: evaluatedItems.length,
     };
 
-    await this.stepExecutionRuntime.setCurrentStepState(foreachState);
+    this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  private async advanceIteration(): Promise<void> {
+  private advanceIteration(): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     let foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
     // Update items and index if they have changed
@@ -90,7 +90,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       total,
     };
     // Enter a new scope for the new iteration
-    await this.stepExecutionRuntime.setCurrentStepState(foreachState);
+    this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();

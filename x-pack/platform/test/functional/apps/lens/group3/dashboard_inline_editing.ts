@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timeToVisualize',
     'security',
   ]);
-  const find = getService('find');
   const log = getService('log');
   const securityService = getService('security');
   const listingTable = getService('listingTable');
@@ -246,7 +245,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.createLayer('annotations');
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
+      // switch to the annotation tab
+      await lens.ensureLayerTabIsActive(1);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -294,7 +295,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and try to edit again the by reference annotation layer event
       await dashboardPanelActions.clickInlineEdit();
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
+      // switch to the annotation tab
+      await lens.ensureLayerTabIsActive(1);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -318,6 +321,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Adds reference line');
 
       await lens.createLayer('referenceLine');
+
+      await lens.assertLayerCount(2);
+      // switch to the reference line tab
+      await lens.ensureLayerTabIsActive(1);
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',

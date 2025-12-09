@@ -29,6 +29,8 @@ export type {
   ESQLInlineCast,
   ESQLAstBaseItem,
   ESQLAstChangePointCommand,
+  ESQLAstForkCommand,
+  ESQLForkParens,
 } from './src/types';
 
 export * from './src/ast/is';
@@ -72,3 +74,7 @@ export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';
 export { withAutoSuggest } from './src/definitions/utils/autocomplete/helpers';
 
 export { getNoValidCallSignatureError } from './src/definitions/utils/validation/utils';
+
+export { SuggestionOrderingEngine } from './src/sorting';
+export { SuggestionCategory } from './src/sorting';
+export type { SortingContext } from './src/sorting';

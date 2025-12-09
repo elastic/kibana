@@ -10,6 +10,8 @@ import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
+  StreamsAIDissectSuggestionAcceptedProps,
+  StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsChildStreamCreatedProps,
@@ -18,10 +20,18 @@ import type {
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
+  StreamsFeatureIdentificationSavedProps,
+  StreamsFeatureIdentificationIdentifiedProps,
+  StreamsFeatureIdentificationDeletedProps,
+  StreamsDescriptionGeneratedProps,
+  StreamsProcessingSimulationSamplesFetchLatencyProps,
+  StreamsTabVisitedProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
@@ -31,6 +41,12 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
+  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+  STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -60,6 +76,24 @@ export class StreamsTelemetryClient {
 
   public trackAIGrokSuggestionAccepted(params: StreamsAIGrokSuggestionAcceptedProps) {
     this.analytics.reportEvent(STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE, params);
+  }
+
+  public startTrackingAIDissectSuggestionLatency(
+    params: Pick<StreamsAIDissectSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>
+  ) {
+    const start = Date.now();
+    return (count: number, rates: number[]) => {
+      this.analytics.reportEvent(STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE, {
+        ...params,
+        duration_ms: Date.now() - start,
+        suggestion_count: count,
+        match_rate: rates,
+      });
+    };
+  }
+
+  public trackAIDissectSuggestionAccepted(params: StreamsAIDissectSuggestionAcceptedProps) {
+    this.analytics.reportEvent(STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE, params);
   }
 
   public trackWiredStreamsStatusChanged(params: WiredStreamsStatusChangedProps) {
@@ -94,6 +128,42 @@ export class StreamsTelemetryClient {
 
   public trackSignificantEventsCreated(params: StreamsSignificantEventsCreatedProps) {
     this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE, params);
+  }
+
+  public trackFeaturesIdentified(params: StreamsFeatureIdentificationIdentifiedProps) {
+    this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
+  }
+
+  public trackFeaturesSaved(params: StreamsFeatureIdentificationSavedProps) {
+    this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE, params);
+  }
+
+  public trackFeaturesDeleted(params: StreamsFeatureIdentificationDeletedProps) {
+    this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE, params);
+  }
+
+  public trackStreamDescriptionGenerated(params: StreamsDescriptionGeneratedProps) {
+    this.analytics.reportEvent(STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE, params);
+  }
+
+  public startTrackingSimulationSamplesFetchLatency(
+    params: Pick<
+      StreamsProcessingSimulationSamplesFetchLatencyProps,
+      'stream_name' | 'stream_type' | 'data_source_type'
+    >
+  ) {
+    const start = Date.now();
+
+    return () => {
+      this.analytics.reportEvent(STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE, {
+        ...params,
+        duration_ms: Date.now() - start,
+      });
+    };
+  }
+
+  public trackTabVisited(params: StreamsTabVisitedProps) {
+    this.analytics.reportEvent(STREAMS_TAB_VISITED_EVENT_TYPE, params);
   }
 
   private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {

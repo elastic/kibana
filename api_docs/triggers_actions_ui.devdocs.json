@@ -258,6 +258,39 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AddMessageVariablesOptional",
+        "type": "Function",
+        "tags": [],
+        "label": "AddMessageVariablesOptional",
+        "description": [],
+        "signature": [
+          "{ ({ buttonTitle, messageVariables, paramsProperty, onSelectEventHandler, showButtonTitle, isOptionalField, }: Props): React.JSX.Element; displayName: string | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/add_message_variables_optional.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AddMessageVariablesOptional.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  onSelectEventHandler,\n  showButtonTitle = false,\n  isOptionalField = false,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/add_message_variables_optional.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.CreateConnectorFlyout",
         "type": "Function",
         "tags": [],
@@ -1985,6 +2018,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ActionType.validate",
             "type": "Object",
             "tags": [],
@@ -2532,7 +2579,7 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\")[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\")[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
             "deprecated": false,
@@ -4256,7 +4303,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"monitoring\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -5133,6 +5180,27 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5678,7 +5746,7 @@
         "label": "ValidNormalizedTypes",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
         "deprecated": false,

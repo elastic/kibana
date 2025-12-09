@@ -12,12 +12,14 @@ import type {
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
   ESQLSourceResult,
+  ESQLFieldWithMetadata,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
-import type { FieldType, SupportedDataType } from '../definitions/types';
+import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
+import type { SuggestionCategory } from '../sorting/types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -66,6 +68,10 @@ export interface ISuggestionItem {
    */
   sortText?: string;
   /**
+   * The category of the suggestion, used for sorting and prioritization
+   */
+  category?: SuggestionCategory;
+  /**
    * Suggestions can trigger a command by id. This is useful to trigger specific actions in some contexts
    */
   command?: {
@@ -103,18 +109,6 @@ export type GetColumnsByTypeFn = (
     variableType?: ESQLVariableType;
   }
 ) => Promise<ISuggestionItem[]>;
-
-// TODO consider not exporting this
-export interface ESQLFieldWithMetadata {
-  name: string;
-  type: FieldType;
-  userDefined: false;
-  isEcs?: boolean;
-  hasConflict?: boolean;
-  metadata?: {
-    description?: string;
-  };
-}
 
 // TODO consider not exporting this
 export interface ESQLUserDefinedColumn {

@@ -6,7 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { ZodError } from '@kbn/zod';
+import { z as z3 } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import type {
   ActionType,
   ActionTypeConfig,
@@ -149,8 +150,10 @@ function validateWithSchema<
       }
     } catch (err) {
       let errMessage = err.message;
-      if (err instanceof ZodError) {
+      if (err instanceof z3.ZodError) {
         errMessage = formatZodError(err);
+      } else if (err instanceof z4.ZodError) {
+        errMessage = z4.prettifyError(err);
       }
       // we can't really i18n this yet, since the err.message isn't i18n'd itself
       throw Boom.badRequest(`error validating ${name}: ${errMessage}`);

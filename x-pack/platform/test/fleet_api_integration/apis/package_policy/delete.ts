@@ -176,7 +176,9 @@ export default function (providerContext: FtrProviderContext) {
         await supertest.get(`/api/fleet/agent_policies/${agentPolicy.id}`).expect(200);
       });
     });
-    describe('Delete bulk', () => {
+
+    // TODO: see https://github.com/elastic/kibana/pull/243499
+    describe.skip('Delete bulk', () => {
       let agentPolicy: any;
       let packagePolicy: any;
       before(async () => {

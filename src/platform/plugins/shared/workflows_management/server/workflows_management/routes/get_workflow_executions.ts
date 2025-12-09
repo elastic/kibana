@@ -71,7 +71,7 @@ export function registerGetWorkflowExecutionsRoute({
             )
           ),
           page: schema.maybe(schema.number({ min: 1 })),
-          perPage: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
+          size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
         }),
       },
     },
@@ -83,7 +83,7 @@ export function registerGetWorkflowExecutionsRoute({
           statuses: parseExecutionStatuses(request.query.statuses),
           executionTypes: parseExecutionTypes(request.query.executionTypes),
           page: request.query.page,
-          perPage: request.query.perPage,
+          size: request.query.size,
         };
         return response.ok({
           body: await api.getWorkflowExecutions(params, spaceId),

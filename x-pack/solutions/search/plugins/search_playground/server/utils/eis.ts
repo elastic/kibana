@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
+import { CONNECTOR_ID as INFERENCE_CONNECTOR_ID } from '@kbn/connector-schemas/inference';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { elasticModelIds } from '@kbn/inference-common';
 

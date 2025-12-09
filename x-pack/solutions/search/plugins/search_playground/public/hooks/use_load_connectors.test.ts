@@ -9,7 +9,7 @@ import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugi
 import { useLoadConnectors } from './use_load_connectors';
 import { useKibana } from './use_kibana';
 import { waitFor, renderHook } from '@testing-library/react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 
 const mockedLoadConnectors = loadConnectors as jest.Mock;

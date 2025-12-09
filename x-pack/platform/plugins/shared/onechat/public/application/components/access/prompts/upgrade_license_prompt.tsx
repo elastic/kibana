@@ -5,80 +5,61 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PromptLayout } from './prompt_layout';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
-const UpgradeLicenseActions: React.FC<{}> = () => {
-  const { navigationService } = useOnechatServices();
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiButton fill href={SUBSCRIPTIONS_LINK} target="_blank">
-          <FormattedMessage
-            id="xpack.onechat.access.prompt.upgradeLicense.actions.subscriptionPlansButton"
-            defaultMessage="Subscription plans"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      {navigationService.hasLicenseManagentLocator() && (
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            onClick={() => {
-              navigationService.navigateToLicenseManagementDashboard();
-            }}
-          >
-            <FormattedMessage
-              id="xpack.onechat.access.prompt.upgradeLicense.actions.manageLicenseButton"
-              defaultMessage="Manage license"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-};
-
 export const UpgradeLicensePrompt: React.FC<{}> = () => {
+  const assetBasePath = useAssetBasePath();
+  const { colorMode } = useEuiTheme();
+  const { navigationService } = useOnechatServices();
+
+  const primaryButton = (
+    <EuiButton fill href={SUBSCRIPTIONS_LINK} target="_blank">
+      <FormattedMessage
+        id="xpack.onechat.access.prompt.upgradeLicense.actions.subscriptionPlansButton"
+        defaultMessage="Subscription plans"
+      />
+    </EuiButton>
+  );
+
+  const secondaryButton = navigationService.hasLicenseManagentLocator() ? (
+    <EuiButtonEmpty
+      onClick={() => {
+        navigationService.navigateToLicenseManagementDashboard();
+      }}
+    >
+      <FormattedMessage
+        id="xpack.onechat.access.prompt.upgradeLicense.actions.manageLicenseButton"
+        defaultMessage="Manage your license"
+      />
+    </EuiButtonEmpty>
+  ) : undefined;
+
   return (
-    <PromptLayout>
-      <EuiPanel hasShadow={false}>
-        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-          <EuiFlexItem>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.onechat.access.prompt.upgradeLicense.title"
-                  defaultMessage="Upgrade your cluster license"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.onechat.access.prompt.upgradeLicense.description"
-                defaultMessage="Your cluster needs an Enterprise license to use the Elastic Agent Builder."
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UpgradeLicenseActions />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </PromptLayout>
+    <PromptLayout
+      imageSrc={
+        colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`
+      }
+      title={
+        <FormattedMessage
+          id="xpack.onechat.access.prompt.upgradeLicense.title"
+          defaultMessage="Upgrade your cluster license"
+        />
+      }
+      subtitle={
+        <FormattedMessage
+          id="xpack.onechat.access.prompt.upgradeLicense.description"
+          defaultMessage="Your cluster needs an Enterprise license to use the Elastic Agent Builder."
+        />
+      }
+      primaryButton={primaryButton}
+      secondaryButton={secondaryButton}
+    />
   );
 };

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const VARIABLE_REGEX_GLOBAL = /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"'])\s*\}\}/g;
+export const VARIABLE_REGEX = /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"'])\s*\}\}/;
+export const VARIABLE_REGEX_GLOBAL = new RegExp(VARIABLE_REGEX.source, 'g');
 export const UNFINISHED_VARIABLE_REGEX_GLOBAL =
   /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"']?)\s*$/g;
 
@@ -80,4 +81,21 @@ export function isVariableValue(value: unknown): boolean {
     return false;
   }
   return VARIABLE_VALUE_REGEX.test(value);
+}
+
+// Regex to match Liquid tags: {% ... %} or {%- ... -%} (with optional dashes)
+// Matches both single-line and multi-line Liquid tag blocks
+export const LIQUID_TAG_VALUE_REGEX = /\{\%-?\s*[^%]*?\s*-?\%\}/s;
+
+/**
+ * Checks if a value contains Liquid tag patterns ({% ... %} or {%- ... -%})
+ * Examples: {% if condition %}, {%- if condition -%}, multi-line blocks with Liquid tags
+ * Pattern: matches {% or {%- followed by content and %} or -%}
+ * The 's' flag allows . to match newlines for multi-line support
+ */
+export function isLiquidTagValue(value: unknown): boolean {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return LIQUID_TAG_VALUE_REGEX.test(value);
 }

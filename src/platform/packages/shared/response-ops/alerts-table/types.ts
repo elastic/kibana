@@ -43,7 +43,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -57,6 +57,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Case } from './apis/bulk_get_cases';
+import type { ItemsSelectionState } from './components/tags/items/types';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -686,6 +687,12 @@ export interface BulkActionsState {
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
   updatedAt: number;
+}
+
+export interface BulkEditTagsFlyoutState {
+  isFlyoutOpen: boolean;
+  onClose: () => void;
+  onSaveTags: (itemsSelection: ItemsSelectionState) => void;
 }
 
 export interface AlertsTableFlyoutBaseProps {

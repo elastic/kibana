@@ -761,6 +761,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.enableSuggestWidgetRepositioning",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableSuggestWidgetRepositioning",
+            "description": [
+              "\nEnables the suggestion widget repositioning. Enabled by default.\nDisabled for cases like embedded console."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

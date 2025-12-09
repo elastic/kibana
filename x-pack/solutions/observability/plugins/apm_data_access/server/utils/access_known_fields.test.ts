@@ -15,6 +15,7 @@ describe('accessKnownApmEventFields', () => {
     'service.version': ['1.0.0'],
     'service.environment': ['production'],
     'agent.name': ['nodejs'],
+    'agent.version': [],
     'links.span_id': ['link1', 'link2'],
   };
 
@@ -71,6 +72,18 @@ describe('accessKnownApmEventFields', () => {
     });
   });
 
+  it('can be built into a new flattened object with the correct value formats', () => {
+    const event = accessKnownApmEventFields(smallInput);
+
+    const newEvent = event.build();
+
+    expect(newEvent).toEqual({
+      '@timestamp': '2024-10-10T10:10:10.000Z',
+      'service.name': 'node-svc',
+      'links.span_id': ['link1', 'link2'],
+    });
+  });
+
   it('exposes a `requireFields` method, which validates the original object again to narrow its definition', () => {
     const event = accessKnownApmEventFields(smallInput).requireFields(['@timestamp']);
 
@@ -95,8 +108,28 @@ describe('accessKnownApmEventFields', () => {
       // Disabling type checking here to ensure we also have runtime protection of immutability,
       // so people can't just cast their way out of this. Normally, doing the setter op will
       // error at compile time.
-      // @ts-ignore
+      // @ts-expect-error
       event['agent.name'] = 'nodejs';
     }).toThrowError("'set' on proxy: trap returned falsish for property 'agent.name'");
+  });
+
+  it('checks for the existence of any fields with values that partially match a key string', () => {
+    const event = accessKnownApmEventFields(input);
+
+    expect(event.containsFields('service')).toBe(true);
+    expect(event.containsFields('links')).toBe(true);
+    expect(event.containsFields('transaction')).toBe(false);
+    expect(event.containsFields('agent.version')).toBe(false);
+  });
+
+  it('lists only the keys that exist on the original object', () => {
+    const event = accessKnownApmEventFields(smallInput);
+
+    expect(Object.keys(event)).toEqual(['@timestamp', 'service.name', 'links.span_id']);
+    expect(Object.entries(event)).toEqual([
+      ['@timestamp', '2024-10-10T10:10:10.000Z'],
+      ['service.name', 'node-svc'],
+      ['links.span_id', ['link1', 'link2']],
+    ]);
   });
 });

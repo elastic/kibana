@@ -52,18 +52,18 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:aef9a80b65c721485588a6d925ae71652f12e26a4adb66d55510e9e2e4cce645';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:25397820ef168d951339e69cedb5460f354cea842e2af367e33b89e988c51615';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.solution) imageFlavor += `-${flags.solution}`;
+  if (flags.solution) imageFlavor += `-${flags.solution.artifact}`;
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:72d1c432b89a0469716a08f9d4911bbacce858fc76bdd7e8f3984cd89e6b9c85';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:765b72eeb064eab5a6c2b778e9342893be97e11dbbca65af4b4dc660297f5f30';
   }
 
   // General docker var config
@@ -80,7 +80,7 @@ export async function runDockerGenerator(
   let artifactVariant = '';
   let artifactSolution = '';
   if (flags.serverless) artifactVariant = '-serverless';
-  if (flags.solution) artifactSolution = `-${flags.solution}`;
+  if (flags.solution) artifactSolution = `-${flags.solution.artifact}`;
   const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';

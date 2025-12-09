@@ -13,7 +13,7 @@ import {
   type AttackDiscoveryApiAlert,
   type AttackDiscoveryGenerationConfig,
 } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';

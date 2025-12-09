@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI, XYDataLayerConfig, XYState } from '@kbn/lens-common';
+import type { FramePublicAPI, XYDataLayerConfig, XYState, SeriesType } from '@kbn/lens-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
 
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
-import type { SeriesType, State } from '../../types';
 import { XyAppearanceSettings } from './appearance_settings';
 
 describe('Appearance settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): State {
+  function testState(): XYState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',

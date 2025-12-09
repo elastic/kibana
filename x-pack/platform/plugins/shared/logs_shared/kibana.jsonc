@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/logs-shared-plugin",
-  "owner": "@elastic/obs-onboarding-team",
+  "owner": "@elastic/obs-exploration-team",
   "group": "platform",
   "visibility": "shared",
   "description": "Exposes the shared components and APIs to access and visualize logs.",

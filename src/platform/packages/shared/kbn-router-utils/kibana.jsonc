@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/router-utils",
   "owner": [
-    "@elastic/obs-onboarding-team"
+    "@elastic/obs-exploration-team"
   ],
   "group": "platform",
   "visibility": "shared"

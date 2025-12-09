@@ -101,14 +101,15 @@ export const createTextChunkEvent = (
 };
 
 export const createMessageEvent = (
-  content: string,
+  content: string | object,
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageCompleteEvent => {
   return {
     type: ChatEventType.messageComplete,
     data: {
       message_id: messageId,
-      message_content: content,
+      message_content: typeof content === 'string' ? content : '',
+      ...(typeof content === 'object' ? { structured_output: content } : {}),
     },
   };
 };

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
 import { ConversationsHistoryPopover } from '../conversations_history/conversations_history_popover';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 const labels = {
   open: i18n.translate('xpack.onechat.conversationsHistory.open', {
@@ -27,6 +28,7 @@ export const ConversationsHistoryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
+  const { isEmbeddedContext } = useConversationContext();
 
   const togglePopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -36,7 +38,8 @@ export const ConversationsHistoryButton: React.FC = () => {
     padding-left: ${euiTheme.size.s};
   `;
 
-  const button = hasActiveConversation ? (
+  const showButtonIcon = isEmbeddedContext || hasActiveConversation;
+  const button = showButtonIcon ? (
     <EuiButtonIcon
       iconType="clockCounter"
       color="text"
@@ -57,8 +60,9 @@ export const ConversationsHistoryButton: React.FC = () => {
     </EuiButtonEmpty>
   );
 
+  const shouldAddPaddingLeft = hasActiveConversation && !isEmbeddedContext;
   return (
-    <EuiPageHeaderSection css={hasActiveConversation ? paddingLeft : undefined}>
+    <EuiPageHeaderSection css={shouldAddPaddingLeft ? paddingLeft : undefined}>
       <ConversationsHistoryPopover
         button={button}
         isOpen={isPopoverOpen}

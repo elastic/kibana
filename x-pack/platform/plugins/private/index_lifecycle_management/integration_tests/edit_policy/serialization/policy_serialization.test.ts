@@ -5,45 +5,72 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   getDefaultHotPhasePolicy,
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
 } from '../constants';
-import type { SerializationTestBed } from './policy_serialization.helpers';
-import { setupSerializationTestBed } from './policy_serialization.helpers';
+import {
+  createColdPhaseActions,
+  createDeletePhaseActions,
+  createFrozenPhaseActions,
+  createHotPhaseActions,
+  createWarmPhaseActions,
+} from '../../helpers/actions/phases';
+import { createFormSetValueAction } from '../../helpers/actions/form_set_value_action';
+import { createRolloverActions } from '../../helpers/actions/rollover_actions';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
 
 describe('<EditPolicy /> serialization', () => {
-  let testBed: SerializationTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setDefaultResponses();
-
-    await act(async () => {
-      testBed = await setupSerializationTestBed(httpSetup);
-    });
-
-    const { component } = testBed;
-    component.update();
+  beforeAll(() => {
+    jest.useFakeTimers();
   });
 
-  describe('top level form', () => {
-    afterAll(async () => {
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-          },
-        });
-      });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  const setupTest = async (options?: { isNewPolicy?: boolean; appServicesContext?: any }) => {
+    renderEditPolicy(httpSetup, {
+      appServicesContext: options?.appServicesContext,
+      initialEntries: options?.isNewPolicy ? ['/policies/edit'] : undefined,
     });
 
+    await screen.findByTestId('savePolicyButton');
+
+    return {
+      togglePhase: createTogglePhaseAction(),
+      savePolicy: () => fireEvent.click(screen.getByTestId('savePolicyButton')),
+      setPolicyName: createFormSetValueAction('policyNameField'),
+      ...createRolloverActions(),
+      ...createHotPhaseActions(),
+      ...createWarmPhaseActions(),
+      ...createColdPhaseActions(),
+      ...createFrozenPhaseActions(),
+      ...createDeletePhaseActions(),
+      screen,
+    };
+  };
+
+  describe('top level form', () => {
     /**
      * We assume that policies that populate this form are loaded directly from ES and so
      * are valid according to ES. There may be settings in the policy created through the ILM
@@ -52,18 +79,22 @@ describe('<EditPolicy /> serialization', () => {
      */
     it('preserves policy settings it did not configure', async () => {
       httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS]);
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
 
-      const { component, actions } = testBed;
-      component.update();
+      const actions = await setupTest();
 
       // Set max docs to test whether we keep the unknown fields in that object after serializing
       await actions.rollover.setMaxDocs('1000');
       // Remove the delete phase to ensure that we also correctly remove data
       await actions.togglePhase('delete');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/policies`,
@@ -96,19 +127,22 @@ describe('<EditPolicy /> serialization', () => {
           }),
         })
       );
-    });
+    }, 10000);
 
     it('default policy (only policy name input) on enterprise license', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
-
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
 
-      const { component, actions } = testBed;
-      component.update();
+      const actions = await setupTest({ isNewPolicy: true });
       await actions.setPolicyName('test_policy');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/policies`,
@@ -136,19 +170,23 @@ describe('<EditPolicy /> serialization', () => {
 
     it('default policy (only policy name input) on basic license', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
-
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'basic' } }),
-          },
-        });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
 
-      const { component, actions } = testBed;
-      component.update();
+      const actions = await setupTest({
+        isNewPolicy: true,
+        appServicesContext: {
+          license: licensingMock.createLicense({ license: { type: 'basic' } }),
+        },
+      });
       await actions.setPolicyName('test_policy');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/policies`,
@@ -176,35 +214,30 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('hot phase', () => {
+    let actions: Awaited<ReturnType<typeof setupTest>>;
+
     beforeEach(async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
-      });
-
-      const { component } = testBed;
-
-      component.update();
+      actions = await setupTest();
     });
 
     test('setting all values', async () => {
-      const { actions } = testBed;
-
-      await actions.rollover.toggleDefault();
+      actions.rollover.toggleDefault();
       await actions.rollover.setMaxSize('123', 'mb');
       await actions.rollover.setMaxDocs('123');
       await actions.rollover.setMaxAge('123', 'h');
       await actions.rollover.setMaxPrimaryShardDocs('123');
-      await actions.hot.toggleForceMerge();
+      actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('123');
-      await actions.hot.setBestCompression(true);
+      actions.hot.setBestCompression(true);
       await actions.hot.setShrinkCount('2');
       await actions.hot.toggleAllowWriteAfterShrink();
-      await actions.hot.toggleReadonly();
+      actions.hot.toggleReadonly();
       await actions.hot.setIndexPriority('123');
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/policies`,
@@ -240,14 +273,13 @@ describe('<EditPolicy /> serialization', () => {
           }),
         })
       );
-    });
+    }, 15000);
 
     test('setting searchable snapshot', async () => {
-      const { actions } = testBed;
-
       await actions.hot.setSearchableSnapshot('abc');
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -259,13 +291,12 @@ describe('<EditPolicy /> serialization', () => {
 
     // Setting downsample disables setting readonly so we test this separately
     test('setting downsample', async () => {
-      const { actions } = testBed;
-
-      await actions.rollover.toggleDefault();
-      await actions.hot.downsample.toggle();
+      actions.rollover.toggleDefault();
+      actions.hot.downsample.toggle();
       await actions.hot.downsample.setDownsampleInterval('2', 'h');
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -276,12 +307,11 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('disabling rollover', async () => {
-      const { actions } = testBed;
-
-      await actions.rollover.toggleDefault();
-      await actions.rollover.toggle();
+      actions.rollover.toggleDefault();
+      actions.rollover.toggle();
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -297,22 +327,14 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('warm phase', () => {
-    beforeEach(async () => {
+    test('default values', async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
-      });
-
-      const { component } = testBed;
-      component.update();
-    });
-
-    test('default values', async () => {
-      const { actions } = testBed;
+      const actions = await setupTest();
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -332,7 +354,15 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('setting all values', async () => {
-      const { actions } = testBed;
+      httpRequestsMockHelpers.setDefaultResponses();
+      // Override with correct node attributes format (server returns 'key:value' as keys)
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+
+      const actions = await setupTest();
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
       await actions.warm.setDataAllocation('node_attrs');
@@ -340,12 +370,13 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.setReplicas('123');
       await actions.warm.setShrinkCount('123');
       await actions.warm.toggleAllowWriteAfterShrink();
-      await actions.warm.toggleForceMerge();
+      actions.warm.toggleForceMerge();
       await actions.warm.setForcemergeSegmentsCount('123');
-      await actions.warm.setBestCompression(true);
-      await actions.warm.toggleReadonly();
+      actions.warm.setBestCompression(true);
+      actions.warm.toggleReadonly();
       await actions.warm.setIndexPriority('123');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/policies`,
@@ -389,18 +420,20 @@ describe('<EditPolicy /> serialization', () => {
           }),
         })
       );
-    });
+    }, 15000);
 
     // Setting downsample disables setting readonly so we test this separately
     test('setting downsample', async () => {
-      const { actions } = testBed;
+      httpRequestsMockHelpers.setDefaultResponses();
 
+      const actions = await setupTest();
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
-      await actions.warm.downsample.toggle();
+      actions.warm.downsample.toggle();
       await actions.warm.downsample.setDownsampleInterval('20', 'm');
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -408,31 +441,24 @@ describe('<EditPolicy /> serialization', () => {
 
       expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
       expect(parsedReqBody.phases.warm.actions.downsample).toEqual({ fixed_interval: '20m' });
-    });
+    }, 10000);
 
     describe('policy with include and exclude', () => {
-      beforeEach(async () => {
+      test('preserves include, exclude allocation settings', async () => {
         httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_INCLUDE_EXCLUDE]);
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
         httpRequestsMockHelpers.setListNodes({
           nodesByRoles: {},
-          nodesByAttributes: { test: ['123'] },
+          nodesByAttributes: { 'test:123': ['node-1'] },
           isUsingDeprecatedDataRoleConfig: false,
         });
-        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
-        await act(async () => {
-          testBed = await setupSerializationTestBed(httpSetup);
-        });
-
-        const { component } = testBed;
-        component.update();
-      });
-
-      test('preserves include, exclude allocation settings', async () => {
-        const { actions } = testBed;
+        const actions = await setupTest();
         await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.savePolicy();
+        await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
         const [requestUrl, requestBody] = lastReq;
@@ -459,23 +485,14 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('cold phase', () => {
-    beforeEach(async () => {
+    test('default values', async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
-      });
-
-      const { component } = testBed;
-      component.update();
-    });
-
-    test('default values', async () => {
-      const { actions } = testBed;
-
+      const actions = await setupTest();
       await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('11');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -495,18 +512,26 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('setting all values, excluding searchable snapshot', async () => {
-      const { actions } = testBed;
+      httpRequestsMockHelpers.setDefaultResponses();
+      // Override with correct node attributes format (server returns 'key:value' as keys)
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
 
+      const actions = await setupTest();
       await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('123');
-      await actions.cold.setMinAgeUnits('s');
+      await actions.cold.setMinAgeUnits('h');
       await actions.cold.setDataAllocation('node_attrs');
       await actions.cold.setSelectedNodeAttribute('test:123');
       await actions.cold.setReplicas('123');
-      await actions.cold.toggleReadonly();
+      actions.cold.toggleReadonly();
       await actions.cold.setIndexPriority('123');
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/policies`,
@@ -524,7 +549,7 @@ describe('<EditPolicy /> serialization', () => {
                 },
               },
               cold: {
-                min_age: '123s',
+                min_age: '123h',
                 actions: {
                   set_priority: {
                     priority: 123,
@@ -542,18 +567,20 @@ describe('<EditPolicy /> serialization', () => {
           }),
         })
       );
-    });
+    }, 15000);
 
     // Setting downsample disables setting readonly so we test this separately
     test('setting downsample', async () => {
-      const { actions } = testBed;
+      httpRequestsMockHelpers.setDefaultResponses();
 
+      const actions = await setupTest();
       await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('11');
-      await actions.cold.downsample.toggle();
+      actions.cold.downsample.toggle();
       await actions.cold.downsample.setDownsampleInterval('2');
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -565,11 +592,16 @@ describe('<EditPolicy /> serialization', () => {
 
     // Setting searchable snapshot field disables setting replicas so we test this separately
     test('setting searchable snapshot', async () => {
-      const { actions } = testBed;
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      const actions = await setupTest();
+
       await actions.togglePhase('cold');
+      await screen.findByTestId('cold-phase');
       await actions.cold.setMinAgeValue('10');
       await actions.cold.setSearchableSnapshot('my-repo');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -579,28 +611,27 @@ describe('<EditPolicy /> serialization', () => {
       expect(parsedReqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
         'my-repo'
       );
-    });
+    }, 15000);
   });
 
   describe('frozen phase', () => {
-    beforeEach(async () => {
+    test('default value', async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
+      const actions = await setupTest({
+        appServicesContext: {
+          license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+        },
       });
-
-      const { component } = testBed;
-      component.update();
-    });
-
-    test('default value', async () => {
-      const { actions } = testBed;
       await actions.togglePhase('frozen');
+
+      await screen.findByTestId('frozen-phase');
+
       await actions.frozen.setMinAgeValue('13');
       await actions.frozen.setSearchableSnapshot('myRepo');
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -613,10 +644,10 @@ describe('<EditPolicy /> serialization', () => {
           searchable_snapshot: { snapshot_repository: 'myRepo' },
         },
       });
-    });
+    }, 10000);
 
     describe('deserialization', () => {
-      beforeEach(async () => {
+      test('default value', async () => {
         const policyToEdit = getDefaultHotPhasePolicy();
         policyToEdit.policy.phases.frozen = {
           min_age: '1234m',
@@ -625,24 +656,16 @@ describe('<EditPolicy /> serialization', () => {
 
         httpRequestsMockHelpers.setLoadPolicies([policyToEdit]);
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
         httpRequestsMockHelpers.setListNodes({
           nodesByRoles: {},
-          nodesByAttributes: { test: ['123'] },
+          nodesByAttributes: { 'test:123': ['node-1'] },
           isUsingDeprecatedDataRoleConfig: false,
         });
 
-        await act(async () => {
-          testBed = await setupSerializationTestBed(httpSetup);
-        });
-
-        const { component } = testBed;
-        component.update();
-      });
-
-      test('default value', async () => {
-        const { actions } = testBed;
-
+        const actions = await setupTest();
         await actions.savePolicy();
+        await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
         const [requestUrl, requestBody] = lastReq;
@@ -663,10 +686,13 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('delete phase', () => {
     test('default value', async () => {
-      const { actions } = testBed;
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      const actions = await setupTest();
       await actions.togglePhase('delete');
-      await actions.delete.setSnapshotPolicy('test');
+      actions.delete.setSnapshotPolicy('test');
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -689,7 +715,9 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('shrink', () => {
     test('shrink shard size', async () => {
-      const { actions } = testBed;
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      const actions = await setupTest();
       await actions.hot.setShrinkSize('50');
 
       await actions.togglePhase('warm');
@@ -698,6 +726,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.toggleAllowWriteAfterShrink();
 
       await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/policies`,
@@ -734,6 +763,6 @@ describe('<EditPolicy /> serialization', () => {
           }),
         })
       );
-    });
+    }, 10000);
   });
 });

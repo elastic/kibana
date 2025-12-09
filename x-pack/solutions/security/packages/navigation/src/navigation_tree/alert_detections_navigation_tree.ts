@@ -11,16 +11,11 @@ import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
-export const createAlertDetectionsNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createAlertDetectionsNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.alertDetections,
   title: SecurityLinkGroup[SecurityGroupName.alertDetections].title,
-  iconV2: 'warning',
+  icon: 'warning',
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       title: i18nStrings.alertDetections.views.title,

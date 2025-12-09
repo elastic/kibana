@@ -24,8 +24,7 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
-  ESQLCommand,
-  ESQLAstQueryExpression,
+  ESQLAstForkCommand,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -105,16 +104,21 @@ export function hasTransformationalCommand(esql?: string) {
   }
 
   // Check for fork commands with all transformational branches
-  const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<ESQLCommand>;
+  const forkCommands = Walker.findAll(
+    root,
+    (node) => node.name === 'fork'
+  ) as Array<ESQLAstForkCommand>;
 
   const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
-    const forkArguments = forkCommand?.args as ESQLAstQueryExpression[];
+    const forkArguments = forkCommand?.args;
 
     if (!forkArguments || forkArguments.length === 0) {
       return false;
     }
 
-    return forkArguments.every((branch) => {
+    return forkArguments.every((parens) => {
+      const branch = parens.child;
+
       if (branch.type !== 'query') {
         return false;
       }
@@ -587,3 +591,54 @@ export const missingSortBeforeLimit = (esql: string): boolean => {
   }
   return false;
 };
+
+/**
+ * Checks if the ESQL query contains a timeseries bucket aggregation.
+ * @param esql: string - The ESQL query string
+ * @param columns: DatatableColumn[] - The columns of the datatable
+ * @returns true if the query contains a timeseries bucket aggregation, false otherwise
+ */
+export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []): boolean {
+  const { root } = Parser.parse(esql);
+
+  const normalize = (name: string) => name.toLowerCase().replace(/\s+/g, '');
+  const dateColumnNames = new Set(
+    columns.filter((col) => col.meta.type === 'date').map((col) => normalize(col.name))
+  );
+  if (dateColumnNames.size === 0) {
+    return false;
+  }
+
+  const commands = Walker.commands(root);
+  if (!commands.some((cmd) => cmd.name === 'ts')) {
+    return false;
+  }
+
+  const statsCommands = commands.filter((cmd) => cmd.name === 'stats');
+  if (statsCommands.length === 0) {
+    return false;
+  }
+
+  const statsByCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
+  if (statsByCommands.length === 0) {
+    return false;
+  }
+
+  const lastByCommand = statsByCommands[statsByCommands.length - 1];
+
+  let foundDateField = false;
+  walk(lastByCommand, {
+    visitColumn: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.name))) {
+        foundDateField = true;
+      }
+    },
+    visitFunction: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.text))) {
+        foundDateField = true;
+      }
+    },
+  });
+
+  return foundDateField;
+}

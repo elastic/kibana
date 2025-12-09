@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo } from 'react';
 
-import { EuiButtonGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps, UseEuiTheme, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -90,8 +90,7 @@ export function FlyoutToolbar<S>({
   const FlyoutContent = idSelected ? contentMap[idSelected] : null;
 
   return (
-    <EuiFlexItem
-      grow={false}
+    <div
       css={css`
         // NOTE: Override euiAccordion styles added in LensConfigurationFlyout
         .euiAccordion {
@@ -125,7 +124,7 @@ export function FlyoutToolbar<S>({
           </div>
         ) : null}
       </FlyoutContainer>
-    </EuiFlexItem>
+    </div>
   );
 }
 

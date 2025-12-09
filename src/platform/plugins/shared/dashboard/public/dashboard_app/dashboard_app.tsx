@@ -9,7 +9,7 @@
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { History } from 'history';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -117,7 +117,6 @@ export function DashboardApp({
       createKbnUrlStateStorage({
         history,
         useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-        ...withNotifyOnErrors(coreServices.notifications.toasts),
       }),
     [history]
   );
