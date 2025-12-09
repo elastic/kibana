@@ -60,7 +60,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
 
     onechat.openConversationFlyout({
       newConversation: true,
-      sessionTag: `alert:${alertId}`,
       attachments: [
         {
           type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
