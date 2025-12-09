@@ -18,19 +18,7 @@ export {
   TestConnectorRequestSchema,
   ListToolsRequestSchema,
   CallToolRequestSchema,
-  MCPExecutorParamsSchema,
-  // Legacy aliases
-  ConfigSchema,
-  SecretsSchema,
 } from './schemas/latest';
 
 // Types
-export type {
-  MCPConnectorConfig,
-  MCPConnectorSecrets,
-  // Legacy aliases
-  Config,
-  Secrets,
-} from './types/latest';
-
-export type { MCPAuthTypeName } from './schemas/latest';
+export type { MCPConnectorConfig, MCPConnectorSecrets } from './types/latest';

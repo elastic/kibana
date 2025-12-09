@@ -10,10 +10,5 @@
 import type { z } from '@kbn/zod';
 import type { MCPConnectorConfigSchema, MCPConnectorSecretsSchema } from '../schemas/v1';
 
-// Main types
 export type MCPConnectorConfig = z.input<typeof MCPConnectorConfigSchema>;
 export type MCPConnectorSecrets = z.infer<typeof MCPConnectorSecretsSchema>;
-
-// Legacy aliases for backward compatibility
-export type Config = MCPConnectorConfig;
-export type Secrets = MCPConnectorSecrets;

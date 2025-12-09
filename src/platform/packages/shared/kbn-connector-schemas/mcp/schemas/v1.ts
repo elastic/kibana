@@ -19,8 +19,6 @@ export const MCPAuthType = {
   Basic: 'basic',
 } as const;
 
-export type MCPAuthTypeName = (typeof MCPAuthType)[keyof typeof MCPAuthType];
-
 /**
  * Schema for MCP connector configuration.
  *
@@ -81,10 +79,6 @@ export const MCPConnectorSecretsSchema = z.object({
   secretHeaders: z.record(z.string(), z.string()).optional(),
 });
 
-// Legacy aliases for backward compatibility during migration
-export const ConfigSchema = MCPConnectorConfigSchema;
-export const SecretsSchema = MCPConnectorSecretsSchema;
-
 // Sub-action schemas
 
 export const TestConnectorRequestSchema = z.object({}).strict();
@@ -93,19 +87,7 @@ export const ListToolsRequestSchema = z.object({
   forceRefresh: z.boolean().optional(),
 });
 
-const MCPListToolsParamsSchema = z.object({
-  subAction: z.literal('listTools'),
-  subActionParams: ListToolsRequestSchema,
-});
-
 export const CallToolRequestSchema = z.object({
   name: z.string(),
   arguments: z.record(z.string(), z.any()).optional(),
 });
-
-const MCPCallToolParamsSchema = z.object({
-  subAction: z.literal('callTool'),
-  subActionParams: CallToolRequestSchema,
-});
-
-export const MCPExecutorParamsSchema = z.union([MCPListToolsParamsSchema, MCPCallToolParamsSchema]);
