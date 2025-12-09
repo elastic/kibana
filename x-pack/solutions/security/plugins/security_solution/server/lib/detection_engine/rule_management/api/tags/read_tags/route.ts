@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { ReadTagsResponse } from '../../../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -20,7 +21,7 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_TAGS_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })

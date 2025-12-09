@@ -76,6 +76,7 @@ export const SomeThings: StoryFn<{}> = () => {
             },
             feature: {
               name: 'Feature',
+              type: 'system',
               filter: {
                 always: {},
               },

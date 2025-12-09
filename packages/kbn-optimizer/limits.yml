@@ -1,6 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
+  agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 10000
   aiops: 15359
   alerting: 26932
@@ -113,7 +114,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 14703
+  navigation: 18999
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
