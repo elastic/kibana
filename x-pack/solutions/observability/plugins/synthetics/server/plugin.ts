@@ -32,6 +32,9 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { getTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
+import { getTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -94,9 +97,15 @@ export class Plugin implements PluginType {
 
     this.syncPrivateLocationMonitorsTask = new SyncPrivateLocationMonitorsTask(
       this.server,
-      plugins.taskManager,
       this.syntheticsMonitorClient
     );
+    this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
+
+    plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
+      transformOutInjectsReferences: true,
+      transformIn: getTransformIn(plugins.embeddable.transformEnhancementsIn),
+      transformOut: getTransformOut(plugins.embeddable.transformEnhancementsOut),
+    });
 
     return {};
   }

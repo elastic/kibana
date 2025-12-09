@@ -88,17 +88,19 @@ describe('scripts library client', () => {
       ).toHaveBeenCalledWith(
         SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
         {
-          created_by: 'elastic',
           description: 'does some stuff',
           example: 'bash -c script_one.sh',
-          executable: undefined,
+          path_to_executable: undefined,
           hash: 'e5441eb2bb',
           id: scriptId,
           instructions: 'just execute it',
           name: 'script one',
           platform: ['linux', 'macos'],
           requires_input: false,
+          created_by: 'elastic',
+          created_at: expect.any(String),
           updated_by: 'elastic',
+          updated_at: expect.any(String),
         },
         { id: scriptId }
       );
@@ -134,6 +136,134 @@ describe('scripts library client', () => {
         updatedAt: '2025-11-24T16:04:17.471Z',
         updatedBy: 'elastic',
         version: 'WzgsMV0=',
+      });
+    });
+  });
+
+  describe('#list()', () => {
+    it('should use defaults when called with no options', async () => {
+      await scriptsClient.list();
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
+      ).toHaveBeenCalledWith({
+        filter: undefined,
+        page: 1,
+        perPage: 10,
+        sortField: 'name',
+        sortOrder: 'asc',
+        type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should search for scripts using options provided on input', async () => {
+      await scriptsClient.list({
+        page: 101,
+        pageSize: 500,
+        sortField: 'createdAt',
+        sortDirection: 'desc',
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
+      ).toHaveBeenCalledWith({
+        filter: undefined,
+        page: 101,
+        perPage: 500,
+        sortField: 'created_at', // << Important: uses internal SO field name
+        sortOrder: 'desc',
+        type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should use a kuery with field names prefixed with SO type', async () => {
+      await scriptsClient.list({
+        kuery: 'name:script_one AND platform: (linux OR macos)',
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // The `kuery` passed to soClient.find() is converted to `KueryNode` (AST) and field names
+          // prepended with the SO type
+          filter: {
+            arguments: [
+              {
+                arguments: [
+                  {
+                    isQuoted: false,
+                    type: 'literal',
+                    value: 'security:endpoint-scripts-library.attributes.name',
+                  },
+                  { isQuoted: false, type: 'literal', value: 'script_one' },
+                ],
+                function: 'is',
+                type: 'function',
+              },
+              {
+                arguments: [
+                  {
+                    arguments: [
+                      {
+                        isQuoted: false,
+                        type: 'literal',
+                        value: 'security:endpoint-scripts-library.attributes.platform',
+                      },
+                      { isQuoted: false, type: 'literal', value: 'linux' },
+                    ],
+                    function: 'is',
+                    type: 'function',
+                  },
+                  {
+                    arguments: [
+                      {
+                        isQuoted: false,
+                        type: 'literal',
+                        value: 'security:endpoint-scripts-library.attributes.platform',
+                      },
+                      { isQuoted: false, type: 'literal', value: 'macos' },
+                    ],
+                    function: 'is',
+                    type: 'function',
+                  },
+                ],
+                function: 'or',
+                type: 'function',
+              },
+            ],
+            function: 'and',
+            type: 'function',
+          },
+        })
+      );
+    });
+
+    it('should return expected response', async () => {
+      await expect(scriptsClient.list()).resolves.toEqual({
+        data: [
+          {
+            createdAt: '2025-11-24T16:04:17.471Z',
+            createdBy: 'elastic',
+            description: undefined,
+            downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
+            example: undefined,
+            id: '1-2-3',
+            instructions: undefined,
+            name: 'my script',
+            pathToExecutable: undefined,
+            platform: ['macos', 'linux'],
+            requiresInput: false,
+            updatedAt: '2025-11-24T16:04:17.471Z',
+            updatedBy: 'elastic',
+            version: 'WzgsMV0=',
+          },
+        ],
+        page: 1,
+        pageSize: 10,
+        sortDirection: 'asc',
+        sortField: 'name',
+        total: 0,
       });
     });
   });

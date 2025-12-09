@@ -453,7 +453,7 @@ export const PrevalenceDetails: React.FC = () => {
           columns={columns}
           loading={loading}
           data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-          message={
+          noItemsMessage={
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
               defaultMessage="No prevalence data available."

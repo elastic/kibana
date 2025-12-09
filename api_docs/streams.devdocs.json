@@ -650,9 +650,11 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            ">; }, \"strip\", ",
+            ">; type: ",
+            "ZodEnum",
+            "<[\"system\"]>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; filter: ",
+            ", { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -660,7 +662,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }, { name: string; filter: ",
+            "; }, { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -680,7 +682,7 @@
             "ZodNumber",
             ">; }, \"strip\", ",
             "ZodTypeAny",
-            ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+            ", { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -688,7 +690,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+            "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -698,7 +700,7 @@
             },
             "; } | undefined; severity_score?: number | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+            ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -706,7 +708,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; severity_score?: number | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+            "; } | undefined; severity_score?: number | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -906,9 +908,11 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            ">; }, \"strip\", ",
+            ">; type: ",
+            "ZodEnum",
+            "<[\"system\"]>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; filter: ",
+            ", { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -916,7 +920,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }, { name: string; filter: ",
+            "; }, { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -932,7 +936,7 @@
             "ZodTypeAny",
             ", { query: string; }, { query: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { kql: { query: string; }; feature?: { name: string; filter: ",
+            ", { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -940,7 +944,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; }, { kql: { query: string; }; feature?: { name: string; filter: ",
+            "; } | undefined; }, { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -950,7 +954,7 @@
             },
             "; } | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+            ", { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -958,7 +962,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+            "; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -968,7 +972,7 @@
             },
             "; } | undefined; }; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -976,7 +980,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+            "; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -3082,9 +3086,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">; }, \"strip\", ",
+          ">; type: ",
+          "ZodEnum",
+          "<[\"system\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; filter: ",
+          ", { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3092,7 +3098,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }, { name: string; filter: ",
+          "; }, { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3112,7 +3118,7 @@
           "ZodNumber",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          ", { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3120,7 +3126,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3130,7 +3136,7 @@
           },
           "; } | undefined; severity_score?: number | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3138,7 +3144,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; severity_score?: number | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; severity_score?: number | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3338,9 +3344,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">; }, \"strip\", ",
+          ">; type: ",
+          "ZodEnum",
+          "<[\"system\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; filter: ",
+          ", { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3348,7 +3356,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }, { name: string; filter: ",
+          "; }, { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3364,7 +3372,7 @@
           "ZodTypeAny",
           ", { query: string; }, { query: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { kql: { query: string; }; feature?: { name: string; filter: ",
+          ", { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3372,7 +3380,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; }, { kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; }, { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3382,7 +3390,7 @@
           },
           "; } | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+          ", { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3390,7 +3398,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3400,7 +3408,7 @@
           },
           "; } | undefined; }; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3408,7 +3416,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",

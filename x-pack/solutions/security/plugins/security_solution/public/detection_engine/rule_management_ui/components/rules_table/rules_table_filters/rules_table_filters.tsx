@@ -8,26 +8,33 @@
 import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import styled from 'styled-components';
 import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from '../../../../common/translations';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
+import { AllRulesTabs } from '../rules_table_toolbar';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import { GapFillStatusSelector } from './gap_fill_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
+interface RulesTableFiltersProps {
+  selectedTab: AllRulesTabs;
+}
+
 /**
  * Collection of filters for filtering data within the RulesTable. Contains search bar, Elastic/Custom
  * Rules filter button toggle, and tag selection
  */
-const RulesTableFiltersComponent = () => {
+const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => {
   const { startTransaction } = useStartTransaction();
   const {
     state: { filterOptions },
@@ -44,6 +51,7 @@ const RulesTableFiltersComponent = () => {
     tags: selectedTags,
     enabled,
     ruleExecutionStatus: selectedRuleExecutionStatus,
+    gapFillStatuses,
   } = filterOptions;
 
   const handleOnSearch = useCallback(
@@ -94,6 +102,17 @@ const RulesTableFiltersComponent = () => {
     [selectedRuleExecutionStatus, setFilterOptions, startTransaction]
   );
 
+  const handleSelectedGapStatuses = useCallback(
+    (newStatuses: GapFillStatus[]) => {
+      const currentStatuses = gapFillStatuses ?? [];
+      if (!isEqual(newStatuses, currentStatuses)) {
+        startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+        setFilterOptions({ gapFillStatuses: newStatuses });
+      }
+    },
+    [gapFillStatuses, setFilterOptions, startTransaction]
+  );
+
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
@@ -107,6 +126,17 @@ const RulesTableFiltersComponent = () => {
           />
         </EuiFilterGroup>
       </EuiFlexItem>
+
+      {selectedTab === AllRulesTabs.monitoring && (
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <GapFillStatusSelector
+              selectedStatuses={gapFillStatuses ?? []}
+              onSelectedStatusesChanged={handleSelectedGapStatuses}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
