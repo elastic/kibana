@@ -35,6 +35,7 @@ import {
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
+import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -154,6 +155,7 @@ export class OnechatPlugin
     );
 
     const onechatService: OnechatPluginStart = {
+      agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
