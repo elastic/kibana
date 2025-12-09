@@ -68,11 +68,7 @@ export class ArtifactManager {
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
     const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
     this.log.debug(`Downloading artifact from [${artifactUrl}]`);
-    const artifactFullPath = await download(
-      artifactUrl,
-      artifactPathAtVolume,
-      'application/zip',
-    );
+    const artifactFullPath = await download(artifactUrl, artifactPathAtVolume, 'application/zip');
 
     this.downloadedFiles.add(artifactPathAtVolume);
 
