@@ -76,10 +76,10 @@ export const addIdentifierToStep = (step: StreamlangStep, path: string, index: n
     delete step.customIdentifier;
   }
 
+  // Use just the step path as the identifier - this is sufficient since we only
+  // diff for additive changes now (new steps at end), not content modifications
   const stepPath = `${path}.steps[${index}]`;
-  const contentHash = objectHash(step);
-  const id = `${contentHash}${stepPath}`;
-  step.customIdentifier = id;
+  step.customIdentifier = stepPath;
 
   return { step, stepPath };
 };
