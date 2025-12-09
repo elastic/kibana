@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/onechat-common';
-import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import { visualizationElement } from '@kbn/agent-builder-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 
 export const renderVisualizationPrompt = () => {

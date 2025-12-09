@@ -9,10 +9,10 @@ import type { Agent } from 'supertest';
 import type {
   ChatRequestBodyPayload,
   ChatResponse,
-} from '@kbn/onechat-plugin/common/http_api/chat';
-import type { Conversation } from '@kbn/onechat-common';
+} from '@kbn/agent-builder-plugin/common/http_api/chat';
+import type { Conversation } from '@kbn/agent-builder-common';
 
-export function createOneChatApiClient(supertest: Agent) {
+export function createAgentBuilderApiClient(supertest: Agent) {
   return {
     async converse(payload: ChatRequestBodyPayload): Promise<ChatResponse> {
       const res = await supertest
@@ -31,4 +31,4 @@ export function createOneChatApiClient(supertest: Agent) {
   };
 }
 
-export type OneChatApiClient = ReturnType<typeof createOneChatApiClient>;
+export type AgentBuilderApiClient = ReturnType<typeof createAgentBuilderApiClient>;

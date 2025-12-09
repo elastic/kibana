@@ -18,9 +18,9 @@ import { labels } from '../utils/i18n';
 import { ToolsProvider } from '../context/tools_provider';
 import { useUiPrivileges } from '../hooks/use_ui_privileges';
 
-export const OnechatToolDetailsPage = () => {
+export const AgentBuilderToolDetailsPage = () => {
   const { toolId } = useParams<{ toolId: string }>();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   const { tool, isLoading } = useTool({ toolId });
   const { manageTools } = useUiPrivileges();
 
@@ -46,7 +46,7 @@ export const OnechatToolDetailsPage = () => {
   }
 
   if (!tool) {
-    navigateToOnechatUrl(appPaths.tools.list);
+    navigateToAgentBuilderUrl(appPaths.tools.list);
     return;
   }
 

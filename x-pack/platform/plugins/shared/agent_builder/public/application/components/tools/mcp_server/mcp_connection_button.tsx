@@ -35,7 +35,7 @@ export const McpConnectionButton = () => {
           onClick={() => setIsContextOpen(true)}
         >
           <EuiText size="s">
-            {i18n.translate('xpack.onechat.tools.mcpServerConnectionButton', {
+            {i18n.translate('xpack.agentBuilder.tools.mcpServerConnectionButton', {
               defaultMessage: 'MCP Server',
             })}
           </EuiText>
@@ -55,7 +55,7 @@ export const McpConnectionButton = () => {
           >
             {(copy) => (
               <EuiContextMenuItem key="copy" icon="copy" onClick={copy}>
-                {i18n.translate('xpack.onechat.tools.copyMcpServerUrlButton', {
+                {i18n.translate('xpack.agentBuilder.tools.copyMcpServerUrlButton', {
                   defaultMessage: 'Copy MCP Server URL',
                 })}
               </EuiContextMenuItem>
@@ -63,7 +63,7 @@ export const McpConnectionButton = () => {
           </EuiCopy>,
 
           <EuiContextMenuItem key="documentation" href={docLinks.mcpServer} target="_blank">
-            {i18n.translate('xpack.onechat.tools.aboutMcpServerDocumentationButton', {
+            {i18n.translate('xpack.agentBuilder.tools.aboutMcpServerDocumentationButton', {
               defaultMessage: 'Documentation',
             })}
           </EuiContextMenuItem>,

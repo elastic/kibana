@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AgentHandlerFn } from '@kbn/onechat-server';
+import type { AgentHandlerFn } from '@kbn/agent-builder-server';
 import type { InternalAgentDefinition } from '../agent_registry';
 import { runAgent } from './run_agent';
 
 /**
- * Create the handler function for the default onechat agent.
+ * Create the handler function for the default agentBuilder agent.
  */
 export const createAgentHandler = ({
   agent,

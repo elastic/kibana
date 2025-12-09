@@ -8,8 +8,8 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
-import { useOnechatServices } from '../../../../../hooks/use_onechat_service';
+import type { TabularDataResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 
 interface TabularDataResultStepProps {
   result: TabularDataResult;
@@ -20,7 +20,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
 }) => {
   const {
     startDependencies: { share },
-  } = useOnechatServices();
+  } = useAgentBuilderServices();
 
   const {
     url: { locators },
@@ -41,15 +41,15 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+          id="xpack.agentBuilder.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
           defaultMessage="Found {results}"
           values={{
             results: (
               <EuiLink
                 href={discoverUrl}
-                data-test-subj="onechat-esql-data-result-see-in-discover"
+                data-test-subj="agent-builder-esql-data-result-see-in-discover"
                 aria-label={i18n.translate(
-                  'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
+                  'xpack.agentBuilder.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
                   {
                     defaultMessage: 'Explore results in Discover',
                   }
@@ -57,7 +57,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+                  id="xpack.agentBuilder.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
                   defaultMessage="{totalResults, plural, one {{totalResults, number} result} other {{totalResults, number} results}}"
                   values={{
                     totalResults: data.values.length,

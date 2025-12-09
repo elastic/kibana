@@ -9,21 +9,21 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { OnechatNavControl } from './onechat_nav_control';
-import type { OnechatStartDependencies } from '../../types';
-import type { OnechatPluginStart } from '../../types';
+import { AgentBuilderNavControl } from './agent_builder_nav_control';
+import type { AgentBuilderStartDependencies } from '../../types';
+import type { AgentBuilderPluginStart } from '../../types';
 
-interface OnechatNavControlWithProviderDeps {
+interface AgentBuilderNavControlWithProviderDeps {
   coreStart: CoreStart;
-  pluginsStart: OnechatStartDependencies;
-  onechatService: OnechatPluginStart;
+  pluginsStart: AgentBuilderStartDependencies;
+  agentBuilderService: AgentBuilderPluginStart;
 }
 
-export const OnechatNavControlWithProvider = ({
+export const AgentBuilderNavControlWithProvider = ({
   coreStart,
   pluginsStart,
-  onechatService,
-}: OnechatNavControlWithProviderDeps) => {
+  agentBuilderService,
+}: AgentBuilderNavControlWithProviderDeps) => {
   return (
     <EuiErrorBoundary>
       <KibanaThemeProvider theme={coreStart.theme}>
@@ -31,11 +31,11 @@ export const OnechatNavControlWithProvider = ({
           services={{
             ...coreStart,
             ...pluginsStart,
-            onechat: onechatService,
+            agentBuilder: agentBuilderService,
           }}
         >
           <coreStart.i18n.Context>
-            <OnechatNavControl />
+            <AgentBuilderNavControl />
           </coreStart.i18n.Context>
         </KibanaContextProvider>
       </KibanaThemeProvider>

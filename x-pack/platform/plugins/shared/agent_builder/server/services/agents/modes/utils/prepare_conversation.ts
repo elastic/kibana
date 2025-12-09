@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-common';
-import { createInternalError } from '@kbn/onechat-common';
-import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { AttachmentsService } from '@kbn/onechat-server/runner';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/agent-builder-common';
+import { createInternalError } from '@kbn/agent-builder-common';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type {
   AttachmentRepresentation,
   AttachmentBoundedTool,
-} from '@kbn/onechat-server/attachments';
+} from '@kbn/agent-builder-server/attachments';
 
 export interface ProcessedAttachment {
   attachment: Attachment;

@@ -11,17 +11,17 @@ import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
-import { ChatEventType } from '@kbn/onechat-common';
+import type { ChatAgentEvent } from '@kbn/agent-builder-common';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import type {
   AgentEventEmitterFn,
   ExecutableTool,
-  OnechatToolEvent,
+  AgentBuilderToolEvent,
   RunToolReturn,
   ToolEventHandlerFn,
   ToolProvider,
-} from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -32,7 +32,7 @@ export interface ToolsAndMappings {
    */
   tools: StructuredTool[];
   /**
-   * ID mapping that can be used to retrieve the onechat tool id from the langchain tool id.
+   * ID mapping that can be used to retrieve the agentBuilder tool id from the langchain tool id.
    */
   idMappings: ToolIdMapping;
 }
@@ -51,16 +51,16 @@ export const toolsToLangchain = async ({
   addReasoningParam?: boolean;
 }): Promise<ToolsAndMappings> => {
   const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
-  const onechatToLangchainIdMap = createToolIdMappings(allTools);
+  const agentBuilderToLangchainIdMap = createToolIdMappings(allTools);
 
   const convertedTools = await Promise.all(
     allTools.map((tool) => {
-      const toolId = onechatToLangchainIdMap.get(tool.id);
+      const toolId = agentBuilderToLangchainIdMap.get(tool.id);
       return toolToLangchain({ tool, logger, toolId, sendEvent, addReasoningParam });
     })
   );
 
-  const reverseMappings = reverseMap(onechatToLangchainIdMap);
+  const reverseMappings = reverseMap(agentBuilderToLangchainIdMap);
 
   return {
     tools: convertedTools,
@@ -73,7 +73,7 @@ export const sanitizeToolId = (toolId: string): string => {
 };
 
 /**
- * Create a [onechat tool id] -> [langchain tool id] mapping.
+ * Create a [agentBuilder tool id] -> [langchain tool id] mapping.
  *
  * Handles id sanitization (e.g. removing dot prefixes), and potential id conflict.
  */
@@ -181,7 +181,7 @@ function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
 }
 
 const getToolEventConverter = ({ toolCallId }: { toolCallId: string }) => {
-  return (toolEvent: OnechatToolEvent): ChatAgentEvent => {
+  return (toolEvent: AgentBuilderToolEvent): ChatAgentEvent => {
     if (toolEvent.type === ChatEventType.toolProgress) {
       return {
         type: ChatEventType.toolProgress,

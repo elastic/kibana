@@ -21,7 +21,7 @@ export const ThinkingTimeDisplay = ({ timeToFirstToken }: { timeToFirstToken: nu
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.onechat.conversation.thinking.timeToFirstToken"
+            id="xpack.agentBuilder.conversation.thinking.timeToFirstToken"
             defaultMessage="{timeToFirstToken} seconds"
             values={{
               timeToFirstToken: Math.round(timeToFirstToken / 1000),

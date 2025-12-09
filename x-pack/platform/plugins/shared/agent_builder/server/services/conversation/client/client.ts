@@ -7,12 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,

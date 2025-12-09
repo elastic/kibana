@@ -6,8 +6,8 @@
  */
 
 import { randomInt } from 'crypto';
-import type { ErrorResult } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common';
+import type { ErrorResult } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common';
 
 const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const idRegex = /^[a-zA-Z0-9]{6}$/;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 
 export interface ToolTypeInfo {
   /**

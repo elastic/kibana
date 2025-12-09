@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { OnechatEvent } from './base/events';
+export type { AgentBuilderEvent } from './base/events';
 export {
   internalNamespaces as toolNamespaces,
   protectedNamespaces as toolReservedNamespaces,
@@ -49,38 +49,38 @@ export {
   type BrowserApiToolMetadata,
 } from './tools';
 export {
-  OnechatErrorCode,
-  OnechatErrorUtils,
+  AgentBuilderErrorCode,
+  AgentBuilderErrorUtils,
   isInternalError,
   isToolNotFoundError,
-  isOnechatError,
+  isAgentBuilderError,
   isAgentNotFoundError,
   isConversationNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
-  createOnechatError,
+  createAgentBuilderError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
-  type OnechatError,
-  type OnechatInternalError,
-  type OnechatToolNotFoundError,
-  type OnechatAgentNotFoundError,
-  type OnechatConversationNotFoundError,
-  type OnechatBadRequestError,
-  type OnechatRequestAbortedError,
-  type OnechatAgentExecutionError,
-  type SerializedOnechatError,
+  type AgentBuilderError,
+  type AgentBuilderInternalError,
+  type AgentBuilderToolNotFoundError,
+  type AgentBuilderAgentNotFoundError,
+  type AgentBuilderConversationNotFoundError,
+  type AgentBuilderBadRequestError,
+  type AgentBuilderRequestAbortedError,
+  type AgentBuilderAgentExecutionError,
+  type SerializedAgentBuilderError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
 export {
-  oneChatDefaultAgentId,
+  agentBuilderDefaultAgentId,
   AgentType,
   AgentExecutionErrorCode,
   type AgentDefinition,

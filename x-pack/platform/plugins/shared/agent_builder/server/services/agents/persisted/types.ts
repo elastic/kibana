@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 
 export type PersistedAgentDefinition = Omit<AgentDefinition, 'readonly'>;

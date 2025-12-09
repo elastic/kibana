@@ -7,9 +7,9 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools/search/run_search_tool';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';

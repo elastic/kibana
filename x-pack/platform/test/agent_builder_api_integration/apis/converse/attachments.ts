@@ -6,20 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
+import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../../utils/one_chat_client';
+import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
 
-export default function ({ getService }: OneChatApiFtrProviderContext) {
+export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
   const supertest = getService('supertest');
 
   const log = getService('log');
-  const oneChatApiClient = createOneChatApiClient(supertest);
+  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
   const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
   const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
@@ -43,8 +43,8 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
     });
 
     it('returns an error when the attachment type is unknown', async () => {
-      const body: any = await oneChatApiClient.converse({
-        input: 'Hello OneChat',
+      const body: any = await agentBuilderApiClient.converse({
+        input: 'Hello AgentBuilder',
         attachments: [
           {
             type: 'unknown',
@@ -59,8 +59,8 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
     });
 
     it('returns an error when the attachment validation fails', async () => {
-      const body: any = await oneChatApiClient.converse({
-        input: 'Hello OneChat',
+      const body: any = await agentBuilderApiClient.converse({
+        input: 'Hello AgentBuilder',
         attachments: [
           {
             type: 'text',
@@ -81,8 +81,8 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         response: MOCKED_LLM_RESPONSE,
       });
 
-      await oneChatApiClient.converse({
-        input: 'Hello OneChat',
+      await agentBuilderApiClient.converse({
+        input: 'Hello AgentBuilder',
         attachments: [
           {
             type: 'text',
@@ -112,8 +112,8 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         response: MOCKED_LLM_RESPONSE,
       });
 
-      const response = await oneChatApiClient.converse({
-        input: 'Hello OneChat',
+      const response = await agentBuilderApiClient.converse({
+        input: 'Hello AgentBuilder',
         attachments: [
           {
             type: 'text',
@@ -125,7 +125,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         connector_id: connectorId,
       });
 
-      const conversation = await oneChatApiClient.getConversation(response.conversation_id);
+      const conversation = await agentBuilderApiClient.getConversation(response.conversation_id);
 
       expect(conversation.rounds.length).to.eql(1);
       expect(conversation.rounds[0].input.attachments!.length).to.eql(1);

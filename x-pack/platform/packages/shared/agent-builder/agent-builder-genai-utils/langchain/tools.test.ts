@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ToolType } from '@kbn/onechat-common';
-import type { ExecutableTool } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { ExecutableTool } from '@kbn/agent-builder-server';
 import { createToolIdMappings, toolToLangchain, sanitizeToolId } from './tools';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const createTool = (
   toolId: string,

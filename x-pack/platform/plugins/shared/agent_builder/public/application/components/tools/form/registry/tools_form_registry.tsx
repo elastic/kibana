@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 
 import type { CreateToolPayload, UpdateToolPayload } from '../../../../../../common/http_api/tools';
 import type { ToolFormData } from '../types/tool_form_types';

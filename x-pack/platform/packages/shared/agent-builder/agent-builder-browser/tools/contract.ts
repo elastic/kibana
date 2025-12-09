@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { ToolDefinition, ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ToolDefinition, ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 
 export interface ExecuteToolParams {
   toolId: string;

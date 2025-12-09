@@ -6,24 +6,24 @@
  */
 
 import expect from '@kbn/expect';
-import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
+import type { ChatResponse } from '@kbn/agent-builder-plugin/common/http_api/chat';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import type { QueryResult, TabularDataResult } from '@kbn/onechat-common';
+import type { QueryResult, TabularDataResult } from '@kbn/agent-builder-common';
 import { setupAgentCallSearchToolWithEsqlThenAnswer } from '../../utils/proxy_scenario';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../../utils/one_chat_client';
-import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
+import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
+import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 
-export default function ({ getService }: OneChatApiFtrProviderContext) {
+export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const synthtrace = getService('synthtrace');
-  const oneChatApiClient = createOneChatApiClient(supertest);
+  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
   describe('POST /api/agent_builder/converse: tool calling', () => {
     let llmProxy: LlmProxy;
@@ -55,7 +55,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         esqlQuery: MOCKED_ESQL_QUERY,
       });
 
-      body = await oneChatApiClient.converse({
+      body = await agentBuilderApiClient.converse({
         input: USER_PROMPT,
         connector_id: connectorId,
       });

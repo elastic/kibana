@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/onechat-common';
+import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { getRiskIndex } from '../../../common/search_strategy/security_solution/risk_score/common';
 import {

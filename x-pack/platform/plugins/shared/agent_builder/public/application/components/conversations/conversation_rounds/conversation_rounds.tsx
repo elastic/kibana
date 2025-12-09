@@ -11,7 +11,7 @@ import React from 'react';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { RoundLayout } from './round_layout';
 
-const CONVERSATION_ROUNDS_ID = 'onechatConversationRoundsContainer';
+const CONVERSATION_ROUNDS_ID = 'agentBuilderConversationRoundsContainer';
 
 interface ConversationRoundsProps {
   scrollContainerHeight: number;
@@ -27,7 +27,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
       id={CONVERSATION_ROUNDS_ID}
       direction="column"
       gutterSize="l"
-      aria-label={i18n.translate('xpack.onechat.conversationRounds', {
+      aria-label={i18n.translate('xpack.agentBuilder.conversationRounds', {
         defaultMessage: 'Conversation messages',
       })}
     >

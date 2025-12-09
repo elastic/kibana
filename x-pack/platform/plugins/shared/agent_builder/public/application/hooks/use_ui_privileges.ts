@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../../../common/features';
+import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../../../common/features';
 
 type AgentBuilderUiPrivileges = {
   [K in keyof typeof uiPrivileges]: boolean;
@@ -18,8 +18,8 @@ export const useUiPrivileges = (): AgentBuilderUiPrivileges => {
     services: { application },
   } = useKibana();
 
-  const onechatCapabilities = useMemo(() => {
-    const capabilities = application?.capabilities?.[ONECHAT_FEATURE_ID] ?? {};
+  const agentBuilderCapabilities = useMemo(() => {
+    const capabilities = application?.capabilities?.[AGENTBUILDER_FEATURE_ID] ?? {};
 
     return Object.keys(uiPrivileges).reduce((acc, key) => {
       const privilegeKey = key as keyof typeof uiPrivileges;
@@ -28,5 +28,5 @@ export const useUiPrivileges = (): AgentBuilderUiPrivileges => {
     }, {} as AgentBuilderUiPrivileges);
   }, [application]);
 
-  return onechatCapabilities;
+  return agentBuilderCapabilities;
 };

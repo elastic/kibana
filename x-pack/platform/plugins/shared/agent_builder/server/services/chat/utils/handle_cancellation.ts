@@ -7,7 +7,7 @@
 
 import type { OperatorFunction } from 'rxjs';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { createRequestAbortedError } from '@kbn/onechat-common';
+import { createRequestAbortedError } from '@kbn/agent-builder-common';
 
 /**
  * Handles cancellation by unsubscribing to the observable and emitting an error if the request is aborted.

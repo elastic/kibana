@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
 const riskEntityAttachmentDataSchema = z.object({
@@ -47,7 +47,7 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
       // Extract data to allow proper type narrowing
       const data = attachment.data;
       // Necessary because we cannot currently use the AttachmentType type as agent is not
-      // registered with enum AttachmentType in onechat attachment_types.ts
+      // registered with enum AttachmentType in agentBuilder attachment_types.ts
       if (!isEntityRiskFormattedData(data)) {
         throw new Error(`Invalid risk entity attachment data for attachment ${attachment.id}`);
       }

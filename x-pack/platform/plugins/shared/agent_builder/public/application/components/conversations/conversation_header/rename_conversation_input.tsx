@@ -9,23 +9,23 @@ import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationTitle } from '../../../hooks/use_conversation';
 import { useToasts } from '../../../hooks/use_toasts';
 
 const labels = {
-  inputPlaceholder: i18n.translate('xpack.onechat.renameConversationInput.inputPlaceholder', {
+  inputPlaceholder: i18n.translate('xpack.agentBuilder.renameConversationInput.inputPlaceholder', {
     defaultMessage: 'Enter conversation name',
   }),
-  confirmButton: i18n.translate('xpack.onechat.renameConversationInput.confirmButton', {
+  confirmButton: i18n.translate('xpack.agentBuilder.renameConversationInput.confirmButton', {
     defaultMessage: 'Confirm rename',
   }),
-  cancelButton: i18n.translate('xpack.onechat.renameConversationInput.cancelButton', {
+  cancelButton: i18n.translate('xpack.agentBuilder.renameConversationInput.cancelButton', {
     defaultMessage: 'Cancel rename',
   }),
-  renameErrorToast: i18n.translate('xpack.onechat.renameConversationInput.renameErrorToast', {
+  renameErrorToast: i18n.translate('xpack.agentBuilder.renameConversationInput.renameErrorToast', {
     defaultMessage: 'Failed to rename conversation',
   }),
 };
@@ -74,7 +74,7 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
     } catch (error) {
       addErrorToast({
         title: labels.renameErrorToast,
-        text: formatOnechatErrorMessage(error),
+        text: formatAgentBuilderErrorMessage(error),
       });
     } finally {
       setIsLoading(false);

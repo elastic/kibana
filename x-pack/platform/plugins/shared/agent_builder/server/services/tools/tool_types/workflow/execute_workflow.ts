@@ -8,13 +8,13 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
-import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/onechat-common/tools/types/workflow';
+import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
+import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
 import {
   getExecutionState,
   type WorkflowExecutionState,
-} from '@kbn/onechat-genai-utils/tools/utils/workflows';
-import { errorResult, otherResult } from '@kbn/onechat-genai-utils/tools/utils/results';
+} from '@kbn/agent-builder-genai-utils/tools/utils/workflows';
+import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 

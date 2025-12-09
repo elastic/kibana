@@ -22,7 +22,7 @@ export const NoConversationsPrompt: React.FC = () => {
           data-test-subj="agentBuilderNoConversationsMessage"
         >
           <p>
-            {i18n.translate('xpack.onechat.conversationsHistory.noConversations', {
+            {i18n.translate('xpack.agentBuilder.conversationsHistory.noConversations', {
               defaultMessage: "You haven't started any conversations yet.",
             })}
           </p>

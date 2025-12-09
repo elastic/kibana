@@ -9,16 +9,16 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   describe('Create agent', function () {
     it('should create an agent', async function () {
       const salt = Date.now();
       const id = `test_agent_${salt}`;
       const name = `Test Agent ${salt}`;
       const labels = ['one', 'two', 'three'];
-      await onechat.createAgentViaUI({ id, name, labels });
-      await onechat.agentExistsOrFail(id);
-      expect(await onechat.getAgentLabels(id)).to.eql(labels);
+      await agentBuilder.createAgentViaUI({ id, name, labels });
+      await agentBuilder.agentExistsOrFail(id);
+      expect(await agentBuilder.getAgentLabels(id)).to.eql(labels);
     });
   });
 }

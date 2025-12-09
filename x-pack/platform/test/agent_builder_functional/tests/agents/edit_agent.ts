@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../functional/ftr_provider_contex
 import { setupAgents } from './setup/setup_agents';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const browser = getService('browser');
 
   describe('Edit agent', function () {
@@ -24,40 +24,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let agent = agents[0];
 
     it('should navigate to agent edit form', async function () {
-      await onechat.clickAgentEdit(agent.id);
+      await agentBuilder.clickAgentEdit(agent.id);
       await browser.waitForUrlToBe(`/app/agent_builder/agents/${agent.id}`);
     });
 
     it('should show agent name as page title', async function () {
-      expect(await onechat.getAgentFormPageTitle()).to.be(agent.name);
+      expect(await agentBuilder.getAgentFormPageTitle()).to.be(agent.name);
     });
 
     it('should not have save button enabled', async function () {
-      expect(await onechat.agentFormSaveButton().isEnabled()).to.be(false);
+      expect(await agentBuilder.agentFormSaveButton().isEnabled()).to.be(false);
     });
 
     it('should disable agent id input', async function () {
-      const idInput = onechat.getAgentIdInput();
+      const idInput = agentBuilder.getAgentIdInput();
       expect(await idInput.getValue()).to.be(agent.id);
       expect(await idInput.isEnabled()).to.be(false);
     });
 
     it('should edit agent name', async function () {
-      expect(await onechat.getAgentFormDisplayName()).to.be(agent.name);
+      expect(await agentBuilder.getAgentFormDisplayName()).to.be(agent.name);
       const editedName = 'Edited Test Agent';
-      await onechat.setAgentFormDisplayName(editedName);
-      const saveButton = onechat.agentFormSaveButton();
+      await agentBuilder.setAgentFormDisplayName(editedName);
+      const saveButton = agentBuilder.agentFormSaveButton();
       expect(await saveButton.isEnabled()).to.be(true);
       await saveButton.click();
-      expect(await onechat.getAgentRowDisplayName(agent.id)).to.be(editedName);
+      expect(await agentBuilder.getAgentRowDisplayName(agent.id)).to.be(editedName);
     });
 
     it('should clone agent', async function () {
       agent = agents[1];
-      await onechat.clickAgentClone(agent.id);
+      await agentBuilder.clickAgentClone(agent.id);
       await browser.waitForUrlToBe(`/app/agent_builder/agents/new?source_id=${agent.id}`);
-      expect(await onechat.getAgentFormDisplayName()).to.be(agent.name);
-      const idInput = onechat.getAgentIdInput();
+      expect(await agentBuilder.getAgentFormDisplayName()).to.be(agent.name);
+      const idInput = agentBuilder.getAgentIdInput();
       expect(await idInput.getValue()).to.be('test_agent_3');
       expect(await idInput.isEnabled()).to.be(true);
     });

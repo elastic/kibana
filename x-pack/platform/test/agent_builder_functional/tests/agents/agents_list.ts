@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../functional/ftr_provider_contex
 import { setupAgents } from './setup/setup_agents';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('renders', async function () {
-      await onechat.navigateToApp('agents');
+      await agentBuilder.navigateToApp('agents');
 
       const titleSelector = 'agentBuilderAgentsListPageTitle';
       const newAgentButtonSelector = 'agentBuilderNewAgentButton';
@@ -36,57 +36,57 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('lists created agents', async function () {
-      expect(await onechat.countAgentsListRows()).to.be.greaterThan(2);
+      expect(await agentBuilder.countAgentsListRows()).to.be.greaterThan(2);
       for (const agent of agents) {
-        await onechat.agentExistsOrFail(agent.id);
+        await agentBuilder.agentExistsOrFail(agent.id);
       }
     });
 
     it('filters on search', async function () {
-      const search = onechat.agentsListSearch();
+      const search = agentBuilder.agentsListSearch();
       await search.type(agents[0].name);
-      expect(await onechat.countAgentsListRows()).to.equal(1);
-      await onechat.agentExistsOrFail(agents[0].id);
+      expect(await agentBuilder.countAgentsListRows()).to.equal(1);
+      await agentBuilder.agentExistsOrFail(agents[0].id);
       await search.clear();
       expect(await search.getValue()).to.be('');
     });
 
     it('filters on labels', async function () {
-      await onechat.selectAgentLabel(agents[0].labels[0]);
-      expect(await onechat.countAgentsListRows()).to.equal(1);
-      await onechat.agentExistsOrFail(agents[0].id);
+      await agentBuilder.selectAgentLabel(agents[0].labels[0]);
+      expect(await agentBuilder.countAgentsListRows()).to.equal(1);
+      await agentBuilder.agentExistsOrFail(agents[0].id);
     });
 
     it('chats with agent', async function () {
       const agent = agents[0];
-      await onechat.clickAgentChat(agent.id);
+      await agentBuilder.clickAgentChat(agent.id);
       await browser.waitForUrlToBe(`/app/agent_builder/conversations/new?agent_id=${agent.id}`);
       const agentText = await testSubjects.getVisibleText('agentBuilderAgentSelectorButton');
       expect(agentText).to.contain(agent.name);
       // go back to agents list
-      await onechat.navigateToApp('agents');
+      await agentBuilder.navigateToApp('agents');
     });
 
     it('has edit link with correct href', async function () {
-      const hasEditLink = await onechat.hasAgentEditLink(agents[0].id);
+      const hasEditLink = await agentBuilder.hasAgentEditLink(agents[0].id);
       expect(hasEditLink).to.be(true);
     });
 
     it('has clone link with correct href', async function () {
-      const hasCloneLink = await onechat.hasAgentCloneLink(agents[0].id);
+      const hasCloneLink = await agentBuilder.hasAgentCloneLink(agents[0].id);
       expect(hasCloneLink).to.be(true);
     });
 
     it('deletes agent', async function () {
       const agent = agents[1];
-      await onechat.agentExistsOrFail(agent.id);
+      await agentBuilder.agentExistsOrFail(agent.id);
 
-      const modal = await onechat.openAgentDeleteModal(agent.id);
+      const modal = await agentBuilder.openAgentDeleteModal(agent.id);
       const expectedTitle = `Delete ${agent.name}`;
       expect(await modal.getTitle()).to.contain(expectedTitle);
       await modal.clickConfirm();
 
-      await onechat.agentMissingOrFail(agent.id);
+      await agentBuilder.agentMissingOrFail(agent.id);
     });
   });
 }

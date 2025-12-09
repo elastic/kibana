@@ -6,8 +6,8 @@
  */
 
 import type { AgentCard, AgentSkill } from '@a2a-js/sdk';
-import type { AgentDefinition } from '@kbn/onechat-common';
-import { filterToolsBySelection } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { filterToolsBySelection } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolsServiceStart } from '../../services/tools';
 import { A2A_SERVER_PATH } from '../../routes/a2a';

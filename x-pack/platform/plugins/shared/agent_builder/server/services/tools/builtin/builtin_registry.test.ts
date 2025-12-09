@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { ToolType } from '@kbn/onechat-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import { createBuiltinToolRegistry } from './builtin_registry';
 

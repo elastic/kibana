@@ -8,7 +8,7 @@
 import type { OperatorFunction } from 'rxjs';
 import { catchError, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { createInternalError, isOnechatError } from '@kbn/onechat-common';
+import { createInternalError, isAgentBuilderError } from '@kbn/agent-builder-common';
 import { getCurrentTraceId } from '../../../tracing';
 import type { TrackingService } from '../../../telemetry';
 
@@ -36,7 +36,7 @@ export function convertErrors<T>({
 
         return throwError(() => {
           const traceId = getCurrentTraceId();
-          if (isOnechatError(err)) {
+          if (isAgentBuilderError(err)) {
             err.meta = {
               ...err.meta,
               traceId,

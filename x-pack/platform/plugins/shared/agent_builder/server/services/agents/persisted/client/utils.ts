@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { allToolsSelectionWildcard } from '@kbn/onechat-common';
-import type { ToolSelection } from '@kbn/onechat-common';
+import { allToolsSelectionWildcard } from '@kbn/agent-builder-common';
+import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolRegistry } from '../../../tools';
 

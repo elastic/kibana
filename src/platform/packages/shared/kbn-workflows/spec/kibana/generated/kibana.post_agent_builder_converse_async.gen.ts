@@ -211,7 +211,7 @@ A typical conversation round emits events in this sequence:
 5. \`thinking_complete\`
 6. \`message_chunk\` (multiple, as text streams)
 7. \`message_complete\`
-8. \`round_complete\`<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+8. \`round_complete\`<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/converse/async'],
   documentation:

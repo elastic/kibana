@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ToolType, platformCoreTools } from '@kbn/onechat-common';
-import type { WorkflowToolConfig } from '@kbn/onechat-common/tools';
-import { createErrorResult } from '@kbn/onechat-server';
-import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/onechat-common/tools/types/workflow';
-import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
+import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
+import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { AnyToolTypeDefinition } from '../definitions';
 import { executeWorkflow } from './execute_workflow';
 import { generateSchema } from './generate_schema';

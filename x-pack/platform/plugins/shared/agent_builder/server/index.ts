@@ -6,24 +6,24 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
-import type { OnechatConfig } from './config';
+import type { AgentBuilderConfig } from './config';
 import type {
-  OnechatPluginSetup,
-  OnechatPluginStart,
-  OnechatSetupDependencies,
-  OnechatStartDependencies,
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies,
 } from './types';
-import { OnechatPlugin } from './plugin';
+import { AgentBuilderPlugin } from './plugin';
 
-export type { OnechatPluginSetup, OnechatPluginStart, ToolsSetup, ToolsStart } from './types';
+export type { AgentBuilderPluginSetup, AgentBuilderPluginStart, ToolsSetup, ToolsStart } from './types';
 
 export const plugin: PluginInitializer<
-  OnechatPluginSetup,
-  OnechatPluginStart,
-  OnechatSetupDependencies,
-  OnechatStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<OnechatConfig>) => {
-  return new OnechatPlugin(pluginInitializerContext);
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies
+> = async (pluginInitializerContext: PluginInitializerContext<AgentBuilderConfig>) => {
+  return new AgentBuilderPlugin(pluginInitializerContext);
 };
 
 export { config } from './config';

@@ -8,7 +8,7 @@
 import { EuiForm, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import { useFormContext } from 'react-hook-form';
 import { Configuration } from './sections/configuration';
 import { Labels } from './sections/labels';

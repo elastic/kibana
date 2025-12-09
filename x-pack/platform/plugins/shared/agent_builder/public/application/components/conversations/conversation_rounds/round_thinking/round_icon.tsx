@@ -14,10 +14,10 @@ interface RoundIconProps {
 }
 
 const labels = {
-  loading: i18n.translate('xpack.onechat.round.icon.loading', {
+  loading: i18n.translate('xpack.agentBuilder.round.icon.loading', {
     defaultMessage: 'Round is loading',
   }),
-  content: i18n.translate('xpack.onechat.round.icon.content', {
+  content: i18n.translate('xpack.agentBuilder.round.icon.content', {
     defaultMessage: 'Round content',
   }),
 };

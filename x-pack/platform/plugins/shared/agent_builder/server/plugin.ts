@@ -8,57 +8,57 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { OnechatConfig } from './config';
+import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
-  OnechatPluginSetup,
-  OnechatPluginStart,
-  OnechatSetupDependencies,
-  OnechatStartDependencies,
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
-import type { OnechatHandlerContext } from './request_handler_context';
-import { registerOnechatHandlerContext } from './request_handler_context';
-import { createOnechatUsageCounter } from './telemetry/usage_counters';
+import type { AgentBuilderHandlerContext } from './request_handler_context';
+import { registerAgentBuilderHandlerContext } from './request_handler_context';
+import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 
-export class OnechatPlugin
+export class AgentBuilderPlugin
   implements
     Plugin<
-      OnechatPluginSetup,
-      OnechatPluginStart,
-      OnechatSetupDependencies,
-      OnechatStartDependencies
+      AgentBuilderPluginSetup,
+      AgentBuilderPluginStart,
+      AgentBuilderSetupDependencies,
+      AgentBuilderStartDependencies
     >
 {
   private logger: Logger;
   // @ts-expect-error unused for now
-  private config: OnechatConfig;
+  private config: AgentBuilderConfig;
   private serviceManager = new ServiceManager();
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
 
-  constructor(context: PluginInitializerContext<OnechatConfig>) {
+  constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
   }
 
   setup(
-    coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    setupDeps: OnechatSetupDependencies
-  ): OnechatPluginSetup {
+    coreSetup: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>,
+    setupDeps: AgentBuilderSetupDependencies
+  ): AgentBuilderPluginSetup {
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
-      this.usageCounter = createOnechatUsageCounter(setupDeps.usageCollection);
+      this.usageCounter = createAgentBuilderUsageCounter(setupDeps.usageCollection);
       if (this.usageCounter) {
         this.trackingService = new TrackingService(this.usageCounter, this.logger.get('telemetry'));
         registerTelemetryCollector(setupDeps.usageCollection, this.logger.get('telemetry'));
       }
 
-      this.logger.info('Onechat telemetry initialized');
+      this.logger.info('AgentBuilder telemetry initialized');
     } else {
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
@@ -73,9 +73,9 @@ export class OnechatPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    registerOnechatHandlerContext({ coreSetup });
+    registerAgentBuilderHandlerContext({ coreSetup });
 
-    const router = coreSetup.http.createRouter<OnechatHandlerContext>();
+    const router = coreSetup.http.createRouter<AgentBuilderHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
@@ -106,8 +106,8 @@ export class OnechatPlugin
 
   start(
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces }: OnechatStartDependencies
-  ): OnechatPluginStart {
+    { inference, spaces }: AgentBuilderStartDependencies
+  ): AgentBuilderPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,

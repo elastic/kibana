@@ -7,8 +7,8 @@
 
 import React, { useMemo, useCallback, useState } from 'react';
 import { EuiLoadingSpinner, EuiSpacer, EuiSearchBar } from '@elastic/eui';
-import type { ToolSelection, ToolDefinition } from '@kbn/onechat-common';
-import { filterToolsBySelection, activeToolsCountWarningThreshold } from '@kbn/onechat-common';
+import type { ToolSelection, ToolDefinition } from '@kbn/agent-builder-common';
+import { filterToolsBySelection, activeToolsCountWarningThreshold } from '@kbn/agent-builder-common';
 import { toggleToolSelection } from '../../../utils/tool_selection_utils';
 import { ActiveToolsStatus } from './active_tools_status';
 import { ToolsSearchControls } from './tools_search_controls';

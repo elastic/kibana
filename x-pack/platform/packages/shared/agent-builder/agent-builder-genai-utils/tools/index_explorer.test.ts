@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsResourceType } from '@kbn/onechat-common';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import type { ResourceDescriptor } from './index_explorer';
 import { createIndexSelectorPrompt, formatResource } from './index_explorer';
 

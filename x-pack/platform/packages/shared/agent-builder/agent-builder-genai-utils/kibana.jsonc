@@ -1,6 +1,6 @@
 {
   "type": "shared-server",
-  "id": "@kbn/onechat-genai-utils",
+  "id": "@kbn/agent-builder-genai-utils",
   "owner": "@elastic/workchat-eng",
   "group": "platform",
   "visibility": "shared"

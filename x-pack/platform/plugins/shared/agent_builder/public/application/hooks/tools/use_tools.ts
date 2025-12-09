@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 import { useQuery } from '@kbn/react-query';
 import { useEffect } from 'react';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useToasts } from '../use_toasts';
 
 export const useToolsService = () => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const { data, isLoading, error, isError } = useQuery({
     queryKey: queryKeys.tools.all,
@@ -26,7 +26,7 @@ export const useToolsService = () => {
 };
 
 export const useToolService = (toolId?: string) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const {
     data: tool,
@@ -59,7 +59,7 @@ export const useTool = ({ toolId, onLoadingError }: UseToolProps) => {
 
   useEffect(() => {
     if (toolId && isError) {
-      const formattedError = formatOnechatErrorMessage(error);
+      const formattedError = formatAgentBuilderErrorMessage(error);
       addErrorToast({
         title: labels.tools.loadToolErrorToast(toolId),
         text: formattedError,
@@ -86,7 +86,7 @@ export const useTools = ({ onLoadingError }: UseToolsWithErrorHandlingProps = {}
 
   useEffect(() => {
     if (isError) {
-      const formattedError = formatOnechatErrorMessage(error);
+      const formattedError = formatAgentBuilderErrorMessage(error);
       addErrorToast({
         title: labels.tools.loadToolsErrorToast,
         text: formattedError,

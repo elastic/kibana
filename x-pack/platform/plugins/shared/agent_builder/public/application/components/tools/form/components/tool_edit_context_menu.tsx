@@ -23,7 +23,7 @@ import { appPaths } from '../../../../utils/app_paths';
 
 export const ToolEditContextMenu = () => {
   const { euiTheme } = useEuiTheme();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   const { cloneTool, deleteTool } = useToolsActions();
   const { control } = useFormContext<ToolFormData>();
   const toolId = useWatch({ name: 'toolId', control });
@@ -68,7 +68,7 @@ export const ToolEditContextMenu = () => {
             `}
             onClick={() => {
               setIsOpen(false);
-              deleteTool(toolId, { onConfirm: () => navigateToOnechatUrl(appPaths.tools.list) });
+              deleteTool(toolId, { onConfirm: () => navigateToAgentBuilderUrl(appPaths.tools.list) });
             }}
           >
             {labels.tools.deleteToolButtonLabel}

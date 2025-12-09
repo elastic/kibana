@@ -15,22 +15,22 @@ import { eventTypes } from '../common/events';
 import {
   AGENT_BUILDER_FULL_TITLE,
   AGENT_BUILDER_SHORT_TITLE,
-  ONECHAT_APP_ID,
-  ONECHAT_PATH,
+  AGENTBUILDER_APP_ID,
+  AGENTBUILDER_PATH,
 } from '../common/features';
-import type { OnechatInternalService } from './services';
-import type { OnechatStartDependencies } from './types';
+import type { AgentBuilderInternalService } from './services';
+import type { AgentBuilderStartDependencies } from './types';
 
 export const registerApp = ({
   core,
   getServices,
 }: {
-  core: CoreSetup<OnechatStartDependencies>;
-  getServices: () => OnechatInternalService;
+  core: CoreSetup<AgentBuilderStartDependencies>;
+  getServices: () => AgentBuilderInternalService;
 }) => {
   core.application.register({
-    id: ONECHAT_APP_ID,
-    appRoute: ONECHAT_PATH,
+    id: AGENTBUILDER_APP_ID,
+    appRoute: AGENTBUILDER_PATH,
     category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     title: AGENT_BUILDER_SHORT_TITLE,
     euiIconType: 'logoElasticsearch',
@@ -39,19 +39,19 @@ export const registerApp = ({
       {
         id: 'conversations',
         path: '/conversations',
-        title: i18n.translate('xpack.onechat.chat.conversationsTitle', {
+        title: i18n.translate('xpack.agentBuilder.chat.conversationsTitle', {
           defaultMessage: 'Agent Chat',
         }),
       },
       {
         id: 'tools',
         path: '/tools',
-        title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
+        title: i18n.translate('xpack.agentBuilder.tools.title', { defaultMessage: 'Tools' }),
       },
       {
         id: 'agents',
         path: '/agents',
-        title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
+        title: i18n.translate('xpack.agentBuilder.agents.title', { defaultMessage: 'Agents' }),
       },
     ],
     async mount({ element, history, onAppLeave }: AppMountParameters) {
@@ -77,7 +77,7 @@ export const registerManagementSection = ({
   core,
   management,
 }: {
-  core: CoreSetup<OnechatStartDependencies>;
+  core: CoreSetup<AgentBuilderStartDependencies>;
   management: ManagementSetup;
 }) => {
   management.sections.section.ai.registerApp({
@@ -93,7 +93,7 @@ export const registerManagementSection = ({
 
 export const registerAnalytics = ({ analytics }: { analytics: AnalyticsServiceSetup }) => {
   analytics.registerEventType({
-    eventType: eventTypes.ONECHAT_CONVERSE_ERROR,
+    eventType: eventTypes.AGENTBUILDER_CONVERSE_ERROR,
     schema: {
       error_type: {
         type: 'keyword',

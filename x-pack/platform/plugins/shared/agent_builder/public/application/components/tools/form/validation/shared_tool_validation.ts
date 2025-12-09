@@ -6,36 +6,36 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toolIdRegexp, toolIdMaxLength, isReservedToolId } from '@kbn/onechat-common/tools';
-import { isInProtectedNamespace, hasNamespaceName } from '@kbn/onechat-common/base/namespaces';
+import { toolIdRegexp, toolIdMaxLength, isReservedToolId } from '@kbn/agent-builder-common/tools';
+import { isInProtectedNamespace, hasNamespaceName } from '@kbn/agent-builder-common/base/namespaces';
 import { z } from '@kbn/zod';
 
 export const sharedI18nMessages = {
   toolId: {
-    requiredError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.requiredError', {
+    requiredError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.requiredError', {
       defaultMessage: 'Tool ID is required.',
     }),
-    tooLongError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.tooLongError', {
+    tooLongError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.tooLongError', {
       defaultMessage: 'Tool ID must be 63 characters or less.',
     }),
-    formatError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.formatError', {
+    formatError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.formatError', {
       defaultMessage:
         'Tool ID must start with a letter and contain only lowercase letters, numbers, and hyphens.',
     }),
     reservedError: (name: string) =>
-      i18n.translate('xpack.onechat.tools.newTool.validation.toolId.reservedError', {
+      i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.reservedError', {
         defaultMessage: 'Tool ID "{name}" is reserved.',
         values: { name },
       }),
     protectedNamespaceError: (name: string) =>
-      i18n.translate('xpack.onechat.tools.newTool.validation.toolId.protectedNamespaceError', {
+      i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.protectedNamespaceError', {
         defaultMessage: 'Tool ID "{name}" uses a protected namespace.',
         values: { name },
       }),
   },
   description: {
     requiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.description.requiredError',
+      'xpack.agentBuilder.tools.newTool.validation.description.requiredError',
       {
         defaultMessage: 'Description is required.',
       }

@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod';
 import dedent from 'dedent';
-import type { Attachment } from '@kbn/onechat-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 

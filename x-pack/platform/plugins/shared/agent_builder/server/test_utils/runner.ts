@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { WritableToolResultStore } from '@kbn/onechat-server';
+import type { WritableToolResultStore } from '@kbn/agent-builder-server';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';

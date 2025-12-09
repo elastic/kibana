@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
@@ -30,25 +30,25 @@ import { useAgentOptions } from './use_agent_options';
 const AGENT_OPTION_ROW_HEIGHT = 88;
 
 const selectAgentAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.selectAgent.ariaLabel',
+  'xpack.agentBuilder.conversationInput.agentSelector.selectAgent.ariaLabel',
   {
     defaultMessage: 'Select an agent',
   }
 );
 const createAgentAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.createAgent.ariaLabel',
+  'xpack.agentBuilder.conversationInput.agentSelector.createAgent.ariaLabel',
   {
     defaultMessage: 'Create an agent',
   }
 );
 const manageAgentsAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.manageAgents.ariaLabel',
+  'xpack.agentBuilder.conversationInput.agentSelector.manageAgents.ariaLabel',
   {
     defaultMessage: 'Manage agents',
   }
 );
 const agentSearchPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.search.placeholder',
+  'xpack.agentBuilder.conversationInput.agentSelector.search.placeholder',
   { defaultMessage: 'Search agents' }
 );
 
@@ -85,9 +85,9 @@ const AgentSelectPopoverButton: React.FC<{
 };
 
 const AgentPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
-  const { createOnechatUrl } = useNavigation();
-  const createAgentHref = createOnechatUrl(appPaths.agents.new);
-  const manageAgentsHref = createOnechatUrl(appPaths.agents.list);
+  const { createAgentBuilderUrl } = useNavigation();
+  const createAgentHref = createAgentBuilderUrl(appPaths.agents.new);
+  const manageAgentsHref = createAgentBuilderUrl(appPaths.agents.list);
   return (
     <EuiPopoverTitle paddingSize="s">
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">

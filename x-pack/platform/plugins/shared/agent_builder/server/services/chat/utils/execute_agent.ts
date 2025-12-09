@@ -12,8 +12,8 @@ import type {
   Conversation,
   ChatAgentEvent,
   AgentCapabilities,
-} from '@kbn/onechat-common';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart } from '../../agents';
 
 export const executeAgent$ = ({

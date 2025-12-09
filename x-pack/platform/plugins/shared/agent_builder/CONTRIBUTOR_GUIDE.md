@@ -34,12 +34,12 @@ the Kibana server, where user-created tools can only use the other (serializable
 
 ### Registering the tool
 
-Registering tools can be done using the `tools.register` API of the `onechat` plugin's setup contract.
+Registering tools can be done using the `tools.register` API of the `agentBuilder` plugin's setup contract.
 
 ```ts
 class MyPlugin {
-  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
-    onechat.tools.register(myToolDefinition);
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.tools.register(myToolDefinition);
   }
 }
 ```
@@ -51,7 +51,7 @@ list of all internally registered tools. The intention is simply to trigger a co
 tools are added, so that we can review it.
 
 To add a tool to the allow list, simply add the tool's id to the `AGENT_BUILDER_BUILTIN_TOOLS` array,
-in `x-pack/platform/packages/shared/onechat/onechat-server/allow_lists.ts`
+in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
@@ -59,7 +59,7 @@ in `x-pack/platform/packages/shared/onechat/onechat-server/allow_lists.ts`
 
 Platform tools should all be namespaced under protected namespaces, to avoid id collisions with user-created tools. 
 When introducing a new protected namespace (e.g. when adding a new category of tools), it must be added
-to the `protectedNamespaces` array in `x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts`
+to the `protectedNamespaces` array in `x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts`
 
 ### Built-in tool examples
 
@@ -68,7 +68,7 @@ to the `protectedNamespaces` array in `x-pack/platform/packages/shared/onechat/o
 A simple example, with a tool just doing some math:
 
 ```ts
-onechat.tools.register({
+agentBuilder.tools.register({
   id: 'platform.examples.add_42',
   type: ToolType.builtin,
   description: 'Returns the sum of the input number and 42.',
@@ -101,7 +101,7 @@ This context exposes, in addition to the `request` object, a panel of pre-scoped
 - scoped logger
 
 ```ts
-onechat.tools.register({
+agentBuilder.tools.register({
   id: 'platform.examples.scoped_services',
   type: ToolType.builtin,
   description: 'Some example',
@@ -125,7 +125,7 @@ onechat.tools.register({
 });
 ```
 
-Refer to `ToolHandlerContext` in `x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts` to
+Refer to `ToolHandlerContext` in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts` to
 have access to the full list of services available from the handler context.
 
 #### reporting tool progress
@@ -139,7 +139,7 @@ Those progress updates will be displayed in the UI (inside the thinking panel), 
 regarding what is happening under the hood.
 
 ```ts
-onechat.tools.register({
+agentBuilder.tools.register({
   id: 'platform.examples.progress_report',
   type: ToolType.builtin,
   description: 'Some example',
@@ -178,7 +178,7 @@ This is also how we render specific type of results differently in the UI, e.g w
 in the thinking panel.
 
 ```ts
-onechat.tools.register({
+agentBuilder.tools.register({
   id: 'platform.examples.result_types',
   type: ToolType.builtin,
   description: 'Some example',
@@ -200,7 +200,7 @@ onechat.tools.register({
 });
 ```
 
-See the `ToolResultType` and corresponding types in `x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_result.ts`
+See the `ToolResultType` and corresponding types in `x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts`
 
 ### Registering other types of tools
 
@@ -210,7 +210,7 @@ existing tool types, and create static instances of them.
 E.g. registering a built-in `index_search` tool:
 
 ```ts
-onechatSetup.tools.register({
+agentBuilderSetup.tools.register({
   id: 'platform.core.some_knowledge_base',
   type: ToolType.index_search,
   description: 'Use this tool to retrieve documentation from our knowledge base',
@@ -226,8 +226,8 @@ onechatSetup.tools.register({
 
 ```ts
 class MyPlugin {
-  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
-    onechat.agents.register(myAgentDefinition);
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.agents.register(myAgentDefinition);
   }
 }
 ```
@@ -238,7 +238,7 @@ Similar to tools, we keep an hardcoded list of registered agents to trigger a co
 agents are added.
 
 To add a tool to the allow list, simply add the tool's id to the `AGENT_BUILDER_BUILTIN_AGENTS` array,
-in `x-pack/platform/packages/shared/onechat/onechat-server/allow_lists.ts`
+in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
@@ -246,14 +246,14 @@ in `x-pack/platform/packages/shared/onechat/onechat-server/allow_lists.ts`
 
 Platform agents should all be namespaced under protected namespaces, to avoid id collisions with user-created agents.
 When introducing a new protected namespace (e.g. when adding a new category of agents), it must be added
-to the `protectedNamespaces` array in `x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts`
+to the `protectedNamespaces` array in `x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts`
 
 ### Basic example
 
 How registering a basic agent looks like:
 
 ```ts
-onechat.agents.register({
+agentBuilder.agents.register({
   id: 'platform.core.dashboard',
   name: 'Dashboard agent',
   description: 'Agent specialized in dashboard related tasks',
@@ -281,7 +281,7 @@ mixing instructions, which can sometimes be confusing for the agent. It also all
 different instructions for each step of the agent's flow..
 
 ```ts
-onechat.agents.register({
+agentBuilder.agents.register({
   id: 'platform.core.dashboard',
   name: 'Dashboard agent',
   description: 'Agent specialized in dashboard related tasks',
@@ -302,7 +302,7 @@ onechat.agents.register({
 });
 ```
 
-Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts)
+Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts)
 for the full list of available configuration options.
 
 ## Registering attachment types
@@ -314,12 +314,12 @@ and how it is rendered in the UI.
 
 ### Server-side registration
 
-You can register an attachment type by using the `attachments.registerType` API of the `onechat` plugin's setup contract.
+You can register an attachment type by using the `attachments.registerType` API of the `agentBuilder` plugin's setup contract.
 
 ```ts
 class MyPlugin {
-  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
-    onechat.attachments.registerType(myAttachmentDefinition);
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.attachments.registerType(myAttachmentDefinition);
   }
 }
 ```
@@ -357,7 +357,7 @@ const textArrachmentType: InlineAttachmentTypeDefinition = {
 }
 ```
 
-Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/onechat/onechat-server/attachments/type_definition.ts)
+Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
 for the full list of available configuration options.
 
 ### Browser-side registration

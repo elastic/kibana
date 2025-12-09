@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
+import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { RoundFlyout } from './round_flyout';
@@ -24,18 +24,18 @@ import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
 import { roundedBorderRadiusStyles } from '../../conversation.styles';
 
-const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
+const rawResponseButtonLabel = i18n.translate('xpack.agentBuilder.conversation.rawResponseButton', {
   defaultMessage: 'View JSON',
 });
 
-const closePanelLabel = i18n.translate('xpack.onechat.conversation.closePanel', {
+const closePanelLabel = i18n.translate('xpack.agentBuilder.conversation.closePanel', {
   defaultMessage: 'Close panel',
 });
 
-const reasoningLabel = i18n.translate('xpack.onechat.conversation.reasoning', {
+const reasoningLabel = i18n.translate('xpack.agentBuilder.conversation.reasoning', {
   defaultMessage: 'Reasoning',
 });
-const completedReasoningLabel = i18n.translate('xpack.onechat.conversation.completedReasoning', {
+const completedReasoningLabel = i18n.translate('xpack.agentBuilder.conversation.completedReasoning', {
   defaultMessage: 'Completed reasoning',
 });
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ToolResultType, type ErrorResult } from '@kbn/onechat-common';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
+import { ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools/search/run_search_tool';
 import {
   createToolAvailabilityContext,
   createToolHandlerContext,
@@ -17,7 +17,7 @@ import {
 } from '../__mocks__/test_helpers';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 
-jest.mock('@kbn/onechat-genai-utils/tools/search/run_search_tool', () => ({
+jest.mock('@kbn/agent-builder-genai-utils/tools/search/run_search_tool', () => ({
   runSearchTool: jest.fn(),
 }));
 

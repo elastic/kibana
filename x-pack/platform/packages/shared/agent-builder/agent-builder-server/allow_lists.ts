@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/onechat-common/tools';
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.

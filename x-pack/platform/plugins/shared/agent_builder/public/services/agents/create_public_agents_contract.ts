@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentsServiceStartContract } from '@kbn/onechat-browser';
+import type { AgentsServiceStartContract } from '@kbn/agent-builder-browser';
 import type { AgentService } from './agents_service';
 
 export const createPublicAgentsContract = ({

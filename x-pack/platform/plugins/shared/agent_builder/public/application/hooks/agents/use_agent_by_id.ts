@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
 const useFetchAgentById = () => {
-  const { agentService } = useOnechatServices();
+  const { agentService } = useAgentBuilderServices();
   return (agentId?: string) => {
     if (!agentId) {
       return Promise.reject(new Error('Agent ID is required'));
@@ -19,7 +19,7 @@ const useFetchAgentById = () => {
   };
 };
 
-export const useOnechatAgentById = (agentId?: string) => {
+export const useAgentBuilderAgentById = (agentId?: string) => {
   const fetchAgentById = useFetchAgentById();
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.agentProfiles.byId(agentId),

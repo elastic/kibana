@@ -6,7 +6,7 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AgentType } from '@kbn/onechat-common';
+import { AgentType } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties, AgentConfigurationProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';

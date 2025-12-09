@@ -10,8 +10,8 @@ import type { Observable } from 'rxjs';
 import { tap } from 'rxjs';
 import { safeJsonStringify } from '@kbn/std';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ChatEvent } from '@kbn/onechat-common';
-import { isRoundCompleteEvent } from '@kbn/onechat-common';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 
 interface WithConverseSpanOptions {
   agentId: string;

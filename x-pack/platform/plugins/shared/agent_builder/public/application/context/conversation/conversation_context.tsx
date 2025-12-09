@@ -6,8 +6,8 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {

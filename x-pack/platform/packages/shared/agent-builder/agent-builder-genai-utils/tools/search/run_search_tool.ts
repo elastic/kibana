@@ -6,11 +6,11 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ScopedModel } from '@kbn/onechat-server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ToolEventEmitter, ToolHandlerResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools';
+import type { ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import { createSearchToolGraph } from './graph';
 
 export const runSearchTool = async ({

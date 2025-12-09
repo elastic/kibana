@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentConfiguration } from '@kbn/onechat-common';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from '../types';
 
 export const resolveConfiguration = (configuration: AgentConfiguration): ResolvedConfiguration => {

@@ -7,14 +7,14 @@
 
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ONECHAT_APP_ID } from '../../common/features';
+import { AGENTBUILDER_APP_ID } from '../../common/features';
 
 export type AgentBuilderLocatorParams = SerializableRecord;
 
 export class AgentBuilderLocatorDefinition implements LocatorDefinition<AgentBuilderLocatorParams> {
   public readonly getLocation = async () => {
     return {
-      app: ONECHAT_APP_ID,
+      app: AGENTBUILDER_APP_ID,
       path: '',
       state: {},
     };

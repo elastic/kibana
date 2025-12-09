@@ -31,7 +31,7 @@ export const BottomBarActions: React.FC<Props> = ({
     <EuiBottomBar
       paddingSize="s"
       position="fixed"
-      aria-label={i18n.translate('xpack.onechat.management.bottomBar.ariaLabel', {
+      aria-label={i18n.translate('xpack.agentBuilder.management.bottomBar.ariaLabel', {
         defaultMessage: 'Settings actions',
       })}
     >
@@ -44,7 +44,7 @@ export const BottomBarActions: React.FC<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <p aria-live="polite" aria-atomic="true" data-test-subj="unsavedChangesCount">
-              {i18n.translate('xpack.onechat.management.bottomBar.unsavedChangesCount', {
+              {i18n.translate('xpack.agentBuilder.management.bottomBar.unsavedChangesCount', {
                 defaultMessage: '{count, plural, one {# change} other {# changes}}',
                 values: { count: unsavedChangesCount },
               })}
@@ -58,11 +58,11 @@ export const BottomBarActions: React.FC<Props> = ({
                 color="text"
                 onClick={onDiscardChanges}
                 data-test-subj="agentBuilderDiscard"
-                aria-label={i18n.translate('xpack.onechat.management.bottomBar.discardAria', {
+                aria-label={i18n.translate('xpack.agentBuilder.management.bottomBar.discardAria', {
                   defaultMessage: 'Discard unsaved changes',
                 })}
               >
-                {i18n.translate('xpack.onechat.management.bottomBar.discard', {
+                {i18n.translate('xpack.agentBuilder.management.bottomBar.discard', {
                   defaultMessage: 'Discard',
                 })}
               </EuiButton>
@@ -74,11 +74,11 @@ export const BottomBarActions: React.FC<Props> = ({
                 isDisabled={!!areChangesInvalid}
                 onClick={onSave}
                 data-test-subj="agentBuilderSave"
-                aria-label={i18n.translate('xpack.onechat.management.bottomBar.saveAria', {
+                aria-label={i18n.translate('xpack.agentBuilder.management.bottomBar.saveAria', {
                   defaultMessage: 'Save changes',
                 })}
               >
-                {i18n.translate('xpack.onechat.management.bottomBar.save', {
+                {i18n.translate('xpack.agentBuilder.management.bottomBar.save', {
                   defaultMessage: 'Save changes',
                 })}
               </EuiButton>

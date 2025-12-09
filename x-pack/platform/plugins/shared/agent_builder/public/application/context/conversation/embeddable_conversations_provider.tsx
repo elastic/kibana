@@ -14,7 +14,7 @@ import type {
   EmbeddableConversationProps,
 } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
-import { OnechatServicesContext } from '../onechat_services_context';
+import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
@@ -199,7 +199,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     <KibanaContextProvider services={kibanaServices}>
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
-          <OnechatServicesContext.Provider value={services}>
+          <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <ConversationContext.Provider value={conversationContextValue}>
                 <AgentBuilderTourProvider>
@@ -207,7 +207,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
                 </AgentBuilderTourProvider>
               </ConversationContext.Provider>
             </AppLeaveContext.Provider>
-          </OnechatServicesContext.Provider>
+          </AgentBuilderServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>
     </KibanaContextProvider>

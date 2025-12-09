@@ -6,20 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ToolType } from '@kbn/onechat-common/tools';
+import { ToolType } from '@kbn/agent-builder-common/tools';
 import { z } from '@kbn/zod';
 import { sharedValidationSchemas } from './shared_tool_validation';
 import type { ToolsService } from '../../../../../services';
 
 const workflowI18nMessages = {
   workflowId: {
-    requiredError: i18n.translate('xpack.onechat.tools.workflow.workflowId.requiredError', {
+    requiredError: i18n.translate('xpack.agentBuilder.tools.workflow.workflowId.requiredError', {
       defaultMessage: 'Workflow is required.',
     }),
-    notFoundError: i18n.translate('xpack.onechat.tools.workflow.workflowId.notFoundError', {
+    notFoundError: i18n.translate('xpack.agentBuilder.tools.workflow.workflowId.notFoundError', {
       defaultMessage: 'Selected workflow not found.',
     }),
-    apiError: i18n.translate('xpack.onechat.tools.workflow.workflowId.error', {
+    apiError: i18n.translate('xpack.agentBuilder.tools.workflow.workflowId.error', {
       defaultMessage: 'Error loading workflows.',
     }),
   },

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { listSearchSources } from '@kbn/onechat-genai-utils';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -41,7 +41,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -86,7 +86,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -127,7 +127,7 @@ export function registerInternalToolsRoutes({
       validate: false,
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -155,7 +155,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -167,7 +167,7 @@ export function registerInternalToolsRoutes({
         });
       }
 
-      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
+      const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
       const { results } = await workflowsManagement.management.getWorkflows(
         { page: request.query.page, size: request.query.limit, enabled: [true] },
@@ -197,7 +197,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -211,7 +211,7 @@ export function registerInternalToolsRoutes({
         });
       }
 
-      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
+      const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
       const workflow = await workflowsManagement.management.getWorkflow(
         request.params.id,

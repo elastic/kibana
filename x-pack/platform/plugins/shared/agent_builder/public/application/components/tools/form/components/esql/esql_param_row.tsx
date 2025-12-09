@@ -22,7 +22,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EsqlToolFieldType } from '@kbn/onechat-common';
+import { EsqlToolFieldType } from '@kbn/agent-builder-common';
 import React, { useCallback, useMemo } from 'react';
 import type { FieldArrayWithId, FieldError } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';

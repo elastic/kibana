@@ -6,11 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolSelection } from '@kbn/onechat-common';
-import { filterToolsBySelection } from '@kbn/onechat-common';
-import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
-import type { AgentConfiguration } from '@kbn/onechat-common';
-import type { AttachmentsService } from '@kbn/onechat-server/runner';
+import type { ToolSelection } from '@kbn/agent-builder-common';
+import { filterToolsBySelection } from '@kbn/agent-builder-common';
+import type { ToolProvider, ExecutableTool } from '@kbn/agent-builder-server';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
+import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({

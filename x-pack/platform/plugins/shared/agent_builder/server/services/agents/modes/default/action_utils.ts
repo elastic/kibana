@@ -7,9 +7,9 @@
 
 import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
-import { extractTextContent, extractToolCalls } from '@kbn/onechat-genai-utils/langchain';
-import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
-import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
+import { extractTextContent, extractToolCalls } from '@kbn/agent-builder-genai-utils/langchain';
+import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type {
   ToolCallAction,
   HandoverAction,

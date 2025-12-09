@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { ONECHAT_USAGE_DOMAIN, trackLLMUsage as trackLLMUsageCounter } from './usage_counters';
+import { AGENTBUILDER_USAGE_DOMAIN, trackLLMUsage as trackLLMUsageCounter } from './usage_counters';
 import {
   normalizeErrorType,
   sanitizeForCounterName,
@@ -51,7 +51,7 @@ export class TrackingService {
   trackToolCall(toolId: string, source: ToolCallSource): void {
     try {
       this.usageCounter.incrementCounter({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_${source}`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_${source}`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -84,7 +84,7 @@ export class TrackingService {
       }
 
       this.usageCounter.incrementCounter({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_${bucket}`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -142,7 +142,7 @@ export class TrackingService {
       }
 
       this.usageCounter.incrementCounter({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_${bucket}`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -187,7 +187,7 @@ export class TrackingService {
       let sanitizedType = sanitizeForCounterName(errorType);
 
       this.usageCounter.incrementCounter({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_total`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_total`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -197,7 +197,7 @@ export class TrackingService {
         sanitizedType = `agentExecutionError_${sanitizeForCounterName(agentExecutionErrorCode)}`;
       }
       this.usageCounter.incrementCounter({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_${sanitizedType}`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_${sanitizedType}`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -205,7 +205,7 @@ export class TrackingService {
       if (conversationId && !this.conversationsWithErrors.has(conversationId)) {
         this.conversationsWithErrors.add(conversationId);
         this.usageCounter.incrementCounter({
-          counterName: `${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`,
+          counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`,
           counterType: 'count',
           incrementBy: 1,
         });

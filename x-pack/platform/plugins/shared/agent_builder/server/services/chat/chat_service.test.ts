@@ -15,7 +15,7 @@ import {
   generateTitleMock,
   resolveServicesMock,
 } from './chat_service.test.mocks';
-import { ChatEventType } from '@kbn/onechat-common';
+import { ChatEventType } from '@kbn/agent-builder-common';
 
 import { firstValueFrom, toArray, of } from 'rxjs';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -33,7 +33,7 @@ import {
 } from '../../test_utils';
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
-import { isConversationIdSetEvent } from '@kbn/onechat-common/chat';
+import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it

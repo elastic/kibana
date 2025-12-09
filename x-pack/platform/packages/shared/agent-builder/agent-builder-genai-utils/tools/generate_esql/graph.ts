@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';

@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-const techPreviewLabel = i18n.translate('xpack.onechat.techPreviewLabel', {
+const techPreviewLabel = i18n.translate('xpack.agentBuilder.techPreviewLabel', {
   defaultMessage: 'Tech preview',
 });
 

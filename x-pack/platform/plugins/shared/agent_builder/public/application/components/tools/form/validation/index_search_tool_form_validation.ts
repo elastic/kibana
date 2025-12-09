@@ -6,25 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ToolType } from '@kbn/onechat-common/tools';
+import { ToolType } from '@kbn/agent-builder-common/tools';
 import { z } from '@kbn/zod';
 import { sharedValidationSchemas } from './shared_tool_validation';
 import type { ToolsService } from '../../../../../services';
 
 const indexSearchI18nMessages = {
   pattern: {
-    requiredError: i18n.translate('xpack.onechat.tools.indexPattern.pattern.requiredError', {
+    requiredError: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.requiredError', {
       defaultMessage: 'Pattern is required.',
     }),
-    noMatchesError: i18n.translate('xpack.onechat.tools.indexPattern.pattern.noMatchesError', {
+    noMatchesError: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.noMatchesError', {
       defaultMessage: 'No matches found for this pattern.',
     }),
-    apiError: i18n.translate('xpack.onechat.tools.indexPattern.pattern.error', {
+    apiError: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.error', {
       defaultMessage: 'Error loading index patterns.',
     }),
   },
   defaultRowLimit: {
-    invalidError: i18n.translate('xpack.onechat.tools.indexPattern.defaultRowLimit.invalidError', {
+    invalidError: i18n.translate('xpack.agentBuilder.tools.indexPattern.defaultRowLimit.invalidError', {
       defaultMessage: 'Default row limit must be bigger than 0.',
     }),
   },

@@ -13,7 +13,7 @@ const platformCoreTool = (toolName: string) => {
 };
 
 /**
- * Ids of built-in onechat tools
+ * Ids of built-in agentBuilder tools
  */
 export const platformCoreTools = {
   indexExplorer: platformCoreTool('index_explorer'),

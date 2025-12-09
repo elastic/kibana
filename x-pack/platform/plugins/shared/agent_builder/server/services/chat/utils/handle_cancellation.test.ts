@@ -6,7 +6,7 @@
  */
 
 import { of, Subject, toArray, firstValueFrom } from 'rxjs';
-import { isOnechatError, OnechatErrorCode } from '@kbn/onechat-common';
+import { isAgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import { handleCancellation } from './handle_cancellation';
 
 describe('handleCancellation', () => {
@@ -46,8 +46,8 @@ describe('handleCancellation', () => {
     source$.next(3);
 
     expect(values).toEqual([1, 2]);
-    expect(isOnechatError(thrownError)).toBe(true);
-    expect(thrownError.code).toBe(OnechatErrorCode.requestAborted);
+    expect(isAgentBuilderError(thrownError)).toBe(true);
+    expect(thrownError.code).toBe(AgentBuilderErrorCode.requestAborted);
     expect(thrownError.message).toContain('Converse request was aborted');
   });
 });

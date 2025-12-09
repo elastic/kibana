@@ -32,25 +32,25 @@ import { useNavigation } from '../../../../../hooks/use_navigation';
 import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
 
 const selectableAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
+  'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
   {
     defaultMessage: 'Select a connector',
   }
 );
 const manageConnectorsAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.manageConnectorAriaLabel',
+  'xpack.agentBuilder.conversationInput.connectorSelector.manageConnectorAriaLabel',
   {
     defaultMessage: 'Manage connectors',
   }
 );
 const defaultConnectorLabel = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.defaultConnectorLabel',
+  'xpack.agentBuilder.conversationInput.connectorSelector.defaultConnectorLabel',
   {
     defaultMessage: 'Default',
   }
 );
 const connectorSearchPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.search.placeholder',
+  'xpack.agentBuilder.conversationInput.connectorSelector.search.placeholder',
   { defaultMessage: 'Search LLMs' }
 );
 
@@ -76,7 +76,7 @@ const ConnectorPopoverButton: React.FC<{
       aria-labelledby={connectorSelectId}
     >
       <FormattedMessage
-        id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
+        id="xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel"
         defaultMessage="LLM"
       />
     </EuiButton>

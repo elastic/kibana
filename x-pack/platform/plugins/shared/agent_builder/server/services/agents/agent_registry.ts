@@ -6,9 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { createAgentNotFoundError, createBadRequestError } from '@kbn/onechat-common';
-import type { AgentDefinition } from '@kbn/onechat-common/agents';
-import { validateAgentId } from '@kbn/onechat-common/agents';
+import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
+import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import type {
   AgentCreateRequest,
   AgentListOptions,

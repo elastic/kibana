@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IndexSearchToolConfig } from '@kbn/onechat-common/tools';
-import { createBadRequestError } from '@kbn/onechat-common';
-import { listSearchSources } from '@kbn/onechat-genai-utils';
+import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
+import { createBadRequestError } from '@kbn/agent-builder-common';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 
 const CCS_TOKEN = ':';
 

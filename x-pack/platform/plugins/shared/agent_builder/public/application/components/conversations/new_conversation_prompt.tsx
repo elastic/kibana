@@ -45,7 +45,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
         <TechPreviewBadge />
         <EuiTitle size="m" css={titleStyles}>
           <h2>
-            {i18n.translate('xpack.onechat.conversations.newConversationPrompt', {
+            {i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
               defaultMessage: 'How can I help you?',
             })}
           </h2>

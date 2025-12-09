@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import React, { useCallback, useMemo } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -42,7 +42,7 @@ interface ConversationHistoryListProps {
 export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = ({ onClose }) => {
   const { conversations = [], isLoading } = useConversationList();
   const currentConversationId = useConversationId();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
 
   const timeSections = useMemo(() => {
@@ -88,11 +88,11 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
       if (isEmbeddedContext) {
         setConversationId?.(conversation.id);
       } else {
-        navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }));
+        navigateToAgentBuilderUrl(appPaths.chat.conversation({ conversationId: conversation.id }));
       }
       onClose?.();
     },
-    [isEmbeddedContext, onClose, setConversationId, navigateToOnechatUrl]
+    [isEmbeddedContext, onClose, setConversationId, navigateToAgentBuilderUrl]
   );
 
   if (isLoading) {
@@ -115,7 +115,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     <EuiSelectable
       searchable
       searchProps={{
-        placeholder: i18n.translate('xpack.onechat.conversationsHistory.searchPlaceholder', {
+        placeholder: i18n.translate('xpack.agentBuilder.conversationsHistory.searchPlaceholder', {
           defaultMessage: 'Search conversations',
         }),
         compressed: true,
@@ -126,7 +126,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
       options={selectableOptions}
       onChange={handleChange}
       singleSelection={true}
-      aria-label={i18n.translate('xpack.onechat.conversationsHistory.conversations', {
+      aria-label={i18n.translate('xpack.agentBuilder.conversationsHistory.conversations', {
         defaultMessage: 'Conversations',
       })}
       data-test-subj="agentBuilderConversationList"
@@ -160,7 +160,7 @@ const PopoverHeader = () => {
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs">
           <h5>
-            {i18n.translate('xpack.onechat.conversationsHistory.title', {
+            {i18n.translate('xpack.agentBuilder.conversationsHistory.title', {
               defaultMessage: 'Conversations',
             })}
           </h5>

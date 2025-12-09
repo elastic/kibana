@@ -6,19 +6,19 @@
  */
 
 import { z } from '@kbn/zod';
-import type { ConversationRound, RawRoundInput } from '@kbn/onechat-common';
-import { ConversationRoundStepType, ToolResultType, ToolType } from '@kbn/onechat-common';
-import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { AttachmentsService } from '@kbn/onechat-server/runner';
+import type { ConversationRound, RawRoundInput } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType, ToolResultType, ToolType } from '@kbn/agent-builder-common';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type {
   AttachmentBoundedTool,
   AttachmentRepresentation,
   AttachmentTypeDefinition,
-} from '@kbn/onechat-server/attachments';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+} from '@kbn/agent-builder-server/attachments';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { prepareConversation } from './prepare_conversation';
 
-jest.mock('@kbn/onechat-server/tools', () => ({
+jest.mock('@kbn/agent-builder-server/tools', () => ({
   getToolResultId: jest.fn(),
 }));
 

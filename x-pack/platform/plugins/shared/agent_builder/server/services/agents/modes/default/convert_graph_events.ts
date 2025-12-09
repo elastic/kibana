@@ -19,8 +19,8 @@ import type {
   BrowserToolCallEvent,
   ToolResultEvent,
   ReasoningEvent,
-} from '@kbn/onechat-common';
-import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
+} from '@kbn/agent-builder-common';
+import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import {
   matchGraphName,
   matchEvent,
@@ -35,10 +35,10 @@ import {
   createThinkingCompleteEvent,
   extractTextContent,
   toolIdentifierFromToolCall,
-} from '@kbn/onechat-genai-utils/langchain';
+} from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import type { RunToolReturn } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
+import type { RunToolReturn } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import type { StateType } from './state';
 import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
 import {

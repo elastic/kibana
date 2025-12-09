@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ExecuteToolParams } from '@kbn/onechat-browser';
+import type { ExecuteToolParams } from '@kbn/agent-builder-browser';
 import type {
   ListToolsResponse,
   GetToolResponse,

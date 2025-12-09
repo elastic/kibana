@@ -14,9 +14,9 @@ import type {
   ToolCallEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
-} from '@kbn/onechat-common';
-import { ChatEventType } from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+} from '@kbn/agent-builder-common';
+import { ChatEventType } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;

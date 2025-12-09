@@ -31,6 +31,6 @@
     "@kbn/scout",
     "@kbn/some-dev-log",
     "@kbn/synthtrace",
-    "@kbn/onechat-common"
+    "@kbn/agent-builder-common"
   ]
 }

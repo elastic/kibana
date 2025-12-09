@@ -36,7 +36,7 @@ export const DELETE_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: Intern
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
     methods: ['DELETE'],
     patterns: ['/api/agent_builder/conversations/{conversation_id}'],
     documentation:

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ScopedModel } from '@kbn/onechat-server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { PerformMatchSearchResponse } from './steps';
 import { performMatchSearch } from './steps';
 import { resolveResource } from './utils/resources';

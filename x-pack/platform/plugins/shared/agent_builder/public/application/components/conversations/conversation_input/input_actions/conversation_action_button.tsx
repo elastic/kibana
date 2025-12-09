@@ -18,10 +18,10 @@ interface ConversationActionButtonProps {
 }
 
 const labels = {
-  cancel: i18n.translate('xpack.onechat.conversationInput.actionButton.cancel', {
+  cancel: i18n.translate('xpack.agentBuilder.conversationInput.actionButton.cancel', {
     defaultMessage: 'Cancel',
   }),
-  submit: i18n.translate('xpack.onechat.conversationInput.actionButton.submit', {
+  submit: i18n.translate('xpack.agentBuilder.conversationInput.actionButton.submit', {
     defaultMessage: 'Submit',
   }),
 };

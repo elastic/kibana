@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 export interface UseAgentBuilderAttachmentParams {
@@ -40,10 +40,10 @@ export const useAgentBuilderAttachment = ({
   attachmentData,
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
-  const { onechat } = useKibana().services;
+  const { agentBuilder } = useKibana().services;
 
   const openAgentBuilderFlyout = useCallback(() => {
-    if (!onechat?.openConversationFlyout) {
+    if (!agentBuilder?.openConversationFlyout) {
       return;
     }
 
@@ -58,13 +58,13 @@ export const useAgentBuilderAttachment = ({
     };
 
     // Open the conversation flyout with attachment and prefilled message
-    onechat.openConversationFlyout({
+    agentBuilder.openConversationFlyout({
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, onechat]);
+  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
 
   return {
     openAgentBuilderFlyout,

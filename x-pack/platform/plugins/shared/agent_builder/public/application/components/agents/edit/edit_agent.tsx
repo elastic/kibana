@@ -10,7 +10,7 @@ import { AgentForm } from './agent_form';
 import { DeleteAgentProvider, useDeleteAgent } from '../../../context/delete_agent_context';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useOnechatAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 
 interface EditAgentProps {
   agentId: string;
@@ -18,7 +18,7 @@ interface EditAgentProps {
 
 const EditAgentForm: React.FC<EditAgentProps> = ({ agentId }) => {
   const { deleteAgent } = useDeleteAgent();
-  const { agent } = useOnechatAgentById(agentId);
+  const { agent } = useAgentBuilderAgentById(agentId);
   return (
     <AgentForm
       editingAgentId={agentId}
@@ -32,11 +32,11 @@ const EditAgentForm: React.FC<EditAgentProps> = ({ agentId }) => {
 };
 
 export const EditAgent: React.FC<EditAgentProps> = ({ agentId }) => {
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   return (
     <DeleteAgentProvider
       onSuccess={() => {
-        navigateToOnechatUrl(appPaths.agents.list);
+        navigateToAgentBuilderUrl(appPaths.agents.list);
       }}
     >
       <EditAgentForm agentId={agentId} />

@@ -10,14 +10,14 @@ import {
   createToolNotFoundError,
   createBadRequestError,
   validateToolId,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import type {
   Runner,
   RunToolReturn,
   ScopedRunnerRunToolsParams,
   ToolAvailabilityContext,
   InternalToolDefinition,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { chatSystemIndex } from '@kbn/onechat-server';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
 import {
   connectorToInference,
   getConnectorModel,
@@ -53,7 +53,7 @@ export class QueryUtils {
 
   /**
    * Get all usage counters for a specific domain
-   * @param domainId - Domain identifier (e.g., 'onechat')
+   * @param domainId - Domain identifier (e.g., 'agentBuilder')
    * @returns Array of usage counter data
    */
   async getCountersByDomain(domainId: string): Promise<UsageCounterData[]> {

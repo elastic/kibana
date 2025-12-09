@@ -7,23 +7,23 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import type {
-  OnechatPluginSetup,
-  OnechatPluginStart,
-  OnechatSetupDependencies,
-  OnechatStartDependencies,
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies,
   ConfigSchema,
 } from './types';
-import { OnechatPlugin } from './plugin';
+import { AgentBuilderPlugin } from './plugin';
 import { RobotIcon } from './application/components/common/icons/robot';
 
-export type { OnechatPluginSetup, OnechatPluginStart };
-export { RobotIcon as onechatIconType };
+export type { AgentBuilderPluginSetup, AgentBuilderPluginStart };
+export { RobotIcon as agentBuilderIconType };
 
 export const plugin: PluginInitializer<
-  OnechatPluginSetup,
-  OnechatPluginStart,
-  OnechatSetupDependencies,
-  OnechatStartDependencies
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) => {
-  return new OnechatPlugin(pluginInitializerContext);
+  return new AgentBuilderPlugin(pluginInitializerContext);
 };

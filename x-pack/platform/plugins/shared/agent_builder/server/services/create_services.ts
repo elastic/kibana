@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Runner } from '@kbn/onechat-server';
+import type { Runner } from '@kbn/agent-builder-server';
 import type {
   InternalSetupServices,
   InternalStartServices,

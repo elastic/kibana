@@ -7,10 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
-import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
-import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
+import { isStreamEvent, toolsToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -25,7 +25,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 
-const chatAgentGraphName = 'default-onechat-agent';
+const chatAgentGraphName = 'default-agent-builder-agent';
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
   browserApiTools?: BrowserApiToolMetadata[];
@@ -38,7 +38,7 @@ export type RunChatAgentFn = (
 ) => Promise<RunAgentResponse>;
 
 /**
- * Create the handler function for the default onechat agent.
+ * Create the handler function for the default agentBuilder agent.
  */
 export const runDefaultAgentMode: RunChatAgentFn = async (
   {

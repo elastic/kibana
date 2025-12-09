@@ -6,11 +6,11 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { isAllowedBuiltinAgent } from '@kbn/onechat-server/allow_lists';
+import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import { AgentsService } from './agents_service';
 import { createMockedAgent } from '../../test_utils/agents';
 
-jest.mock('@kbn/onechat-server/allow_lists');
+jest.mock('@kbn/agent-builder-server/allow_lists');
 
 const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
   typeof isAllowedBuiltinAgent
@@ -45,7 +45,7 @@ describe('AgentsService', () => {
 
       expect(() => serviceSetup.register(createMockedAgent())).toThrowErrorMatchingInlineSnapshot(`
         "Built-in agent with id \\"test_agent\\" is not in the list of allowed built-in agents.
-                     Please add it to the list of allowed built-in agents in the \\"@kbn/onechat-server/allow_lists.ts\\" file."
+                     Please add it to the list of allowed built-in agents in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
       `);
     });
   });

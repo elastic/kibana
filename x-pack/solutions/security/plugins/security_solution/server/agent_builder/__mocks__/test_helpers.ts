@@ -9,14 +9,14 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/onechat-server/tools';
+import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
 import type {
   ModelProvider,
   ToolProvider,
   ScopedRunner,
   ToolResultStore,
   ToolEventEmitter,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 
 /**
  * Creates common mocks for tool tests

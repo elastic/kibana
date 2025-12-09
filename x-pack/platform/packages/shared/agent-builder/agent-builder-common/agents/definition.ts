@@ -16,12 +16,12 @@ export enum AgentType {
 }
 
 /**
- * ID of the onechat default conversational agent
+ * ID of the agentBuilder default conversational agent
  */
-export const oneChatDefaultAgentId = 'elastic-ai-agent';
+export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
- * Definition of a onechat agent.
+ * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
   /**

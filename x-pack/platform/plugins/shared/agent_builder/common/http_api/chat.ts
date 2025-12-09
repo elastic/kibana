@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRound, AgentCapabilities } from '@kbn/onechat-common';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
+import type { ConversationRound, AgentCapabilities } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 
 /**
- * body payload for request to the /internal/onechat/chat endpoint
+ * body payload for request to the /internal/agent_builder/chat endpoint
  */
 export interface ChatRequestBodyPayload {
   agent_id?: string;

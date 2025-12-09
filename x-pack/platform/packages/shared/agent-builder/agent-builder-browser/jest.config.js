@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/onechat/onechat-browser'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-browser'],
 };

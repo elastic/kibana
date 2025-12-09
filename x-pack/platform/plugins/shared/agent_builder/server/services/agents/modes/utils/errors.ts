@@ -10,9 +10,9 @@ import {
   isToolValidationError,
   isContextLengthExceededError,
 } from '@kbn/inference-common/src/chat_complete/errors';
-import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
-import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
-import { createAgentExecutionError, isAgentExecutionError } from '@kbn/onechat-common/base/errors';
+import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
+import { createAgentExecutionError, isAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 
 const recoverableErrorCodes = [
   ErrCodes.toolNotFound,
@@ -25,7 +25,7 @@ const recoverableErrorCodes = [
  * leveraging the errors which are already processed by the inference plugin for some of them.
  * Also categorizes the error to identifiable error codes.
  */
-export const convertError = (error: Error): OnechatAgentExecutionError => {
+export const convertError = (error: Error): AgentBuilderAgentExecutionError => {
   if (isToolNotFoundError(error)) {
     return createAgentExecutionError(error.message, ErrCodes.toolNotFound, {
       toolName: error.meta.name,
@@ -44,7 +44,7 @@ export const convertError = (error: Error): OnechatAgentExecutionError => {
   }
 };
 
-export const isRecoverableError = (error: OnechatAgentExecutionError): boolean => {
+export const isRecoverableError = (error: AgentBuilderAgentExecutionError): boolean => {
   if (!isAgentExecutionError(error)) {
     return false;
   }

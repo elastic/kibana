@@ -6,7 +6,7 @@
  */
 
 import { EuiCodeBlock, useEuiTheme } from '@elastic/eui';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import React from 'react';
 import { css } from '@emotion/react';
 import { codeblockStyles } from './codeblock.styles';

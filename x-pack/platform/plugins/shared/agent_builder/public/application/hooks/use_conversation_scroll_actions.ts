@@ -23,7 +23,7 @@ const scrollToMostRecentRound = ({
   requestAnimationFrame(() => {
     // Find the rounds container within the specific scroll container
     const conversationRoundsElement = scrollContainer.querySelector(
-      '[id="onechatConversationRoundsContainer"]'
+      '[id="agentBuilderConversationRoundsContainer"]'
     );
     if (conversationRoundsElement) {
       const rounds = conversationRoundsElement.children;

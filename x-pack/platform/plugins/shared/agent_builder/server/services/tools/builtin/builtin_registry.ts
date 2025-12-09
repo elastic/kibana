@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { validateToolId } from '@kbn/onechat-common';
-import type { StaticToolRegistration } from '@kbn/onechat-server/tools';
+import { validateToolId } from '@kbn/agent-builder-common';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
 
 export interface BuiltinToolRegistry {
   register(tool: StaticToolRegistration<any>): void;

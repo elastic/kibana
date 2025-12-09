@@ -230,22 +230,22 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
-  private registerOnechatAttachmentsAndTools(
-    onechat: SecuritySolutionPluginSetupDependencies['onechat'],
+  private registerAgentBuilderAttachmentsAndTools(
+    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
     config: ConfigType,
     core: SecuritySolutionPluginCoreSetupDependencies
   ): void {
-    if (!onechat || !config.experimentalFeatures.agentBuilderEnabled) {
+    if (!agentBuilder || !config.experimentalFeatures.agentBuilderEnabled) {
       return;
     }
 
-    registerTools(onechat, core).catch((error) => {
+    registerTools(agentBuilder, core).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
-    registerAttachments(onechat).catch((error) => {
+    registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
-    registerAgents(onechat).catch((error) => {
+    registerAgents(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security agent: ${error}`);
     });
   }
@@ -633,7 +633,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core);
+    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, config, core);
 
     return {
       setProductFeaturesConfigurator:

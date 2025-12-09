@@ -7,7 +7,7 @@
 
 import { EuiText, EuiCodeBlock, EuiSplitPanel } from '@elastic/eui';
 import React from 'react';
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
 
 const getStackTrace = (error: unknown) => {
@@ -15,12 +15,12 @@ const getStackTrace = (error: unknown) => {
     return error.stack;
   }
 
-  // Fallback to onechat error formatter
-  return formatOnechatErrorMessage(error);
+  // Fallback to agentBuilder error formatter
+  return formatAgentBuilderErrorMessage(error);
 };
 
 const labels = {
-  description: i18n.translate('xpack.onechat.round.error.generic.description', {
+  description: i18n.translate('xpack.agentBuilder.round.error.generic.description', {
     defaultMessage:
       'Something in the query caused the model to freeze mid-thought. Performance debugging can be broad - try narrowing your question. See the error log below for specifics.',
   }),

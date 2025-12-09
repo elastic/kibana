@@ -6,9 +6,9 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
+import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
 
 export interface ToolCreateParams<TConfig extends object = {}> {
   id: string;

@@ -19,10 +19,10 @@ import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
+import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
-import { OnechatNavControlInitiator } from './components/nav_control/lazy_onechat_nav_control';
+import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -31,35 +31,35 @@ import {
   ConversationsService,
   NavigationService,
   ToolsService,
-  type OnechatInternalService,
+  type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
-  OnechatPluginSetup,
-  OnechatPluginStart,
-  OnechatSetupDependencies,
-  OnechatStartDependencies,
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies,
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 import type { ConversationFlyoutRef } from './types';
 
-export class OnechatPlugin
+export class AgentBuilderPlugin
   implements
     Plugin<
-      OnechatPluginSetup,
-      OnechatPluginStart,
-      OnechatSetupDependencies,
-      OnechatStartDependencies
+      AgentBuilderPluginSetup,
+      AgentBuilderPluginStart,
+      AgentBuilderSetupDependencies,
+      AgentBuilderStartDependencies
     >
 {
   logger: Logger;
   private conversationFlyoutActiveConfig: EmbeddableConversationProps = {};
-  private internalServices?: OnechatInternalService;
+  private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
     navigationService: NavigationService;
   };
@@ -70,9 +70,9 @@ export class OnechatPlugin
     this.logger = context.logger.get();
   }
   setup(
-    core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    deps: OnechatSetupDependencies
-  ): OnechatPluginSetup {
+    core: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>,
+    deps: AgentBuilderSetupDependencies
+  ): AgentBuilderPluginSetup {
     const isAgentBuilderEnabled = core.settings.client.get<boolean>(
       AGENT_BUILDER_ENABLED_SETTING_ID,
       true
@@ -103,7 +103,7 @@ export class OnechatPlugin
     try {
       core.getStartServices().then(([coreStart]) => {
         const { capabilities } = coreStart.application;
-        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
+        if (capabilities[AGENTBUILDER_FEATURE_ID][uiPrivileges.showManagement]) {
           registerManagementSection({ core, management: deps.management });
         }
       });
@@ -114,7 +114,7 @@ export class OnechatPlugin
     return {};
   }
 
-  start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+  start(core: CoreStart, startDependencies: AgentBuilderStartDependencies): AgentBuilderPluginStart {
     const { http } = core;
     const { licensing, inference } = startDependencies;
     docLinks.setDocLinks(core.docLinks.links);
@@ -132,7 +132,7 @@ export class OnechatPlugin
 
     const { navigationService } = this.setupServices;
 
-    const internalServices: OnechatInternalService = {
+    const internalServices: AgentBuilderInternalService = {
       agentService,
       attachmentsService,
       chatService,
@@ -154,7 +154,7 @@ export class OnechatPlugin
       false
     );
 
-    const onechatService: OnechatPluginStart = {
+    const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
@@ -202,10 +202,10 @@ export class OnechatPlugin
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
-            <OnechatNavControlInitiator
+            <AgentBuilderNavControlInitiator
               coreStart={core}
               pluginsStart={startDependencies}
-              onechatService={onechatService}
+              agentBuilderService={agentBuilderService}
             />,
             element,
             () => {}
@@ -220,6 +220,6 @@ export class OnechatPlugin
       });
     }
 
-    return onechatService;
+    return agentBuilderService;
   }
 }

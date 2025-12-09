@@ -7,24 +7,24 @@
 
 import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
-import type { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
-} from '@kbn/onechat-plugin/common/http_api/conversations';
+} from '@kbn/agent-builder-plugin/common/http_api/conversations';
 import { createLlmProxy, type LlmProxy } from '../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../utils/one_chat_client';
-import type { OneChatApiFtrProviderContext } from '../../onechat/services/api';
+import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
+import type { AgentBuilderApiFtrProviderContext } from '../../agent_builder/services/api';
 
-export default function ({ getService }: OneChatApiFtrProviderContext) {
+export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
-  const oneChatApiClient = createOneChatApiClient(supertest);
+  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
   describe('Conversation API', () => {
     let llmProxy: LlmProxy;
@@ -59,7 +59,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         response: `Response to: ${input}`,
       });
 
-      const response = await oneChatApiClient.converse({
+      const response = await agentBuilderApiClient.converse({
         input,
         connector_id: connectorId,
       });
@@ -130,7 +130,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
 
       it('should filter conversations by agent_id', async () => {
         const conversationId = await createConversation('Agent filter test', 'Agent Filter Test');
-        const conversation = await oneChatApiClient.getConversation(conversationId);
+        const conversation = await agentBuilderApiClient.getConversation(conversationId);
         const agentId = conversation.agent_id;
 
         const response = await supertest

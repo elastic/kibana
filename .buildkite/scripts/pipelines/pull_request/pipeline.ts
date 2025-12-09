@@ -144,8 +144,8 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
       /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
     ];
     const agentBuilderPaths = [
-      /^x-pack\/platform\/plugins\/shared\/onechat/,
-      /^x-pack\/platform\/packages\/shared\/onechat/,
+      /^x-pack\/platform\/plugins\/shared\/agent_builder/,
+      /^x-pack\/platform\/packages\/shared\/agent_builder/,
     ];
 
     if (

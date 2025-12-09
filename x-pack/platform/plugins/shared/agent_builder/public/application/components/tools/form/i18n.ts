@@ -9,71 +9,71 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nMessages = {
   paramUnusedWarning: (name: string) =>
-    i18n.translate('xpack.onechat.tools.newTool.paramUnusedWarning', {
+    i18n.translate('xpack.agentBuilder.tools.newTool.paramUnusedWarning', {
       defaultMessage: 'Parameter "{name}" is not used in the ES|QL query.',
       values: { name },
     }),
-  paramNameLabel: i18n.translate('xpack.onechat.tools.newTool.paramNameLabel', {
+  paramNameLabel: i18n.translate('xpack.agentBuilder.tools.newTool.paramNameLabel', {
     defaultMessage: 'Name',
   }),
-  paramNamePlaceholder: i18n.translate('xpack.onechat.tools.newTool.paramNamePlaceholder', {
+  paramNamePlaceholder: i18n.translate('xpack.agentBuilder.tools.newTool.paramNamePlaceholder', {
     defaultMessage: 'Name',
   }),
-  paramDescriptionLabel: i18n.translate('xpack.onechat.tools.newTool.paramDescriptionLabel', {
+  paramDescriptionLabel: i18n.translate('xpack.agentBuilder.tools.newTool.paramDescriptionLabel', {
     defaultMessage: 'Description',
   }),
   paramDescriptionPlaceholder: i18n.translate(
-    'xpack.onechat.tools.newTool.paramDescriptionPlaceholder',
+    'xpack.agentBuilder.tools.newTool.paramDescriptionPlaceholder',
     {
       defaultMessage: 'Description',
     }
   ),
-  paramTypeLabel: i18n.translate('xpack.onechat.tools.newTool.paramTypeLabel', {
+  paramTypeLabel: i18n.translate('xpack.agentBuilder.tools.newTool.paramTypeLabel', {
     defaultMessage: 'Type',
   }),
-  optionalParamLabel: i18n.translate('xpack.onechat.tools.newTool.optionalParamLabel', {
+  optionalParamLabel: i18n.translate('xpack.agentBuilder.tools.newTool.optionalParamLabel', {
     defaultMessage: 'Optional',
   }),
-  removeParamButtonLabel: i18n.translate('xpack.onechat.tools.newTool.removeParamButtonLabel', {
+  removeParamButtonLabel: i18n.translate('xpack.agentBuilder.tools.newTool.removeParamButtonLabel', {
     defaultMessage: 'Remove parameter',
   }),
-  addParamButtonLabel: i18n.translate('xpack.onechat.tools.newTool.addParamButtonLabel', {
+  addParamButtonLabel: i18n.translate('xpack.agentBuilder.tools.newTool.addParamButtonLabel', {
     defaultMessage: 'Add a parameter',
   }),
-  inferParamsButtonLabel: i18n.translate('xpack.onechat.tools.newTool.inferParamsButtonLabel', {
+  inferParamsButtonLabel: i18n.translate('xpack.agentBuilder.tools.newTool.inferParamsButtonLabel', {
     defaultMessage: 'Infer parameters',
   }),
-  noParamsMessage: i18n.translate('xpack.onechat.tools.newTool.noParamsMessage', {
+  noParamsMessage: i18n.translate('xpack.agentBuilder.tools.newTool.noParamsMessage', {
     defaultMessage: 'Add parameters or infer them from your ES|QL query.',
   }),
-  optionalFieldLabel: i18n.translate('xpack.onechat.tools.newTool.optionalFieldLabel', {
+  optionalFieldLabel: i18n.translate('xpack.agentBuilder.tools.newTool.optionalFieldLabel', {
     defaultMessage: 'Optional',
   }),
-  documentationLinkLabel: i18n.translate('xpack.onechat.tools.newTool.documentationLinkLabel', {
+  documentationLinkLabel: i18n.translate('xpack.agentBuilder.tools.newTool.documentationLinkLabel', {
     defaultMessage: 'Documentation',
   }),
   systemReferences: {
     documentation: {
-      title: i18n.translate('xpack.onechat.tools.newTool.systemReferences.title', {
+      title: i18n.translate('xpack.agentBuilder.tools.newTool.systemReferences.title', {
         defaultMessage: 'System references',
       }),
-      description: i18n.translate('xpack.onechat.tools.newTool.systemReferences.description', {
+      description: i18n.translate('xpack.agentBuilder.tools.newTool.systemReferences.description', {
         defaultMessage:
           'These values are used by agents and configurations, not shown to end users.',
       }),
       fieldsHelp: {
-        title: i18n.translate('xpack.onechat.tools.newTool.systemReferences.fieldsHelp.title', {
+        title: i18n.translate('xpack.agentBuilder.tools.newTool.systemReferences.fieldsHelp.title', {
           defaultMessage: 'What are these fields?',
         }),
         toolId: {
           label: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.toolId.label',
+            'xpack.agentBuilder.tools.newTool.systemReferences.fieldsHelp.toolId.label',
             {
               defaultMessage: 'Tool ID',
             }
           ),
           description: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.toolId.description',
+            'xpack.agentBuilder.tools.newTool.systemReferences.fieldsHelp.toolId.description',
             {
               defaultMessage: 'Unique ID for referencing the tool in code or configurations.',
             }
@@ -81,13 +81,13 @@ export const i18nMessages = {
         },
         description: {
           label: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.label',
+            'xpack.agentBuilder.tools.newTool.systemReferences.fieldsHelp.description.label',
             {
               defaultMessage: 'Description',
             }
           ),
           description: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.description',
+            'xpack.agentBuilder.tools.newTool.systemReferences.fieldsHelp.description.description',
             {
               defaultMessage:
                 'Help humans and agents understand how the tool works. Start with a short human-friendly summary, because the first ~50 characters appear in the tool list.',
@@ -96,7 +96,7 @@ export const i18nMessages = {
         },
       },
       toolBasicsDocumentationLink: i18n.translate(
-        'xpack.onechat.tools.newTool.toolBasics.documentationLink',
+        'xpack.agentBuilder.tools.newTool.toolBasics.documentationLink',
         {
           defaultMessage: 'Tool basics',
         }
@@ -104,16 +104,16 @@ export const i18nMessages = {
     },
     form: {
       toolId: {
-        label: i18n.translate('xpack.onechat.tools.newTool.form.toolIdLabel', {
+        label: i18n.translate('xpack.agentBuilder.tools.newTool.form.toolIdLabel', {
           defaultMessage: 'Tool ID',
         }),
-        helpText: i18n.translate('xpack.onechat.tools.newTool.form.toolIdHelpText', {
+        helpText: i18n.translate('xpack.agentBuilder.tools.newTool.form.toolIdHelpText', {
           defaultMessage:
             'Tool ID must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, and underscores.',
         }),
       },
       description: {
-        label: i18n.translate('xpack.onechat.tools.newTool.form.descriptionLabel', {
+        label: i18n.translate('xpack.agentBuilder.tools.newTool.form.descriptionLabel', {
           defaultMessage: 'Description',
         }),
       },
@@ -121,40 +121,40 @@ export const i18nMessages = {
   },
   toolLabels: {
     documentation: {
-      title: i18n.translate('xpack.onechat.tools.newTool.labels.title', {
+      title: i18n.translate('xpack.agentBuilder.tools.newTool.labels.title', {
         defaultMessage: 'Labels',
       }),
-      description: i18n.translate('xpack.onechat.tools.newTool.labels.description', {
+      description: i18n.translate('xpack.agentBuilder.tools.newTool.labels.description', {
         defaultMessage:
           "Labels help with filtering, search, and bulk selection — they don't affect how tools behave.",
       }),
       documentationLink: i18n.translate(
-        'xpack.onechat.tools.newTool.labels.toolLabelsDocumentationLink',
+        'xpack.agentBuilder.tools.newTool.labels.toolLabelsDocumentationLink',
         {
           defaultMessage: 'Tool labels',
         }
       ),
     },
     form: {
-      label: i18n.translate('xpack.onechat.tools.newTool.labels.formLabel', {
+      label: i18n.translate('xpack.agentBuilder.tools.newTool.labels.formLabel', {
         defaultMessage: 'Labels',
       }),
-      placeholder: i18n.translate('xpack.onechat.tools.newTool.labels.formPlaceholder', {
+      placeholder: i18n.translate('xpack.agentBuilder.tools.newTool.labels.formPlaceholder', {
         defaultMessage: 'Add or create labels',
       }),
     },
   },
   configuration: {
     documentation: {
-      title: i18n.translate('xpack.onechat.tools.newTool.configuration.title', {
+      title: i18n.translate('xpack.agentBuilder.tools.newTool.configuration.title', {
         defaultMessage: 'Configuration',
       }),
-      description: i18n.translate('xpack.onechat.tools.newTool.configuration.description', {
+      description: i18n.translate('xpack.agentBuilder.tools.newTool.configuration.description', {
         defaultMessage:
           'Set up how the tool works, by defining the index pattern or ES|QL query syntax and any required parameters.',
       }),
       documentationLink: i18n.translate(
-        'xpack.onechat.tools.newTool.configuration.documentationLink',
+        'xpack.agentBuilder.tools.newTool.configuration.documentationLink',
         {
           defaultMessage: 'Configuring a tool',
         }
@@ -162,23 +162,23 @@ export const i18nMessages = {
     },
     form: {
       type: {
-        label: i18n.translate('xpack.onechat.tools.newTool.configuration.form.type.label', {
+        label: i18n.translate('xpack.agentBuilder.tools.newTool.configuration.form.type.label', {
           defaultMessage: 'Type',
         }),
         esqlOption: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.type.esqlOption',
+          'xpack.agentBuilder.tools.newTool.configuration.form.type.esqlOption',
           {
             defaultMessage: 'ES|QL',
           }
         ),
         indexSearchOption: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.type.indexSearchOption',
+          'xpack.agentBuilder.tools.newTool.configuration.form.type.indexSearchOption',
           {
             defaultMessage: 'Index search',
           }
         ),
         workflowOption: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.type.workflowOption',
+          'xpack.agentBuilder.tools.newTool.configuration.form.type.workflowOption',
           {
             defaultMessage: 'Workflow',
           }
@@ -186,38 +186,38 @@ export const i18nMessages = {
       },
       indexSearch: {
         patternLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.indexSearch.patternLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.patternLabel',
           {
             defaultMessage: 'Target pattern',
           }
         ),
         defaultRowLimitLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.defaultRowLimitLabel',
           {
             defaultMessage: 'Row limit',
           }
         ),
         defaultRowLimitHelpText: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitHelpText',
+          'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.defaultRowLimitHelpText',
           {
             defaultMessage: 'Maximum number of rows to return from ES|QL queries.',
           }
         ),
         customInstructionsLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.customInstructionsLabel',
           {
             defaultMessage: 'Custom instructions',
           }
         ),
         customInstructionsHelpText: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsHelpText',
+          'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.customInstructionsHelpText',
           {
             defaultMessage:
               'Additional guidance for ES|QL query generation, such as field selection or limit logic.',
           }
         ),
         customInstructionsPlaceholder: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsPlaceholder',
+          'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.customInstructionsPlaceholder',
           {
             defaultMessage: 'e.g., "Always include timestamp field" ',
           }
@@ -225,13 +225,13 @@ export const i18nMessages = {
       },
       esql: {
         queryLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.esql.queryLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.esql.queryLabel',
           {
             defaultMessage: 'ES|QL Query',
           }
         ),
         parametersLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.esql.parametersLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.esql.parametersLabel',
           {
             defaultMessage: 'ES|QL Parameters',
           }
@@ -239,26 +239,26 @@ export const i18nMessages = {
       },
       workflow: {
         workflowLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.workflow.workflowLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.workflow.workflowLabel',
           {
             defaultMessage: 'Workflow',
           }
         ),
         waitForCompletionLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.workflow.waitForCompletionLabel',
           {
             defaultMessage: 'Workflow execution',
           }
         ),
         waitForCompletionHelpText: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionHelpText',
+          'xpack.agentBuilder.tools.newTool.configuration.form.workflow.waitForCompletionHelpText',
           {
             defaultMessage:
               'If checked, the tool waits until the workflow completes (up to 120s) and returns the results. If unchecked, the workflow runs in the background and you can ask the agent to check the execution status.',
           }
         ),
         waitForCompletionCheckboxLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionCheckboxLabel',
+          'xpack.agentBuilder.tools.newTool.configuration.form.workflow.waitForCompletionCheckboxLabel',
           {
             defaultMessage: 'Wait until the workflow completes',
           }

@@ -9,8 +9,8 @@ import type {
   ToolSelection,
   ToolSelectionRelevantFields,
   ToolDefinition,
-} from '@kbn/onechat-common';
-import { ToolType, allToolsSelectionWildcard } from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
+import { ToolType, allToolsSelectionWildcard } from '@kbn/agent-builder-common';
 import {
   toggleToolSelection,
   isToolSelected,

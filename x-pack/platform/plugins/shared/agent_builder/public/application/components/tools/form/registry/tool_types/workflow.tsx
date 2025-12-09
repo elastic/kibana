@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isWorkflowTool } from '@kbn/onechat-common/tools/types/workflow';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { isWorkflowTool } from '@kbn/agent-builder-common/tools/types/workflow';
 
 import { WorkflowConfiguration } from '../../sections/configuration_fields/workflow_configuration_fields';
 

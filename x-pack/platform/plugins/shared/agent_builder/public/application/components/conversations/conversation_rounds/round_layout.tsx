@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRound } from '@kbn/onechat-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
@@ -23,7 +23,7 @@ interface RoundLayoutProps {
 }
 
 const labels = {
-  container: i18n.translate('xpack.onechat.round.container', {
+  container: i18n.translate('xpack.agentBuilder.round.container', {
     defaultMessage: 'Conversation round',
   }),
 };

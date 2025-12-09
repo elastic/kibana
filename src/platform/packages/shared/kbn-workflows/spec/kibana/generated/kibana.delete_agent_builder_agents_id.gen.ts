@@ -35,7 +35,7 @@ export const DELETE_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract 
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
+Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.`,
   methods: ['DELETE'],
   patterns: ['/api/agent_builder/agents/{id}'],
   documentation:

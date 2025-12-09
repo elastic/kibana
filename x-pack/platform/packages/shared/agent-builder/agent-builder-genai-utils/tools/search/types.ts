@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsResourceType } from '@kbn/onechat-common';
+import type { EsResourceType } from '@kbn/agent-builder-common';
 
 export interface SearchTarget {
   type: EsResourceType;

@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,

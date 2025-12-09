@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
+import type { ChatAgentEvent } from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse } from './provider';
 
 export interface RunAgentReturn {
@@ -53,11 +53,11 @@ export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;
 export type ScopedRunnerRunAgentParams = Omit<RunAgentParams, 'request'>;
 
 /**
- * Public onechat API to execute an agent.
+ * Public agentBuilder API to execute an agent.
  */
 export type RunAgentFn = (params: RunAgentParams) => Promise<RunAgentReturn>;
 
 /**
- * Public onechat API to execute an agent.
+ * Public agentBuilder API to execute an agent.
  */
 export type ScopedRunAgentFn = (params: ScopedRunnerRunAgentParams) => Promise<RunAgentReturn>;

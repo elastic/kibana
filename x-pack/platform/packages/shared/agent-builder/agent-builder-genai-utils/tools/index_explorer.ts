@@ -8,8 +8,8 @@
 import { take } from 'lodash';
 import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
-import { EsResourceType } from '@kbn/onechat-common';
-import type { ScopedModel } from '@kbn/onechat-server';
+import { EsResourceType } from '@kbn/agent-builder-common';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {

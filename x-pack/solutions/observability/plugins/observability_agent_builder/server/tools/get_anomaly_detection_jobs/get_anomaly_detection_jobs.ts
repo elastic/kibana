@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import type { ErrorResult } from '@kbn/onechat-common/tools/tool_result';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';

@@ -16,7 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/onechat-common",
+    "@kbn/agent-builder-common",
     "@kbn/zod",
   ]
 }

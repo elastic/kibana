@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { ZodSchema } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 

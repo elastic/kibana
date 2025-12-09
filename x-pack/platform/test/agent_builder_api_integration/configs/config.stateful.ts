@@ -6,10 +6,10 @@
  */
 
 import { createStatefulTestConfig } from '../../api_integration_deployment_agnostic/default_configs/stateful.config.base';
-import { oneChatApiServices } from '../../onechat/services/api';
+import { agentBuilderApiServices } from '../../agent_builder/services/api';
 
 export default createStatefulTestConfig({
-  services: oneChatApiServices,
+  services: agentBuilderApiServices,
   testFiles: [require.resolve('../apis')],
   junit: {
     reportName: 'X-Pack Agent Builder Stateful API Integration Tests',
@@ -19,7 +19,7 @@ export default createStatefulTestConfig({
     serverArgs: [
       `--logging.loggers=${JSON.stringify([
         {
-          name: 'plugins.onechat',
+          name: 'plugins.agentBuilder',
           level: 'all',
           appenders: ['default'],
         },

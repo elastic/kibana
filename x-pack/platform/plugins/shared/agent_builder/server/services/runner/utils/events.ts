@@ -11,9 +11,9 @@ import type {
   RunContext,
   ToolEventEmitter,
   ToolEventHandlerFn,
-} from '@kbn/onechat-server';
-import type { InternalToolProgressEvent } from '@kbn/onechat-server/runner';
-import { ChatEventType } from '@kbn/onechat-common';
+} from '@kbn/agent-builder-server';
+import type { InternalToolProgressEvent } from '@kbn/agent-builder-server/runner';
+import { ChatEventType } from '@kbn/agent-builder-common';
 
 /**
  * Creates a run event emitter sending events to the provided event handler.

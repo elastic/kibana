@@ -7,7 +7,7 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiHighlight, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { AgentAvatar } from '../../../../common/agent_avatar';

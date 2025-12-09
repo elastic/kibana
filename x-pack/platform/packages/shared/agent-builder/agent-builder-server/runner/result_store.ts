@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolResult } from '@kbn/onechat-common/tools';
+import type { ToolResult } from '@kbn/agent-builder-common/tools';
 
 /**
  * Store to access tool results during execution

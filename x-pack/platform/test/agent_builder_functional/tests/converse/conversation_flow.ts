@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const supertest = getService('supertest');
@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates to new conversation page and shows initial state', async () => {
-      await onechat.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp('conversations/new');
 
       // Assert the welcome page is displayed
       await testSubjects.existOrFail('agentBuilderWelcomePage');
@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_TITLE = 'Test Search Conversation';
 
       // Create conversation with tool calls
-      const conversationId = await onechat.createConversationViaUI(
+      const conversationId = await agentBuilder.createConversationViaUI(
         MOCKED_TITLE,
         MOCKED_INPUT,
         MOCKED_RESPONSE,
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const titleText = await titleElement.getVisibleText();
         expect(titleText).to.contain(MOCKED_TITLE);
 
-        await onechat.openConversationsHistory();
+        await agentBuilder.openConversationsHistory();
         // Wait for the conversation to appear in the list
         await retry.try(async () => {
           const conversationList = await testSubjects.find('agentBuilderConversationList');
@@ -89,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      await onechat.clickThinkingToggle();
+      await agentBuilder.clickThinkingToggle();
 
       // Wait for the expanded thinking details to appear
       await retry.try(async () => {
@@ -101,12 +101,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Click the "new" button
-      await onechat.clickNewConversationButton();
+      await agentBuilder.clickNewConversationButton();
 
       // Wait for navigation to complete and assert we're back to the initial state with a populated conversation list
       await retry.try(async () => {
         // The conversation list should still contain our previous conversation
-        const isConversationInHistory = await onechat.isConversationInHistory(conversationId);
+        const isConversationInHistory = await agentBuilder.isConversationInHistory(conversationId);
         expect(isConversationInHistory).to.be(true);
 
         // Assert the welcome page is displayed

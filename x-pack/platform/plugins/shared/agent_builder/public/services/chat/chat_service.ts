@@ -9,13 +9,13 @@ import type { Observable } from 'rxjs';
 import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import type { ChatEvent, AgentCapabilities } from '@kbn/onechat-common';
-import { getKibanaDefaultAgentCapabilities } from '@kbn/onechat-common/agents';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
+import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
+import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
-import { unwrapOnechatErrors } from '../utils/errors';
+import { unwrapAgentBuilderErrors } from '../utils/errors';
 
 export interface ChatParams {
   signal?: AbortSignal;
@@ -56,7 +56,7 @@ export class ChatService {
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
-      unwrapOnechatErrors()
+      unwrapAgentBuilderErrors()
     );
   }
 }

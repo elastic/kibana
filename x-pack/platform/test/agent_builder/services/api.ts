@@ -6,14 +6,14 @@
  */
 
 import type { GenericFtrProviderContext } from '@kbn/test';
-import { oneChatCommonServices } from './common';
+import { agentBuilderCommonServices } from './common';
 
 /**
- * Onechat API-only services.
- * Composes common deployment-agnostic services and adds any onechat-specific API helpers.
+ * AgentBuilder API-only services.
+ * Composes common deployment-agnostic services and adds any agent-builder-specific API helpers.
  */
-export const oneChatApiServices = {
-  ...oneChatCommonServices,
+export const agentBuilderApiServices = {
+  ...agentBuilderCommonServices,
 };
 
-export type OneChatApiFtrProviderContext = GenericFtrProviderContext<typeof oneChatApiServices, {}>;
+export type AgentBuilderApiFtrProviderContext = GenericFtrProviderContext<typeof agentBuilderApiServices, {}>;

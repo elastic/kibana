@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { ToolsSelection } from '../tools_selection';

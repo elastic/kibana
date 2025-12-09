@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ListToolsResponse } from '@kbn/onechat-plugin/common/http_api/tools';
-import type { ListAgentResponse } from '@kbn/onechat-plugin/common/http_api/agents';
+import type { ListToolsResponse } from '@kbn/agent-builder-plugin/common/http_api/tools';
+import type { ListAgentResponse } from '@kbn/agent-builder-plugin/common/http_api/agents';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { spaceUrl } from '../utils/spaces';

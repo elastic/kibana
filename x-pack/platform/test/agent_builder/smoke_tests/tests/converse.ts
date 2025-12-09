@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import { isToolCallStep, platformCoreTools } from '@kbn/onechat-common';
+import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
 import type {
   ChatRequestBodyPayload,
   ChatResponse,
-} from '@kbn/onechat-plugin/common/http_api/chat';
+} from '@kbn/agent-builder-plugin/common/http_api/chat';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export const converseApiSuite = (

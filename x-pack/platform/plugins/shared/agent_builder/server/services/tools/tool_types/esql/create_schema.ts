@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlToolConfig } from '@kbn/onechat-common';
+import type { EsqlToolConfig } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod';
 
 export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodObject<any> {

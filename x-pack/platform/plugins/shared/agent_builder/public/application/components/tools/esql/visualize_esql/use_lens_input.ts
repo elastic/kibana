@@ -12,7 +12,7 @@ import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/pu
 import type { ChartType } from '@kbn/visualization-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import type { TabularDataResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import useAsync from 'react-use/lib/useAsync';

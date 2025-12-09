@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
 export type ValidateAttachmentResult<Type extends string, Data> =

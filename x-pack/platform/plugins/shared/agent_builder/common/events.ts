@@ -7,5 +7,5 @@
 
 export const eventTypes = {
   // For reporting errors when conversing with the assistant
-  ONECHAT_CONVERSE_ERROR: 'onechat_converse_error',
+  AGENTBUILDER_CONVERSE_ERROR: 'agent_builder_converse_error',
 } as const;

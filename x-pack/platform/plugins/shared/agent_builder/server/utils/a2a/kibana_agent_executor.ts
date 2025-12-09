@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/sdk/server';
 import type { Part, TextPart } from '@a2a-js/sdk';
-import { isRoundCompleteEvent } from '@kbn/onechat-common';
+import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,7 +22,7 @@ const A2A_CONVERSATION_ID_PREFIX = 'a2a-';
 const generateA2AConversationId = (id: string) => `${A2A_CONVERSATION_ID_PREFIX}${id}`;
 
 /**
- * Agent executor that bridges A2A requests to Kibana's onechat system
+ * Agent executor that bridges A2A requests to Kibana's agentBuilder system
  */
 export class KibanaAgentExecutor implements AgentExecutor {
   constructor(

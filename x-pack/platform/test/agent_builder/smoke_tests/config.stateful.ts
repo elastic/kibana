@@ -8,14 +8,14 @@
 import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { createStatefulTestConfig } from '../../api_integration_deployment_agnostic/default_configs/stateful.config.base';
-import { oneChatApiServices } from '../services/api';
+import { agentBuilderApiServices } from '../services/api';
 
 // eslint-disable-next-line import/no-default-export
 export default async function (ftrContext: FtrConfigProviderContext) {
   const preconfiguredConnectors = getPreconfiguredConnectorConfig();
 
   return createStatefulTestConfig({
-    services: oneChatApiServices,
+    services: agentBuilderApiServices,
     testFiles: [require.resolve('./tests')],
     junit: {
       reportName: 'Agent Builder - Smoke Tests - API Integration',

@@ -51,7 +51,7 @@ const ViewMorePopover: React.FC<{
   `;
   const [isOpen, setIsOpen] = useState(false);
 
-  const viewMoreAriaLabel = i18n.translate('xpack.onechat.labels.viewMore.ariaLabel', {
+  const viewMoreAriaLabel = i18n.translate('xpack.agentBuilder.labels.viewMore.ariaLabel', {
     defaultMessage:
       'View {hiddenCount} more {hiddenCount, plural, one {label} other {labels}} ({totalCount} total)',
     values: {
@@ -80,7 +80,7 @@ const ViewMorePopover: React.FC<{
           data-test-subj="agentBuilderLabelsViewMoreButton"
         >
           <FormattedMessage
-            id="xpack.onechat.labels.viewMore.buttonLabel"
+            id="xpack.agentBuilder.labels.viewMore.buttonLabel"
             defaultMessage="View more"
           />
         </EuiButtonEmpty>

@@ -8,9 +8,9 @@
 import type {
   ToolDefinition,
   ToolDefinitionWithSchema,
-  SerializedOnechatError,
-} from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+  SerializedAgentBuilderError,
+} from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolTypeInfo } from '../tools';
 
 export interface ListToolsResponse {
@@ -44,7 +44,7 @@ interface BulkDeleteToolSuccessResult extends BulkDeleteToolResultBase {
 
 interface BulkDeleteToolFailureResult extends BulkDeleteToolResultBase {
   success: false;
-  reason: SerializedOnechatError;
+  reason: SerializedAgentBuilderError;
 }
 
 export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolFailureResult;

@@ -8,28 +8,28 @@
 import type { IRouter, CustomRequestHandlerContext, CoreSetup } from '@kbn/core/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { getCurrentSpaceId } from './utils/spaces';
-import type { OnechatPluginStart, OnechatStartDependencies } from './types';
+import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from './types';
 
-export interface OnechatRequestHandlerContext {
+export interface AgentBuilderRequestHandlerContext {
   spaces: {
     getSpaceId: () => string;
   };
 }
 
-export type OnechatHandlerContext = CustomRequestHandlerContext<{
+export type AgentBuilderHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-  onechat: OnechatRequestHandlerContext;
+  agentBuilder: AgentBuilderRequestHandlerContext;
 }>;
 
-export type OnechatRouter = IRouter<OnechatHandlerContext>;
+export type AgentBuilderRouter = IRouter<AgentBuilderHandlerContext>;
 
-export const registerOnechatHandlerContext = ({
+export const registerAgentBuilderHandlerContext = ({
   coreSetup,
 }: {
-  coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>;
+  coreSetup: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>;
 }) => {
-  coreSetup.http.registerRouteHandlerContext<OnechatHandlerContext, 'onechat'>(
-    'onechat',
+  coreSetup.http.registerRouteHandlerContext<AgentBuilderHandlerContext, 'agentBuilder'>(
+    'agentBuilder',
     async (context, request) => {
       const [, { spaces }] = await coreSetup.getStartServices();
 

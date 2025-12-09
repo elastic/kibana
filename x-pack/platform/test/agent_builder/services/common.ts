@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SynthtraceProvider } from '../../onechat_api_integration/configs/synthrace_provider';
+import { SynthtraceProvider } from '../../agent_builder_api_integration/configs/synthrace_provider';
 import { services as platformDeploymentAgnosticServices } from '../../api_integration_deployment_agnostic/services';
 
 /**
- * Services common to both API and UI onechat test suites.
+ * Services common to both API and UI agentBuilder test suites.
  */
-export const oneChatCommonServices = {
+export const agentBuilderCommonServices = {
   ...platformDeploymentAgnosticServices,
   synthtrace: SynthtraceProvider,
 };
 
-export type OneChatCommonServices = typeof oneChatCommonServices;
+export type AgentBuilderCommonServices = typeof agentBuilderCommonServices;

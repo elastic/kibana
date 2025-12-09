@@ -30,7 +30,7 @@ export const AgentBuilderSettingsApp: React.FC = () => {
       window.location.reload();
     } catch (e) {
       services.notifications?.toasts.addDanger({
-        title: i18n.translate('xpack.onechat.management.agentBuilder.save.error', {
+        title: i18n.translate('xpack.agentBuilder.management.agentBuilder.save.error', {
           defaultMessage: 'An error occurred while saving the settings',
         }),
         text: e instanceof Error ? e.message : String(e),

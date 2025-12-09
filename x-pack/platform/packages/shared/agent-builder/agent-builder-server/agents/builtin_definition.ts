@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentDefinition, AgentConfiguration } from '@kbn/onechat-common';
+import type { AgentDefinition, AgentConfiguration } from '@kbn/agent-builder-common';
 
 /** Same type for now */
 export type BuiltInAgentConfiguration = AgentConfiguration;

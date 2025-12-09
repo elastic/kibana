@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/onechat-common';
-import type { Attachment } from '@kbn/onechat-common/attachments';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 export const newConversationId = 'new';
 export const createNewConversation = (): Conversation => {
   const now = new Date().toISOString();
   return {
     id: newConversationId,
-    agent_id: oneChatDefaultAgentId,
+    agent_id: agentBuilderDefaultAgentId,
     user: { id: '', username: '' },
     title: '',
     created_at: now,

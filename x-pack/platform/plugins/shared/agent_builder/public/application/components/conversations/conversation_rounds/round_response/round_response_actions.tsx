@@ -11,14 +11,14 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RoundModelUsageStats } from '@kbn/onechat-common';
+import type { RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { useToasts } from '../../../../hooks/use_toasts';
 
 const labels = {
-  copy: i18n.translate('xpack.onechat.roundResponseActions.copy', {
+  copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
     defaultMessage: 'Copy response',
   }),
-  copySuccess: i18n.translate('xpack.onechat.roundResponseActions.copySuccess', {
+  copySuccess: i18n.translate('xpack.agentBuilder.roundResponseActions.copySuccess', {
     defaultMessage: 'Response copied to clipboard',
   }),
 };
@@ -66,7 +66,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
           <FormattedMessage
-            id="xpack.onechat.roundResponseActions.tokenUsage"
+            id="xpack.agentBuilder.roundResponseActions.tokenUsage"
             defaultMessage="Input tokens: {inputTokens} / Output tokens: {outputTokens}"
             values={{
               inputTokens: <EuiI18nNumber value={modelUsage.input_tokens} />,

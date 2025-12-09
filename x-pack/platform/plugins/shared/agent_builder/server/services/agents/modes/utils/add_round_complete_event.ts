@@ -16,7 +16,7 @@ import type {
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -26,9 +26,9 @@ import {
   isToolResultEvent,
   isToolProgressEvent,
   isReasoningEvent,
-} from '@kbn/onechat-common';
-import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
-import type { ModelProvider, ModelProviderStats } from '@kbn/onechat-server/runner';
+} from '@kbn/agent-builder-common';
+import type { RoundModelUsageStats } from '@kbn/agent-builder-common/chat';
+import type { ModelProvider, ModelProviderStats } from '@kbn/agent-builder-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
 
 type SourceEvents = ChatAgentEvent;

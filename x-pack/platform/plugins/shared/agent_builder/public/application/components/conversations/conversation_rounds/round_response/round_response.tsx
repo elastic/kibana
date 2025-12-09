@@ -12,7 +12,7 @@ import type {
   AssistantResponse,
   ConversationRoundStep,
   RoundModelUsageStats,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import React, { useState } from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
@@ -39,7 +39,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       gutterSize="m"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
+      aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
       data-test-subj="agentBuilderRoundResponse"

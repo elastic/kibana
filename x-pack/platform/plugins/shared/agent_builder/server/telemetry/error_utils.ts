@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { isOnechatError, OnechatErrorCode, isAgentExecutionError } from '@kbn/onechat-common';
+import { isAgentBuilderError, AgentBuilderErrorCode, isAgentExecutionError } from '@kbn/agent-builder-common';
 
 /**
  * Normalize error type/code from error object
  * @param error - Error object
  */
 export function normalizeErrorType(error: unknown): string {
-  if (isOnechatError(error)) {
-    return error.code || OnechatErrorCode.internalError;
+  if (isAgentBuilderError(error)) {
+    return error.code || AgentBuilderErrorCode.internalError;
   }
 
   return 'other';

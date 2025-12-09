@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isIndexSearchTool } from '@kbn/onechat-common/tools';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { isIndexSearchTool } from '@kbn/agent-builder-common/tools';
 
 import { IndexSearchConfiguration } from '../../sections/configuration_fields/index_search_configuration_fields';
 

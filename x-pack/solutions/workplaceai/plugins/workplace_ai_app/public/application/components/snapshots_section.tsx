@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { DATA_CONNECTORS_APP_ID } from '@kbn/deeplinks-data-connectors';
-import type { AgentConfiguration, ToolSelection } from '@kbn/onechat-common';
+import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_AGENTS } from '../../../common';
 import { useAgents } from '../hooks/use_agents';
 import { useKibana } from '../hooks/use_kibana';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
-import { ToolResultType } from '@kbn/onechat-common';
+import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
+import { ToolResultType } from '@kbn/agent-builder-common';
 
 export const errorResult = (error: string): ToolHandlerResult => {
   return {

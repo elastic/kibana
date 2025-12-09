@@ -8,31 +8,31 @@
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { OnechatStartDependencies } from '../../types';
-import type { OnechatPluginStart } from '../../types';
+import type { AgentBuilderStartDependencies } from '../../types';
+import type { AgentBuilderPluginStart } from '../../types';
 
-const LazyOnechatNavControlWithProvider = dynamic(() =>
-  import('./onechat_nav_control_with_provider').then((m) => ({
-    default: m.OnechatNavControlWithProvider,
+const LazyAgentBuilderNavControlWithProvider = dynamic(() =>
+  import('./agent_builder_nav_control_with_provider').then((m) => ({
+    default: m.AgentBuilderNavControlWithProvider,
   }))
 );
 
-interface OnechatNavControlInitiatorProps {
+interface AgentBuilderNavControlInitiatorProps {
   coreStart: CoreStart;
-  pluginsStart: OnechatStartDependencies;
-  onechatService: OnechatPluginStart;
+  pluginsStart: AgentBuilderStartDependencies;
+  agentBuilderService: AgentBuilderPluginStart;
 }
 
-export const OnechatNavControlInitiator = ({
+export const AgentBuilderNavControlInitiator = ({
   coreStart,
   pluginsStart,
-  onechatService,
-}: OnechatNavControlInitiatorProps) => {
+  agentBuilderService,
+}: AgentBuilderNavControlInitiatorProps) => {
   return (
-    <LazyOnechatNavControlWithProvider
+    <LazyAgentBuilderNavControlWithProvider
       coreStart={coreStart}
       pluginsStart={pluginsStart}
-      onechatService={onechatService}
+      agentBuilderService={agentBuilderService}
     />
   );
 };

@@ -7,10 +7,10 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import type { ToolDefinition } from '@kbn/onechat-common/tools';
+import type { ToolDefinition } from '@kbn/agent-builder-common/tools';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
-import { OnechatToolTags } from '../tags/tool_tags';
+import { AgentBuilderToolTags } from '../tags/tool_tags';
 import { ToolContextMenu } from './tools_table_context_menu';
 import { ToolIdWithDescription } from './tools_table_id';
 import { ToolQuickActions } from './tools_table_quick_actions';
@@ -37,7 +37,7 @@ export const getToolsTableColumns = ({
     {
       field: 'tags',
       name: labels.tools.tagsLabel,
-      render: (tags: string[]) => <OnechatToolTags tags={tags} />,
+      render: (tags: string[]) => <AgentBuilderToolTags tags={tags} />,
     },
     {
       width: '100px',

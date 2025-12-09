@@ -14,7 +14,7 @@ import { CloseDockedViewButton } from './close_docked_view_button';
 import { TourStep, useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
 
 const labels = {
-  container: i18n.translate('xpack.onechat.conversationActions.container', {
+  container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
     defaultMessage: 'Conversation actions',
   }),
 };

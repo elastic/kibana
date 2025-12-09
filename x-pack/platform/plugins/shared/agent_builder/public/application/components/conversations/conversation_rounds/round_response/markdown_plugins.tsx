@@ -14,12 +14,12 @@ import {
   type TabularDataResult,
   type VisualizationResult,
   ToolResultType,
-} from '@kbn/onechat-common/tools/tool_result';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common/tools/tool_result';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import classNames from 'classnames';
 import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
 
-import type { OnechatStartDependencies } from '../../../../../types';
+import type { AgentBuilderStartDependencies } from '../../../../../types';
 import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
 import { VisualizeLens } from '../../../tools/esql/visualize_lens';
 
@@ -121,7 +121,7 @@ export function createVisualizationRenderer({
   stepsFromCurrentRound,
   stepsFromPrevRounds,
 }: {
-  startDependencies: OnechatStartDependencies;
+  startDependencies: AgentBuilderStartDependencies;
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/onechat-common';
-import { isToolCallStep, ConversationRoundStepType, ToolResultType } from '@kbn/onechat-common';
-import { getToolResultId } from '@kbn/onechat-server/tools/utils';
+import type { Conversation } from '@kbn/agent-builder-common';
+import { isToolCallStep, ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 
 import { fromEs, toEs, type Document as ConversationDocument } from './converters';
 import { expect } from '@kbn/scout';
 
-jest.mock('@kbn/onechat-server/tools/utils');
+jest.mock('@kbn/agent-builder-server/tools/utils');
 
 const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 

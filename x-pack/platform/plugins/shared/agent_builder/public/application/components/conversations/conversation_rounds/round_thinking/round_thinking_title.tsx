@@ -20,16 +20,16 @@ const clampTextStyles = css`
   overflow: hidden;
 `;
 
-const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
+const defaultThinkingLabel = i18n.translate('xpack.agentBuilder.conversation.thinking.label', {
   defaultMessage: 'Thinking...',
 });
 const thinkingCompletedLabel = i18n.translate(
-  'xpack.onechat.conversation.thinking.completedReasoning',
+  'xpack.agentBuilder.conversation.thinking.completedReasoning',
   {
     defaultMessage: 'Completed reasoning',
   }
 );
-const showButtonLabel = i18n.translate('xpack.onechat.conversation.thinking.show', {
+const showButtonLabel = i18n.translate('xpack.agentBuilder.conversation.thinking.show', {
   defaultMessage: 'Show',
 });
 

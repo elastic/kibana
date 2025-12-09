@@ -8,7 +8,7 @@
 import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { EsResourceType } from '@kbn/onechat-common';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
 import { flattenMapping, getIndexMappings, getDataStreamMappings } from '../mappings';
 import { processFieldCapsResponse } from '../field_caps';

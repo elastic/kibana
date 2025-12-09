@@ -9,30 +9,30 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import type { OnechatPluginStart } from '../../types';
+import type { AgentBuilderPluginStart } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
 
-interface OnechatNavControlServices {
-  onechat: OnechatPluginStart;
+interface AgentBuilderNavControlServices {
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 const buttonCss = css`
   padding: 0px 8px;
 `;
 
-export function OnechatNavControl() {
+export function AgentBuilderNavControl() {
   const {
-    services: { onechat },
-  } = useKibana<OnechatNavControlServices>();
+    services: { agentBuilder },
+  } = useKibana<AgentBuilderNavControlServices>();
 
   return (
     <EuiToolTip content={buttonLabel}>
       <EuiButton
         css={buttonCss}
         aria-label={buttonLabel}
-        data-test-subj="OnechatNavControlButton"
+        data-test-subj="AgentBuilderNavControlButton"
         onClick={() => {
-          onechat.openConversationFlyout();
+          agentBuilder.openConversationFlyout();
         }}
         color="primary"
         size="s"
@@ -45,6 +45,6 @@ export function OnechatNavControl() {
   );
 }
 
-const buttonLabel = i18n.translate('xpack.onechat.navControl.openTheOnechatFlyoutLabel', {
+const buttonLabel = i18n.translate('xpack.agentBuilder.navControl.openTheAgentBuilderFlyoutLabel', {
   defaultMessage: 'Open Agent Builder',
 });

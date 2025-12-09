@@ -10,11 +10,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../common/doc_links';
 import { PromptLayout } from './prompt_layout';
-import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 export const AddLlmConnectionPrompt: React.FC<{}> = () => {
-  const { navigationService } = useOnechatServices();
+  const { navigationService } = useAgentBuilderServices();
   const { colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
   const llmDocsHref = docLinks.models;
@@ -27,7 +27,7 @@ export const AddLlmConnectionPrompt: React.FC<{}> = () => {
       }}
     >
       <FormattedMessage
-        id="xpack.onechat.access.prompt.addLlm.actions.connectButton"
+        id="xpack.agentBuilder.access.prompt.addLlm.actions.connectButton"
         defaultMessage="Connect LLM"
       />
     </EuiButton>
@@ -36,7 +36,7 @@ export const AddLlmConnectionPrompt: React.FC<{}> = () => {
   const secondaryButton = (
     <EuiButtonEmpty href={llmDocsHref} target="_blank" iconType="popout" iconSide="right">
       <FormattedMessage
-        id="xpack.onechat.access.prompt.addLlm.actions.docsLink"
+        id="xpack.agentBuilder.access.prompt.addLlm.actions.docsLink"
         defaultMessage="Read the docs"
       />
     </EuiButtonEmpty>
@@ -51,13 +51,13 @@ export const AddLlmConnectionPrompt: React.FC<{}> = () => {
       }
       title={
         <FormattedMessage
-          id="xpack.onechat.access.prompt.addLlm.title"
+          id="xpack.agentBuilder.access.prompt.addLlm.title"
           defaultMessage="No Large Language Model detected"
         />
       }
       subtitle={
         <FormattedMessage
-          id="xpack.onechat.access.prompt.addLlm.description"
+          id="xpack.agentBuilder.access.prompt.addLlm.description"
           defaultMessage="Select a model to integrate with your chat experience. You can also set up your connection."
         />
       }

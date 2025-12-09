@@ -7,14 +7,14 @@
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
-import type { AssistantResponse, ToolCallWithResult } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
+import type { AssistantResponse, ToolCallWithResult } from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
 import {
   sanitizeToolId,
   createUserMessage,
   createAIMessage,
-} from '@kbn/onechat-genai-utils/langchain';
-import { generateXmlTree } from '@kbn/onechat-genai-utils/tools/utils';
+} from '@kbn/agent-builder-genai-utils/langchain';
+import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type {
   ProcessedConversation,
   ProcessedRoundInput,

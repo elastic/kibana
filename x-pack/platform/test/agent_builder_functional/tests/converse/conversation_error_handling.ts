@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { setupAgentDirectAnswer } from '../../../onechat_api_integration/utils/proxy_scenario';
+import type { LlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
+import { setupAgentDirectAnswer } from '../../../agent_builder_api_integration/utils/proxy_scenario';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const supertest = getService('supertest');
@@ -45,14 +45,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'This is a successful response after retry';
       const MOCKED_TITLE = 'Error Handling Test';
 
-      await onechat.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp('conversations/new');
 
       // DON'T set up any interceptors for the first attempt - this will cause a 404 error
 
-      await onechat.typeMessage(MOCKED_INPUT);
-      await onechat.sendMessage();
+      await agentBuilder.typeMessage(MOCKED_INPUT);
+      await agentBuilder.sendMessage();
 
-      const isErrorVisible = await onechat.isErrorVisible();
+      const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
       await testSubjects.find('agentBuilderRoundError');
@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Click the retry button
-      await onechat.clickRetryButton();
+      await agentBuilder.clickRetryButton();
 
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(responseText).to.contain(MOCKED_RESPONSE);
 
       // Assert the error is no longer visible
-      const isErrorStillVisible = await onechat.isErrorVisible();
+      const isErrorStillVisible = await agentBuilder.isErrorVisible();
       expect(isErrorStillVisible).to.be(false);
     });
 
@@ -91,20 +91,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'This is a successful response in new conversation';
       const MOCKED_TITLE = 'New Conversation After Error';
 
-      await onechat.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp('conversations/new');
 
       // DON'T set up any interceptors for the first attempt - this will cause a 404 error
-      await onechat.typeMessage(MOCKED_INPUT);
-      await onechat.sendMessage();
+      await agentBuilder.typeMessage(MOCKED_INPUT);
+      await agentBuilder.sendMessage();
 
       // Wait for error to appear
-      const isErrorVisible = await onechat.isErrorVisible();
+      const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
       await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
-      await onechat.clickNewConversationButton();
+      await agentBuilder.clickNewConversationButton();
 
       // Wait for navigation to complete and assert we're back to the initial state
       await retry.try(async () => {
@@ -117,8 +117,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         response: MOCKED_RESPONSE,
       });
 
-      await onechat.typeMessage(MOCKED_INPUT);
-      await onechat.sendMessage();
+      await agentBuilder.typeMessage(MOCKED_INPUT);
+      await agentBuilder.sendMessage();
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
@@ -139,7 +139,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const ERROR_INPUT = 'error conversation message';
 
       // Create a successful conversation first
-      const successfulConversationId = await onechat.createConversationViaUI(
+      const successfulConversationId = await agentBuilder.createConversationViaUI(
         SUCCESSFUL_TITLE,
         SUCCESSFUL_INPUT,
         SUCCESSFUL_RESPONSE,
@@ -147,26 +147,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // Now create a new conversation that will have an error
-      await onechat.clickNewConversationButton();
+      await agentBuilder.clickNewConversationButton();
 
       await retry.try(async () => {
         await testSubjects.existOrFail('agentBuilderWelcomePage');
       });
 
       // DON'T set up any interceptors for the error conversation
-      await onechat.typeMessage(ERROR_INPUT);
-      await onechat.sendMessage();
+      await agentBuilder.typeMessage(ERROR_INPUT);
+      await agentBuilder.sendMessage();
 
-      const isErrorVisible = await onechat.isErrorVisible();
+      const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
       await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Navigate back to the successful conversation
-      await onechat.navigateToConversationViaHistory(successfulConversationId);
+      await agentBuilder.navigateToConversationViaHistory(successfulConversationId);
 
-      const isErrorVisibleInSuccessful = await onechat.isErrorVisible();
+      const isErrorVisibleInSuccessful = await agentBuilder.isErrorVisible();
       expect(isErrorVisibleInSuccessful).to.be(false);
 
       const responseElement = await testSubjects.find('agentBuilderRoundResponse');
@@ -180,14 +180,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const NEW_RESPONSE = 'This is a successful response after error';
       const MOCKED_TITLE = 'Error Cleared Test';
 
-      await onechat.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp('conversations/new');
 
       // DON'T set up any interceptors for the first attempt - this will cause a 404 error
-      await onechat.typeMessage(ERROR_INPUT);
-      await onechat.sendMessage();
+      await agentBuilder.typeMessage(ERROR_INPUT);
+      await agentBuilder.sendMessage();
 
       // Assert error is visible
-      const isErrorVisible = await onechat.isErrorVisible();
+      const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
       await testSubjects.find('agentBuilderRoundError');
@@ -201,8 +201,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Send a new message instead of retrying
-      await onechat.typeMessage(NEW_INPUT);
-      await onechat.sendMessage();
+      await agentBuilder.typeMessage(NEW_INPUT);
+      await agentBuilder.sendMessage();
 
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -213,7 +213,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Assert the error is cleared and no longer visible
-      const isErrorStillVisible = await onechat.isErrorVisible();
+      const isErrorStillVisible = await agentBuilder.isErrorVisible();
       expect(isErrorStillVisible).to.be(false);
     });
 
@@ -225,7 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const ERROR_INPUT = 'error message';
 
       // Create a conversation with a successful first round
-      await onechat.createConversationViaUI(FIRST_TITLE, FIRST_INPUT, FIRST_RESPONSE, llmProxy);
+      await agentBuilder.createConversationViaUI(FIRST_TITLE, FIRST_INPUT, FIRST_RESPONSE, llmProxy);
 
       // Assert the first round is visible
       const firstResponseElement = await testSubjects.find('agentBuilderRoundResponse');
@@ -233,11 +233,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(firstResponseText).to.contain(FIRST_RESPONSE);
 
       // Send a message that will cause an error (no interceptors set up)
-      await onechat.typeMessage(ERROR_INPUT);
-      await onechat.sendMessage();
+      await agentBuilder.typeMessage(ERROR_INPUT);
+      await agentBuilder.sendMessage();
 
       // Assert error is visible
-      const isErrorVisible = await onechat.isErrorVisible();
+      const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
       await testSubjects.find('agentBuilderRoundError');

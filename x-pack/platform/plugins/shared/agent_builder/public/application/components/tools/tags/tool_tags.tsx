@@ -8,10 +8,10 @@
 import React from 'react';
 import { Labels } from '../../common/labels';
 
-interface OnechatToolTagsProps {
+interface AgentBuilderToolTagsProps {
   tags: string[];
 }
 
-export const OnechatToolTags: React.FC<OnechatToolTagsProps> = ({ tags }) => {
+export const AgentBuilderToolTags: React.FC<AgentBuilderToolTagsProps> = ({ tags }) => {
   return <Labels labels={tags} />;
 };

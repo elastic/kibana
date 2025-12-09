@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useRef, useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import { useToolTypes } from '../../../../hooks/tools/use_tool_type_info';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';

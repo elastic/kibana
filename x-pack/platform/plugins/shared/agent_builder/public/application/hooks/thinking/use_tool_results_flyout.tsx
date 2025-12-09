@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolResult } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/agent-builder-common';
 import { useState, useCallback } from 'react';
 
 export const useToolResultsFlyout = () => {

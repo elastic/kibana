@@ -19,10 +19,10 @@ import React from 'react';
 import { roundedBorderRadiusStyles } from '../../conversation.styles';
 
 const labels = {
-  reasoningError: i18n.translate('xpack.onechat.round.error.reasoningError', {
+  reasoningError: i18n.translate('xpack.agentBuilder.round.error.reasoningError', {
     defaultMessage: 'Reasoning error',
   }),
-  closeAriaLabel: i18n.translate('xpack.onechat.round.error.closeAriaLabel', {
+  closeAriaLabel: i18n.translate('xpack.agentBuilder.round.error.closeAriaLabel', {
     defaultMessage: 'Close error panel',
   }),
 };

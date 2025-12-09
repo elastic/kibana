@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
-import type { AgentEventEmitter } from '@kbn/onechat-server';
-import { createReasoningEvent } from '@kbn/onechat-genai-utils/langchain';
+import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
+import type { AgentEventEmitter } from '@kbn/agent-builder-server';
+import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
 import type { ResolvedConfiguration } from '../types';

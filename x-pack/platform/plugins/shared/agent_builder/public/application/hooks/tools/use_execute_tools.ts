@@ -8,7 +8,7 @@
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { ExecuteToolResponse } from '../../../../common/http_api/tools';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 
 export interface ExecuteToolParams {
   toolId: string;
@@ -30,7 +30,7 @@ export const useExecuteTool = ({
   onError?: ExecuteToolErrorCallback;
   onSettled?: ExecuteToolSettledCallback;
 } = {}) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const mutationFn = ({ toolId, toolParams }: ExecuteToolParams): Promise<ExecuteToolResponse> =>
     toolsService.execute({ toolId, toolParams });

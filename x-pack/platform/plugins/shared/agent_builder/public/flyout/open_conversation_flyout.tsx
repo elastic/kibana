@@ -12,17 +12,17 @@ import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import type { OpenConversationFlyoutOptions } from './types';
-import type { OnechatInternalService } from '../services';
+import type { AgentBuilderInternalService } from '../services';
 import type { ConversationFlyoutRef } from '../types';
 import type { EmbeddableConversationProps } from '../embeddable/types';
 
-const htmlId = htmlIdGenerator('onechat-conversation-flyout');
+const htmlId = htmlIdGenerator('agent-builder-conversation-flyout');
 
 const FLYOUT_SIZE = 600;
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
-  services: OnechatInternalService;
+  services: AgentBuilderInternalService;
   onClose?: () => void;
   onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
 }
@@ -76,7 +76,7 @@ export function openConversationFlyout(
       startServices
     ),
     {
-      'data-test-subj': 'onechat-conversation-flyout-wrapper',
+      'data-test-subj': 'agent-builder-conversation-flyout-wrapper',
       ownFocus: false,
       type: 'push',
       hideCloseButton: true,

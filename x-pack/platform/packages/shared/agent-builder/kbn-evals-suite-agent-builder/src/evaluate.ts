@@ -6,22 +6,22 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
-import { OnechatEvaluationChatClient } from './chat_client';
+import { AgentBuilderEvaluationChatClient } from './chat_client';
 export const evaluate = base.extend<
   {},
   {
-    chatClient: OnechatEvaluationChatClient;
-    onechatSetup: void;
+    chatClient: AgentBuilderEvaluationChatClient;
+    agentBuilderSetup: void;
   }
 >({
-  onechatSetup: [
+  agentBuilderSetup: [
     async ({ fetch, log }, use) => {
-      // Ensure OneChat API is enabled before running the evaluation
+      // Ensure AgentBuilder API is enabled before running the evaluation
       const currentSettings = (await fetch('/internal/kibana/settings')) as any;
-      const isOnechatEnabled =
+      const isAgentBuilderEnabled =
         currentSettings?.settings?.['agentBuilder:enabled']?.userValue === true;
 
-      if (isOnechatEnabled) {
+      if (isAgentBuilderEnabled) {
         log.debug('Agent Builder is already enabled');
       } else {
         await fetch('/internal/kibana/settings', {
@@ -44,7 +44,7 @@ export const evaluate = base.extend<
   ],
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      const chatClient = new OnechatEvaluationChatClient(fetch, log, connector.id);
+      const chatClient = new AgentBuilderEvaluationChatClient(fetch, log, connector.id);
       await use(chatClient);
     },
     {

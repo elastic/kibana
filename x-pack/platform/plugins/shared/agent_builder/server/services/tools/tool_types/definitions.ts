@@ -6,10 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
-import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/onechat-server';
+import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/agent-builder-server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 

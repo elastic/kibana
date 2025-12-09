@@ -43,7 +43,7 @@ export const useReportConverseError = () => {
       }: { conversationId?: string; agentId?: string; connectorId?: string }
     ) => {
       reportEvent({
-        eventType: eventTypes.ONECHAT_CONVERSE_ERROR,
+        eventType: eventTypes.AGENTBUILDER_CONVERSE_ERROR,
         eventData: {
           error_type: error?.constructor?.name || 'unknown',
           error_message: error instanceof Error ? error.message : String(error),

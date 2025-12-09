@@ -9,7 +9,7 @@ import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { withAgentSpan } from '../../tracing';
 import { createAgentHandler } from '../agents/modes/create_handler';

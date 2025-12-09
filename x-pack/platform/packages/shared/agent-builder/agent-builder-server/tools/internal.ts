@@ -7,7 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
-import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerFn } from './handler';
 import type { ToolAvailabilityContext, ToolAvailabilityResult } from './builtin';
 import type { LlmDescriptionHandler } from '../runner';

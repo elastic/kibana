@@ -17,7 +17,7 @@ import { RoutedConversationsProvider } from '../../context/conversation/routed_c
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles } from './conversation.styles';
 
-export const OnechatConversationsView: React.FC<{}> = () => {
+export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
 
   const mainStyles = css`
@@ -40,10 +40,10 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   `;
 
   const labels = {
-    header: i18n.translate('xpack.onechat.conversationsView.header', {
+    header: i18n.translate('xpack.agentBuilder.conversationsView.header', {
       defaultMessage: 'Conversation header',
     }),
-    content: i18n.translate('xpack.onechat.conversationsView.content', {
+    content: i18n.translate('xpack.agentBuilder.conversationsView.content', {
       defaultMessage: 'Conversation content',
     }),
   };
@@ -55,7 +55,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
           <KibanaPageTemplate
             offset={0}
             restrictWidth={false}
-            data-test-subj="onechatPageConversations"
+            data-test-subj="agentBuilderPageConversations"
             grow={false}
             panelled={false}
             mainProps={{

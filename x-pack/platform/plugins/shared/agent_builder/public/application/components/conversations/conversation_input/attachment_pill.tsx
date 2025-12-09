@@ -8,10 +8,10 @@
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { Attachment } from '@kbn/onechat-common/attachments';
-import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
-const removeAriaLabel = i18n.translate('xpack.onechat.attachmentPill.removeAriaLabel', {
+const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
   defaultMessage: 'Remove attachment',
 });
 
@@ -27,7 +27,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
 }) => {
-  const { attachmentsService } = useOnechatServices();
+  const { attachmentsService } = useAgentBuilderServices();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -51,7 +51,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         onRemoveAttachment?.();
       }}
       iconOnClickAriaLabel={canRemoveAttachment ? removeAriaLabel : undefined}
-      data-test-subj={`onechatAttachmentPill-${attachment.id}`}
+      data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
     >
       {displayName}
     </EuiBadge>

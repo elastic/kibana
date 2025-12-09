@@ -6,8 +6,8 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
-import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
+import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import { formatDate } from './utils/helpers';

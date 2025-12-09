@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiAvatar } from '@elastic/eui';
 import type { EuiAvatarProps } from '@elastic/eui';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 
 interface AgentAvatarProps {
   agent: Pick<AgentDefinition, 'name' | 'avatar_symbol' | 'avatar_color'>;

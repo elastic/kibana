@@ -6,8 +6,8 @@
  */
 
 import { createToolEventEmitter, createAgentEventEmitter } from './events';
-import type { RunContext } from '@kbn/onechat-server';
-import { ChatEventType, type MessageChunkEvent } from '@kbn/onechat-common';
+import type { RunContext } from '@kbn/agent-builder-server';
+import { ChatEventType, type MessageChunkEvent } from '@kbn/agent-builder-common';
 
 describe('Event utilities', () => {
   describe('createToolEventEmitter', () => {

@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder'],
 };

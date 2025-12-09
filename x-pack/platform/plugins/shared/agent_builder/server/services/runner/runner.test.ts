@@ -12,7 +12,7 @@ import type {
   RunToolParams,
   RunAgentParams,
   ToolHandlerFn,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 import type {
   CreateScopedRunnerDepsMock,
   MockedTool,
@@ -30,16 +30,16 @@ import {
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { getToolResultId } from '@kbn/onechat-server/tools/utils';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 
 jest.mock('../agents/modes/create_handler');
-jest.mock('@kbn/onechat-server/tools/utils');
+jest.mock('@kbn/agent-builder-server/tools/utils');
 
 const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
 
-describe('Onechat runner', () => {
+describe('AgentBuilder runner', () => {
   let scopedRunnerDeps: CreateScopedRunnerDepsMock;
   let toolHandler: jest.MockedFunction<ToolHandlerFn>;
 

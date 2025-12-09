@@ -14,8 +14,8 @@ import type { LocationState } from '../../hooks/use_navigation';
 import { newConversationId } from '../../utils/new_conversation';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
-import { useOnechatServices } from '../../hooks/use_onechat_service';
-import { useOnechatAgents } from '../../hooks/agents/use_agents';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
 import { searchParamNames } from '../../search_param_names';
 import { useConversationActions } from './use_conversation_actions';
 
@@ -27,7 +27,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   children,
 }) => {
   const queryClient = useQueryClient();
-  const { conversationsService } = useOnechatServices();
+  const { conversationsService } = useAgentBuilderServices();
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
 
   const conversationId = useMemo(() => {
@@ -40,9 +40,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   // Get search params for agent ID syncing
   const [searchParams] = useSearchParams();
-  const { agents } = useOnechatAgents();
+  const { agents } = useAgentBuilderAgents();
 
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   const shouldAllowConversationRedirectRef = useRef(true);
   const agentIdSyncedRef = useRef(false);
 
@@ -60,10 +60,10 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
         const path = appPaths.chat.conversation({ conversationId: nextConversationId });
         const params = undefined;
         const state = { shouldStickToBottom: false };
-        navigateToOnechatUrl(path, params, state);
+        navigateToAgentBuilderUrl(path, params, state);
       }
     },
-    [shouldAllowConversationRedirectRef, navigateToOnechatUrl]
+    [shouldAllowConversationRedirectRef, navigateToAgentBuilderUrl]
   );
 
   const onConversationCreated = useCallback(
@@ -78,10 +78,10 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       if (isCurrentConversation) {
         // If deleting current conversation, navigate to new conversation
         const path = appPaths.chat.new;
-        navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
+        navigateToAgentBuilderUrl(path, undefined, { shouldStickToBottom: true });
       }
     },
-    [navigateToOnechatUrl]
+    [navigateToAgentBuilderUrl]
   );
 
   const conversationActions = useConversationActions({

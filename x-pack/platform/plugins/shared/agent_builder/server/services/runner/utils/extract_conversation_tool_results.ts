@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConversationRound, ToolResult } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
+import type { ConversationRound, ToolResult } from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
 
 export const extractConversationToolResults = (conversation: ConversationRound[]): ToolResult[] => {
   const results: ToolResult[] = [];

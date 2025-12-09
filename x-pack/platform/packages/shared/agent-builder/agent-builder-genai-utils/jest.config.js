@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/onechat/onechat-genai-utils'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils'],
 };

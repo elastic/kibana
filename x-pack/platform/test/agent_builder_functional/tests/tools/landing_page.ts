@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
+import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 
-export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
   describe('tools landing page', function () {
     it('should render', async () => {
-      await onechat.navigateToToolsLanding();
+      await agentBuilder.navigateToToolsLanding();
       await testSubjects.existOrFail('agentBuilderToolsPage');
       await testSubjects.existOrFail('agentBuilderToolsTable');
     });
@@ -36,13 +36,13 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           .expect(200);
       }
 
-      await onechat.navigateToToolsLanding();
+      await agentBuilder.navigateToToolsLanding();
       await testSubjects.existOrFail('agentBuilderToolsTable');
-      await onechat.bulkDeleteTools(ids);
+      await agentBuilder.bulkDeleteTools(ids);
 
       await testSubjects.existOrFail('agentBuilderToolsTable');
       for (const id of ids) {
-        expect(await onechat.isToolInTable(id)).to.be(false);
+        expect(await agentBuilder.isToolInTable(id)).to.be(false);
       }
     });
   });

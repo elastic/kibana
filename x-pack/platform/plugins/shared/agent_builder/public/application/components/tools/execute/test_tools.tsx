@@ -29,8 +29,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm, type Control } from 'react-hook-form';
 import { docLinks } from '../../../../../common/doc_links';
@@ -60,25 +60,25 @@ const submitButtonContainerStyles = css`
 
 const i18nMessages = {
   fieldRequiredError: (label: string) =>
-    i18n.translate('xpack.onechat.tools.testTool.fieldRequiredError', {
+    i18n.translate('xpack.agentBuilder.tools.testTool.fieldRequiredError', {
       defaultMessage: '{label} is required',
       values: { label },
     }),
   inputPlaceholder: (label: string) =>
-    i18n.translate('xpack.onechat.tools.testTool.inputPlaceholder', {
+    i18n.translate('xpack.agentBuilder.tools.testTool.inputPlaceholder', {
       defaultMessage: 'Enter {label}',
       values: { label },
     }),
-  title: i18n.translate('xpack.onechat.tools.testFlyout.title', {
+  title: i18n.translate('xpack.agentBuilder.tools.testFlyout.title', {
     defaultMessage: 'Test Tool',
   }),
-  inputsTitle: i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
+  inputsTitle: i18n.translate('xpack.agentBuilder.tools.testTool.inputsTitle', {
     defaultMessage: 'Inputs',
   }),
-  executeButton: i18n.translate('xpack.onechat.tools.testTool.executeButton', {
+  executeButton: i18n.translate('xpack.agentBuilder.tools.testTool.executeButton', {
     defaultMessage: 'Submit',
   }),
-  responseTitle: i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
+  responseTitle: i18n.translate('xpack.agentBuilder.tools.testTool.responseTitle', {
     defaultMessage: 'Response',
   }),
 };
@@ -244,7 +244,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
       setResponse(JSON.stringify(data, null, 2));
     },
     onError: (error: Error) => {
-      setResponse(JSON.stringify({ error: formatOnechatErrorMessage(error) }, null, 2));
+      setResponse(JSON.stringify({ error: formatAgentBuilderErrorMessage(error) }, null, 2));
     },
     onSettled: () => {
       setResponseKey((key) => key + 1);
@@ -271,7 +271,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLink href={`${docLinks.tools}#testing-your-tools`} target="_blank">
-              {i18n.translate('xpack.onechat.tools.testFlyout.documentationLink', {
+              {i18n.translate('xpack.agentBuilder.tools.testFlyout.documentationLink', {
                 defaultMessage: 'Documentation - Testing tools',
               })}
             </EuiLink>

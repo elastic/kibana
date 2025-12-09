@@ -30,7 +30,7 @@ const disabledStyles = css`
   }
 `;
 
-const editorAriaLabel = i18n.translate('xpack.onechat.conversationInput.messageEditor.label', {
+const editorAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.messageEditor.label', {
   defaultMessage: 'Message input',
 });
 
