@@ -12,4 +12,18 @@ echo "--- Fleet Cypress tests (Chrome)"
 cd x-pack/platform/plugins/shared/fleet
 
 set +e
-yarn cypress:run:reporter; status=$?; yarn cypress_space_awareness:run:reporter; space_status=$?; yarn junit:merge || :; [ "$status" -ne 0 ] && exit $status || [ "$space_status" -ne 0 ] && exit $space_status || exit 0
+yarn cypress:run:reporter; status=$?; yarn cypress_space_awareness:run:reporter; space_status=$?; yarn junit:merge || :
+
+# Determine final status
+if [ "$status" -ne 0 ]; then
+  final_status=$status
+elif [ "$space_status" -ne 0 ]; then
+  final_status=$space_status
+else
+  final_status=0
+fi
+
+# Scout reporter
+upload_scout_cypress_events "Fleet Cypress tests"
+
+exit $final_status

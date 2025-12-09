@@ -22,7 +22,5 @@ describe('AI Assistant - Basic License', { tags: ['@ess'] }, () => {
     openAssistant();
     cy.get(UPGRADE_CTA).should('be.visible');
     assertConversationReadOnly();
-    // Duplicated line to trigger test run
-    assertConversationReadOnly();
   });
 });
