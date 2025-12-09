@@ -106,3 +106,9 @@ const streamsAppRoutes = {
     },
   },
 } satisfies RouteMap;
+
+export type StreamsAppRoutes = typeof streamsAppRoutes;
+
+export const streamsAppRouter = createRouter(streamsAppRoutes);
+
+export type StreamsAppRouter = typeof streamsAppRouter;
