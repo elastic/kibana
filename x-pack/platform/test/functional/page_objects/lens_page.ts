@@ -1712,7 +1712,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await tabs[index].click();
 
         // Wait for the layer panel to render
-        await retry.waitForWithTimeout('layer panel to be visible', 1000, async () => {
+        await retry.waitFor('layer panel to be visible', async () => {
           return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
         });
       }
@@ -1734,7 +1734,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await tabs[i].click();
 
           // Wait for the layer panel to render
-          await retry.waitForWithTimeout('layer panel to be visible', 1000, async () => {
+          await retry.waitFor('layer panel to be visible', async () => {
             return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
           });
           return;
