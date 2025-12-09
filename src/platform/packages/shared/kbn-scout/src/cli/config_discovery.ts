@@ -7,50 +7,137 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
-import path from 'path';
+import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
-import { measurePerformance } from '../common';
-import { validateWithScoutCiConfig } from '../config/discovery';
+import fs from 'fs';
+import path from 'path';
+import { filterModulesByScoutCiConfig } from '../config/discovery';
+import { tags } from '../playwright/tags';
 
-const getCountByType = (configs: Map<string, any>, type: 'plugin' | 'package'): number => {
-  return Array.from(configs.values()).filter((config) => config.type === type).length;
+type TargetType = 'all' | 'mki' | 'ech';
+
+const TARGET_TYPES: TargetType[] = ['all', 'mki', 'ech'];
+
+const getTestTagsForTarget = (target: string): string[] => {
+  switch (target) {
+    case 'mki':
+      return tags.SERVERLESS_ONLY;
+    case 'ech':
+      return tags.ESS_ONLY;
+    case 'all':
+    default:
+      return tags.DEPLOYMENT_AGNOSTIC;
+  }
 };
 
-export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: ToolingLog) => {
-  const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
+const collectUniqueTags = (tests: Array<{ tags?: string[] }>): string[] => {
+  const tagSet = new Set<string>();
+  for (const test of tests) {
+    if (test.tags) {
+      for (const tag of test.tags) {
+        tagSet.add(tag);
+      }
+    }
+  }
+  return Array.from(tagSet);
+};
 
-  const scoutConfigs = measurePerformance(log, 'Discovering Playwright config files', () =>
-    getScoutPlaywrightConfigs(searchPaths, log)
+const countModulesByType = (
+  modules: ModuleDiscoveryInfo[]
+): { plugins: number; packages: number } => {
+  let plugins = 0;
+  let packages = 0;
+  for (const module of modules) {
+    if (module.type === 'plugin') {
+      plugins++;
+    } else {
+      packages++;
+    }
+  }
+  return { plugins, packages };
+};
+
+export interface ModuleDiscoveryInfo {
+  name: string;
+  group: string;
+  type: 'plugin' | 'package';
+  visibility: 'shared' | 'private';
+  configs: {
+    path: string;
+    hasTests: boolean;
+    tags: string[];
+    usesParallelWorkers: boolean;
+  }[];
+}
+
+export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: ToolingLog) => {
+  const target = (flagsReader.enum('target', TARGET_TYPES) || 'all') as TargetType;
+  const targetTags = getTestTagsForTarget(target);
+  const targetTagsSet = new Set(targetTags);
+
+  const modulesWithTests: ModuleDiscoveryInfo[] = testableModules.allIncludingConfigs.map(
+    (module) => ({
+      name: module.name,
+      group: module.group,
+      type: module.type,
+      visibility: module.visibility,
+      configs: module.configs.map((config) => {
+        const runnableTest = config.manifest.tests.find(
+          (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
+        );
+
+        const usesParallelWorkers = config.path.includes('parallel.playwright.config.ts');
+        const allTags = collectUniqueTags(config.manifest.tests);
+
+        return {
+          path: config.path,
+          hasTests: !!runnableTest,
+          tags: allTags,
+          usesParallelWorkers,
+        };
+      }),
+    })
   );
 
-  const pluginCount = getCountByType(scoutConfigs, 'plugin');
-  const packageCount = getCountByType(scoutConfigs, 'package');
+  // Filter configs based on matching tags with targetTags
+  // Keep only configs with matching tags, and filter each config's tags to only include cross tags
+  const filteredModulesWithTests = modulesWithTests
+    .map((module) => ({
+      ...module,
+      configs: module.configs
+        .filter((config) => config.tags.some((tag) => targetTagsSet.has(tag)))
+        .map((config) => ({
+          ...config,
+          tags: config.tags.filter((tag) => targetTagsSet.has(tag)),
+        })),
+    }))
+    .filter((module) => module.configs.length > 0);
+
+  const { plugins: pluginCount, packages: packageCount } =
+    countModulesByType(filteredModulesWithTests);
 
   const finalMessage =
-    scoutConfigs.size === 0
+    filteredModulesWithTests.length === 0
       ? 'No Playwright config files found'
       : `Found Playwright config files in ${pluginCount} plugin(s) and ${packageCount} package(s)`;
 
   if (!flagsReader.boolean('save')) {
     log.info(finalMessage);
 
-    scoutConfigs.forEach((data, itemName) => {
-      log.info(`${data.group} / [${itemName}] ${data.type}:`);
-      data.configs.map((file) => {
-        log.info(`- ${file}`);
+    filteredModulesWithTests.forEach((module) => {
+      log.info(`${module.group} / [${module.name}] ${module.type}:`);
+      module.configs.forEach((config) => {
+        log.info(
+          `- ${config.path} (hasTests: ${config.hasTests}, tags: [${config.tags.join(', ')}])`
+        );
       });
     });
   }
 
   if (flagsReader.boolean('save')) {
-    const runnableConfigs = validateWithScoutCiConfig(log, scoutConfigs);
-
-    const runnablePluginCount = getCountByType(runnableConfigs, 'plugin');
-    const runnablePackageCount = getCountByType(runnableConfigs, 'package');
+    const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModulesWithTests);
 
     const dirPath = path.dirname(SCOUT_PLAYWRIGHT_CONFIGS_PATH);
 
@@ -58,20 +145,20 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    fs.writeFileSync(
-      SCOUT_PLAYWRIGHT_CONFIGS_PATH,
-      JSON.stringify(Object.fromEntries(runnableConfigs), null, 2)
-    );
+    fs.writeFileSync(SCOUT_PLAYWRIGHT_CONFIGS_PATH, JSON.stringify(filteredForCiModules, null, 2));
+
+    const { plugins: savedPluginCount, packages: savedPackageCount } =
+      countModulesByType(filteredForCiModules);
 
     log.info(
-      `${finalMessage}.\nSaved ${runnablePluginCount} plugin(s) and ${runnablePackageCount} package(s) to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
+      `Scout configs were filtered for CI. Saved ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
     );
 
     return;
   }
 
   if (flagsReader.boolean('validate')) {
-    validateWithScoutCiConfig(log, scoutConfigs);
+    filterModulesByScoutCiConfig(log, filteredModulesWithTests);
   }
 };
 
@@ -83,16 +170,24 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   description: `
   Discover Playwright configuration files with Scout tests.
 
+  Options:
+    --target <target>  Filter configs by deployment target:
+                       - 'all': deployment-agnostic tags (default)
+                       - 'mki': serverless-only tags (MKI)
+                       - 'ech': ESS-only tags (ECH)
+    --validate         Validate that all discovered modules are registered in Scout CI config
+    --save             Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
+
   Common usage:
-    node scripts/scout discover-playwright-configs --searchPaths <search_paths>
-    node scripts/scout discover-playwright-configs --validate // validate if all items are registered in the Scout CI config
-    node scripts/scout discover-playwright-configs --save // validate and save enabled items with their config files to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     node scripts/scout discover-playwright-configs
+    node scripts/scout discover-playwright-configs --target mki
+    node scripts/scout discover-playwright-configs --validate
+    node scripts/scout discover-playwright-configs --save
   `,
   flags: {
-    string: ['searchPaths'],
+    string: ['target'],
     boolean: ['save', 'validate'],
-    default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS, save: false, validate: false },
+    default: { target: 'all', save: false, validate: false },
   },
   run: ({ flagsReader, log }) => {
     runDiscoverPlaywrightConfigs(flagsReader, log);

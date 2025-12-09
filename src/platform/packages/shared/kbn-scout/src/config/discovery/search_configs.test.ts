@@ -7,102 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fastGlob from 'fast-glob';
-import yaml from 'js-yaml';
 import { ToolingLog } from '@kbn/tooling-log';
-import { getScoutPlaywrightConfigs, validateWithScoutCiConfig } from './search_configs';
+import fs from 'fs';
+import yaml from 'js-yaml';
+import type { ModuleDiscoveryInfo } from '../../cli/config_discovery';
 
+jest.mock('@kbn/repo-info', () => ({
+  REPO_ROOT: '/mock/repo/root',
+}));
+
+jest.mock('fs');
 jest.mock('fast-glob');
 jest.mock('js-yaml');
 
-describe('getScoutPlaywrightConfigs', () => {
-  let mockLog: ToolingLog;
+import { filterModulesByScoutCiConfig } from './search_configs';
 
-  beforeEach(() => {
-    mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
-    jest.spyOn(mockLog, 'info').mockImplementation(() => {});
-    jest.spyOn(mockLog, 'warning').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should return an empty map if no matching files are found', () => {
-    (fastGlob.sync as jest.Mock).mockReturnValueOnce([]);
-
-    const configs = getScoutPlaywrightConfigs(['x-pack/plugins'], mockLog);
-    expect(configs.size).toBe(0);
-  });
-
-  it('should correctly extract item names and group config files', () => {
-    (fastGlob.sync as jest.Mock).mockReturnValue([
-      'x-pack/platform/plugins/private/plugin_a/test/scout/ui/playwright.config.ts',
-      'x-pack/platform/plugins/private/plugin_a/test/scout/ui/parallel.playwright.config.ts',
-      'x-pack/platform/packages/shared/package_a/test/scout/api/playwright.config.ts',
-      'x-pack/solutions/security/plugins/plugin_b/test/scout/ui/playwright.config.ts',
-      'src/platform/plugins/shared/plugin_c/test/scout/ui/playwright.config.ts',
-      'src/platform/packages/private/package_b/test/scout/ui/playwright.config.ts',
-    ]);
-
-    const configs = getScoutPlaywrightConfigs(['x-pack/', 'src/'], mockLog);
-
-    expect(configs.size).toBe(5);
-    expect(configs.get('plugin_a')).toEqual({
-      configs: [
-        'x-pack/platform/plugins/private/plugin_a/test/scout/ui/playwright.config.ts',
-        'x-pack/platform/plugins/private/plugin_a/test/scout/ui/parallel.playwright.config.ts',
-      ],
-      usesParallelWorkers: true,
-      group: 'platform',
-      path: 'x-pack/platform/plugins/private/plugin_a',
-      type: 'plugin',
-    });
-    expect(configs.get('plugin_b')).toEqual({
-      configs: ['x-pack/solutions/security/plugins/plugin_b/test/scout/ui/playwright.config.ts'],
-      usesParallelWorkers: false,
-      group: 'security',
-      path: 'x-pack/solutions/security/plugins/plugin_b',
-      type: 'plugin',
-    });
-    expect(configs.get('plugin_c')).toEqual({
-      configs: ['src/platform/plugins/shared/plugin_c/test/scout/ui/playwright.config.ts'],
-      usesParallelWorkers: false,
-      group: 'platform',
-      path: 'src/platform/plugins/shared/plugin_c',
-      type: 'plugin',
-    });
-    expect(configs.get('package_a')).toEqual({
-      configs: ['x-pack/platform/packages/shared/package_a/test/scout/api/playwright.config.ts'],
-      usesParallelWorkers: false,
-      group: 'platform',
-      path: 'x-pack/platform/packages/shared/package_a',
-      type: 'package',
-    });
-    expect(configs.get('package_b')).toEqual({
-      configs: ['src/platform/packages/private/package_b/test/scout/ui/playwright.config.ts'],
-      usesParallelWorkers: false,
-      group: 'platform',
-      path: 'src/platform/packages/private/package_b',
-      type: 'package',
-    });
-  });
-
-  it('should log a warning if a file path does not match the expected pattern', () => {
-    (fastGlob.sync as jest.Mock).mockReturnValue([
-      'x-pack/security/plugins/unknown-path/playwright.config.ts',
-    ]);
-
-    const configs = getScoutPlaywrightConfigs(['x-pack/security'], mockLog);
-
-    expect(configs.size).toBe(0);
-    expect(mockLog.warning).toHaveBeenCalledWith(
-      expect.stringContaining('Unable to extract plugin/package name from path')
-    );
-  });
-});
-
-describe('validateWithScoutCiConfig', () => {
+describe('filterModulesByScoutCiConfig', () => {
   let mockLog: ToolingLog;
   const mockScoutCiConfig = {
     plugins: {
@@ -118,6 +38,7 @@ describe('validateWithScoutCiConfig', () => {
   beforeEach(() => {
     mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
     jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
+    (fs.readFileSync as jest.Mock).mockReturnValue('mock yaml content');
     (yaml.load as jest.Mock).mockReturnValue(mockScoutCiConfig);
   });
 
@@ -126,125 +47,204 @@ describe('validateWithScoutCiConfig', () => {
   });
 
   it('should return only enabled plugins and packages', () => {
-    const scoutConfigs = new Map([
-      [
-        'pluginA',
-        {
-          group: 'group1',
-          path: 'pluginPathA',
-          usesParallelWorkers: true,
-          configs: ['configA'],
-          type: 'plugin' as const,
-        },
-      ],
-      [
-        'pluginB',
-        {
-          group: 'group1',
-          path: 'pluginPathB',
-          usesParallelWorkers: false,
-          configs: ['configB1', 'configB2'],
-          type: 'plugin' as const,
-        },
-      ],
-      [
-        'pluginC',
-        {
-          group: 'group2',
-          path: 'pluginPathC',
-          usesParallelWorkers: true,
-          configs: ['configC'],
-          type: 'plugin' as const,
-        },
-      ],
-      [
-        'packageA',
-        {
-          group: 'group1',
-          path: 'packagePathA',
-          usesParallelWorkers: true,
-          configs: ['configA'],
-          type: 'package' as const,
-        },
-      ],
-      [
-        'packageB',
-        {
-          group: 'group2',
-          path: 'packagePathB',
-          usesParallelWorkers: false,
-          configs: ['configB'],
-          type: 'package' as const,
-        },
-      ],
-    ]);
+    const scoutConfigs: ModuleDiscoveryInfo[] = [
+      {
+        name: 'pluginA',
+        group: 'group1',
+        type: 'plugin',
+        visibility: 'private',
+        configs: [
+          {
+            path: 'pluginPathA',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+      {
+        name: 'pluginB',
+        group: 'group1',
+        type: 'plugin',
+        visibility: 'shared',
+        configs: [
+          {
+            path: 'pluginPathB',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: false,
+          },
+          {
+            path: 'pluginPathB2',
+            hasTests: true,
+            tags: ['@svlOblt'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+      {
+        name: 'pluginC',
+        group: 'group2',
+        type: 'plugin',
+        visibility: 'private',
+        configs: [
+          {
+            path: 'pluginPathC',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+      {
+        name: 'packageA',
+        group: 'group1',
+        type: 'package',
+        visibility: 'shared',
+        configs: [
+          {
+            path: 'packagePathA',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+      {
+        name: 'packageB',
+        group: 'group2',
+        type: 'package',
+        visibility: 'private',
+        configs: [
+          {
+            path: 'packagePathB',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ];
 
-    const result = validateWithScoutCiConfig(mockLog, scoutConfigs);
-    expect(result.size).toBe(3);
-    expect(result.has('pluginA')).toBe(true);
-    expect(result.has('pluginB')).toBe(true);
-    expect(result.has('packageA')).toBe(true);
-    expect(result.has('pluginC')).toBe(false);
-    expect(result.has('packageB')).toBe(false);
+    const result = filterModulesByScoutCiConfig(mockLog, scoutConfigs);
+    expect(result.length).toBe(3);
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'pluginA')).toBeDefined();
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'pluginB')).toBeDefined();
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'packageA')).toBeDefined();
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'pluginC')).toBeUndefined();
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'packageB')).toBeUndefined();
   });
 
   it('should throw an error if plugins or packages are not registered in Scout CI config', () => {
-    const scoutConfigs = new Map([
-      [
-        'pluginX',
-        {
-          group: 'groupX',
-          path: 'pluginPathX',
-          usesParallelWorkers: true,
-          configs: ['configX'],
-          type: 'plugin' as const,
-        },
-      ],
-      [
-        'packageX',
-        {
-          group: 'groupX',
-          path: 'packagePathX',
-          usesParallelWorkers: true,
-          configs: ['configX'],
-          type: 'package' as const,
-        },
-      ],
-    ]);
+    const scoutConfigs: ModuleDiscoveryInfo[] = [
+      {
+        name: 'pluginX',
+        group: 'groupX',
+        type: 'plugin',
+        visibility: 'private',
+        configs: [
+          {
+            path: 'pluginPathX',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+      {
+        name: 'packageX',
+        group: 'groupX',
+        type: 'package',
+        visibility: 'shared',
+        configs: [
+          {
+            path: 'packagePathX',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+    ];
 
-    expect(() => validateWithScoutCiConfig(mockLog, scoutConfigs)).toThrow(
-      "The following plugin(s)/package(s) are not listed in Scout CI config '.buildkite/scout_ci_config.yml':\n- pluginX (plugin)\n- packageX (package)"
+    expect(() => {
+      filterModulesByScoutCiConfig(mockLog, scoutConfigs);
+    }).toThrow(
+      "The following plugin(s)/package(s) are not registered in Scout CI config '.buildkite/scout_ci_config.yml':"
     );
   });
 
   it('should log a warning for disabled plugins and packages', () => {
-    const scoutConfigs = new Map([
-      [
-        'pluginC',
-        {
-          group: 'group2',
-          path: 'pluginPathC',
-          usesParallelWorkers: true,
-          configs: ['configC'],
-          type: 'plugin' as const,
-        },
-      ],
-      [
-        'packageB',
-        {
-          group: 'group2',
-          path: 'packagePathB',
-          usesParallelWorkers: false,
-          configs: ['configB'],
-          type: 'package' as const,
-        },
-      ],
-    ]);
+    const scoutConfigs: ModuleDiscoveryInfo[] = [
+      {
+        name: 'pluginC',
+        group: 'group2',
+        type: 'plugin',
+        visibility: 'private',
+        configs: [
+          {
+            path: 'pluginPathC',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+      {
+        name: 'packageB',
+        group: 'group2',
+        type: 'package',
+        visibility: 'private',
+        configs: [
+          {
+            path: 'packagePathB',
+            hasTests: true,
+            tags: ['@ess'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ];
 
-    validateWithScoutCiConfig(mockLog, scoutConfigs);
+    filterModulesByScoutCiConfig(mockLog, scoutConfigs);
 
     expect(mockLog.warning).toHaveBeenCalledWith(
-      `The following plugin(s)/package(s) are disabled in '.buildkite/scout_ci_config.yml' and will be excluded from CI run\n- pluginC\n- packageB`
+      expect.stringContaining(
+        "The following plugin(s)/package(s) are disabled in '.buildkite/scout_ci_config.yml' and will be excluded from CI:"
+      )
     );
+    expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('pluginC'));
+    expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('packageB'));
+  });
+
+  it('should preserve configs and tags when filtering modules', () => {
+    const scoutConfigs: ModuleDiscoveryInfo[] = [
+      {
+        name: 'pluginA',
+        group: 'group1',
+        type: 'plugin',
+        visibility: 'private',
+        configs: [
+          {
+            path: 'pluginPathA',
+            hasTests: true,
+            tags: ['@ess', '@svlOblt'],
+            usesParallelWorkers: true,
+          },
+          {
+            path: 'pluginPathA2',
+            hasTests: false,
+            tags: ['@svlSecurity'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ];
+
+    const result = filterModulesByScoutCiConfig(mockLog, scoutConfigs);
+    expect(result.length).toBe(1);
+    expect(result[0]?.configs.length).toBe(2);
+    expect(result[0]?.configs[0]?.tags).toEqual(['@ess', '@svlOblt']);
+    expect(result[0]?.configs[1]?.tags).toEqual(['@svlSecurity']);
   });
 });

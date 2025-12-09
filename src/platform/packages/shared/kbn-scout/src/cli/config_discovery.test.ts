@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getScoutPlaywrightConfigs } from '../config';
+import fs from 'fs';
+import { filterModulesByScoutCiConfig } from '../config/discovery';
+import type { ModuleDiscoveryInfo } from './config_discovery';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
-import { measurePerformance } from '../common';
-import { validateWithScoutCiConfig } from '../config/discovery';
 
 jest.mock('fs');
 
@@ -21,56 +20,44 @@ jest.mock('@kbn/scout-info', () => ({
   SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout_playwright_configs.json',
 }));
 
-jest.mock('../common', () => ({
-  measurePerformance: jest.fn(),
-}));
+let mockTestableModules: any[] = [];
 
-jest.mock('../config', () => ({
-  getScoutPlaywrightConfigs: jest.fn(),
+jest.mock('@kbn/scout-reporting/src/registry', () => ({
+  testableModules: {
+    get allIncludingConfigs() {
+      return mockTestableModules;
+    },
+  },
 }));
 
 jest.mock('../config/discovery', () => ({
-  validateWithScoutCiConfig: jest.fn(),
+  filterModulesByScoutCiConfig: jest.fn(),
 }));
 
 describe('runDiscoverPlaywrightConfigs', () => {
   let flagsReader: jest.Mocked<FlagsReader>;
   let log: jest.Mocked<ToolingLog>;
 
-  // 'enabled' items
-  const mockScoutConfigs: Map<string, any> = new Map([
-    [
-      'pluginA',
-      {
-        group: 'groupA',
-        path: 'plugin/path',
-        configs: ['config1.ts', 'config2.ts'],
-        usesParallelWorkers: true,
-        type: 'plugin',
-      },
-    ],
-    [
-      'packageA',
-      {
-        group: 'groupC',
-        path: 'package/path',
-        configs: ['config4.ts'],
-        usesParallelWorkers: false,
-        type: 'package',
-      },
-    ],
-  ]);
-
-  // these are all the items found, but only some of them will be enabled (validateWithScoutCiConfig will find out which ones)
-  const mockAllConfigs = new Map([
-    ['pluginA', { group: 'groupA', configs: ['config1.ts', 'config2.ts'], type: 'plugin' }], // enabled
-    ['pluginB', { group: 'groupB', configs: ['config3.ts'], type: 'plugin' }], // disabled
-    ['packageA', { group: 'groupB', configs: ['config4.ts'], type: 'package' }], // enabled
-    ['packageB', { group: 'groupC', configs: ['config5.ts'], type: 'package' }], // disabled
-  ]);
+  const mockFilteredModules: ModuleDiscoveryInfo[] = [
+    {
+      name: 'pluginA',
+      group: 'groupA',
+      type: 'plugin',
+      visibility: 'private',
+      configs: [
+        {
+          path: 'pluginA/config1.playwright.config.ts',
+          hasTests: true,
+          tags: ['@ess', '@svlOblt'],
+          usesParallelWorkers: false,
+        },
+      ],
+    },
+  ];
 
   beforeAll(() => {
     flagsReader = {
+      enum: jest.fn(),
       arrayOfStrings: jest.fn(),
       boolean: jest.fn(),
     } as any;
@@ -89,160 +76,325 @@ describe('runDiscoverPlaywrightConfigs', () => {
     (fs.mkdirSync as jest.Mock).mockImplementation(jest.fn());
     (fs.writeFileSync as jest.Mock).mockImplementation(jest.fn());
 
-    (measurePerformance as jest.Mock).mockImplementation((_log, _msg, fn) => fn());
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockReturnValue(false);
+    flagsReader.arrayOfStrings.mockReturnValue([]);
 
-    (getScoutPlaywrightConfigs as jest.Mock).mockReturnValue(mockAllConfigs);
-    (validateWithScoutCiConfig as jest.Mock).mockReturnValue(mockScoutConfigs);
+    (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
+
+    // Default mock modules
+    mockTestableModules = [
+      {
+        name: 'pluginA',
+        group: 'groupA',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        configs: [
+          {
+            path: 'pluginA/config1.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test1.spec.ts' },
+                  tags: ['@ess', '@svlOblt'],
+                },
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test2.spec.ts' },
+                  tags: ['@svlSecurity'],
+                },
+              ],
+            },
+          },
+          {
+            path: 'pluginA/parallel.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test3.spec.ts' },
+                  tags: ['@svlSearch'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        name: 'pluginB',
+        group: 'groupB',
+        type: 'plugin' as const,
+        visibility: 'shared' as const,
+        configs: [
+          {
+            path: 'pluginB/config3.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test4.spec.ts' },
+                  tags: ['@svlWorkplaceAI'], // Only serverless, not in DEPLOYMENT_AGNOSTIC
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        name: 'packageA',
+        group: 'groupC',
+        type: 'package' as const,
+        visibility: 'shared' as const,
+        configs: [
+          {
+            path: 'packageA/config4.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test5.spec.ts' },
+                  tags: ['@ess', '@svlOblt'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
   });
 
   it('validates configs when "validate" is true', () => {
-    // force --validate
+    flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockImplementation((flag) => {
-      if (flag === 'save') {
-        return false;
-      }
-
-      // force --validate
-      if (flag === 'validate') {
-        return true;
-      }
-
+      if (flag === 'save') return false;
+      if (flag === 'validate') return true;
       return false;
     });
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // setting --validate will trigger a validation
-    expect(validateWithScoutCiConfig).toHaveBeenCalledWith(log, mockAllConfigs);
+    expect(filterModulesByScoutCiConfig).toHaveBeenCalled();
+    const callArgs = (filterModulesByScoutCiConfig as jest.Mock).mock.calls[0];
+    expect(callArgs[0]).toBe(log);
+    expect(Array.isArray(callArgs[1])).toBe(true);
   });
 
-  it('should correctly parse custom config search paths', () => {
-    flagsReader.arrayOfStrings.mockReturnValue(['customConfigSearchPaths']);
-    runDiscoverPlaywrightConfigs(flagsReader, log);
-    expect(getScoutPlaywrightConfigs).toHaveBeenCalledWith(['customConfigSearchPaths'], log);
-  });
-
-  it('logs found configs when they exist and "save" flag is false', () => {
-    flagsReader.boolean.mockImplementation((flag) => {
-      // never --save
-      if (flag === 'save') {
-        return false;
-      }
-
-      if (flag === 'validate') {
-        return false;
-      }
-
-      return false;
-    });
-
-    runDiscoverPlaywrightConfigs(flagsReader, log);
-
-    expect(log.info.mock.calls).toEqual([
-      ['Found Playwright config files in 2 plugin(s) and 2 package(s)'],
-      ['groupA / [pluginA] plugin:'],
-      ['- config1.ts'],
-      ['- config2.ts'],
-      ['groupB / [pluginB] plugin:'],
-      ['- config3.ts'],
-      ['groupB / [packageA] package:'],
-      ['- config4.ts'],
-      ['groupC / [packageB] package:'],
-      ['- config5.ts'],
-    ]);
-  });
-
-  it('logs "No Playwright config files found" when no configs are found', () => {
-    flagsReader.arrayOfStrings.mockReturnValue([]);
+  it('filters configs based on target tags for "all" target (DEPLOYMENT_AGNOSTIC)', () => {
+    flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
-    (getScoutPlaywrightConfigs as jest.Mock).mockReturnValue(new Map());
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // pluginA has @ess, @svlOblt, @svlSecurity, @svlSearch which are in DEPLOYMENT_AGNOSTIC
+    // pluginB has @svlWorkplaceAI which is NOT in DEPLOYMENT_AGNOSTIC, it should be excluded
+    // packageA has @ess and @svlOblt which are in DEPLOYMENT_AGNOSTIC
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only (pluginB filtered out)
+    expect(foundMessage![0]).toContain('1 package(s)'); // packageA
+  });
+
+  it('filters configs based on target tags for "mki" target (SERVERLESS_ONLY)', () => {
+    flagsReader.enum.mockReturnValue('mki');
+    flagsReader.boolean.mockReturnValue(false);
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // pluginA has @svlOblt, @svlSecurity, @svlSearch which are in SERVERLESS_ONLY
+    // pluginB has @svlWorkplaceAI which is in SERVERLESS_ONLY
+    // packageA has @svlOblt which is in SERVERLESS_ONLY
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    // All modules should be included for mki target
+    expect(foundMessage![0]).toContain('2 plugin(s)');
+    expect(foundMessage![0]).toContain('1 package(s)');
+  });
+
+  it('filters configs based on target tags for "ech" target (ESS_ONLY)', () => {
+    flagsReader.enum.mockReturnValue('ech');
+    flagsReader.boolean.mockReturnValue(false);
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // pluginA has @ess which is in ESS_ONLY
+    // pluginB has no @ess, it should be excluded
+    // packageA has @ess which is in ESS_ONLY
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only
+    expect(foundMessage![0]).toContain('1 package(s)'); // packageA
+  });
+
+  it('filters config tags to only include cross tags', () => {
+    flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY = ['@ess']
+    flagsReader.boolean.mockReturnValue(false);
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // Find the log call that shows config details
+    const infoCalls = log.info.mock.calls;
+    const configLogCall = infoCalls.find((call) =>
+      call[0].includes('config1.playwright.config.ts')
+    );
+
+    expect(configLogCall).toBeDefined();
+    // pluginA config1 has tags ['@ess', '@svlOblt', '@svlSecurity'], but after filtering for ESS_ONLY, only ['@ess'] should remain
+    expect(configLogCall![0]).toContain('tags: [@ess]');
+    expect(configLogCall![0]).not.toContain('@svlOblt');
+    expect(configLogCall![0]).not.toContain('@svlSecurity');
+  });
+
+  it('logs found configs with tags when they exist and "save" flag is false', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockReturnValue(false);
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const infoCalls = log.info.mock.calls;
+    expect(infoCalls.length).toBeGreaterThan(0);
+    expect(infoCalls[0][0]).toContain('Found Playwright config files');
+
+    // Check that config logs include tags
+    const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
+    expect(configLogs.length).toBeGreaterThan(0);
+    configLogs.forEach((call) => {
+      expect(call[0]).toContain('tags: [');
+    });
+  });
+
+  it('logs "No Playwright config files found" when no configs match target tags', () => {
+    flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY
+    flagsReader.boolean.mockReturnValue(false);
+
+    // Set up modules with no matching tags
+    mockTestableModules = [
+      {
+        name: 'pluginNoMatch',
+        group: 'groupX',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        configs: [
+          {
+            path: 'pluginNoMatch/config.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test.spec.ts' },
+                  tags: ['@svlWorkplaceAI'], // Not in ESS_ONLY
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     expect(log.info).toHaveBeenCalledWith('No Playwright config files found');
   });
 
-  it('validates and saves enabled plugins with their config files when --save is set', () => {
-    // force --save
+  it('validates and saves filtered modules when --save is set', () => {
+    flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockImplementation((flag) => {
-      if (flag === 'save') {
-        return true;
-      }
-
-      if (flag === 'validate') {
-        return false;
-      }
-
+      if (flag === 'save') return true;
+      if (flag === 'validate') return false;
       return false;
     });
 
-    flagsReader.arrayOfStrings.mockReturnValue(['searchPaths']);
-
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // setting --save will trigger a validation
-    expect(validateWithScoutCiConfig).toHaveBeenCalledWith(log, mockAllConfigs);
-
-    // create directory if it doesn't exist
+    expect(filterModulesByScoutCiConfig).toHaveBeenCalled();
     expect(fs.mkdirSync).toHaveBeenCalledWith('/path/to', { recursive: true });
+    expect(fs.writeFileSync).toHaveBeenCalled();
 
-    // we should only write the configs of the items that are actually enabled
-    expect(fs.writeFileSync).toHaveBeenCalledWith(
-      '/path/to/scout_playwright_configs.json',
-      JSON.stringify(Object.fromEntries(mockScoutConfigs), null, 2)
-    );
+    const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    expect(writeCall[0]).toBe('/path/to/scout_playwright_configs.json');
+    const savedData = JSON.parse(writeCall[1]);
+    expect(Array.isArray(savedData)).toBe(true);
 
     expect(log.info).toHaveBeenCalledWith(
-      `Found Playwright config files in 2 plugin(s) and 2 package(s).\nSaved 1 plugin(s) and 1 package(s) to '/path/to/scout_playwright_configs.json'`
+      expect.stringContaining('Scout configs were filtered for CI. Saved')
     );
   });
 
-  it('handles both plugins and packages correctly', () => {
-    // Test data with both plugins and packages
-    const mixedConfigs = new Map([
-      ['pluginX', { group: 'solution1', configs: ['plugin.config.ts'], type: 'plugin' }],
-      ['packageY', { group: 'platform', configs: ['package.config.ts'], type: 'package' }],
-    ]);
-
-    (getScoutPlaywrightConfigs as jest.Mock).mockReturnValue(mixedConfigs);
-    (validateWithScoutCiConfig as jest.Mock).mockReturnValue(mixedConfigs);
-
+  it('filters out modules with no matching configs after tag filtering', () => {
+    flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY = ['@ess']
     flagsReader.boolean.mockReturnValue(false);
-    flagsReader.arrayOfStrings.mockReturnValue([]);
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    expect(log.info.mock.calls).toEqual([
-      ['Found Playwright config files in 1 plugin(s) and 1 package(s)'],
-      ['solution1 / [pluginX] plugin:'],
-      ['- plugin.config.ts'],
-      ['platform / [packageY] package:'],
-      ['- package.config.ts'],
-    ]);
+    // pluginB has @svlWorkplaceAI which is not in ESS_ONLY, it should be filtered out
+    const infoCalls = log.info.mock.calls;
+    const moduleLogs = infoCalls.filter(
+      (call) => call[0].includes('] plugin:') || call[0].includes('] package:')
+    );
+
+    // Should not contain pluginB
+    const pluginBLog = moduleLogs.find((call) => call[0].includes('pluginB'));
+    expect(pluginBLog).toBeUndefined();
   });
 
-  it('handles package-only scenarios', () => {
-    // Test data with only packages
-    const packageOnlyConfigs = new Map([
-      ['packageA', { group: 'platform', configs: ['config1.ts', 'config2.ts'], type: 'package' }],
-      ['packageB', { group: 'security', configs: ['config3.ts'], type: 'package' }],
-    ]);
-
-    (getScoutPlaywrightConfigs as jest.Mock).mockReturnValue(packageOnlyConfigs);
-    (validateWithScoutCiConfig as jest.Mock).mockReturnValue(packageOnlyConfigs);
-
+  it('handles configs with no passed tests correctly', () => {
+    flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
-    flagsReader.arrayOfStrings.mockReturnValue([]);
+
+    // Set up a module with a config that has no passed tests
+    mockTestableModules = [
+      {
+        name: 'pluginNoTests',
+        group: 'groupY',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        configs: [
+          {
+            path: 'pluginNoTests/config.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'failed',
+                  location: { file: 'test.spec.ts' },
+                  tags: ['@ess'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    expect(log.info.mock.calls).toEqual([
-      ['Found Playwright config files in 0 plugin(s) and 2 package(s)'],
-      ['platform / [packageA] package:'],
-      ['- config1.ts'],
-      ['- config2.ts'],
-      ['security / [packageB] package:'],
-      ['- config3.ts'],
-    ]);
+    // Configs with no passed tests should still be included if they have matching tags
+    const infoCalls = log.info.mock.calls;
+    expect(infoCalls.length).toBeGreaterThan(0);
+  });
+
+  it('correctly identifies parallel worker configs', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockReturnValue(false);
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // The parallel config should be identified
+    const infoCalls = log.info.mock.calls;
+    const parallelConfigLog = infoCalls.find((call) =>
+      call[0].includes('parallel.playwright.config.ts')
+    );
+    expect(parallelConfigLog).toBeDefined();
   });
 });
