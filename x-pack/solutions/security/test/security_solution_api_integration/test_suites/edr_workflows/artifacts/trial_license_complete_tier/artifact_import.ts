@@ -115,18 +115,24 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
   describe('@ess @serverless @skipInServerlessMKI Import Endpoint artifacts API', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
+    let fleetEndpointPolicyOtherSpace: PolicyTestResourceInfo;
     let endpointOpsAnalystSupertest: TestAgent;
 
     before(async () => {
       endpointOpsAnalystSupertest = await utils.createSuperTest(ROLE.endpoint_operations_analyst);
 
-      // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
+      fleetEndpointPolicyOtherSpace = await endpointPolicyTestResources.createPolicy({
+        options: { spaceId: 'other-space' },
+      });
     });
 
     after(async () => {
       if (fleetEndpointPolicy) {
         await fleetEndpointPolicy.cleanup();
+      }
+      if (fleetEndpointPolicyOtherSpace) {
+        await fleetEndpointPolicyOtherSpace.cleanup();
       }
     });
 
@@ -413,11 +419,125 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   expect(body.data.length).to.eql(3);
                 });
 
-                it('should import per-policy artifacts to other space if assigned to policy in current space', async () => {});
+                it('should import per-policy artifacts to other space if assigned to policy in current space', async () => {
+                  await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        {
+                          item_id: 'to-other-space',
+                          tags: [
+                            OTHER_SPACE_OWNER_ID,
+                            buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                            buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                          ],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [],
+                      success: true,
+                      success_count: 2,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: true,
+                      success_count_exception_list_items: 1,
+                    } as ImportExceptionsResponseSchema);
 
+                  const { body } = await endpointOpsAnalystSupertest
+                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .query({
+                      list_id: artifact.listId,
+                      namespace_type: 'agnostic',
+                    })
+                    .send()
+                    .expect(200);
+
+                  expect(body.data.length).to.eql(1);
+                  expect(body.data[0].tags).to.eql([
+                    OTHER_SPACE_OWNER_ID,
+                    buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                    // policy id in other space is kept
+                    buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                  ]);
+                });
+
+                // todo do we need this? create API allows this, but import could block it
                 it('should not import per-policy artifacts to other space if not visible in current space', async () => {});
+              });
 
+              describe('when data is invalid', () => {
+                // todo do we need this? create allows this, and will use actual space ID instead
                 it('should not import per-policy artifacts with invalid space id', async () => {});
+
+                it('should import per-policy artifacts assigned to invalid policy ids and remove invalid ids', async () => {
+                  await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        {
+                          item_id: 'with-invalid-policy-id',
+                          tags: [
+                            DEFAULT_SPACE_OWNER_ID,
+                            buildPerPolicyTag('i-do-not-exist'),
+                            buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                            buildPerPolicyTag('me-neither'),
+                            buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                          ],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [],
+                      success: true,
+                      success_count: 2,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: true,
+                      success_count_exception_list_items: 1,
+                    } as ImportExceptionsResponseSchema);
+
+                  const { body } = await endpointOpsAnalystSupertest
+                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .query({
+                      list_id: artifact.listId,
+                      namespace_type: 'agnostic',
+                    })
+                    .send()
+                    .expect(200);
+
+                  expect(body.data.length).to.eql(1);
+
+                  // invalid policy ids are removed, valid ones are kept
+                  expect(body.data[0].tags).to.eql([
+                    DEFAULT_SPACE_OWNER_ID,
+                    buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                    buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                  ]);
+
+                  // changes indicated in a comment
+                  expect(body.data[0].comments.length).to.eql(1);
+                  expect(body.data[0].comments[0].comment).to.eql(
+                    `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n- "i-do-not-exist"\n- "me-neither"`
+                  );
+
+                  const username = `${artifact.listId}_allWithGlobal`;
+                  expect(body.data[0].comments[0].created_by).to.eql(username);
+                });
               });
 
               describe('when `overwrite` query param is `true`', () => {
@@ -430,8 +550,6 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   it('should remove existing per-policy artifacts that are visible in current space', async () => {});
                 });
               });
-
-              it('should import per-policy artifacts assigned to non-existing policy', async () => {});
             });
 
             describe('when importing multiple lists', () => {
