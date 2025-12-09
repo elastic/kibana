@@ -232,7 +232,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
       <EuiFlexItem>
         <EuiSwitch
           label={flappingSettings.enabled ? enabledOnLabel : enabledOffLabel}
-          checked={flappingSettings.enabled || true} // default to true if flapping.enabled is undefined
+          checked={flappingSettings.enabled !== undefined ? flappingSettings.enabled : true} // default to true if flapping.enabled is undefined
           disabled={!canWriteFlappingSettingsUI}
           onChange={(e) => onEnabledChange(e.target.checked)}
         />
