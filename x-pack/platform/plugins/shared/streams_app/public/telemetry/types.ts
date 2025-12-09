@@ -101,7 +101,7 @@ interface StreamsSignificantEventsCreatedProps {
 
 interface StreamsFeatureIdentificationIdentifiedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: Record<FeatureType, number>;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
@@ -110,14 +110,14 @@ interface StreamsFeatureIdentificationIdentifiedProps {
 
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: Record<FeatureType, number>;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: Record<FeatureType, number>;
   stream_name: string;
   stream_type: StreamType;
 }
