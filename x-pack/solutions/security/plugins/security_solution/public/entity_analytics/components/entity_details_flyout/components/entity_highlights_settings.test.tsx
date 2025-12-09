@@ -11,11 +11,12 @@ import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { TestProviders } from '../../../../common/mock';
 
 const mockShowAssistantOverlay = jest.fn();
-const mockOnRegenerate = jest.fn();
 const mockOnChangeShowAnonymizedValues = jest.fn();
 const mockSetConnectorId = jest.fn();
 const mockClosePopover = jest.fn();
 const mockOpenPopover = jest.fn();
+const mockOpenAgentBuilderFlyout = jest.fn();
+const mockUseIsExperimentalFeatureEnabled = jest.fn(() => false);
 
 jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
   useAskAiAssistant: () => ({
@@ -23,9 +24,18 @@ jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
   }),
 }));
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+}));
+
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
+  useAgentBuilderAttachment: () => ({
+    openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
+  }),
+}));
+
 describe('EntityHighlightsSettings', () => {
   const defaultProps = {
-    onRegenerate: mockOnRegenerate,
     showAnonymizedValues: false,
     onChangeShowAnonymizedValues: mockOnChangeShowAnonymizedValues,
     setConnectorId: mockSetConnectorId,
@@ -62,39 +72,6 @@ describe('EntityHighlightsSettings', () => {
 
     fireEvent.click(screen.getByLabelText('Entity highlights settings menu'));
     expect(mockOpenPopover).toHaveBeenCalled();
-  });
-
-  it('renders regenerate menu item', () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByText('Regenerate')).toBeInTheDocument();
-  });
-
-  it('calls onRegenerate when regenerate is clicked', () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    fireEvent.click(screen.getByLabelText('Regenerate'));
-    expect(mockOnRegenerate).toHaveBeenCalled();
-  });
-
-  it('disables regenerate button when loading', () => {
-    render(<EntityHighlightsSettings {...defaultProps} isLoading={true} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByLabelText('Regenerate')).toBeDisabled();
-  });
-
-  it('disables regenerate button when no assistant result', () => {
-    render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByLabelText('Regenerate')).toBeDisabled();
   });
 
   it('renders anonymized values switch', () => {
