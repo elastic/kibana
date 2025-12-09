@@ -111,7 +111,7 @@ export const EditExample = ({ dataView }: Props) => {
     if (type === OPTIONS_LIST_CONTROL && toggleIconIdToSelectedMapIcon[WITH_CUSTOM_PLACEHOLDER]) {
       return {
         ...newState,
-        placeholder: 'Custom Placeholder',
+        displaySettings: { placeholder: 'Custom Placeholder' },
       };
     }
 
@@ -144,7 +144,7 @@ export const EditExample = ({ dataView }: Props) => {
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
                 if (!controlGroupAPI) return;
-                controlGroupAPI.openAddDataControlFlyout();
+                controlGroupAPI.openAddDataControlFlyout({ controlStateTransform });
               }}
             >
               Add control
@@ -212,7 +212,6 @@ export const EditExample = ({ dataView }: Props) => {
                 ...persistedState,
               },
               getEditorOptions: () => ({
-                controlStateTransform,
                 defaultDataViewId: dataView?.id,
               }),
             };

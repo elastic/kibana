@@ -182,13 +182,23 @@ export const ControlGroupRenderer = ({
       },
     };
 
-    const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] =
-      async () => {
-        const action = await uiActions.getAction('createControl');
-        action.execute({
-          embeddable: publicApi,
-        } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
-      };
+    const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] = async (
+      options
+    ) => {
+      const action = await uiActions.getAction('createControl');
+      // get up to date control state transform
+      action.execute({
+        embeddable: {
+          ...publicApi,
+          ...(options?.controlStateTransform && {
+            getEditorConfig: () => ({
+              ...publicApi.getEditorConfig?.(),
+              controlStateTransform: options.controlStateTransform,
+            }),
+          }),
+        },
+      } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
+    };
 
     onApiAvailable({
       ...publicApi,

@@ -10,13 +10,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   ControlGroupRenderer,
-  type ControlGroupCreationOptions,
   type ControlGroupRendererProps,
   type ControlGroupRendererApi,
   type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
   type ControlStateTransform,
-  type ControlGroupEditorConfig,
 } from '@kbn/control-group-renderer';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
@@ -340,18 +338,17 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       });
       return {
         initialState,
-        getEditorConfig: (): ControlGroupEditorConfig => {
+        getEditorConfig: () => {
           return {
             defaultDataViewId: dataViewId ?? undefined,
             hideDataViewSelector: true,
             hideAdditionalSettings: true,
             fieldFilterPredicate: (f) => f.type !== 'number',
-            controlStateTransform: newControlStateTransform,
           };
         },
-      } as ControlGroupCreationOptions;
+      };
     },
-    [dataViewId, selectControlsWithPriority, newControlStateTransform]
+    [dataViewId, selectControlsWithPriority]
   );
 
   const discardChangesHandler = useCallback(async () => {
@@ -407,8 +404,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [switchToViewMode, upsertPersistableControls]);
 
   const addControlsHandler = useCallback(() => {
-    controlGroup?.openAddDataControlFlyout();
-  }, [controlGroup]);
+    controlGroup?.openAddDataControlFlyout({ controlStateTransform: newControlStateTransform });
+  }, [controlGroup, newControlStateTransform]);
 
   if (!spaceId) {
     return <FilterGroupLoading />;

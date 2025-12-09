@@ -50,7 +50,7 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
      */
     getInput: () => ControlGroupRuntimeState;
 
-    openAddDataControlFlyout: () => void;
+    openAddDataControlFlyout: (options?: { controlStateTransform?: ControlStateTransform }) => void;
   };
 
 /**
@@ -67,7 +67,7 @@ interface HasEditorConfig {
 }
 
 export const apiHasEditorConfig = (parentApi: unknown): parentApi is HasEditorConfig => {
-  return Boolean((parentApi as HasEditorConfig).getEditorConfig);
+  return typeof (parentApi as HasEditorConfig).getEditorConfig === 'function';
 };
 
 export interface ControlGroupEditorConfig {
@@ -103,7 +103,7 @@ export interface ControlGroupRuntimeState<
 
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;
-  getEditorConfig?: () => ControlGroupEditorConfig | undefined;
+  getEditorConfig?: () => Omit<ControlGroupEditorConfig, 'controlStateTransform'> | undefined;
 }
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;

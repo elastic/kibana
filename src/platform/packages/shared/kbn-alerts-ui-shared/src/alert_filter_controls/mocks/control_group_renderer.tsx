@@ -43,7 +43,7 @@ export const getMockedControlGroupRenderer = (
       setCreationOptionsCalled(true);
       if (getCreationOptions) {
         (async () => {
-          const result = await getCreationOptions({
+          const result = await getCreationOptions({ initialChildControlState: {} }, {
             addOptionsListControl: addOptionsListControlMock,
           } as unknown as ControlGroupStateBuilder);
           setCreateOptions?.(result);
