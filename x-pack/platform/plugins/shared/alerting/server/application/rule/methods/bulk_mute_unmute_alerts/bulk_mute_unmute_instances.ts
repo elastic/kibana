@@ -6,8 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { SavedObjectsBulkUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObject,
+  SavedObjectsBulkUpdateResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { bulkGetRulesSo, bulkUpdateRuleSo } from '../../../../data/rule';
 import type { BulkEditOperationResult } from '../../../../rules_client/common/bulk_edit';
 import { retryIfBulkEditConflicts } from '../../../../rules_client/common';
@@ -20,11 +22,17 @@ import { AlertingAuthorizationEntity, WriteOperations } from '../../../../author
 import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { transformMuteRequestToRuleAttributes } from './transforms/transform_rule_mute_instance_ids';
+import { transformUnmuteRequestToRuleAttributes } from './transforms/transform_rule_unmute_instance_ids';
 import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
 
-export async function bulkMuteInstances(
+interface BulkMuteUnmuteArgs {
+  params: BulkMuteUnmuteAlertsParams;
+  mute: boolean;
+}
+
+export async function bulkMuteUnmuteInstances(
   context: RulesClientContext,
-  params: BulkMuteUnmuteAlertsParams
+  { params, mute }: BulkMuteUnmuteArgs
 ): Promise<void> {
   try {
     bulkMuteUnmuteAlertsParamsSchema.validate(params);
@@ -34,12 +42,12 @@ export async function bulkMuteInstances(
 
   await retryIfBulkEditConflicts(
     context.logger,
-    `rulesClient.bulkMuteInstances('${JSON.stringify(params)}')`,
-    async () => await bulkMuteInstancesWithOCC(context, params)
+    `rulesClient.bulkMuteUnmuteInstances('${JSON.stringify(params)}', ${mute})`,
+    async () => await bulkMuteUnmuteInstancesWithOCC(context, { params, mute })
   );
 }
 
-const EMPTY_RESULT = {
+const EMPTY_RESULT: BulkEditOperationResult = {
   apiKeysToInvalidate: [],
   resultSavedObjects: [],
   errors: [],
@@ -47,9 +55,9 @@ const EMPTY_RESULT = {
   skipped: [],
 };
 
-async function bulkMuteInstancesWithOCC(
+async function bulkMuteUnmuteInstancesWithOCC(
   context: RulesClientContext,
-  params: BulkMuteUnmuteAlertsParams
+  { params, mute }: BulkMuteUnmuteArgs
 ): Promise<BulkEditOperationResult> {
   let bulkUpdateRes: SavedObjectsBulkUpdateResponse<RawRule>;
 
@@ -87,24 +95,30 @@ async function bulkMuteInstancesWithOCC(
 
     await context.authorization.bulkEnsureAuthorized({
       ruleTypeIdConsumersPairs,
-      operation: WriteOperations.MuteAlert,
+      operation: mute ? WriteOperations.MuteAlert : WriteOperations.UnmuteAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
+    const action = mute ? RuleAuditAction.BULK_MUTE_ALERTS : RuleAuditAction.BULK_UNMUTE_ALERTS;
     for (const rule of rulesSavedObjects) {
       context.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.BULK_MUTE_ALERTS,
+          action,
           outcome: 'unknown',
           savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.attributes.name },
         })
       );
     }
 
-    const rulesToUpdate = transformMuteRequestToRuleAttributes({
-      savedRules: rulesSavedObjects,
-      paramRules: params.rules,
-    });
+    const rulesToUpdate = mute
+      ? transformMuteRequestToRuleAttributes({
+          savedRules: rulesSavedObjects,
+          paramRules: params.rules,
+        })
+      : transformUnmuteRequestToRuleAttributes({
+          savedRules: rulesSavedObjects,
+          paramRules: params.rules,
+        });
 
     bulkUpdateRes = await bulkUpdateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -112,27 +126,34 @@ async function bulkMuteInstancesWithOCC(
     });
 
     if (indices && indices.length > 0) {
-      await context.alertsService?.muteAlertInstances({
+      const options = {
         targets: transformParamsRulesToAlertInstances(params.rules),
         indices,
         logger: context.logger,
-      });
+      };
+      if (mute) {
+        await context.alertsService?.muteAlertInstances(options);
+      } else {
+        await context.alertsService?.unmuteAlertInstances(options);
+      }
     }
   } catch (error) {
+    const action = mute ? RuleAuditAction.BULK_MUTE_ALERTS : RuleAuditAction.BULK_UNMUTE_ALERTS;
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.BULK_MUTE_ALERTS,
+        action,
         error,
       })
     );
-    context.logger.error(`Error while bulk muting alerts: ${error.message}`);
+    const alertAction = mute ? 'muting' : 'unmuting';
+    context.logger.error(`Error while bulk ${alertAction} alerts: ${error.message}`);
 
     throw error;
   }
 
   return {
     apiKeysToInvalidate: [],
-    resultSavedObjects: bulkUpdateRes.saved_objects,
+    resultSavedObjects: bulkUpdateRes.saved_objects ?? [],
     errors: [],
     rules: [],
     skipped: [],
