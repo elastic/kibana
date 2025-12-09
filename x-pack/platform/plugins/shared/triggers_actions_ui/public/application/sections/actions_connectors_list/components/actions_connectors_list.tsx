@@ -592,11 +592,11 @@ const RunOperation: React.FunctionComponent<{
           canExecute
             ? i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDescription',
-                { defaultMessage: 'Run this connector' }
+                { defaultMessage: 'Test this connector' }
               )
             : i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription',
-                { defaultMessage: 'Unable to run connectors' }
+                { defaultMessage: 'Unable to test connectors' }
               )
         }
       >
@@ -605,7 +605,7 @@ const RunOperation: React.FunctionComponent<{
           data-test-subj="runConnector"
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorName',
-            { defaultMessage: 'Run' }
+            { defaultMessage: 'Test' }
           )}
           onClick={onRun}
           iconType={'play'}
