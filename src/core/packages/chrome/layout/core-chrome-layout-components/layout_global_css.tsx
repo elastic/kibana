@@ -12,6 +12,8 @@ import { Global, css } from '@emotion/react';
 import { layoutVar, layoutVarName } from '@kbn/core-chrome-layout-constants';
 import { useLayoutState } from './layout_state_context';
 
+const gap = 8; // 8px gap between layout areas, TODO: variable
+
 /**
  * Defines global CSS variables for layout structure using custom properties.
  * These variables are globally available for consistent and dynamic layout styling.
@@ -26,8 +28,6 @@ export const LayoutGlobalCSS = () => {
     sidebarWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
-    applicationMarginBottom,
-    applicationMarginRight,
   } = useLayoutState();
 
   const banner = css`
@@ -61,9 +61,9 @@ export const LayoutGlobalCSS = () => {
 
   const navigation = css`
     ${layoutVarName('navigation.top')}: ${bannerHeight + headerHeight}px;
-    ${layoutVarName('navigation.bottom')}: ${layoutVar('footer.height')};
+    ${layoutVarName('navigation.bottom')}: ${footerHeight + gap}px;
     ${layoutVarName('navigation.left')}: 0;
-    ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth}px);
+    ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth + gap}px);
     ${layoutVarName('navigation.height')}: calc(
       100vh - ${layoutVar('navigation.top')} - ${layoutVar('navigation.bottom')}
     );
@@ -79,21 +79,13 @@ export const LayoutGlobalCSS = () => {
       100vh - ${layoutVar('sidebar.top')} - ${layoutVar('sidebar.bottom')}
     );
     ${layoutVarName('sidebar.width')}: ${sidebarWidth}px;
-    ${layoutVarName('sidebar.marginBottom')}: ${applicationMarginBottom}px;
   `;
 
   const application = css`
-    ${layoutVarName('application.marginBottom')}: ${applicationMarginBottom}px;
-    ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
-
     ${layoutVarName('application.top')}: ${bannerHeight + headerHeight}px;
-    ${layoutVarName('application.bottom')}: calc(${layoutVar('footer.height')} + ${layoutVar(
-      'application.marginBottom'
-    )});
-    ${layoutVarName('application.left')}: ${navigationWidth}px;
-    ${layoutVarName('application.right')}: calc(${layoutVar(
-      'application.marginRight'
-    )} + ${sidebarWidth}px);
+    ${layoutVarName('application.bottom')}: ${footerHeight + gap}px;
+    ${layoutVarName('application.left')}: ${navigationWidth + gap}px;
+    ${layoutVarName('application.right')}: ${sidebarWidth + gap}px;
     ${layoutVarName('application.height')}: calc(
       100vh - ${layoutVar('application.top')} - ${layoutVar('application.bottom')}
     );

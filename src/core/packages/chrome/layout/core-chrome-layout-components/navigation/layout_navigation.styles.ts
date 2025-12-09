@@ -13,6 +13,7 @@ import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
+  grid-area: navigation;
   height: ${layoutVar('navigation.height')};
   width: ${layoutVar('navigation.width')};
   z-index: ${layoutLevels.navigation};

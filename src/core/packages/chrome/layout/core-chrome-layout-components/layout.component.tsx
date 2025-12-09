@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { LayoutApplication } from './application';
 import { LayoutBanner } from './banner';
 import { LayoutNavigation } from './navigation';
@@ -23,8 +24,6 @@ export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
   // application
   children: Slot;
 }
-
-const DEFAULT_GRID_COLUMN_GAP = '8px';
 
 /**
  * The chrome layout component that composes slots together.
@@ -72,21 +71,39 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     </LayoutApplication>
   );
 
+  const applicationGapLeft = (
+    <div
+      css={css`
+        grid-area: application-gap-left;
+      `}
+    />
+  );
+
+  const applicationGapRight = (
+    <div
+      css={css`
+        grid-area: application-gap-right;
+      `}
+    />
+  );
+
+  const gapBottom = (
+    <div
+      css={css`
+        grid-area: gap-bottom;
+      `}
+    />
+  );
+
   return (
     <div css={styles.css} style={styles.style}>
       {banner}
       {header}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `${layoutState.navigationWidth}px 1fr`,
-          columnGap: layoutState.isNavigationExpanded && layoutState.isSidePanelOpen ? DEFAULT_GRID_COLUMN_GAP : '0px',
-          gridArea: 'navigation-application',
-        }}
-      >
-        {navigation}
-        {application}
-      </div>
+      {navigation}
+      {applicationGapLeft}
+      {application}
+      {applicationGapRight}
+      {gapBottom}
       {footer}
       {sidebar}
     </div>

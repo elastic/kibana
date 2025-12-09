@@ -24,25 +24,39 @@ const cssProp = css`
   display: grid;
 
   grid-template-areas:
-    'banner banner'
-    'header header'
-    'navigation-application sidebar'
-    'footer footer';
+    'banner banner banner banner banner'
+    'header header header header header'
+    'navigation application-gap-left application application-gap-right sidebar'
+    'gap-bottom gap-bottom gap-bottom gap-bottom gap-bottom '
+    'footer footer footer footer footer';
 `;
+
+const gap = 8; // gap between application side edges, TODO: variable
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
-  const { sidebarWidth, bannerHeight, headerHeight, footerHeight } = layoutState;
+  const {
+    navigationWidth,
+    isSidePanelOpen,
+    sidebarWidth,
+    bannerHeight,
+    headerHeight,
+    footerHeight,
+  } = layoutState;
 
   const style = {
     gridTemplateColumns: `
+      ${navigationWidth}px
+      ${isSidePanelOpen ? gap : 0}px
       1fr
+      ${gap}px
       ${sidebarWidth}px
     `,
     gridTemplateRows: `
       ${bannerHeight}px
       ${headerHeight}px
       1fr
+      ${gap}px
       ${footerHeight}px
     `,
   };

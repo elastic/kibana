@@ -24,8 +24,6 @@ export type LayoutConfig = Pick<
   | 'sidebarWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
-  | 'applicationMarginRight'
-  | 'applicationMarginBottom'
 > & {
   isSidePanelOpen?: boolean;
 };
