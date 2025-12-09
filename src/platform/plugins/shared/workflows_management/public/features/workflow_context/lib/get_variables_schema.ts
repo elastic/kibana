@@ -12,27 +12,37 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { DataSetStepTypeId } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 
-type SimpleZodKind = 'string' | 'number' | 'boolean' | 'array' | 'null' | 'object' | 'undefined';
-const zodByKind: Record<SimpleZodKind, z.ZodTypeAny> = {
-  string: z.string(),
-  number: z.number(),
-  boolean: z.boolean(),
-  array: z.array(z.unknown()),
-  null: z.null(),
-  undefined: z.undefined(),
-  object: z.object({}).loose(),
-};
-
-// If you have a string like "string" | "number" | ...
-export function zodFromKind(value: string): z.ZodTypeAny {
-  let kind;
-  if (Array.isArray(value)) {
-    kind = 'array';
-  } else {
-    kind = typeof value;
+function inferZodTypeFromValue(value: unknown): z.ZodTypeAny {
+  if (typeof value === 'string') {
+    return z.string();
   }
-  // fallback to z.unknown() if not in the map
-  return zodByKind[kind as SimpleZodKind] ?? z.unknown();
+  if (typeof value === 'number') {
+    return z.number();
+  }
+  if (typeof value === 'boolean') {
+    return z.boolean();
+  }
+  if (value === null) {
+    return z.null();
+  }
+  if (value === undefined) {
+    return z.undefined();
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return z.array(z.unknown());
+    }
+    const firstElementType = inferZodTypeFromValue(value[0]);
+    return z.array(firstElementType);
+  }
+  if (typeof value === 'object') {
+    const objectSchema: Record<string, z.ZodTypeAny> = {};
+    for (const key of Object.keys(value)) {
+      objectSchema[key] = inferZodTypeFromValue((value as Record<string, unknown>)[key]);
+    }
+    return z.object(objectSchema);
+  }
+  return z.unknown();
 }
 
 export function getVariablesSchema(workflowExecutionGraph: WorkflowGraph, stepName: string) {
@@ -62,7 +72,7 @@ export function getVariablesSchema(workflowExecutionGraph: WorkflowGraph, stepNa
 
       for (const key of Object.keys(withConfig)) {
         const value = withConfig[key];
-        stepSchema[key] = zodFromKind(value);
+        stepSchema[key] = inferZodTypeFromValue(value);
       }
 
       variablesSchema = variablesSchema.extend(stepSchema);
