@@ -39,7 +39,6 @@ interface EntityHighlightsSettingsProps {
   entityType: string;
   entityIdentifier: string;
   assistantResult: {
-    aiResponse?: string;
     replacements?: Record<string, string>;
     formattedEntitySummary?: string;
     generatedAt?: number;
@@ -78,15 +77,10 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
 
   const getPromptContext = useCallback(
     async () =>
-      `### The following entity is under investigation:\nType: ${entityType}\nIdentifier: ${`\`${anonymizedEntityIdentifier}\``}\n#### Highlights:\n${
-        assistantResult?.aiResponse
-      }\n#### Context:\n\`\`\`json\n${assistantResult?.formattedEntitySummary}`,
-    [
-      anonymizedEntityIdentifier,
-      assistantResult?.aiResponse,
-      assistantResult?.formattedEntitySummary,
-      entityType,
-    ]
+      `### The following entity is under investigation:\nType: ${entityType}\nIdentifier: ${`\`${anonymizedEntityIdentifier}\``}\n#### Context:\n\`\`\`json\n${
+        assistantResult?.formattedEntitySummary
+      }`,
+    [anonymizedEntityIdentifier, assistantResult?.formattedEntitySummary, entityType]
   );
 
   const { showAssistantOverlay } = useAskAiAssistant({
@@ -143,12 +137,14 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               }
             )}
             key={'ask-ai-assistant'}
-            disabled={isLoading}
+            disabled={isLoading || !assistantResult}
           >
             <NewAgentBuilderAttachment
               onClick={() => {
-                openAgentBuilderFlyout();
-                closePopover();
+                if (assistantResult && !isLoading) {
+                  openAgentBuilderFlyout();
+                  closePopover();
+                }
               }}
               size="s"
             />
@@ -167,7 +163,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               closePopover();
             }}
             icon={<AssistantIcon />}
-            disabled={isLoading}
+            disabled={isLoading || !assistantResult}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
@@ -203,6 +199,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       isAgentBuilderEnabled,
       openAgentBuilderFlyout,
       isLoading,
+      assistantResult,
     ]
   );
 
