@@ -32,6 +32,7 @@ export const aiPromptStepDefinition = (
         request: context.contextManager.getFakeRequest(),
         chatModelOptions: {
           temperature: context.input.temperature,
+          maxRetries: 0,
         },
       });
       const modelInput = [
