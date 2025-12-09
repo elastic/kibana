@@ -249,7 +249,7 @@ export const bulkUpsertOperationsFactoryShared =
         ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel));
       }
     }
-    return ops;
+    return ops; // why using a separate sourceLabel vs monitoring label for buildUdateParams and buildCreateDoc? They are the same value.
   };
 
 export const makeOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
@@ -257,7 +257,7 @@ export const makeOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) => {
     let sourceLabel = 'entity_analytics_integration';
     if (source.type === 'index') {
-      sourceLabel = 'index_sync'; // sourceType is 'index' but label used is 'index_sync'. Inconsistent.
+      sourceLabel = 'index'; // want to update source label to index_sync. Currently just index.
     }
     return buildOps({
       users: usersChunk,

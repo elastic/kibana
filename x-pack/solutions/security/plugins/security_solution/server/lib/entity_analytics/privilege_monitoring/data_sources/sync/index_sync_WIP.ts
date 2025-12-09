@@ -10,6 +10,7 @@ import type { MonitoringEntitySource } from '../../../../../../common/api/entity
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import { createSourcesSyncService } from './sources_sync';
 import { createIndexUpdateDetectionService } from './update_detection/index/update_detection';
+import { createIndexDeletionDetectionService } from './deletion_detection/index/deletion_detection';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncServiceWiP>;
 
@@ -18,7 +19,7 @@ export const createIndexSyncServiceWiP = (
   soClient: SavedObjectsClientContract
 ) => {
   const updateDetectionService = createIndexUpdateDetectionService(dataClient, soClient);
-  // const deletionDetectionService = createIndexDeletionDetectionService(dataClient, soClient);
+  const deletionDetectionService = createIndexDeletionDetectionService(dataClient, soClient);
   const sourcesSyncService = createSourcesSyncService(dataClient);
   /**
    * Pattern matcher service to find privileged users based on matchers defined in saved objects
@@ -31,7 +32,7 @@ export const createIndexSyncServiceWiP = (
         // process each index source
         await updateDetectionService.updateDetection(source);
         // TODO: enable deletion detection once update detection is verified
-        // await deletionDetectionService.deletionDetection(source); commenting so updateDetetion can be tested independently in PR
+        await deletionDetectionService.deletionDetection(source);
       },
     });
   };

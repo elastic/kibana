@@ -33,10 +33,16 @@ export const createIndexDeletionDetectionService = (
       pageSize: DEFAULT_COMPOSITE_PAGE_SIZE,
     });
     const staleUsers = await findStaleUsers(source.id, allIndexUserNames, 'index');
+
     if (staleUsers.length === 0) {
       dataClient.log('debug', `No stale users to soft delete for source ${source.id}`);
+      return;
     }
     const ops = bulkUtilsService.bulkSoftDeleteOperations(staleUsers, dataClient.index, 'index');
+    if (ops.length === 0) {
+      dataClient.log('debug', `No bulk operations to execute for source ${source.id}`);
+      return;
+    }
     try {
       // soft delete the stale users, NOT outright delete.
       const resp = await esClient.bulk({ body: ops, refresh: 'wait_for' });
