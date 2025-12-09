@@ -17,7 +17,9 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
     name: 'custom',
     reverse: false,
     rangeType: 'number',
+    // @ts-expect-error - This can be null
     rangeMin: null,
+    // @ts-expect-error - This can be null
     rangeMax: null,
     progression: 'fixed',
     stops: [
@@ -31,12 +33,14 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
       {
         color: '#f6726a',
+        // @ts-expect-error - This can be null
         stop: null,
       },
     ],
     colorStops: [
       {
         color: '#24c292',
+        // @ts-expect-error - This can be null
         stop: null,
       },
       {
@@ -62,6 +66,7 @@ export const lowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
     reverse: false,
     rangeType: 'number',
     rangeMin: 300,
+    // @ts-expect-error - This can be null
     rangeMax: null,
     progression: 'fixed',
     stops: [
@@ -75,6 +80,7 @@ export const lowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
       {
         color: '#f6726a',
+        // @ts-expect-error - This can be null
         stop: null,
       },
     ],
@@ -105,6 +111,7 @@ export const upperLimitPalette: PaletteOutput<CustomPaletteParams> = {
     name: 'custom',
     reverse: false,
     rangeType: 'number',
+    // @ts-expect-error - This can be null
     rangeMin: null,
     rangeMax: 700,
     progression: 'fixed',
@@ -125,6 +132,7 @@ export const upperLimitPalette: PaletteOutput<CustomPaletteParams> = {
     colorStops: [
       {
         color: '#24c292',
+        // @ts-expect-error - This can be null
         stop: null,
       },
       {

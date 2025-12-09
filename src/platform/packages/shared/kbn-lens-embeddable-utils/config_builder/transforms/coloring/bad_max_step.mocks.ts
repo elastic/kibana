@@ -19,7 +19,9 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
     name: 'custom',
     reverse: false,
     rangeType: 'percent',
+    // @ts-expect-error - This can be null
     rangeMin: null,
+    // @ts-expect-error - This can be null
     rangeMax: null,
     progression: 'fixed',
     stops: [
@@ -39,6 +41,7 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
     colorStops: [
       {
         color: '#24c292',
+        // @ts-expect-error - This can be null
         stop: null,
       },
       {
@@ -64,6 +67,7 @@ export const lowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
     reverse: false,
     rangeType: 'percent',
     rangeMin: 0,
+    // @ts-expect-error - This can be null
     rangeMax: null,
     progression: 'fixed',
     stops: [

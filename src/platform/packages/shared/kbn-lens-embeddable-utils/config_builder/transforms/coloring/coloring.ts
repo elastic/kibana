@@ -41,12 +41,14 @@ export function fromColorByValueAPIToLensState(
   const stops = config.steps.map(
     ({ lt, lte, color }): ColorStop => ({
       color,
-      stop: lt ?? lte ?? null, // we need to implicitly set this value to the domain max in client code
+      // @ts-expect-error - This can be null
+      stop: lt ?? lte ?? null,
     })
   );
   const colorStops = config.steps.map(
     ({ gte, color }): ColorStop => ({
       color,
+      // @ts-expect-error - This can be null
       stop: gte ?? null,
     })
   );
@@ -61,7 +63,9 @@ export function fromColorByValueAPIToLensState(
       name: 'custom',
       progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
+      // @ts-expect-error - This can be null
       rangeMin,
+      // @ts-expect-error - This can be null
       rangeMax,
       rangeType: config.range
         ? API_TO_LEGACY_RANGE_NAMES[config.range]

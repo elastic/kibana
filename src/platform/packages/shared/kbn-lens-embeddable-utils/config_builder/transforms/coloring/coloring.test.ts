@@ -53,14 +53,18 @@ describe('Color util transforms', () => {
           reverse: false,
           steps: 3,
           maxSteps: 5,
+          // @ts-expect-error - This can be null
           rangeMax: null,
+          // @ts-expect-error - This can be null
           rangeMin: null,
           stops: [
             { color: 'red', stop: 0 },
             { color: 'green', stop: 100 },
+            // @ts-expect-error - This can be null
             { color: 'blue', stop: null },
           ],
           colorStops: [
+            // @ts-expect-error - This can be null
             { color: 'red', stop: null },
             { color: 'green', stop: 0 },
             { color: 'blue', stop: 100 },
@@ -145,6 +149,7 @@ describe('Color util transforms', () => {
             { color: 'blue', stop: 100 },
           ],
           colorStops: [
+            // @ts-expect-error - This can be null
             { color: 'red', stop: null },
             { color: 'green', stop: 0 },
             { color: 'blue', stop: 50 },
@@ -295,6 +300,7 @@ describe('Color util transforms', () => {
             { color: 'blue', stop: 100 },
           ],
           colorStops: [
+            // @ts-expect-error - This can be null
             { color: 'red', stop: null },
             { color: 'green', stop: 0 },
             { color: 'blue', stop: 50 },
@@ -526,6 +532,7 @@ describe('Color util transforms', () => {
         // Currently the final stop value is set to the domain max or the implicit max value
         // instead of the more accurate rangeMax value. We need to override the final stop
         // value to the rangeMax value, to match that of the transformed state.
+        // @ts-expect-error - This can be null
         palette.params!.stops!.at(-1)!.stop = palette.params!.rangeMax ?? null;
 
         expect(returnedPaletteState).toEqual(palette);

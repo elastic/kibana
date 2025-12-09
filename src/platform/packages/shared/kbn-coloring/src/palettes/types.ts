@@ -145,8 +145,8 @@ export interface CustomPaletteParams {
    * @deprecated - appears to be unused
    */
   progression?: 'fixed';
-  rangeMin?: number | null;
-  rangeMax?: number | null;
+  rangeMin?: number; // this can be null
+  rangeMax?: number; // this can be null
   /** upper bounds of color stops ranges */
   stops?: ColorStop[];
   /** lower bounds of color stops ranges */
@@ -162,5 +162,5 @@ export type RequiredPaletteParamTypes = Assign<
 
 export interface ColorStop {
   color: string;
-  stop: number | null;
+  stop: number; // this can be null
 }
