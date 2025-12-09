@@ -25,5 +25,6 @@ module.exports = {
     deployment_agnostic_test_context: require('./rules/deployment_agnostic_test_context'),
     scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
+    require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
   },
 };

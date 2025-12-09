@@ -114,6 +114,7 @@ describe('createToggleColumnCellActionFactory', () => {
       TableId.alertsOnCasePage,
       TableId.alertsOnRuleDetailsPage,
       TableId.alertsRiskInputs,
+      TableId.alertsOnAttacksPage,
     ].forEach((scopeId) => {
       it(`should call toggleColumn on the visible alerts table to add a column in alert for TableId ${scopeId}`, async () => {
         const name = 'fake-field-name';
@@ -136,6 +137,7 @@ describe('createToggleColumnCellActionFactory', () => {
       TableId.alertsOnCasePage,
       TableId.alertsOnRuleDetailsPage,
       TableId.alertsRiskInputs,
+      TableId.alertsOnAttacksPage,
     ].forEach((scopeId) => {
       it(`should call toggleColumn on the visible alerts table to remove a column in alert for TableId ${scopeId}`, async () => {
         await toggleColumnAction.execute({

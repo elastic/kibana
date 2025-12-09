@@ -25,7 +25,7 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import type { Attachment } from '@kbn/connector-schemas/email';
-import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
+import { getDeleteTokenAxiosInterceptor } from '@kbn/actions-plugin/server/lib';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
 
@@ -147,7 +147,7 @@ export async function sendEmailWithExchange(
     Authorization: accessToken,
   };
 
-  const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
+  const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
     connectorTokenClient,
     connectorId,
   });

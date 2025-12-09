@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { AgentPolicyCreateState } from '../../applications/fleet/sections/agents/components';
 import {
@@ -41,6 +41,9 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   isFleetServerPolicy,
   refreshAgentPolicies,
 }) => {
+  // Track if we've done the initial auto-selection to avoid re-selecting after user clears
+  const hasAutoSelectedRef = useRef(false);
+
   const regularAgentPolicies = useMemo(() => {
     return agentPolicies.filter(
       (policy) =>
@@ -49,16 +52,18 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   }, [agentPolicies, excludeFleetServer]);
 
   useEffect(() => {
-    // Select default value if policy has no fleet server
+    // Select default value if policy has no fleet server (only on initial load)
     if (
+      !hasAutoSelectedRef.current &&
       regularAgentPolicies.length === 1 &&
       !selectedPolicyId &&
       excludeFleetServer !== false &&
       !policyHasFleetServer(regularAgentPolicies[0])
     ) {
       setSelectedPolicyId(regularAgentPolicies[0].id);
+      hasAutoSelectedRef.current = true;
     }
-  }, [regularAgentPolicies, selectedPolicyId, setSelectedPolicyId, excludeFleetServer]);
+  }, [regularAgentPolicies, setSelectedPolicyId, excludeFleetServer, selectedPolicyId]);
 
   const onAgentPolicyChange = useCallback(
     async (key?: string, policy?: AgentPolicy) => {

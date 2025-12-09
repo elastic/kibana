@@ -126,6 +126,7 @@ export async function readSignificantEventsFromAlertsIndices(
           stationary: { p_value: 0, change_point: 0 },
         },
       },
+      severity_score: queryLink.query.severity_score,
     }));
   }
 
@@ -147,6 +148,7 @@ export async function readSignificantEventsFromAlertsIndices(
           }))
         : [],
       change_points: changePoints,
+      severity_score: queryLink.query.severity_score,
     };
   });
 
@@ -164,6 +166,7 @@ export async function readSignificantEventsFromAlertsIndices(
           stationary: { p_value: 0, change_point: 0 },
         },
       },
+      severity_score: queryLink.query.severity_score,
     }));
 
   return [...significantEvents, ...notFoundSignificantEvents];

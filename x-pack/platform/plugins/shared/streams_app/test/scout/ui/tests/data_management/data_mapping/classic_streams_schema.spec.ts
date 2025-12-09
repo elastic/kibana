@@ -15,8 +15,7 @@ test.describe(
   'Stream data mapping - schema editor - Classic Streams',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Create a classic stream
       await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM_NAME });
     });
@@ -29,16 +28,16 @@ test.describe(
 
       await pageObjects.streams.gotoSchemaEditorTab(CLASSIC_STREAM_NAME);
       await pageObjects.streams.verifyClassicBadge();
+      await pageObjects.streams.expectSchemaEditorTableVisible();
     });
 
     test.afterAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
     });
 
-    test('read-only user cannot add/edit fields', async ({ page, browserAuth, pageObjects }) => {
+    test('read-only user cannot add/edit fields', async ({ page, browserAuth }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoSchemaEditorTab(CLASSIC_STREAM_NAME);
-      await pageObjects.streams.expectSchemaEditorTableVisible();
+      await page.reload();
 
       // Verify "Add field" button is not visible for read-only user
       await expect(page.getByTestId('streamsAppContentAddFieldButton')).toBeHidden();
@@ -48,8 +47,6 @@ test.describe(
     });
 
     test('copy_to advanced parameter works', async ({ page, pageObjects }) => {
-      await pageObjects.streams.expectSchemaEditorTableVisible();
-
       // First, add a target field
       await page.getByTestId('streamsAppContentAddFieldButton').click();
       await expect(
@@ -129,6 +126,46 @@ test.describe(
       const codeValue = await pageObjects.streams.advancedSettingsCodeBlock.getCodeValue();
       expect(codeValue).toContain('copy_to');
       expect(codeValue).toContain(targetFieldName);
+    });
+
+    test('allows mapping a field as geo_point', async ({ page, pageObjects }) => {
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      await page.getByTestId('streamsAppContentAddFieldButton').click();
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeVisible();
+
+      const fieldName = 'attributes.geo_test';
+      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
+      await page.keyboard.type(fieldName);
+      await page.keyboard.press('Enter');
+
+      await pageObjects.streams.setFieldMappingType('geo_point');
+
+      await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
+      await pageObjects.streams.reviewStagedFieldMappingChanges();
+      await pageObjects.streams.submitSchemaChanges();
+
+      await pageObjects.toasts.closeAll();
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      await pageObjects.streams.searchFields(fieldName);
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'name',
+        rowIndex: 0,
+        value: fieldName,
+      });
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'type',
+        rowIndex: 0,
+        value: 'geo_point',
+      });
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'status',
+        rowIndex: 0,
+        value: 'Mapped',
+      });
     });
   }
 );
