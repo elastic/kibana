@@ -48,7 +48,6 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
