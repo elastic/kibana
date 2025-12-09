@@ -46,6 +46,7 @@ import { usePropsApi } from './use_props_api';
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
   getCreationOptions: (
+    initialState: ControlGroupRuntimeState,
     builder: ControlGroupStateBuilder
   ) => Promise<Partial<ControlGroupCreationOptions>>;
   viewMode?: ViewMode;

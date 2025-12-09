@@ -204,10 +204,11 @@ export const EditExample = ({ dataView }: Props) => {
         ) : null}
         <ControlGroupRenderer
           onApiAvailable={setControlGroupAPI}
-          getCreationOptions={async (builder) => {
+          getCreationOptions={async (initialState, builder) => {
             const persistedState = await onLoad();
             return {
               initialState: {
+                ...initialState,
                 ...persistedState,
               },
               getEditorOptions: () => ({

@@ -245,10 +245,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             >
               <ControlGroupRenderer
                 onApiAvailable={setControlGroupAPI}
-                getCreationOptions={async (builder) => {
+                getCreationOptions={async (initialState, builder) => {
                   const panels = stateStorage.get<ControlPanelsState>('controlPanels');
 
-                  const initialState = { initialChildControlState: {} };
                   if (!panels) {
                     builder.addOptionsListControl(initialState, {
                       dataViewId: dataView?.id!,

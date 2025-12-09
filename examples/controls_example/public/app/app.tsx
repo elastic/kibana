@@ -30,7 +30,7 @@ const App = ({
           </EuiPageSection>
           <EuiPageTemplate.Section>
             <EuiPageSection>
-              <ControlGroupRendererExamples data={data} navigation={navigation} />;{' '}
+              <ControlGroupRendererExamples data={data} navigation={navigation} />
             </EuiPageSection>
           </EuiPageTemplate.Section>
         </EuiPageBody>

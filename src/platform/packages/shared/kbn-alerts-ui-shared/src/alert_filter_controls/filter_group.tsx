@@ -311,9 +311,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
-    async ({ addOptionsListControl }: ControlGroupStateBuilder) => {
+    async (defaultState, { addOptionsListControl }: ControlGroupStateBuilder) => {
       const initialState: ControlGroupRuntimeState = {
-        initialChildControlState: {},
+        ...defaultState,
         ignoreParentSettings: {
           ignoreValidations: true,
         },

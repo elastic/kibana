@@ -12,7 +12,11 @@ import type { BehaviorSubject } from 'rxjs';
 
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { controlGroupStateBuilder } from './control_group_state_builder';
-import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
+import type {
+  ControlGroupCreationOptions,
+  ControlGroupRuntimeState,
+  ControlPanelsState,
+} from './types';
 
 export const useInitialControlGroupState = (
   getCreationOptions: ControlGroupRendererProps['getCreationOptions'],
@@ -28,7 +32,8 @@ export const useInitialControlGroupState = (
 
   useEffect(() => {
     let cancelled = false;
-    getCreationOptions(controlGroupStateBuilder).then((creationOptions) => {
+    const emptyState: ControlGroupRuntimeState = { initialChildControlState: {} };
+    getCreationOptions(emptyState, controlGroupStateBuilder).then((creationOptions) => {
       if (cancelled) return;
       getEditorConfig.current = creationOptions.getEditorConfig;
       const ignoreParentSettings = creationOptions.initialState?.ignoreParentSettings;

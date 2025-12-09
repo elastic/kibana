@@ -71,8 +71,7 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
             setApi(nextApi);
           }}
           dataLoading={dataLoading}
-          getCreationOptions={async (builder: ControlGroupStateBuilder) => {
-            const initialState = {};
+          getCreationOptions={async (initialState, builder: ControlGroupStateBuilder) => {
             builder.addTimeSliderControl(initialState);
             return {
               initialState,

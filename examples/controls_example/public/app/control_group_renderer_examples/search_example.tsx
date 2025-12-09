@@ -146,8 +146,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
 
         <ControlGroupRenderer
           filters={filters}
-          getCreationOptions={async (builder) => {
-            const initialState = {};
+          getCreationOptions={async (initialState, builder) => {
             await builder.addDataControlFromField(
               initialState,
               {
