@@ -6,11 +6,10 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiHorizontalRule,
   EuiFlexItem,
   EuiCallOut,
   EuiLink,
@@ -25,15 +24,12 @@ import { useBreadcrumbs } from '../../../../hooks';
 
 import { PackageListGrid } from '../../components/package_list_grid';
 
-import { CategoryFacets, ExtendedIntegrationCategory } from '../home/category_facets';
-
 import { categoryExists } from '../home';
-
-import { useAvailablePackages } from '../home/hooks/use_available_packages';
 
 import { PackageGrid } from './components/package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { SideBar } from './components/side_bar';
+import { useBrowseIntegrationHook } from './hooks';
 
 const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
   statusCode,
@@ -113,13 +109,12 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   const euiTheme = useEuiTheme();
 
   const {
+    allCategories,
     initialSelectedCategory,
     selectedCategory,
     setCategory,
-    allCategories,
     mainCategories,
     onlyAgentlessFilter,
-    setOnlyAgentlessFilter,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
@@ -134,41 +129,8 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
-
-  const onCategoryChange = useCallback(
-    ({ id }: { id: string }) => {
-      setCategory(id as ExtendedIntegrationCategory);
-      setSearchTerm('');
-      setSelectedSubCategory(undefined);
-      setUrlandPushHistory({
-        searchString: '',
-        categoryId: id,
-        subCategoryId: '',
-        onlyAgentless: onlyAgentlessFilter,
-      });
-    },
-    [setCategory, setSearchTerm, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
-  );
-
-  const onOnlyAgentlessFilterChange = useCallback(
-    (enabled: boolean) => {
-      setOnlyAgentlessFilter(enabled);
-      setUrlandPushHistory({
-        searchString: searchTerm,
-        categoryId: selectedCategory,
-        subCategoryId: selectedSubCategory || '',
-        onlyAgentless: enabled,
-      });
-    },
-    [
-      setOnlyAgentlessFilter,
-      setUrlandPushHistory,
-      searchTerm,
-      selectedCategory,
-      selectedSubCategory,
-    ]
-  );
+    onCategoryChange,
+  } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlandReplaceHistory({
@@ -178,26 +140,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       onlyAgentless: onlyAgentlessFilter,
     });
     return null;
-  }
-
-  let controls = [
-    <EuiFlexItem grow={false}>
-      <EuiHorizontalRule margin="m" />
-    </EuiFlexItem>,
-  ];
-
-  if (mainCategories) {
-    controls = [
-      <EuiFlexItem className="eui-yScrollWithShadows">
-        <CategoryFacets
-          isLoading={isLoading}
-          categories={mainCategories}
-          selectedCategory={selectedCategory}
-          onCategoryChange={onCategoryChange}
-        />
-      </EuiFlexItem>,
-      ...controls,
-    ];
   }
 
   let noEprCallout;
@@ -246,7 +188,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   return (
     <PackageListGrid
       isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
-      controls={controls}
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
       list={filteredCards}
