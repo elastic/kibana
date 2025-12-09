@@ -45,26 +45,13 @@ export interface PrivMatchersAggregation {
   };
 }
 
-export interface PrivMatcherModeConfig {
-  useSyncMarkers: boolean;
-  emptyMatcherPolicy: 'none' | 'all';
-}
-
-export const PRIV_MATCHER_MODE_CONFIG: Record<MonitoringEntitySyncType, PrivMatcherModeConfig> = {
+export const PRIV_MATCHER_MODE_CONFIG: Record<MonitoringEntitySyncType, boolean> = {
   /**
    * - Uses lastProcessedTimestamp
-   * - If no matchers → return 0 privileged users
    */
-  entity_analytics_integration: {
-    useSyncMarkers: true,
-    emptyMatcherPolicy: 'none',
-  },
+  entity_analytics_integration: true,
   /**
-   * - Ignores timestamps (full scan style)
-   * - If no matchers → treat all as privileged
+   * - Ignores timestamps
    */
-  index: {
-    useSyncMarkers: false,
-    emptyMatcherPolicy: 'all',
-  },
+  index: false,
 };

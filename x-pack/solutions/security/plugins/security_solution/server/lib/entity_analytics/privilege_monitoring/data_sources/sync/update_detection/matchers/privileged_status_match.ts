@@ -32,24 +32,14 @@ export const createPatternMatcherService = ({
   const searchService = createSearchService(dataClient);
   const syncMarkerService = createSyncMarkersService(dataClient, soClient);
 
-  const modeConfig = PRIV_MATCHER_MODE_CONFIG[sourceType];
   const syncMarkersStrategy = createSyncMarkersStrategy(
-    modeConfig.useSyncMarkers,
+    PRIV_MATCHER_MODE_CONFIG[sourceType],
     syncMarkerService
   );
 
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonBulkUser[]> => {
-    if (!source.matchers?.length && modeConfig.emptyMatcherPolicy === 'none') {
-      dataClient.log(
-        'info',
-        `No matchers for source id=${source.id ?? '(unknown)'} (type=${
-          source.type
-        }). Returning 0 privileged users.`
-      );
-      return [];
-    }
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
     // the last processed user from previous task run.
     const lastProcessedTimeStamp = await syncMarkersStrategy.getLastProcessedMarker(source);
