@@ -25,7 +25,7 @@ describe('EisPromotionalCallout', () => {
   const dataId = `${promoId}-eis-promo-callout`;
   const ctaLink = 'https://example.com';
   const direction: EisPromotionalCalloutProps['direction'] = 'row';
-  const mockOnSkipTour = jest.fn();
+  const mockOnDismissTour = jest.fn();
 
   const renderEisPromotionalCallout = (props?: Partial<EisPromotionalCalloutProps>) => {
     return render(
@@ -45,7 +45,7 @@ describe('EisPromotionalCallout', () => {
     jest.clearAllMocks();
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onSkipTour: mockOnSkipTour,
+      onDismissTour: mockOnDismissTour,
     });
   });
 
@@ -67,19 +67,19 @@ describe('EisPromotionalCallout', () => {
     expect(screen.getByAltText(EIS_PROMO_CALLOUT_ICON_ALT)).toBeInTheDocument();
   });
 
-  it('calls onSkipTour when dismiss button is clicked', () => {
+  it('calls onDismissTour when dismiss button is clicked', () => {
     renderEisPromotionalCallout();
 
-    const dismissButton = screen.getByLabelText('Dismiss');
+    const dismissButton = screen.getByTestId('eisPromoCalloutDismissBtn');
     fireEvent.click(dismissButton);
 
-    expect(mockOnSkipTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
   });
 
   it('does not render callout when promo is not visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: false,
-      onSkipTour: mockOnSkipTour,
+      onDismissTour: mockOnDismissTour,
     });
 
     renderEisPromotionalCallout();

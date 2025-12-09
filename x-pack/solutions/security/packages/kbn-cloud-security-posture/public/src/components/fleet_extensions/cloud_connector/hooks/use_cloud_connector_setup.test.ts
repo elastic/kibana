@@ -18,6 +18,11 @@ jest.mock('../utils', () => ({
   updateInputVarsWithCredentials: jest.fn(),
   updatePolicyInputs: jest.fn(),
   isAzureCloudConnectorVars: jest.fn(),
+  isCloudConnectorNameValid: jest.fn((name: string | undefined) => {
+    if (!name) return false;
+    const trimmedLength = name.trim().length;
+    return trimmedLength > 0 && name.length <= 255;
+  }),
 }));
 
 import {
