@@ -158,12 +158,21 @@ describe('Indices Metadata - MetadataReceiver', () => {
       expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
         name: '*',
         expand_wildcards: ['open', 'hidden'],
-        filter_path: ['data_streams.name', 'data_streams.indices'],
+        filter_path: [
+          'data_streams.name',
+          'data_streams.indices',
+          'data_streams.lifecycle.enabled',
+          'data_streams.lifecycle.data_retention',
+        ],
       });
 
       expect(result).toEqual([
         {
           datastream_name: 'test-datastream',
+          dsl: {
+            enabled: false,
+            data_retention: undefined,
+          },
           indices: [
             {
               index_name: 'test-index-1',
@@ -203,6 +212,10 @@ describe('Indices Metadata - MetadataReceiver', () => {
       expect(result).toEqual([
         {
           datastream_name: 'test-datastream',
+          dsl: {
+            enabled: false,
+            data_retention: undefined,
+          },
           indices: [],
         },
       ]);
@@ -214,6 +227,275 @@ describe('Indices Metadata - MetadataReceiver', () => {
 
       await expect(receiver.getDataStreams()).rejects.toThrow('Elasticsearch error');
       expect(logger.error).toHaveBeenCalledWith('Error fetching datastreams', { error });
+    });
+
+    it.each([
+      { description: '7 days', retention: '7d' },
+      { description: '30 days', retention: '30d' },
+      { description: '90 days', retention: '90d' },
+      { description: '365 days', retention: '365d' },
+      { description: '1 year', retention: '1y' },
+    ])('should handle DSL enabled with retention: $description', async ({ retention }) => {
+      const mockResponse = {
+        data_streams: [
+          {
+            name: 'logs-test',
+            lifecycle: {
+              enabled: true,
+              data_retention: retention,
+            },
+            indices: [
+              {
+                index_name: '.ds-logs-test-000001',
+              },
+            ],
+          },
+        ],
+      };
+
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await receiver.getDataStreams();
+
+      expect(result).toEqual([
+        {
+          datastream_name: 'logs-test',
+          dsl: {
+            enabled: true,
+            data_retention: retention,
+          },
+          indices: [
+            {
+              index_name: '.ds-logs-test-000001',
+              ilm_policy: undefined,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should handle DSL enabled without retention period', async () => {
+      const mockResponse = {
+        data_streams: [
+          {
+            name: 'logs-test',
+            lifecycle: {
+              enabled: true,
+            },
+            indices: [
+              {
+                index_name: '.ds-logs-test-000001',
+              },
+            ],
+          },
+        ],
+      };
+
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await receiver.getDataStreams();
+
+      expect(result).toEqual([
+        {
+          datastream_name: 'logs-test',
+          dsl: {
+            enabled: true,
+            data_retention: undefined,
+          },
+          indices: [
+            {
+              index_name: '.ds-logs-test-000001',
+              ilm_policy: undefined,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should handle multiple datastreams with different DSL configurations', async () => {
+      const mockResponse = {
+        data_streams: [
+          {
+            name: 'logs-enabled-with-retention',
+            lifecycle: {
+              enabled: true,
+              data_retention: '30d',
+            },
+            indices: [{ index_name: '.ds-logs-1-000001' }],
+          },
+          {
+            name: 'logs-enabled-no-retention',
+            lifecycle: {
+              enabled: true,
+            },
+            indices: [{ index_name: '.ds-logs-2-000001' }],
+          },
+          {
+            name: 'logs-disabled-no-lifecycle',
+            indices: [{ index_name: '.ds-logs-3-000001' }],
+          },
+          {
+            name: 'logs-disabled-with-retention',
+            lifecycle: {
+              enabled: false,
+              data_retention: '7d',
+            },
+            indices: [{ index_name: '.ds-logs-4-000001' }],
+          },
+        ],
+      };
+
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await receiver.getDataStreams();
+
+      expect(result).toHaveLength(4);
+      expect(result).toEqual([
+        {
+          datastream_name: 'logs-enabled-with-retention',
+          dsl: { enabled: true, data_retention: '30d' },
+          indices: [{ index_name: '.ds-logs-1-000001', ilm_policy: undefined }],
+        },
+        {
+          datastream_name: 'logs-enabled-no-retention',
+          dsl: { enabled: true, data_retention: undefined },
+          indices: [{ index_name: '.ds-logs-2-000001', ilm_policy: undefined }],
+        },
+        {
+          datastream_name: 'logs-disabled-no-lifecycle',
+          dsl: { enabled: false, data_retention: undefined },
+          indices: [{ index_name: '.ds-logs-3-000001', ilm_policy: undefined }],
+        },
+        {
+          datastream_name: 'logs-disabled-with-retention',
+          dsl: { enabled: false, data_retention: '7d' },
+          indices: [{ index_name: '.ds-logs-4-000001', ilm_policy: undefined }],
+        },
+      ]);
+    });
+
+    it('should handle null lifecycle object', async () => {
+      const mockResponse = {
+        data_streams: [
+          {
+            name: 'logs-null-lifecycle',
+            lifecycle: null,
+            indices: [{ index_name: '.ds-logs-000001' }],
+          },
+        ],
+      };
+
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await receiver.getDataStreams();
+
+      expect(result).toEqual([
+        {
+          datastream_name: 'logs-null-lifecycle',
+          dsl: {
+            enabled: false,
+            data_retention: undefined,
+          },
+          indices: [{ index_name: '.ds-logs-000001', ilm_policy: undefined }],
+        },
+      ]);
+    });
+
+    it('should handle null data_retention value', async () => {
+      const mockResponse = {
+        data_streams: [
+          {
+            name: 'logs-null-retention',
+            lifecycle: {
+              enabled: true,
+              data_retention: null,
+            },
+            indices: [{ index_name: '.ds-logs-000001' }],
+          },
+        ],
+      };
+
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await receiver.getDataStreams();
+
+      expect(result).toEqual([
+        {
+          datastream_name: 'logs-null-retention',
+          dsl: {
+            enabled: true,
+            data_retention: null,
+          },
+          indices: [{ index_name: '.ds-logs-000001', ilm_policy: undefined }],
+        },
+      ]);
+    });
+
+    it.each([
+      { description: 'hours', retention: '24h' },
+      { description: 'minutes', retention: '1440m' },
+      { description: 'mixed case', retention: '30D' },
+      { description: 'with spaces', retention: '7 d' },
+      { description: 'empty string', retention: '' },
+    ])('should preserve retention format as-is: $description', async ({ retention }) => {
+      const mockResponse = {
+        data_streams: [
+          {
+            name: 'logs-format-test',
+            lifecycle: {
+              enabled: true,
+              data_retention: retention,
+            },
+            indices: [],
+          },
+        ],
+      };
+
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await receiver.getDataStreams();
+
+      expect(result[0].dsl?.data_retention).toBe(retention);
+    });
+
+    it('should handle datastreams with both DSL and ILM policy', async () => {
+      const mockResponse = {
+        data_streams: [
+          {
+            name: 'logs-both-dsl-ilm',
+            lifecycle: {
+              enabled: true,
+              data_retention: '30d',
+            },
+            indices: [
+              {
+                index_name: '.ds-logs-000001',
+                ilm_policy: 'logs-policy',
+              },
+            ],
+          },
+        ],
+      };
+
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await receiver.getDataStreams();
+
+      expect(result).toEqual([
+        {
+          datastream_name: 'logs-both-dsl-ilm',
+          dsl: {
+            enabled: true,
+            data_retention: '30d',
+          },
+          indices: [
+            {
+              index_name: '.ds-logs-000001',
+              ilm_policy: 'logs-policy',
+            },
+          ],
+        },
+      ]);
     });
   });
 
