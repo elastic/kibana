@@ -29,25 +29,8 @@ export function buildSectionDescription({
   type,
   groupingName,
 }: BuildSectionDescriptionParams): string | undefined {
-  const fields: FieldInfo[] = [];
-
-  if (serviceName?.value) {
-    fields.push(serviceName);
-  }
-  if (culprit?.value) {
-    fields.push(culprit);
-  }
-  if (message?.value) {
-    fields.push(message);
-  }
-  if (type?.value) {
-    fields.push(type);
-  }
-  if (groupingName?.value) {
-    fields.push(groupingName);
-  }
-
-  const fieldsWithValues = fields.filter((field) => field.value).map((field) => field.field);
+  const fields: (FieldInfo | undefined)[] = [serviceName, culprit, message, type, groupingName];
+  const fieldsWithValues = fields.filter((field) => field?.value).map((field) => field?.field);
 
   if (fieldsWithValues.length === 0) {
     return undefined;
