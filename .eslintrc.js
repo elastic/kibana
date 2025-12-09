@@ -816,7 +816,7 @@ module.exports = {
             /* Files that ARE allowed to use devDependencies */
             devDependencies: [...DEV_PATTERNS],
             peerDependencies: true,
-            packageDir: '.',
+            packageDir: __dirname,
           },
         ],
       },
@@ -2067,7 +2067,7 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            packageDir: '.',
+            packageDir: __dirname,
           },
         ],
       },
@@ -2701,6 +2701,7 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
