@@ -41,12 +41,12 @@ export function getEsqlQuery({
   const conditions: string[] = [];
   const params: Record<string, string> = {};
 
-  if (!serviceName) {
-    return undefined;
-  } else {
+  if (serviceName) {
     const paramName = 'serviceName';
     conditions.push(`${fieldConstants.SERVICE_NAME_FIELD} == ?${paramName}`);
     params[paramName] = serviceName;
+  } else {
+    return undefined;
   }
 
   if (culprit) {
