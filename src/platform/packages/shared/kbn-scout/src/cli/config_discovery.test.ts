@@ -10,11 +10,10 @@
 import fs from 'fs';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getScoutPlaywrightConfigs } from '../config';
+import { getScoutPlaywrightConfigs } from '../servers/configs';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
 import { measurePerformance } from '../common';
-import { validateWithScoutCiConfig } from '../config/discovery';
-
+import { validateWithScoutCiConfig } from '../servers/configs/discovery';
 jest.mock('fs');
 
 jest.mock('@kbn/scout-info', () => ({
@@ -25,11 +24,11 @@ jest.mock('../common', () => ({
   measurePerformance: jest.fn(),
 }));
 
-jest.mock('../config', () => ({
+jest.mock('../servers/configs', () => ({
   getScoutPlaywrightConfigs: jest.fn(),
 }));
 
-jest.mock('../config/discovery', () => ({
+jest.mock('../servers/configs/discovery', () => ({
   validateWithScoutCiConfig: jest.fn(),
 }));
 
