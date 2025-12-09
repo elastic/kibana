@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RestoreConfig, LoadResult } from '../types';
+import { getErrorMessage } from '../utils';
+import {
+  registerUrlRepository,
+  getSnapshotMetadata,
+  deleteRepository,
+  generateRepoName,
+} from './repository';
+import { filterIndicesToRestore, restoreIndices, waitForRestore } from './restore';
+
+export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
+  const { esClient, logger, snapshotUrl, indices } = config;
+
+  const result: LoadResult = {
+    success: false,
+    snapshotName: '',
+    restoredIndices: [],
+    errors: [],
+  };
+
+  const repoName = generateRepoName();
+
+  try {
+    logger.info('Step 1/3: Registering snapshot repository...');
+    await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
+
+    logger.info('Step 2/3: Retrieving snapshot metadata...');
+    const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName });
+    result.snapshotName = snapshotInfo.snapshot;
+
+    const indicesToRestore = indices
+      ? filterIndicesToRestore(snapshotInfo.indices, indices)
+      : snapshotInfo.indices;
+
+    logger.info(`Found ${indicesToRestore.length} indices to restore`);
+
+    if (indicesToRestore.length === 0) {
+      throw new Error(
+        `No indices in snapshot match the specified patterns: ${indices?.join(', ')}. ` +
+          `Available indices: ${snapshotInfo.indices.slice(0, 10).join(', ')}${
+            snapshotInfo.indices.length > 10 ? '...' : ''
+          }`
+      );
+    }
+
+    logger.info('Step 3/3: Restoring indices...');
+    const restoredIndices = await restoreIndices({
+      esClient,
+      logger,
+      repoName,
+      snapshotName: snapshotInfo.snapshot,
+      indices: indicesToRestore,
+    });
+    result.restoredIndices = restoredIndices;
+
+    await waitForRestore({ esClient, logger, restoredIndices });
+
+    result.success = true;
+    logger.info(`Restore completed: ${restoredIndices.length} indices restored successfully`);
+  } catch (error) {
+    result.errors.push(getErrorMessage(error));
+    logger.error(`Snapshot restore failed: ${getErrorMessage(error)}`);
+  } finally {
+    logger.debug('Cleaning up...');
+    await deleteRepository({ esClient, logger, repoName });
+  }
+
+  return result;
+}

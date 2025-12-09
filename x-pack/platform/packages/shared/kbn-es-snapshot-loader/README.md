@@ -1,0 +1,162 @@
+# @kbn/es-snapshot-loader
+
+Load Elasticsearch snapshots for testing environments. Provides two operations:
+
+- **restore** - Basic snapshot restore directly to Elasticsearch
+- **replay** - Restore with timestamp transformation for data streams, making historical data appear fresh
+
+## Limitations
+
+**Currently only `file://` URLs are supported** (local file share snapshot repositories). Elasticsearch must be started with `path.repo` configured to allow URL-based repository registration.
+
+## CLI Usage
+
+### Restore
+
+Restore a snapshot directly to Elasticsearch:
+
+```bash
+node scripts/es_snapshot_loader restore \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200
+
+# With index filtering
+node scripts/es_snapshot_loader restore \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --indices "my-index-*,other-index-*"
+
+# With rename
+node scripts/es_snapshot_loader restore \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --rename-pattern "(.+)" \
+  --rename-replacement "restored-$1"
+```
+
+### Replay
+
+Restore data streams with timestamp transformation. The most recent record in the snapshot will appear as "now", with all other timestamps adjusted relative to it:
+
+```bash
+node scripts/es_snapshot_loader replay \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200
+
+# With custom data stream patterns
+node scripts/es_snapshot_loader replay \
+  --snapshot-url file:///path/to/snapshot \
+  --kibana-url http://localhost:5601 \
+  --patterns "logs-*,metrics-*,traces-*"
+```
+
+### Common Options
+
+| Flag             | Description                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| `--snapshot-url` | URL to the snapshot directory (required). Only `file://` URLs are currently supported. |
+| `--es-url`       | Elasticsearch URL with credentials (e.g., `http://elastic:changeme@localhost:9200`)    |
+| `--kibana-url`   | Kibana URL for ES requests proxied through Kibana (e.g., `http://localhost:5601`)      |
+
+### Restore-specific Options
+
+| Flag                   | Description                               |
+| ---------------------- | ----------------------------------------- |
+| `--indices`            | Comma-separated index patterns to restore |
+| `--rename-pattern`     | Regex pattern for renaming indices        |
+| `--rename-replacement` | Replacement string for rename             |
+
+### Replay-specific Options
+
+| Flag         | Description                                                                           |
+| ------------ | ------------------------------------------------------------------------------------- |
+| `--patterns` | Comma-separated data stream patterns to replay (default: `logs-*,metrics-*,traces-*`) |
+
+## Programmatic API
+
+### Basic Restore
+
+```typescript
+import { restoreSnapshot } from '@kbn/es-snapshot-loader';
+
+const result = await restoreSnapshot({
+  esClient,
+  logger,
+  snapshotUrl: 'file:///path/to/snapshot',
+  indices: ['my-index-*'],
+  renamePattern: '(.+)',
+  renameReplacement: 'restored-$1',
+});
+
+if (result.success) {
+  console.log(`Restored ${result.restoredIndices.length} indices`);
+}
+```
+
+### Replay with Timestamp Transformation
+
+```typescript
+import { replaySnapshot } from '@kbn/es-snapshot-loader';
+
+const result = await replaySnapshot({
+  esClient,
+  logger,
+  snapshotUrl: 'file:///path/to/snapshot',
+  patterns: ['logs-*', 'metrics-*', 'traces-*'],
+});
+
+if (result.success) {
+  console.log(`Reindexed ${result.reindexedIndices?.length} indices`);
+  console.log(`Max timestamp: ${result.maxTimestamp}`);
+}
+```
+
+### Using in Test Hooks
+
+```typescript
+import { Client } from '@elastic/elasticsearch';
+import { replaySnapshot } from '@kbn/es-snapshot-loader';
+
+describe('my test suite', () => {
+  beforeAll(async () => {
+    const esClient = new Client({
+      node: 'http://localhost:9200',
+      auth: { username: 'elastic', password: 'changeme' },
+    });
+
+    await replaySnapshot({
+      esClient,
+      logger: console, // or your test logger
+      snapshotUrl: 'file:///fixtures/otel-demo-snapshot',
+      patterns: ['logs-*', 'metrics-*', 'traces-*'],
+    });
+  });
+
+  // ... tests that use the replayed data
+});
+```
+
+## Prerequisites
+
+### For Restore
+
+- Elasticsearch must have `path.repo` configured to allow URL-based repository registration
+- The snapshot must be accessible at the specified `file://` URL
+
+### For Replay
+
+- All prerequisites for restore, plus:
+- Index templates for the target data streams must exist (install Fleet or required integrations in Kibana)
+- Without these templates, data streams cannot be created correctly during reindex
+
+## How Replay Works
+
+1. Register a URL-based snapshot repository
+2. Retrieve snapshot metadata (finds the most recent snapshot)
+3. Verify that required index templates exist
+4. Restore indices to temporary locations (prefixed with `snapshot-loader-temp-`)
+5. Create an ingest pipeline that transforms `@timestamp` fields:
+   - The most recent timestamp in the snapshot becomes "now"
+   - All other timestamps are adjusted by the same offset, preserving relative timing
+6. Reindex through the pipeline to the target data streams
+7. Clean up temporary indices, pipeline, and repository
