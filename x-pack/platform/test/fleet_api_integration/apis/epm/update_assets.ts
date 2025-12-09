@@ -366,6 +366,10 @@ export default function (providerContext: FtrProviderContext) {
               type: 'search',
             },
             {
+              id: 'sample_slo_template',
+              type: 'slo_template',
+            },
+            {
               id: 'sample_ml_module',
               type: 'ml-module',
             },
