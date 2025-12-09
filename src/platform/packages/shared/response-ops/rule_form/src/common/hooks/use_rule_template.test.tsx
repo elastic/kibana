@@ -12,6 +12,8 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRuleTemplate } from './use_rule_template';
 import { loadRuleTemplate } from '../apis/create_rule_from_template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { HttpStart } from '@kbn/core-http-browser';
+
 
 // Mocks
 jest.mock('../apis/create_rule_from_template', () => ({
@@ -34,7 +36,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('useRuleTemplate', () => {
-  const mockHttp = {} as any;
+  const mockHttp = {} as HttpStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
