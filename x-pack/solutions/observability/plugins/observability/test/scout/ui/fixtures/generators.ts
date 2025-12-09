@@ -12,8 +12,9 @@ import { apm, log, timerange } from '@kbn/synthtrace-client';
 export const TEST_START_DATE = '2024-01-01T00:00:00.000Z';
 export const TEST_END_DATE = '2024-01-01T01:00:00.000Z';
 
+// Make sure you have a prefix that makes sure that rules show up first in the list.
 export const RULE_NAMES = {
-  FIRST_RULE_TEST: 'Scout - First Rule Test',
+  FIRST_RULE_TEST: '!!! - Scout - First Rule Test',
 } as const;
 
 /**
