@@ -19,7 +19,7 @@ type CommonDataLayerFnArgs = {
 
 export const commonDataLayerArgs: Omit<
   CommonDataLayerFnArgs,
-  'accessors' | 'xAccessor' | 'splitAccessor'
+  'accessors' | 'xAccessor' | 'splitAccessors'
 > = {
   simpleView: {
     types: ['boolean'],

@@ -935,8 +935,8 @@ export const getXyVisualization = ({
       const breakDownLayerValidation = validateLayersForDimension(
         'break_down',
         state.layers,
-        ({ splitAccessors: splitAccessor, seriesType }) =>
-          seriesType.includes('percentage') && splitAccessor == null // check if no split accessor
+        ({ splitAccessors, seriesType }) =>
+          seriesType.includes('percentage') && splitAccessors == null // check if no split accessor
       );
       if (!breakDownLayerValidation.valid) {
         errors.push(breakDownLayerValidation.error);

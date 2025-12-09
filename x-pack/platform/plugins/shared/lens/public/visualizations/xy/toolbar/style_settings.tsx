@@ -284,7 +284,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
     filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessors);
 
   const isTimeHistogramModeEnabled = dataLayers.some(
-    ({ xAccessor, layerId, seriesType, splitAccessors: splitAccessor }) => {
+    ({ xAccessor, layerId, seriesType, splitAccessors }) => {
       if (!xAccessor) {
         return false;
       }
@@ -293,7 +293,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
       return (
         getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
         xAccessorOp?.isBucketed &&
-        (seriesType.includes('stacked') || !splitAccessor) &&
+        (seriesType.includes('stacked') || !splitAccessors) &&
         (seriesType.includes('stacked') ||
           !seriesType.includes('bar') ||
           !chartHasMoreThanOneBarSeries)

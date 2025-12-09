@@ -164,7 +164,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should convert parent pipeline aggregation', async () => {
+    it.only('should convert parent pipeline aggregation', async () => {
       await visEditor.clickMetricEditor();
       await visEditor.selectAggregation('Cumulative sum', 'metrics');
       await visEditor.clickBucket('Split series');

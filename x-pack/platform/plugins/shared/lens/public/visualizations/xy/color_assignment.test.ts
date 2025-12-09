@@ -174,7 +174,7 @@ describe('color_assignment', () => {
     it('should return the correct rank for a series without a split', () => {
       const newLayers = [
         layers[0],
-        { ...layers[1], palette: layers[0].palette, splitAccessor: undefined },
+        { ...layers[1], palette: layers[0].palette, splitAccessors: undefined },
       ];
       const assignments = getColorAssignments(newLayers, data, formatFactory);
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1

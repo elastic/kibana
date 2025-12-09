@@ -96,7 +96,7 @@ export function getLensAttributes({
             seriesType: breakdownFieldName ? 'line' : 'bar',
             xAccessor: DatasetQualityLensColumn.Date,
             ...(breakdownFieldName
-              ? { splitAccessor: DatasetQualityLensColumn.Breakdown }
+              ? { splitAccessors: [DatasetQualityLensColumn.Breakdown] }
               : {
                   yConfig: [
                     {

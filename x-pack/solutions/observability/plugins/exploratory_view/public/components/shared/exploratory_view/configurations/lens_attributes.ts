@@ -1126,7 +1126,7 @@ export class LensAttributes {
         ...(layerConfig.breakdown &&
         layerConfig.breakdown !== PERCENTILE &&
         layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-          ? { splitAccessor: `breakdown-column-layer${index}` }
+          ? { splitAccessors: [`breakdown-column-layer${index}`] }
           : {}),
         ...(this.layerConfigs[0].seriesConfig.yTitle
           ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
