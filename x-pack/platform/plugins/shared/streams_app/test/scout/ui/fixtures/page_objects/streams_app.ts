@@ -8,8 +8,14 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
-import { EuiComboBoxWrapper } from '@kbn/scout';
+import {
+  expect,
+  EuiDataGridWrapper,
+  EuiSuperSelectWrapper,
+  EuiComboBoxWrapper,
+  EuiCodeBlockWrapper,
+  KibanaCodeEditorWrapper,
+} from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -17,6 +23,11 @@ export class StreamsApp {
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+  public readonly fieldTypeSuperSelect;
+  public readonly previewDataGrid;
+  public readonly schemaDataGrid;
+  public readonly advancedSettingsCodeBlock;
+  public readonly kibanaMonacoEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -35,6 +46,20 @@ export class StreamsApp {
       this.page,
       'streamsAppProcessorTypeSelector'
     );
+    this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
+      this.page,
+      'streamsAppFieldFormTypeSelect'
+    );
+    // TODO: Make locator more specific when possible
+    this.previewDataGrid = new EuiDataGridWrapper(this.page, { locator: '.euiDataGrid' });
+    this.schemaDataGrid = new EuiDataGridWrapper(
+      this.page,
+      'streamsAppSchemaEditorFieldsTableLoaded'
+    );
+    this.advancedSettingsCodeBlock = new EuiCodeBlockWrapper(this.page, {
+      locator: '.euiCodeBlock',
+    });
+    this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
   async goto() {
@@ -662,14 +687,12 @@ export class StreamsApp {
     value: string;
     invertCondition?: boolean;
   }) {
-    const cellContent = this.page.locator(
-      `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
-    );
+    const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
 
     if (invertCondition) {
-      await expect(cellContent).not.toContainText(value);
+      await expect(cellLocator).not.toContainText(value);
     } else {
-      await expect(cellContent).toContainText(value);
+      await expect(cellLocator).toContainText(value);
     }
   }
 
@@ -703,6 +726,10 @@ export class StreamsApp {
 
   async clickFieldStatusFilter() {
     await this.page.getByRole('button', { name: 'Status' }).click();
+  }
+
+  async getFilterOptions() {
+    return this.getModal().getByRole('option');
   }
 
   async selectFilterValue(value: string) {

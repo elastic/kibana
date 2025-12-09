@@ -18,6 +18,8 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
+import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { isActiveLicense } from './lib/license';
 import type {
   AiopsLicense,
@@ -32,8 +34,12 @@ import { defineRoute as defineCategorizationFieldValidationRoute } from './route
 import { registerCasesPersistableState } from './register_cases';
 import type { ConfigSchema } from './config_schema';
 import { setupCapabilities } from './lib/capabilities';
+import { transformIn as changePointTransformIn } from '../common/embeddables/change_point_chart/transform_in';
+import { transformOut as changePointTransformOut } from '../common/embeddables/change_point_chart/transform_out';
 import { transformIn as logRateTransformIn } from '../common/embeddables/log_rate_analysis/transform_in';
 import { transformOut as logRateTransformOut } from '../common/embeddables/log_rate_analysis/transform_out';
+import { transformIn as patternAnalysisTransformIn } from '../common/embeddables/pattern_analysis/transform_in';
+import { transformOut as patternAnalysisTransformOut } from '../common/embeddables/pattern_analysis/transform_out';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
@@ -75,6 +81,18 @@ export class AiopsPlugin
       defineLogRateAnalysisFieldCandidatesRoute(router, aiopsLicense, coreStart, this.usageCounter);
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
       defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
+    });
+
+    plugins.embeddable.registerTransforms(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
+      transformOutInjectsReferences: true,
+      transformIn: changePointTransformIn,
+      transformOut: changePointTransformOut,
+    });
+
+    plugins.embeddable.registerTransforms(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
+      transformOutInjectsReferences: true,
+      transformIn: patternAnalysisTransformIn,
+      transformOut: patternAnalysisTransformOut,
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {

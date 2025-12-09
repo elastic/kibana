@@ -12,17 +12,26 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { groupBy } from 'lodash';
 import { AttachmentNotFoundError } from '../errors/attachment_not_found_error';
 import { AttachmentLinkNotFoundError } from '../errors/attachment_link_not_found_error';
+import { AttachmentInDifferentSpaceError } from '../errors/attachment_in_different_space_error';
 import type { AttachmentStorageSettings } from './storage_settings';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
 import {
   ATTACHMENT_TYPES,
   type Attachment,
   type AttachmentBulkOperation,
+  type AttachmentData,
   type AttachmentDocument,
   type AttachmentLink,
   type AttachmentType,
 } from './types';
-import { getAttachmentDocument, getAttachmentLinkUuid, getSoByIds, getSuggestedSo } from './utils';
+import {
+  attachmentTypeToSavedObjectTypeMap,
+  getAttachmentDocument,
+  getAttachmentLinkUuid,
+  getSoByIds,
+  getSuggestedSo,
+  processRuleResults,
+} from './utils';
 
 /**
  * Client for managing attachments linked to streams.
@@ -38,13 +47,14 @@ export class AttachmentClient {
     private readonly clients: {
       storageClient: IStorageClient<AttachmentStorageSettings, AttachmentDocument>;
       soClient: SavedObjectsClientContract;
+      internalSoClient: SavedObjectsClientContract;
       rulesClient: RulesClient;
     }
   ) {}
 
   private getAttachmentEntitiesMap: Record<
     AttachmentType,
-    (ids: string[]) => Promise<Attachment[]>
+    (ids: string[]) => Promise<AttachmentData[]>
   > = {
     dashboard: async (ids) =>
       getSoByIds({ soClient: this.clients.soClient, attachmentType: 'dashboard', ids }),
@@ -54,13 +64,7 @@ export class AttachmentClient {
           ids,
         });
 
-        return rules.map((rule) => ({
-          id: rule.id,
-          redirectId: rule.id,
-          title: rule.name,
-          tags: rule.tags,
-          type: 'rule',
-        }));
+        return processRuleResults(rules);
       } catch (error) {
         if (error.message === 'No rules found for bulk get') {
           return [];
@@ -73,7 +77,7 @@ export class AttachmentClient {
 
   private getSuggestedEntitiesMap: Record<
     AttachmentType,
-    (options: { query: string; tags?: string[]; perPage: number }) => Promise<Attachment[]>
+    (options: { query: string; tags?: string[]; perPage: number }) => Promise<AttachmentData[]>
   > = {
     dashboard: async ({ query, tags, perPage }) =>
       getSuggestedSo({
@@ -96,13 +100,7 @@ export class AttachmentClient {
         },
       });
 
-      return data.map((rule) => ({
-        id: rule.id,
-        redirectId: rule.id,
-        title: rule.name,
-        tags: rule.tags,
-        type: 'rule',
-      }));
+      return processRuleResults(data);
     },
     slo: async ({ query, tags, perPage }) =>
       getSuggestedSo({
@@ -158,20 +156,76 @@ export class AttachmentClient {
   }
 
   /**
+   * Validates that attachments being unlinked are not exclusively in different spaces.
+   *
+   * This method fetches all attachments in the current space and checks if any are missing.
+   * If attachments are missing, it verifies they don't exist in other spaces (which would
+   * indicate cross-space manipulation). Deleted attachments (not found anywhere) are allowed.
+   *
+   * @param attachmentLinks - Array of attachment links to validate
+   * @throws {AttachmentInDifferentSpaceError} If any attachment exists exclusively in a different space
+   */
+  private async validateAttachmentsNotInDifferentSpace(
+    attachmentLinks: AttachmentLink[]
+  ): Promise<void> {
+    if (attachmentLinks.length === 0) {
+      return;
+    }
+
+    // Fetch attachments that exist in the current space
+    const fetchedAttachments = await this.fetchAttachments(attachmentLinks);
+
+    // If all attachments were found in current space, validation passes
+    if (fetchedAttachments.length === attachmentLinks.length) {
+      return;
+    }
+
+    // Find which attachments are missing from current space
+    const fetchedIds = new Set(fetchedAttachments.map((a) => a.id));
+    const missingLinks = attachmentLinks.filter((link) => !fetchedIds.has(link.id));
+
+    // Check all missing attachments across all spaces in parallel (grouped by type)
+    const missingByType = groupBy(missingLinks, 'type');
+
+    await Promise.all(
+      Object.entries(missingByType).map(async ([type, links]) => {
+        const soType = attachmentTypeToSavedObjectTypeMap[type as AttachmentType];
+        const ids = links.map((link) => link.id);
+
+        // Search for these IDs across all spaces using _id and originId fields
+        const searchTerms = ids.map((id) => `"${soType}:${id}" "${id}"`).join(' ');
+        const result = await this.clients.internalSoClient.find({
+          type: soType,
+          perPage: ids.length,
+          search: searchTerms,
+          rootSearchFields: ['_id', 'originId'],
+          namespaces: ['*'],
+        });
+
+        // If any were found in other spaces, throw error
+        const foundIds = new Set(result.saved_objects.map((obj) => obj.id));
+        if (ids.some((id) => foundIds.has(id))) {
+          throw new AttachmentInDifferentSpaceError(`Cannot unlink ${type}(s).`);
+        }
+      })
+    );
+  }
+
+  /**
    * Fetches full attachment details for a given array of attachment links.
    *
    * Groups attachment links by type and fetches them efficiently using the appropriate
    * client methods (bulk operations when available).
    *
    * @param attachmentLinks - Array of attachment links to fetch
-   * @returns A promise that resolves with an array of full attachment details
+   * @returns A promise that resolves with an array of full attachment details (without stream names)
    */
-  private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<Attachment[]> {
+  private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<AttachmentData[]> {
     // Group attachment links by type using lodash groupBy
     const attachmentLinksByType = groupBy(attachmentLinks, 'type');
 
     // Fetch attachments for each type and flatten results
-    const attachments: Attachment[] = (
+    const attachments: AttachmentData[] = (
       await Promise.all(
         Object.entries(attachmentLinksByType).map(async ([type, links]) => {
           const ids = links.map((link) => link.id);
@@ -256,6 +310,7 @@ export class AttachmentClient {
    * @param attachmentLink - The attachment link containing the attachment id and type
    * @returns A promise that resolves when the unlinking operation is complete
    * @throws {AttachmentLinkNotFoundError} If the attachment link doesn't exist
+   * @throws {AttachmentInDifferentSpaceError} If the attachment exists in a different space
    *
    * @example
    * ```typescript
@@ -289,6 +344,9 @@ export class AttachmentClient {
       }
       throw error;
     }
+
+    // Validate that the attachment is not in a different space
+    await this.validateAttachmentsNotInDifferentSpace([attachmentLink]);
 
     const existingStreamNames = existingAttachment[STREAM_NAMES];
 
@@ -333,13 +391,16 @@ export class AttachmentClient {
    * associations and automatic cleanup when attachments have no remaining stream associations.
    *
    * All attachments being linked must exist in the current space and all storage operations must succeed,
-   * otherwise the entire operation fails atomically. Unlink operations do not validate that the attachment
-   * exists in the current space.
+   * otherwise the entire operation fails atomically. Unlink operations validate that attachments are not
+   * in different spaces unless skipSpaceValidation is set to true.
    *
    * @param streamName - The name of the stream for the bulk operations
    * @param operations - Array of bulk operations to perform (index or delete)
+   * @param options - Optional configuration
+   * @param options.skipSpaceValidation - If true, skips space validation for unlink operations
    * @returns A promise that resolves when all operations succeed
    * @throws {AttachmentNotFoundError} If any attachment being linked doesn't exist in the current space
+   * @throws {AttachmentInDifferentSpaceError} If any attachment being unlinked exists in a different space (unless skipSpaceValidation is true)
    * @throws {Error} If any storage operation fails
    *
    * @example
@@ -350,7 +411,11 @@ export class AttachmentClient {
    * ]);
    * ```
    */
-  async bulk(streamName: string, operations: AttachmentBulkOperation[]): Promise<void> {
+  async bulk(
+    streamName: string,
+    operations: AttachmentBulkOperation[],
+    options?: { skipSpaceValidation?: boolean }
+  ): Promise<void> {
     if (operations.length === 0) {
       return;
     }
@@ -364,6 +429,7 @@ export class AttachmentClient {
       }
     >();
     const attachmentLinksToValidate: AttachmentLink[] = [];
+    const attachmentLinksToValidateForUnlink: AttachmentLink[] = [];
 
     operations.forEach((operation) => {
       const attachmentLink =
@@ -376,6 +442,11 @@ export class AttachmentClient {
         attachmentLinksToValidate.push(attachmentLink);
       }
 
+      // Add to unlink validation array if this is an unlink operation
+      if (!isLinkOperation && !attachmentMap.has(uuid)) {
+        attachmentLinksToValidateForUnlink.push(attachmentLink);
+      }
+
       attachmentMap.set(uuid, {
         attachmentLink,
         operation: isLinkOperation ? 'link' : 'unlink',
@@ -383,10 +454,15 @@ export class AttachmentClient {
       });
     });
 
-    // Step 1: Validate all attachments exist in the current space
-
-    // Fetch attachments that exist in the current space
-    const fetchedAttachments = await this.fetchAttachments(attachmentLinksToValidate);
+    // Step 1: Validate all attachments in parallel
+    // - For link operations: fetch attachments to ensure they exist in current space
+    // - For unlink operations: validate they're not in different spaces (unless skipSpaceValidation is set)
+    const [fetchedAttachments] = await Promise.all([
+      this.fetchAttachments(attachmentLinksToValidate),
+      !options?.skipSpaceValidation && attachmentLinksToValidateForUnlink.length > 0
+        ? this.validateAttachmentsNotInDifferentSpace(attachmentLinksToValidateForUnlink)
+        : Promise.resolve(),
+    ]);
 
     // Check if all attachments were found
     if (fetchedAttachments.length !== attachmentLinksToValidate.length) {
@@ -537,13 +613,23 @@ export class AttachmentClient {
       },
     });
 
-    // Convert attachment documents to attachment links
-    const attachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(({ _source }) => ({
-      id: _source[ATTACHMENT_ID],
-      type: _source[ATTACHMENT_TYPE],
-    }));
+    // Extract attachment links and stream names in a single pass
+    const streamNamesById = new Map<string, string[]>();
+    const attachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(({ _source }) => {
+      streamNamesById.set(_source[ATTACHMENT_ID], _source[STREAM_NAMES]);
+      return {
+        id: _source[ATTACHMENT_ID],
+        type: _source[ATTACHMENT_TYPE],
+      };
+    });
 
-    return this.fetchAttachments(attachmentLinks);
+    const attachments = await this.fetchAttachments(attachmentLinks);
+
+    // Enrich attachments with stream names
+    return attachments.map((attachment) => ({
+      ...attachment,
+      streamNames: streamNamesById.get(attachment.id) ?? [],
+    }));
   }
 
   /**
@@ -593,8 +679,49 @@ export class AttachmentClient {
     );
 
     const results = await Promise.all(suggestionsPromises);
+    const attachments = results.flat();
 
-    return results.flat();
+    // Get stream names for all suggested attachments
+    const streamNamesById = await this.getStreamNamesForAttachments(attachments.map((a) => a.id));
+
+    // Enrich attachments with stream names (empty array if not linked to any stream)
+    return attachments.map((attachment) => ({
+      ...attachment,
+      streamNames: streamNamesById.get(attachment.id) ?? [],
+    }));
+  }
+
+  /**
+   * Retrieves the stream names for a list of attachment IDs.
+   *
+   * Queries the attachments storage to find which streams each attachment is linked to.
+   *
+   * @param attachmentIds - Array of attachment IDs to look up
+   * @returns A Map where keys are attachment IDs and values are arrays of stream names
+   */
+  private async getStreamNamesForAttachments(
+    attachmentIds: string[]
+  ): Promise<Map<string, string[]>> {
+    if (attachmentIds.length === 0) {
+      return new Map();
+    }
+
+    const response = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ terms: { [ATTACHMENT_ID]: attachmentIds } }],
+        },
+      },
+    });
+
+    const streamNamesById = new Map<string, string[]>();
+    for (const hit of response.hits.hits) {
+      streamNamesById.set(hit._source[ATTACHMENT_ID], hit._source[STREAM_NAMES]);
+    }
+
+    return streamNamesById;
   }
 
   /**
@@ -659,7 +786,8 @@ export class AttachmentClient {
     ];
 
     if (operations.length) {
-      await this.bulk(streamName, operations);
+      // Skip space validation when syncing attachment list to allow cleanup of attachments from other spaces
+      await this.bulk(streamName, operations, { skipSpaceValidation: true });
     }
 
     return {

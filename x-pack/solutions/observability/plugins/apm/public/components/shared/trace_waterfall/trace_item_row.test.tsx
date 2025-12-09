@@ -69,6 +69,7 @@ const baseItem = {
   name: 'Test Span',
   traceId: 'trace-1',
   serviceName: 'Test Service',
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 } as TraceWaterfallItem;
 
 describe('TraceItemRow', () => {

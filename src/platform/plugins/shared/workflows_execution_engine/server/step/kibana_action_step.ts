@@ -12,7 +12,7 @@
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import { getKibanaUrl } from '../utils';

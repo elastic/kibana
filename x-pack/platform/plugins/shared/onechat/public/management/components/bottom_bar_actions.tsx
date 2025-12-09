@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiBottomBar, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { pushFlyoutPaddingStyles } from '../../common.styles';
 
 interface Props {
   isLoading: boolean;
@@ -34,7 +35,12 @@ export const BottomBarActions: React.FC<Props> = ({
         defaultMessage: 'Settings actions',
       })}
     >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="m"
+        css={pushFlyoutPaddingStyles}
+      >
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <p aria-live="polite" aria-atomic="true" data-test-subj="unsavedChangesCount">
