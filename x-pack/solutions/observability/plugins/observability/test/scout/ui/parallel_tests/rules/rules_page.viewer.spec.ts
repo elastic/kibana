@@ -97,8 +97,13 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     // Navigate to logs tab
     await pageObjects.rulesPage.clickLogsTab();
 
-    // Click on the created rule in the event logs
-    await pageObjects.rulesPage.clickOnRuleInEventLogs('Logs Tab Test Rule');
+    // Wait for logs table to load
+    await pageObjects.rulesPage.waitForLogsTableToLoad();
+
+    // Click on one of the rule links in the event logs
+    const ruleLinks = await pageObjects.rulesPage.getLogsTableRuleLinks('Logs Tab Test Rule');
+    expect(ruleLinks.length).toBeGreaterThan(0);
+    await pageObjects.rulesPage.clickOnRuleInEventLogs(ruleLinks[0]);
 
     // Verify we navigated to the rule details page
     await expect(pageObjects.rulesPage.ruleDetails).toBeVisible();

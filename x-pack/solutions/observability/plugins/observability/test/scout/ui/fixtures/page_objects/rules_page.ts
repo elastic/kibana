@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout-oblt';
+import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
@@ -252,6 +252,15 @@ export class RulesPage {
     });
   }
 
+  async waitForLogsTableToLoad() {
+    const loadingIndicators = await this.eventLogTable
+      .getByRole('progressbar', { name: 'Loading' })
+      .all();
+    for await (const indicator of loadingIndicators) {
+      await expect(indicator).toBeHidden({ timeout: 60000 });
+    }
+  }
+
   /**
    * Verifies the logs tab is active/selected
    */
@@ -267,12 +276,17 @@ export class RulesPage {
   }
 
   /**
+   * Gets the editable rules locator
+   */
+  public async getLogsTableRuleLinks(ruleName: string) {
+    return this.eventLogTable.getByRole('button', { name: ruleName }).all();
+  }
+
+  /**
    * Clicks on a rule in the event logs table by its name
    */
-  async clickOnRuleInEventLogs(ruleName: string) {
-    const ruleLink = this.eventLogTable.getByRole('button', { name: ruleName });
-    await expect(ruleLink).toBeVisible({ timeout: 10000 });
-    await ruleLink.click();
+  async clickOnRuleInEventLogs(ruleLog: Locator) {
+    await ruleLog.click();
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.RULE_DETAILS, {
       timeout: 30000,
     });
