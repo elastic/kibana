@@ -111,11 +111,6 @@ export enum ProductFeatureSecurityKey {
   securityWorkflowInsights = 'security_workflow_insights',
 
   /**
-   * Enables customization of prebuilt Elastic rules
-   */
-  prebuiltRuleCustomization = 'prebuilt_rule_customization',
-
-  /**
    * Enables graph visualization for alerts and events
    */
   graphVisualization = 'graph_visualization',
