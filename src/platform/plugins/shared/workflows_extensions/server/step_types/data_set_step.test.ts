@@ -14,7 +14,10 @@ const createMockContext = (
   input: Record<string, unknown>
 ): StepHandlerContext<Record<string, unknown>> => ({
   input,
-  contextManager: {} as any,
+  rawInput: input,
+  contextManager: {
+    setVariables: jest.fn(),
+  } as any,
   logger: {
     debug: jest.fn(),
     info: jest.fn(),

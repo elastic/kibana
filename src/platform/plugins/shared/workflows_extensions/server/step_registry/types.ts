@@ -102,6 +102,11 @@ export interface StepHandlerContext<TInput = unknown> {
   input: TInput;
 
   /**
+   * The raw input configuration before template rendering
+   */
+  rawInput: unknown;
+
+  /**
    * Runtime context manager for accessing workflow state, context, and template evaluation
    */
   contextManager: ContextManager;
@@ -148,8 +153,10 @@ export interface ContextManager {
 
   /**
    * Evaluate a template string using the workflow context
+   * @param input - The value to render with template expressions
+   * @param additionalContext - Optional additional context to merge with workflow context
    */
-  renderInputTemplate<T>(input: T): T;
+  renderInputTemplate<T>(input: T, additionalContext?: Record<string, unknown>): T;
 
   /**
    * Returns the fake request

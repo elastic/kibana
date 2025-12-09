@@ -82,6 +82,9 @@ describe('WorkflowContextManager', () => {
       delete: jest.fn(),
     } as any;
 
+    workflowExecutionState.getVariables = jest.fn().mockReturnValue({});
+    workflowExecutionState.setVariables = jest.fn();
+
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
