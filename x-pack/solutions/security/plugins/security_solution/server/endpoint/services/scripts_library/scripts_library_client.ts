@@ -281,56 +281,15 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     const logger = this.logger.get('create');
     const scriptId = uuidV4();
     const fileStream = _file as HapiReadableStream;
-
-    const fileStorage = await this.filesClient
-      .create({
-        metadata: {
-          name: fileStream.hapi.filename ?? scriptDefinition.name.replace(/\D\W/g, '_'),
-          mime: fileStream.hapi.headers['content-type'] ?? 'application/octet-stream',
-          meta: { scriptId },
-        },
-      })
-      .catch((error) => {
-        const message = `Unable to create File storage record: ${error.message}`;
-        logger.error(message, { error });
-
-        throw new ScriptLibraryError(message, 500, error);
-      });
-
-    try {
-      await fileStorage.uploadContent(fileStream, undefined, {
-        transforms: [createFileHashTransform()],
-      });
-
-      assert(
-        fileStorage.data.hash && fileStorage.data.hash.sha256,
-        new ScriptLibraryError('File hash was not generated after upload!')
-      );
-    } catch (error) {
-      logger.error(`Error encountered while attempting to store file: ${error.message}`, {
-        error,
-      });
-
-      // attempt to delete the file record since we encountered an error during upload fo the file
-      // Best effort being done here. If it fails, then just log the error since there is nothing else we can do.
-      await fileStorage.delete().catch((deleteError) => {
-        logger.error(
-          `Error encountered while attempting to cleanup file record: ${deleteError.message}`,
-          { error: deleteError }
-        );
-      });
-
-      throw wrapErrorIfNeeded(error);
-    }
-
-    // Create the script entity in the saved objects store
     const soAttributes = this.mapToSavedObjectProperties(scriptDefinition);
+    const fileStorage = await this.storeFile({ scriptId, file: fileStream });
 
     Object.assign(soAttributes, {
       id: scriptId,
       file_id: fileStorage.id,
       file_name: fileStorage.data.name,
       file_size: fileStorage.data.size ?? 0,
+      // @ts-expect-error: TS18048: fileStorage.data.hash is possibly undefined - `.storeFile()` already ensure we have data.hash
       file_hash_sha256: fileStorage.data.hash.sha256,
       created_by: this.username,
       updated_by: this.username,
