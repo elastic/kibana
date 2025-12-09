@@ -36,23 +36,15 @@ export const ChatExperience: React.FC = () => {
   }, [kibana.services]);
 
   // Show confirmation modal for AI Agents selection
-  useEffect(() => {
-    const unsavedChatExperience = unsavedChanges[AI_CHAT_EXPERIENCE_TYPE];
-    if (
-      unsavedChatExperience?.unsavedValue === AIChatExperience.Agent &&
-      !isConfirmModalOpen &&
-      !hasHandledAgentSelection
-    ) {
-      setConfirmModalOpen(true);
-      setHasHandledAgentSelection(true);
-    } else if (
-      (!unsavedChatExperience || unsavedChatExperience.unsavedValue !== AIChatExperience.Agent) &&
-      hasHandledAgentSelection
-    ) {
-      // Reset the handled state when user selects something else or clears the change
-      setHasHandledAgentSelection(false);
-    }
-  }, [unsavedChanges, isConfirmModalOpen, hasHandledAgentSelection]);
+  const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
+    (id, change) => {
+      if (id === AI_CHAT_EXPERIENCE_TYPE && change?.unsavedValue === AIChatExperience.Agent) {
+        setConfirmModalOpen(true);
+      }
+      handleFieldChange(id, change);
+    },
+    [handleFieldChange]
+  );
 
   const handleConfirmAgent = () => {
     setConfirmModalOpen(false);
@@ -84,7 +76,7 @@ export const ChatExperience: React.FC = () => {
         <FieldRow
           field={field}
           isSavingEnabled={!!canEditAdvancedSettings}
-          onFieldChange={handleFieldChange}
+          onFieldChange={wrappedHandleFieldChange}
           unsavedChange={unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]}
         />
       </FieldRowProvider>
