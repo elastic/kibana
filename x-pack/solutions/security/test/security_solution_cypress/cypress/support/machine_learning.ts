@@ -138,7 +138,7 @@ const getJobsSummary = ({ jobIds }: { jobIds: string[] }) =>
  */
 export const waitForJobsToBeStarted = ({
   jobIds,
-  timeout = 120000,
+  timeout = 360000,
 }: {
   jobIds: string[];
   timeout?: number;
