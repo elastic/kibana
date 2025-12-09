@@ -237,6 +237,7 @@ export class BlocklistValidator extends BaseValidator {
     await this.validatePreImportItems(items, async (item) => {
       await this.validateCreateOwnerSpaceIds(item);
       await this.validateCanCreateGlobalArtifacts(item);
+      await this.removeInvalidPolicyIds(item);
     });
   }
 
