@@ -73,13 +73,33 @@ describe('transformScheduledReport', () => {
     );
   });
 
-  it('marks as custom when freq=DAILY and no weekdays', () => {
+  it('handles freq=DAILY and no weekdays', () => {
     const report = {
       ...baseReport,
-      schedule: { rrule: { freq: Frequency.DAILY, tzid: 'UTC' } },
+      schedule: { rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 } },
     } as ScheduledReportApiJSON;
     expect(transformScheduledReport(report).recurringSchedule).toEqual(
-      expect.objectContaining({ frequency: 'CUSTOM', customFrequency: Frequency.DAILY })
+      expect.objectContaining({ ends: 'never', frequency: Frequency.DAILY, interval: 1 })
+    );
+  });
+
+  it('handles freq=DAILY and weekdays', () => {
+    const report = {
+      ...baseReport,
+      schedule: {
+        rrule: { freq: Frequency.DAILY, tzid: 'UTC', byweekday: ['MO', 'TU'], interval: 1 },
+      },
+    } as ScheduledReportApiJSON;
+    expect(transformScheduledReport(report).recurringSchedule).toEqual(
+      expect.objectContaining({
+        byweekday: {
+          '1': true,
+          '2': true,
+        },
+        ends: 'never',
+        frequency: 3,
+        interval: 1,
+      })
     );
   });
 

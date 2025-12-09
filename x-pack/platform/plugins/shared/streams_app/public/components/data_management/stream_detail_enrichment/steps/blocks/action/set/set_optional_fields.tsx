@@ -42,7 +42,7 @@ export const IgnoreEmptyValueField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setIgnoreEmptyValueHelpText"
-          defaultMessage="If true and {value} is a template snippet that evaluates to null or an empty string, the processor quietly exits without modifying the document."
+          defaultMessage="If true and {value} evaluates to null or an empty string, the processor quietly exits without modifying the document."
           values={{ value: <EuiCode>value</EuiCode> }}
         />
       }

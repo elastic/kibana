@@ -12,4 +12,5 @@ canvas-confetti
 undici
 ajv-formats
 dompurify
+@axe-core/playwright
 magic-bytes.js
