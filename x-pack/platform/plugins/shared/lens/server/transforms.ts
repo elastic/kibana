@@ -29,7 +29,7 @@ export const getLensServerTransforms = (
 };
 
 export const legacyPanelSchema = lensItemDataSchema.extends({
-  type: schema.literal('lens'), // why is this added to the panel state?
+  type: schema.maybe(schema.literal('lens')), // why is this added to the panel state?
 });
 
 const lensPanelSchema = schema.object(
