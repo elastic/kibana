@@ -116,6 +116,7 @@ export interface FetchResult {
 export interface BulkUpdateOpts {
   validate: boolean;
   mergeAttributes?: boolean;
+  options?: ApiKeyOptions;
 }
 
 export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
@@ -214,6 +215,25 @@ export class TaskStore {
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       });
     }
+    return this.savedObjectsRepository;
+  }
+
+  private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
+    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    if (options?.request && !hasEncryptedFields) {
+      this.logger.debug(
+        'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+      );
+    }
+
+    // Return scoped client if request is defined AND at least one document has encrypted fields
+    if (options?.request && this.getIsSecurityEnabled() && hasEncryptedFields) {
+      return this.savedObjectsService.getScopedClient(options.request, {
+        includedHiddenTypes: [TASK_SO_NAME],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      });
+    }
+
     return this.savedObjectsRepository;
   }
 
@@ -518,8 +538,10 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate, mergeAttributes = true }: BulkUpdateOpts
+    { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
+    const soClientToUpdate = this.getSoClientForUpdate(docs, options);
+
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -530,7 +552,11 @@ export class TaskStore {
             type: 'task',
             id: doc.id,
             version: doc.version,
-            attributes: taskInstanceToAttributes(taskInstance, doc.id),
+            attributes: {
+              ...taskInstanceToAttributes(taskInstance, doc.id),
+              ...(doc?.apiKey ? { apiKey: doc.apiKey } : {}),
+              ...(doc?.userScope ? { userScope: doc.userScope } : {}),
+            },
             mergeAttributes,
           });
         } catch (e) {
@@ -546,7 +572,7 @@ export class TaskStore {
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
-        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
           Array.from(newDocs.values()),
           {
             refresh: false,

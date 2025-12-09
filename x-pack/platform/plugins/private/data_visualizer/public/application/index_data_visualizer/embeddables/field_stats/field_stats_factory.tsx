@@ -53,12 +53,12 @@ import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
-import { FIELD_STATS_EMBEDDABLE_TYPE } from './constants';
 import { initializeFieldStatsControls } from './initialize_field_stats_controls';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
+import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
 
 export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
