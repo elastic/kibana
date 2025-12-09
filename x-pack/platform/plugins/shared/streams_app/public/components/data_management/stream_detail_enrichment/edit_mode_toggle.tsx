@@ -12,10 +12,14 @@ import {
   useStreamEnrichmentSelector,
   useStreamEnrichmentEvents,
 } from './state_management/stream_enrichment_state_machine';
-import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
+import {
+  selectIsInteractiveMode,
+  selectHasAnyErrors,
+} from './state_management/stream_enrichment_state_machine/selectors';
 
 export const EditModeToggle = () => {
   const isInteractiveMode = useStreamEnrichmentSelector(selectIsInteractiveMode);
+  const hasErrors = useStreamEnrichmentSelector((state) => selectHasAnyErrors(state.context));
 
   const canSwitchToInteractiveMode = useStreamEnrichmentSelector((state) => {
     return state.can({ type: 'mode.switchToInteractive' });
@@ -33,13 +37,14 @@ export const EditModeToggle = () => {
       label: i18n.translate('xpack.streams.enrichment.editMode.interactive', {
         defaultMessage: 'Interactive',
       }),
-      isDisabled: interactiveModeIsUnavailable,
+      isDisabled: interactiveModeIsUnavailable || (hasErrors && !isInteractiveMode),
     },
     {
       id: 'yaml',
       label: i18n.translate('xpack.streams.enrichment.editMode.yaml', {
         defaultMessage: 'YAML',
       }),
+      isDisabled: hasErrors && isInteractiveMode,
     },
   ];
 
@@ -51,17 +56,24 @@ export const EditModeToggle = () => {
     }
   };
 
+  // Determine tooltip content based on state
+  const getTooltipContent = () => {
+    if (hasErrors) {
+      return i18n.translate('xpack.streams.enrichment.editMode.errorsTooltip', {
+        defaultMessage: 'Please fix errors before switching modes',
+      });
+    }
+    if (interactiveModeIsUnavailable) {
+      return i18n.translate('xpack.streams.enrichment.editMode.interactiveDisabledTooltip', {
+        defaultMessage:
+          'The current YAML configuration contains features that cannot be represented in the interactive editor',
+      });
+    }
+    return undefined;
+  };
+
   return (
-    <EuiToolTip
-      content={
-        interactiveModeIsUnavailable
-          ? i18n.translate('xpack.streams.enrichment.editMode.interactiveDisabledTooltip', {
-              defaultMessage:
-                'The current YAML configuration contains features that cannot be represented in the interactive editor',
-            })
-          : undefined
-      }
-    >
+    <EuiToolTip content={getTooltipContent()}>
       <EuiButtonGroup
         legend={i18n.translate('xpack.streams.enrichment.editMode.legend', {
           defaultMessage: 'Edit mode selection',
