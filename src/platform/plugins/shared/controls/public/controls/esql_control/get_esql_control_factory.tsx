@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -31,10 +31,7 @@ import type { OptionsListComponentApi } from '../data_controls/options_list_cont
 import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { initializeDefaultControlManager } from '../default_control_manager';
-
-const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
-  defaultMessage: 'Static values list',
-});
+import { VariableControlsStrings } from './constants';
 
 export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQLControlApi> => {
   return {
@@ -96,7 +93,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         isPinnable: true,
         defaultTitle$: new BehaviorSubject<string | undefined>(state.title),
         isEditingEnabled: () => true,
-        getTypeDisplayName: () => displayName,
+        getTypeDisplayName: () => VariableControlsStrings.displayName,
         onEdit: async () => {
           const nextState = {
             ...titlesManager.getLatestState(),
@@ -177,7 +174,22 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
         singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
-        deselectOption: () => {},
+        invalidSelections$: selections.internalApi.invalidSelections$,
+        deselectOption: (key?: string) => {
+          const incompatibleSelections = selections.internalApi.invalidSelections$.value;
+          const isIncompatible = key ? incompatibleSelections.has(key) : false;
+          if (isIncompatible) {
+            // remove from incompatible selections
+            const newIncompatibleSelections = new Set(incompatibleSelections);
+            newIncompatibleSelections.delete(key!);
+            selections.internalApi.setInvalidSelections(newIncompatibleSelections);
+
+            // remove from selected options
+            const currentSelected = componentApi.selectedOptions$.value || [];
+            const newSelected = currentSelected.filter((option) => option !== key);
+            selections.internalApi.setSelectedOptions(newSelected);
+          }
+        },
         selectAll: (keys: string[]) => {
           selections.internalApi.setSelectedOptions(keys);
         },
@@ -201,6 +213,12 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
                 hideExclude: true,
                 hideExists: true,
                 hideSort: true,
+                placeholder: VariableControlsStrings.emptySelectionPlaceholder,
+              },
+              customStrings: {
+                invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
+                  componentApi.invalidSelections$.value.size
+                ),
               },
             }}
           >

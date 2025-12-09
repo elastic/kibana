@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
-import { getMockedFinalizeApi } from '../mocks/control_mocks';
+import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/esql-types';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject } from 'rxjs';
 
@@ -118,6 +118,41 @@ describe('ESQLControlApi', () => {
         expect(mockIsSuccess).toHaveBeenCalledTimes(1);
       });
       mockFetch$.next({});
+    });
+
+    test('should update when variables change for queries with dependencies', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        variableName: 'variable2',
+        variableType: 'values',
+        esqlQuery: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+      } as ESQLControlState;
+      await factory.buildControl({
+        initialState,
+        finalizeApi,
+        uuid,
+        controlGroupApi,
+      });
+      await waitFor(() => {
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+        expect(mockIsSuccess).toHaveBeenCalledTimes(1);
+      });
+      const controlFetch$ = controlGroupApi.controlFetch$(
+        uuid
+      ) as BehaviorSubject<ControlFetchContext>;
+
+      // Variable change
+      controlFetch$.next({
+        esqlVariables: [
+          {
+            key: 'variable1',
+            value: 'newValue',
+            type: ESQLVariableType.VALUES,
+          },
+        ],
+      });
+
       await waitFor(() => {
         expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(2);
         expect(mockIsSuccess).toHaveBeenCalledTimes(2);

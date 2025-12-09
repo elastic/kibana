@@ -10,7 +10,7 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { RoutingConditionEditor } from './routing_condition_editor';
 import { EditRoutingRuleControls } from './control_bars';
-import { StreamNameFormRow } from './stream_name_form_row';
+import { StreamNameFormRow, useChildStreamInput } from './stream_name_form_row';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
 export function EditRoutingStreamEntry({
@@ -21,6 +21,7 @@ export function EditRoutingStreamEntry({
   routingRule: RoutingDefinitionWithUIAttributes;
 }) {
   const { euiTheme } = useEuiTheme();
+  const { partitionName, prefix } = useChildStreamInput(routingRule.destination, true);
 
   return (
     <EuiPanel
@@ -30,7 +31,7 @@ export function EditRoutingStreamEntry({
       data-test-subj={`routingRule-${routingRule.destination}`}
     >
       <EuiFlexGroup direction="column" gutterSize="m">
-        <StreamNameFormRow value={routingRule.destination} readOnly />
+        <StreamNameFormRow partitionName={partitionName} prefix={prefix} readOnly />
         <RoutingConditionEditor
           condition={routingRule.where}
           status={routingRule.status}

@@ -48,7 +48,6 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/data-views-plugin'
   - '@kbn/fields-metadata-plugin'
-  - '@kbn/restorable-state'
   - '@kbn/chart-expressions-common'
   - '@kbn/lens-common'
   - '@kbn/control-group-renderer'

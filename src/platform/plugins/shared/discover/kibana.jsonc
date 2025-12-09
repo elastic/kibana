@@ -51,7 +51,15 @@
       "fileUpload",
       "metricsExperience"
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "unifiedSearch",
+      "savedObjects",
+      "presentationPanel"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

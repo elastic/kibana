@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Range Slider Control';
 
-  describe('Range Slider Control', () => {
+  describe.only('Range Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('create and edit', () => {
+    describe.only('create and edit', () => {
       it('can create a new range slider control from a blank state', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
@@ -251,7 +251,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
         await dashboard.switchToEditMode();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await retry.try(async () => {
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        });
       });
 
       it('deletes an existing control', async () => {

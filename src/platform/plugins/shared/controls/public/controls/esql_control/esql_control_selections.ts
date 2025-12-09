@@ -24,6 +24,7 @@ import type { OptionsListSearchTechnique, OptionsListSelection } from '@kbn/cont
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { apiHasSections } from '@kbn/presentation-containers';
 import {
   fetch$,
@@ -34,6 +35,7 @@ import {
 import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
+import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -97,6 +99,9 @@ export function initializeESQLControlSelections(
     initialState.availableOptions?.map((value) => ({ value })) ?? []
   );
 
+  // Use it for incompatible suggestions
+  const temporaryStateManager = initializeTemporayStateManager();
+
   function setSearchString(next: string) {
     searchString$.next(next);
   }
@@ -109,23 +114,82 @@ export function initializeESQLControlSelections(
     }
   }
 
+  function haveVariablesValuesChanged(
+    currentVariables: ESQLControlVariable[],
+    previousVariables: ESQLControlVariable[],
+    variablesInQuery: string[]
+  ): boolean {
+    if (variablesInQuery.length === 0) return false;
+
+    for (const variableName of variablesInQuery) {
+      const currentVariable = currentVariables.find((v) => v.key === variableName);
+      const previousVariable = previousVariables.find((v) => v.key === variableName);
+
+      if (!deepEqual(currentVariable?.value, previousVariable?.value)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // For Values From Query controls, update values on dashboard load/reload
+  // or when dependencies change in case of chaining controls
+  let previousESQLVariables: ESQLControlVariable[] = [];
+  let hasInitialFetch = false;
   const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      switchMap(async ({ timeRange }) => {
+      filter(({ esqlVariables }) => {
+        const variablesInQuery = getESQLQueryVariables(esqlQuery$.getValue());
+        const variablesInParent = esqlVariables || [];
+
+        // Filter out this control's own variable
+        const currentVariableName = variableName$.getValue();
+        const externalVariables = variablesInParent.filter(
+          (variable) => variable.key !== currentVariableName
+        );
+
+        const shouldFetch =
+          !hasInitialFetch ||
+          haveVariablesValuesChanged(externalVariables, previousESQLVariables, variablesInQuery);
+
+        if (shouldFetch) {
+          previousESQLVariables = [...externalVariables];
+          hasInitialFetch = true;
+        }
+
+        return shouldFetch;
+      }),
+      switchMap(async ({ timeRange, esqlVariables }) => {
         setDataLoading(true);
+        const variablesInParent = esqlVariables || [];
+
         return await getESQLSingleColumnValues({
           query: esqlQuery$.getValue(),
           search: dataService.search.search,
           timeRange,
+          esqlVariables: variablesInParent,
         });
       })
     )
     .subscribe((result) => {
       setDataLoading(false);
       if (getESQLSingleColumnValues.isSuccess(result)) {
-        availableOptions$.next(result.values.map((value) => value));
+        const newAvailableOptions = result.values.map((value) => value);
+        availableOptions$.next(newAvailableOptions);
+
+        // Check if current selections are still compatible
+        const currentSelections = selectedOptions$.getValue() ?? [];
+        const incompatibleSelections = new Set<OptionsListSelection>();
+
+        currentSelections.forEach((selection) => {
+          if (!newAvailableOptions.includes(selection)) {
+            incompatibleSelections.add(selection);
+          }
+        });
+
+        // Update incompatible selections
+        temporaryStateManager.api.setInvalidSelections(incompatibleSelections);
       }
     });
 
@@ -218,6 +282,9 @@ export function initializeESQLControlSelections(
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
       title$.next(lastSaved?.title);
+      temporaryStateManager.api.setInvalidSelections(new Set());
+      previousESQLVariables = [];
+      hasInitialFetch = false;
     },
     getLatestState: () => {
       return {
@@ -244,6 +311,8 @@ export function initializeESQLControlSelections(
       searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique | undefined>('wildcard'),
       searchString$,
       searchStringValid$: new BehaviorSubject(true),
+      invalidSelections$: temporaryStateManager.api.invalidSelections$,
+      setInvalidSelections: temporaryStateManager.api.setInvalidSelections,
     },
   };
 }

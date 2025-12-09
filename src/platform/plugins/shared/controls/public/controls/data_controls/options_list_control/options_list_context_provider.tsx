@@ -9,11 +9,13 @@
 
 import React, { useContext } from 'react';
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
-import type { OptionsListComponentApi } from './types';
+import type { OptionsListComponentApi, OptionsListCustomStrings } from './types';
 
 interface Context {
   componentApi: OptionsListComponentApi;
   displaySettings: OptionsListDisplaySettings;
+  // Optional custom strings to override default labels
+  customStrings?: OptionsListCustomStrings;
 }
 
 export const OptionsListControlContext = React.createContext<Context | undefined>(undefined);
