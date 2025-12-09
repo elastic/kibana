@@ -31,7 +31,7 @@ export class InterceptsServerPlugin
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<ServerConfigSchema>();
 
-    if (this.config.enabled) {
+    if (this.config.enabled && initContext.node.roles.ui) {
       this.interceptsOrchestrator = new InterceptsTriggerOrchestrator();
     }
   }
