@@ -18,8 +18,12 @@ describe('transformMapOut', () => {
   });
 
   test('descrption', () => {
-    expect(transformMapAttributesOut({ title: 'my map', description: 'this is a great map' }, []))
-      .toMatchInlineSnapshot(`
+    expect(
+      transformMapAttributesOut(
+        { title: 'my map', description: 'this is a great map' },
+        findReference
+      )
+    ).toMatchInlineSnapshot(`
       Object {
         "description": "this is a great map",
         "title": "my map",
