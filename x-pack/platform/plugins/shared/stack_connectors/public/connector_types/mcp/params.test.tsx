@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SUB_ACTION } from '@kbn/connector-schemas/mcp';
+import { SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import ParamsFields from './params';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MCPActionParams } from './types';

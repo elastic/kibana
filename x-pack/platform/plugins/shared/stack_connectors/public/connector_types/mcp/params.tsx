@@ -8,7 +8,8 @@
 import type { EuiSelectOption } from '@elastic/eui';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/alerts-ui-shared';
-import { type CallToolParams, SUB_ACTION } from '@kbn/connector-schemas/mcp';
+import { SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
+import type { CallToolParams } from '@kbn/connector-schemas/mcp';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { mcpParamsStrings } from './translations';

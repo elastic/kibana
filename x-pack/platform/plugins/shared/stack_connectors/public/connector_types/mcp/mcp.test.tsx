@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/mcp';
+import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import { mcpParamsErrorStrings } from './translations';
 import { getConnectorType } from './mcp';
 import type {

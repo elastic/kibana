@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/mcp';
+import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import type { MCPConnector } from './types';
