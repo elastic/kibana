@@ -8,10 +8,10 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
-import type { ObservabilityAgentDataRegistry } from '../data_registry/data_registry';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { getGlobalObservabilityAgentBuilderServerRouteRepository } from './get_global_observability_agent_builder_route_repository';
 
 export function registerServerRoutes({
@@ -19,9 +19,12 @@ export function registerServerRoutes({
   logger,
   dataRegistry,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
-  dataRegistry: ObservabilityAgentDataRegistry;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }) {
   registerRoutes({
     core,
