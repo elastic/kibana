@@ -1182,8 +1182,15 @@
     "version"
   ],
   "slo-settings": [],
-  "slo_template": ["name", "tags"],
-  "space": ["disabledFeatures", "name", "solution"],
+  "slo_template": [
+    "name",
+    "tags"
+  ],
+  "space": [
+    "disabledFeatures",
+    "name",
+    "solution"
+  ],
   "spaces-usage-stats": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
