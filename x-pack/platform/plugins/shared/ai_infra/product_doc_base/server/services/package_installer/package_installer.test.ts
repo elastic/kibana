@@ -87,6 +87,13 @@ describe('PackageInstaller', () => {
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
 
+      const artifactName = getArtifactName({
+        productName: 'kibana',
+        productVersion: '8.16',
+      });
+
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+
       const mappings = {
         properties: {
           semantic: {
@@ -100,11 +107,8 @@ describe('PackageInstaller', () => {
 
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
-      const artifactName = getArtifactName({
-        productName: 'kibana',
-        productVersion: '8.16',
-      });
       const indexName = getProductDocIndexName('kibana');
+
       expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
 
       expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
