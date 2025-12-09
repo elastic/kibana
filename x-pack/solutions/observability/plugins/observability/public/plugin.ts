@@ -522,7 +522,9 @@ export class Plugin
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {
-      return pluginsStart.navigation.addSolutionNavigation(createDefinition(pluginsStart));
+      return pluginsStart.navigation.addSolutionNavigation(
+        createDefinition(coreStart, pluginsStart)
+      );
     });
 
     return {

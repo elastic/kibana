@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
@@ -593,6 +594,7 @@ function createNavTree({
 }
 
 export const createDefinition = (
+  coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
 ): AddSolutionNavigationArg => ({
   id: 'oblt',
@@ -601,7 +603,7 @@ export const createDefinition = (
   homePage: 'observabilityOnboarding',
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
-    pluginsStart.uiSettings.get$<AIChatExperience>(
+    coreStart.settings.client.get$<AIChatExperience>(
       AI_CHAT_EXPERIENCE_TYPE,
       AIChatExperience.Classic
     ),
