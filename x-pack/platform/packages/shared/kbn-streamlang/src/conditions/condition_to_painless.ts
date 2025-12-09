@@ -59,7 +59,6 @@ function generateRangeComparisonClauses(
 // Convert a shorthand binary filter condition to painless
 function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
   const safeFieldAccessor = safePainlessField(condition);
-  // Find which operator is present
   const op = BINARY_OPERATORS.find((k) => condition[k] !== undefined);
 
   if (!op) {
@@ -68,89 +67,93 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
 
   const value = condition[op];
 
-  switch (op) {
-    case 'gt':
-    case 'gte':
-    case 'lt':
-    case 'lte': {
-      const { numberClause, stringClause } = generateRangeComparisonClauses(
-        safeFieldAccessor,
-        op as 'gt' | 'gte' | 'lt' | 'lte',
-        Number(value)
-      );
-      return `((${safeFieldAccessor} instanceof String && ${stringClause}) || ${numberClause})`;
+  const applyOperation = (field: string) => {
+    switch (op) {
+      case 'gt':
+      case 'gte':
+      case 'lt':
+      case 'lte': {
+        const { numberClause, stringClause } = generateRangeComparisonClauses(
+          field,
+          op as 'gt' | 'gte' | 'lt' | 'lte',
+          Number(value)
+        );
+        return `((${field} instanceof String && ${stringClause}) || ${numberClause})`;
+      }
+      case 'startsWith':
+        return `((${field} instanceof Number && ${field}.toString().startsWith(${encodeValue(
+          String(value)
+        )})) || ${field}.startsWith(${encodeValue(String(value))}))`;
+      case 'endsWith':
+        return `((${field} instanceof Number && ${field}.toString().endsWith(${encodeValue(
+          String(value)
+        )})) || ${field}.endsWith(${encodeValue(String(value))}))`;
+      case 'contains':
+        return `((${field} instanceof Number && ${field}.toString().toLowerCase().contains(${encodeValue(
+          String(value).toLowerCase()
+        )})) || ${field}.toLowerCase().contains(${encodeValue(String(value).toLowerCase())}))`;
+      case 'range': {
+        const range = value as RangeCondition;
+        const numberClauses: string[] = [];
+        const stringClauses: string[] = [];
+
+        if (range.gte !== undefined) {
+          const { numberClause, stringClause } = generateRangeComparisonClauses(
+            field,
+            'gte',
+            Number(range.gte)
+          );
+          numberClauses.push(numberClause);
+          stringClauses.push(stringClause);
+        }
+        if (range.lte !== undefined) {
+          const { numberClause, stringClause } = generateRangeComparisonClauses(
+            field,
+            'lte',
+            Number(range.lte)
+          );
+          numberClauses.push(numberClause);
+          stringClauses.push(stringClause);
+        }
+        if (range.gt !== undefined) {
+          const { numberClause, stringClause } = generateRangeComparisonClauses(
+            field,
+            'gt',
+            Number(range.gt)
+          );
+          numberClauses.push(numberClause);
+          stringClauses.push(stringClause);
+        }
+        if (range.lt !== undefined) {
+          const { numberClause, stringClause } = generateRangeComparisonClauses(
+            field,
+            'lt',
+            Number(range.lt)
+          );
+          numberClauses.push(numberClause);
+          stringClauses.push(stringClause);
+        }
+
+        const numberExpr = numberClauses.length > 0 ? numberClauses.join(' && ') : 'true';
+        const stringExpr = stringClauses.length > 0 ? stringClauses.join(' && ') : 'true';
+
+        return `((${field} instanceof Number && ${numberExpr}) || (${field} instanceof String && ${stringExpr}))`;
+      }
+      case 'neq':
+      default: // eq
+        const operator = op === 'neq' ? '!=' : '==';
+        return `((${field} instanceof Number && ${field}.toString() ${operator} ${encodeValue(
+          String(value)
+        )}) || ${field} ${operator} ${encodeValue(value as StringOrNumberOrBoolean)})`;
     }
-    case 'startsWith':
-      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString().startsWith(${encodeValue(
-        String(value)
-      )})) || ${safeFieldAccessor}.startsWith(${encodeValue(String(value))}))`;
-    case 'endsWith':
-      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString().endsWith(${encodeValue(
-        String(value)
-      )})) || ${safeFieldAccessor}.endsWith(${encodeValue(String(value))}))`;
-    case 'contains':
-      // Behaviour is "fuzzy"
-      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString().toLowerCase().contains(${encodeValue(
-        String(value).toLowerCase()
-      )})) || ${safeFieldAccessor}.toLowerCase().contains(${encodeValue(
-        String(value).toLowerCase()
-      )}))`;
-    case 'range': {
-      const range = value as RangeCondition;
+  };
 
-      // Build clauses for both Number and String types using generateComparisonClauses
-      const numberClauses: string[] = [];
-      const stringClauses: string[] = [];
-
-      if (range.gte !== undefined) {
-        const { numberClause, stringClause } = generateRangeComparisonClauses(
-          safeFieldAccessor,
-          'gte',
-          Number(range.gte)
-        );
-        numberClauses.push(numberClause);
-        stringClauses.push(stringClause);
-      }
-      if (range.lte !== undefined) {
-        const { numberClause, stringClause } = generateRangeComparisonClauses(
-          safeFieldAccessor,
-          'lte',
-          Number(range.lte)
-        );
-        numberClauses.push(numberClause);
-        stringClauses.push(stringClause);
-      }
-      if (range.gt !== undefined) {
-        const { numberClause, stringClause } = generateRangeComparisonClauses(
-          safeFieldAccessor,
-          'gt',
-          Number(range.gt)
-        );
-        numberClauses.push(numberClause);
-        stringClauses.push(stringClause);
-      }
-      if (range.lt !== undefined) {
-        const { numberClause, stringClause } = generateRangeComparisonClauses(
-          safeFieldAccessor,
-          'lt',
-          Number(range.lt)
-        );
-        numberClauses.push(numberClause);
-        stringClauses.push(stringClause);
-      }
-
-      const numberExpr = numberClauses.length > 0 ? numberClauses.join(' && ') : 'true';
-      const stringExpr = stringClauses.length > 0 ? stringClauses.join(' && ') : 'true';
-
-      return `((${safeFieldAccessor} instanceof Number && ${numberExpr}) || (${safeFieldAccessor} instanceof String && ${stringExpr}))`;
-    }
-    case 'neq':
-    default: // eq
-      const operator = op === 'neq' ? '!=' : '==';
-      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString() ${operator} ${encodeValue(
-        String(value)
-      )}) || ${safeFieldAccessor} ${operator} ${encodeValue(value as StringOrNumberOrBoolean)})`;
-  }
+  return `(
+    (${safeFieldAccessor} instanceof List && ${safeFieldAccessor}.stream().anyMatch(item -> ${applyOperation(
+    'item'
+  )})) ||
+    (!(${safeFieldAccessor} instanceof List) && ${applyOperation(safeFieldAccessor)})
+  )`;
 }
 
 // Convert a shorthand unary filter condition to painless

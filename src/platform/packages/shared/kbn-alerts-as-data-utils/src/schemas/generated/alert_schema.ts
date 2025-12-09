@@ -71,6 +71,8 @@ const AlertRequired = rt.type({
   '@timestamp': schemaDate,
   'status': schemaString,
   'rule.id': schemaString,
+  'rule.query': schemaString,
+  'alert.start': schemaDate,
   'rule.parent_id': schemaString,
   'attrs': schemaUnknown,
   'run.id': schemaStringOrNumber,
@@ -111,6 +113,8 @@ const AlertOptional = rt.partial({
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.version': schemaString,
   tags: schemaStringArray,
+  'alert.end': schemaDate,
+  'alert.flapping': schemaBoolean,
 });
 
 // prettier-ignore

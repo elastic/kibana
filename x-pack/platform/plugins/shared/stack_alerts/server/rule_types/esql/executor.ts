@@ -67,7 +67,7 @@ export async function executor(
         id: alertId,
         state: { latestTimestamp, dateStart, dateEnd },
         payload: {
-          attrs: source,
+          ...source,
         },
       });
     } else {
@@ -95,4 +95,11 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
+}
+
+export function getLineage(trackedAlert: {
+  'lineage.parents'?: string[];
+  alertUuid: string;
+}): string[] {
+  return [...(trackedAlert['lineage.parents'] || []), trackedAlert.alertUuid];
 }
