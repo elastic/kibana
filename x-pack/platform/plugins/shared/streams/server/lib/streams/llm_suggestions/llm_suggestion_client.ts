@@ -52,13 +52,13 @@ export class LLMSuggestionClient {
     };
   }
 
-  toStorage(streamName: string, feature: LLMSuggestion): StoredLLMSuggestion {
+  toStorage(streamName: string, llmSuggestion: LLMSuggestion): StoredLLMSuggestion {
     return {
       [STREAM_NAME]: streamName,
-      [LLM_SUGGESTION_UUID]: this.getLLMSuggestionUuid(streamName, feature.name),
-      [LLM_SUGGESTION_TYPE]: feature.type,
-      [LLM_SUGGESTION_NAME]: feature.name,
-      [LLM_SUGGESTION_DESCRIPTION]: feature.description,
+      [LLM_SUGGESTION_UUID]: this.getLLMSuggestionUuid(streamName, llmSuggestion.name),
+      [LLM_SUGGESTION_TYPE]: llmSuggestion.type,
+      [LLM_SUGGESTION_NAME]: llmSuggestion.name,
+      [LLM_SUGGESTION_DESCRIPTION]: llmSuggestion.description,
     };
   }
 
