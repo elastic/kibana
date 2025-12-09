@@ -121,6 +121,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/react-query'
   - '@kbn/deeplinks-observability'
+  - '@kbn/core-saved-objects-migration-server-internal'
 tags:
   - plugin
   - prod
