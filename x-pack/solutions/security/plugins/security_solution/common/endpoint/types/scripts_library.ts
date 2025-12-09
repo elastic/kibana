@@ -14,6 +14,11 @@ export interface EndpointScript {
   id: string;
   name: string;
   platform: Array<SupportedHostOsType>;
+  fileName: string;
+  /** Size of file in bytes */
+  fileSize: number;
+  /** SHA-256 hash of the file */
+  fileHash: string;
   /** If `true`, then the script, when invoked, requires input arguments to be provided */
   requiresInput: boolean;
   /**
