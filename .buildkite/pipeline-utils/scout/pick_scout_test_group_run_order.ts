@@ -17,7 +17,6 @@ export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
   type: 'plugin' | 'package';
-  visibility: 'shared' | 'private';
   configs: {
     path: string;
     hasTests: boolean;
