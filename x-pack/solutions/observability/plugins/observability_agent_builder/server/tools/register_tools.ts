@@ -40,6 +40,7 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
+  platformCoreTools.productDocumentation,
 ];
 
 const OBSERVABILITY_TOOL_IDS = [
