@@ -30,7 +30,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   const contentStyles = css`
     width: 100%;
     height: 100%;
-    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
     display: flex;
     justify-content: center;
     align-items: center;
