@@ -103,4 +103,3 @@ export { transformAttackDiscoveryScheduleCreatePropsToApi } from './impl/utils/t
 export { transformAttackDiscoveryScheduleUpdatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_update_props_to_api';
 export { transformAttackDiscoveryScheduleCreatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_create_props_from_api';
 export { transformAttackDiscoveryScheduleUpdatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_update_props_from_api';
-export { FindAttackDiscoverySchedulesInternalRequestQuery } from './impl/schemas/attack_discovery/routes/internal/schedules/find_attack_discovery_schedules_route.gen';

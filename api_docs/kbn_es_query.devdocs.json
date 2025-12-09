@@ -4161,6 +4161,59 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.sanitizeProjectRoutingForES",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitizeProjectRoutingForES",
+        "description": [
+          "\nSanitizes project routing value for Elasticsearch API calls.\n\nApplication-level code may use special values like 'ALL' to represent \"all projects\"\nwith explicit state, but Elasticsearch only accepts specific routing values.\n"
+        ],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
+          ") => \"_alias:_origin\" | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/project_routing/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.sanitizeProjectRoutingForES.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The project routing value from application state"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/project_routing/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The sanitized value for Elasticsearch, or undefined to search all projects"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.termQuery",
         "type": "Function",
         "tags": [],
