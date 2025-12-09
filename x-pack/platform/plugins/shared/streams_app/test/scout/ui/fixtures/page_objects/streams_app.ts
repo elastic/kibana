@@ -901,7 +901,7 @@ export class StreamsApp {
     queries: { title: string; feature: string; query: string; severity: string }[]
   ) {
     const rows = this.page.getByTestId('significant_events_table').locator('tbody>tr');
-    expect(await rows.count()).toEqual(queries.length);
+    await expect(rows).toHaveCount(queries.length);
     for (const query of queries) {
       const row = await this.getSignificantEventRow(query.title);
       await expect(row).toBeVisible();
