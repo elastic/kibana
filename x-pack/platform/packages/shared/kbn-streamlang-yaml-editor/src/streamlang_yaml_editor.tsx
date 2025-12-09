@@ -24,7 +24,7 @@ import {
   type YamlLineMap,
 } from './utils/yaml_line_mapper';
 import { createStreamlangHoverProvider } from './monaco_providers';
-import { stripCustomIdentifiers } from './utils/strip_custom_identifiers';
+import { sanitiseForEditing } from './utils/sanitise_for_editing';
 import { canRunSimulationForStep } from './utils/can_run_simulation';
 import { yamlLanguageService } from './services/yaml_language_service';
 import { StepActions } from './components/step_actions';
@@ -60,11 +60,11 @@ export const StreamlangYamlEditor = ({
   const [yamlLineMap, setYamlLineMap] = useState<YamlLineMap | undefined>(undefined);
   const { euiTheme } = useEuiTheme();
 
-  // Compute initial display value from dsl (with stripped customIdentifiers)
+  // Compute initial display value from dsl (with internal fields stripped)
   // This is only used for initialization - after that, internalValue is the source of truth
   const initialValue = useMemo(() => {
-    // Strip customIdentifiers from DSL before converting to YAML for display
-    const cleanedDsl = stripCustomIdentifiers(dsl);
+    // Strip internal fields from DSL before converting to YAML for display
+    const cleanedDsl = sanitiseForEditing(dsl);
     return yaml.stringify(cleanedDsl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty deps - only compute on mount
@@ -165,7 +165,7 @@ export const StreamlangYamlEditor = ({
   // and various levels of processing / validation to complete. This effect keeps the internal values in
   // sync when chosen props change.
   useEffect(() => {
-    const cleanedDsl = stripCustomIdentifiers(dsl);
+    const cleanedDsl = sanitiseForEditing(dsl);
     const serialized = yaml.stringify(cleanedDsl);
     setInternalValue(serialized);
     setIsTyping(false);
@@ -298,6 +298,8 @@ export const StreamlangYamlEditor = ({
 
   return (
     <EuiPanel
+      // NOTE: Incredibly insidious but this must be false or the transforms
+      // applied for shadows will break Monaco's fixed positioning for menus
       hasShadow={false}
       borderRadius="none"
       paddingSize="none"

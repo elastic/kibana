@@ -91,7 +91,9 @@ export const YamlEditorWrapper = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" css={fullHeightContainer}>
       <EuiFlexItem grow={true} css={editorContainer}>
-        <EuiPanel css={fullHeightPanel} paddingSize="none">
+        {/* NOTE: Incredibly insidious but this must be hasShadow={false} or the transforms
+        applied for shadows will break Monaco's fixed positioning for menus */}
+        <EuiPanel css={fullHeightPanel} paddingSize="none" hasShadow={false}>
           <StreamlangYamlEditor
             dsl={dsl}
             onDslChange={handleDslChange}
