@@ -21,7 +21,7 @@ import {
   allSetM7,
   detectionRulesInstalledM3,
   installedPackagesM1,
-  casesM7,
+  casesM6,
 } from './trial_companion_nba_detectors';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
 import type {
@@ -70,7 +70,7 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
     detectors.push(
       savedDiscoverySessionsM2(usageCollectorDeps),
       detectionRulesInstalledM3(usageCollectorDeps),
-      casesM7(usageCollectorDeps)
+      casesM6(usageCollectorDeps)
     );
   }
   detectors.push(allSetM7(logger));

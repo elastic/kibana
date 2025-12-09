@@ -102,10 +102,7 @@ export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF =
   };
 };
 
-// TODO:
-// M2 - explore your data - there is no rollups collector in serverless
-
-export const casesM7 = (deps: UsageCollectorDeps): DetectorF => {
+export const casesM6 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
     interface SavedObjectsCountsTelemetry {
       by_type?: [{ type: string; count: number }];

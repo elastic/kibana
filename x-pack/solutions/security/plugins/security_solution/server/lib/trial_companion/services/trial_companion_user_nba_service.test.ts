@@ -27,6 +27,7 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
       [
         'first milestone',
         {
+          // TODO: create a builder function for all saved objects samples
           saved_objects: [
             {
               id: 'abc',
