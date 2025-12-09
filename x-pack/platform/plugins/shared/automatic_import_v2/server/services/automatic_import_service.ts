@@ -195,23 +195,14 @@ export class AutomaticImportService {
     );
   }
 
-  public async updateDataStream(
-    data: DataStreamAttributes,
-    expectedVersion: string,
-    versionUpdate?: 'major' | 'minor' | 'patch',
-    options?: SavedObjectsUpdateOptions<DataStreamAttributes>
-  ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
+  public async getDataStream(
+    dataStreamId: string,
+    integrationId: string
+  ): Promise<SavedObject<DataStreamAttributes>> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
-    return this.savedObjectService.updateDataStream(data, expectedVersion, versionUpdate, options);
-  }
-
-  public async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
-    }
-    return this.savedObjectService.getDataStream(dataStreamId);
+    return this.savedObjectService.getDataStream(dataStreamId, integrationId);
   }
 
   public async getAllDataStreams(integrationId: string): Promise<DataStreamAttributes[]> {
@@ -242,13 +233,12 @@ export class AutomaticImportService {
   }
 
   public async deleteDataStream(
+    integrationId: string,
     dataStreamId: string,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
-    }
-    return this.savedObjectService.deleteDataStream(dataStreamId, options);
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    await this.savedObjectService.deleteDataStream(integrationId, dataStreamId, options);
   }
 
   public async addSamplesToDataStream(
