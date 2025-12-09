@@ -291,12 +291,10 @@ export const getCloudDefaultAwsCredentialConfig = ({
       value: credentialsType,
       type: 'text',
     },
-    ...(showCloudConnectors && {
-      'aws.supports_cloud_connectors': {
-        value: showCloudConnectors,
-        type: 'bool',
-      },
-    }),
+    'aws.supports_cloud_connectors': {
+      value: showCloudConnectors,
+      type: 'bool',
+    },
   };
 
   return config;
@@ -541,15 +539,10 @@ export const getCloudCredentialVarsConfig = ({
   const credentialType = `${getCloudProvider(inputType)}.credentials.type`;
   const supportCloudConnectors = `${getCloudProvider(inputType)}.supports_cloud_connectors`;
 
-  if (showCloudConnectors) {
-    return {
-      [credentialType]: { value: optionId },
-      [supportCloudConnectors]: { value: supportsCloudConnector },
-    };
-  }
-
+  // Always return the supports_cloud_connectors field to ensure it's properly updated
   return {
     [credentialType]: { value: optionId },
+    [supportCloudConnectors]: { value: supportsCloudConnector },
   };
 };
 export const getCloudProviderFromCloudHost = (

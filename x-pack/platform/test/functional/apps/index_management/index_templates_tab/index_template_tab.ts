@@ -145,8 +145,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Navigate to Mappings
         await testSubjects.click('formWizardStep-3');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        const mappingTabs = await testSubjects.findAll('formTab');
-        await mappingTabs[3].click();
+        await testSubjects.click('advancedOptionsTab');
 
         // Modify timestamp format
         await testSubjects.click('comboBoxClearButton');
@@ -164,10 +163,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.indexManagement.clickNextButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        const flyoutTabs = await testSubjects.findAll('tab');
-
         // Verify Index Settings
-        await flyoutTabs[1].click();
+        await testSubjects.click('settingsTabBtn');
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.exists('settingsTabContent')).to.be(true);
         const settingsTabContent = await testSubjects.getVisibleText('settingsTabContent');
@@ -185,7 +182,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify Mappings
-        await flyoutTabs[2].click();
+        await testSubjects.click('mappingsTabBtn');
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.exists('mappingsTabContent')).to.be(true);
         const mappingsTabContent = await testSubjects.getVisibleText('mappingsTabContent');
@@ -202,8 +199,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Navigate to Mappings
           await testSubjects.click('formWizardStep-3');
           await pageObjects.header.waitUntilLoadingHasFinished();
-          const mappingTabs = await testSubjects.findAll('formTab');
-          await mappingTabs[3].click();
+          await (await testSubjects.find('advancedOptionsTab')).click();
 
           // Modify source
           await testSubjects.click('sourceValueField');
