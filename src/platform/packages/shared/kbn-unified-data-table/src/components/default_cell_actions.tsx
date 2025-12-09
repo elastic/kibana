@@ -79,8 +79,6 @@ export const FilterOutBtn = ({
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  // const filteringDisabled =
-  //   isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
     values: { value: columnId },
