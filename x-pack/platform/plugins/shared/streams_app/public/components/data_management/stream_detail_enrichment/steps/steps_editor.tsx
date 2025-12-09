@@ -19,7 +19,6 @@ import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { NoStepsEmptyPrompt } from '../empty_prompts';
 import { PipelineSuggestion } from '../pipeline_suggestions/pipeline_suggestion';
-import { SuggestPipelineLoadingPrompt } from '../pipeline_suggestions/suggest_pipeline_loading_prompt';
 import { SuggestPipelinePanel } from '../pipeline_suggestions/suggest_pipeline_panel';
 import {
   useSimulatorSelector,
@@ -31,6 +30,7 @@ import { selectValidationErrors } from '../state_management/stream_enrichment_st
 import { getActiveDataSourceRef } from '../state_management/stream_enrichment_state_machine/utils';
 import { hasValidMessageFieldsForSuggestion } from '../utils';
 import { RootSteps } from './root_steps';
+import { SuggestionLoadingPrompt } from '../../shared/suggestion_loading_prompt';
 
 interface ErrorPanelsProps {
   showBottomBar: boolean;
@@ -275,7 +275,7 @@ export const StepsEditor = React.memo(() => {
   if (aiFeatures && aiFeatures.enabled) {
     if (isLoadingSuggestion) {
       return (
-        <SuggestPipelineLoadingPrompt
+        <SuggestionLoadingPrompt
           onCancel={() => {
             cancelSuggestion();
           }}
