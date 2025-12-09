@@ -42,19 +42,19 @@ export const aiPromptStepDefinition = (
       ];
 
       if (context.input.outputSchema) {
-        const modelResponse = await chatModel
-          .withStructuredOutput({
-            type: 'object',
-            properties: {
-              // withStructuredOutput fails if outputSchema is not an object.
-              // for example, if the user expects an array, we wrap it into an object here
-              // and then unwrap it below
-              response: context.input.outputSchema,
-            },
-          })
-          .invoke(modelInput, {
-            signal: context.abortSignal,
-          });
+        const runnable = chatModel.withStructuredOutput({
+          type: 'object',
+          properties: {
+            // withStructuredOutput fails if outputSchema is not an object.
+            // for example, if the user expects an array, we wrap it into an object here
+            // and then unwrap it below
+            response: context.input.outputSchema,
+          },
+        });
+
+        const modelResponse = await runnable.invoke(modelInput, {
+          signal: context.abortSignal,
+        });
         return {
           // We modify the output to match the expected schema
           // For now, structured output flow does not output response_metadata,
