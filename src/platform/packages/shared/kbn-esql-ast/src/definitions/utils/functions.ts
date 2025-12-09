@@ -454,7 +454,7 @@ export const buildColumnSuggestions = (
 
     const category = getColumnSuggestionCategory(column, fieldIsRecommended);
 
-    let suggestion: ISuggestionItem = {
+    const suggestion: ISuggestionItem = {
       label: column.name,
       text:
         getSafeInsertText(column.name) +
@@ -466,11 +466,7 @@ export const buildColumnSuggestions = (
       category,
     };
 
-    if (options?.openSuggestions) {
-      suggestion = withAutoSuggest(suggestion);
-    }
-
-    return suggestion;
+    return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
 
   const suggestions = [...fieldsSuggestions];

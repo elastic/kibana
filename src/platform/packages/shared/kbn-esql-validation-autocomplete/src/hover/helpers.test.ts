@@ -8,7 +8,8 @@
  */
 import type { WalkerAstNode } from '@kbn/esql-ast';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { getVariablesHoverContent, correctQuerySyntax } from './helpers';
+import { getVariablesHoverContent } from './helpers';
+import { correctQuerySyntax } from '../shared/query_syntax_helpers';
 
 describe('getVariablesHoverContent', () => {
   test('should return empty array if no variables are used in the query', async () => {
