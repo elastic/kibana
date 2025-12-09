@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateBracketsInFieldNames } from './validate_stream';
+import { validateBracketsInFieldNames, validateSettings } from './validate_stream';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 
 describe('validateBracketsInFieldNames', () => {
@@ -144,5 +144,47 @@ describe('validateBracketsInFieldNames', () => {
       },
     });
     expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
+  });
+});
+
+describe('validateSettings', () => {
+  const createStream = (settings: any = {}) => ({
+    ingest: {
+      settings,
+    },
+  });
+
+  it('should throw if validation fails for refresh_interval in serverless', () => {
+    expect(() =>
+      validateSettings(createStream({ 'index.refresh_interval': { value: '1s' } }) as any, true)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"index setting [index.refresh_interval=1s] should be either -1 or equal to or greater than 5s."`
+    );
+  });
+
+  it('should allow valid refresh_interval in serverless', () => {
+    expect(() =>
+      validateSettings(createStream({ 'index.refresh_interval': { value: '5s' } }) as any, true)
+    ).not.toThrow();
+    expect(() =>
+      validateSettings(createStream({ 'index.refresh_interval': { value: '10s' } }) as any, true)
+    ).not.toThrow();
+    expect(() =>
+      validateSettings(createStream({ 'index.refresh_interval': { value: -1 } }) as any, true)
+    ).not.toThrow();
+  });
+
+  it('should throw if non-allowed setting is present in serverless', () => {
+    expect(() =>
+      validateSettings(createStream({ 'index.number_of_shards': { value: 1 } }) as any, true)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Setting [index.number_of_shards] is not allowed in serverless"`
+    );
+  });
+
+  it('should not validate settings in non-serverless', () => {
+    expect(() =>
+      validateSettings(createStream({ 'index.refresh_interval': { value: '1s' } }) as any, false)
+    ).not.toThrow();
   });
 });

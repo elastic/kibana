@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import type { IngestStreamSettings } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, parseEsTimeValueInMs } from '@kbn/streams-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,7 +27,6 @@ import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { Row, RowMetadata } from './row';
-import { parseDuration } from '../../stream_detail_lifecycle/helpers/helpers';
 
 interface Setting {
   invalid: boolean;
@@ -250,13 +249,13 @@ export function Settings({
         setting={settings['index.refresh_interval']}
         isInvalid={settings['index.refresh_interval']?.invalid}
         valueDescription="Accepts time values like 5s, 30s, 1m. Set to -1 to disable."
-        onChange={(value) =>
-          updateSetting(
-            'index.refresh_interval',
-            value,
-            !!value && !parseDuration(value) && Number(value) !== -1
-          )
-        }
+        onChange={(value) => {
+          const durationMs = parseEsTimeValueInMs(value);
+          const isDisabled = Number(value) === -1;
+          const isValidFormat = durationMs !== undefined || isDisabled;
+          const isBelowServerlessMin = isServerless && !isDisabled && durationMs !== undefined && durationMs < 5000;
+          updateSetting('index.refresh_interval', value, !!value && (!isValidFormat || isBelowServerlessMin));
+        }}
         onReset={() => onReset('index.refresh_interval')}
       />
 
