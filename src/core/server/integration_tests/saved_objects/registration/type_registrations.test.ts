@@ -149,6 +149,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-pinned-event',
   'slo',
   'slo-settings',
+  'slo_template',
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
