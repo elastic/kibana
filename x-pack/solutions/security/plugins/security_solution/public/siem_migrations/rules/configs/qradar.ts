@@ -7,7 +7,7 @@
 
 import { QradarDataInputStepId } from '../components/data_input_flyout/steps/constants';
 import { RulesDataInput } from '../components/data_input_flyout/steps/rules/rules_data_input';
-import type { Steps } from '../components/data_input_flyout/types';
+import type { Steps } from '../types';
 
 export const QRADAR_MIGRATION_STEPS: Steps = [
   { id: QradarDataInputStepId.Rules, Component: RulesDataInput },

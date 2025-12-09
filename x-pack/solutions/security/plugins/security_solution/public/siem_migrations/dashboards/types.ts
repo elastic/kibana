@@ -7,7 +7,10 @@
 
 import type { DashboardMigrationTaskStats } from '../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
+import type { Step, UseMigrationStepsProps } from '../common/types';
 
 export interface DashboardMigrationStats extends DashboardMigrationTaskStats {
   status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
 }
+
+export type Steps = Array<Step<UseMigrationStepsProps<DashboardMigrationStats>>>;

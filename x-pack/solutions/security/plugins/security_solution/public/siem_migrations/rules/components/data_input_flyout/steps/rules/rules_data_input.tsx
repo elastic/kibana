@@ -11,21 +11,20 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { SubSteps, useMigrationNameStep } from '../../../../../common/components';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import type {
-  OnMigrationCreated,
-  OnMissingResourcesFetched,
-  RulesDataInputSubStepsProps,
-  UseMigrationStepsProps,
-} from '../../types';
+import type { OnMigrationCreated, RulesDataInputSubStepsProps } from '../../types';
 import * as i18n from './translations';
 import { QradarDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import { MigrationSource } from '../../../../types';
-import { SplunkDataInputStep } from '../../../../../common/types';
+import type {
+  OnMissingResourcesFetched,
+  UseMigrationStepsProps,
+} from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
+import type { RuleMigrationStats } from '../../../../types';
 
-export const RulesDataInput = React.memo<UseMigrationStepsProps>(
+export const RulesDataInput = React.memo<UseMigrationStepsProps<RuleMigrationStats>>(
   ({
     dataInputStep,
     migrationStats,

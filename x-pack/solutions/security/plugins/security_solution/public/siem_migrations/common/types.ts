@@ -6,7 +6,10 @@
  */
 
 import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
-import type { MigrationTaskStats } from '../../../common/siem_migrations/model/common.gen';
+import type {
+  MigrationTaskStats,
+  SiemMigrationResourceBase,
+} from '../../../common/siem_migrations/model/common.gen';
 
 export interface GetMigrationsStatsAllParams {
   /** Optional AbortSignal for cancelling request */
@@ -45,4 +48,30 @@ export enum SplunkDataInputStep {
   Macros = 2,
   Lookups = 3,
   End = 10,
+}
+
+export interface Step<Props, C extends React.ComponentType<Props> = React.ComponentType<Props>> {
+  id: string;
+  Component: C;
+}
+
+interface MissingResourcesIndexed {
+  macros: string[];
+  lookups: string[];
+}
+
+export type OnMissingResourcesFetched = (missingResources: SiemMigrationResourceBase[]) => void;
+
+export enum MigrationSource {
+  SPLUNK = 'splunk',
+  QRADAR = 'qradar',
+}
+export interface UseMigrationStepsProps<T> {
+  dataInputStep: number;
+  migrationSource: MigrationSource;
+  migrationStats?: T;
+  onMigrationCreated: (createdMigrationStats: T) => void;
+  onMissingResourcesFetched: OnMissingResourcesFetched;
+  setDataInputStep: (step: number) => void;
+  missingResourcesIndexed?: MissingResourcesIndexed;
 }

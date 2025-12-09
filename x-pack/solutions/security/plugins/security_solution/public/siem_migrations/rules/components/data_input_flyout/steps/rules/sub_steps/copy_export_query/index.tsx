@@ -10,7 +10,7 @@ import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import { CopyExportedSplunkQuery } from './copy_exported_splunk_query';
 import * as i18n from './translations';
 import { CopyExportedQradarQuery } from './copy_exported_qradar_query';
-import { MigrationSource } from '../../../../../../types';
+import { MigrationSource } from '../../../../../../../common/types';
 
 export interface CopyExportQueryStepProps {
   status: EuiStepStatus;

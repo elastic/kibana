@@ -25,16 +25,13 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
-import { DashboardsUploadStep } from './steps/upload_dashboards';
-import { MacrosDataInput } from './steps/macros/macros_data_input';
-import { LookupsDataInput } from './steps/lookups/lookups_data_input';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-import type { MigrationSettingsBase } from '../../../common/types';
-import { SplunkDataInputStep } from '../../../common/types';
-import { MigrationSource } from '../../../rules/types';
+import type { MigrationSettingsBase, Step, UseMigrationStepsProps } from '../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { useMissingResources } from '../../../rules/components/data_input_flyout/steps/hooks/use_missing_resources';
+import { STEP_COMPONENTS } from '../../configs';
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -120,39 +117,23 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem>
-                <DashboardsUploadStep
-                  dataInputStep={dataInputStep}
-                  migrationSource={MigrationSource.SPLUNK}
-                  migrationStats={migrationStats}
-                  missingResourcesIndexed={missingResourcesIndexed}
-                  onMigrationCreated={onMigrationCreated}
-                  onMissingResourcesFetched={onMissingResourcesFetched}
-                  setDataInputStep={setDataInputStep}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <MacrosDataInput
-                  dataInputStep={dataInputStep}
-                  migrationSource={MigrationSource.SPLUNK}
-                  migrationStats={migrationStats}
-                  missingResourcesIndexed={missingResourcesIndexed}
-                  onMigrationCreated={onMigrationCreated}
-                  onMissingResourcesFetched={onMissingResourcesFetched}
-                  setDataInputStep={setDataInputStep}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <LookupsDataInput
-                  dataInputStep={dataInputStep}
-                  migrationSource={MigrationSource.SPLUNK}
-                  migrationStats={migrationStats}
-                  missingResourcesIndexed={missingResourcesIndexed}
-                  onMigrationCreated={onMigrationCreated}
-                  onMissingResourcesFetched={onMissingResourcesFetched}
-                  setDataInputStep={setDataInputStep}
-                />
-              </EuiFlexItem>
+              <>
+                {STEP_COMPONENTS[MigrationSource.SPLUNK].map(
+                  (step: Step<UseMigrationStepsProps<DashboardMigrationStats>>) => (
+                    <EuiFlexItem key={step.id}>
+                      <step.Component
+                        dataInputStep={dataInputStep}
+                        migrationSource={MigrationSource.SPLUNK}
+                        migrationStats={migrationStats}
+                        missingResourcesIndexed={missingResourcesIndexed}
+                        onMigrationCreated={onMigrationCreated}
+                        onMissingResourcesFetched={onMissingResourcesFetched}
+                        setDataInputStep={setDataInputStep}
+                      />
+                    </EuiFlexItem>
+                  )
+                )}
+              </>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

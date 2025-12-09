@@ -11,8 +11,7 @@ import { LookupsDataInput } from './lookups_data_input';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
-import { MigrationSource } from '../../../../types';
-import { SplunkDataInputStep } from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();

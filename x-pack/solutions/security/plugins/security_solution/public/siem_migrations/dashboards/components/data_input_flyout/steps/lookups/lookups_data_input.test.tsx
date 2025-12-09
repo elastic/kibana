@@ -12,8 +12,7 @@ import * as i18n from './translations';
 import { getDashboardMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
-import { MigrationSource } from '../../../../../rules/types';
-import { SplunkDataInputStep } from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();

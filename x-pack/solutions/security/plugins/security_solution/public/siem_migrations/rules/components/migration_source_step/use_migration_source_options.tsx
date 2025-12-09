@@ -9,7 +9,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { MigrationSource } from '../../types';
+import { MigrationSource } from '../../../common/types';
 
 export const useMigrationSourceOptions = () => {
   const isQradarEnabled = useIsExperimentalFeatureEnabled('qradarRulesMigration');

@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import type { RuleMigrationStats } from '../../../../../../types';
-import { MigrationSource } from '../../../../../../types';
 import type { OnMigrationCreated } from '../../../../types';
 import { RulesFileUpload } from './rules_file_upload';
 import {
@@ -17,6 +16,7 @@ import {
 } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
 import { RulesXMLFileUpload } from './rules_xml_file_upload';
+import { MigrationSource } from '../../../../../../../common/types';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;

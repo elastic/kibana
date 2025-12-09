@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useRulesFileUploadStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useCreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import { MigrationSource } from '../../../../../../types';
+import { MigrationSource } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../service/hooks/use_create_migration', () => ({
   useCreateMigration: jest.fn(),

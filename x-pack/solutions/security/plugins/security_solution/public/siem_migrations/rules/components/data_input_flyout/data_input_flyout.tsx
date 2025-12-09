@@ -24,14 +24,14 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
-import { MigrationSource, type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
+import { type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
-import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { STEP_COMPONENTS } from '../../configs';
 import { useMissingResources } from './steps/hooks/use_missing_resources';
-import { SplunkDataInputStep } from '../../../common/types';
+import type { Step, UseMigrationStepsProps } from '../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
+import { STEP_COMPONENTS } from '../../configs';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -136,19 +136,21 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 />
               </EuiFlexItem>
               <>
-                {STEP_COMPONENTS[migrationSource]?.map((step) => (
-                  <EuiFlexItem key={step.id}>
-                    <step.Component
-                      dataInputStep={dataInputStep}
-                      migrationSource={migrationSource}
-                      migrationStats={migrationStats}
-                      missingResourcesIndexed={missingResourcesIndexed}
-                      onMigrationCreated={onMigrationCreated}
-                      onMissingResourcesFetched={onMissingResourcesFetched}
-                      setDataInputStep={setDataInputStep}
-                    />
-                  </EuiFlexItem>
-                )) ?? <CenteredLoadingSpinner />}
+                {STEP_COMPONENTS[migrationSource].map(
+                  (step: Step<UseMigrationStepsProps<RuleMigrationStats>>) => (
+                    <EuiFlexItem key={step.id}>
+                      <step.Component
+                        dataInputStep={dataInputStep}
+                        migrationSource={migrationSource}
+                        migrationStats={migrationStats}
+                        missingResourcesIndexed={missingResourcesIndexed}
+                        onMigrationCreated={onMigrationCreated}
+                        onMissingResourcesFetched={onMissingResourcesFetched}
+                        setDataInputStep={setDataInputStep}
+                      />
+                    </EuiFlexItem>
+                  )
+                )}
               </>
             </EuiFlexGroup>
           </EuiFlyoutBody>

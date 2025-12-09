@@ -13,9 +13,9 @@ import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrat
 import { TestProviders } from '../../../../../../common/mock';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
-import type { UseMigrationStepsProps } from '../../../../../rules/components/data_input_flyout/types';
-import { MigrationSource } from '../../../../../rules/types';
-import { SplunkDataInputStep } from '../../../../../common/types';
+import type { UseMigrationStepsProps } from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
+import type { DashboardMigrationStats } from '../../../../types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -46,7 +46,7 @@ jest.mock('../../../../../../common/hooks/use_app_toasts');
 describe('MacrosDataInput', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
-  const defaultProps: UseMigrationStepsProps = {
+  const defaultProps: UseMigrationStepsProps<DashboardMigrationStats> = {
     onMissingResourcesFetched: jest.fn(),
     dataInputStep: SplunkDataInputStep.Macros,
     migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),

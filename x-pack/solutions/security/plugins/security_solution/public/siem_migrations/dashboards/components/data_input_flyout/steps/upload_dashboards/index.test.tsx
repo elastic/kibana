@@ -9,8 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DashboardsUploadStep } from '.';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
-import { MigrationSource } from '../../../../../rules/types';
-import { SplunkDataInputStep } from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
 describe('DashboardsUploadStep', () => {
   const defaultProps = {

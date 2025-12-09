@@ -23,11 +23,13 @@ import { SubSteps } from '../../../../../common/components';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnResourcesCreated, UseMigrationStepsProps } from '../../types';
+import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
+import type { UseMigrationStepsProps } from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
+import type { RuleMigrationStats } from '../../../../types';
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -35,7 +37,7 @@ interface LookupsDataInputSubStepsProps {
   onAllLookupsCreated: OnResourcesCreated;
 }
 
-export const LookupsDataInput = React.memo<UseMigrationStepsProps>(
+export const LookupsDataInput = React.memo<UseMigrationStepsProps<RuleMigrationStats>>(
   ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
     const missingLookups = useMemo(
       () => missingResourcesIndexed?.lookups,
