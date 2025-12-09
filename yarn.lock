@@ -2064,7 +2064,7 @@
   resolved "https://registry.yarnpkg.com/@babel/regjsgen/-/regjsgen-0.8.0.tgz#f0ba69b075e1f05fb2825b7fad991e7adbb18310"
   integrity sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.22.5", "@babel/runtime@^7.24.7", "@babel/runtime@^7.26.7", "@babel/runtime@^7.27.6", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.22.5", "@babel/runtime@^7.24.7", "@babel/runtime@^7.26.7", "@babel/runtime@^7.28.4", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.28.4"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.28.4.tgz#a70226016fabe25c5783b2f22d3e1c9bc5ca3326"
   integrity sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==
@@ -2385,13 +2385,13 @@
   dependencies:
     tslib "^1.9.3"
 
-"@elastic/ebt@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ebt/-/ebt-1.4.0.tgz#e155357ffbc5e310002f058829ed2b142b39b144"
-  integrity sha512-BQUXn607aOq1+Q5dQuDi9DkmbBI97oYh401Siyqjyyr7z8kWvBGn0P8CitlZEC3Rou6yXW9uoC3VgmnqNitVjQ==
+"@elastic/ebt@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@elastic/ebt/-/ebt-1.4.1.tgz#159d70c6d0798b29af0b0b9356f02c77e13adbab"
+  integrity sha512-8kvqG4cU/+V0CvJcXH9Bh0jyHmqvmVwhsOiGW0ZS1ylHMMgVP95186W3quL8luivoAg7PNIUj69OsV2OjLDmwg==
   dependencies:
-    "@babel/runtime" "^7.27.6"
-    fp-ts "^2.16.10"
+    "@babel/runtime" "^7.28.4"
+    fp-ts "^2.16.11"
     io-ts "^2.2.22"
     js-sha256 "^0.11.1"
     lodash.get "^4.4.2"
@@ -21145,10 +21145,10 @@ forwarded@0.2.0:
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.2.0.tgz#2269936428aad4c15c7ebe9779a84bf0b2a81811"
   integrity sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==
 
-fp-ts@^2.16.10, fp-ts@^2.3.1:
-  version "2.16.10"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.16.10.tgz#829b82a46571c2dc202bed38a9c2eeec603e38c4"
-  integrity sha512-vuROzbNVfCmUkZSUbnWSltR1sbheyQbTzug7LB/46fEa1c0EucLeBaCEUE0gF3ZGUGBt9lVUiziGOhhj6K1ORA==
+fp-ts@^2.16.11, fp-ts@^2.3.1:
+  version "2.16.11"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.16.11.tgz#831a10514bf4e22adf12065732fc5a20c85d9623"
+  integrity sha512-LaI+KaX2NFkfn1ZGHoKCmcfv7yrZsC3b8NtWsTVQeHkq4F27vI5igUuO53sxqDEa2gNQMHFPmpojDw/1zmUK7w==
 
 fraction.js@^4.2.0:
   version "4.2.0"
