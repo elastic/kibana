@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { Conversation } from '@kbn/onechat-common';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
@@ -19,8 +18,8 @@ import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { getProcessedAttachments } from './get_processed_attachments';
 import { AppLeaveContext } from '../app_leave_context';
+import { AgentBuilderTourProvider } from '../agent_builder_tour_context';
 
 const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
@@ -36,18 +35,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
-  const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
-
   // Register callback to receive prop updates from parent.
   const onPropsUpdate = contextProps.onPropsUpdate;
   useEffect(() => {
     if (onPropsUpdate) {
       onPropsUpdate((newProps) => {
         setCurrentProps(newProps);
-        if (newProps.newConversation) {
-          // If the user starts a new conversation, we need to clear the attachment map
-          attachmentMapRef.current = new Map();
-        }
       });
     }
   }, [onPropsUpdate]);
@@ -148,24 +141,26 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onDeleteConversation,
   });
 
-  const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {
-    attachmentMapRef.current = attachments;
+  // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
+  const resetInitialMessage = useCallback(() => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      initialMessage: undefined,
+      autoSendInitialMessage: false,
+    }));
   }, []);
 
-  const handleGetProcessedAttachments = useCallback(
-    (_conversation?: Conversation) => {
-      return getProcessedAttachments({
-        attachments: currentProps.attachments ?? [],
-        getAttachment: (id) => attachmentMapRef.current.get(id),
-        setAttachment: (id, content) => attachmentMapRef.current.set(id, content),
-      });
-    },
-    [currentProps.attachments]
-  );
+  // Resets the {attachments} array after attachment(s) have been sent as part of a Conversation Round.
+  const resetAttachments = useCallback(() => {
+    setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
+  }, []);
 
-  const resetInitialMessage = useCallback(() => {
-    setCurrentProps({ ...currentProps, initialMessage: undefined });
-  }, [currentProps, setCurrentProps]);
+  const removeAttachment = useCallback((attachmentIndex: number) => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
+    }));
+  }, []);
 
   const conversationContextValue = useMemo(
     () => ({
@@ -175,26 +170,28 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId,
       initialMessage: currentProps.initialMessage,
+      autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
       attachments: currentProps.attachments,
+      resetAttachments,
+      removeAttachment,
       conversationActions,
-      getProcessedAttachments: handleGetProcessedAttachments,
-      setAttachmentMap,
     }),
     [
       conversationId,
       currentProps.sessionTag,
       currentProps.agentId,
       currentProps.initialMessage,
-      currentProps.attachments,
+      currentProps.autoSendInitialMessage,
       currentProps.browserApiTools,
-      conversationActions,
-      handleGetProcessedAttachments,
-      setConversationId,
-      setAttachmentMap,
+      currentProps.attachments,
       resetInitialMessage,
+      setConversationId,
+      resetAttachments,
+      removeAttachment,
+      conversationActions,
     ]
   );
 
@@ -205,7 +202,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           <OnechatServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <ConversationContext.Provider value={conversationContextValue}>
-                <SendMessageProvider>{children}</SendMessageProvider>
+                <AgentBuilderTourProvider>
+                  <SendMessageProvider>{children}</SendMessageProvider>
+                </AgentBuilderTourProvider>
               </ConversationContext.Provider>
             </AppLeaveContext.Provider>
           </OnechatServicesContext.Provider>

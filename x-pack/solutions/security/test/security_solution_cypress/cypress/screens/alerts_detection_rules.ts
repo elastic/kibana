@@ -113,6 +113,10 @@ export const RULES_ROW = '.euiTableRow';
 
 export const SEVERITY = '[data-test-subj="severity"]';
 
+export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
+
+export const ENABLE_RULE_TOGGLE = '[data-test-subj="ruleSwitch"]';
+
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
