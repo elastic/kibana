@@ -9,10 +9,7 @@
 
 import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
-import type {
-  ChartSectionConfiguration,
-  UnifiedHistogramPartialLayoutProps,
-} from '@kbn/unified-histogram';
+import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
@@ -22,6 +19,7 @@ import {
   type ChartSectionConfigurationExtensionParams,
   useProfileAccessor,
 } from '../../../../context_awareness';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -41,6 +39,10 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
+import type {
+  ChartSectionConfigurationExtensionParams,
+  ChartSectionConfiguration,
+} from '../../../../context_awareness/types';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -295,20 +297,17 @@ const CustomChartSectionWrapper = ({
     return null;
   }
 
-  const isComponentVisible =
-    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
+  const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
 
-  return (
-    <chartSectionConfig.Component
-      histogramCss={histogramCss}
-      chartToolbarCss={chartToolbarCss}
-      renderToggleActions={renderCustomChartToggleActions}
-      fetch$={fetch$}
-      fetchParams={fetchParams}
-      isComponentVisible={isComponentVisible}
-      {...unifiedHistogramProps}
-      initialState={metricsGridState}
-      onInitialStateChange={onInitialStateChange}
-    />
-  );
+  return chartSectionConfig.renderChartSection({
+    histogramCss,
+    chartToolbarCss,
+    renderToggleActions: renderCustomChartToggleActions,
+    fetch$,
+    fetchParams,
+    isComponentVisible,
+    ...unifiedHistogramProps,
+    initialState: metricsGridState,
+    onInitialStateChange,
+  });
 };
