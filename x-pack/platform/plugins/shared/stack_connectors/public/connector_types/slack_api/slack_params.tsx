@@ -45,7 +45,11 @@ const SlackParamsFields: React.FunctionComponent<
   const { subAction, subActionParams } = actionParams;
   const { channels = [], text, channelIds = [], channelNames = [] } = subActionParams ?? {};
 
-  const selectedChannel = getSelectedChannel({ channels, channelIds, channelNames });
+  const selectedChannel = getSelectedChannel({
+    channels,
+    channelIds,
+    channelNames,
+  });
 
   const [messageType, setMessageType] = useState('text');
   const [textValue, setTextValue] = useState<string | undefined>(text);
@@ -60,7 +64,7 @@ const SlackParamsFields: React.FunctionComponent<
     'data-test-subj': ac.name,
   }));
 
-  const shouldAllowAnyChannel = !Boolean(slackChannelsOptions.length);
+  const hasAllowedChannelsConfig = Boolean(allowedChannelsConfig.length);
 
   const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption<string>[]>(
     selectedChannel ? [{ value: selectedChannel, label: selectedChannel }] : []
@@ -98,7 +102,7 @@ const SlackParamsFields: React.FunctionComponent<
     if (connectorId && connectorId !== actionConnector?.id) {
       editAction(
         'subActionParams',
-        { channels: undefined, channelIds: undefined, channelNames: [], text },
+        { channels: undefined, channelIds: undefined, channelNames: undefined, text },
         index
       );
       setSelectedChannels([]);
@@ -139,18 +143,32 @@ const SlackParamsFields: React.FunctionComponent<
     [editAction, index, text]
   );
 
-  const onCreateOption = (searchValue: string) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
+  const onCreateOption = useCallback(
+    (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
 
-    if (!normalizedSearchValue) {
-      return;
-    }
+      if (!normalizedSearchValue) {
+        return;
+      }
 
-    const newOption = {
-      label: searchValue,
-    };
+      const newOption = {
+        label: searchValue,
+      };
 
-    setSelectedChannels([newOption]);
+      setSelectedChannels([newOption]);
+
+      editAction(
+        'subActionParams',
+        { channels: undefined, channelIds: undefined, channelNames: [newOption], text },
+        index
+      );
+    },
+    [editAction, index, text]
+  );
+
+  const onTextChange = (value: string) => {
+    setTextValue(value);
+    editAction('subActionParams', { channels, channelIds, channelNames, text: value }, index);
   };
 
   const channelInput = useMemo(() => {
@@ -158,16 +176,22 @@ const SlackParamsFields: React.FunctionComponent<
       <EuiComboBox
         noSuggestions={false}
         data-test-subj="slackChannelsComboBox"
-        options={shouldAllowAnyChannel ? slackChannelsOptions : undefined}
+        options={hasAllowedChannelsConfig ? slackChannelsOptions : undefined}
         selectedOptions={selectedChannels}
         onChange={onChangeComboBox}
-        onCreateOption={shouldAllowAnyChannel ? onCreateOption : undefined}
+        onCreateOption={hasAllowedChannelsConfig ? undefined : onCreateOption}
         singleSelection={true}
         fullWidth={true}
         aria-labelledby="channelsLabelId"
       />
     );
-  }, [onChangeComboBox, selectedChannels, shouldAllowAnyChannel, slackChannelsOptions]);
+  }, [
+    hasAllowedChannelsConfig,
+    onChangeComboBox,
+    onCreateOption,
+    selectedChannels,
+    slackChannelsOptions,
+  ]);
 
   return (
     <>
@@ -213,8 +237,7 @@ const SlackParamsFields: React.FunctionComponent<
         <TextAreaWithMessageVariables
           index={index}
           editAction={(_: string, value: string) => {
-            setTextValue(value);
-            editAction('subActionParams', { channels, channelIds, text: value }, index);
+            onTextChange(value);
           }}
           messageVariables={messageVariables}
           paramsProperty="webApiText"
@@ -230,10 +253,7 @@ const SlackParamsFields: React.FunctionComponent<
       ) : (
         <>
           <JsonEditorWithMessageVariables
-            onDocumentsChange={(json: string) => {
-              setTextValue(json);
-              editAction('subActionParams', { channels, channelIds, text: json }, index);
-            }}
+            onDocumentsChange={onTextChange}
             messageVariables={messageVariables}
             paramsProperty="webApiBlock"
             inputTargetValue={textValue}
@@ -290,6 +310,8 @@ const getSelectedChannel = ({
   if (channels && channels.length > 0) {
     return channels[0];
   }
+
+  return null;
 };
 
 const formatChannel = (channel: string): string => {

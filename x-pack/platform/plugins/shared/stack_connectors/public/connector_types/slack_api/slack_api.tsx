@@ -31,14 +31,19 @@ import type { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
 
 const isChannelValid = (channels?: string[], channelIds?: string[], channelNames?: string[]) => {
-  if (
-    (channels === undefined && !channelIds?.length) ||
-    (channelIds === undefined && !channels?.length) ||
-    (!channelIds?.length && !channels?.length)
-  ) {
-    return false;
+  if (channelNames && channelNames.length > 0) {
+    return true;
   }
-  return true;
+
+  if (channelIds && channelIds.length > 0) {
+    return true;
+  }
+
+  if (channels && channels.length > 0) {
+    return true;
+  }
+
+  return false;
 };
 
 export const getConnectorType = (): ConnectorTypeModel<
@@ -111,7 +116,8 @@ export const getConnectorType = (): ConnectorTypeModel<
   },
   connectorForm: {
     serializer: (data) => {
-      const formAllowedChannels = data.config?.allowedChannels ?? [];
+      const formAllowedChannels =
+        (data.config?.allowedChannels as SlackApiConfig['allowedChannels']) ?? [];
 
       const allowedChannels = formAllowedChannels.map((option) => ({ name: option })) ?? [];
 
@@ -121,8 +127,9 @@ export const getConnectorType = (): ConnectorTypeModel<
       };
     },
     deserializer: (data) => {
-      const allowedChannels =
-        data.config?.allowedChannels?.map((channel) => {
+      const allowedChannels = data.config?.allowedChannels as Array<{ name: string }>;
+      const formattedChannels =
+        allowedChannels.map((channel) => {
           if (channel.name.startsWith('#')) {
             return channel.name;
           }
@@ -132,7 +139,7 @@ export const getConnectorType = (): ConnectorTypeModel<
 
       return {
         ...data,
-        config: { ...data.config, allowedChannels },
+        config: { ...data.config, allowedChannels: formattedChannels },
       };
     },
   },

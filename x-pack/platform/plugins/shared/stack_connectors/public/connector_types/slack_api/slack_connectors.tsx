@@ -16,7 +16,6 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
 
-import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
 
 const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => [

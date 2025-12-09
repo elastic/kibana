@@ -86,12 +86,11 @@ export type ConnectorFormSchema<
 > &
   Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name'>>;
 
-export type InternalConnectorForm<T extends Record<string, unknown> = Record<string, unknown>> =
-  ConnectorFormSchema & {
-    __internal__?: {
-      headers?: Array<{ key: string; value: string; type: string }>;
-    };
+export type InternalConnectorForm = ConnectorFormSchema & {
+  __internal__?: {
+    headers?: Array<{ key: string; value: string; type: string }>;
   };
+};
 
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
@@ -160,18 +159,12 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
      * Form hook lib deserializer used in the connector form
      * Use this to transform the connector object to an intermediate state used in the form
      */
-    deserializer?: SerializerFunc<
-      InternalConnectorForm,
-      ConnectorFormSchema<ActionConfig, ActionSecrets>
-    >;
+    deserializer?: SerializerFunc<InternalConnectorForm, ConnectorFormSchema>;
     /**
      * Form hook lib serializer used in the connector form
      * Use this to transform the intermediate state used in the form into a connector object
      */
-    serializer?: SerializerFunc<
-      ConnectorFormSchema<ActionConfig, ActionSecrets>,
-      InternalConnectorForm
-    >;
+    serializer?: SerializerFunc<ConnectorFormSchema, InternalConnectorForm>;
     /**
      * If true, hides the settings title of the connector form
      * @default false
