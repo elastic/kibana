@@ -26,6 +26,16 @@ export const AIAssistantVisibility: React.FC = () => {
 
   if (!field) return null;
 
+  const hasObservabilityAssistant =
+    application.capabilities.observabilityAIAssistant?.show === true;
+  const hasSecurityAssistant =
+    application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+
+  // Hide if user doesn't have any assistant capabilities
+  if (!hasObservabilityAssistant && !hasSecurityAssistant) {
+    return null;
+  }
+
   const currentChatExperience =
     unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??

@@ -60,6 +60,8 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
 
+  const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.show === true;
+
   // Check feature flag on mount
   useEffect(() => {
     getIsAiAgentsEnabled(coreStart)
@@ -273,9 +275,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       titleSize="xs"
                       icon={<RobotIcon size="xxl" />}
                       data-test-subj="aiAssistantAgentCard"
-                      isDisabled={
-                        !isSecurityAIAssistantEnabled && !isObservabilityAIAssistantEnabled
-                      }
+                      isDisabled={!hasAgentBuilder}
                     />
                   </EuiFlexItem>
                 )}
