@@ -32,12 +32,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Happy path', () => {
       it('should create QRadar migrations and identify reference sets as missing resources', async () => {
         // Add QRadar rules with reference sets
-        const createResponse = await migrationRulesRoutes.addQRadarRulesToMigration({
+        await migrationRulesRoutes.addQradarRulesToMigration({
           migrationId,
-          xml: qradarXmlWithReferenceSets,
+          payload: {
+            xml: qradarXmlWithReferenceSets,
+          },
         });
-
-        expect(createResponse.body.message).toContain('Successfully imported');
 
         // Fetch migration rules to verify they were created
         const rulesResponse = await migrationRulesRoutes.getRules({ migrationId });
@@ -60,9 +60,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Error handling', () => {
       it('should return 404 if invalid migration id is provided', async () => {
-        const { body } = await migrationRulesRoutes.addQRadarRulesToMigration({
+        const { body } = await migrationRulesRoutes.addQradarRulesToMigration({
           migrationId: 'non-existing-migration-id',
-          xml: qradarXmlWithReferenceSets,
+          payload: {
+            xml: qradarXmlWithReferenceSets,
+          },
           expectStatusCode: 404,
         });
 
@@ -74,30 +76,31 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return an error when xml is not provided', async () => {
-        const response = await migrationRulesRoutes.addQRadarRulesToMigration({
+        await migrationRulesRoutes.addQradarRulesToMigration({
           migrationId,
-          xml: undefined,
+          payload: {
+            // @ts-expect-error
+            xml: undefined,
+          },
           expectStatusCode: 400,
         });
-
-        expect(response.body.statusCode).toEqual(400);
       });
 
       it('should return an error when invalid XML is provided', async () => {
-        const response = await migrationRulesRoutes.addQRadarRulesToMigration({
+        await migrationRulesRoutes.addQradarRulesToMigration({
           migrationId,
-          xml: 'not valid xml content',
+          payload: {
+            xml: 'not valid xml content',
+          },
           expectStatusCode: 400,
         });
-
-        expect(response.body.statusCode).toEqual(400);
       });
 
       it('should return an error when XML has no rules', async () => {
         const emptyXml = `<?xml version="1.0" encoding="UTF-8"?><content></content>`;
-        const response = await migrationRulesRoutes.addQRadarRulesToMigration({
+        const response = await migrationRulesRoutes.addQradarRulesToMigration({
           migrationId,
-          xml: emptyXml,
+          payload: { xml: emptyXml },
           expectStatusCode: 400,
         });
 
