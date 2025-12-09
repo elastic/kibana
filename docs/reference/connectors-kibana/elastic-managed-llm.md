@@ -10,10 +10,10 @@ applies_to:
 Elastic provides built-in LLMs through the Elastic Managed LLM connector vetted for GenAI product features across our platform.
 Currently, the following built-in LLMs are available:
 
-* [General Purpose LLM v2](#general-purpose-llm-v2)
-* [General Purpose LLM v1](#general-purpose-llm-v1)
+* [`anthropic-claude-4.5-sonnet`](#claude-45)
+* [`anthropic-claude-3.7-sonnet`](#claude-37)
 
-## General Purpose LLM v2
+## `anthropic-claude-4.5-sonnet` [claude-45]
 ```{applies_to}
 stack: ga 9.3
 serverless: ga
@@ -22,13 +22,13 @@ serverless: ga
 A high-performance, general-purpose language model suitable for the widest range of use cases.
 Model details are available in the [model card](https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/docs/reference/resources/General_Purpose_LLM_v2_model_card.pdf).
 
-## General Purpose LLM v1
+## `anthropic-claude-3.7-sonnet` [claude-37]
 ```{applies_to}
 stack: ga 9.0
 serverless: ga
 ```
 
-General Purpose LLM v1 is the default LLM to use with this connector.
+`anthropic-claude-3.7-sonnet` is the default LLM to use with this connector.
 
 ::::{note}
 * The default LLM may change in the future based on evaluations of performance, security, and accuracy.
