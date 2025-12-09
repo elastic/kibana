@@ -24,9 +24,12 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-export function ErrorSampleAiInsight({ error }: { error: APMError }) {
+type ErrorSampleDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>;
+
+export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'>) {
   const { onechat, core } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
