@@ -221,9 +221,11 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
    * @protected
    */
   protected async storeFile({
+    scriptId,
     file,
     fileName = '',
   }: {
+    scriptId: string;
     file: HapiReadableStream;
     /** The file name. By Default, an attempt will be made to get it from the File stream unless this option is set. */
     fileName?: string;
@@ -233,8 +235,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         metadata: {
           name: fileName || (file.hapi.filename ?? 'script_file'),
           mime: file.hapi.headers['content-type'] ?? 'application/octet-stream',
-
-          // FIXME:PT update file info. to SO once PR245273 merges
+          meta: { scriptId },
         },
       })
       .catch((error) => {
@@ -372,7 +373,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     ...scriptUpdates
   }: ScriptUpdateParams): Promise<EndpointScript> {
     const currentScriptSoItem = await this.getScriptSavedObject(id);
-    let fileStorage: File | undefined;
+    let newFileStorage: File | undefined;
 
     if (version && currentScriptSoItem.version !== version) {
       throw new ScriptLibraryError(
@@ -382,10 +383,11 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     }
 
     if (file) {
-      fileStorage = await this.storeFile({ file: file as HapiReadableStream });
+      newFileStorage = await this.storeFile({ scriptId: id, file: file as HapiReadableStream });
 
       this.logger.debug(
-        () => `New file for Script id ${id} uploaded successfully: ${stringify(fileStorage?.data)}`
+        () =>
+          `New file for Script id ${id} uploaded successfully: ${stringify(newFileStorage?.data)}`
       );
     }
 
@@ -405,10 +407,12 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       soUpdate.updated_at = new Date().toISOString();
 
       // If a new file was uploaded, then update SO entry with its info.
-      if (fileStorage) {
-        // FIXME:PT update file info. to SO once PR245273 merges
+      if (newFileStorage) {
+        soUpdate.file_id = newFileStorage.id;
+        soUpdate.file_name = newFileStorage.data.name;
+        soUpdate.file_size = newFileStorage.data.size ?? 0;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        soUpdate.hash = fileStorage.data.hash!.sha256;
+        soUpdate.file_hash_sha256 = newFileStorage.data.hash!.sha256;
       }
 
       this.logger.debug(() => `Updating script id ${id} with:\n${stringify(soUpdate)}`);
@@ -422,10 +426,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         .catch(catchAndWrapError.withMessage(`Failed to update script with id: ${id}`));
     } catch (error) {
       // If a new file was uploaded, then delete it now since the update failed
-      if (fileStorage) {
-        await fileStorage.delete().catch((deleteError) => {
+      if (newFileStorage) {
+        await newFileStorage.delete().catch((deleteError) => {
           this.logger.error(
-            `Error encountered while attempting to delete new file [${fileStorage.id}] upload for Script [${id}]: ${deleteError.message}. File is now orphaned!`,
+            `Error encountered while attempting to delete (cleanup) new file [${newFileStorage.id}] upload for Script [${id}]: ${deleteError.message}. File is now orphaned!`,
             { error: deleteError }
           );
         });
@@ -435,14 +439,15 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     }
 
     // If a new file was uploaded, then delete the old one
-    if (fileStorage) {
-      // FIXME:PT update file info. to SO once PR245273 merges
-      // this.filesClient.delete({ id: currentScriptSoItem.file_id }).catch((deleteError) => {
-      //           this.logger.error(
-      //             `Error encountered while attempting to delete old file [${fileStorage.id}] for script [${id}]: ${deleteError.message}. File is now orphaned!`,
-      //             { error: deleteError }
-      //           );
-      //         });;
+    if (newFileStorage) {
+      this.filesClient
+        .delete({ id: currentScriptSoItem.attributes.file_id })
+        .catch((deleteError) => {
+          this.logger.error(
+            `Error encountered while attempting to delete old file [${newFileStorage.id}] for script [${id}]: ${deleteError.message}. File is now orphaned!`,
+            { error: deleteError }
+          );
+        });
     }
 
     return this.mapSoAttributesToEndpointScript(await this.getScriptSavedObject(id));
