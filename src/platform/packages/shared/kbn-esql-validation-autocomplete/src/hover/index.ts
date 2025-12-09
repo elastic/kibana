@@ -13,7 +13,7 @@ import {
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
 
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { correctQuerySyntax, getVariablesHoverContent } from './helpers';
 import { getPolicyHover } from './get_policy_hover';

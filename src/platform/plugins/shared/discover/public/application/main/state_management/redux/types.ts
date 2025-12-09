@@ -20,7 +20,10 @@ import type {
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import type {
+  UnifiedFieldListRestorableState,
+  UnifiedFieldListSidebarContainerProps,
+} from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
@@ -145,6 +148,7 @@ export interface TabState extends TabItem {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
+    fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
