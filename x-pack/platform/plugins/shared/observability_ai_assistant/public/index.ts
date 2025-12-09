@@ -142,3 +142,5 @@ export {
   ObservabilityAIAssistantFlyoutStateProvider,
   useObservabilityAIAssistantFlyoutStateContext,
 } from './context/observability_ai_assistant_flyout_state_context';
+
+export { useIsAgentBuilderEnabled } from './hooks/use_is_agent_builder_enabled';
