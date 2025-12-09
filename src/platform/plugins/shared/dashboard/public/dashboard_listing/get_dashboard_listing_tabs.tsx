@@ -103,7 +103,7 @@ const VisualizationsTabContent = ({
   initialFilter,
   parentProps,
 }: TabContentProps) => {
-  const { tableListViewTableProps, contentInsightsClient } = useDashboardListingTable({
+  const { tableListViewTableProps } = useDashboardListingTable({
     goToDashboard,
     getDashboardUrl,
     useSessionStorageIntegration,
@@ -117,7 +117,6 @@ const VisualizationsTabContent = ({
         core: coreServices,
         savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
         FormattedRelative,
-        contentInsightsClient,
         isKibanaVersioningEnabled: !serverlessService,
       }}
     >
