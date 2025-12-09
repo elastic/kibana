@@ -61,10 +61,10 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
 
     if (GITHUB_PR_LABELS.includes('ci:beta-faster-pr-build')) {
       await runPreBuild();
-      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
     } else {
-      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
     }
 
     if (FTR_ENABLE_FIPS_AGENT || GITHUB_PR_LABELS.includes('ci:enable-fips-agent')) {
