@@ -110,6 +110,7 @@ export class StreamsPlugin
     const featureService = new FeatureService(core, this.logger, getDefaultFeatureRegistry());
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
+    const llmSuggestionsStorage = new LLMSuggestionsStorage(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
