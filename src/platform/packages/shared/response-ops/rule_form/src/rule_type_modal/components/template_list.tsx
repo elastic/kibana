@@ -101,16 +101,22 @@ export const TemplateList: React.FC<TemplateListProps> = ({
             iconType="search"
             title={
               <h2>
-                {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.noTemplatesErrorTitle', {
-                  defaultMessage: 'No templates found',
-                })}
+                {i18n.translate(
+                  'responseOpsRuleForm.components.ruleTypeModal.noTemplatesErrorTitle',
+                  {
+                    defaultMessage: 'No templates found',
+                  }
+                )}
               </h2>
             }
             body={
               <p>
-                {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.noTemplatesErrorBody', {
-                  defaultMessage: 'Try a different search or change your filter settings',
-                })}
+                {i18n.translate(
+                  'responseOpsRuleForm.components.ruleTypeModal.noTemplatesErrorBody',
+                  {
+                    defaultMessage: 'Try a different search or change your filter settings',
+                  }
+                )}
               </p>
             }
           />
@@ -132,9 +138,12 @@ export const TemplateList: React.FC<TemplateListProps> = ({
                   iconType="arrowDown"
                   data-test-subj="templateList-loadMore"
                 >
-                  {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.loadMoreTemplatesButton', {
-                    defaultMessage: 'Load more',
-                  })}
+                  {i18n.translate(
+                    'responseOpsRuleForm.components.ruleTypeModal.loadMoreTemplatesButton',
+                    {
+                      defaultMessage: 'Load more',
+                    }
+                  )}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
