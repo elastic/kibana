@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import deepMerge from 'deepmerge';
-import { bytePartition } from '@kbn/std';
-import { isEmpty } from 'lodash';
-import type {
-  IndicesGetDataStreamResponse,
-  IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
-
-interface MeteringStatsResponse {
-  indices: Array<{
-    name: string;
-    num_docs: number;
-    size_in_bytes: number;
-  }>;
-}
+import {
+  getDataStreamsMeteringStats,
+  getLastBackingIndexByStream,
+  processAsyncInChunks,
+} from './utils';
 
 /**
  * Fetches total document counts for multiple streams.
@@ -40,23 +31,15 @@ export async function getDocCountsForStreams(options: {
    * _metering/stats API as a secondary auth user to ensure proper permissions.
    */
   esClientAsSecondaryAuthUser?: ElasticsearchClient;
-  streamNames: string[];
 }): Promise<StreamDocsStat[]> {
-  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamNames } = options;
+  const { isServerless, esClient, esClientAsSecondaryAuthUser } = options;
 
-  if (!streamNames.length) {
+  const { data_streams: dataStreams } = await esClient.indices.getDataStream();
+  if (!dataStreams.length) {
     return [];
   }
 
-  const { data_streams: streams } = await esClient.indices.getDataStream({
-    name: streamNames,
-  });
-
-  if (!streams.length) {
-    return [];
-  }
-
-  const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
+  const lastBackingIndexByStream = getLastBackingIndexByStream(dataStreams);
   const allBackingIndices = Array.from(new Set(lastBackingIndexByStream.values()));
 
   if (!allBackingIndices.length) {
@@ -79,16 +62,19 @@ export async function getDocCountsForStreams(options: {
   } else {
     // Stateful fallback – use indices.stats, chunked for large numbers of indices.
     const indicesStats: Record<string, IndicesStatsIndicesStats> = {};
-    const chunkSize = 100;
+    const statsResponses = await processAsyncInChunks<
+      string,
+      { indices?: Record<string, IndicesStatsIndicesStats> }
+    >({
+      items: allBackingIndices,
+      processChunk: async (indexChunk) =>
+        (esClientAsSecondaryAuthUser ?? esClient).indices.stats({
+          index: indexChunk,
+          metric: ['docs'],
+        }),
+    });
 
-    for (let i = 0; i < allBackingIndices.length; i += chunkSize) {
-      const indexChunk = allBackingIndices.slice(i, i + chunkSize);
-
-      const statsResponse = await (esClientAsSecondaryAuthUser ?? esClient).indices.stats({
-        index: indexChunk,
-        metric: ['docs'],
-      });
-
+    for (const statsResponse of statsResponses) {
       if (statsResponse.indices) {
         Object.assign(indicesStats, statsResponse.indices);
       }
@@ -126,80 +112,83 @@ export async function getDocCountsForStreams(options: {
  */
 export async function getDegradedDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
-  streamNames: string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamNames } = options;
+  const { esClient } = options;
 
-  if (!streamNames.length) {
-    return [];
-  }
-
-  const { data_streams: streams } = await esClient.indices.getDataStream({
-    name: streamNames,
-  });
+  const { data_streams: streams } = await esClient.indices.getDataStream();
 
   if (!streams.length) {
     return [];
   }
 
   const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
-  const streamIndexPairs = Array.from(lastBackingIndexByStream.entries()).map(
-    ([streamName, index]) => ({ streamName, index })
-  );
+  const indexToStreams = new Map<string, string>();
 
-  if (!streamIndexPairs.length) {
+  for (const [streamName, index] of lastBackingIndexByStream.entries()) {
+    indexToStreams.set(index, streamName);
+  }
+
+  const allIndices = Array.from(indexToStreams.keys());
+  if (!allIndices.length) {
     return [];
   }
 
   const results: StreamDocsStat[] = [];
-  const chunkSize = 100;
 
-  for (let i = 0; i < streamIndexPairs.length; i += chunkSize) {
-    const chunk = streamIndexPairs.slice(i, i + chunkSize);
+  const chunkResponses = await processAsyncInChunks<
+    string,
+    { indices: string[]; buckets: Record<string, { doc_count: number }> }
+  >({
+    items: allIndices,
+    processChunk: async (indicesInChunk) => {
+      // Build a filters aggregation keyed by index name so we get per-index counts in a single search.
+      const filters: Record<string, any> = {};
+      for (const index of indicesInChunk) {
+        filters[index] = {
+          term: {
+            _index: index,
+          },
+        };
+      }
 
-    const indicesInChunk = chunk.map(({ index }) => index);
-
-    // Build a filters aggregation keyed by index name so we get per-index counts in a single search.
-    const filters: Record<string, any> = {};
-    for (const index of indicesInChunk) {
-      filters[index] = {
-        term: {
-          _index: index,
-        },
-      };
-    }
-
-    const response = await esClient.search<any>({
-      index: indicesInChunk,
-      size: 0,
-      track_total_hits: false,
-      query: {
-        exists: {
-          field: '_ignored',
-        },
-      },
-      aggs: {
-        per_index: {
-          filters: {
-            filters,
+      const response = await esClient.search<any>({
+        index: indicesInChunk,
+        size: 0,
+        track_total_hits: false,
+        query: {
+          exists: {
+            field: '_ignored',
           },
         },
-      },
-    });
+        aggs: {
+          per_index: {
+            filters: {
+              filters,
+            },
+          },
+        },
+      });
 
-    const buckets =
-      // @ts-expect-error Aggregations are not strongly typed here
-      response.aggregations?.per_index?.buckets ?? {};
+      const buckets =
+        // @ts-expect-error Aggregations are not strongly typed here
+        response.aggregations?.per_index?.buckets ?? {};
 
-    for (const { streamName, index } of chunk) {
+      return { indices: indicesInChunk, buckets };
+    },
+  });
+
+  for (const { indices, buckets } of chunkResponses) {
+    for (const index of indices) {
       const bucket = buckets[index];
       const docCount: number = bucket?.doc_count ?? 0;
 
-      if (docCount > 0) {
-        results.push({
-          stream: streamName,
-          count: docCount,
-        });
+      if (docCount <= 0) {
+        continue;
+      }
+
+      const streamForIndex = indexToStreams.get(index);
+      if (streamForIndex) {
+        results.push({ stream: streamForIndex, count: docCount });
       }
     }
   }
@@ -217,19 +206,12 @@ export async function getDegradedDocCountsForStreams(options: {
  */
 export async function getFailedDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
-  streamNames: string[];
   start: number;
   end: number;
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamNames, start, end } = options;
+  const { esClient, start, end } = options;
 
-  if (!streamNames.length) {
-    return [];
-  }
-
-  const { data_streams: streams } = await esClient.indices.getDataStream({
-    name: streamNames,
-  });
+  const { data_streams: streams } = await esClient.indices.getDataStream();
 
   if (!streams.length) {
     return [];
@@ -292,65 +274,5 @@ FROM *::failures METADATA _index
       stream,
       count,
     })
-  );
-}
-
-function getLastBackingIndexByStream(
-  dataStreams: IndicesGetDataStreamResponse['data_streams']
-): Map<string, string> {
-  const lastBackingIndexByStream = new Map<string, string>();
-
-  for (const dataStream of dataStreams) {
-    const indices = dataStream.indices;
-    const lastBackingIndex = indices[indices.length - 1]?.index_name;
-
-    if (lastBackingIndex) {
-      lastBackingIndexByStream.set(dataStream.name, lastBackingIndex);
-    }
-  }
-
-  return lastBackingIndexByStream;
-}
-
-async function getDataStreamsMeteringStats({
-  esClient,
-  dataStreams,
-}: {
-  esClient: ElasticsearchClient;
-  dataStreams: string[];
-}): Promise<Record<string, { size?: string; sizeBytes: number; totalDocs: number }>> {
-  if (!dataStreams.length) {
-    return {};
-  }
-
-  const chunks = bytePartition(dataStreams);
-
-  if (isEmpty(chunks)) {
-    return {};
-  }
-
-  const chunkResults = await Promise.all(
-    chunks.map((dataStreamsChunk) =>
-      esClient.transport.request<MeteringStatsResponse>({
-        method: 'GET',
-        path: `/_metering/stats/` + dataStreamsChunk.join(','),
-      })
-    )
-  );
-
-  const { indices } = chunkResults.reduce((result, chunkResult) => deepMerge(result, chunkResult));
-
-  return indices.reduce(
-    (
-      acc: Record<string, { sizeBytes: number; totalDocs: number }>,
-      index: { name: string; size_in_bytes: number; num_docs: number }
-    ) => ({
-      ...acc,
-      [index.name]: {
-        sizeBytes: index.size_in_bytes,
-        totalDocs: index.num_docs,
-      },
-    }),
-    {} as Record<string, { size?: string; sizeBytes: number; totalDocs: number }>
   );
 }

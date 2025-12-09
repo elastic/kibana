@@ -26,15 +26,11 @@ const degradedDocCountsRoute = createServerRoute({
     },
   },
   handler: async ({ getScopedClients, request }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
-
-    const streams = await streamsClient.listStreams();
-    const streamNames = streams.map((stream) => stream.name);
 
     return await getDegradedDocCountsForStreams({
       esClient,
-      streamNames,
     });
   },
 });
@@ -50,16 +46,12 @@ const totalDocCountsRoute = createServerRoute({
     },
   },
   handler: async ({ getScopedClients, request, server }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
-
-    const streams = await streamsClient.listStreams();
-    const streamNames = streams.map((stream) => stream.name);
+    const { scopedClusterClient } = await getScopedClients({ request });
 
     return await getDocCountsForStreams({
       isServerless: server.isServerless,
       esClient: scopedClusterClient.asCurrentUser,
       esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
-      streamNames,
     });
   },
 });
@@ -81,16 +73,12 @@ const failedDocCountsRoute = createServerRoute({
     }),
   }),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
     const { start, end } = params.query;
 
-    const streams = await streamsClient.listStreams();
-    const streamNames = streams.map((stream) => stream.name);
-
     return await getFailedDocCountsForStreams({
       esClient,
-      streamNames,
       start,
       end,
     });
