@@ -68,8 +68,26 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
     TableId.alertsOnAttacksPage
   );
 
+  // for showing / hiding anonymized data:
+  const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
+  const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
+  const showAnonymizedSwitch = useMemo(() => {
+    return (
+      <EuiSwitch
+        checked={showAnonymized}
+        compressed={true}
+        data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
+        label={i18n.SHOW_ANONYMIZED_LABEL}
+        onChange={onToggleShowAnonymized}
+      />
+    );
+  }, [onToggleShowAnonymized, showAnonymized]);
+
   const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
-  const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({ attackIds });
+  const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
+    attackIds,
+    showAnonymized,
+  });
 
   const onAggregationsChange = useCallback(
     (aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>, groupingLevel?: number) => {
@@ -87,21 +105,6 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
     },
     []
   );
-
-  // for showing / hiding anonymized data:
-  const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
-  const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
-  const showAnonymizedSwitch = useMemo(() => {
-    return (
-      <EuiSwitch
-        checked={showAnonymized}
-        compressed={true}
-        data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
-        label={i18n.SHOW_ANONYMIZED_LABEL}
-        onChange={onToggleShowAnonymized}
-      />
-    );
-  }, [onToggleShowAnonymized, showAnonymized]);
 
   // AlertsTable manages global filters itself, so not including `filters`
   const defaultFilters = useMemo(
