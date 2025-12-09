@@ -140,7 +140,7 @@ export const WorkpadTable = ({
       itemId="id"
       items={workpads}
       columns={columns}
-      message={strings.getNoWorkpadsFoundMessage()}
+      noItemsMessage={strings.getNoWorkpadsFoundMessage()}
       search={search}
       sorting={{
         sort: {

@@ -133,6 +133,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         panelPaddingSize="none"
         anchorPosition="downRight"
         hasArrow={false}
+        buffer={0}
         panelProps={{
           css: popoverCss,
           ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',
