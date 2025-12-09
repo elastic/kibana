@@ -17,6 +17,7 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
+  autoSendInitialMessage?: boolean;
   resetInitialMessage?: () => void;
   attachments?: AttachmentInput[];
   resetAttachments?: () => void;
