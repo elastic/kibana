@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { useIsAgentBuilderEnabled } from './use_is_agent_builder_enabled';
+import { useAgentBuilderAvailability } from './use_agent_builder_availability';
 import { useKibana } from '../../common/lib/kibana';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
@@ -17,7 +17,7 @@ jest.mock('@kbn/kibana-react-plugin/public');
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 
-describe('useIsAgentBuilderEnabled', () => {
+describe('useAgentBuilderAvailability', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -37,7 +37,7 @@ describe('useIsAgentBuilderEnabled', () => {
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
 
-    const { result } = renderHook(() => useIsAgentBuilderEnabled());
+    const { result } = renderHook(() => useAgentBuilderAvailability());
 
     expect(result.current.isAgentBuilderEnabled).toBe(true);
     expect(result.current.hasAgentBuilderPrivilege).toBe(true);
@@ -55,7 +55,7 @@ describe('useIsAgentBuilderEnabled', () => {
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
 
-    const { result } = renderHook(() => useIsAgentBuilderEnabled());
+    const { result } = renderHook(() => useAgentBuilderAvailability());
 
     expect(result.current.isAgentBuilderEnabled).toBe(false);
     expect(result.current.hasAgentBuilderPrivilege).toBe(false);
@@ -77,7 +77,7 @@ describe('useIsAgentBuilderEnabled', () => {
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
 
-    const { result } = renderHook(() => useIsAgentBuilderEnabled());
+    const { result } = renderHook(() => useAgentBuilderAvailability());
 
     expect(result.current.isAgentBuilderEnabled).toBe(false);
     expect(result.current.hasAgentBuilderPrivilege).toBe(false);
@@ -99,7 +99,7 @@ describe('useIsAgentBuilderEnabled', () => {
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Classic]);
 
-    const { result } = renderHook(() => useIsAgentBuilderEnabled());
+    const { result } = renderHook(() => useAgentBuilderAvailability());
 
     expect(result.current.isAgentBuilderEnabled).toBe(false);
     expect(result.current.hasAgentBuilderPrivilege).toBe(true);
@@ -119,7 +119,7 @@ describe('useIsAgentBuilderEnabled', () => {
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
 
-    const { result } = renderHook(() => useIsAgentBuilderEnabled());
+    const { result } = renderHook(() => useAgentBuilderAvailability());
 
     expect(result.current.isAgentBuilderEnabled).toBe(false);
     expect(result.current.hasAgentBuilderPrivilege).toBe(false);
@@ -139,11 +139,10 @@ describe('useIsAgentBuilderEnabled', () => {
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
 
-    const { result } = renderHook(() => useIsAgentBuilderEnabled());
+    const { result } = renderHook(() => useAgentBuilderAvailability());
 
     expect(result.current.isAgentBuilderEnabled).toBe(false);
     expect(result.current.hasAgentBuilderPrivilege).toBe(false);
     expect(result.current.isAgentChatExperienceEnabled).toBe(true);
   });
 });
-

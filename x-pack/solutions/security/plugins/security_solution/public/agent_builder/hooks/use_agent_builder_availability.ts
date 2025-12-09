@@ -13,13 +13,13 @@ import { useKibana } from '../../common/lib/kibana';
 
 const AGENT_BUILDER_FEATURE_ID = 'agentBuilder';
 
-interface UseIsAgentBuilderEnabled {
+interface UseAgentBuilderAvailability {
   isAgentBuilderEnabled: boolean;
   hasAgentBuilderPrivilege: boolean;
   isAgentChatExperienceEnabled: boolean;
 }
 
-export const useIsAgentBuilderEnabled = (): UseIsAgentBuilderEnabled => {
+export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
   const [chatExperience] = useUiSetting$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
     AIChatExperience.Classic

@@ -17,7 +17,7 @@ import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_eng
 
 import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { useIsAgentBuilderEnabled } from '../../../../agent_builder/hooks/use_is_agent_builder_enabled';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -53,7 +53,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
     return `${ruleNameForChat} - ${title} ${date}`;
   }, [date, title, ruleNameForChat]);
 
-  const { isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const attachmentData = useMemo(
     () => ({
       text:

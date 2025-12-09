@@ -19,7 +19,7 @@ import { useDocumentDetailsContext } from '../shared/context';
 import { useAssistant } from './hooks/use_assistant';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { TakeActionButton } from '../shared/components/take_action_button';
-import { useIsAgentBuilderEnabled } from '../../../agent_builder/hooks/use_is_agent_builder_enabled';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../../assistant/helpers';
@@ -50,7 +50,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
-  const { isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const alertData = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);

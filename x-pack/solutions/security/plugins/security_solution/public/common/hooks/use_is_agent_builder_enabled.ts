@@ -13,7 +13,7 @@ import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
  * Hook that returns true when the chat experience is set to Agent.
  * This replaces the previous agentBuilderEnabled experimental feature flag.
  */
-export const useIsAgentBuilderEnabled = (): boolean => {
+export const useAgentBuilderAvailability = (): boolean => {
   const [chatExperience] = useUiSetting$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
     AIChatExperience.Classic

@@ -20,7 +20,7 @@ import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
 import { ViewInAiAssistant } from '../view_in_ai_assistant';
-import { useIsAgentBuilderEnabled } from '../../../../../agent_builder/hooks/use_is_agent_builder_enabled';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../../agent_builder/hooks/use_agent_builder_attachment';
 
@@ -74,7 +74,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   const entitySummaryOrTitle =
     entitySummary != null && entitySummary.length > 0 ? entitySummary : title;
 
-  const { isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const attackDiscoveryWithOriginalValues = useMemo(
     () =>
       // Agent builder is not anonymized

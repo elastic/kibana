@@ -14,7 +14,7 @@ import { getAnonymizedValue } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
 import type { AnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useIsAgentBuilderEnabled } from '../../../../../agent_builder/hooks/use_is_agent_builder_enabled';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { EntityType } from '../../../../../../common/search_strategy';
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
@@ -36,7 +36,7 @@ export const AskAiAssistant = <T extends EntityType>({
   const entityField = EntityTypeToIdentifierField[entityType];
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
-  const { isAgentBuilderEnabled, isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
+  const { isAgentBuilderEnabled, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const { anonymizedValues, replacements }: AnonymizedValues = useMemo(() => {
     if (!anonymizationFields.data) {
