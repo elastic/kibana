@@ -30,7 +30,7 @@ export function useStreamDocCountsFetch({
   canReadFailureStore,
   numDataPoints,
 }: UseDocCountFetchProps): {
-  getStreamDocCounts(): StreamDocCountsFetch;
+  getStreamDocCounts(streamName?: string): StreamDocCountsFetch;
   getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
 } {
   const { timeState, timeState$ } = useTimefilter();
@@ -78,7 +78,7 @@ export function useStreamDocCountsFetch({
   }, [timeState$]);
 
   return {
-    getStreamDocCounts() {
+    getStreamDocCounts(streamName?: string) {
       if (docCountsPromiseCache.current) {
         return docCountsPromiseCache.current;
       }
@@ -91,6 +91,15 @@ export function useStreamDocCountsFetch({
 
       const countPromise = streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
         signal: abortController.signal,
+        ...(streamName
+          ? {
+              params: {
+                query: {
+                  stream: streamName,
+                },
+              },
+            }
+          : {}),
       });
 
       const failedCountPromise = canReadFailureStore
@@ -100,6 +109,7 @@ export function useStreamDocCountsFetch({
               query: {
                 start: timeState.start,
                 end: timeState.end,
+                ...(streamName ? { stream: streamName } : {}),
               },
             },
           })
@@ -109,6 +119,15 @@ export function useStreamDocCountsFetch({
         'GET /internal/streams/doc_counts/degraded',
         {
           signal: abortController.signal,
+          ...(streamName
+            ? {
+                params: {
+                  query: {
+                    stream: streamName,
+                  },
+                },
+              }
+            : {}),
         }
       );
 

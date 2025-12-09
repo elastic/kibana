@@ -102,5 +102,3 @@ export async function getDataStreamsMeteringStats({
     {} as Record<string, { size?: string; sizeBytes: number; totalDocs: number }>
   );
 }
-
-

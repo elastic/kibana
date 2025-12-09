@@ -16,7 +16,7 @@ import {
 } from './utils';
 
 /**
- * Fetches total document counts for multiple streams.
+ * Fetches total document counts for one or all streams.
  *
  * The current implementation no longer uses a time range. Instead it:
  * 1) calls the indices.getDataStream API to resolve data streams and their backing indices
@@ -31,15 +31,21 @@ export async function getDocCountsForStreams(options: {
    * _metering/stats API as a secondary auth user to ensure proper permissions.
    */
   esClientAsSecondaryAuthUser?: ElasticsearchClient;
+  /**
+   * When provided, limits the computation to a single stream name.
+   * When omitted, doc counts are returned for all streams.
+   */
+  streamName?: string;
 }): Promise<StreamDocsStat[]> {
-  const { isServerless, esClient, esClientAsSecondaryAuthUser } = options;
+  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
 
-  const { data_streams: dataStreams } = await esClient.indices.getDataStream();
-  if (!dataStreams.length) {
+  const { data_streams: streams } = streamName
+    ? await esClient.indices.getDataStream({ name: streamName })
+    : await esClient.indices.getDataStream();
+  if (!streams.length) {
     return [];
   }
-
-  const lastBackingIndexByStream = getLastBackingIndexByStream(dataStreams);
+  const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
   const allBackingIndices = Array.from(new Set(lastBackingIndexByStream.values()));
 
   if (!allBackingIndices.length) {
@@ -88,12 +94,12 @@ export async function getDocCountsForStreams(options: {
 
   const results: StreamDocsStat[] = [];
 
-  for (const [streamName, indexName] of lastBackingIndexByStream.entries()) {
-    const docsCount = docsByBackingIndex[indexName] ?? 0;
+  for (const [stream, index] of lastBackingIndexByStream.entries()) {
+    const docsCount = docsByBackingIndex[index] ?? 0;
 
     if (docsCount > 0) {
       results.push({
-        stream: streamName,
+        stream,
         count: docsCount,
       });
     }
@@ -103,7 +109,7 @@ export async function getDocCountsForStreams(options: {
 }
 
 /**
- * Fetches degraded document counts for multiple streams.
+ * Fetches degraded document counts for one or all streams.
  *
  * For each stream we:
  * 1) resolve the data stream and its backing indices via indices.getDataStream
@@ -112,10 +118,17 @@ export async function getDocCountsForStreams(options: {
  */
 export async function getDegradedDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
+  /**
+   * When provided, limits the computation to a single stream name.
+   * When omitted, degraded counts are returned for all streams.
+   */
+  streamName?: string;
 }): Promise<StreamDocsStat[]> {
-  const { esClient } = options;
+  const { esClient, streamName } = options;
 
-  const { data_streams: streams } = await esClient.indices.getDataStream();
+  const { data_streams: streams } = streamName
+    ? await esClient.indices.getDataStream({ name: streamName })
+    : await esClient.indices.getDataStream();
 
   if (!streams.length) {
     return [];
@@ -124,8 +137,8 @@ export async function getDegradedDocCountsForStreams(options: {
   const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
   const indexToStreams = new Map<string, string>();
 
-  for (const [streamName, index] of lastBackingIndexByStream.entries()) {
-    indexToStreams.set(index, streamName);
+  for (const [stream, index] of lastBackingIndexByStream.entries()) {
+    indexToStreams.set(index, stream);
   }
 
   const allIndices = Array.from(indexToStreams.keys());
@@ -197,7 +210,7 @@ export async function getDegradedDocCountsForStreams(options: {
 }
 
 /**
- * Fetches failed document counts for multiple streams.
+ * Fetches failed document counts for one or all streams.
  *
  * The implementation:
  * 1) resolves failure store data streams and their backing indices via indices.getDataStream
@@ -208,10 +221,17 @@ export async function getFailedDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
+  /**
+   * When provided, limits the computation to a single stream name.
+   * When omitted, failed counts are returned for all streams.
+   */
+  streamName?: string;
 }): Promise<StreamDocsStat[]> {
-  const { esClient, start, end } = options;
+  const { esClient, start, end, streamName } = options;
 
-  const { data_streams: streams } = await esClient.indices.getDataStream();
+  const { data_streams: streams } = streamName
+    ? await esClient.indices.getDataStream({ name: streamName })
+    : await esClient.indices.getDataStream();
 
   if (!streams.length) {
     return [];
@@ -261,12 +281,12 @@ FROM *::failures METADATA _index
       continue;
     }
 
-    const streamName = backingIndexToStream.get(backingIndex);
-    if (!streamName) {
+    const stream = backingIndexToStream.get(backingIndex);
+    if (!stream) {
       continue;
     }
 
-    countsByStream.set(streamName, (countsByStream.get(streamName) ?? 0) + failedCount);
+    countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + failedCount);
   }
 
   return Array.from(countsByStream.entries()).map(

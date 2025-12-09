@@ -102,7 +102,7 @@ export function Wrapper({
       : true,
     numDataPoints: 25,
   });
-  const docCountsFetch = getStreamDocCounts();
+  const docCountsFetch = getStreamDocCounts(streamId);
 
   const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
   const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);

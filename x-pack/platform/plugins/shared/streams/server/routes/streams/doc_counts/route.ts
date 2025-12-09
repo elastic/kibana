@@ -25,12 +25,21 @@ const degradedDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ getScopedClients, request }): Promise<StreamDocsStat[]> => {
+  params: z.object({
+    query: z
+      .object({
+        stream: z.string().optional(),
+      })
+      .optional(),
+  }),
+  handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
+    const streamName = params.query?.stream;
 
     return await getDegradedDocCountsForStreams({
       esClient,
+      streamName,
     });
   },
 });
@@ -45,13 +54,22 @@ const totalDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ getScopedClients, request, server }): Promise<StreamDocsStat[]> => {
+  params: z.object({
+    query: z
+      .object({
+        stream: z.string().optional(),
+      })
+      .optional(),
+  }),
+  handler: async ({ getScopedClients, request, server, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
+    const streamName = params.query?.stream;
 
     return await getDocCountsForStreams({
       isServerless: server.isServerless,
       esClient: scopedClusterClient.asCurrentUser,
       esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
+      streamName,
     });
   },
 });
@@ -70,17 +88,19 @@ const failedDocCountsRoute = createServerRoute({
     query: z.object({
       start: z.coerce.number(),
       end: z.coerce.number(),
+      stream: z.string().optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
-    const { start, end } = params.query;
+    const { start, end, stream } = params.query;
 
     return await getFailedDocCountsForStreams({
       esClient,
       start,
       end,
+      streamName: stream,
     });
   },
 });
