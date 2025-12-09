@@ -33,7 +33,8 @@ export const retryOnError = async ({
 
     if (attempt > 0) {
       logger.info(
-        `Report generation for report[${report._id}] succeeded on attempt ${attempt + 1}.`
+        `Report generation for report[${report._id}] succeeded on attempt ${attempt + 1}.`,
+        { tags: [report._id] }
       );
     }
     return result;
@@ -47,27 +48,28 @@ export const retryOnError = async ({
       const retryCount = attempt + 1;
       const retryDelaySec: number = Math.min(Math.pow(2, retryCount), MAX_DELAY_SECONDS); // 2s, 4s, 8s, 16s, 30s, 30s, 30s...
 
-      logger.warn(
+      logger.error(
         `Retrying report generation for report[${
           report._id
-        }] after [${retryDelaySec}s] due to error: ${err.toString()} ${
-          err.stack
-        } - attempt ${retryCount} of ${retries + 1} failed.`
+        }] after [${retryDelaySec}s] due to error: ${err.toString()} - attempt ${retryCount} of ${
+          retries + 1
+        } failed.`,
+        { tags: [report._id], error: { stack_trace: err.stack } }
       );
 
       // delay with some randomness
-      await delay(retryDelaySec + 1000 * Math.random());
+      // convert delay to milliseconds and multiply by random number between 1.0 and 2.0
+      await delay(retryDelaySec * 1000 * (1 + Math.random()));
       return retryOnError({ operation, logger, report, retries, attempt: retryCount });
     }
 
     if (retries > 0) {
       // no retries left
-      logger.error(
+      logger.info(
         `No retries left for report generation for report[${
           report._id
-        }]. No report generated after ${retries + 1} attempts due to error: ${err.toString()} ${
-          err.stack
-        }`
+        }]. No report generated after ${retries + 1} attempts due to error: ${err.toString()}`,
+        { tags: [report._id] }
       );
     }
 
