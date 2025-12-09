@@ -7,7 +7,7 @@
 
 import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
-import fetch, { type Response } from 'node-fetch';
+import fetch from 'node-fetch';
 import { validateMimeType, validateFileSignature, type MimeType } from './validators';
 
 export const download = async (
