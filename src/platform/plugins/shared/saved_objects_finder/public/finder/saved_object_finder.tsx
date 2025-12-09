@@ -107,7 +107,7 @@ class SavedObjectFinderUiClass extends React.Component<
   SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>,
   SavedObjectFinderState
 > {
-  public static propTypes = {
+  public static propTypes: Record<string, PropTypes.Validator<unknown>> = {
     onChoose: PropTypes.func,
     noItemsMessage: PropTypes.node,
     savedObjectMetaData: PropTypes.array.isRequired,
