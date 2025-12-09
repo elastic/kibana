@@ -77,6 +77,9 @@ import { createAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
 import { getInternalRuleTemplateRoute } from './rule_templates/apis/get/get_rule_template_route';
+import { bulkMuteAlertsRoute } from './rule/apis/bulk_mute_alerts/bulk_mute_alerts_route';
+import { bulkUnmuteAlertsRoute } from './rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -141,6 +144,8 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
+  bulkMuteAlertsRoute(router, licenseState);
+  bulkUnmuteAlertsRoute(router, licenseState);
   alertDeletePreviewRoute(router, licenseState);
   alertDeleteScheduleRoute(router, licenseState, core);
   alertDeleteLastRunRoute(router, licenseState);
