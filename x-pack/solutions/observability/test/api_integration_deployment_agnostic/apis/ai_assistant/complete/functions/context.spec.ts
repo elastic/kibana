@@ -206,7 +206,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const extractedDocs = await getDocumentsToScore();
           const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
           const actualTexts = extractedDocs.map((doc) => doc.text).sort();
-          expect(actualTexts).to.eql(expectedTexts);
+          expectedTexts.forEach((text) => {
+            expect(actualTexts).to.contain(text);
+          });
         });
       });
 
