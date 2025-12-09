@@ -233,7 +233,7 @@ export function AgentInstancesDetails({
             direction: 'desc',
           },
         }}
-        message={
+        noItemsMessage={
           isLoading
             ? i18n.translate('xpack.apm.agentInstanceDetails.table.loading', {
                 defaultMessage: 'Loading...',

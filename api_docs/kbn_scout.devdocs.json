@@ -9366,14 +9366,7 @@
             "label": "projectType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es",
-                "scope": "common",
-                "docId": "kibKbnEsPluginApi",
-                "section": "def-common.ServerlessProjectType",
-                "text": "ServerlessProjectType"
-              },
-              " | undefined"
+              "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,

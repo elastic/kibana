@@ -8,11 +8,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { getSchemaAtPath } from './get_schema_at_path';
 import { getShape } from './get_shape';
-import { getZodObjectProperty } from './get_zod_object_property';
 
 export function getShapeAt(schema: z.ZodType, property: string): Record<string, z.ZodType> {
-  const schemaAtProperty = getZodObjectProperty(schema, property);
+  const { schema: schemaAtProperty } = getSchemaAtPath(schema, property);
   if (schemaAtProperty === null) {
     return {};
   }
@@ -20,5 +20,5 @@ export function getShapeAt(schema: z.ZodType, property: string): Record<string, 
   if (property === 'body' && schemaAtProperty instanceof z.ZodArray) {
     return { operations: schemaAtProperty.describe('Bulk request body') };
   }
-  return getShape(schemaAtProperty as z.ZodObject);
+  return getShape(schemaAtProperty);
 }
