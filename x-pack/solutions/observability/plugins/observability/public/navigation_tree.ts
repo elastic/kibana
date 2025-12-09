@@ -9,9 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { lazy } from 'react';
-import { combineLatest, map, of } from 'rxjs';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 const LazyIconBriefcase = lazy(() =>
   import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
@@ -38,13 +36,7 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
-function createNavTree({
-  streamsAvailable,
-  showAiAssistant = true,
-}: {
-  streamsAvailable?: boolean;
-  showAiAssistant?: boolean;
-}) {
+function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -249,18 +241,14 @@ function createNavTree({
           },
         ],
       },
-      ...(showAiAssistant
-        ? [
-            {
-              id: 'aiAssistantContainer',
-              title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
-                defaultMessage: 'AI Assistant',
-              }),
-              icon: 'sparkles',
-              link: 'observabilityAIAssistant',
-            } as const,
-          ]
-        : []),
+      {
+        id: 'aiAssistantContainer',
+        title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
+          defaultMessage: 'AI Assistant',
+        }),
+        icon: 'sparkles',
+        link: 'observabilityAIAssistant',
+      },
       {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
@@ -599,19 +587,8 @@ export const createDefinition = (
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: combineLatest([
-    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
-    pluginsStart.uiSettings.get$<AIChatExperience>(
-      AI_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    ),
-  ]).pipe(
-    map(([{ status }, chatExperience]) =>
-      createNavTree({
-        streamsAvailable: status === 'enabled',
-        showAiAssistant: chatExperience !== AIChatExperience.Agent,
-      })
-    )
-  ),
+  navigationTree$: (
+    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const })
+  ).pipe(map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))),
   dataTestSubj: 'observabilitySideNav',
 });
