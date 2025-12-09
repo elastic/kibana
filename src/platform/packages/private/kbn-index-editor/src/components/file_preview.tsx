@@ -24,6 +24,7 @@ import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { FileClash } from '@kbn/file-upload/file_upload_manager';
 import { FileClashResult } from './file_clashes';
 
@@ -213,6 +214,9 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, columnNames }) =>
         <EuiBasicTable
           data-test-subj="indexEditorPreviewFile"
           tableLayout="auto"
+          tableCaption={i18n.translate('indexEditor.fileUploader.previewTableCaption', {
+            defaultMessage: 'Preview results',
+          })}
           columns={columns}
           items={items}
           css={{ overflow: 'auto' }}
