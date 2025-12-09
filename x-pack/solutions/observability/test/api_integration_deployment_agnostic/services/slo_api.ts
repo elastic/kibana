@@ -232,7 +232,6 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-
     async findInstances(
       sloId: string,
       params: { search?: string; size?: string; searchAfter?: string },
@@ -248,7 +247,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
 
       return body;
     },
-    
+
     async getSettings(roleAuthc: RoleCredentials) {
       const { body } = await supertestWithoutAuth
         .get(`/internal/slo/settings`)
