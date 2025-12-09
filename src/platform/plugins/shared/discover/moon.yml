@@ -117,7 +117,6 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/restorable-state'
   - '@kbn/esql-editor'
-  - '@kbn/controls-plugin'
   - '@kbn/esql-types'
   - '@kbn/controls-constants'
   - '@kbn/core-application-browser'
@@ -126,7 +125,9 @@ dependsOn:
   - '@kbn/metrics-experience-plugin'
   - '@kbn/unified-metrics-grid'
   - '@kbn/shared-ux-link-redirect-app'
+  - '@kbn/control-group-renderer'
   - '@kbn/react-query'
+  - '@kbn/controls-schemas'
 tags:
   - plugin
   - prod
