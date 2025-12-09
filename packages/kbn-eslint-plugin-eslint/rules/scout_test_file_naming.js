@@ -36,6 +36,15 @@ const hasSpecExtension = (filename) => {
 };
 
 /**
+ * Checks if a file is a global setup file
+ * @param {string} filename
+ * @returns {boolean}
+ */
+const isGlobalSetupFile = (filename) => {
+  return path.basename(filename) === 'global.setup.ts';
+};
+
+/**
  * Gets the file extension from a filename
  * @param {string} filename
  * @returns {string}
@@ -81,6 +90,11 @@ module.exports = {
 
     // Check if the file is in a Scout test directory
     if (isInScoutTestDirectory(filename)) {
+      // Allow global.setup.ts files
+      if (isGlobalSetupFile(filename)) {
+        return {};
+      }
+
       // File is in correct directory structure, check extension
       if (!hasSpecExtension(filename)) {
         const actualExt = getExtension(filename);

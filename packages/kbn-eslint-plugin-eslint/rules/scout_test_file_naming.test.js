@@ -80,6 +80,24 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       filename:
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/playwright.config.ts',
     },
+    // Valid: global.setup.ts in tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/global.setup.ts',
+    },
+    // Valid: global.setup.ts in parallel_tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel_tests/global.setup.ts',
+    },
+    // Valid: global.setup.ts in API tests
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/global.setup.ts',
+    },
   ],
 
   invalid: [
@@ -172,6 +190,27 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       errors: [
         {
           messageId: 'invalidPath',
+        },
+      ],
+    },
+    // Invalid: Non-global setup file (only global.setup.ts is allowed)
+    {
+      code: '',
+      filename: 'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/my.setup.ts',
+      errors: [
+        {
+          messageId: 'invalidExtension',
+        },
+      ],
+    },
+    // Invalid: Custom setup file in parallel_tests (only global.setup.ts is allowed)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel_tests/custom.setup.ts',
+      errors: [
+        {
+          messageId: 'invalidExtension',
         },
       ],
     },
