@@ -326,8 +326,6 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
      * @param prev
      */
     getRecommendedFields: (prev) => () => {
-      const prevValue = prev ? prev() : {};
-
       // Define example recommended field names for the example logs data source
       const exampleRecommendedFieldNames: Array<DataViewField['name']> = [
         'log.level',
@@ -337,16 +335,16 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ];
 
       return {
-        ...prevValue,
+        ...prev(),
         recommendedFields: exampleRecommendedFieldNames,
       };
     },
     getChartSectionConfiguration: (prev) => (params) => {
-      const prevConfig = prev ? prev(params) : {};
-
       return {
-        ...prevConfig,
-        Component: (props) => <ChartWithCustomButtons {...props} actions={params.actions} />,
+        ...prev(params),
+        renderChartSection: (props) => (
+          <ChartWithCustomButtons {...props} actions={params.actions} />
+        ),
         localStorageKeyPrefix: 'discover:exampleDataSource',
         replaceDefaultChart: true,
       };
