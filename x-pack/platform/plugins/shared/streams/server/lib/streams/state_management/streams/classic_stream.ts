@@ -228,17 +228,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       }
     }
 
+    validateClassicFields(this._definition);
+    validateBracketsInFieldNames(this._definition);
+
+    validateSettings(this._definition, this.dependencies.isServerless);
+
     await validateSimulation(
       this._definition,
       this.dependencies.scopedClusterClient,
       this.dependencies.streamsClient,
       this.dependencies.fieldsMetadataClient
     );
-
-    validateClassicFields(this._definition);
-    validateBracketsInFieldNames(this._definition);
-
-    validateSettings(this._definition, this.dependencies.isServerless);
 
     return { isValid: true, errors: [] };
   }
