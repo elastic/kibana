@@ -46,7 +46,7 @@ Set the status of one or more detection alerts.`,
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['reason', 'signal_ids', 'status', 'conflicts', 'query'],
   },
   paramsSchema: z.object({
     ...getShapeAt(set_alerts_status_request, 'body'),

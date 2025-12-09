@@ -54,7 +54,11 @@ export function scheduleReportingTelemetry(logger: Logger, taskManager?: TaskMan
         params: {},
         schedule: SCHEDULE,
       })
-      .catch((e) => logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`));
+      .catch((e) =>
+        logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`, {
+          error: { stack_trace: e.stack },
+        })
+      );
   }
 }
 
