@@ -32,10 +32,18 @@ export async function resolveConnectorId(
 
   const allConnectors = await inferencePlugin.getConnectorList(kibanaRequest);
 
+  if (!allConnectors.length) {
+    throw new Error(`No AI connectors found.`);
+  }
+
   const connector = allConnectors.find((c) => c.name === nameOrId);
 
   if (!connector) {
-    throw new Error(`Connector with name ${nameOrId} not found`);
+    throw new Error(
+      `AI Connector '${nameOrId}' not found. Available AI connectors: ${allConnectors
+        .map((c) => c.name)
+        .join(', ')}`
+    );
   }
 
   return connector.connectorId;
