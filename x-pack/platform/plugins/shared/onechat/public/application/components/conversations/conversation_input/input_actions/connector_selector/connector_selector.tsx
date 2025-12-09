@@ -26,7 +26,7 @@ import { useSendMessage } from '../../../../../context/send_message/send_message
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { SELECTOR_LIST_MAX_HEIGHT, useSelectorListStyles } from '../input_actions.styles';
+import { useSelectorListStyles } from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
 import { SelectorListHeader } from '../selector_list_header';
 
@@ -234,14 +234,13 @@ export const ConnectorSelector: React.FC<{}> = () => {
             />
           );
         }}
-        height={SELECTOR_LIST_MAX_HEIGHT}
         listProps={{ id: connectorListId, css: selectorListStyles }}
       >
         {(list, search) => (
-          <>
+          <div>
             <ConnectorListHeader search={search} />
             {list}
-          </>
+          </div>
         )}
       </EuiSelectable>
     </EuiPopover>

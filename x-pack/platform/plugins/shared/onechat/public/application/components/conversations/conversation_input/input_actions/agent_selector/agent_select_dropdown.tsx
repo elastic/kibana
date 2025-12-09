@@ -23,7 +23,7 @@ import { useHasActiveConversation } from '../../../../../hooks/use_conversation'
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { RobotIcon } from '../../../../common/icons/robot';
-import { SELECTOR_LIST_MAX_HEIGHT, useSelectorListStyles } from '../input_actions.styles';
+import { useSelectorListStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
 import { SelectorListHeader } from '../selector_list_header';
@@ -173,7 +173,6 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
           rowHeight: AGENT_OPTION_ROW_HEIGHT,
           css: selectorListStyles,
         }}
-        height={SELECTOR_LIST_MAX_HEIGHT}
       >
         {(list, search) => (
           <div>

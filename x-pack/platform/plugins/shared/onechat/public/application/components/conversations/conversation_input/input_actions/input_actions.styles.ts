@@ -10,14 +10,16 @@ import { css } from '@emotion/react';
 
 export const SELECTOR_LIST_HEADER_HEIGHT = 57;
 const SELECTOR_POPOVER_MAX_HEIGHT = 300;
-// The EuiSelectable height prop only limits the list content's height, so we need to subtract our header height
-export const SELECTOR_LIST_MAX_HEIGHT = SELECTOR_POPOVER_MAX_HEIGHT - SELECTOR_LIST_HEADER_HEIGHT;
+export const SELECTOR_LIST_HEIGHT = SELECTOR_POPOVER_MAX_HEIGHT - SELECTOR_LIST_HEADER_HEIGHT;
 
 export const useSelectorListStyles = ({ listId }: { listId: string }) => {
   const { euiTheme } = useEuiTheme();
-  return css`
-    /* Override list item styles */
-    /* Styles for all items */
+  const listHeightStyles = css`
+    &#${listId} .euiSelectableList__list {
+      max-block-size: ${SELECTOR_LIST_HEIGHT}px;
+    }
+  `;
+  const listItemStyles = css`
     &#${listId} .euiSelectableListItem {
       border-style: none;
       color: unset;
@@ -28,12 +30,13 @@ export const useSelectorListStyles = ({ listId }: { listId: string }) => {
         text-decoration: none;
       }
     }
-
-    /* Styles for selected item */
+  `;
+  const selectedItemStyles = css`
     &#${listId} .euiSelectableListItem-isFocused {
       :not(:hover) {
         background-color: unset;
       }
     }
   `;
+  return [listHeightStyles, listItemStyles, selectedItemStyles];
 };
