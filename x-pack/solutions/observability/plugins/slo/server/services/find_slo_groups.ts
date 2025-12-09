@@ -63,7 +63,11 @@ export class FindSLOGroups {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            ...excludeStaleSummaryFilter({ settings: this.settings, forceExclude: true }),
+            ...excludeStaleSummaryFilter({
+              settings: this.settings,
+              kqlFilter: kqlQuery,
+              forceExclude: true,
+            }),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
