@@ -13,7 +13,7 @@ import {
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality';
 import type { RiskScoreBucket } from '../types';
-import { processScores } from './calculate_risk_scores';
+import { processScores } from './helpers';
 import { getIndexPatternDataStream } from './configurations';
 
 export interface ResetToZeroDependencies {
