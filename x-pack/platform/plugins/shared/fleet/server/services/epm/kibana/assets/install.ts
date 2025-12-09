@@ -76,6 +76,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.alertingRuleTemplate]: KibanaSavedObjectType.alertingRuleTemplate,
+  [KibanaAssetType.sloTemplate]: KibanaSavedObjectType.sloTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
@@ -378,6 +379,13 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       if (
         soType === KibanaSavedObjectType.alertingRuleTemplate &&
         !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+      ) {
+        return;
+      }
+
+      if (
+        soType === KibanaSavedObjectType.sloTemplate &&
+        !appContextService.getExperimentalFeatures().enableSloTemplates
       ) {
         return;
       }

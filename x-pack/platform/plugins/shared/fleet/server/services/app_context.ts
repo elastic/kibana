@@ -211,6 +211,7 @@ class AppContextService {
       includedHiddenTypes: [
         UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
         KibanaSavedObjectType.alertingRuleTemplate,
+        KibanaSavedObjectType.sloTemplate,
       ],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
@@ -234,6 +235,7 @@ class AppContextService {
       includedHiddenTypes: [
         UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
         KibanaSavedObjectType.alertingRuleTemplate,
+        KibanaSavedObjectType.sloTemplate,
       ],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
@@ -256,6 +258,7 @@ class AppContextService {
       includedHiddenTypes: [
         UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
         KibanaSavedObjectType.alertingRuleTemplate,
+        KibanaSavedObjectType.sloTemplate,
       ],
     });
   }

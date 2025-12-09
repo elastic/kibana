@@ -163,6 +163,7 @@ export const generateFleetPackageInfo = (): PackageInfo => {
     assets: {
       kibana: {
         alerting_rule_template: [],
+        slo_template: [],
         csp_rule_template: [],
         dashboard: [],
         visualization: [],
