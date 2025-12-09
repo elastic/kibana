@@ -248,60 +248,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.be(true);
     });
 
-    it('can copy selected rows as text', async () => {
-      await dataGrid.selectRow(2);
-      await dataGrid.selectRow(1);
-
-      await retry.try(async () => {
-        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
-        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(2);
-        expect(await dataGrid.getNumberOfSelectedRows()).to.be(2);
-      });
-
-      await dataGrid.openSelectedRowsMenu();
-      await testSubjects.click('unifiedDataTableCopyRowsAsText');
-
-      await retry.try(async () => {
-        await testSubjects.missingOrFail('unifiedDataTableSelectionMenu');
-      });
-
-      const clipboardData = await browser.execute(() => navigator.clipboard.readText());
-      expect(
-        clipboardData.startsWith(
-          '"\'@timestamp"\t"\'@message"\t"\'@message.raw"\t"\'@tags"\t"\'@tags.raw"\t"_id"'
-        )
-      ).to.be(true);
-    });
-
-    it('can copy columns for selected rows as text', async () => {
-      await unifiedFieldList.clickFieldListItemAdd('extension');
-      await unifiedFieldList.clickFieldListItemAdd('bytes');
-      await retry.try(async () => {
-        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
-      });
-
-      await dataGrid.selectRow(1);
-      await dataGrid.selectRow(0);
-
-      await retry.try(async () => {
-        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
-        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(2);
-        expect(await dataGrid.getNumberOfSelectedRows()).to.be(2);
-      });
-
-      await dataGrid.openSelectedRowsMenu();
-      await testSubjects.click('unifiedDataTableCopyRowsAsText');
-
-      await retry.try(async () => {
-        await testSubjects.missingOrFail('unifiedDataTableSelectionMenu');
-      });
-
-      const clipboardData = await browser.execute(() => navigator.clipboard.readText());
-      expect(clipboardData).to.be(
-        '"\'@timestamp"\textension\tbytes\n"Sep 22, 2015 @ 23:50:13.253"\tjpg\t"7,124"\n"Sep 22, 2015 @ 23:43:58.175"\tjpg\t"5,453"'
-      );
-    });
-
     [CopyAsTextFormat.tabular, CopyAsTextFormat.markdown].forEach((format) => {
       const buttonTestSubj =
         format === CopyAsTextFormat.markdown
