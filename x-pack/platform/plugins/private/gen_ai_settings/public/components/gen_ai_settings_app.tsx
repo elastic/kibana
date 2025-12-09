@@ -9,7 +9,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   EuiPageSection,
   EuiSpacer,
-  EuiPanel,
+  EuiSplitPanel,
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFlexGroup,
@@ -34,6 +34,7 @@ import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
+import { DocumentationSection } from './documentation';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -41,7 +42,7 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks } = services;
+  const { application, http, docLinks, productDocBase } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -212,122 +213,135 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             paddingTop: euiTheme.size.l,
           }}
         >
-          <EuiPanel hasBorder grow={false}>
-            <EuiDescribedFormGroup
-              data-test-subj="connectorsSection"
-              fullWidth
-              title={
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="sparkles" size="m" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <h3 data-test-subj="connectorsTitle">
-                        <FormattedMessage
-                          id="genAiSettings.aiConnectorLabel"
-                          defaultMessage="Default AI Connector"
-                        />
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              description={connectorDescription}
-            >
-              <EuiFormRow fullWidth>
-                <EuiFlexGroup gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <DefaultAIConnector connectors={connectors} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-
-            {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
-
-            {showSpacesIntegration && canManageSpaces && (
+          <EuiSplitPanel.Outer hasBorder grow={false}>
+            <EuiSplitPanel.Inner color="subdued">
+              <EuiTitle size="s">
+                <h3 data-test-subj="generalSectionTitle">
+                  <FormattedMessage id="genAiSettings.general.title" defaultMessage="General" />
+                </h3>
+              </EuiTitle>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner>
               <EuiDescribedFormGroup
+                data-test-subj="connectorsSection"
                 fullWidth
-                data-test-subj="aiFeatureVisibilitySection"
                 title={
-                  <h3 data-test-subj="aiFeatureVisibilityTitle">
-                    <FormattedMessage
-                      id="genAiSettings.aiFeatureVisibilityLabel"
-                      defaultMessage="AI feature visibility"
-                    />
-                  </h3>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="sparkles" size="m" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xs">
+                        <h3 data-test-subj="connectorsTitle">
+                          <FormattedMessage
+                            id="genAiSettings.aiConnectorLabel"
+                            defaultMessage="Default AI Connector"
+                          />
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 }
-                description={
-                  <p>
-                    {isPermissionsBased ? (
-                      <FormattedMessage
-                        id="genAiSettings.solutionViewDescriptionLabel"
-                        defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
-                        values={{
-                          permissionsTab: (
-                            <strong>
-                              <FormattedMessage
-                                id="genAiSettings.permissionsTab"
-                                defaultMessage="Permissions tab"
-                              />
-                            </strong>
-                          ),
-                          spaces: (
-                            <strong>
-                              <FormattedMessage
-                                id="genAiSettings.spacesLabel"
-                                defaultMessage="Spaces"
-                              />
-                            </strong>
-                          ),
-                          rolesLink: (
-                            <EuiLink
-                              href={application.getUrlForApp('management', {
-                                path: '/security/roles',
-                              })}
-                            >
-                              <FormattedMessage
-                                id="genAiSettings.rolesLink"
-                                defaultMessage="Stack Management > Roles"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="genAiSettings.showAIAssistantDescriptionLabel"
-                        defaultMessage="Enable or disable AI-powered features in {space} settings."
-                        values={{
-                          space: (
-                            <strong>
-                              <FormattedMessage
-                                id="genAiSettings.spacesLabel"
-                                defaultMessage="Space"
-                              />
-                            </strong>
-                          ),
-                        }}
-                      />
-                    )}
-                  </p>
-                }
+                description={connectorDescription}
               >
                 <EuiFormRow fullWidth>
-                  <GoToSpacesButton
-                    onNavigateToSpaces={handleNavigateToSpaces}
-                    navigateToPermissions={isPermissionsBased}
-                  />
+                  <EuiFlexGroup gutterSize="m" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <DefaultAIConnector connectors={connectors} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFormRow>
               </EuiDescribedFormGroup>
-            )}
-            {showAiAssistantsVisibilitySetting && (
-              <EuiFlexItem>
-                <AIAssistantVisibility />
-              </EuiFlexItem>
-            )}
-          </EuiPanel>
+
+              {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+
+              {showSpacesIntegration && canManageSpaces && (
+                <EuiDescribedFormGroup
+                  fullWidth
+                  data-test-subj="aiFeatureVisibilitySection"
+                  title={
+                    <h3 data-test-subj="aiFeatureVisibilityTitle">
+                      <FormattedMessage
+                        id="genAiSettings.aiFeatureVisibilityLabel"
+                        defaultMessage="AI feature visibility"
+                      />
+                    </h3>
+                  }
+                  description={
+                    <p>
+                      {isPermissionsBased ? (
+                        <FormattedMessage
+                          id="genAiSettings.solutionViewDescriptionLabel"
+                          defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
+                          values={{
+                            permissionsTab: (
+                              <strong>
+                                <FormattedMessage
+                                  id="genAiSettings.permissionsTab"
+                                  defaultMessage="Permissions tab"
+                                />
+                              </strong>
+                            ),
+                            spaces: (
+                              <strong>
+                                <FormattedMessage
+                                  id="genAiSettings.spacesLabel"
+                                  defaultMessage="Spaces"
+                                />
+                              </strong>
+                            ),
+                            rolesLink: (
+                              <EuiLink
+                                href={application.getUrlForApp('management', {
+                                  path: '/security/roles',
+                                })}
+                              >
+                                <FormattedMessage
+                                  id="genAiSettings.rolesLink"
+                                  defaultMessage="Stack Management > Roles"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="genAiSettings.showAIAssistantDescriptionLabel"
+                          defaultMessage="Enable or disable AI-powered features in {space} settings."
+                          values={{
+                            space: (
+                              <strong>
+                                <FormattedMessage
+                                  id="genAiSettings.spacesLabel"
+                                  defaultMessage="Space"
+                                />
+                              </strong>
+                            ),
+                          }}
+                        />
+                      )}
+                    </p>
+                  }
+                >
+                  <EuiFormRow fullWidth>
+                    <GoToSpacesButton
+                      onNavigateToSpaces={handleNavigateToSpaces}
+                      navigateToPermissions={isPermissionsBased}
+                    />
+                  </EuiFormRow>
+                </EuiDescribedFormGroup>
+              )}
+              {showAiAssistantsVisibilitySetting && (
+                <EuiFlexItem>
+                  <AIAssistantVisibility />
+                </EuiFlexItem>
+              )}
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+
+          <EuiSpacer size="l" />
+
+          <DocumentationSection productDocBase={productDocBase} />
         </EuiPageSection>
       </div>
       {!isEmpty(unsavedChanges) && (

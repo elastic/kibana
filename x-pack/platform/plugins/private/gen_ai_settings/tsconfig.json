@@ -30,6 +30,7 @@
     "@kbn/licensing-plugin",
     "@kbn/management-settings-components-field-row",
     "@kbn/react-query",
+    "@kbn/product-doc-base-plugin",
   ],
   "exclude": ["target/**/*"]
 }
