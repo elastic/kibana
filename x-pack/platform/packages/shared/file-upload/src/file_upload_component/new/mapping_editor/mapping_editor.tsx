@@ -57,7 +57,7 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
         <FormattedMessage
           id="xpack.fileUpload.mappingEditor.fieldCountDescription"
           defaultMessage={
-            "{fieldCount} fields found. Bear in mind you can't change the field type after creating this index."
+            '{fieldCount} fields found. Note that the field types cannot be changed after creating the index.'
           }
           values={{ fieldCount }}
         />
