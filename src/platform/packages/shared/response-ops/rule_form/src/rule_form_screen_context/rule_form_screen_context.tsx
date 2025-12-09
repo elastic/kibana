@@ -14,11 +14,14 @@ import React, { createContext, useState } from 'react';
  * This provides logic that works on both the Rule Page, which displays these screens in a modal,
  * and the Rule Flyout, which displays these screens by replacing the entire content of the flyout.
  */
+
 const initialRuleFormScreenContextState = {
   isConnectorsScreenVisible: false,
   isShowRequestScreenVisible: false,
+  isShowYamlFlyoutVisible: false,
   setIsConnectorsScreenVisible: (show: boolean) => {},
   setIsShowRequestScreenVisible: (show: boolean) => {},
+  setIsShowYamlFlyoutVisible: (show: boolean) => {},
 };
 
 export const RuleFormScreenContext = createContext(initialRuleFormScreenContextState);
@@ -26,13 +29,16 @@ export const RuleFormScreenContext = createContext(initialRuleFormScreenContextS
 export const RuleFormScreenContextProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [isConnectorsScreenVisible, setIsConnectorsScreenVisible] = useState(false);
   const [isShowRequestScreenVisible, setIsShowRequestScreenVisible] = useState(false);
+  const [isShowYamlFlyoutVisible, setIsShowYamlFlyoutVisible] = useState(false);
   return (
     <RuleFormScreenContext.Provider
       value={{
         isConnectorsScreenVisible,
         isShowRequestScreenVisible,
+        isShowYamlFlyoutVisible,
         setIsConnectorsScreenVisible,
         setIsShowRequestScreenVisible,
+        setIsShowYamlFlyoutVisible,
       }}
     >
       {children}

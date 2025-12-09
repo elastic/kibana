@@ -15,7 +15,13 @@ export interface ESQLRuleParams extends RuleTypeParams {
   timeWindowUnit: string;
   esqlQuery: AggregateQuery;
   timeField: string;
-  parentId: string;
+  group_key: string[];
+  track?: {
+    recovery?: {
+      enabled?: boolean;
+      recoveryQuery?: string;
+    };
+  };
 }
 
 export interface ESQLRuleMetaData {

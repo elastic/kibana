@@ -26,6 +26,7 @@ import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';
 import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
+import { RulePageShowYamlFlyout } from './rule_page_show_yaml_flyout';
 import { ConfirmRuleClose } from '../components';
 
 export interface RulePageProps {
@@ -66,7 +67,8 @@ export const RulePage = (props: RulePageProps) => {
     }
   }, [touched, onCancel]);
 
-  const { isConnectorsScreenVisible, isShowRequestScreenVisible } = useRuleFormScreenContext();
+  const { isConnectorsScreenVisible, isShowRequestScreenVisible, isShowYamlFlyoutVisible } =
+    useRuleFormScreenContext();
 
   const hasActionsDisabled = useMemo(() => {
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
@@ -128,6 +130,7 @@ export const RulePage = (props: RulePageProps) => {
                 iconType="error"
                 data-test-subj="hasActionsDisabled"
                 title={DISABLED_ACTIONS_WARNING_TITLE}
+                announceOnMount
               />
               <EuiSpacer />
             </>
@@ -148,6 +151,7 @@ export const RulePage = (props: RulePageProps) => {
       )}
       {isConnectorsScreenVisible && <RuleActionsConnectorsModal />}
       {isShowRequestScreenVisible && <RulePageShowRequestModal isEdit={isEdit} />}
+      {isShowYamlFlyoutVisible && <RulePageShowYamlFlyout />}
     </>
   );
 };
