@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { SynthtraceGenerator } from '@kbn/apm-synthtrace-client/src/types';
+import type { SynthtraceGenerator } from '@kbn/synthtrace-client/src/types';
 import type { Readable } from 'stream';
 import type { BaseStepCtx } from './journey';
 import type { SynthtraceDataType } from '../services/synthtrace';

@@ -23,7 +23,7 @@ import { generateConfigSchema } from './generate_config_schema';
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
-): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, Record<string, unknown>> => {
+): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const executor = generateExecutorFunction({
     actions: spec.actions,
     getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
@@ -36,9 +36,10 @@ export const createConnectorTypeFromSpec = (
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
       config: generateConfigSchema(spec.schema),
-      secrets: generateSecretsSchema(spec.authTypes),
+      secrets: generateSecretsSchema(spec.auth),
       params: generateParamsSchema(spec.actions),
     },
     executor,
+    globalAuthHeaders: spec.auth?.headers,
   };
 };

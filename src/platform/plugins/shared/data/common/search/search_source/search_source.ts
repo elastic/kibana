@@ -77,7 +77,13 @@ import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } f
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
-import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  isOfQueryType,
+  isPhraseFilter,
+  isPhrasesFilter,
+  sanitizeProjectRoutingForES,
+} from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -682,6 +688,12 @@ export class SearchSource {
         return addToBody(key, sort);
       case 'pit':
         return addToRoot(key, val);
+      case 'projectRouting':
+        const sanitizedProjectRouting = sanitizeProjectRoutingForES(val);
+        if (sanitizedProjectRouting) {
+          return addToBody('project_routing', sanitizedProjectRouting);
+        }
+        return;
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());

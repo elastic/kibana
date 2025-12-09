@@ -19,6 +19,7 @@ import type {
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
+import { getToolTypeInfo } from '../../services/tools/utils';
 
 export function registerInternalToolsRoutes({
   router,
@@ -132,11 +133,11 @@ export function registerInternalToolsRoutes({
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
 
-      const toolTypes = tools.getToolTypeInfo();
+      const toolTypes = tools.getToolDefinitions();
 
       return response.ok<GetToolTypeInfoResponse>({
         body: {
-          toolTypes,
+          toolTypes: getToolTypeInfo(toolTypes),
         },
       });
     })

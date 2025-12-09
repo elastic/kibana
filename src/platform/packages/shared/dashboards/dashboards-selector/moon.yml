@@ -18,10 +18,8 @@ project:
   metadata:
     sourceRoot: src/platform/packages/shared/dashboards/dashboards-selector
 dependsOn:
-  - '@kbn/content-management-plugin'
-  - '@kbn/content-management-utils'
-  - '@kbn/core'
   - '@kbn/i18n'
+  - '@kbn/ui-actions-plugin'
 tags:
   - shared-browser
   - package
