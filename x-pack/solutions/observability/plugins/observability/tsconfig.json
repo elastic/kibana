@@ -139,7 +139,8 @@
     "@kbn/observability-nav-icons",
     "@kbn/react-query",
     "@kbn/content-management-utils",
-    "@kbn/maintenance-windows-plugin"
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/synthtrace"
   ],
   "exclude": ["target/**/*"]
 }
