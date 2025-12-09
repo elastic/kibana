@@ -15,6 +15,7 @@ import {
   checkAdditiveChanges,
   validateStreamlangModeCompatibility,
   validateStreamlang,
+  stripCustomIdentifiers,
 } from '@kbn/streamlang';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
@@ -148,7 +149,8 @@ export const streamEnrichmentMachine = setup({
     updateDSL: assign(({ context }, params: { dsl: StreamlangDSL }) => ({
       nextStreamlangDSL: params.dsl,
       hasChanges:
-        JSON.stringify(params.dsl.steps) !== JSON.stringify(context.previousStreamlangDSL.steps),
+        JSON.stringify(stripCustomIdentifiers(params.dsl).steps) !==
+        JSON.stringify(stripCustomIdentifiers(context.previousStreamlangDSL).steps),
     })),
     /* Mode machine spawning */
     spawnInteractiveMode: assign(({ context, spawn, self }) => {
@@ -184,8 +186,8 @@ export const streamEnrichmentMachine = setup({
         yamlModeRef: spawn('yamlModeMachine', {
           id: 'yamlMode',
           input: {
-            previousStreamlangDSL: context.previousStreamlangDSL,
-            nextStreamlangDSL: context.nextStreamlangDSL,
+            previousStreamlangDSL: addDeterministicCustomIdentifiers(context.previousStreamlangDSL),
+            nextStreamlangDSL: addDeterministicCustomIdentifiers(context.nextStreamlangDSL),
             parentRef: self,
             privileges: context.definition.privileges,
             simulationMode,
@@ -250,7 +252,8 @@ export const streamEnrichmentMachine = setup({
       const hasSchemaErrors = context.schemaErrors.length > 0;
       const hasValidationErrors = context.validationErrors.size > 0;
       const hasChanges =
-        JSON.stringify(context.previousStreamlangDSL) !== JSON.stringify(context.nextStreamlangDSL);
+        JSON.stringify(stripCustomIdentifiers(context.previousStreamlangDSL)) !==
+        JSON.stringify(stripCustomIdentifiers(context.nextStreamlangDSL));
 
       return !hasSchemaErrors && !hasValidationErrors && hasChanges;
     },

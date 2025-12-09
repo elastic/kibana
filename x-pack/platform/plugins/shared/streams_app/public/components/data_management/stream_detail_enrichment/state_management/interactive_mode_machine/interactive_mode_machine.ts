@@ -22,7 +22,6 @@ import {
   type StreamlangProcessorDefinition,
   convertUIStepsToDSL,
   convertStepsForUI,
-  addDeterministicCustomIdentifiers,
 } from '@kbn/streamlang';
 import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -194,31 +193,17 @@ export const interactiveModeMachine = setup({
       stepRefs: [...context.stepRefs],
     })),
     syncToDSL: ({ context }) => {
-      // Convert step refs to DSL (strip identifiers, they'll be regenerated deterministically)
+      // Maintain custom identifiers when syncing to DSL, we'll link to these for the validation errors in the top level machine.
       const dsl = convertUIStepsToDSL(
         context.stepRefs.map((stepRef) => {
           return stepRef.getSnapshot().context.step;
-        })
+        }),
+        false
       );
-
-      const dslWithIdentifiers = addDeterministicCustomIdentifiers(dsl);
-
-      // Flatten the DSL to get steps in the same order as stepRefs
-      const flattenedSteps = convertStepsForUI(dslWithIdentifiers);
-
-      // Update each individual step machine with its new deterministic identifier
-      // We defer this here as individual step machines don't have an awareness of sibling steps or hierarchy
-      // This keeps step machines in sync with validation and simulations which use the identifiers
-      context.stepRefs.forEach((stepRef, index) => {
-        const newIdentifier = flattenedSteps[index]?.customIdentifier;
-        if (newIdentifier) {
-          stepRef.send({ type: 'step.updateIdentifier', customIdentifier: newIdentifier });
-        }
-      });
 
       context.parentRef.send({
         type: 'mode.dslUpdated',
-        dsl: dslWithIdentifiers,
+        dsl,
       });
     },
     setActiveDataSource: assign(

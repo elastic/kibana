@@ -98,12 +98,6 @@ export const stepMachine = setup({
         id: context.step.customIdentifier,
       })
     ),
-    updateIdentifier: assign(({ context }, { customIdentifier }: { customIdentifier: string }) => ({
-      step: {
-        ...context.step,
-        customIdentifier,
-      },
-    })),
   },
   guards: {
     isDraft: ({ context }) => context.isNew && !context.isUpdated,
@@ -120,12 +114,6 @@ export const stepMachine = setup({
     isUpdated: input.isUpdated ?? false,
   }),
   initial: 'unresolved',
-  on: {
-    // Global handler - identifier can be updated in any state
-    'step.updateIdentifier': {
-      actions: [{ type: 'updateIdentifier', params: ({ event }) => event }],
-    },
-  },
   states: {
     unresolved: {
       always: [
