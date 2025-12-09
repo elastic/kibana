@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/esql-types';
-import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
+import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject } from 'rxjs';
 
@@ -128,22 +128,18 @@ describe('ESQLControlApi', () => {
         esqlQuery: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
         controlType: EsqlControlType.VALUES_FROM_QUERY,
       } as ESQLControlState;
-      await factory.buildControl({
-        initialState,
+      await factory.buildEmbeddable({
+        initialState: { rawState: initialState },
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: dashboardApi,
       });
       await waitFor(() => {
         expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
         expect(mockIsSuccess).toHaveBeenCalledTimes(1);
       });
-      const controlFetch$ = controlGroupApi.controlFetch$(
-        uuid
-      ) as BehaviorSubject<ControlFetchContext>;
-
       // Variable change
-      controlFetch$.next({
+      mockFetch$.next({
         esqlVariables: [
           {
             key: 'variable1',

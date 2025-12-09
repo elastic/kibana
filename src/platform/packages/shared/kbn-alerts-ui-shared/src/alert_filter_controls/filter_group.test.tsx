@@ -17,7 +17,6 @@ import type {
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
 } from '@kbn/control-group-renderer';
-import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { ControlGroupOutput } from './mocks/data';
 import { initialInputData, sampleOutputData } from './mocks/data';
 import {
