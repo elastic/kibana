@@ -422,6 +422,33 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                MemoryDumpSuccessResponse:
+                  summary: Memory dump action successfully created
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      agentType: endpoint
+                      command: memory-dump
+                      createdBy: elastic
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: gke-node-1235412
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: false
+                      isExpired: false
+                      outputs: {}
+                      parameters:
+                        entity_id: abc123
+                        type: process
+                      startedAt: '2022-07-29T19:08:49.126Z'
+                      status: pending
+                      wasSuccessful: false
               schema:
                 $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Action request was successfully created
