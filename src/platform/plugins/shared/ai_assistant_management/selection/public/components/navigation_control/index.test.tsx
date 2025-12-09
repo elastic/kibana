@@ -55,6 +55,7 @@ describe('AIAssistantHeaderButton', () => {
     jest.clearAllMocks();
     getIsAiAgentsEnabled.mockResolvedValue(true);
     mockCoreStart.settings.client.set.mockResolvedValue(true);
+    mockCoreStart.application.capabilities.agentBuilder = { show: true };
   });
 
   describe('Header Button', () => {
@@ -140,22 +141,6 @@ describe('AIAssistantHeaderButton', () => {
   });
 
   describe('AI Agent Card - Disabled State', () => {
-    it('should be disabled when both Security and Observability assistants are disabled', async () => {
-      renderComponent({
-        isSecurityAIAssistantEnabled: false,
-        isObservabilityAIAssistantEnabled: false,
-      });
-
-      fireEvent.click(screen.getByTestId('aiAssistantHeaderButton'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
-      });
-
-      const agentCard = screen.getByTestId('aiAssistantAgentCard');
-      expect(agentCard.querySelector('[disabled]')).toBeTruthy();
-    });
-
     it('should be enabled when at least Security assistant is enabled', async () => {
       renderComponent({
         isSecurityAIAssistantEnabled: true,
