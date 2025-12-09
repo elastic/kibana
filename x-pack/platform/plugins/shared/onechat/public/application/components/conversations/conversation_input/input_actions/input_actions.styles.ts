@@ -10,13 +10,22 @@ import { css } from '@emotion/react';
 
 export const SELECTOR_LIST_HEADER_HEIGHT = 57;
 const SELECTOR_POPOVER_MAX_HEIGHT = 300;
-export const SELECTOR_LIST_HEIGHT = SELECTOR_POPOVER_MAX_HEIGHT - SELECTOR_LIST_HEADER_HEIGHT;
 
-export const useSelectorListStyles = ({ listId }: { listId: string }) => {
+export const useSelectorListStyles = ({
+  listId,
+  withHeader,
+}: {
+  listId: string;
+  withHeader: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
+  let listHeight = SELECTOR_POPOVER_MAX_HEIGHT;
+  if (withHeader) {
+    listHeight -= SELECTOR_LIST_HEADER_HEIGHT;
+  }
   const listHeightStyles = css`
     &#${listId} .euiSelectableList__list {
-      max-block-size: ${SELECTOR_LIST_HEIGHT}px;
+      max-block-size: ${listHeight}px;
     }
   `;
   const listItemStyles = css`

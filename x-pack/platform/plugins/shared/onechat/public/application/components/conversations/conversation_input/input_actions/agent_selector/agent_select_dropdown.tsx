@@ -132,7 +132,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     agents,
     selectedAgentId: selectedAgent?.id,
   });
-  const selectorListStyles = useSelectorListStyles({ listId: agentListId });
+  const selectorListStyles = useSelectorListStyles({ listId: agentListId, withHeader: true });
 
   return (
     <EuiPopover

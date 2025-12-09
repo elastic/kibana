@@ -8,8 +8,6 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonIcon,
-  EuiFlexItem,
   EuiHighlight,
   EuiPopover,
   EuiSelectable,
@@ -20,15 +18,12 @@ import { css } from '@emotion/react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSelectorListStyles } from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
-import { SelectorListHeader } from '../selector_list_header';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
@@ -36,21 +31,11 @@ const selectableAriaLabel = i18n.translate(
     defaultMessage: 'Select a connector',
   }
 );
-const manageConnectorsAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.manageConnectorAriaLabel',
-  {
-    defaultMessage: 'Manage connectors',
-  }
-);
 const defaultConnectorLabel = i18n.translate(
   'xpack.onechat.conversationInput.connectorSelector.defaultConnectorLabel',
   {
     defaultMessage: 'Default',
   }
-);
-const connectorSearchPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.search.placeholder',
-  { defaultMessage: 'Search LLMs' }
 );
 
 const connectorSelectId = 'agentBuilderConnectorSelect';
@@ -75,24 +60,6 @@ const ConnectorPopoverButton: React.FC<{
         defaultMessage="LLM"
       />
     </InputPopoverButton>
-  );
-};
-
-const ConnectorListHeader: React.FC<{ search: ReactNode }> = ({ search }) => {
-  const { navigateToManageConnectors } = useNavigation();
-  return (
-    <SelectorListHeader>
-      <EuiFlexItem grow={true}>{search}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          size="m"
-          iconType="gear"
-          color="text"
-          aria-label={manageConnectorsAriaLabel}
-          onClick={navigateToManageConnectors}
-        />
-      </EuiFlexItem>
-    </SelectorListHeader>
   );
 };
 
@@ -190,7 +157,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
     }
   }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
 
-  const selectorListStyles = useSelectorListStyles({ listId: connectorListId });
+  const selectorListStyles = useSelectorListStyles({ listId: connectorListId, withHeader: false });
 
   return (
     <EuiPopover
@@ -212,8 +179,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
         data-test-subj="agentBuilderConnectorSelector"
         aria-label={selectableAriaLabel}
         singleSelection
-        searchable
-        searchProps={{ placeholder: connectorSearchPlaceholder }}
         options={connectorOptions}
         onChange={(_options, _event, changedOption) => {
           const { checked, key: connectorId } = changedOption;
@@ -236,12 +201,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
         }}
         listProps={{ id: connectorListId, css: selectorListStyles }}
       >
-        {(list, search) => (
-          <div>
-            <ConnectorListHeader search={search} />
-            {list}
-          </div>
-        )}
+        {(list) => <div>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
   );
