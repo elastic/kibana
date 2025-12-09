@@ -85,7 +85,6 @@ type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
-  [QUERY_EVIDENCE]?: string[];
 };
 
 export type StoredAssetLink = StoredQueryLink & {
@@ -104,6 +103,7 @@ function fromStorage(link: StoredAssetLink): AssetLink {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
     [QUERY_FEATURE_TYPE]: FeatureType;
+    [QUERY_EVIDENCE]?: string[];
   } = link as any;
   return {
     ...storedQueryLink,

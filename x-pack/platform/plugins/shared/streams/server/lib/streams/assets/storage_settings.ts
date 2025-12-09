@@ -29,7 +29,6 @@ export const assetStorageSettings = {
       [QUERY_KQL_BODY]: types.match_only_text(),
       [QUERY_TITLE]: types.keyword(),
       [QUERY_SEVERITY_SCORE]: types.long(),
-      [QUERY_EVIDENCE]: types.keyword(),
       experimental: types.object({ enabled: false }),
     },
   },
