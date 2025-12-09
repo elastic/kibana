@@ -91,6 +91,11 @@ import type { GetRuleTemplateParams } from '../application/rule_template/methods
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
 import { createGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/create/create_gap_auto_fill_scheduler';
 import type { CreateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/create/types';
+import { getGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/get/get_gap_auto_fill_scheduler';
+import type { GetGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/types';
+import { deleteGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/delete/delete_gap_auto_fill_scheduler';
+import { updateGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/update/update_gap_auto_fill_scheduler';
+import type { UpdateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/update/types';
 
 // Gap methods
 import { findGaps } from '../application/gaps/methods/find_gaps';
@@ -106,6 +111,8 @@ import type {
   BulkFillGapsByRuleIdsOptions,
   BulkFillGapsByRuleIdsParams,
 } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { FindGapAutoFillSchedulerLogsParams } from '../application/gap_auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
+import { findGapAutoFillSchedulerLogs } from '../application/gap_auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -272,6 +279,18 @@ export class RulesClient {
 
   public createGapAutoFillScheduler = (params: CreateGapAutoFillSchedulerParams) =>
     createGapAutoFillScheduler(this.context, params);
+
+  public getGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    getGapAutoFillScheduler(this.context, params);
+
+  public updateGapAutoFillScheduler = (params: UpdateGapAutoFillSchedulerParams) =>
+    updateGapAutoFillScheduler(this.context, params);
+
+  public deleteGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    deleteGapAutoFillScheduler(this.context, params);
+
+  public findGapAutoFillSchedulerLogs = (params: FindGapAutoFillSchedulerLogsParams) =>
+    findGapAutoFillSchedulerLogs(this.context, params);
 
   public getContext() {
     return this.context;
