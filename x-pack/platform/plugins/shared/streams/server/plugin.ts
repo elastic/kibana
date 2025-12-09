@@ -178,7 +178,7 @@ export class StreamsPlugin
       };
     };
 
-    taskService.registerTasks({ getScopedClients });
+    taskService.registerTasks({ getScopedClients, logger: this.logger });
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,

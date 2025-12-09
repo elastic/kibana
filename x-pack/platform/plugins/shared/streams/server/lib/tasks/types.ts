@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export type TaskStatus = 'not_started' | 'in_progress' | 'completed' | 'failed';
+
 interface PersistedTaskBase {
   id: string;
   type: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'failed';
+  status: TaskStatus;
   stream: string;
   space: string;
   created_at: string;

@@ -54,6 +54,7 @@ export class TaskClient<TaskType extends string> {
     }
   }
 
+  // What if you want to cancel the current task and then re-schedule it?
   public async schedule<TParams extends {} = {}>({
     task,
     params,
