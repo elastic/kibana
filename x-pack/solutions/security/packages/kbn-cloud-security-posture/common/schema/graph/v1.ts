@@ -79,7 +79,7 @@ export const nodeDocumentDataSchema = schema.object({
     })
   ),
   entity: schema.maybe(entitySchema),
-  entityFieldNamespace: schema.maybe(schema.string()),
+  entityParentField: schema.maybe(schema.string()),
 });
 
 export const REACHED_NODES_LIMIT = 'REACHED_NODES_LIMIT';

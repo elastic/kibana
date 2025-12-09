@@ -40,7 +40,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
               {
                 id: 'admin@example.com',
                 type: DOCUMENT_TYPE_ENTITY,
-                entityFieldNamespace: 'user',
+                entityParentField: 'user',
               },
             ],
           },
@@ -53,7 +53,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
               {
                 id: 'projects/your-project-id/roles/customRole',
                 type: DOCUMENT_TYPE_ENTITY,
-                entityFieldNamespace: 'entity',
+                entityParentField: 'entity',
                 entity: {
                   name: 'Custom Role',
                   type: 'role',

@@ -321,18 +321,18 @@ ${
 | EVAL targetHostIp = TO_STRING(null)
 `
 }
-// Create actor and target data with entityFieldNamespace
+// Create actor and target data with entityParentField
 
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actorEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entityFieldNamespace\\":\\"", actorEntityFieldHint, "\\"",
+    ",\\"entityParentField\\":\\"", actorEntityFieldHint, "\\"",
     actorEntityField,
   "}")
 | EVAL targetDocData = CONCAT("{",
     "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entityFieldNamespace\\":\\"", targetEntityFieldHint, "\\"",
+    ",\\"entityParentField\\":\\"", targetEntityFieldHint, "\\"",
     targetEntityField,
   "}")
 

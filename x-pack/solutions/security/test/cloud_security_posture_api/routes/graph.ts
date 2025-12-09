@@ -402,7 +402,7 @@ export default function (providerContext: FtrProviderContext) {
               expectExpect.objectContaining({
                 id: 'admin@example.com',
                 type: 'entity',
-                entityFieldNamespace: 'user',
+                entityParentField: 'user',
               })
             );
           }
@@ -416,7 +416,7 @@ export default function (providerContext: FtrProviderContext) {
               expectExpect.objectContaining({
                 id: 'projects/your-project-id/roles/customRole',
                 type: 'entity',
-                entityFieldNamespace: 'entity',
+                entityParentField: 'entity',
               })
             );
           }
@@ -701,12 +701,12 @@ export default function (providerContext: FtrProviderContext) {
         expectExpect(actorNode.documentsData).toContainEqual({
           id: 'actor-mv-1',
           type: 'entity',
-          entityFieldNamespace: 'entity',
+          entityParentField: 'entity',
         });
         expectExpect(actorNode.documentsData).toContainEqual({
           id: 'actor-mv-2',
           type: 'entity',
-          entityFieldNamespace: 'entity',
+          entityParentField: 'entity',
         });
 
         // Find target node (should have count: 3 for 3 target IDs)
@@ -720,17 +720,17 @@ export default function (providerContext: FtrProviderContext) {
         expectExpect(targetNode.documentsData).toContainEqual({
           id: 'target-mv-1',
           type: 'entity',
-          entityFieldNamespace: 'entity',
+          entityParentField: 'entity',
         });
         expectExpect(targetNode.documentsData).toContainEqual({
           id: 'target-mv-2',
           type: 'entity',
-          entityFieldNamespace: 'entity',
+          entityParentField: 'entity',
         });
         expectExpect(targetNode.documentsData).toContainEqual({
           id: 'target-mv-3',
           type: 'entity',
-          entityFieldNamespace: 'entity',
+          entityParentField: 'entity',
         });
 
         // Verify label node exists for the action with count of 6 (2 actors × 3 targets)
@@ -1273,7 +1273,7 @@ export default function (providerContext: FtrProviderContext) {
               expectExpect.objectContaining({
                 id: 'service-account-123@project.iam.gserviceaccount.com',
                 type: 'entity',
-                entityFieldNamespace: 'service',
+                entityParentField: 'service',
                 entity: expectExpect.objectContaining({
                   name: 'ServiceAccount123',
                   type: 'Service',
@@ -1299,7 +1299,7 @@ export default function (providerContext: FtrProviderContext) {
               expectExpect.objectContaining({
                 id: 'host-instance-1',
                 type: 'entity',
-                entityFieldNamespace: 'host',
+                entityParentField: 'host',
                 entity: expectExpect.objectContaining({
                   name: 'HostInstance1',
                   type: 'Container',
@@ -1311,7 +1311,7 @@ export default function (providerContext: FtrProviderContext) {
               expectExpect.objectContaining({
                 id: 'host-instance-2',
                 type: 'entity',
-                entityFieldNamespace: 'host',
+                entityParentField: 'host',
                 entity: expectExpect.objectContaining({
                   name: 'HostInstance2',
                   type: 'Container',
@@ -1511,7 +1511,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(actorNode.icon).to.equal('user');
           expect(actorNode.shape).to.equal('ellipse');
           expect(actorNode.tag).to.equal('Identity');
-          // entityFieldNamespace assertion
+          // entityParentField assertion
           expect(actorNode!.documentsData!.length).to.equal(1);
           expectExpect(actorNode!.documentsData).toContainEqual(
             expectExpect.objectContaining({
@@ -1522,7 +1522,7 @@ export default function (providerContext: FtrProviderContext) {
                 type: 'Identity',
                 sub_type: 'GCP IAM User',
               },
-              entityFieldNamespace: 'user',
+              entityParentField: 'user',
             })
           );
 
@@ -1544,7 +1544,7 @@ export default function (providerContext: FtrProviderContext) {
                 type: 'Compute',
                 sub_type: 'GCP Compute Instance',
               },
-              entityFieldNamespace: 'service',
+              entityParentField: 'service',
             })
           );
 
@@ -1614,7 +1614,7 @@ export default function (providerContext: FtrProviderContext) {
             expectExpect.objectContaining({
               id: 'multi-target-user@example.com',
               type: 'entity',
-              entityFieldNamespace: 'user',
+              entityParentField: 'user',
               entity: expectExpect.objectContaining({
                 name: 'MultiTargetUser',
                 type: 'Identity',
@@ -1637,7 +1637,7 @@ export default function (providerContext: FtrProviderContext) {
             expectExpect.objectContaining({
               id: 'projects/multi-target-project-id/buckets/target-bucket-a',
               type: 'entity',
-              entityFieldNamespace: 'entity',
+              entityParentField: 'entity',
               entity: expectExpect.objectContaining({
                 name: 'TargetBucketA',
                 type: 'Storage',
@@ -1649,7 +1649,7 @@ export default function (providerContext: FtrProviderContext) {
             expectExpect.objectContaining({
               id: 'projects/multi-target-project-id/buckets/target-bucket-b',
               type: 'entity',
-              entityFieldNamespace: 'entity',
+              entityParentField: 'entity',
               entity: expectExpect.objectContaining({
                 name: 'TargetBucketB',
                 type: 'Storage',
@@ -1661,7 +1661,7 @@ export default function (providerContext: FtrProviderContext) {
             expectExpect.objectContaining({
               id: 'projects/multi-target-project-id/buckets/target-bucket-c',
               type: 'entity',
-              entityFieldNamespace: 'service',
+              entityParentField: 'service',
               entity: expectExpect.objectContaining({
                 name: 'TargetBucketC',
                 type: 'Storage',
@@ -1687,7 +1687,7 @@ export default function (providerContext: FtrProviderContext) {
             expectExpect.objectContaining({
               id: 'projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com',
               type: 'entity',
-              entityFieldNamespace: 'service',
+              entityParentField: 'service',
               entity: expectExpect.objectContaining({
                 name: 'TargetServiceDifferent',
                 type: 'Service',
