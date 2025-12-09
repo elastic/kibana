@@ -16,4 +16,4 @@ NAMESPACE_TYPE=${2-single}
 # Example: ./get_exception_list.sh {id} agnostic
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET "${KIBANA_URL}${SPACE_URL}/api/exception_lists?list_id=$1&namespace_type=${NAMESPACE_TYPE}" | jq .
+ -X GET "${KIBANA_URL}${SPACE_URL}/api/exception_lists?list_id=$1&namespace_type=${NAMESPACE_TYPE}"

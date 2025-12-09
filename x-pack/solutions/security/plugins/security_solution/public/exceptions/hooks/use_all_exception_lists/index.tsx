@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import { fetchRules } from '../../../detection_engine/rule_management/api/api';
 export interface ExceptionListInfo extends ExceptionListSchema {
@@ -39,6 +40,7 @@ export const useAllExceptionLists = ({
   const [exceptionsListsInfo, setExceptionsListInfo] = useState<Record<string, ExceptionListInfo>>(
     {}
   );
+  const { read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
 
   const handleExceptionsInfo = useCallback(
     (rules: Rule[]): Record<string, ExceptionListInfo> => {
@@ -91,13 +93,18 @@ export const useAllExceptionLists = ({
       try {
         setLoading(true);
 
-        const { data: rules } = await fetchRules({
-          pagination: {
-            page: 1,
-            perPage: 10000,
-          },
-          signal: abortCtrl.signal,
-        });
+        const rules: Rule[] = [];
+
+        if (canReadRules) {
+          const { data: rulesResponse } = await fetchRules({
+            pagination: {
+              page: 1,
+              perPage: 10000,
+            },
+            signal: abortCtrl.signal,
+          });
+          rules.push(...rulesResponse);
+        }
 
         const updatedLists = handleExceptionsInfo(rules);
 
@@ -124,7 +131,7 @@ export const useAllExceptionLists = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [exceptionLists.length, handleExceptionsInfo]);
+  }, [canReadRules, exceptionLists.length, handleExceptionsInfo]);
 
   return [loading, exceptions, exceptionsListsInfo];
 };

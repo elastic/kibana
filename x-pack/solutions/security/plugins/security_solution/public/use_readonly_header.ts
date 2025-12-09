@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 
 import * as i18n from './translations';
 import { useKibana } from './common/lib/kibana';
-import { useAlertsPrivileges } from './detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useUserPrivileges } from './common/components/user_privileges';
 
 /**
  * This component places a read-only icon badge in the header
@@ -17,11 +17,11 @@ import { useAlertsPrivileges } from './detections/containers/detection_engine/al
  * privileges
  */
 export function useReadonlyHeader(tooltip: string) {
-  const { hasKibanaREAD, hasKibanaCRUD } = useAlertsPrivileges();
+  const { read, edit } = useUserPrivileges().rulesPrivileges.rules;
   const chrome = useKibana().services.chrome;
 
   useEffect(() => {
-    if (hasKibanaREAD && !hasKibanaCRUD) {
+    if (read && !edit) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip,
@@ -33,5 +33,5 @@ export function useReadonlyHeader(tooltip: string) {
     return () => {
       chrome.setBadge();
     };
-  }, [chrome, hasKibanaREAD, hasKibanaCRUD, tooltip]);
+  }, [chrome, tooltip, read, edit]);
 }

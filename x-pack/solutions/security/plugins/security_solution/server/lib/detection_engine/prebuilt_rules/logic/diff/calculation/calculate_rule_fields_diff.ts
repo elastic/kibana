@@ -30,9 +30,11 @@ import { orderAgnosticArrayDiffAlgorithm } from './two_way_diff_algorithms/order
 export const calculateRuleFieldsDiff = ({
   ruleA,
   ruleB,
+  isUpdateRuleRoute = false,
 }: {
   ruleA: RuleResponse;
   ruleB: RuleResponse;
+  isUpdateRuleRoute?: boolean;
 }): TwoWayRuleFieldsDiff => {
   const normalizedRuleA = normalizeRuleResponse(ruleA);
   const normalizedRuleB = normalizeRuleResponse(ruleB);
@@ -49,7 +51,18 @@ export const calculateRuleFieldsDiff = ({
     const comparator = allFieldsComparators[fieldKey] as
       | ((a: unknown, b: unknown) => boolean)
       | undefined;
-
+    if (isUpdateRuleRoute) {
+      const specialComparator = specialUpdateRulesFieldComparators[
+        fieldKey as 'exceptions_list'
+      ] as ((a: unknown, b: unknown) => boolean) | undefined;
+      if (specialComparator) {
+        fieldsDiff[fieldKey] = {
+          is_equal: specialComparator(valueA, valueB),
+          value_a: valueA,
+          value_b: valueB,
+        };
+      }
+    }
     // We only compare fields if there is a comparator explicitly defined for the field in the lists below
     if (comparator) {
       fieldsDiff[fieldKey] = {
@@ -85,6 +98,7 @@ const commonFieldComparators: TwoWayFieldsDiffAlgorithmsFor<TwoWayRuleDiffCommon
   references: orderAgnosticArrayDiffAlgorithm,
   false_positives: deepEqualityDiffAlgorithm,
   threat: deepEqualityDiffAlgorithm,
+  exceptions_list: deepEqualityDiffAlgorithm,
   note: deepEqualityDiffAlgorithm,
   setup: deepEqualityDiffAlgorithm,
   related_integrations: deepEqualityDiffAlgorithm,
@@ -205,4 +219,10 @@ const allFieldsComparators: TwoWayFieldsDiffAlgorithmsFor<TwoWayDiffRule> = {
   ...thresholdFieldComparators,
   ...machineLearningFieldComparators,
   ...newTermsFieldComparators,
+};
+
+const specialUpdateRulesFieldComparators: Partial<
+  TwoWayFieldsDiffAlgorithmsFor<Partial<TwoWayRuleDiffCommonFields>>
+> = {
+  exceptions_list: deepEqualityDiffAlgorithm,
 };

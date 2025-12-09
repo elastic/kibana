@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ALERTS_PAGE_LOADING_TEST_ID, AlertsPage } from './alerts';
 import { useUserData } from '../../components/user_info';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 import { TestProviders } from '../../../common/mock';
@@ -19,6 +20,7 @@ import { NEED_ADMIN_CALLOUT_TEST_ID } from '../../../detection_engine/rule_manag
 import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
 
 jest.mock('../../components/user_info');
+jest.mock('../../../common/components/user_privileges');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../sourcerer/containers/use_signal_helpers');
 jest.mock('../../../common/hooks/use_missing_privileges');
@@ -26,9 +28,21 @@ jest.mock('../../components/alerts/wrapper', () => ({
   Wrapper: () => <div data-test-subj={'alerts-page-data-view-wrapper'} />,
 }));
 
+const doMockRulesPrivileges = ({ read = false }) => {
+  (useUserPrivileges as jest.Mock).mockReturnValue({
+    rulesPrivileges: {
+      rules: {
+        read,
+        edit: false,
+      },
+    },
+  });
+};
+
 describe('<AlertsPageWrapper />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    doMockRulesPrivileges({});
   });
 
   describe('showing loading spinner', () => {
@@ -123,11 +137,11 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          canUserREAD: true,
           hasIndexRead: true,
           hasEncryptionKey: false,
         },
       ]);
+      doMockRulesPrivileges({ read: true });
       (useListsConfig as jest.Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
@@ -155,12 +169,12 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          canUserREAD: true,
           hasIndexRead: true,
           signalIndexMappingOutdated: true,
           hasIndexManage: false,
         },
       ]);
+      doMockRulesPrivileges({ read: true });
       (useListsConfig as jest.Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
@@ -188,10 +202,10 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          canUserREAD: true,
           hasIndexRead: true,
         },
       ]);
+      doMockRulesPrivileges({ read: true });
       (useListsConfig as jest.Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
@@ -221,7 +235,6 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          canUserREAD: false,
           hasIndexRead: false,
         },
       ]);
@@ -253,10 +266,10 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          canUserREAD: true,
           hasIndexRead: true,
         },
       ]);
+      doMockRulesPrivileges({ read: true });
       (useListsConfig as jest.Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,

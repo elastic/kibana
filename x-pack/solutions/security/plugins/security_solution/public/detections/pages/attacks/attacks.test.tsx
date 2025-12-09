@@ -17,8 +17,10 @@ import { NO_INDEX_TEST_ID } from '../../components/alerts/empty_pages/no_index_e
 import { NO_INTEGRATION_CALLOUT_TEST_ID } from '../../components/callouts/no_api_integration_key_callout';
 import { NEED_ADMIN_CALLOUT_TEST_ID } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('../../components/user_info');
+jest.mock('../../../common/components/user_privileges');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../sourcerer/containers/use_signal_helpers');
 jest.mock('../../../common/hooks/use_missing_privileges');
@@ -26,9 +28,21 @@ jest.mock('../../components/attacks/wrapper', () => ({
   Wrapper: () => <div data-test-subj={'attacks-page-data-view-wrapper'} />,
 }));
 
+const doMockRulesPrivileges = ({ read = false }) => {
+  (useUserPrivileges as jest.Mock).mockReturnValue({
+    rulesPrivileges: {
+      rules: {
+        read,
+        edit: false,
+      },
+    },
+  });
+};
+
 describe('<AttacksPageWrapper />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    doMockRulesPrivileges({});
   });
 
   describe('showing loading spinner', () => {
@@ -221,7 +235,6 @@ describe('<AttacksPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          canUserREAD: false,
           hasIndexRead: false,
         },
       ]);
@@ -253,10 +266,10 @@ describe('<AttacksPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          canUserREAD: true,
           hasIndexRead: true,
         },
       ]);
+      doMockRulesPrivileges({ read: true });
       (useListsConfig as jest.Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,

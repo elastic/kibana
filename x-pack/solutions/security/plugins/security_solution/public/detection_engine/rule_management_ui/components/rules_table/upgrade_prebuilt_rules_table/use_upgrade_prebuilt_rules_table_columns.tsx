@@ -23,16 +23,15 @@ import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/cons
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../common/components/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
-import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeState>;
 
@@ -242,8 +241,7 @@ const createUpgradeButtonColumn = (
 });
 
 export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
-  const [{ canUserCRUD }] = useUserData();
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
     state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
@@ -281,7 +279,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         truncateText: true,
         width: '10%',
       },
-      ...(hasCRUDPermissions
+      ...(canEditRules
         ? [
             createUpgradeButtonColumn(
               upgradeRules,
@@ -295,13 +293,13 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         : []),
     ],
     [
+      isRulesCustomizationEnabled,
       showRelatedIntegrations,
-      hasCRUDPermissions,
+      canEditRules,
       upgradeRules,
       openRulePreview,
       loadingRules,
       isDisabled,
-      isRulesCustomizationEnabled,
       telemetry,
     ]
   );
