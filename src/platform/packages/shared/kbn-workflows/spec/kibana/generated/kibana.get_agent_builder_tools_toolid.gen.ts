@@ -35,7 +35,7 @@ export const GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract 
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/tools/{toolId}'],
   documentation:

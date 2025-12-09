@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
+import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
@@ -17,7 +17,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     security: {
       authz: {
-        requiredPrivileges: [apiPrivileges.readOnechat],
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
       },
     },
     params: t.type({

@@ -6,7 +6,7 @@
  */
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/onechat-server';
+import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/constants';
 import {

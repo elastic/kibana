@@ -36,7 +36,7 @@ export const POST_AGENT_BUILDER_A2A_AGENTID_CONTRACT: InternalConnectorContract 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 > warn
-> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/a2a/{agentId}'],
   documentation:

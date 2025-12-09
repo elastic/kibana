@@ -1,6 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
+  agentBuilder: 28638
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 10000
   aiops: 15359
@@ -20,7 +21,7 @@ pageLoadAssetSize:
   cloudFullStory: 4752
   cloudLinks: 36333
   cloudSecurityPosture: 19900
-  console: 31271
+  console: 31192
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
@@ -53,7 +54,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 38000
-  esql: 20000
+  esql: 18225
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -114,7 +115,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 18999
+  navigation: 18669
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
@@ -124,7 +125,6 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 28638
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
@@ -160,7 +160,7 @@ pageLoadAssetSize:
   security: 79627
   securitySolution: 187862
   securitySolutionEss: 38689
-  securitySolutionServerless: 52082
+  securitySolutionServerless: 51979
   serverless: 7451
   serverlessObservability: 19472
   serverlessSearch: 26393

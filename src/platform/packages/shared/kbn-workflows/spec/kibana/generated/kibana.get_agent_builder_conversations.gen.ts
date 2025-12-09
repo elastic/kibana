@@ -35,7 +35,7 @@ export const GET_AGENT_BUILDER_CONVERSATIONS_CONTRACT: InternalConnectorContract
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/conversations'],
   documentation:

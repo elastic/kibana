@@ -35,7 +35,7 @@ export const PUT_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
+Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.`,
   methods: ['PUT'],
   patterns: ['/api/agent_builder/agents/{id}'],
   documentation:

@@ -19,7 +19,7 @@ export async function registerObservabilityAgent({
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
-  plugins.onechat.agents.register({
+  plugins.agentBuilder.agents.register({
     id: OBSERVABILITY_AGENT_ID,
     name: 'Observability Agent',
     description: 'Agent specialized in logs, metrics, and traces',

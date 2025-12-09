@@ -7,9 +7,9 @@
 
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';

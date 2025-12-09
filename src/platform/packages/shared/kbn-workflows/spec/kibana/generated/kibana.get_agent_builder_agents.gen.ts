@@ -35,7 +35,7 @@ export const GET_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/agents'],
   documentation:

@@ -250,7 +250,7 @@ export class APMPlugin
       getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
     );
 
-    if (plugins.onechat) {
+    if (plugins.agentBuilder) {
       registerTools({
         core,
         plugins,

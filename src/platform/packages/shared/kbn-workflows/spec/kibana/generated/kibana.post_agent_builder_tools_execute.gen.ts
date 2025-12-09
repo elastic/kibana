@@ -35,7 +35,7 @@ export const POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT: InternalConnectorContrac
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/tools/_execute'],
   documentation:

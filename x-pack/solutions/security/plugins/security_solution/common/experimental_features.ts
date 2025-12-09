@@ -204,7 +204,7 @@ export const allowedExperimentalValues = Object.freeze({
    */
   entityAnalyticsWatchlistEnabled: false,
   /**
-   * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
+   * Enables dynamic registration of security attachments and tools from agent_builder with the agentBuilder plugin
    */
   agentBuilderEnabled: false,
 });

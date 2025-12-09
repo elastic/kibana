@@ -35,7 +35,7 @@ export const POST_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
+Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/tools'],
   documentation:

@@ -35,7 +35,7 @@ export const PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract 
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
+Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.`,
   methods: ['PUT'],
   patterns: ['/api/agent_builder/tools/{toolId}'],
   documentation:

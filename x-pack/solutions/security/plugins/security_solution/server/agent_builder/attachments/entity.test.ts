@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
 import { createEntityAttachmentType } from './entity';

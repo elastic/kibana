@@ -74,13 +74,13 @@ export class DashboardAgentPlugin
       return;
     }
 
-    setupDeps.onechat.tools.register(
+    setupDeps.agentBuilder.tools.register(
       createDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
         dashboardLocator,
         spaces: startDeps.spaces,
       })
     );
-    setupDeps.onechat.tools.register(
+    setupDeps.agentBuilder.tools.register(
       updateDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
         dashboardLocator,
         spaces: startDeps.spaces,
@@ -88,7 +88,7 @@ export class DashboardAgentPlugin
     );
 
     // Register the dashboard agent
-    registerDashboardAgent(setupDeps.onechat);
+    registerDashboardAgent(setupDeps.agentBuilder);
   }
 
   start(

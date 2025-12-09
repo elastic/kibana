@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
-import { platformCoreTools } from '@kbn/onechat-common';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,

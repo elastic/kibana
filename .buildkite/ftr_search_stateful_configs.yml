@@ -11,4 +11,4 @@ enabled:
   - x-pack/solutions/search/test/api_integration/apis/search_playground/config.ts
   - x-pack/solutions/search/test/functional_solution_sidenav/config.ts
   - x-pack/solutions/search/test/accessibility/config.ts
-  - x-pack/platform/test/onechat_api_integration/configs/config.stateful.ts
+  - x-pack/platform/test/agent_builder_api_integration/configs/config.stateful.ts

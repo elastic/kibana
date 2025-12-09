@@ -35,7 +35,7 @@ export const GET_AGENT_BUILDER_A2A_AGENTID_JSON_CONTRACT: InternalConnectorContr
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/a2a/{agentId}.json'],
   documentation:
