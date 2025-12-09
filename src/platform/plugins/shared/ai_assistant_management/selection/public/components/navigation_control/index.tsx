@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiModal,
   EuiOverlayMask,
@@ -55,22 +55,12 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isAiAgentsEnabled, setIsAiAgentsEnabled] = useState(false);
 
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
 
   const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.show === true;
-
-  // Check feature flag on mount
-  useEffect(() => {
-    getIsAiAgentsEnabled(coreStart)
-      .then(setIsAiAgentsEnabled)
-      .catch(() => {
-        // Default to false if check fails
-        setIsAiAgentsEnabled(false);
-      });
-  }, [coreStart]);
+  const isAiAgentsEnabled = getIsAiAgentsEnabled(coreStart.featureFlags);
 
   const [selectedType, setSelectedType] = useState<AIExperienceSelection>(AIAssistantType.Default);
 

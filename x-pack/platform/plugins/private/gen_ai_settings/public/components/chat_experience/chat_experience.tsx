@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -23,17 +23,7 @@ export const ChatExperience: React.FC = () => {
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const [hasHandledAgentSelection, setHasHandledAgentSelection] = useState(false);
-  const [isAiAgentsEnabled, setIsAiAgentsEnabled] = useState(false);
-
-  // Check feature flag on mount
-  useEffect(() => {
-    getIsAiAgentsEnabled(kibana.services)
-      .then(setIsAiAgentsEnabled)
-      .catch(() => {
-        // Default to false if check fails
-        setIsAiAgentsEnabled(false);
-      });
-  }, [kibana.services]);
+  const isAiAgentsEnabled = getIsAiAgentsEnabled(kibana.services.featureFlags);
 
   // Show confirmation modal for AI Agents selection
   const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
