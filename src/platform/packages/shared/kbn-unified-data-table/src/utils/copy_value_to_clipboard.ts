@@ -12,9 +12,14 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { CopyAsTextFormat, type ValueToStringConverter } from '../types';
+import type { ValueToStringConverter } from '../types';
 import { convertNameToString } from './convert_value_to_string';
 import { getColumnDisplayName } from '../components/data_table_columns';
+
+export enum CopyAsTextFormat {
+  tabular = 'tabular',
+  markdown = 'markdown',
+}
 
 const WARNING_FOR_FORMULAS = i18n.translate(
   'unifiedDataTable.copyEscapedValueWithFormulasToClipboardWarningText',

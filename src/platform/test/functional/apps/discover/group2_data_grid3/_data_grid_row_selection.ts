@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CopyAsTextFormat } from '@kbn/unified-data-table/src/types';
+import { CopyAsTextFormat } from '@kbn/unified-data-table/src/utils/copy_value_to_clipboard';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

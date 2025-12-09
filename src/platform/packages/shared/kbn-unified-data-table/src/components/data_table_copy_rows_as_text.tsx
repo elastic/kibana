@@ -14,9 +14,8 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { calcFieldCounts } from '@kbn/discover-utils';
-import { copyRowsAsTextToClipboard } from '../utils/copy_value_to_clipboard';
+import { copyRowsAsTextToClipboard, CopyAsTextFormat } from '../utils/copy_value_to_clipboard';
 import { UnifiedDataTableContext } from '../table_context';
-import { CopyAsTextFormat } from '../types';
 
 interface DataTableCopyRowsAsTextProps {
   format: CopyAsTextFormat;

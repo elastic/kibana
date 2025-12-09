@@ -18,9 +18,10 @@ import {
   copyRowsAsJsonToClipboard,
   copyRowsAsTextToClipboard,
   copyValueToClipboard,
+  CopyAsTextFormat,
 } from './copy_value_to_clipboard';
 import { convertValueToString } from './convert_value_to_string';
-import { CopyAsTextFormat, type ValueToStringConverter } from '../types';
+import type { ValueToStringConverter } from '../types';
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
