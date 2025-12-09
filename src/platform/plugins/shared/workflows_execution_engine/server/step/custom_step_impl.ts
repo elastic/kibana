@@ -88,6 +88,9 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         getFakeRequest: () => {
           return this.stepExecutionRuntime.contextManager.getFakeRequest();
         },
+        setVariables: (variables: Record<string, unknown>) => {
+          return this.stepExecutionRuntime.contextManager.setVariables(variables);
+        },
       },
       logger: {
         debug: (message, meta) => this.workflowLogger.logDebug(message, meta),

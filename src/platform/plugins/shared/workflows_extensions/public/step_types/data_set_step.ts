@@ -74,8 +74,11 @@ export const dataSetStepDefinition: PublicStepDefinition = {
 - name: call-api
   type: http
   with:
+    # Option 1: Standard step reference
     url: "\${{ steps.set-context.output.api_url }}/users/\${{ steps.set-context.output.user_id }}"
-    timeout: "\${{ steps.set-context.output.timeout }}"
+    # Option 2: Simplified variables reference (sugar syntax)
+    url: "\${{ variables.api_url }}/users/\${{ variables.user_id }}"
+    timeout: "\${{ variables.timeout }}"
 \`\`\``,
 
       `## Pass through and transform data

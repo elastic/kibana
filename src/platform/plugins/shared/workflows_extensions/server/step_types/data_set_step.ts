@@ -20,6 +20,8 @@ export const dataSetStepDefinition = createServerStepDefinition({
         variables: Object.keys(context.input),
       });
 
+      context.contextManager.setVariables(context.input);
+
       return { output: context.input };
     } catch (error) {
       context.logger.error('Failed to set variables', error);

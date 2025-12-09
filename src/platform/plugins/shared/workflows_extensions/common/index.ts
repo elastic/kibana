@@ -8,3 +8,4 @@
  */
 
 export type { CommonStepDefinition } from './step_registry/types';
+export { DataSetStepTypeId } from './step_types';

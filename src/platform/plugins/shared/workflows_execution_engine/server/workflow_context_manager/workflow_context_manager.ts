@@ -45,6 +45,7 @@ export class WorkflowContextManager {
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
+  private variables: Record<string, unknown> = {};
 
   public get scopeStack(): WorkflowScopeStack {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
@@ -68,6 +69,7 @@ export class WorkflowContextManager {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
+      variables: this.variables,
     };
 
     const currentNode = this.node;
@@ -217,6 +219,16 @@ export class WorkflowContextManager {
    */
   public getCoreStart(): CoreStart {
     return this.coreStart;
+  }
+
+  /**
+   * Set variables that will be available in the context.variables namespace
+   */
+  public setVariables(variables: Record<string, unknown>): void {
+    this.variables = {
+      ...this.variables,
+      ...variables,
+    };
   }
 
   /**
