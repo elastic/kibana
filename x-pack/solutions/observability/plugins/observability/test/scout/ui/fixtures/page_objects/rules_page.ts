@@ -12,6 +12,8 @@ import {
   RULE_TYPE_MODAL_TEST_SUBJECTS,
   RULE_LIST_TEST_SUBJECTS,
   LOGS_TAB_TEST_SUBJECTS,
+  BIGGER_TIMEOUT,
+  SHORTER_TIMEOUT,
 } from '../constants';
 
 export class RulesPage {
@@ -23,7 +25,7 @@ export class RulesPage {
   async goto() {
     await this.page.gotoApp('observability/alerts/rules');
     await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
-      timeout: 100000,
+      timeout: BIGGER_TIMEOUT,
     });
   }
 
@@ -71,7 +73,7 @@ export class RulesPage {
    * Clicks the settings link to open the flyout
    */
   async openSettingsFlyout() {
-    await expect(this.settingsLink).toBeVisible({ timeout: 5000 });
+    await expect(this.settingsLink).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.settingsLink.click();
     await expect(this.settingsFlyout).toBeVisible();
   }
@@ -140,7 +142,7 @@ export class RulesPage {
    * Clicks the create rule button to open the modal
    */
   async openRuleTypeModal() {
-    await expect(this.createRuleButton).toBeVisible({ timeout: 5000 });
+    await expect(this.createRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.createRuleButton.click();
     await expect(this.ruleTypeModal).toBeVisible();
   }
@@ -166,7 +168,7 @@ export class RulesPage {
    */
   async closeRuleTypeModal() {
     await this.page.keyboard.press('Escape');
-    await expect(this.ruleTypeModal).toBeHidden({ timeout: 5000 });
+    await expect(this.ruleTypeModal).toBeHidden({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
@@ -237,7 +239,7 @@ export class RulesPage {
   async gotoLogsTab() {
     await this.page.gotoApp('observability/alerts/rules/logs');
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
-      timeout: 30000,
+      timeout: BIGGER_TIMEOUT,
     });
   }
 
@@ -245,10 +247,10 @@ export class RulesPage {
    * Clicks the logs tab to navigate to it
    */
   async clickLogsTab() {
-    await expect(this.logsTab).toBeVisible({ timeout: 5000 });
+    await expect(this.logsTab).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.logsTab.click();
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
-      timeout: 30000,
+      timeout: BIGGER_TIMEOUT,
     });
   }
 
@@ -257,7 +259,7 @@ export class RulesPage {
       .getByRole('progressbar', { name: 'Loading' })
       .all();
     for await (const indicator of loadingIndicators) {
-      await expect(indicator).toBeHidden({ timeout: 60000 });
+      await expect(indicator).toBeHidden({ timeout: BIGGER_TIMEOUT });
     }
   }
 
@@ -288,7 +290,7 @@ export class RulesPage {
   async clickOnRuleInEventLogs(ruleLog: Locator) {
     await ruleLog.click();
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.RULE_DETAILS, {
-      timeout: 30000,
+      timeout: BIGGER_TIMEOUT,
     });
   }
 
@@ -359,6 +361,6 @@ export class RulesPage {
    */
   async closeEditRuleFlyout() {
     await this.editRuleFlyoutCancelButton.click();
-    await expect(this.editRuleFlyout).toBeHidden({ timeout: 5000 });
+    await expect(this.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
   }
 }

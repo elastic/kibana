@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApiServicesFixture, ScoutLogger } from '@kbn/scout-oblt';
-import type { ApmFields, LogDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import type { ApiServicesFixture } from '@kbn/scout-oblt';
+import type { ApmFields, LogDocument } from '@kbn/synthtrace-client';
+import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
 import { apm, log, timerange } from '@kbn/synthtrace-client';
 
 export const TEST_START_DATE = '2024-01-01T00:00:00.000Z';
 export const TEST_END_DATE = '2024-01-01T01:00:00.000Z';
 
 export const RULE_NAMES = {
-  LOGS_TAB_TEST: 'Scout - Logs Tab Test Rule',
-  VIEWER_TEST: 'Scout - Viewer Test Rule',
-  ADMIN_TEST: 'Scout - Admin Test Rule',
+  FIRST_RULE_TEST: 'Scout - First Rule Test',
 } as const;
 
 /**
  * Generate synthetic logs data for testing
  */
-export function generateLogsData({
+export async function generateLogsData({
   from,
   to,
+  client,
 }: {
   from: number;
   to: number;
-}): SynthtraceGenerator<LogDocument> {
+  client: Pick<SynthtraceEsClient<LogDocument>, 'index'>;
+}): Promise<void> {
   const range = timerange(from, to);
 
-  return range
+  const generator = range
     .interval('1m')
     .rate(1)
     .generator((timestamp) =>
@@ -44,21 +45,25 @@ export function generateLogsData({
           'service.name': 'test-service',
         })
     );
+
+  await client.index(generator);
 }
 
 /**
  * Generate synthetic APM data for testing
  */
-export function generateApmData({
+export async function generateApmData({
   from,
   to,
+  client,
 }: {
   from: number;
   to: number;
-}): SynthtraceGenerator<ApmFields> {
+  client: Pick<SynthtraceEsClient<ApmFields>, 'index'>;
+}): Promise<void> {
   const range = timerange(from, to);
 
-  return range
+  const generator = range
     .interval('1m')
     .rate(1)
     .generator((timestamp) =>
@@ -70,23 +75,24 @@ export function generateApmData({
         .duration(100)
         .success()
     );
+
+  await client.index(generator);
 }
 
 /**
  * Generate test rules for rules page tests
  */
-export async function generateRulesData(apiServices: ApiServicesFixture, scoutLogger: ScoutLogger) {
-  const existingRules = await apiServices.alerting.rules.find({});
+export async function generateRulesData(apiServices: ApiServicesFixture) {
+  const allRuleNames = Object.values(RULE_NAMES);
+  const RuleNamesQuery = allRuleNames.join(' OR ');
+  const existingRules = await apiServices.alerting.rules.find({ search: RuleNamesQuery });
   const existingRuleNames = new Set(
     existingRules?.data?.data?.map((r: { name: string }) => r.name) ?? []
   );
 
-  for (const ruleName of Object.values(RULE_NAMES)) {
-    if (existingRuleNames.has(ruleName)) {
-      scoutLogger.info(`Rule "${ruleName}" already exists`);
-      continue;
-    }
+  const filteredRuleNames = allRuleNames.filter((name) => !existingRuleNames.has(name));
 
+  for (const ruleName of filteredRuleNames) {
     await apiServices.alerting.rules.create({
       name: ruleName,
       ruleTypeId: 'observability.rules.custom_threshold',

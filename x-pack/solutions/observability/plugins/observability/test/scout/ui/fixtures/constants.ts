@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export const BIGGER_TIMEOUT = 100000 as const;
+export const SHORTER_TIMEOUT = 5000 as const;
+
 /**
  * Constants for data-test-subj values used in rules settings flyout tests
  */

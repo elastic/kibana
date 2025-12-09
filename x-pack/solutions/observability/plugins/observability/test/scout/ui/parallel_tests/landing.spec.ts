@@ -12,19 +12,16 @@ import {
   TEST_START_DATE,
   TEST_END_DATE,
 } from '../fixtures/generators';
+import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
-test.describe.skip('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
+test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
     await browserAuth.loginAsAdmin();
     await apmSynthtraceEsClient.clean();
     await logsSynthtraceEsClient.clean();
   });
 
-  test.afterAll(async ({ logsSynthtraceEsClient, apmSynthtraceEsClient }) => {
+  test.afterAll(async ({ apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
     await apmSynthtraceEsClient.clean();
     await logsSynthtraceEsClient.clean();
   });
@@ -44,7 +41,7 @@ test.describe.skip('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, 
     await page.goto(kbnUrl.get('/'));
 
     // Wait for redirect and verify we're on the metrics page
-    await expect(page).toHaveURL(/\/app\/metrics/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/app\/metrics/, { timeout: BIGGER_TIMEOUT });
 
     // Restore default route
     await kbnClient.uiSettings.update({
@@ -58,18 +55,17 @@ test.describe.skip('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, 
     logsSynthtraceEsClient,
   }) => {
     // Generate logs data only
-    await logsSynthtraceEsClient.index(
-      generateLogsData({
-        from: new Date(TEST_START_DATE).getTime(),
-        to: new Date(TEST_END_DATE).getTime(),
-      })
-    );
+    await generateLogsData({
+      from: new Date(TEST_START_DATE).getTime(),
+      to: new Date(TEST_END_DATE).getTime(),
+      client: logsSynthtraceEsClient,
+    });
 
     // Navigate to observability landing page
     await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on Discover logs page
-    await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/app\/discover/, { timeout: BIGGER_TIMEOUT });
   });
 
   test('redirects to APM services when only APM data exists', async ({
@@ -78,18 +74,17 @@ test.describe.skip('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, 
     apmSynthtraceEsClient,
   }) => {
     // Generate APM data only
-    await apmSynthtraceEsClient.index(
-      generateApmData({
-        from: new Date(TEST_START_DATE).getTime(),
-        to: new Date(TEST_END_DATE).getTime(),
-      })
-    );
+    await generateApmData({
+      from: new Date(TEST_START_DATE).getTime(),
+      to: new Date(TEST_END_DATE).getTime(),
+      client: apmSynthtraceEsClient,
+    });
 
     // Navigate to observability landing page
     await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on APM page
-    await expect(page).toHaveURL(/\/app\/apm/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/app\/apm/, { timeout: BIGGER_TIMEOUT });
   });
 
   test('redirects to Discover logs when both logs and APM data exist (logs priority)', async ({
@@ -99,24 +94,23 @@ test.describe.skip('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, 
     apmSynthtraceEsClient,
   }) => {
     // Generate both logs and APM data
-    await logsSynthtraceEsClient.index(
-      generateLogsData({
-        from: new Date(TEST_START_DATE).getTime(),
-        to: new Date(TEST_END_DATE).getTime(),
-      })
-    );
-    await apmSynthtraceEsClient.index(
-      generateApmData({
-        from: new Date(TEST_START_DATE).getTime(),
-        to: new Date(TEST_END_DATE).getTime(),
-      })
-    );
+    generateLogsData({
+      from: new Date(TEST_START_DATE).getTime(),
+      to: new Date(TEST_END_DATE).getTime(),
+      client: logsSynthtraceEsClient,
+    });
+
+    generateApmData({
+      from: new Date(TEST_START_DATE).getTime(),
+      to: new Date(TEST_END_DATE).getTime(),
+      client: apmSynthtraceEsClient,
+    });
 
     // Navigate to observability landing page
     await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on Discover logs page (logs takes priority)
-    await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/app\/discover/, { timeout: BIGGER_TIMEOUT });
   });
 
   test('redirects to onboarding when no data exists', async ({ page, pageObjects }) => {
@@ -124,6 +118,6 @@ test.describe.skip('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, 
     await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on onboarding page
-    await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: BIGGER_TIMEOUT });
   });
 });

@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import { RULE_NAMES } from '../../fixtures/generators';
+import { SHORTER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -40,9 +41,6 @@ test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
 });
 
 test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  // Rule is created in global setup
-  const ruleName = RULE_NAMES.LOGS_TAB_TEST;
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     // Navigate to the rules list page
@@ -89,7 +87,7 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.rulesPage.waitForLogsTableToLoad();
 
     // Click on one of the rule links in the event logs
-    const ruleLinks = await pageObjects.rulesPage.getLogsTableRuleLinks(ruleName);
+    const ruleLinks = await pageObjects.rulesPage.getLogsTableRuleLinks(RULE_NAMES.FIRST_RULE_TEST);
     expect(ruleLinks.length).toBeGreaterThan(0);
     await pageObjects.rulesPage.clickOnRuleInEventLogs(ruleLinks[0]);
 
@@ -99,9 +97,6 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 });
 
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  // Rule is created in global setup
-  const ruleName = RULE_NAMES.VIEWER_TEST;
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.rulesPage.goto();
@@ -113,7 +108,7 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('should see a non-editable rule in the Rules Table', async ({ pageObjects }) => {
     const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
-    await expect(nonEditableRules.filter({ hasText: ruleName })).toHaveCount(1);
+    await expect(nonEditableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST })).toHaveCount(1);
   });
 
   test('should not show the edit action button for a rule when logged in as viewer', async ({
@@ -121,7 +116,7 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     // As a viewer, rules appear as non-editable
     const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
-    const ruleRow = nonEditableRules.filter({ hasText: ruleName });
+    const ruleRow = nonEditableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST });
 
     // Verify the rule row is visible (rule exists in table)
     await expect(ruleRow).toBeVisible();
@@ -129,7 +124,7 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Verify the edit action (ruleSidebarEditAction) is NOT visible for viewers
     const editActionContainer = pageObjects.rulesPage.getRuleSidebarEditAction(ruleRow);
-    await expect(editActionContainer).toBeHidden({ timeout: 5000 });
+    await expect(editActionContainer).toBeHidden({ timeout: SHORTER_TIMEOUT });
 
     // Verify the edit button is also NOT visible
     const editButton = pageObjects.rulesPage.getEditActionButton(ruleRow);

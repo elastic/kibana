@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import { RULE_NAMES } from '../../fixtures/generators';
+import { SHORTER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -37,9 +38,6 @@ test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
 });
 
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  // Rule is created in global setup
-  const ruleName = RULE_NAMES.ADMIN_TEST;
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.rulesPage.goto();
@@ -52,14 +50,14 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test('should see an editable rule in the Rules Table', async ({ pageObjects }) => {
     await expect(pageObjects.rulesPage.ruleSearchField).toBeVisible();
     const editableRules = pageObjects.rulesPage.getEditableRules();
-    await expect(editableRules.filter({ hasText: ruleName })).toHaveCount(1);
+    await expect(editableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST })).toHaveCount(1);
   });
 
   test('should show the edit action button for an editable rule & open the edit rule flyout', async ({
     pageObjects,
   }) => {
     const editableRules = pageObjects.rulesPage.getEditableRules();
-    const ruleRow = editableRules.filter({ hasText: ruleName });
+    const ruleRow = editableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST });
 
     // Verify the rule row exists & that the edit button visible on hover
     await expect(ruleRow).toBeVisible();
@@ -67,7 +65,7 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Verify the rule edit action (ruleSidebarEditAction) is visible
     const editActionContainer = pageObjects.rulesPage.getRuleSidebarEditAction(ruleRow);
-    await expect(editActionContainer).toBeVisible({ timeout: 5000 });
+    await expect(editActionContainer).toBeVisible({ timeout: SHORTER_TIMEOUT });
 
     // Verify the edit button is also visible
     const editButton = pageObjects.rulesPage.getEditActionButton(ruleRow);
@@ -84,6 +82,6 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Close the edit rule flyout & verify the edit rule flyout is closed
     await pageObjects.rulesPage.closeEditRuleFlyout();
-    await expect(pageObjects.rulesPage.editRuleFlyout).toBeHidden({ timeout: 10000 });
+    await expect(pageObjects.rulesPage.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
   });
 });
