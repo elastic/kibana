@@ -294,11 +294,16 @@ export const useDashboardListingTable = ({
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
     return {
-      contentEditor: {
-        isReadonly: !showWriteControls,
-        onSave: updateItemMeta,
-        customValidators: contentEditorValidators,
-      },
+      contentEditor:
+        contentTypeFilter === TAB_IDS.DASHBOARDS
+          ? {
+              isReadonly: !showWriteControls,
+              onSave: updateItemMeta,
+              customValidators: contentEditorValidators,
+            }
+          : {
+              enabled: false,
+            },
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,

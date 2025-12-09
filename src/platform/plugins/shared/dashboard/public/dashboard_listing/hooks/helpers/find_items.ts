@@ -32,6 +32,8 @@ import {
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 
+const getReferenceIds = (refs?: Reference[]) => refs?.map((r) => r.id);
+
 export async function findDashboardListingItems(
   searchTerm: string,
   tabId: TabId,
@@ -73,8 +75,8 @@ export async function findDashboardListingItems(
     const response = await service.findAnnotationGroupContent(
       searchTerm,
       limit,
-      references?.map((r) => r.id),
-      referencesToExclude?.map((r) => r.id)
+      getReferenceIds(references),
+      getReferenceIds(referencesToExclude)
     );
     reportSearchDuration('event-annotation-group');
 
@@ -98,8 +100,8 @@ export async function findDashboardListingItems(
     search: searchTerm,
     per_page: limit,
     tags: {
-      included: (references ?? []).map(({ id }) => id),
-      excluded: (referencesToExclude ?? []).map(({ id }) => id),
+      included: getReferenceIds(references) ?? [],
+      excluded: getReferenceIds(referencesToExclude) ?? [],
     },
   });
   reportSearchDuration(DASHBOARD_SAVED_OBJECT_TYPE);

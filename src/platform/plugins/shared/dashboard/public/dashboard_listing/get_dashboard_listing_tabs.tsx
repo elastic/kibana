@@ -43,6 +43,13 @@ type TabContentProps = Omit<GetDashboardListingTabsParams, 'listingViewRegistry'
   parentProps: TableListTabParentProps<DashboardListingUserContent>;
 };
 
+const getBaseKibanaProviderProps = () => ({
+  core: coreServices,
+  savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
+  FormattedRelative,
+  isKibanaVersioningEnabled: !serverlessService,
+});
+
 const DashboardsTabContent = ({
   goToDashboard,
   getDashboardUrl,
@@ -73,14 +80,9 @@ const DashboardsTabContent = ({
 
   return (
     <TableListViewKibanaProvider
-      {...{
-        core: coreServices,
-        savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-        FormattedRelative,
-        favorites: dashboardFavoritesClient,
-        contentInsightsClient,
-        isKibanaVersioningEnabled: !serverlessService,
-      }}
+      {...getBaseKibanaProviderProps()}
+      favorites={dashboardFavoritesClient}
+      contentInsightsClient={contentInsightsClient}
     >
       <DashboardUnsavedListing
         goToDashboard={goToDashboard}
@@ -112,14 +114,7 @@ const VisualizationsTabContent = ({
   });
 
   return (
-    <TableListViewKibanaProvider
-      {...{
-        core: coreServices,
-        savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-        FormattedRelative,
-        isKibanaVersioningEnabled: !serverlessService,
-      }}
-    >
+    <TableListViewKibanaProvider {...getBaseKibanaProviderProps()}>
       <TableListViewTable<DashboardListingUserContent>
         tableCaption={tableListViewTableProps.title}
         {...tableListViewTableProps}
@@ -136,17 +131,18 @@ export const getDashboardListingTabs = ({
   initialFilter,
   listingViewRegistry,
 }: GetDashboardListingTabsParams): TableListTab<DashboardListingUserContent>[] => {
+  const commonProps = {
+    goToDashboard,
+    getDashboardUrl,
+    useSessionStorageIntegration,
+    initialFilter,
+  };
+
   const dashboardsTab: TableListTab<DashboardListingUserContent> = {
     title: 'Dashboards',
     id: TAB_IDS.DASHBOARDS,
     getTableList: (parentProps) => (
-      <DashboardsTabContent
-        goToDashboard={goToDashboard}
-        getDashboardUrl={getDashboardUrl}
-        useSessionStorageIntegration={useSessionStorageIntegration}
-        initialFilter={initialFilter}
-        parentProps={parentProps}
-      />
+      <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
   };
 
@@ -154,13 +150,7 @@ export const getDashboardListingTabs = ({
     title: 'Visualizations',
     id: TAB_IDS.VISUALIZATIONS,
     getTableList: (parentProps) => (
-      <VisualizationsTabContent
-        goToDashboard={goToDashboard}
-        getDashboardUrl={getDashboardUrl}
-        useSessionStorageIntegration={useSessionStorageIntegration}
-        initialFilter={initialFilter}
-        parentProps={parentProps}
-      />
+      <VisualizationsTabContent {...commonProps} parentProps={parentProps} />
     ),
   };
 
