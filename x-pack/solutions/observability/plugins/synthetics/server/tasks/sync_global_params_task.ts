@@ -22,7 +22,7 @@ import type { SyntheticsServerSetup } from '../types';
 const TASK_TYPE = 'Synthetics:Sync-Global-Params-Private-Locations';
 
 interface TaskState extends Record<string, unknown> {
-  paramsSpaceToSync?: string;
+  paramsSpaceToSync: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -49,7 +49,7 @@ export class SyncGlobalParamsPrivateLocationsTask {
         description:
           'This task is executed so that we can sync private location monitors for example when global params are updated',
         timeout: '10m',
-        maxAttempts: 1,
+        maxAttempts: 2,
         createTaskRunner: ({ taskInstance }) => {
           return {
             run: async () => {
@@ -61,11 +61,11 @@ export class SyncGlobalParamsPrivateLocationsTask {
     });
   }
 
-  public async runTask({
-    taskInstance,
-  }: {
-    taskInstance: CustomTaskInstance;
-  }): Promise<{ state: TaskState; error?: Error; schedule?: IntervalSchedule | RruleSchedule }> {
+  public async runTask({ taskInstance }: { taskInstance: CustomTaskInstance }): Promise<{
+    state: TaskState;
+    error?: Error;
+    schedule?: IntervalSchedule | RruleSchedule;
+  } | void> {
     const {
       coreStart: { savedObjects },
       encryptedSavedObjects,
@@ -73,31 +73,31 @@ export class SyncGlobalParamsPrivateLocationsTask {
     } = this.serverSetup;
 
     const paramsSpaceToSync = taskInstance.state.paramsSpaceToSync;
+    if (paramsSpaceToSync) {
+      try {
+        this.debugLog(`current task state is ${JSON.stringify(taskInstance.state)}`);
+        const soClient = savedObjects.createInternalRepository();
 
-    try {
-      this.debugLog(`current task state is ${JSON.stringify(taskInstance.state)}`);
-      const soClient = savedObjects.createInternalRepository();
-
-      const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      if (allPrivateLocations.length > 0 && paramsSpaceToSync) {
-        await this.deployPackagePolicies.syncPackagePolicies({
-          allPrivateLocations,
-          soClient,
-          encryptedSavedObjects,
-          spaceIdToSync: paramsSpaceToSync,
-        });
-        this.debugLog(`Sync of global params succeeded for space  ${paramsSpaceToSync}`);
+        const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+        if (allPrivateLocations.length > 0) {
+          await this.deployPackagePolicies.syncPackagePolicies({
+            allPrivateLocations,
+            soClient,
+            encryptedSavedObjects,
+            spaceIdToSync: paramsSpaceToSync,
+          });
+          this.debugLog(`Sync of global params succeeded for space  ${paramsSpaceToSync}`);
+        }
+      } catch (error) {
+        logger.error(`Sync of global params failed: ${error.message}`);
+        return {
+          error,
+          state: {
+            paramsSpaceToSync,
+          },
+        };
       }
-    } catch (error) {
-      logger.error(`Sync of global params failed: ${error.message}`);
-      return {
-        error,
-        state: {},
-      };
     }
-    return {
-      state: {},
-    };
   }
 
   debugLog = (message: string) => {
