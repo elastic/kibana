@@ -6,13 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { generatePath } from 'react-router-dom';
 import type { NavigateToAppOptions } from '@kbn/core/public';
-import {
-  MAINTENANCE_WINDOW_PATHS,
-  MANAGEMENT_APP_ID,
-  MAINTENANCE_WINDOWS_APP_ID,
-} from '@kbn/maintenance-windows-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 
 export const useNavigation = (appId: string) => {
@@ -30,54 +24,4 @@ export const useNavigation = (appId: string) => {
     [appId, getUrlForApp]
   );
   return { navigateTo, getAppUrl };
-};
-
-export const useCreateMaintenanceWindowNavigation = () => {
-  const { navigateTo } = useNavigation(MANAGEMENT_APP_ID);
-  return {
-    navigateToCreateMaintenanceWindow: () =>
-      navigateTo({
-        path: MAINTENANCE_WINDOW_PATHS.maintenanceWindowsCreate,
-        deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
-      }),
-  };
-};
-
-export const useMaintenanceWindowsNavigation = () => {
-  const { navigateTo, getAppUrl } = useNavigation(MANAGEMENT_APP_ID);
-  const path = '/';
-  const deepLinkId = MAINTENANCE_WINDOWS_APP_ID;
-
-  return {
-    navigateToMaintenanceWindows: () => navigateTo({ path, deepLinkId }),
-    getMaintenanceWindowsUrl: (absolute?: boolean) =>
-      getAppUrl({
-        path,
-        deepLinkId,
-        absolute,
-      }),
-  };
-};
-
-export const useEditMaintenanceWindowsNavigation = () => {
-  const { navigateTo, getAppUrl } = useNavigation(MANAGEMENT_APP_ID);
-  const deepLinkId = MAINTENANCE_WINDOWS_APP_ID;
-
-  return {
-    navigateToEditMaintenanceWindows: (maintenanceWindowId: string) =>
-      navigateTo({
-        path: generatePath(MAINTENANCE_WINDOW_PATHS.maintenanceWindowsEdit, {
-          maintenanceWindowId,
-        }),
-        deepLinkId,
-      }),
-    getEditMaintenanceWindowsUrl: (maintenanceWindowId: string, absolute?: boolean) =>
-      getAppUrl({
-        path: generatePath(MAINTENANCE_WINDOW_PATHS.maintenanceWindowsEdit, {
-          maintenanceWindowId,
-        }),
-        deepLinkId,
-        absolute,
-      }),
-  };
 };

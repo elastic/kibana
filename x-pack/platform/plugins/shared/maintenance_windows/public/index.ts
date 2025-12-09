@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
 import { MaintenanceWindowsPublicPlugin } from './plugin';
 
-export const plugin = () => {
-  return new MaintenanceWindowsPublicPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) => {
+  return new MaintenanceWindowsPublicPlugin(initializerContext);
 };

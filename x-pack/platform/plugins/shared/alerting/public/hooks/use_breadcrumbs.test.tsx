@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react';
 import { useBreadcrumbs } from './use_breadcrumbs';
-import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '@kbn/maintenance-windows-plugin/common';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 
@@ -46,45 +45,5 @@ describe('useBreadcrumbs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
-  });
-
-  test('set maintenance windows breadcrumbs', () => {
-    renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows), {
-      wrapper: appMockRenderer.AppWrapper,
-    });
-    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
-      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
-      { text: 'Maintenance Windows' },
-    ]);
-  });
-
-  test('set create maintenance windows breadcrumbs', () => {
-    renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate), {
-      wrapper: appMockRenderer.AppWrapper,
-    });
-    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
-      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
-      {
-        href: MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
-        onClick: expect.any(Function),
-        text: 'Maintenance Windows',
-      },
-      { text: 'Create' },
-    ]);
-  });
-
-  test('set edit maintenance windows breadcrumbs', () => {
-    renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit), {
-      wrapper: appMockRenderer.AppWrapper,
-    });
-    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
-      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
-      {
-        href: MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
-        onClick: expect.any(Function),
-        text: 'Maintenance Windows',
-      },
-      { text: 'Edit' },
-    ]);
   });
 });
