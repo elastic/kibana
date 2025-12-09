@@ -18,8 +18,8 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getRelevantAlertFields } from './get_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
@@ -89,7 +89,10 @@ export function createGetAlertsTool({
   core,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
 }): StaticToolRegistration<typeof getAlertsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {

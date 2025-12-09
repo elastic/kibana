@@ -34,14 +34,14 @@ export const DELETE_PARAMETERS_CONTRACT: InternalConnectorContract = {
   summary: `Delete parameters`,
   description: `**Spaces method and path for this operation:**
 
-<div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/_bulk_delete</span></div>
+<div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/_bulk_delete</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete parameters from the Synthetics app.
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['DELETE'],
+  methods: ['POST'],
   patterns: ['/api/synthetics/params/_bulk_delete'],
   documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-parameters',
   parameterTypes: {
