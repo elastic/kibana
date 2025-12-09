@@ -27,7 +27,10 @@ export interface IlmPolicyDetails {
 /**
  * Async function to fetch ILM policy by name
  */
-export type IlmPolicyFetcher = (policyName: string) => Promise<PolicyFromES | null>;
+export type IlmPolicyFetcher = (
+  policyName: string,
+  signal?: AbortSignal
+) => Promise<PolicyFromES | null>;
 
 /**
  * Phase indicator colors for ILM phases

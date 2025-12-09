@@ -64,30 +64,30 @@ export const ConfirmTemplateDetailsSection = ({
       return;
     }
 
-    let isCancelled = false;
+    const abortController = new AbortController();
     setIsLoadingIlmPolicy(true);
 
-    getIlmPolicy(ilmPolicyName)
+    getIlmPolicy(ilmPolicyName, abortController.signal)
       .then((policy) => {
-        if (!isCancelled && policy) {
+        if (!abortController.signal.aborted && policy) {
           const phases = getPhaseDescriptions(policy.policy.phases, phaseColors);
           setIlmPhases(phases);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         // Silently fail - we'll just not show phases
-        if (!isCancelled) {
+        if (!abortController.signal.aborted) {
           setIlmPhases(null);
         }
       })
       .finally(() => {
-        if (!isCancelled) {
+        if (!abortController.signal.aborted) {
           setIsLoadingIlmPolicy(false);
         }
       });
 
     return () => {
-      isCancelled = true;
+      abortController.abort();
     };
   }, [ilmPolicyName, getIlmPolicy, phaseColors]);
 

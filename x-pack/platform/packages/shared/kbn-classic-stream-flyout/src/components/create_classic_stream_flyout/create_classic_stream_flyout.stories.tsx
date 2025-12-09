@@ -368,11 +368,30 @@ const MOCK_ILM_POLICIES: Record<string, PolicyFromES> = {
 const createMockIlmPolicyFetcher = (): IlmPolicyFetcher => {
   const onGetIlmPolicyAction = action('getIlmPolicy');
 
-  return async (policyName: string) => {
+  return async (policyName: string, signal?: AbortSignal) => {
     onGetIlmPolicyAction(policyName);
+    action('getIlmPolicy:start')({ policyName, timestamp: Date.now() });
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Check if aborted before starting delay
+    if (signal?.aborted) {
+      action('getIlmPolicy:aborted')({ policyName, reason: 'aborted before delay' });
+      throw new Error('ILM policy fetch aborted');
+    }
+
+    // Simulate network delay with periodic abort checks
+    const delay = 500;
+    const startTime = Date.now();
+    while (Date.now() - startTime < delay) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      if (signal?.aborted) {
+        action('getIlmPolicy:aborted')({
+          policyName,
+          reason: 'aborted during delay',
+          elapsed: Date.now() - startTime,
+        });
+        throw new Error('ILM policy fetch aborted');
+      }
+    }
 
     const policy = MOCK_ILM_POLICIES[policyName];
     action('getIlmPolicy:result')(policy ?? null);
