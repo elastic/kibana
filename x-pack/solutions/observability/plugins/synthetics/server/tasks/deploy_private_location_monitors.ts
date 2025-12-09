@@ -180,6 +180,6 @@ export class DeployPrivateLocationMonitors {
   }
 
   debugLog = (message: string) => {
-    this.serverSetup.logger.debug(`[SyncPrivateLocationMonitorsTask] ${message}`);
+    this.serverSetup.logger.debug(`[DeployPrivateLocationMonitors] ${message}`);
   };
 }
