@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from '@emotion/react';
+import { action } from '@storybook/addon-actions';
 import { Callout, type CalloutProps } from './callout';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
@@ -36,7 +37,7 @@ export default {
   ],
 } satisfies Meta<typeof Callout>;
 
-const onDismiss = () => {};
+const onDismiss = action('onDismiss');
 
 export const MissingAllRequirements: StoryObj<CalloutProps> = {
   args: {
