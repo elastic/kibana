@@ -18,7 +18,7 @@ project:
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-assistant/common
 dependsOn:
-  - '@kbn/core'
+  - '@kbn/core-feature-flags-browser'
 tags:
   - shared-common
   - package
