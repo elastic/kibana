@@ -27,11 +27,11 @@ describe('TimeTypeSection', () => {
   });
 
   it('should render null when timeRange is not provided', () => {
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
-      isAbsoluteTime: false,
-      changeTimeType,
+      isAbsoluteTimeByDefault: false,
+      onTimeTypeChange,
     });
 
     const timeRangeSwitch = screen.queryByRole('switch');
@@ -41,12 +41,12 @@ describe('TimeTypeSection', () => {
 
   it('should render absolute time range', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
       timeRange,
-      isAbsoluteTime: true,
-      changeTimeType,
+      isAbsoluteTimeByDefault: true,
+      onTimeTypeChange,
     });
 
     const absoluteTimeInfoText = screen.getByTestId('absoluteTimeInfoText');
@@ -58,12 +58,12 @@ describe('TimeTypeSection', () => {
 
   it('should render relative time range', () => {
     const timeRange = { from: 'now', to: 'now+15m' };
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
       timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
+      isAbsoluteTimeByDefault: false,
+      onTimeTypeChange,
     });
 
     const timeRangeSwitch = screen.getByRole('switch');
@@ -74,14 +74,14 @@ describe('TimeTypeSection', () => {
     expect(screen.getByText('in 15 minutes')).toBeInTheDocument();
   });
 
-  it('should disable switch when timeRange is already absolute', () => {
+  it('should hide switch when timeRange is already absolute', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
       timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
+      isAbsoluteTimeByDefault: true,
+      onTimeTypeChange,
     });
 
     const timeRangeSwitch = screen.queryByRole('switch');
@@ -91,12 +91,12 @@ describe('TimeTypeSection', () => {
 
   it('should render with mixed time range (absolute from, relative to)', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: 'now' };
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
       timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
+      isAbsoluteTimeByDefault: false,
+      onTimeTypeChange,
     });
 
     const timeRangeSwitch = screen.getByRole('switch');
@@ -109,12 +109,12 @@ describe('TimeTypeSection', () => {
 
   it('should render with mixed time range (relative from, absolute to)', () => {
     const timeRange = { from: 'now-30m', to: '2022-01-01T00:00:00.000Z' };
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
       timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
+      isAbsoluteTimeByDefault: false,
+      onTimeTypeChange,
     });
 
     const timeRangeSwitch = screen.getByRole('switch');
@@ -127,12 +127,12 @@ describe('TimeTypeSection', () => {
 
   it('should render "now"', () => {
     const timeRange = { from: 'now-30m', to: 'now' };
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
       timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
+      isAbsoluteTimeByDefault: false,
+      onTimeTypeChange,
     });
 
     expect(screen.getByText('30 minutes ago')).toBeInTheDocument();
@@ -141,12 +141,12 @@ describe('TimeTypeSection', () => {
 
   it('should handle plain "now" value correctly in mixed ranges', () => {
     const timeRange = { from: '2025-11-10T14:17:51.794Z', to: 'now' };
-    const changeTimeType = jest.fn();
+    const onTimeTypeChange = jest.fn();
 
     renderComponent({
       timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
+      isAbsoluteTimeByDefault: false,
+      onTimeTypeChange,
     });
 
     expect(screen.getByText(/November 10, 2025/)).toBeInTheDocument();

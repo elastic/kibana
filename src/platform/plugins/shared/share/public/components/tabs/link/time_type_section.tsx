@@ -10,14 +10,13 @@
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   convertRelativeTimeStringToAbsoluteTimeDate,
   getRelativeTimeValueAndUnitFromTimeString,
-  isTimeRangeAbsoluteTime,
 } from '../../../lib/time_utils';
 
 const BoldText = ({ children }: { children: ReactNode }) => {
@@ -100,8 +99,8 @@ interface TimeRange {
 
 interface Props {
   timeRange?: TimeRange;
-  isAbsoluteTime: boolean;
-  changeTimeType: (e: EuiSwitchEvent) => void;
+  isAbsoluteTimeByDefault: boolean;
+  onTimeTypeChange?: (isAbsolute: boolean) => void;
 }
 
 const getTimeRangeText = (timeRange: TimeRange) => {
@@ -134,12 +133,18 @@ const getTimeRangeText = (timeRange: TimeRange) => {
   );
 };
 
-export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: Props) => {
-  const [isAbsoluteTimeByDefault, setIsAbsoluteTimeByDefault] = useState(false);
+export const TimeTypeSection = ({
+  timeRange,
+  onTimeTypeChange,
+  isAbsoluteTimeByDefault,
+}: Props) => {
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
 
-  useEffect(() => {
-    setIsAbsoluteTimeByDefault(isTimeRangeAbsoluteTime(timeRange));
-  }, [timeRange]);
+  const handleTimeTypeChange = (e: EuiSwitchEvent) => {
+    const newIsAbsolute = e.target.checked;
+    setIsAbsoluteTime(newIsAbsolute);
+    onTimeTypeChange?.(newIsAbsolute);
+  };
 
   if (!timeRange) {
     return null;
@@ -154,7 +159,7 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
               defaultMessage: 'Use absolute time range',
             })}
             checked={isAbsoluteTime}
-            onChange={changeTimeType}
+            onChange={handleTimeTypeChange}
           />
           <EuiSpacer size="m" />
         </>
