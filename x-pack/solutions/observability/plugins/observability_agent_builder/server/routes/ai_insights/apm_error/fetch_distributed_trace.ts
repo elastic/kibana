@@ -21,6 +21,7 @@ interface ServiceAggregate {
 export interface DistributedTrace {
   traceDocuments: Array<UnflattenedApmEvent>;
   traceServiceAggregates: ServiceAggregate[];
+  isPartialTrace: boolean;
 }
 
 export async function fetchDistributedTrace({
@@ -41,10 +42,11 @@ export async function fetchDistributedTrace({
   const search = getTypedSearch(esClient.asCurrentUser);
   const indices = [apmIndices.transaction, apmIndices.span, apmIndices.error].join(',');
 
+  const size = 100;
   const traceResponse = await search({
     index: indices,
-    size: 100,
-    track_total_hits: false,
+    size,
+    track_total_hits: size + 1,
     query: {
       bool: {
         filter: [
@@ -108,12 +110,16 @@ export async function fetchDistributedTrace({
     }))
     .sort((a, b) => b.count - a.count) as ServiceAggregate[];
 
+  const total = traceResponse.hits.total;
+  const isPartialTrace = total.relation === 'gte';
+
   logger.debug(
-    `Fetched distributed trace for ${traceId}: ${traceDocuments.length} documents, ${traceServiceAggregates.length} services`
+    `Fetched distributed trace for ${traceId}: ${traceDocuments.length} documents, ${traceServiceAggregates.length} services, partial: ${isPartialTrace}`
   );
 
   return {
     traceDocuments,
     traceServiceAggregates,
+    isPartialTrace,
   };
 }

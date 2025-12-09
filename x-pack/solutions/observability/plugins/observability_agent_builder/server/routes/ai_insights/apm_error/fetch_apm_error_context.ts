@@ -119,7 +119,13 @@ export async function fetchApmErrorContext({
       name: 'TraceDocuments',
       start,
       end,
-      handler: async () => (await traceContextPromise).traceDocuments,
+      handler: async () => {
+        const { traceDocuments, isPartialTrace } = await traceContextPromise;
+        return {
+          isPartialTrace,
+          documents: traceDocuments,
+        };
+      },
     });
 
     contextParts.push({
@@ -170,6 +176,7 @@ export async function fetchApmErrorContext({
         if (!data || (Array.isArray(data) && data.length === 0)) {
           return undefined;
         }
+
         return dedent`<${name}>
           Time window: ${partStart} to ${partEnd}
           \`\`\`json
