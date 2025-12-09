@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
 import stripAnsi from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { runFunctionalTestRunner } from './test_helpers';
 
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
 const FAILURE_HOOKS_CONFIG = require.resolve('./__fixtures__/failure_hooks/config.js');
 
 describe('failure hooks', function () {
-  it('runs and prints expected output', () => {
-    const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG], {
-      // this FTR run should not produce a scout report
-      env: { ...process.env, SCOUT_REPORTER_ENABLED: '0' },
-    });
-    const lines = stripAnsi(proc.stdout.toString('utf8')).split(/\r?\n/);
+  it('runs and prints expected output', async () => {
+    const stdout = await runFunctionalTestRunner(SCRIPT, FAILURE_HOOKS_CONFIG);
+    const lines = stripAnsi(stdout).split(/\r?\n/);
     const linesCopy = [...lines];
 
     const tests = [
