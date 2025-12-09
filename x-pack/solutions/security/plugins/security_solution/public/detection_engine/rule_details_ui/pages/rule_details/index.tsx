@@ -265,6 +265,7 @@ export const RuleDetailsPage = connector(
       },
     ] = useUserData();
     const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+    const canReadAlerts = useUserPrivileges().alertsPrivileges.alerts.read;
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
@@ -794,7 +795,7 @@ export const RuleDetailsPage = connector(
                 </Display>
                 <StyledMinHeightTabContainer>
                   <Routes>
-                    <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
+                    {canReadAlerts && <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                           <EuiFlexItem grow={false}>
@@ -815,7 +816,7 @@ export const RuleDetailsPage = connector(
                           />
                           <EuiSpacer />
                         </Display>
-                        {ruleId != null && (
+                        { ruleId != null && (
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
@@ -834,7 +835,7 @@ export const RuleDetailsPage = connector(
                           />
                         )}
                       </>
-                    </Route>
+                    </Route> }
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                       <ExceptionsViewer
                         rule={rule}
