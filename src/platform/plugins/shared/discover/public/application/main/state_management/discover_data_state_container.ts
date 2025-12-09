@@ -351,17 +351,14 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
 
-          const isEsqlQuery = isOfAggregateQueryType(getCurrentTab().appState.query);
           const latestFetchDetails: DiscoverLatestFetchDetails = {
             abortController,
           };
 
           // Trigger chart fetching after the pre fetch state has been updated
           // to ensure state values that would affect data fetching are set
-          if (!isEsqlQuery) {
-            // trigger in parallel with the main request for Classic mode
-            fetchChart$.next(latestFetchDetails);
-          }
+          // trigger in parallel with the main request for Classic mode
+          fetchChart$.next(latestFetchDetails);
 
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
@@ -375,11 +372,6 @@ export function getDataStateContainer({
             reset: options.reset,
             abortController,
             onFetchRecordsComplete: async () => {
-              if (isEsqlQuery && !abortController.signal.aborted) {
-                // defer triggering chart fetching until after main request completes for ES|QL mode
-                fetchChart$.next(latestFetchDetails);
-              }
-
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {

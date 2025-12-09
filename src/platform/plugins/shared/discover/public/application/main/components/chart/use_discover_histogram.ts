@@ -21,13 +21,14 @@ import {
 } from '@kbn/unified-histogram';
 import { isEqual, intersection } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
+import { distinctUntilChanged, filter, map, pairwise, startWith, type Observable } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -35,10 +36,7 @@ import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { type DiscoverAppState, useAppStateSelector } from '../../state_management/redux';
-import type {
-  DataDocumentsMsg,
-  DiscoverLatestFetchDetails,
-} from '../../state_management/discover_data_state_container';
+import type { DiscoverLatestFetchDetails } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
@@ -266,11 +264,12 @@ export const useDiscoverHistogram = (
   const previousFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
 
   const triggerUnifiedHistogramFetch = useLatest(
-    (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
+    async (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
       const visContext = collectedFetchParams?.externalVisContext ?? savedSearchState?.visContext;
-      const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
-        documentsValue: documents$.getValue(),
-        isEsqlMode,
+      const { table, esqlQueryColumns } = await getUnifiedHistogramTableForEsql({
+        query,
+        opts: collectedFetchParams,
+        services,
       });
 
       const nextFetchParams = {
@@ -498,32 +497,40 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
   );
 };
 
-function getUnifiedHistogramTableForEsql({
-  documentsValue,
-  isEsqlMode,
+async function getUnifiedHistogramTableForEsql({
+  query,
+  opts,
+  services,
 }: {
-  documentsValue: DataDocumentsMsg | undefined;
-  isEsqlMode: boolean;
-}) {
-  if (
-    !isEsqlMode ||
-    !documentsValue?.result ||
-    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
-  ) {
+  query: Query | AggregateQuery | undefined;
+  opts: UnifiedHistogramFetchParamsExternal;
+  services: ReturnType<typeof useDiscoverServices>;
+}): Promise<{
+  table: Datatable | undefined;
+  esqlQueryColumns: DatatableColumn[];
+}> {
+  if (!isOfAggregateQueryType(query)) {
     return {
       table: undefined,
       esqlQueryColumns: EMPTY_ESQL_COLUMNS,
     };
   }
 
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const columns = await getESQLQueryColumns({
+    esqlQuery: query.esql,
+    search: services.data.search.search,
+    variables: opts.esqlVariables,
+    signal: opts.abortController?.signal,
+    timeRange: opts.timeRange,
+  });
+
   return {
     table: {
       type: 'datatable' as const,
-      rows: documentsValue.result.map((r) => r.raw),
-      columns: esqlQueryColumns,
+      rows: [],
+      columns: columns || EMPTY_ESQL_COLUMNS,
       meta: { type: ESQL_TABLE_TYPE },
     },
-    esqlQueryColumns,
+    esqlQueryColumns: columns,
   };
 }
