@@ -45,6 +45,7 @@ import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
+import { VIEW_MODE } from '../../common/constants';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -179,8 +180,10 @@ export function initializeFetch({
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews, esqlVariables]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
+        const isDocumentViewMode = savedSearch.viewMode === VIEW_MODE.DOCUMENT_LEVEL;
+
         setBlockingError(undefined);
-        if (!dataView || !savedSearch.searchSource) {
+        if (!dataView || !savedSearch.searchSource || !isDocumentViewMode) {
           return;
         }
 
