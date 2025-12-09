@@ -174,8 +174,8 @@ describe('TabsBarMenu', () => {
     const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    expect(await screen.findByText('Recently closed')).toBeInTheDocument();
-    expect(await screen.findByText(/5 minutes ago/i)).toBeInTheDocument();
-    expect(await screen.findByText(/10 minutes ago/i)).toBeInTheDocument();
+    expect(await screen.findByText('Recently closed')).toBeVisible();
+    expect(await screen.findByText(/5 minutes ago/i)).toBeVisible();
+    expect(await screen.findByText(/10 minutes ago/i)).toBeVisible();
   });
 });
