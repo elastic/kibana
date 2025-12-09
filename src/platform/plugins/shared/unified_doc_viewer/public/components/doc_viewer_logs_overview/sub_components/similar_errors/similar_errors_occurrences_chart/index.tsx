@@ -17,7 +17,7 @@ import {
   type LensAnnotationLayer,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
-import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -85,7 +85,6 @@ export function SimilarErrorsOccurrencesChart({
   baseEsqlQuery,
   currentDocumentTimestamp,
 }: SimilarErrorsOccurrencesChartProps) {
-  const { euiTheme } = useEuiTheme();
   const { data } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
@@ -103,12 +102,10 @@ export function SimilarErrorsOccurrencesChart({
         {
           name: currentDocumentLabel,
           datetime: timestamp,
-          color: euiTheme.colors.vis.euiColorVis2,
-          icon: 'mapMarker',
         },
       ],
     }),
-    [euiTheme.colors.vis.euiColorVis2]
+    []
   );
 
   const chartEsqlQuery = useMemo(() => {
