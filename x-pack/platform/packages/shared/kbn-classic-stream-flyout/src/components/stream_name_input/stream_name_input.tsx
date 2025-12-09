@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   parseIndexPattern,
   createInputGroups,
@@ -124,6 +125,12 @@ export const StreamNameInput = ({
         isInvalid={isInputInvalid(group.wildcardIndex)}
         prepend={group.prepend}
         append={group.append}
+        aria-label={i18n.translate(
+          'xpack.createClassicStreamFlyout.streamNameInput.singleWildcardAriaLabel',
+          {
+            defaultMessage: 'Stream name',
+          }
+        )}
         data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
       />
     );
@@ -156,6 +163,13 @@ export const StreamNameInput = ({
               isInvalid={isInputInvalid(group.wildcardIndex)}
               prepend={group.prepend}
               append={group.append}
+              aria-label={i18n.translate(
+                'xpack.createClassicStreamFlyout.streamNameInput.wildcardAriaLabel',
+                {
+                  defaultMessage: 'Stream name part {index} of {total}',
+                  values: { index: index + 1, total: inputGroups.length },
+                }
+              )}
               data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
             />
           </EuiFlexItem>
