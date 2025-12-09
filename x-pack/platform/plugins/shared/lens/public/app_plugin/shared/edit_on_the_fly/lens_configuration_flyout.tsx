@@ -18,6 +18,7 @@ import {
   euiScrollBarStyles,
   EuiWindowEvent,
   keys,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
@@ -75,6 +76,10 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
+
+  const isDevMode = useMemo(() => {
+    return process.env.NODE_ENV === 'development';
+  }, []);
 
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
@@ -291,12 +296,32 @@ export function LensEditConfigurationFlyout({
 
   if (isLoading) return null;
 
+  const showConvertToEsqlButton = isDevMode;
+  const isConvertToEsqlButtonDisbaled = false;
+
   const toolbar = (
     <>
       <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
         <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+      {showConvertToEsqlButton ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            color="success"
+            display="base"
+            size="s"
+            iconType="code"
+            aria-label={i18n.translate('xpack.lens.config.convertToEsqllabel', {
+              defaultMessage: 'Convert to ES|QL',
+            })}
+            onClick={() => {
+              console.log('Convert to ES|QL');
+            }}
+            isDisabled={isConvertToEsqlButtonDisbaled}
+          />
+        </EuiFlexItem>
+      ) : null}
     </>
   );
 
