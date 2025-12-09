@@ -294,12 +294,18 @@ export function LensEditConfigurationFlyout({
     return process.env.NODE_ENV === 'development';
   }, []);
 
+  const layerIds = useMemo(() => {
+    return activeVisualization && visualization.state
+      ? activeVisualization.getLayerIds(visualization.state)
+      : [];
+  }, [activeVisualization, visualization.state]);
+
   const showConvertToEsqlButton = useMemo(() => {
-    return isDevMode && !textBasedMode;
-  }, [isDevMode, textBasedMode]);
+    const isSingleLayerVisualization = layerIds.length === 1;
+    return isDevMode && !textBasedMode && isSingleLayerVisualization;
+  }, [isDevMode, textBasedMode, layerIds]);
 
   // The button is disabled when the visualization cannot be converted to ES|QL
-  // It has more than one layer
   const isConvertToEsqlButtonDisbaled = false;
 
   if (isLoading) return null;
