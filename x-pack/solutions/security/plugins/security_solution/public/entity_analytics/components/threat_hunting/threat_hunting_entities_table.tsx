@@ -250,7 +250,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
 
         return (
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            <EuiIcon type={EntityIconByType[entityType]} />
+            <EuiIcon type={EntityIconByType[entityType]} aria-label={`${entityType} entity`} />
             <span css={{ paddingLeft: euiTheme.size.s }}>{entityName}</span>
           </span>
         );
