@@ -14,6 +14,8 @@ import type {
   ESQLStringLiteral,
 } from '@kbn/esql-ast/src/types';
 
+export type SupportedOperation = '+' | '-' | 'is_not_null' | 'is_null';
+
 export type SupportedOperators =
   | Extract<BinaryExpressionComparisonOperator, '==' | '!='>
   | 'is not null'
@@ -63,12 +65,7 @@ export const getOperator = (
  * Get the list of supported operators dynamically by mapping all possible operation inputs
  */
 export function getSupportedOperators(): SupportedOperators[] {
-  const operations: ('+' | '-' | 'is_not_null' | 'is_null')[] = [
-    '+',
-    '-',
-    'is_not_null',
-    'is_null',
-  ];
+  const operations: SupportedOperation[] = ['+', '-', 'is_not_null', 'is_null'];
   return operations.map((op) => getOperator(op).operator);
 }
 

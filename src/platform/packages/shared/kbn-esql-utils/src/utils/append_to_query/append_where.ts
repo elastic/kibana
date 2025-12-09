@@ -18,6 +18,7 @@ import {
   extractMatchFunctionDetails,
   getSupportedOperators,
   type SupportedOperators,
+  type SupportedOperation,
 } from './utils';
 
 /**
@@ -28,7 +29,7 @@ import {
 function createFilterExpression(
   field: string,
   value: unknown,
-  operation: '+' | '-' | 'is_not_null' | 'is_null',
+  operation: SupportedOperation,
   fieldType?: string
 ): { expression: string; isMultiValue?: boolean } {
   // Handle is not null / is null operations
@@ -81,7 +82,7 @@ function handleExistingFilter(
   fullQuery: string,
   commandText: string,
   field: string,
-  operation: '+' | '-' | 'is_not_null' | 'is_null',
+  operation: SupportedOperation,
   value: unknown,
   filterExpression: string
 ): string {
@@ -112,7 +113,7 @@ function handleExistingFilterForMultiValues(
   lastWhereCommand: any,
   field: string,
   value: unknown,
-  operation: '+' | '-',
+  operation: SupportedOperation,
   filterExpression: string
 ): string {
   const existingMatchFunctionsList = Walker.findAll(
@@ -189,7 +190,7 @@ export function appendWhereClauseToESQLQuery(
   baseESQLQuery: string,
   field: string,
   value: unknown,
-  operation: '+' | '-' | 'is_not_null' | 'is_null',
+  operation: SupportedOperation,
   fieldType?: string
 ): string | undefined {
   const ESQLQuery = EsqlQuery.fromSrc(baseESQLQuery);
