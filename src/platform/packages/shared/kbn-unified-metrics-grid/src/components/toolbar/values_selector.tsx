@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef } from 'react';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
@@ -54,7 +54,6 @@ export const ValuesSelector = ({
     dimensionNames: selectedDimensionNames,
   });
 
-  // Map: "field${SEPARATOR}value" → metricFieldKey
   const metricsByFieldValue = useMemo(() => {
     const result = new Map<string, Set<FieldSpecId>>();
     for (const [field, values] of valuesByDimensionName.entries()) {
@@ -65,8 +64,6 @@ export const ValuesSelector = ({
     return result;
   }, [valuesByDimensionName]);
 
-  // Convert values to EuiSelectable options with group labels
-  // Key format: field${SEPARATOR}value${SEPARATOR}metricFieldKey (3 parts for parseDimensionFilters)
   const options: SelectableEntry[] = useMemo(() => {
     const selectedSet = new Set(selectedValues);
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
@@ -110,6 +107,24 @@ export const ValuesSelector = ({
     },
     [onChange, metricsByFieldValue]
   );
+
+  const selectedValuesRef = useRef(selectedValues);
+  selectedValuesRef.current = selectedValues;
+
+  // Sync selected values when available options change
+  useEffect(() => {
+    if (isFieldsLoading || options.length === 0) return;
+
+    const availableKeys = new Set(options.map((o) => o.key));
+    const currentSelectedValues = selectedValuesRef.current;
+
+    if (
+      currentSelectedValues.length > 0 &&
+      !currentSelectedValues.every((v) => availableKeys.has(v))
+    ) {
+      onChange([]);
+    }
+  }, [options, isFieldsLoading, onChange]);
 
   const isLoading = isFieldsLoading;
 

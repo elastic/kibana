@@ -21,7 +21,6 @@ import { SearchButton } from './toolbar/right_side_actions/search_button';
 import { useMetricFields } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { UnifiedMetricsGridProps } from '../types';
-import { generateMetricFields } from '../utils';
 import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
 
 export const MetricsExperienceGrid = ({

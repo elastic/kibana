@@ -44,6 +44,7 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
       setCurrentPage(0);
+      setSelectedValueMetricFieldIds([]);
       setSelectedDimensions(nextDimensions);
       setSelectedDimensionValues((prevValueFilters) => {
         if (nextDimensions.length === 0) {
@@ -55,7 +56,12 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         );
       });
     },
-    [setCurrentPage, setSelectedDimensionValues, setSelectedDimensions]
+    [
+      setCurrentPage,
+      setSelectedDimensionValues,
+      setSelectedDimensions,
+      setSelectedValueMetricFieldIds,
+    ]
   );
 
   const onDimensionValuesChange = useCallback(
@@ -89,12 +95,12 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     <MetricsExperienceStateContext.Provider
       value={{
         currentPage,
-        selectedDimensions,
+        dimensionFilters,
         isFullscreen,
         searchTerm,
+        selectedDimensions,
         selectedDimensionValues,
         selectedValueMetricFieldIds,
-        dimensionFilters,
         onPageChange,
         onDimensionsChange,
         onDimensionValuesChange,
