@@ -12,6 +12,10 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-action
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getIcon } from './get_icon';
+import {
+  createConnectorFormSerializer,
+  createConnectorFormDeserializer,
+} from './connector_form_serializers';
 
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
@@ -28,42 +32,70 @@ export function registerConnectorTypesFromSpecs({
     ref.uiSettings = uiSettings;
   });
 
-  // Creating an async chunk for the connectors specs.
-  // This is a workaround to avoid webpack from bundling the entire @kbn/connector-specs package into the main stackConnectors plugin bundle.
-  // If this chunk grows too much, we could have problems in some pages since the connectors won't be registered in time for rendering.
-  import(
-    /* webpackChunkName: "connectorsSpecs" */
-    '@kbn/connector-specs'
-  ).then(({ connectorsSpecs }) => {
+  Promise.all([
+    // Creating an async chunk for the connectors specs.
+    // This is a workaround to avoid webpack from bundling the entire @kbn/connector-specs package into the main stackConnectors plugin bundle.
+    // If this chunk grows too much, we could have problems in some pages since the connectors won't be registered in time for rendering.
+    import(
+      /* webpackChunkName: "singleFileConnectorBundle" */
+      '@kbn/connector-specs'
+    ),
+    import(
+      /* webpackChunkName: "singleFileConnectorBundle" */
+      '@kbn/response-ops-form-generator'
+    ),
+    import(
+      /* webpackChunkName: "singleFileConnectorBundle" */
+      './generate_schema'
+    ),
+  ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
     for (const spec of Object.values(connectorsSpecs)) {
-      connectorTypeRegistry.register(createConnectorTypeFromSpec(spec, ref));
+      connectorTypeRegistry.register(
+        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema)
+      );
     }
   });
 }
 
 const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
-  ref: { uiSettings?: IUiSettingsClient }
-): ActionTypeModel => ({
-  // get generated schema from spec
-  // const schema = generateSchema(spec);
-  // pass this to the form builder. output should go into actionConnectorFields
-  id: spec.metadata.id,
-  actionTypeTitle: spec.metadata.displayName,
-  selectMessage: spec.metadata.description,
-  iconClass: getIcon(spec),
-  // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
-  getHideInUi: () => {
-    if (
-      spec.metadata.supportedFeatureIds.length === 1 &&
-      spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
-    ) {
-      return !ref.uiSettings?.get<boolean>('workflows:ui:enabled') ?? false;
-    }
-    return false;
-  },
-  // TODO: Implement the rest of the properties
-  actionConnectorFields: null,
-  actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
-  validateParams: async () => ({ errors: {} }),
-});
+  ref: { uiSettings?: IUiSettingsClient },
+  generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
+  generateSchema: typeof import('./generate_schema').generateSchema
+): ActionTypeModel => {
+  const schema = generateSchema(spec);
+
+  return {
+    id: spec.metadata.id,
+    actionTypeTitle: spec.metadata.displayName,
+    selectMessage: spec.metadata.description,
+    iconClass: getIcon(spec),
+    // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
+    getHideInUi: () => {
+      if (
+        spec.metadata.supportedFeatureIds.length === 1 &&
+        spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
+      ) {
+        // @ts-expect-error upgrade typescript v5.9.3
+        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled') ?? false;
+      }
+      return false;
+    },
+    actionConnectorFields: lazy(() =>
+      Promise.resolve({
+        default: (props) => {
+          return generateFormFields({
+            schema,
+            formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
+          });
+        },
+      })
+    ),
+    actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
+    validateParams: async () => ({ errors: {} }),
+    connectorForm: {
+      serializer: createConnectorFormSerializer(),
+      deserializer: createConnectorFormDeserializer(schema),
+    },
+  };
+};

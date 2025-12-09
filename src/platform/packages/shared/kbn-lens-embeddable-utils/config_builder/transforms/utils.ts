@@ -365,7 +365,9 @@ export const buildDatasourceStates = (
   > = {};
   // a few charts types support multiple layers
   const configLayers = 'layers' in config ? config.layers : [config];
+  // @ts-expect-error upgrade typescript v5.9.3
   for (let i = 0; i < configLayers.length; i++) {
+    // @ts-expect-error upgrade typescript v5.9.3
     const layer = configLayers[i];
     const layerId = `${layer.type ?? 'layer'}_${i}`;
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
