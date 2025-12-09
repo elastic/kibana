@@ -362,7 +362,7 @@ describe('CreateClassicStreamFlyout', () => {
   });
 
   describe('name and confirm step', () => {
-    it('renders the name and confirm step', () => {
+    it('renders the name and confirm step with template details', () => {
       const { getByTestId, getByText } = renderFlyout();
 
       // Select template and navigate to second step
@@ -371,8 +371,15 @@ describe('CreateClassicStreamFlyout', () => {
       // Check step content is rendered
       expect(getByTestId('nameAndConfirmStep')).toBeInTheDocument();
 
-      // Check section title
+      // Check section titles
       expect(getByText('Name classic stream')).toBeInTheDocument();
+      expect(getByText('Confirm index template details')).toBeInTheDocument();
+
+      // Check template details are displayed
+      expect(getByTestId('templateDetails')).toBeInTheDocument();
+      expect(getByText('Index mode')).toBeInTheDocument();
+      expect(getByText('Standard')).toBeInTheDocument();
+      expect(getByText('Component templates')).toBeInTheDocument();
     });
 
     it('displays the index pattern prefix as prepend text', () => {
@@ -403,6 +410,39 @@ describe('CreateClassicStreamFlyout', () => {
       // Change the input value
       fireEvent.change(streamNameInput, { target: { value: 'my-stream' } });
       expect(streamNameInput).toHaveValue('my-stream');
+    });
+
+    it('displays component templates as separate lines', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // template-1 has composedOf: ['logs@mappings', 'logs@settings']
+      // Component templates are displayed as block elements (each on its own line)
+      expect(getByText('logs@mappings')).toBeInTheDocument();
+      expect(getByText('logs@settings')).toBeInTheDocument();
+    });
+
+    it('displays correct index mode for different templates', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template-2 and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-2');
+
+      // template-2 has indexMode: 'logsdb'
+      expect(getByText('Logsdb')).toBeInTheDocument();
+    });
+
+    it('displays version when available', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // multi-pattern-template has version: 12
+      expect(getByText('Version')).toBeInTheDocument();
+      expect(getByText('12')).toBeInTheDocument();
     });
 
     describe('multiple index patterns', () => {
@@ -845,6 +885,183 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Should not validate again (hasAttemptedSubmit was reset to false)
         expect(onValidate).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('ILM policy fetching', () => {
+    it('should fetch ILM policy details when template has ILM policy', async () => {
+      const mockGetIlmPolicy = jest.fn().mockResolvedValue({
+        name: '30d',
+        policy: {
+          phases: {
+            hot: { actions: {} },
+            warm: { min_age: '7d', actions: {} },
+            cold: { min_age: '30d', actions: {} },
+          },
+        },
+      });
+
+      const { getByTestId, findByText } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+
+      // Select template with ILM policy and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Wait for ILM policy to be fetched
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalledWith('30d', expect.any(AbortSignal));
+      });
+
+      // Check that phase information is displayed
+      await findByText(/Hot till 7d/i);
+      await findByText(/Warm till 30d/i);
+      await findByText(/Cold indefinitely/i);
+    });
+
+    it('should pass abort signal to getIlmPolicy', async () => {
+      let capturedSignal: AbortSignal | undefined;
+      const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+        capturedSignal = signal;
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(null), 10000);
+        });
+      });
+
+      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+
+      // Select template with ILM policy and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalled();
+        expect(capturedSignal).toBeDefined();
+      });
+    });
+
+    it('should abort ILM policy fetch when going back to template selection', async () => {
+      let capturedSignal: AbortSignal | undefined;
+      const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+        capturedSignal = signal;
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(null), 10000);
+        });
+      });
+
+      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+
+      // Select template with ILM policy and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalled();
+        expect(capturedSignal).toBeDefined();
+      });
+
+      // Go back - should abort the fetch
+      fireEvent.click(getByTestId('backButton'));
+
+      await waitFor(() => {
+        expect(capturedSignal?.aborted).toBe(true);
+      });
+    });
+
+    it('should show loading spinner while fetching ILM policy', async () => {
+      const mockGetIlmPolicy = jest.fn().mockImplementation(() => {
+        return new Promise((resolve) => {
+          setTimeout(
+            () =>
+              resolve({
+                name: '30d',
+                policy: {
+                  phases: {
+                    hot: { actions: {} },
+                  },
+                },
+              }),
+            100
+          );
+        });
+      });
+
+      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+
+      // Select template with ILM policy and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Wait for loading spinner to appear
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalled();
+      });
+
+      // Loading spinner should be visible while fetching
+      const templateDetails = getByTestId('templateDetails');
+      expect(templateDetails).toBeInTheDocument();
+    });
+
+    it('should handle ILM policy fetch errors gracefully', async () => {
+      const mockGetIlmPolicy = jest.fn().mockRejectedValue(new Error('Network error'));
+
+      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+
+      // Select template with ILM policy and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalled();
+      });
+
+      // Component should not crash and should display template details without phases
+      expect(getByTestId('templateDetails')).toBeInTheDocument();
+    });
+
+    it('should not fetch ILM policy when template has no ILM policy', () => {
+      const mockGetIlmPolicy = jest.fn();
+
+      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+
+      // Select template without ILM policy and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-3');
+
+      // Should not call getIlmPolicy
+      expect(mockGetIlmPolicy).not.toHaveBeenCalled();
+    });
+
+    it('should abort previous ILM policy fetch when switching templates', async () => {
+      let firstSignal: AbortSignal | undefined;
+      let secondSignal: AbortSignal | undefined;
+      let callCount = 0;
+
+      const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
+        callCount++;
+        if (callCount === 1) {
+          firstSignal = signal;
+        } else if (callCount === 2) {
+          secondSignal = signal;
+        }
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(null), 10000);
+        });
+      });
+
+      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+
+      // Select template-1 and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalledTimes(1);
+        expect(firstSignal).toBeDefined();
+      });
+
+      // Go back and select template-2
+      fireEvent.click(getByTestId('backButton'));
+      fireEvent.click(getByTestId('template-option-template-2'));
+      fireEvent.click(getByTestId('nextButton'));
+
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalledTimes(2);
+        expect(firstSignal?.aborted).toBe(true);
+        expect(secondSignal).toBeDefined();
       });
     });
   });

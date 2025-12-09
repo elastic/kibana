@@ -8,9 +8,10 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
-import type { StreamNameValidator } from '../../utils';
+import type { StreamNameValidator, IlmPolicyFetcher } from '../../utils';
 
 const MOCK_TEMPLATES: TemplateDeserialized[] = [
   {
@@ -242,6 +243,163 @@ const HIGHER_PRIORITY_PATTERNS = [
 ];
 
 /**
+ * Mock ILM policies for demonstrating ILM phase display
+ */
+const MOCK_ILM_POLICIES: Record<string, PolicyFromES> = {
+  logs: {
+    name: 'logs',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: 'logs',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '7d' } },
+        },
+        warm: {
+          min_age: '7d',
+          actions: {},
+        },
+        cold: {
+          min_age: '14d',
+          actions: {},
+        },
+        frozen: {
+          min_age: '44d',
+          actions: {},
+        },
+        delete: {
+          min_age: '74d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  'profiling-60-days': {
+    name: 'profiling-60-days',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: 'profiling-60-days',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '30d' } },
+        },
+        delete: {
+          min_age: '60d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  '.alerts-ilm-policy': {
+    name: '.alerts-ilm-policy',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: '.alerts-ilm-policy',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '90d' } },
+        },
+        warm: {
+          min_age: '30d',
+          actions: {},
+        },
+        delete: {
+          min_age: '180d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  '.monitoring-8-ilm-policy': {
+    name: '.monitoring-8-ilm-policy',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: '.monitoring-8-ilm-policy',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {},
+        },
+        delete: {
+          min_age: '7d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer': {
+    name: 'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: 'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '7d' } },
+        },
+        warm: {
+          min_age: '7d',
+          actions: {},
+        },
+        cold: {
+          min_age: '30d',
+          actions: {},
+        },
+        delete: {
+          min_age: '90d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+};
+
+/**
+ * Creates a mock ILM policy fetcher that wraps fetch logic with Storybook action logging.
+ */
+const createMockIlmPolicyFetcher = (): IlmPolicyFetcher => {
+  const onGetIlmPolicyAction = action('getIlmPolicy');
+
+  return async (policyName: string, signal?: AbortSignal) => {
+    onGetIlmPolicyAction(policyName);
+    action('getIlmPolicy:start')({ policyName, timestamp: Date.now() });
+
+    // Check if aborted before starting delay
+    if (signal?.aborted) {
+      action('getIlmPolicy:aborted')({ policyName, reason: 'aborted before delay' });
+      throw new Error('ILM policy fetch aborted');
+    }
+
+    // Simulate network delay with periodic abort checks
+    const delay = 500;
+    const startTime = Date.now();
+    while (Date.now() - startTime < delay) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      if (signal?.aborted) {
+        action('getIlmPolicy:aborted')({
+          policyName,
+          reason: 'aborted during delay',
+          elapsed: Date.now() - startTime,
+        });
+        throw new Error('ILM policy fetch aborted');
+      }
+    }
+
+    const policy = MOCK_ILM_POLICIES[policyName];
+    action('getIlmPolicy:result')(policy ?? null);
+    return policy ?? null;
+  };
+};
+
+/**
  * Creates a mock validator that wraps validation logic with Storybook action logging.
  * You'll see "onValidate" events in the Actions panel whenever validation is triggered.
  */
@@ -337,6 +495,7 @@ export const Default: Story = {
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
+      getIlmPolicy={createMockIlmPolicyFetcher()}
     />
   ),
 };
@@ -360,6 +519,7 @@ export const WithValidation: Story = {
         onRetryLoadTemplates={action('onRetryLoadTemplates')}
         templates={MOCK_TEMPLATES}
         onValidate={validator}
+        getIlmPolicy={createMockIlmPolicyFetcher()}
       />
     );
   },
@@ -388,6 +548,7 @@ export const WithSlowValidation: Story = {
         onRetryLoadTemplates={action('onRetryLoadTemplates')}
         templates={MOCK_TEMPLATES}
         onValidate={validator}
+        getIlmPolicy={createMockIlmPolicyFetcher()}
       />
     );
   },
