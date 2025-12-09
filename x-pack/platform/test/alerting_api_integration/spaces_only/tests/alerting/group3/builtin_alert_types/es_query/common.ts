@@ -305,11 +305,18 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
   }
 
   async function deleteDocs() {
-    await es.deleteByQuery({
-      index: ES_TEST_INDEX_NAME,
-      query: { match_all: {} },
-      conflicts: 'proceed',
-    });
+    await Promise.all([
+      es.deleteByQuery({
+        index: ES_TEST_INDEX_NAME,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      }),
+      es.deleteByQuery({
+        index: ES_TEST_OUTPUT_INDEX_NAME,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      }),
+    ]);
   }
 
   function getEndDate(millisOffset: number) {
