@@ -68,7 +68,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       {/* Thinking */}
       <EuiFlexItem grow={false}>
         {isErrorCurrentRound ? (
-          <RoundError error={error} onRetry={retrySendMessage} />
+          <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
         ) : (
           <RoundThinking steps={steps} isLoading={isLoadingCurrentRound} rawRound={rawRound} />
         )}
