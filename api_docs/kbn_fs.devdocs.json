@@ -456,6 +456,54 @@
       },
       {
         "parentPluginId": "@kbn/fs",
+        "id": "def-common.getSafePath",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafePath",
+        "description": [],
+        "signature": [
+          "(name: string, volume: string | undefined) => { fullPath: string; alias: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.getSafePath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.getSafePath.$2",
+            "type": "string",
+            "tags": [],
+            "label": "volume",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
         "id": "def-common.readFile",
         "type": "Function",
         "tags": [],
