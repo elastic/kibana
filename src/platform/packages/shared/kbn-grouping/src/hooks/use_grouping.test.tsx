@@ -131,7 +131,6 @@ describe('useGrouping', () => {
     expect(getByTestId('grouping-table')).toBeInTheDocument();
   });
 
-
   it('Passes settings to group selector', () => {
     const settings = {
       hideNoneOption: true,
