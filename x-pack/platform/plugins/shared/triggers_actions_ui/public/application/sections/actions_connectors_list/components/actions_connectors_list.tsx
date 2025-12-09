@@ -320,7 +320,7 @@ const ActionsConnectorsList = ({
 
         const actionType = actionTypesIndex[item.actionTypeId];
         const showFixButton = item.isMissingSecrets && actionType?.enabled;
-        const showRunButton = !item.isMissingSecrets && !actionType?.isSpecActionType;
+        const isStackConnector = !item.isMissingSecrets && !actionType?.isSpecActionType;
 
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
@@ -348,13 +348,14 @@ const ActionsConnectorsList = ({
                 </EuiToolTip>
               </EuiFlexItem>
             )}
-            {showRunButton && (
-              <RunOperation
-                canExecute={hasExecuteActionsCapability(capabilities, actionType?.subFeature)}
-                item={item}
-                onRun={() => editItem(item, EditConnectorTabs.Test)}
-              />
-            )}
+            <RunOperation
+              canExecute={
+                isStackConnector &&
+                hasExecuteActionsCapability(capabilities, actionType?.subFeature)
+              }
+              item={item}
+              onRun={() => editItem(item, EditConnectorTabs.Test)}
+            />
           </EuiFlexGroup>
         );
       },
@@ -596,7 +597,7 @@ const RunOperation: React.FunctionComponent<{
               )
             : i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription',
-                { defaultMessage: 'Unable to test connectors' }
+                { defaultMessage: 'Unable to test this connector' }
               )
         }
       >

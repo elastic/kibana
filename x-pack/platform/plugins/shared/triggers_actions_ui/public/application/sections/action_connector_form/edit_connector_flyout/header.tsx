@@ -54,7 +54,7 @@ const FlyoutHeaderComponent: React.FC<{
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
-  const canExecute = !isSpecConnector && hasExecuteActionsCapability(capabilities, subFeature);
+  const canExecute = hasExecuteActionsCapability(capabilities, subFeature);
 
   const setConfigurationTab = useCallback(() => {
     setTab(EditConnectorTabs.Configuration);
@@ -174,6 +174,7 @@ const FlyoutHeaderComponent: React.FC<{
             onClick={setTestTab}
             data-test-subj="testConnectorTab"
             isSelected={EditConnectorTabs.Test === selectedTab}
+            disabled={isSpecConnector}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
               defaultMessage: 'Test',
