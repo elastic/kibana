@@ -13,6 +13,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
@@ -20,8 +21,54 @@ import type { DataConnectorsServerStartDependencies } from '../types';
 const createDataConnectorRequestSchema = schema.object({
   type: schema.string({ minLength: 1 }),
   name: schema.string({ minLength: 1 }),
-  token: schema.string({ minLength: 1 }),
+  token: schema.string({ minLength: 1 }), // in the future, this can be either token or username&password
 });
+
+/**
+ * Builds the secrets object for a connector based on its spec
+ * @param connectorType - The connector type ID (e.g., '.notion')
+ * @param token - The authentication token
+ * @returns The secrets object to pass to the actions client
+ * @throws Error if the connector spec is not found
+ */
+function buildSecretsFromConnectorSpec(
+  connectorType: string,
+  token: string
+): Record<string, string> {
+  const connectorSpec = Object.values(connectorsSpecs).find(
+    (spec) => spec.metadata.id === connectorType
+  );
+  if (!connectorSpec) {
+    throw new Error(`Stack connector spec not found for type "${connectorType}"`);
+  }
+
+  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
+    const typeId = typeof authType === 'string' ? authType : authType.type;
+    return typeId === 'bearer';
+  });
+
+  const secrets: Record<string, string> = {};
+  if (hasBearerAuth) {
+    secrets.authType = 'bearer';
+    secrets.token = token;
+  } else {
+    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
+      const typeId = typeof authType === 'string' ? authType : authType.type;
+      return typeId === 'api_key_header';
+    });
+
+    const headerField =
+      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
+        ? String(apiKeyHeaderAuth.defaults.headerField)
+        : 'Api-Key'; // default fallback
+
+    secrets.authType = 'api_key_header';
+    secrets.apiKey = token;
+    secrets.headerField = headerField;
+  }
+
+  return secrets;
+}
 
 export function registerRoutes(
   router: IRouter,
@@ -145,16 +192,16 @@ export function registerRoutes(
           });
         }
 
+        const connectorType = dataConnectorTypeDef.stackConnector.type;
+        const secrets = buildSecretsFromConnectorSpec(connectorType, token);
+
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const stackConnector = await actionsClient.create({
           action: {
             name: `${type} stack connector for data connector '${name}'`,
-            actionTypeId: dataConnectorTypeDef.stackConnector.type,
+            actionTypeId: connectorType,
             config: {},
-            secrets: {
-              authType: 'bearer', // TODO: can we get away without specifying this again
-              token,
-            },
+            secrets,
           },
         });
 
