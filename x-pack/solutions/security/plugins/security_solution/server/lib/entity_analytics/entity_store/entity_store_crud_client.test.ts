@@ -498,22 +498,22 @@ describe('EntityStoreCrudClient', () => {
             aggs: {
               count: {
                 value_count: {
-                  field: "host.name",
+                  field: 'host.name',
                 },
               },
             },
             group_by: {
-              "entity.identity.host.name": {
+              'entity.identity.host.name': {
                 terms: {
-                  field: "host.name",
+                  field: 'host.name',
                 },
               },
             },
           },
-            source: {
-              index: '.entities.v1.updates.security_host_default',
-              query: { bool: { must: { term: { 'host.name': 'host-1' } } } },
-            },
+          source: {
+            index: '.entities.v1.updates.security_host_default',
+            query: { bool: { must: { term: { 'host.name': 'host-1' } } } },
+          },
         },
         { querystring: { as_index_request: true } }
       );
