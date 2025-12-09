@@ -182,11 +182,11 @@ export interface DocViewerExtension {
 }
 
 /**
- * Parameters passed to the doc viewer extension
+ * Parameters passed to the additional cell actions extension
  */
 export interface AdditionalCellActionsParams {
   /**
-   * Available actions for the doc viewer extension
+   * Available actions for the additional cell actions extension
    */
   actions: {
     /**
