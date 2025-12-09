@@ -78,7 +78,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             'scan_operations_all',
             'workflow_insights_all',
           ],
-          securitySolutionRulesV1: ['read'],
+          securitySolutionRulesV1: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },
