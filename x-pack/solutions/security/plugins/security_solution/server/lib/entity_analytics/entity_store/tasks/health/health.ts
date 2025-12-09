@@ -145,7 +145,7 @@ export const registerEntityStoreHealthTask = ({
 
   taskManager.registerTaskDefinitions({
     [getTaskName()]: {
-      title: 'Entity Analytics Entity Store - Execute Status Task',
+      title: 'Entity Store - Execute Health Checks Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
       createTaskRunner: createEntityStoreHealthTaskRunnerFactory({
