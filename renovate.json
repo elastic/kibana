@@ -249,7 +249,8 @@
     {
       "groupName": "axe-core",
       "matchDepNames": [
-        "axe-core"
+        "axe-core",
+        "@axe-core/playwright"
       ],
       "reviewers": [
         "team:appex-qa"
@@ -3916,7 +3917,7 @@
         "cytoscape-dagre"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3934,7 +3935,7 @@
         "hdr-histogram-js"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"

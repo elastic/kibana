@@ -404,6 +404,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               startDate={startDate}
               endDate={endDate}
               timezone={timezone}
+              initialRecurringSchedule={initialValue?.recurringSchedule}
             />
           </EuiFlexItem>
         )}

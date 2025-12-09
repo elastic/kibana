@@ -13,3 +13,8 @@ node:
   syncVersionManagerConfig: nvm
   dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
   syncProjectWorkspaceDependencies: false
+
+typescript:
+  includeProjectReferenceSources: false # This would add references to tsconfigs
+  syncProjectReferences: false # This would add references to tsconfigs
+  syncProjectReferencesToPaths: false # This would add path mapping to compiler options
