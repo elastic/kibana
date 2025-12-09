@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -29,7 +30,7 @@ export const getInstalledIntegrationsRoute = (
       path: GET_INSTALLED_INTEGRATIONS_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })

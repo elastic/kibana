@@ -176,6 +176,7 @@
     "@kbn/setup-node-env",
     "@kbn/connector-schemas",
     "@kbn/es-types",
+    "@kbn/automatic-import-v2-plugin",
     "@kbn/streamlang"
   ]
 }
