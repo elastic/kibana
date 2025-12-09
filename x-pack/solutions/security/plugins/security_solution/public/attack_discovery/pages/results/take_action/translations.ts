@@ -56,7 +56,7 @@ export const VIEW_IN_AI_ASSISTANT = i18n.translate(
   }
 );
 
-export const VIEW_IN_AGENT_BUILDER = i18n.translate(
+export const ADD_TO_CHAT = i18n.translate(
   'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.viewInAgentBuilderButtonLabel',
   {
     defaultMessage: 'View in Agent Builder',
