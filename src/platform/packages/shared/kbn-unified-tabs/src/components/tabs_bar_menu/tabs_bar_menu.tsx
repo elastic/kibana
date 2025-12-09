@@ -144,7 +144,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               aria-label={menuButtonLabel}
               color="text"
               data-test-subj="unifiedTabs_tabsBarMenuButton"
-              iconType="boxesVertical"
+              iconType="arrowDown"
               onClick={() => setPopover((prev) => !prev)}
             />
           </EuiToolTip>
