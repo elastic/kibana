@@ -196,6 +196,34 @@ AND MATCH(\`tags.keyword\`, "info") AND MATCH(\`tags.keyword\`, "success")`
     );
   });
 
+  it('does not append MATCH clauses for multivalue fields when WHERE clause already exists with the same filters', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MATCH(`tags.keyword`, "info") AND MATCH(`tags.keyword`, "success")',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string'
+      )
+    ).toBe(
+      `from logstash-* | WHERE MATCH(\`tags.keyword\`, "info") AND MATCH(\`tags.keyword\`, "success")`
+    );
+  });
+
+  it('negates the MATCH clauses for multivalue fields when WHERE clause already exists with the same filters', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MATCH(`tags.keyword`, "info") AND MATCH(`tags.keyword`, "success")',
+        'tags.keyword',
+        ['info', 'success'],
+        '-',
+        'string'
+      )
+    ).toBe(
+      `from logstash-* | WHERE NOT MATCH(\`tags.keyword\`, "info") AND NOT MATCH(\`tags.keyword\`, "success")`
+    );
+  });
+
   it('handles existence checks for multivalue fields with is_not_null', () => {
     expect(
       appendWhereClauseToESQLQuery(
