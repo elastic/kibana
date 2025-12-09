@@ -4580,7 +4580,7 @@ Object {
             "spaceId": Object {
               "type": "string",
             },
-            "summary": Object {
+            "summaryMode": Object {
               "default": true,
               "type": "boolean",
             },
