@@ -273,7 +273,6 @@ export class WorkflowsExecutionEnginePlugin
                 scopeStack: [],
                 error: null,
                 startedAt: workflowCreatedAt.toISOString(),
-                finishedAt: '',
                 cancelRequested: false,
                 duration: 0,
               };
@@ -402,7 +401,6 @@ export class WorkflowsExecutionEnginePlugin
         scopeStack: [],
         error: null,
         startedAt: workflowCreatedAt.toISOString(),
-        finishedAt: '',
         cancelRequested: false,
         duration: 0,
       };

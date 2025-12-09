@@ -119,14 +119,17 @@ export class ConcurrencyManager {
         const cancelledIds: string[] = [];
         for (const execution of runningExecutions) {
           try {
+            // Mark as cancelled immediately - this will be picked up by the monitoring loop
             await this.workflowExecutionRepository.updateWorkflowExecution({
               id: execution.id,
               cancelRequested: true,
+              status: ExecutionStatus.CANCELLED,
               cancellationReason:
                 'Cancelled due to concurrency collision (cancel-in-progress strategy)',
               cancelledAt: new Date().toISOString(),
               cancelledBy: 'system',
             });
+            // Force run idle tasks to wake up monitoring loop if task is idle
             await this.workflowTaskManager.forceRunIdleTasks(execution.id);
             cancelledIds.push(execution.id);
           } catch (error) {
