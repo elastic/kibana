@@ -26,6 +26,7 @@ export const LayoutGlobalCSS = () => {
     sidebarWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
+    isSidePanelOpen,
   } = useLayoutState();
 
   const banner = css`
@@ -124,7 +125,9 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.content.bottom')}: calc(
       ${layoutVar('footer.height')} + ${layoutVar('application.bottomBar.height')}
     );
-    ${layoutVarName('application.content.left')}: ${layoutVar('application.left')};
+    ${layoutVarName('application.content.left')}: ${isSidePanelOpen
+      ? layoutVar('application.left')
+      : navigationWidth + 'px'};
     ${layoutVarName('application.content.right')}: ${layoutVar('application.right')};
     ${layoutVarName('application.content.height')}: calc(
       ${layoutVar('application.height')} - ${layoutVar('application.topBar.height')} -
