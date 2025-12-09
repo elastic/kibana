@@ -66,7 +66,7 @@ export const SolutionViewTour: FC<Props> = ({
           <p>
             <FormattedMessage
               id="xpack.spaces.navControl.tour.content"
-              defaultMessage="Only {solution} features are visible. To access features from other solutions, edit your space settings to select a Solution view."
+              defaultMessage="Only {solution} features are visible. To access features from other solutions, edit your Space settings to select a Solution view."
               values={{
                 solution: solutionLabel,
               }}
