@@ -60,7 +60,6 @@ test.describe('Significant events - manual flow', { tag: ['@ess', '@svlOblt'] },
     expect(await pageObjects.toasts.getHeaderText()).toBe(
       'Saved significant event query successfully'
     );
-    await pageObjects.toasts.closeAll();
   });
 
   test('should list significant events', async ({ pageObjects }) => {
