@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { icon as plugs } from '@elastic/eui/es/components/icon/assets/plugs';
+import { icon as sparkles } from '@elastic/eui/es/components/icon/assets/sparkles';
 import { i18n } from '@kbn/i18n';
 import { AiPromptStepCommonDefinition, AiPromptStepTypeId } from '../../../common/steps/ai';
 import type { PublicStepDefinition } from '../../step_registry/types';
 
 export const AiPromptStepDefinition: PublicStepDefinition = {
   ...AiPromptStepCommonDefinition,
-  icon: plugs,
+  icon: sparkles,
   label: i18n.translate('workflowsExtensionsExample.AiPromptStep.label', {
     defaultMessage: 'AI Prompt',
   }),
