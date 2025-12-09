@@ -30,6 +30,7 @@ import {
   type ESQLControlState,
   type ControlWidthOptions,
   type ESQLControlVariable,
+  TIMEFIELD_ROUTE,
 } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
@@ -223,14 +224,15 @@ export function ValueControlForm({
         onValuesQuerySubmit(initialState.esqlQuery);
       } else if (valuesRetrieval) {
         const indexPattern = getIndexPatternFromESQLQuery(queryString);
+        const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
         core.http
-          .get<{ timeField?: string }>(`/internal/esql/get_timefield/FROM ${indexPattern}`)
+          .get<{ timeField?: string }>(`${TIMEFIELD_ROUTE}${encodedQuery}`)
           .then((result) => {
             const hasTimeField = result?.timeField ? true : false;
             const timeFilter = hasTimeField
-              ? `| WHERE ${result.timeField} <= ?_tend and ${result.timeField} > ?_tstart`
+              ? ` | WHERE ${result.timeField} <= ?_tend and ${result.timeField} > ?_tstart`
               : '';
-            const queryForValues = `FROM ${indexPattern} ${timeFilter} | STATS BY ${valuesRetrieval}`;
+            const queryForValues = `FROM ${indexPattern}${timeFilter} | STATS BY ${valuesRetrieval}`;
             onValuesQuerySubmit(queryForValues);
           });
       }
