@@ -17,6 +17,10 @@ import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_eng
 
 import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 interface RuleStatusFailedCallOutProps {
   ruleNameForChat: string;
@@ -48,6 +52,22 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   const chatTitle = useMemo(() => {
     return `${ruleNameForChat} - ${title} ${date}`;
   }, [date, title, ruleNameForChat]);
+
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const attachmentData = useMemo(
+    () => ({
+      text:
+        ruleName != null && dataSources != null
+          ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
+          : `Error message: ${message}`,
+    }),
+    [message, ruleName, dataSources]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: SecurityAgentBuilderAttachments.rule,
+    attachmentData,
+    attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT,
+  });
 
   if (!shouldBeDisplayed) {
     return null;
@@ -83,18 +103,24 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           {message}
         </EuiCodeBlock>
         {hasAssistantPrivilege && (
-          <NewChat
-            category="detection-rules"
-            color={color}
-            conversationTitle={chatTitle}
-            description={i18n.ASK_ASSISTANT_DESCRIPTION}
-            getPromptContext={getPromptContext}
-            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-            isAssistantEnabled={isAssistantEnabled}
-          >
-            {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-          </NewChat>
+          <>
+            {isAgentBuilderEnabled ? (
+              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} color={color} />
+            ) : (
+              <NewChat
+                category="detection-rules"
+                color={color}
+                conversationTitle={chatTitle}
+                description={i18n.ASK_ASSISTANT_DESCRIPTION}
+                getPromptContext={getPromptContext}
+                suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+                tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+                isAssistantEnabled={isAssistantEnabled}
+              >
+                {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+              </NewChat>
+            )}
+          </>
         )}
       </EuiCallOut>
     </div>
