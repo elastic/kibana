@@ -57,6 +57,7 @@ import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 import { getMachineLearningJobId } from '../../../common/helpers';
 import type { TimeRange } from '../../../rule_gaps/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   GAP_STATUS_HEADER,
   GAP_STATUS_IN_PROGRESS_LABEL,
@@ -148,12 +149,19 @@ const useRuleSnoozeColumn = (): TableColumn => {
 };
 
 export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
+  const {alertsPrivileges, rulesPrivileges} = useUserPrivileges()
+  const canReadAlerts = alertsPrivileges.alerts.read
+  const canReadExceptions = rulesPrivileges.exceptions.read
+  const landingTab = canReadAlerts ? RuleDetailTabs.alerts
+                  : canReadExceptions ? RuleDetailTabs.exceptions
+                  : RuleDetailTabs.executionResults
+
   return (
     <EuiToolTip content={name} anchorClassName="eui-textTruncate">
       <SecuritySolutionLinkAnchor
         data-test-subj="ruleName"
         deepLinkId={SecurityPageName.rules}
-        path={getRuleDetailsTabUrl(id, RuleDetailTabs.alerts)}
+        path={getRuleDetailsTabUrl(id, landingTab)}
       >
         {name}
       </SecuritySolutionLinkAnchor>
