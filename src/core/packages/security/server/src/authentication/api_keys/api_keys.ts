@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
-import type { UiamAPIKeys } from './uiam';
+import type { UiamAPIKeysService } from './uiam';
 
 /**
  * Interface for managing API keys in Elasticsearch, including creation,
@@ -95,7 +95,7 @@ export interface APIKeys {
    * UIAM-specific API key operations.
    * Provides methods for managing API keys through the UIAM service.
    */
-  uiam?: UiamAPIKeys;
+  uiam?: UiamAPIKeysService;
 }
 
 export type CreateAPIKeyParams =

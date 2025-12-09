@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
 
@@ -21,23 +22,38 @@ export interface UiamAPIKeys {
    *
    * @param request Request instance.
    * @param params The parameters for creating the API key (name and optional expiration).
-   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details.
+   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available.
    */
-  grantApiKey(request: KibanaRequest, params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult>;
+  grantApiKey(
+    request: KibanaRequest,
+    params: GrantUiamAPIKeyParams
+  ): Promise<GrantAPIKeyResult | null>;
 
   /**
    * Invalidates an API key via the UIAM service.
    *
    * @param request The Kibana request instance containing the authorization header.
-   * @param apiKeyId The ID of the API key to invalidate.
+   * @param params The parameters containing the ID of the API key to invalidate.
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation.
    * @throws {Error} If the license is not enabled or if the request does not contain an authorization header.
    */
   invalidateApiKey(
     request: KibanaRequest,
-    apiKeyId: string
+    params: InvalidateUiamAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Creates a scoped Elasticsearch client authenticated with an API key.
+   *
+   * This method creates a scoped cluster client that authenticates using the provided API key.
+   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
+   * authentication headers.
+   *
+   * @param apiKey The API key secret.
+   * @returns A scoped cluster client configured with API key authentication, or null if the license is not enabled.
+   */
+  getScopedClusterClientWithApiKey(apiKey: string): IScopedClusterClient | null;
 }
 
 /**
@@ -53,4 +69,14 @@ export interface GrantUiamAPIKeyParams {
    * Optional expiration time for the API key
    */
   expiration?: string;
+}
+
+/**
+ * Parameters for invalidating a UIAM API key.
+ */
+export interface InvalidateUiamAPIKeyParams {
+  /**
+   * ID of the API key to invalidate
+   */
+  id: string;
 }

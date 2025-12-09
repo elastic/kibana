@@ -22,6 +22,8 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
   GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+  UiamAPIKeys,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,

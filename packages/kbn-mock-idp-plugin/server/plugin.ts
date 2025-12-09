@@ -186,6 +186,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           return response.redirected({ headers: { location: '/' } });
         }
       );
+
       router.post(
         {
           path: '/mock_idp/grant_api_key',
@@ -195,7 +196,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               expiration: schema.maybe(schema.string()),
               authcScheme: schema.maybe(schema.string()),
               credential: schema.maybe(schema.string()),
-              isForUiam: schema.maybe(schema.boolean()),
             }),
           },
           security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
@@ -208,7 +208,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               });
             }
 
-            const { name, authcScheme, credential, isForUiam, expiration } = request.body;
+            const { name, authcScheme, credential, expiration } = request.body;
             const authcService = getAuthenticationService();
 
             // Create a new request with authentication header if authcScheme and credential are provided
@@ -225,11 +225,10 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               requestToUse = kibanaRequestFactory(fakeRawRequest);
             }
 
-            const result = await authcService.apiKeys.grantAsInternalUser(
-              requestToUse,
-              { name, expiration },
-              isForUiam
-            );
+            const result = await authcService.apiKeys.uiam.grantApiKey(requestToUse, {
+              name,
+              expiration,
+            });
 
             return response.ok({
               body: result,
@@ -250,7 +249,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           validate: {
             body: schema.object({
               apiKey: schema.string(),
-              authcScheme: schema.string(),
             }),
           },
           options: { authRequired: 'optional' },
@@ -264,21 +262,11 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               });
             }
 
-            const { apiKey, authcScheme } = request.body;
+            const { apiKey } = request.body;
             const authcService = getAuthenticationService();
 
-            const requestHeaders: Headers = {
-              ...request.headers,
-              authorization: `${authcScheme} ${apiKey}`,
-            };
-            const fakeRawRequest: FakeRawRequest = {
-              headers: requestHeaders,
-              path: request.url.pathname,
-            };
-            const requestToUse = kibanaRequestFactory(fakeRawRequest);
-
             // Get scoped client with UIAM headers
-            const scopedClient = authcService.apiKeys.getScopedClusterClient(requestToUse);
+            const scopedClient = authcService.apiKeys.uiam.getScopedClusterClientWithApiKey(apiKey);
 
             if (!scopedClient) {
               return response.badRequest({
@@ -343,7 +331,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             };
             const requestToUse = kibanaRequestFactory(fakeRawRequest);
 
-            const result = await authcService.apiKeys.invalidateViaUiam(requestToUse, apiKeyId);
+            const result = await authcService.apiKeys.uiam.invalidateApiKey(requestToUse, apiKeyId);
 
             return response.ok({
               body: result,

@@ -15,6 +15,8 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
   GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+  UiamAPIKeysService as UiamAPIKeys,
 } from '@kbn/core-security-server';
 
 export {

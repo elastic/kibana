@@ -10,11 +10,15 @@ import type {
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
   InvalidateAPIKeyResult,
+  InvalidateUiamAPIKeyParams,
+  UiamAPIKeys as UiamAPIKeysType,
 } from '@kbn/security-plugin-types-server';
 
 import type { SecurityLicense } from '../../../../common';
 import type { UiamServicePublic } from '../../../uiam';
 import { HTTPAuthorizationHeader } from '../../http_authentication';
+
+const UIAM_CREDENTIALS_PREFIX = 'essu_';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -30,7 +34,7 @@ export interface UiamAPIKeysOptions {
  * Class responsible for managing UIAM-specific API key operations.
  * This class handles API key grants and invalidations through the UIAM service.
  */
-export class UiamAPIKeys {
+export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
@@ -46,22 +50,28 @@ export class UiamAPIKeys {
   /**
    * Grants an API key via the UIAM service.
    *
-   * @param authorization The HTTP authorization header containing the authentication credentials.
+   * @param request
    * @param params The parameters for creating the API key (name and optional expiration).
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details.
    * @throws {Error} If the UIAM service is not available.
    */
   async grantApiKey(
-    authorization: HTTPAuthorizationHeader,
+    request: KibanaRequest,
     params: GrantUiamAPIKeyParams
-  ): Promise<GrantAPIKeyResult> {
+  ): Promise<GrantAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    const authorization = UiamAPIKeys.getAuthorizationHeader(request);
+
     this.logger.debug('Trying to grant an API key via UIAM');
     this.logger.debug(`Using authorization scheme: ${authorization.scheme}`);
 
     let result: GrantAPIKeyResult;
 
-    // If credentials don't start with 'essu_', reuse the existing API key
-    if (!authorization.credentials.startsWith('essu_')) {
+    // If credentials don't start with UIAM_CREDENTIALS_PREFIX, reuse the existing API key
+    if (!UiamAPIKeys.isUiamCredential(authorization)) {
       result = {
         id: 'same_api_key_id',
         name: params.name,
@@ -95,42 +105,39 @@ export class UiamAPIKeys {
    * Invalidates an API key via the UIAM service.
    *
    * @param request The Kibana request instance containing the authorization header.
-   * @param apiKeyId The ID of the API key to invalidate.
+   * @param params
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation.
    * @throws {Error} If the license is not enabled or if the request does not contain an authorization header.
    */
   async invalidateApiKey(
     request: KibanaRequest,
-    apiKeyId: string
+    params: InvalidateUiamAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
     }
 
-    this.logger.debug(`Trying to invalidate API key ${apiKeyId} via UIAM`);
+    const authorization = UiamAPIKeys.getAuthorizationHeader(request);
+    const { id } = params;
 
-    // Extract the API key from the authorization header for authentication
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (authorizationHeader == null) {
-      throw new Error(
-        `Unable to invalidate API key via UIAM, request does not contain an authorization header`
-      );
+    this.logger.debug(`Trying to invalidate API key ${id} via UIAM`);
+
+    if (!UiamAPIKeys.isUiamCredential(authorization)) {
+      throw new Error('Cannot invalidate API key via UIAM: not a UIAM API key');
     }
 
-    const apiKey = authorizationHeader.credentials;
-
     try {
-      await this.uiam.revokeApiKey(apiKeyId, apiKey);
+      await this.uiam.revokeApiKey(id, authorization.credentials);
 
-      this.logger.debug(`API key ${apiKeyId} was invalidated successfully via UIAM`);
+      this.logger.debug(`API key ${id} was invalidated successfully via UIAM`);
 
       return {
-        invalidated_api_keys: [apiKeyId],
+        invalidated_api_keys: [id],
         previously_invalidated_api_keys: [],
         error_count: 0,
       };
     } catch (e) {
-      this.logger.error(`Failed to invalidate API key ${apiKeyId} via UIAM: ${e.message}`);
+      this.logger.error(`Failed to invalidate API key ${id} via UIAM: ${e.message}`);
 
       return {
         invalidated_api_keys: [],
@@ -147,36 +154,41 @@ export class UiamAPIKeys {
   }
 
   /**
-   * Creates a scoped Elasticsearch client with UIAM authentication headers.
+   * Creates a scoped Elasticsearch client authenticated with an API key.
    *
-   * This method checks if the request contains UIAM credentials (starting with 'essu_')
-   * and if so, creates a scoped client with the appropriate UIAM authentication headers.
-   * Otherwise, it returns a standard scoped client.
+   * This method creates a scoped cluster client that authenticates using the provided API key.
+   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
+   * authentication headers.
    *
-   * @param request The Kibana request instance.
-   * @returns A scoped cluster client configured with UIAM authentication headers if applicable.
-   * @throws {Error} If the request does not contain an authorization header.
+   * @param apiKey The API key secret.
+   * @returns A scoped cluster client configured with API key authentication.
    */
-  getScopedClusterClient(request: KibanaRequest) {
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (authorizationHeader == null) {
-      throw new Error(
-        `Unable to create scoped client, request does not contain an authorization header`
-      );
+  getScopedClusterClientWithApiKey(apiKey: string) {
+    if (!this.license.isEnabled()) {
+      return null;
     }
 
-    if (authorizationHeader.credentials.startsWith('essu_')) {
+    // Create authorization header in the format: ApiKey base64(id:key)
+    const authorizationHeader = `ApiKey ${apiKey}`;
+
+    // Check if this is a UIAM credential
+    const isUiam = apiKey.startsWith(UIAM_CREDENTIALS_PREFIX);
+
+    if (isUiam) {
       const uiamHeaders = this.uiam.getEsClientAuthenticationHeader();
 
       return this.clusterClient.asScoped({
-        ...request,
         headers: {
-          ...request.headers,
+          authorization: authorizationHeader,
           ...uiamHeaders,
         },
       });
     } else {
-      return this.clusterClient.asScoped(request);
+      return this.clusterClient.asScoped({
+        headers: {
+          authorization: authorizationHeader,
+        },
+      });
     }
   }
 
@@ -184,10 +196,10 @@ export class UiamAPIKeys {
    * Checks if the given authorization credentials are UIAM credentials.
    *
    * @param authorization The HTTP authorization header to check.
-   * @returns True if the credentials start with 'essu_', false otherwise.
+   * @returns True if the credentials start with UIAM_CREDENTIALS_PREFIX, false otherwise.
    */
   static isUiamCredential(authorization: HTTPAuthorizationHeader): boolean {
-    return authorization.credentials.startsWith('essu_');
+    return authorization.credentials.startsWith(UIAM_CREDENTIALS_PREFIX);
   }
 
   /**
@@ -196,8 +208,15 @@ export class UiamAPIKeys {
    * @param request The Kibana request instance.
    * @returns True if the request contains UIAM credentials, false otherwise.
    */
-  static hasUiamCredentials(request: KibanaRequest): boolean {
+  static getAuthorizationHeader(request: KibanaRequest): HTTPAuthorizationHeader {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    return authorizationHeader != null && this.isUiamCredential(authorizationHeader);
+
+    if (!authorizationHeader) {
+      throw new Error(
+        `Unable to determine if request has UIAM credentials, request does not contain an authorization header`
+      );
+    }
+
+    return authorizationHeader;
   }
 }

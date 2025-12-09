@@ -18,9 +18,32 @@ import { getDetailedErrorMessage } from '../errors';
 import type { UserProfileGrant } from '../user_profile';
 
 /**
+ * Represents the request body for granting an API key via UIAM.
+ * @internal
+ */
+interface GrantUiamApiKeyRequestBody {
+  /** A descriptive name for the API key. */
+  description: string;
+  /** Indicates whether this is an internal API key. */
+  internal: boolean;
+  /** Optional expiration time for the API key (e.g., '1d', '7d'). */
+  expiration?: string;
+  /** Role assignments that define access and resource limits for the API key. */
+  role_assignments: {
+    /** Limits defining the scope of the API key. */
+    limit: {
+      /** Access types granted to the API key (e.g., 'application'). */
+      access: string[];
+      /** Resource types the API key can access (e.g., 'project'). */
+      resource: string[];
+    };
+  };
+}
+
+/**
  * Represents the response from granting an API key via UIAM.
  */
-export interface GrantApiKeyResponse {
+interface GrantUiamApiKeyResponse {
   /** The unique identifier for the API key. */
   id: string;
   /** The API key value (encoded). */
@@ -77,7 +100,7 @@ export interface UiamServicePublic {
     authorization: HTTPAuthorizationHeader,
     name: string,
     expiration?: string
-  ): Promise<GrantApiKeyResponse>;
+  ): Promise<GrantUiamApiKeyResponse>;
 
   /**
    * Revokes a UIAM API key by its ID.
@@ -209,7 +232,22 @@ export class UiamService implements UiamServicePublic {
    */
   async grantApiKey(authorization: HTTPAuthorizationHeader, name: string, expiration?: string) {
     try {
-      this.#logger.debug('Attempting to grant API key.');
+      this.#logger.debug(
+        `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
+      );
+
+      const body: GrantUiamApiKeyRequestBody = {
+        description: name,
+        internal: true,
+        ...(expiration ? { expiration } : {}),
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
+
       const response = await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
           method: 'POST',
@@ -218,23 +256,13 @@ export class UiamService implements UiamServicePublic {
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: authorization.toString(),
           },
-          body: JSON.stringify({
-            description: name,
-            internal: true,
-            ...(expiration ? { expiration } : {}),
-            role_assignments: {
-              limit: {
-                access: ['application'],
-                resource: ['project'],
-              },
-            },
-          }),
+          body: JSON.stringify(body),
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
           dispatcher: this.#dispatcher,
         })
       );
 
-      this.#logger.debug('Successfully granted API key.');
+      this.#logger.debug(`Successfully granted API key with id ${response.id}`);
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to grant API key: ${getDetailedErrorMessage(err)}`);

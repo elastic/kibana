@@ -8,8 +8,8 @@
  */
 
 export type {
-  UiamAPIKeys,
   UiamAPIKeys as UiamAPIKeysService,
   GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
 } from './uiam_api_keys';
 export type { UiamAPIKeysServiceWithContext } from './uiam_api_keys_context';
