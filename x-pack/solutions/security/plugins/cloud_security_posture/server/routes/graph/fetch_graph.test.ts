@@ -278,8 +278,10 @@ describe('fetchGraph', () => {
 
       // Verify target entity ID uses multi-value collection with CASE statements and MV_APPEND
       // (to support multiple targets from different fields)
-      expect(query).toContain('EVAL targetEntityId = user.target.entity.id');
+      // targetEntityId is initialized to null, then all fields use the same CASE pattern
+      expect(query).toContain('EVAL targetEntityId = TO_STRING(null)');
       expect(query).toMatch(/EVAL\s+targetEntityId\s*=\s*CASE\(/);
+      expect(query).toContain('MV_APPEND(targetEntityId, user.target.entity.id)');
       expect(query).toContain('MV_APPEND(targetEntityId, host.target.entity.id)');
       expect(query).toContain('MV_APPEND(targetEntityId, service.target.entity.id)');
       expect(query).toContain('MV_APPEND(targetEntityId, entity.target.id)');

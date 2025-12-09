@@ -177,61 +177,68 @@ const buildEsqlQuery = ({
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
-  const actorFieldsWhereClause = GRAPH_ACTOR_ENTITY_FIELDS.map(
-    (field) => `${field} IS NOT NULL`
-  ).join(' OR ');
-
   const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
+
+  // Helper function to extract namespace from field name (e.g., "user.entity.id" -> "user")
+  const getFieldNamespace = (field: string): string => {
+    // Special case: "entity.id" or "entity.target.id" -> "entity"
+    if (field.startsWith('entity.')) {
+      return 'entity';
+    }
+    // Otherwise, extract the first part before the first dot
+    return field.split('.')[0];
+  };
+
+  // Helper function to generate field hint CASE statements
+  const generateFieldHintCases = (fields: string[], entityIdVar: string): string => {
+    return fields
+      .map((field) => `    MV_CONTAINS(${field}, ${entityIdVar}), "${getFieldNamespace(field)}"`)
+      .join(',\n');
+  };
+
+  // Generate target entity ID collection logic
+  // All fields use the same pattern: only append if not null
+  // This ensures we filter out null values and only collect actual target entity IDs
+  const targetEntityIdEvals = [
+    // Initialize targetEntityId as null
+    '| EVAL targetEntityId = TO_STRING(null)',
+    // For each target field, append if not null
+    ...GRAPH_TARGET_ENTITY_FIELDS.map((field) => {
+      return `| EVAL targetEntityId = CASE(
+    ${field} IS NULL,
+    targetEntityId,
+    CASE(
+      targetEntityId IS NULL,
+      ${field},
+      MV_DEDUPE(MV_APPEND(targetEntityId, ${field}))
+    )
+  )`;
+    }),
+  ].join('\n');
+
+  // Generate actor and target field hint CASE statements
+  const actorFieldHintCases = generateFieldHintCases(GRAPH_ACTOR_ENTITY_FIELDS, 'actorEntityId');
+  const targetFieldHintCases = generateFieldHintCases(GRAPH_TARGET_ENTITY_FIELDS, 'targetEntityId');
 
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND (${actorFieldsWhereClause})
 | EVAL actorEntityId = COALESCE(
     ${actorFieldsCoalesce}
   )
-| EVAL targetEntityId = user.target.entity.id
-| EVAL targetEntityId = CASE(
-    host.target.entity.id IS NULL,
-    targetEntityId,
-    CASE(
-      targetEntityId IS NULL,
-      host.target.entity.id,
-      MV_DEDUPE(MV_APPEND(targetEntityId, host.target.entity.id))
-    )
+| WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
+| EVAL actorEntityId = COALESCE(
+    ${actorFieldsCoalesce}
   )
-| EVAL targetEntityId = CASE(
-    service.target.entity.id IS NULL,
-    targetEntityId,
-    CASE(
-      targetEntityId IS NULL,
-      service.target.entity.id,
-      MV_DEDUPE(MV_APPEND(targetEntityId, service.target.entity.id))
-    )
-  )
-| EVAL targetEntityId = CASE(
-    entity.target.id IS NULL,
-    targetEntityId,
-    CASE(
-      targetEntityId IS NULL,
-      entity.target.id,
-      MV_DEDUPE(MV_APPEND(targetEntityId, entity.target.id))
-    )
-  )
+${targetEntityIdEvals}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 | EVAL actorEntityFieldHint = CASE(
-    user.entity.id IS NOT NULL, "user",
-    host.entity.id IS NOT NULL, "host",
-    service.entity.id IS NOT NULL, "service",
-    entity.id IS NOT NULL, "entity",
+${actorFieldHintCases},
     ""
   )
 | EVAL targetEntityFieldHint = CASE(
-    MV_CONTAINS(user.target.entity.id, targetEntityId), "user",
-    MV_CONTAINS(host.target.entity.id, targetEntityId), "host",
-    MV_CONTAINS(service.target.entity.id, targetEntityId), "service",
-    MV_CONTAINS(entity.target.id, targetEntityId), "entity",
+${targetFieldHintCases},
     ""
 )
 ${
@@ -242,13 +249,27 @@ ${
 | ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
 
 // Construct actor and target entities data
-// Build entity field conditionally - only include if any enrichment field exists
+// Build entity field conditionally - only include fields that have values
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      "\\"name\\":\\"", COALESCE(actorEntityName, "undefined"), "\\"",
-      ",\\"type\\":\\"", COALESCE(actorEntityType, "undefined"), "\\"",
-      ",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, "undefined"), "\\"",
+      CASE(actorEntityName IS NOT NULL, CONCAT("\\"name\\":\\"", actorEntityName, "\\""), ""),
+      CASE(
+        actorEntityType IS NOT NULL,
+        CONCAT(
+          CASE(actorEntityName IS NOT NULL, ",", ""),
+          "\\"type\\":\\"", actorEntityType, "\\""
+        ),
+        ""
+      ),
+      CASE(
+        actorEntitySubType IS NOT NULL,
+        CONCAT(
+          CASE(actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL, ",", ""),
+          "\\"sub_type\\":\\"", actorEntitySubType, "\\""
+        ),
+        ""
+      ),
       CASE(
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
@@ -260,9 +281,23 @@ ${
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      "\\"name\\":\\"", COALESCE(targetEntityName, "undefined"), "\\"",
-      ",\\"type\\":\\"", COALESCE(targetEntityType, "undefined"), "\\"",
-      ",\\"sub_type\\":\\"", COALESCE(targetEntitySubType, "undefined"), "\\"",
+      CASE(targetEntityName IS NOT NULL, CONCAT("\\"name\\":\\"", targetEntityName, "\\""), ""),
+      CASE(
+        targetEntityType IS NOT NULL,
+        CONCAT(
+          CASE(targetEntityName IS NOT NULL, ",", ""),
+          "\\"type\\":\\"", targetEntityType, "\\""
+        ),
+        ""
+      ),
+      CASE(
+        targetEntitySubType IS NOT NULL,
+        CONCAT(
+          CASE(targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL, ",", ""),
+          "\\"sub_type\\":\\"", targetEntitySubType, "\\""
+        ),
+        ""
+      ),
       CASE(
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),

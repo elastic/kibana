@@ -126,6 +126,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
+      await expandedFlyoutGraph.showEntityDetails('5c6ec5af8800b6d061824c3b5d2282c2');
+      // check the preview panel grouped items rendered correctly
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(4);
+      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleTextNumber(4);
+
+      await expandedFlyoutGraph.closePreviewSection();
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(1)'
@@ -334,6 +340,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           0,
           'user.entity.id: serviceaccount@example.com'
         );
+
+        await expandedFlyoutGraph.showEntityDetails('4be3083f01620e3b7ad07ed171640ace');
+        // check the preview panel grouped items rendered correctly
+        await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+        await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
+
+        await expandedFlyoutGraph.closePreviewSection();
 
         // Clear filters to reset state
         await expandedFlyoutGraph.clearAllFilters();
