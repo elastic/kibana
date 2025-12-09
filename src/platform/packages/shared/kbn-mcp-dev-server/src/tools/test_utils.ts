@@ -60,11 +60,5 @@ export function extractToolResultTextContent(result: CallToolResult): string {
     throw new Error('Content does not have text property or text is not a string');
   }
 
-  try {
-    return firstContent.text as string;
-  } catch (error) {
-    throw new Error(
-      `Failed to parse JSON content: ${error instanceof Error ? error.message : String(error)}`
-    );
-  }
+  return firstContent.text as string;
 }
