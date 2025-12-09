@@ -97,7 +97,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -139,7 +139,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
       </TestProviders>
     );
 
