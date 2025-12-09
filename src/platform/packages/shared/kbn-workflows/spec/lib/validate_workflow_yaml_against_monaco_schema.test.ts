@@ -94,23 +94,26 @@ describe('Validate example_security_workflow.yaml against Monaco Schema', () => 
     if (!jsonSchema) {
       throw new Error('jsonSchema is null');
     }
-    // If workflowSchemaDef is not found, use the root schema (might be a $ref or have properties directly)
-    const validationSchema = workflowSchemaDef
-      ? {
-          ...(workflowSchemaDef as Record<string, unknown>),
-          definitions: (jsonSchema as { definitions?: Record<string, unknown> }).definitions,
-        }
-      : {
-          ...(jsonSchema as Record<string, unknown>),
-        };
+    // Use the full jsonSchema for validation, not just a single definition
+    // This ensures all $ref references can be resolved correctly
+    // The root schema might be a $ref, so we need to include all definitions
+    const validationSchema = {
+      ...(jsonSchema as Record<string, unknown>),
+    };
 
     // Remove $schema property if present - AJV 2020 doesn't need it and may complain
     if ('$schema' in validationSchema) {
       delete (validationSchema as { $schema?: string }).$schema;
     }
 
+    // If the root is a $ref, we need to resolve it for validation
+    // AJV can handle $ref at root, but we need to ensure the root schema is valid
     const validate = ajv.compile(validationSchema);
     const valid = validate(workflowData);
+
+    // if (!valid && validate.errors) {
+    //   console.error('Validation errors:', JSON.stringify(validate.errors, null, 2));
+    // }
 
     expect(valid).toBe(true);
     expect(validate.errors).toBeNull();
