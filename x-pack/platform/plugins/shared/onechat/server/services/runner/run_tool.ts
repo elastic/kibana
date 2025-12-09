@@ -116,8 +116,16 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
-  const { request, elasticsearch, spaces, modelProvider, toolsService, resultStore, logger } =
-    manager.deps;
+  const {
+    request,
+    elasticsearch,
+    spaces,
+    actions,
+    modelProvider,
+    toolsService,
+    resultStore,
+    logger,
+  } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
     request,
@@ -125,6 +133,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     logger,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider,
+    actions,
     runner: manager.getRunner(),
     toolProvider: createToolProvider({
       registry: await toolsService.getRegistry({ request }),

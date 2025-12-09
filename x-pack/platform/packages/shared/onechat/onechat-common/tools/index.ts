@@ -52,6 +52,12 @@ export {
   type BuiltinToolDefinitionWithSchema,
 } from './types/builtin';
 export {
+  isMcpTool,
+  type McpToolConfig,
+  type McpToolDefinition,
+  type McpToolDefinitionWithSchema,
+} from './types/mcp';
+export {
   ToolResultType,
   type ToolResult,
   type ErrorResult,
