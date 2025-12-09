@@ -15,6 +15,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   minimum_license_required: minimumLicenseRequired,
   supported_feature_ids: supportedFeatureIds,
   is_system_action_type: isSystemActionType,
+  is_spec_action_type: isSpecActionType,
   sub_feature: subFeature,
   is_deprecated: isDeprecated,
   allow_multiple_system_actions: allowMultipleSystemActions,
@@ -28,6 +29,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   subFeature,
   isDeprecated,
   allowMultipleSystemActions,
+  isSpecActionType,
   ...res,
 });
 

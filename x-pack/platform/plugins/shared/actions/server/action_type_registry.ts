@@ -265,6 +265,7 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
         isSystemActionType: !!actionType.isSystemActionType,
+        isSpecActionType: !!actionType.isSpecActionType,
         subFeature: actionType.subFeature,
         ...(exposeValidation === true
           ? {

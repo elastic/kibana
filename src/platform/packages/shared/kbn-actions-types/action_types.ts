@@ -23,6 +23,7 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
+  isSpecActionType: boolean;
   subFeature?: SubFeature;
   isDeprecated: boolean;
   allowMultipleSystemActions?: boolean;

@@ -122,6 +122,12 @@ export const connectorTypeResponseSchema = schema.object({
       },
     })
   ),
+  is_spec_action_type: schema.boolean({
+    meta: {
+      description:
+        'Indicated whether the connector type is defined through a connector specification.',
+    },
+  }),
 });
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);

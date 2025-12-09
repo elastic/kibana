@@ -314,47 +314,43 @@ const ActionsConnectorsList = ({
     {
       name: '',
       render: (item: ActionConnectorTableItem) => {
+        if (!actionTypesIndex) {
+          return null;
+        }
+
+        const actionType = actionTypesIndex[item.actionTypeId];
+        const showFixButton = item.isMissingSecrets && actionType?.enabled;
+        const showRunButton = !item.isMissingSecrets && !actionType?.isSpecActionType;
+
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
-            {item.isMissingSecrets ? (
-              <>
-                {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
-                  <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
-                        { defaultMessage: 'Fix connector configuration' }
-                      )}
-                    >
-                      <EuiButtonEmpty
-                        size="xs"
-                        data-test-subj="fixConnectorButton"
-                        onClick={() => editItem(item, EditConnectorTabs.Configuration, true)}
-                      >
-                        {i18n.translate(
-                          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
-                          {
-                            defaultMessage: 'Fix',
-                          }
-                        )}
-                      </EuiButtonEmpty>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                ) : null}
-              </>
-            ) : (
+            {showFixButton && (
+              <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
+                    { defaultMessage: 'Fix connector configuration' }
+                  )}
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    data-test-subj="fixConnectorButton"
+                    onClick={() => editItem(item, EditConnectorTabs.Configuration, true)}
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
+                      {
+                        defaultMessage: 'Fix',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {showRunButton && (
               <RunOperation
-                canExecute={
-                  !!(
-                    actionTypesIndex &&
-                    actionTypesIndex[item.actionTypeId] &&
-                    hasExecuteActionsCapability(
-                      capabilities,
-                      actionTypesIndex[item.actionTypeId].subFeature
-                    )
-                  )
-                }
+                canExecute={hasExecuteActionsCapability(capabilities, actionType?.subFeature)}
                 item={item}
                 onRun={() => editItem(item, EditConnectorTabs.Test)}
               />

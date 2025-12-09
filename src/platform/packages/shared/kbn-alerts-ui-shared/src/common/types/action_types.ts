@@ -44,6 +44,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   isSystemAction: boolean;
   isMissingSecrets?: boolean;
   isConnectorTypeDeprecated: boolean;
+  isSpecConnector?: boolean;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {

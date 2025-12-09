@@ -200,6 +200,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
+  isSpecActionType?: boolean;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**

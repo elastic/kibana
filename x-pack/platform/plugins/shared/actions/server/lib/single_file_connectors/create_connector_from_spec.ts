@@ -41,5 +41,6 @@ export const createConnectorTypeFromSpec = (
     },
     executor,
     globalAuthHeaders: spec.auth?.headers,
+    isSpecActionType: true,
   };
 };
