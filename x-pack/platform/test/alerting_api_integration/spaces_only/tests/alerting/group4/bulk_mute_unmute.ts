@@ -15,7 +15,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
@@ -26,10 +26,6 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
 
   describe('bulkMuteUnmute', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const alertUtils: AlertUtils = new AlertUtils({
-      space: Spaces.space1,
-      supertestWithoutAuth: supertest,
-    });
 
     const createRule = async (): Promise<string> => {
       const { body: createdRule } = await supertest
@@ -153,8 +149,6 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
           204
         );
 
-        await alertUtils.runSoon(ruleId);
-
         await retry.try(async () => {
           const updatedAlerts = await getActiveAlertsByRuleId(ruleId);
           const mutedAlert = updatedAlerts.find(
@@ -258,8 +252,6 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
           204
         );
 
-        await alertUtils.runSoon(ruleId);
-
         await retry.try(async () => {
           const mutedAlerts = await getActiveAlertsByRuleId(ruleId);
           const mutedAlert = mutedAlerts.find(
@@ -272,8 +264,6 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
         await bulkUnmuteAlerts([{ rule_id: ruleId, alert_instance_ids: [alertInstanceId] }]).expect(
           204
         );
-
-        await alertUtils.runSoon(ruleId);
 
         await retry.try(async () => {
           const unmutedAlerts = await getActiveAlertsByRuleId(ruleId);
