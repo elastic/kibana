@@ -3861,6 +3861,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "stream-prompts": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
