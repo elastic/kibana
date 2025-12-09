@@ -38,6 +38,8 @@ const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({
 
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
+const jobId = 'mock-job-id';
+
 describe('CsvESQLGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
@@ -113,7 +115,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -145,7 +148,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -173,7 +177,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(false);
@@ -203,7 +208,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(true);
@@ -296,7 +302,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(timeFromNowInMs);
@@ -372,7 +379,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(requestDuration);
@@ -420,7 +428,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -455,7 +464,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -520,7 +530,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -588,7 +599,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -618,7 +630,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -656,7 +669,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -685,7 +699,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
       Object {
@@ -722,7 +737,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const { error_code: errorCode, warnings } = await generateCsv.generateData();
@@ -737,6 +753,11 @@ describe('CsvESQLGenerator', () => {
         Array [
           Array [
             [ResponseError: Response Error],
+            Object {
+              "tags": Array [
+                "mock-job-id",
+              ],
+            },
           ],
         ]
       `);

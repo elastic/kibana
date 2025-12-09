@@ -50,6 +50,7 @@ const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
 EnhancedExtendedTemplate.propTypes = {
   argValue: PropTypes.any.isRequired,
   setLabel: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   label: PropTypes.string,
 };
 
