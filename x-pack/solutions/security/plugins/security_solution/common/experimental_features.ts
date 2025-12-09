@@ -61,11 +61,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Disables ESQL-based risk scoring
-   */
-  disableESQLRiskScoring: false,
-
-  /**
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: true,
@@ -203,6 +198,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Entity Analytics Watchlist feature.
    */
   entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Gap Auto Fill Scheduler feature.
+   */
+  gapAutoFillSchedulerEnabled: false,
   /**
    * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
    */
