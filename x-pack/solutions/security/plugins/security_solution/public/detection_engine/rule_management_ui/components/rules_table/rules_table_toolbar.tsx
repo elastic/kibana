@@ -101,7 +101,7 @@ export const RulesTableToolbar = React.memo(() => {
     return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
   }, [selectedRuleNames]);
 
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
+  const { isAgentBuilderEnabled } = useIsAgentBuilderEnabled();
   const attachmentData = useMemo(
     () => ({ text: getPromptContextFromDetectionRules(selectedRules) }),
     [selectedRules]

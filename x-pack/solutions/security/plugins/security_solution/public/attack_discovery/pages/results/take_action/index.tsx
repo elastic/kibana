@@ -208,7 +208,7 @@ const TakeActionComponent: React.FC<Props> = ({
     showAssistantOverlay?.();
   }, [closePopover, showAssistantOverlay]);
 
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : null;
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
     attachmentType: SecurityAgentBuilderAttachments.alert,
@@ -267,16 +267,18 @@ const TakeActionComponent: React.FC<Props> = ({
         </EuiContextMenuItem>,
 
         attackDiscoveries.length === 1
-          ? isAgentBuilderEnabled
-            ? [
-                <EuiContextMenuItem
-                  data-test-subj="viewInAgentBuilder"
-                  key="viewInAgentBuilder"
-                  onClick={onViewInAgentBuilder}
-                >
-                  {i18n.VIEW_IN_AGENT_BUILDER}
-                </EuiContextMenuItem>,
-              ]
+          ? isAgentChatExperienceEnabled
+            ? hasAgentBuilderPrivilege
+              ? [
+                  <EuiContextMenuItem
+                    data-test-subj="viewInAgentBuilder"
+                    key="viewInAgentBuilder"
+                    onClick={onViewInAgentBuilder}
+                  >
+                    {i18n.VIEW_IN_AGENT_BUILDER}
+                  </EuiContextMenuItem>,
+                ]
+              : []
             : [
                 <EuiContextMenuItem
                   data-test-subj="viewInAiAssistant"
@@ -292,7 +294,8 @@ const TakeActionComponent: React.FC<Props> = ({
     [
       addToCaseDisabled,
       attackDiscoveries.length,
-      isAgentBuilderEnabled,
+      hasAgentBuilderPrivilege,
+      isAgentChatExperienceEnabled,
       onClickAddToExistingCase,
       onClickAddToNewCase,
       onViewInAgentBuilder,

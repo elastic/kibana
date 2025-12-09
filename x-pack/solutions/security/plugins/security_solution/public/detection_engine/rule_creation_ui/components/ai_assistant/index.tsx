@@ -100,7 +100,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
   }, [getFields]);
 
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
   const attachmentData = useMemo(() => {
     const queryField = getFields().queryBar;
     const { query } = (queryField.value as DefineStepRule['queryBar']).query;
@@ -113,7 +113,10 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
   });
 
-  if (!hasAssistantPrivilege) {
+  if (
+    (isAgentChatExperienceEnabled && !hasAgentBuilderPrivilege) ||
+    (!isAgentChatExperienceEnabled && !hasAssistantPrivilege)
+  ) {
     return null;
   }
 
@@ -125,7 +128,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantHelpText"
         defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
         values={{
-          AiAssistantNewChatLink: isAgentBuilderEnabled ? (
+          AiAssistantNewChatLink: isAgentChatExperienceEnabled ? (
             <NewAgentBuilderAttachment
               onClick={openAgentBuilderFlyout}
               text={i18n.ASK_AGENT_ERROR_BUTTON}

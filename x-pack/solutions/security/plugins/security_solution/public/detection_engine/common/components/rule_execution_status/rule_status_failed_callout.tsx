@@ -53,7 +53,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
     return `${ruleNameForChat} - ${title} ${date}`;
   }, [date, title, ruleNameForChat]);
 
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
   const attachmentData = useMemo(
     () => ({
       text:
@@ -102,30 +102,30 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
-        {hasAssistantPrivilege && (
-          <>
-            {isAgentBuilderEnabled ? (
-              <NewAgentBuilderAttachment
-                onClick={openAgentBuilderFlyout}
-                color={color}
-                text={i18n.ASK_AGENT_ERROR_BUTTON}
-              />
-            ) : (
-              <NewChat
-                category="detection-rules"
-                color={color}
-                conversationTitle={chatTitle}
-                description={i18n.ASK_ASSISTANT_DESCRIPTION}
-                getPromptContext={getPromptContext}
-                suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-                tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-                isAssistantEnabled={isAssistantEnabled}
-              >
-                {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-              </NewChat>
-            )}
-          </>
-        )}
+        <>
+          {isAgentChatExperienceEnabled
+            ? hasAgentBuilderPrivilege && (
+                <NewAgentBuilderAttachment
+                  onClick={openAgentBuilderFlyout}
+                  color={color}
+                  text={i18n.ASK_AGENT_ERROR_BUTTON}
+                />
+              )
+            : hasAssistantPrivilege && (
+                <NewChat
+                  category="detection-rules"
+                  color={color}
+                  conversationTitle={chatTitle}
+                  description={i18n.ASK_ASSISTANT_DESCRIPTION}
+                  getPromptContext={getPromptContext}
+                  suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+                  tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+                  isAssistantEnabled={isAssistantEnabled}
+                >
+                  {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+                </NewChat>
+              )}
+        </>
       </EuiCallOut>
     </div>
   );

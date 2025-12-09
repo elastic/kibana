@@ -41,7 +41,7 @@ export const PanelFooter = memo(() => {
     isAlert,
   });
 
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
+  const { isAgentBuilderEnabled } = useIsAgentBuilderEnabled();
 
   const alertData = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);

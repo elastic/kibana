@@ -36,7 +36,8 @@ export const AskAiAssistant = <T extends EntityType>({
   const entityField = EntityTypeToIdentifierField[entityType];
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
+  const { isAgentBuilderEnabled, hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } =
+    useIsAgentBuilderEnabled();
 
   const { anonymizedValues, replacements }: AnonymizedValues = useMemo(() => {
     if (!anonymizationFields.data) {
@@ -82,8 +83,10 @@ export const AskAiAssistant = <T extends EntityType>({
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          {isAgentBuilderEnabled ? (
-            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+          {isAgentChatExperienceEnabled ? (
+            hasAgentBuilderPrivilege && (
+              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            )
           ) : (
             <EuiButton
               data-test-subj="explain-with-ai-button"

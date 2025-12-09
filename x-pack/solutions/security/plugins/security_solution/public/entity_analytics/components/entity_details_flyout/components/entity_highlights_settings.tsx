@@ -98,7 +98,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     replacements: assistantResult?.replacements,
   });
 
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
+  const { isAgentBuilderEnabled } = useIsAgentBuilderEnabled();
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
     attachmentType: SecurityAgentBuilderAttachments.entity,
