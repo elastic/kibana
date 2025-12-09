@@ -52,10 +52,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   );
 
   const { euiTheme } = useEuiTheme();
-  const { title, detailsMarkdown, summaryMarkdown } = useMemo(
-    () => attackDiscovery,
-    [attackDiscovery]
-  );
+  const { detailsMarkdown, summaryMarkdown } = useMemo(() => attackDiscovery, [attackDiscovery]);
 
   const summaryMarkdownWithReplacements = useMemo(
     () =>
