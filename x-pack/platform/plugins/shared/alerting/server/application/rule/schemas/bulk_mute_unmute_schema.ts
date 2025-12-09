@@ -7,12 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 
+const MAX_MUTE_UNMUTE_INSTANCES = 100;
+
 export const bulkMuteUnmuteAlertsParamsSchema = schema.object({
   rules: schema.arrayOf(
     schema.object({
       id: schema.string(),
-      alertInstanceIds: schema.arrayOf(schema.string()),
+      alertInstanceIds: schema.arrayOf(schema.string(), { maxSize: MAX_MUTE_UNMUTE_INSTANCES }),
     }),
-    { maxSize: 100 }
+    { maxSize: MAX_MUTE_UNMUTE_INSTANCES }
   ),
 });
