@@ -18,5 +18,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'EDR Workflows - Metadata Integration Tests - Serverless Env - Complete',
     },
+
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+
+        '--logging.root.level=debug',
+      ],
+    },
   };
 }
