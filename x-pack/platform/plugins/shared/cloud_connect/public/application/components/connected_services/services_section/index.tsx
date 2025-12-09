@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
 import { DisableServiceModal } from './disable_service_modal';
 import { useServiceActions } from './use_service_actions';
-import type { CloudService } from '../../../../types';
+import type { CloudService, ServiceType } from '../../../../types';
 
 interface ServicesSectionProps {
   services: {
     auto_ops?: CloudService;
     eis?: CloudService;
   };
-  onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
+  onServiceUpdate: (serviceKey: ServiceType, enabled: boolean) => void;
   subscription?: string;
 }
 
