@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -29,16 +29,8 @@ const flappingLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.fl
   defaultMessage: 'Flapping Detection',
 });
 
-const flappingOnLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.onLabel', {
-  defaultMessage: 'ON',
-});
-
-const flappingOffLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.offLabel', {
-  defaultMessage: 'OFF',
-});
-
 const enabledOnLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.enabledOnLabel', {
-  defaultMessage: 'On',
+  defaultMessage: 'On (recommended)',
 });
 
 const enabledOffLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.enabledOffLabel', {
@@ -83,17 +75,37 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
 
   const { euiTheme } = useEuiTheme();
 
-  const onFlappingToggle = useCallback(() => {
+  const [disableOverride, setDisableOverride] = useState<boolean>(false);
+  const [isCustom, setIsCustom] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (
+      spaceFlappingSettings &&
+      !spaceFlappingSettings.enabled &&
+      flappingSettings &&
+      flappingSettings.enabled
+    ) {
+      setDisableOverride(true);
+    }
+    if (flappingSettings) {
+      setIsCustom(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onFlappingOverrideToggle = useCallback(() => {
     if (!spaceFlappingSettings) {
       return;
     }
     if (flappingSettings) {
       cachedFlappingSettings.current = flappingSettings;
+      setIsCustom(false);
       return onFlappingChange(null);
     }
     const initialFlappingSettings = cachedFlappingSettings.current || spaceFlappingSettings;
+    setIsCustom(true);
     onFlappingChange({
-      enabled: initialFlappingSettings.enabled,
+      enabled: true,
       lookBackWindow: initialFlappingSettings.lookBackWindow,
       statusChangeThreshold: initialFlappingSettings.statusChangeThreshold,
     });
@@ -136,22 +148,52 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
 
   const onEnabledChange = useCallback(
     (value: boolean) => {
-      if (!flappingSettings) {
+      if (!spaceFlappingSettings) {
         return;
       }
-      internalOnFlappingChange({
-        ...flappingSettings,
-        enabled: value,
-      });
+
+      if (spaceFlappingSettings.enabled === value) {
+        setIsCustom(false);
+        return onFlappingChange(null);
+      }
+
+      if (spaceFlappingSettings.enabled !== value) {
+        if (flappingSettings) {
+          internalOnFlappingChange({
+            ...flappingSettings,
+            enabled: value,
+          });
+        } else {
+          const initialFlappingSettings = cachedFlappingSettings.current || spaceFlappingSettings;
+          onFlappingChange({
+            enabled: value,
+            lookBackWindow: initialFlappingSettings.lookBackWindow,
+            statusChangeThreshold: initialFlappingSettings.statusChangeThreshold,
+          });
+        }
+        setDisableOverride(value);
+        setIsCustom(true);
+      }
     },
-    [flappingSettings, internalOnFlappingChange]
+    [spaceFlappingSettings, flappingSettings, onFlappingChange, internalOnFlappingChange]
   );
+
+  const enabled = useMemo(() => {
+    if (!spaceFlappingSettings) {
+      return false;
+    }
+
+    return !flappingSettings
+      ? spaceFlappingSettings.enabled
+      : flappingSettings.enabled !== undefined
+      ? flappingSettings.enabled
+      : true; // default to true if flapping.enabled is undefined
+  }, [spaceFlappingSettings, flappingSettings]);
 
   const flappingFormHeader = useMemo(() => {
     if (!spaceFlappingSettings) {
       return null;
     }
-    const enabled = !flappingSettings ? spaceFlappingSettings.enabled : flappingSettings.enabled;
 
     return (
       <EuiFlexItem>
@@ -164,17 +206,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
             <EuiText size="s" style={{ marginRight: euiTheme.size.xs }}>
               {flappingLabel}
             </EuiText>
-            <EuiBadge
-              color={enabled !== undefined ? (enabled ? 'success' : 'default') : 'success'}
-              style={{ height: '100%' }}
-            >
-              {enabled !== undefined
-                ? enabled
-                  ? flappingOnLabel
-                  : flappingOffLabel
-                : flappingOnLabel}
-            </EuiBadge>
-            {flappingSettings && enabled && (
+            {isCustom && (
               <EuiBadge color="primary" style={{ height: '100%' }}>
                 {flappingOverrideLabel}
               </EuiBadge>
@@ -184,10 +216,10 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
             <EuiSwitch
               data-test-subj="ruleFormAdvancedOptionsOverrideSwitch"
               compressed
-              checked={!!flappingSettings}
-              label={flappingOverrideConfiguration}
+              label={enabled ? enabledOnLabel : enabledOffLabel}
+              checked={enabled}
               disabled={!canWriteFlappingSettingsUI}
-              onChange={onFlappingToggle}
+              onChange={(e) => onEnabledChange(e.target.checked)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -205,11 +237,13 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     spaceFlappingSettings,
     flappingSettings,
     canWriteFlappingSettingsUI,
-    onFlappingToggle,
+    enabled,
+    onEnabledChange,
+    isCustom,
   ]);
 
   const flappingFormBody = useMemo(() => {
-    if (!flappingSettings) {
+    if (!flappingSettings || !enabled) {
       return null;
     }
     return (
@@ -228,33 +262,34 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     canWriteFlappingSettingsUI,
     onLookBackWindowChange,
     onStatusChangeThresholdChange,
+    enabled,
   ]);
 
   const flappingFormSwitch = useMemo(() => {
-    if (!flappingSettings) {
+    if (!enabled) {
       return null;
     }
-
     return (
       <EuiFlexItem>
         <EuiSwitch
-          label={
-            flappingSettings.enabled !== undefined
-              ? flappingSettings.enabled
-                ? enabledOnLabel
-                : enabledOffLabel
-              : enabledOnLabel
-          }
-          checked={flappingSettings.enabled !== undefined ? flappingSettings.enabled : true} // default to true if flapping.enabled is undefined
-          disabled={!canWriteFlappingSettingsUI}
-          onChange={(e) => onEnabledChange(e.target.checked)}
+          compressed
+          checked={!!flappingSettings}
+          label={flappingOverrideConfiguration}
+          disabled={!canWriteFlappingSettingsUI || disableOverride}
+          onChange={onFlappingOverrideToggle}
         />
       </EuiFlexItem>
     );
-  }, [flappingSettings, canWriteFlappingSettingsUI, onEnabledChange]);
+  }, [
+    flappingSettings,
+    canWriteFlappingSettingsUI,
+    enabled,
+    disableOverride,
+    onFlappingOverrideToggle,
+  ]);
 
   const flappingFormMessage = useMemo(() => {
-    if (!spaceFlappingSettings || !spaceFlappingSettings.enabled) {
+    if (!spaceFlappingSettings || !enabled) {
       return null;
     }
     const settingsToUse = flappingSettings || spaceFlappingSettings;
@@ -272,7 +307,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
         />
       </EuiSplitPanel.Inner>
     );
-  }, [spaceFlappingSettings, flappingSettings, euiTheme]);
+  }, [spaceFlappingSettings, flappingSettings, euiTheme, enabled]);
 
   return (
     <EuiSplitPanel.Outer hasBorder>
