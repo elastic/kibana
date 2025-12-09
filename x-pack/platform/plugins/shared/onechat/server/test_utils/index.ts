@@ -33,9 +33,11 @@ export {
   createAgentsServiceStartMock,
   createMockedAgentRegistry,
   createMockedAgent,
+  createMockedInternalAgent,
   type AgentsServiceStartMock,
   type AgentRegistryMock,
   type MockedAgent,
+  type MockedInternalAgent,
 } from './agents';
 export {
   createConversationClientMock,
