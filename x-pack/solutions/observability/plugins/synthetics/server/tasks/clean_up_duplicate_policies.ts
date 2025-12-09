@@ -17,7 +17,7 @@ export async function cleanUpDuplicatedPackagePolicies(
   soClient: SavedObjectsClientContract,
   taskState: SyncTaskState
 ) {
-  let performSync = false;
+  let performCleanupSync = false;
   const { fleet } = serverSetup.pluginsStart;
   const { logger } = serverSetup;
 
@@ -27,12 +27,12 @@ export async function cleanUpDuplicatedPackagePolicies(
 
   if (taskState.hasAlreadyDoneCleanup) {
     debugLog('Skipping cleanup of duplicated package policies as it has already been done once');
-    return { performSync };
+    return { performCleanupSync };
   } else if (taskState.maxCleanUpRetries <= 0) {
     debugLog('Skipping cleanup of duplicated package policies as max retries have been reached');
     taskState.hasAlreadyDoneCleanup = true;
     taskState.maxCleanUpRetries = 3;
-    return { performSync };
+    return { performCleanupSync };
   }
   debugLog('Starting cleanup of duplicated package policies');
 
@@ -89,7 +89,7 @@ export async function cleanUpDuplicatedPackagePolicies(
     }
 
     // if we have any to delete or any expected that were not found we need to perform a sync
-    performSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
+    performCleanupSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
 
     if (packagePoliciesToDelete.length > 0) {
       logger.info(
@@ -104,7 +104,7 @@ export async function cleanUpDuplicatedPackagePolicies(
     }
     taskState.hasAlreadyDoneCleanup = true;
     taskState.maxCleanUpRetries = 3;
-    return { performSync };
+    return { performCleanupSync };
   } catch (e) {
     taskState.maxCleanUpRetries -= 1;
     if (taskState.maxCleanUpRetries <= 0) {
@@ -116,6 +116,6 @@ export async function cleanUpDuplicatedPackagePolicies(
       '[SyncPrivateLocationMonitorsTask] Error cleaning up duplicated package policies',
       { error: e }
     );
-    return { performSync };
+    return { performCleanupSync };
   }
 }

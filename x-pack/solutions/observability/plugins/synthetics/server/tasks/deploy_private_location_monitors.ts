@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
@@ -30,7 +29,6 @@ import {
 export class DeployPrivateLocationMonitors {
   constructor(
     public serverSetup: SyntheticsServerSetup,
-    public taskManager: TaskManagerSetupContract,
     public syntheticsMonitorClient: SyntheticsMonitorClient
   ) {}
 

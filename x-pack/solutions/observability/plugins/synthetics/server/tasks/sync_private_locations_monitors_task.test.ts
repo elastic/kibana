@@ -357,6 +357,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         allPrivateLocations: mockAllPrivateLocations as any,
         soClient: mockSoClient as any,
         spaceIds: ['space1'],
+        encryptedSavedObjects: mockEncryptedSoClient as any,
       });
 
       expect(task.deployPackagePolicies.getAllMonitorConfigs).toHaveBeenCalled();

@@ -38,7 +38,6 @@ export class SyncGlobalParamsPrivateLocationsTask {
   ) {
     this.deployPackagePolicies = new DeployPrivateLocationMonitors(
       serverSetup,
-      taskManager,
       syntheticsMonitorClient
     );
   }

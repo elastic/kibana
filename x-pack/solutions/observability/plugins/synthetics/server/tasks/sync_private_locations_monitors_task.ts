@@ -47,14 +47,11 @@ export class SyncPrivateLocationMonitorsTask {
   ) {
     this.deployPackagePolicies = new DeployPrivateLocationMonitors(
       serverSetup,
-      taskManager,
       syntheticsMonitorClient
-    );}
-
+    );
+  }
 
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
-  ) {
-
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
         title: 'Synthetics Sync Global Params Task',
@@ -87,14 +84,9 @@ export class SyncPrivateLocationMonitorsTask {
     const {
       coreStart: { savedObjects },
       logger,
+      pluginsStart: { encryptedSavedObjects },
     } = this.serverSetup;
 
-    const taskState = {
-      lastStartedAt: startedAt.toISOString(),
-      lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
-      hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
-      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
-    };
     let lastStartedAt = taskInstance.state.lastStartedAt;
     // if it's too old, set it to 10 minutes ago to avoid syncing everything the first time
     if (!lastStartedAt || moment(lastStartedAt).isBefore(moment().subtract(6, 'hour'))) {
@@ -121,9 +113,9 @@ export class SyncPrivateLocationMonitorsTask {
       });
 
       // Only perform syncGlobalParams if:
-      // - hasDataChanged and disableAutoSync is false
+      // - hasMWsChanged and disableAutoSync is false
       // - OR performCleanupSync is true (from cleanup), regardless of disableAutoSync
-      const dataChangeSync = hasDataChanged && !taskState.disableAutoSync;
+      const dataChangeSync = hasMWsChanged && !taskState.disableAutoSync;
       if (dataChangeSync || performCleanupSync) {
         if (dataChangeSync) {
           this.debugLog(`Syncing private location monitors because data has changed`);
@@ -169,12 +161,11 @@ export class SyncPrivateLocationMonitorsTask {
     };
   }
 
-  getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): TaskState {
+  getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): SyncTaskState {
     const startedAt = taskInstance.startedAt || new Date();
 
     return {
       lastStartedAt: startedAt.toISOString(),
-      lastTotalParams: taskInstance.state.lastTotalParams || 0,
       lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
       maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
