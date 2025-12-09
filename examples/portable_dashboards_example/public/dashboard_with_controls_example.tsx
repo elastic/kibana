@@ -60,7 +60,7 @@ export const DashboardWithControlsExample = ({
               controlGroupState,
               {
                 dataViewId: dataView.id ?? '',
-                title: 'Destintion country',
+                title: 'Destination country',
                 fieldName: 'geo.dest',
                 width: 'medium',
                 grow: false,
