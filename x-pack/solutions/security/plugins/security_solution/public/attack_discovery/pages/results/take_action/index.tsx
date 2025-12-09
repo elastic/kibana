@@ -281,7 +281,7 @@ const TakeActionComponent: React.FC<Props> = ({
                   key="viewInAgentBuilder"
                   onClick={onViewInAgentBuilder}
                 >
-                  {i18n.VIEW_IN_AGENT_BUILDER}
+                  {i18n.ADD_TO_CHAT}
                 </EuiContextMenuItem>,
               ]
             : [

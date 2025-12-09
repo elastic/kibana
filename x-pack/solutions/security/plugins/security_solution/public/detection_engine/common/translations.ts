@@ -682,10 +682,10 @@ export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
   }
 );
 
-export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+export const LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaRulesFeaturePrivileges',
   {
-    defaultMessage: 'You do not have Kibana Security privileges',
+    defaultMessage: 'You do not have Kibana Rules privileges',
   }
 );
 
@@ -1654,12 +1654,5 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDurationTooltip',
   {
     defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
-  }
-);
-
-export const CHAT_IN_AGENT_BUILDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
-  {
-    defaultMessage: 'Chat in Agent Builder',
   }
 );

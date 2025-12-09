@@ -2528,7 +2528,6 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-/x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @patrykkopycinski @maximpn @banderror
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
 
@@ -3050,7 +3049,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/sharing/*.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overviews @elastic/appex-sharedux
-/x-pack/platform/test/functional/apps/product_intercept @elastic/appex-sharedux
+/x-pack/platform/test/product_intercepts_functional @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
