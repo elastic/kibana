@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import {
   monaco,
