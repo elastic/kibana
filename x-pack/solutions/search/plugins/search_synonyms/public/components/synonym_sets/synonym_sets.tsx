@@ -113,6 +113,9 @@ export const SynonymSets = () => {
         />
       )}
       <EuiBasicTable
+        tableCaption={i18n.translate('xpack.searchSynonyms.synonymsSetTable.tableCaption', {
+          defaultMessage: 'Synonyms sets',
+        })}
         data-test-subj="synonyms-set-table"
         items={synonyms.data}
         columns={columns}

@@ -136,7 +136,17 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiBasicTable items={truncateFields(doc)} columns={columns} />
+                <EuiBasicTable
+                  items={truncateFields(doc)}
+                  columns={columns}
+                  tableCaption={i18n.translate(
+                    'xpack.searchPlayground.chat.message.assistant.retrievalDoc.tableCaption',
+                    {
+                      defaultMessage: 'Fields and values for document {id}',
+                      values: { id: doc.metadata._id },
+                    }
+                  )}
+                />
               </EuiFlexGroup>
             </EuiPanel>
           ))}
