@@ -106,6 +106,9 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/content-management-tabbed-table-list-view'
+  - '@kbn/visualizations-plugin'
+  - '@kbn/event-annotation-plugin'
 tags:
   - plugin
   - prod
