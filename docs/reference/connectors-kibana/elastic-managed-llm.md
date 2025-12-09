@@ -28,11 +28,11 @@ stack: ga 9.0
 serverless: ga
 ```
 
-`anthropic-claude-3.7-sonnet` is the default LLM to use with this connector.
+`anthropic-claude-3.7-sonnet` is the default LLM for the Elastic Managed LLM connector.
 
 ::::{note}
 * The default LLM may change in the future based on evaluations of performance, security, and accuracy.
-* This LLM was called Elastic Managed LLM before 9.3.
+* This LLM was called **Elastic Managed LLM** before 9.3.
 ::::
 
 Details of the currently used model are available in the [model card](https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/docs/reference/resources/Elastic_Managed_LLM_model_card.pdf).
