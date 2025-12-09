@@ -425,7 +425,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       if (fileStorage) {
         await fileStorage.delete().catch((deleteError) => {
           this.logger.error(
-            `Error encountered while attempting to cleanup new file [${fileStorage.id}] upload for Script [${id}]: ${deleteError.message}`,
+            `Error encountered while attempting to delete new file [${fileStorage.id}] upload for Script [${id}]: ${deleteError.message}. File is now orphaned!`,
             { error: deleteError }
           );
         });
@@ -437,7 +437,12 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     // If a new file was uploaded, then delete the old one
     if (fileStorage) {
       // FIXME:PT update file info. to SO once PR245273 merges
-      // this.filesClient.delete({ id: currentScriptSoItem.file_id });
+      // this.filesClient.delete({ id: currentScriptSoItem.file_id }).catch((deleteError) => {
+      //           this.logger.error(
+      //             `Error encountered while attempting to delete old file [${fileStorage.id}] for script [${id}]: ${deleteError.message}. File is now orphaned!`,
+      //             { error: deleteError }
+      //           );
+      //         });;
     }
 
     return this.mapSoAttributesToEndpointScript(await this.getScriptSavedObject(id));
