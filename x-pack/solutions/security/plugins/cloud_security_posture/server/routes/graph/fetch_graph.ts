@@ -190,7 +190,7 @@ const buildEsqlQuery = ({
   };
 
   // Helper function to generate field hint CASE statements
-  const generateFieldHintCases = (fields: string[], entityIdVar: string): string => {
+  const generateFieldHintCases = (fields: readonly string[], entityIdVar: string): string => {
     return fields
       .map((field) => `    MV_CONTAINS(${field}, ${entityIdVar}), "${getFieldNamespace(field)}"`)
       .join(',\n');

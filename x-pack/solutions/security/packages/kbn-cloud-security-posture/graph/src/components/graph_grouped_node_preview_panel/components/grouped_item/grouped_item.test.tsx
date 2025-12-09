@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import {
   GROUPED_ITEM_TEST_ID,
-  GROUPED_ITEM_TITLE_TEST_ID,
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT,
+  GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TIMESTAMP_TEST_ID,
   GROUPED_ITEM_ACTOR_TEST_ID,
   GROUPED_ITEM_TARGET_TEST_ID,
@@ -44,7 +45,7 @@ describe('<GroupedItem />', () => {
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
 
-      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('entity-1');
+      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe('entity-1');
       expect(getByTestId(GROUPED_ITEM_TIMESTAMP_TEST_ID).textContent).toBe(
         formatDate(timestamp, `@ ${LIST_ITEM_DATE_FORMAT}`)
       );
@@ -72,7 +73,7 @@ describe('<GroupedItem />', () => {
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
 
-      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('process_start');
+      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe('process_start');
       expect(getByTestId(GROUPED_ITEM_TIMESTAMP_TEST_ID).textContent).toBe(
         formatDate(timestamp, `@ ${LIST_ITEM_DATE_FORMAT}`)
       );
@@ -98,7 +99,7 @@ describe('<GroupedItem />', () => {
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
 
-      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('alert_action');
+      expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe('alert_action');
       expect(getByTestId(GROUPED_ITEM_TIMESTAMP_TEST_ID).textContent).toBe(
         formatDate(timestamp, `@ ${LIST_ITEM_DATE_FORMAT}`)
       );
@@ -112,7 +113,7 @@ describe('<GroupedItem />', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity', id: entityId }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(entityId);
+        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe(entityId);
       });
     });
 
@@ -120,7 +121,7 @@ describe('<GroupedItem />', () => {
       it('falls back to event id when event action is missing', () => {
         const eventId = 'event-id';
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'event', id: eventId }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(eventId);
+        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(eventId);
       });
     });
 
@@ -128,7 +129,7 @@ describe('<GroupedItem />', () => {
       it('falls back to alert id when alert action is missing', () => {
         const alertId = 'alert-id';
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert', id: alertId }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(alertId);
+        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(alertId);
       });
     });
   });
@@ -620,7 +621,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).not.toBeInTheDocument();
     });
 
     it('renders skeleton when isLoading is true even with item provided', () => {
@@ -637,7 +638,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).not.toBeInTheDocument();
     });
 
     it('does not render skeleton when isLoading is false', () => {
@@ -654,7 +655,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).toBeInTheDocument();
     });
 
     it('does not render skeleton when isLoading is undefined and defaults to false', () => {
@@ -670,7 +671,7 @@ describe('<GroupedItem />', () => {
 
       expect(queryByTestId(GROUPED_ITEM_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(GROUPED_ITEM_SKELETON_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT)).toBeInTheDocument();
     });
   });
 

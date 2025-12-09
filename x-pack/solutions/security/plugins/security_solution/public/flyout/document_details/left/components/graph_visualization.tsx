@@ -147,7 +147,7 @@ export const GraphVisualization: React.FC = memo(() => {
           docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
           singleDocumentData.index
         );
-      } else if (docMode === 'single-entity' && hasNodeEntityField(node)) {
+      } else if (docMode === 'single-entity' && singleDocumentData && hasNodeEntityField(node)) {
         showEntityPreview(singleDocumentData);
       } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         openPreviewPanel({
