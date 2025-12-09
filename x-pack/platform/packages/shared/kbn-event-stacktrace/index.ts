@@ -13,3 +13,5 @@ export * from './src/components/stacktrace/stackframe';
 export * from './src/components/stacktrace/variables';
 export * from './src/components/stacktrace/plain/plaintext_stacktrace';
 export * from './src/components/stacktrace/exception/exception_stacktrace';
+
+// TEST
