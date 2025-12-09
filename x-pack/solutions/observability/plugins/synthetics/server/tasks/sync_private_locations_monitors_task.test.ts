@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type { CustomTaskInstance } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
@@ -84,7 +83,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     jest.clearAllMocks();
     task = new SyncPrivateLocationMonitorsTask(
       mockServerSetup as any,
-      mockTaskManager as unknown as TaskManagerSetupContract,
       mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
     );
     mockSoClient.createInternalRepository.mockReturnValue(mockSoClient as any);
@@ -92,12 +90,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
   describe('constructor', () => {
     it('should register task definitions correctly', () => {
+      task.registerTaskDefinition(mockTaskManager as any);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         'Synthetics:Sync-Private-Location-Monitors': expect.objectContaining({
           title: 'Synthetics Sync Global Params Task',
           description:
             'This task is executed so that we can sync private location monitors for example when global params are updated',
-          timeout: '5m',
+          timeout: '10m',
           maxAttempts: 1,
           createTaskRunner: expect.any(Function),
         }),
@@ -150,6 +149,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
+        disableAutoSync: false,
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
         lastTotalMWs: 1,
@@ -189,6 +189,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(task.deployPackagePolicies.syncPackagePolicies).toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
+        disableAutoSync: false,
         lastTotalMWs: 1,
         maxCleanUpRetries: 2,
         hasAlreadyDoneCleanup: false,
@@ -225,6 +226,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
       expect(result.error).toBe(error);
       expect(result.state).toEqual({
+        disableAutoSync: false,
         lastStartedAt: expect.anything(),
         lastTotalMWs: 1,
         hasAlreadyDoneCleanup: false,
@@ -353,7 +355,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       await task.deployPackagePolicies.syncPackagePolicies({
         allPrivateLocations: mockAllPrivateLocations as any,
-        encryptedSavedObjects: mockEncryptedSoClient as any,
         soClient: mockSoClient as any,
         spaceIds: ['space1'],
       });
@@ -447,7 +448,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder);
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
-        mockTaskManager as unknown as TaskManagerSetupContract,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
       );
     });
@@ -460,10 +460,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
-      expect(result.performSync).toBe(false);
+      expect(result.performCleanupSync).toBe(false);
     });
 
-    it('should delete unexpected policies and set performSync true', async () => {
+    it('should delete unexpected policies and set performCleanupSync true', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
           yield ['monitor1-loc1-space1', 'unexpected-policy'];
@@ -476,30 +476,30 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['unexpected-policy'],
         { force: true, spaceIds: ['*'] }
       );
-      expect(result.performSync).toBe(true);
+      expect(result.performCleanupSync).toBe(true);
     });
 
-    it('should set performSync true if expected policies are missing', async () => {
+    it('should set performCleanupSync true if expected policies are missing', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
           yield [];
         })()
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
-      expect(result.performSync).toBe(true);
+      expect(result.performCleanupSync).toBe(true);
     });
 
-    it('should handle errors gracefully and return performSync', async () => {
+    it('should handle errors gracefully and return performCleanupSync', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(mockLogger.error).toHaveBeenCalled();
-      expect(result).toHaveProperty('performSync');
+      expect(result).toHaveProperty('performCleanupSync');
     });
 
     it('should skip cleanup if hasAlreadyDoneCleanup is true', async () => {
       const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 3 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(result.performSync).toBe(false);
+      expect(result.performCleanupSync).toBe(false);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as it has already been done once'
       );
@@ -508,7 +508,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('should skip cleanup if maxCleanUpRetries is 0 or less', async () => {
       const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(result.performSync).toBe(false);
+      expect(result.performCleanupSync).toBe(false);
       expect(state.hasAlreadyDoneCleanup).toBe(true);
       expect(state.maxCleanUpRetries).toBe(3);
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -522,7 +522,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 2 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(state.maxCleanUpRetries).toBe(1);
-      expect(result).toHaveProperty('performSync');
+      expect(result).toHaveProperty('performCleanupSync');
       // Call again to reach 0
       await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(state.hasAlreadyDoneCleanup).toBe(true);

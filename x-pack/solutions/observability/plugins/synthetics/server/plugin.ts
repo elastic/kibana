@@ -99,9 +99,9 @@ export class Plugin implements PluginType {
 
     this.syncPrivateLocationMonitorsTask = new SyncPrivateLocationMonitorsTask(
       this.server,
-      plugins.taskManager,
       this.syntheticsMonitorClient
     );
+    this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
 
     this.syncGlobalParamsTask = new SyncGlobalParamsPrivateLocationsTask(
       this.server,
