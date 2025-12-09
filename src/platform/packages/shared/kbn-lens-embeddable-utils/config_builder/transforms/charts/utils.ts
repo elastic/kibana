@@ -66,7 +66,7 @@ export function getLensStateLayer(
     ([, l]) =>
       !('linkToLayers' in l) ||
       l.linkToLayers == null ||
-      (isTextBasedLayer(l) && 'columns' in l && Array.isArray(l.columns) && l.columns.length > 0)
+      (isTextBasedLayer(l) && l.columns.length > 0)
   );
 
   const visLayer = visLayerId ? mainLayers.find(([id, l]) => id === visLayerId) : undefined;
