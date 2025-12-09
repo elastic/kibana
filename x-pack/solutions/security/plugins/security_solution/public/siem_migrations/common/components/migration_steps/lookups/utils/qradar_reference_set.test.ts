@@ -23,7 +23,7 @@ describe('convertQradarReferenceSetToLookup', () => {
 
     expect(lookup.name).toBe('Blocked IPs');
     expect(lookup.type).toBe('lookup');
-    expect(lookup.content).toBe('value\n1.1.1.1\nmalicious.example.com');
+    expect(lookup.content).toBe('value\r\n1.1.1.1\r\nmalicious.example.com');
   });
 
   it('escapes commas, quotes, and newlines in values', () => {
@@ -34,7 +34,7 @@ describe('convertQradarReferenceSetToLookup', () => {
 
     const lookup = convertQradarReferenceSetToLookup({ fileContent, fallbackName });
 
-    expect(lookup.content).toBe('value\n"host,""with,commas"""\n"line\nbreak"');
+    expect(lookup.content).toBe('value\r\n"host,""with,commas"""\r\n"line\nbreak"');
   });
 
   it('falls back to provided name when export has no name', () => {
