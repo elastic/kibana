@@ -55,7 +55,7 @@ export interface TraceContext {
   traceErrors: TraceError[];
 }
 
-export async function fetchTraceContext({
+export async function fetchDistributedTrace({
   esClient,
   apmIndices,
   traceId,

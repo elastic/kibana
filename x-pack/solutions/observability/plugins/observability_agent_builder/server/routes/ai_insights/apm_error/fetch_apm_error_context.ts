@@ -18,7 +18,7 @@ import { getFilteredLogCategories } from '../../../tools/get_log_categories/get_
 import { getLogsIndices } from '../../../utils/get_logs_indices';
 import { getApmIndices } from '../../../utils/get_apm_indices';
 import { parseDatemath } from '../../../utils/time';
-import { fetchTraceContext } from './fetch_trace_context';
+import { fetchDistributedTrace } from './fetch_distributed_trace';
 
 export interface FetchApmErrorContextParams {
   core: CoreSetup<
@@ -105,7 +105,7 @@ export async function fetchApmErrorContext({
     try {
       // Fetch the trace details for the error (trace items, aggregated services for the trace, trace errors)
       const apmIndices = await getApmIndices({ core, plugins, logger });
-      const traceContext = await fetchTraceContext({
+      const traceContext = await fetchDistributedTrace({
         esClient,
         apmIndices,
         traceId,
