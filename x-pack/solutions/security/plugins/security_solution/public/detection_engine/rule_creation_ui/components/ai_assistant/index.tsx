@@ -126,11 +126,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
         values={{
           AiAssistantNewChatLink: isAgentBuilderEnabled ? (
-            <NewAgentBuilderAttachment
-              onClick={openAgentBuilderFlyout}
-              text={i18n.ASK_AGENT_ERROR_BUTTON}
-              size="xs"
-            />
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} size="xs" />
           ) : (
             <NewChat
               asLink={true}
