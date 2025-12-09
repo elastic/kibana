@@ -91,7 +91,7 @@ export const createPatternsDataSourceProfileProvider = (
               };
 
               if (params.actions.openInNewTab) {
-                params.actions.openInNewTab?.({
+                params.actions.openInNewTab({
                   query,
                   timeRange: executeContext.timeRange,
                 });
