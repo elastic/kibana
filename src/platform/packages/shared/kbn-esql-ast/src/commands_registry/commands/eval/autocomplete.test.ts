@@ -26,6 +26,7 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../../definitions/all_operators';
+import { valuePlaceholderConstant, defaultValuePlaceholderConstant } from '../../complete_items';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
@@ -203,8 +204,8 @@ describe('EVAL Autocomplete', () => {
   });
 
   test('with lists', async () => {
-    await evalExpectSuggestions('from index | EVAL doubleField in ', ['( $0 )']);
-    await evalExpectSuggestions('from index | EVAL doubleField not in /', ['( $0 )']);
+    await evalExpectSuggestions('from index | EVAL doubleField in ', ['($0)']);
+    await evalExpectSuggestions('from index | EVAL doubleField not in /', ['($0)']);
   });
 
   test('after assignment', async () => {
@@ -577,6 +578,7 @@ describe('EVAL Autocomplete', () => {
         ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
           'case',
         ]),
+        valuePlaceholderConstant.text,
       ]);
 
       // case( multiple conditions ) suggests fields like normal
@@ -588,6 +590,7 @@ describe('EVAL Autocomplete', () => {
           ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
             'case',
           ]),
+          defaultValuePlaceholderConstant.text,
         ]
       );
     });

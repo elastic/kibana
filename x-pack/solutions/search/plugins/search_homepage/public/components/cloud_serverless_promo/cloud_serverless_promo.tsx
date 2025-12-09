@@ -68,8 +68,8 @@ export const PromoItem = ({ promoItem }: { promoItem: 'serverless' | 'hosted' })
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
   const logoStyle = css({
-    'min-width': euiTheme.size.xxxxl,
-    'min-height': euiTheme.size.xxxxl,
+    minWidth: euiTheme.size.xxxxl,
+    minHeight: euiTheme.size.xxxxl,
     width: euiTheme.size.xxxxl,
     height: euiTheme.size.xxxxl,
   });

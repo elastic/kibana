@@ -26,6 +26,7 @@ interface K8sContainerDocument extends Fields {
   'cloud.instance.id'?: string;
   'cloud.image.id'?: string;
   'event.dataset'?: string;
+  'event.module'?: string;
   'agent.id': string;
 }
 
@@ -63,5 +64,6 @@ export function k8sContainer(id: string, uid: string, nodeName: string): K8sCont
     'cloud.image.id': 'image-1',
     'cloud.provider': 'aws',
     'event.dataset': 'kubernetes.container',
+    'event.module': 'kubernetes',
   });
 }

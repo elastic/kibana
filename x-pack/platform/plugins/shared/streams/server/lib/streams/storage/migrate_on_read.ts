@@ -150,6 +150,35 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // Add required updated_at to all stream types
+  if (typeof migratedDefinition.updated_at !== 'string') {
+    migratedDefinition = {
+      ...migratedDefinition,
+      updated_at: new Date(0).toISOString(),
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Add updated_at to processing for ingest streams
+  if (
+    isObject(migratedDefinition.ingest) &&
+    'processing' in migratedDefinition.ingest &&
+    isObject(migratedDefinition.ingest.processing) &&
+    !('updated_at' in migratedDefinition.ingest.processing)
+  ) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      ingest: {
+        ...migratedDefinition.ingest,
+        processing: {
+          ...migratedDefinition.ingest.processing,
+          updated_at: new Date(0).toISOString(),
+        },
+      },
+    };
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }

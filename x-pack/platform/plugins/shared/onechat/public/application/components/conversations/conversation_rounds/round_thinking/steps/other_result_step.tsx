@@ -9,6 +9,7 @@ import { EuiCodeBlock, useEuiTheme } from '@elastic/eui';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import React from 'react';
 import { css } from '@emotion/react';
+import { codeblockStyles } from './codeblock.styles';
 
 interface OtherResultStepProps {
   result: ToolResult;
@@ -21,7 +22,14 @@ export const OtherResultStep: React.FC<OtherResultStepProps> = ({ result }) => {
   `;
   return (
     <div css={paddingLeftStyles}>
-      <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable={false} color="subdued">
+      <EuiCodeBlock
+        language="json"
+        fontSize="s"
+        paddingSize="s"
+        isCopyable={false}
+        color="subdued"
+        css={codeblockStyles}
+      >
         {JSON.stringify(result.data, null, 2)}
       </EuiCodeBlock>
     </div>
