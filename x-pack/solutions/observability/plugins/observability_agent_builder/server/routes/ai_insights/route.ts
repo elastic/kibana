@@ -33,14 +33,31 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       }),
     }),
     handler: async ({ request, core, plugins, dataRegistry, params, logger }) => {
-      const { errorId, serviceName, start, end, environment = '', connectorId } = params.body;
+      const {
+        errorId,
+        serviceName,
+        start,
+        end,
+        environment = '',
+        connectorId: lastUsedConnectorId,
+      } = params.body;
 
       const [_, pluginsStart] = await core.getStartServices();
+
+      let connectorId = lastUsedConnectorId;
+      if (!connectorId) {
+        const defaultConnector = await pluginsStart.inference.getDefaultConnector(request);
+        connectorId = defaultConnector?.connectorId;
+      }
+
+      if (!connectorId) {
+        throw new Error('No default connector found');
+      }
 
       const { summary, context } = await generateErrorAiInsight({
         core,
         plugins,
-        connectorId: connectorId ?? undefined,
+        connectorId,
         errorId,
         serviceName,
         start,

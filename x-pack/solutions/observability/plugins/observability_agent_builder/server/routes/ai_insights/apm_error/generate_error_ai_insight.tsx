@@ -65,7 +65,7 @@ export interface GenerateErrorAiInsightParams {
     ObservabilityAgentBuilderPluginStart
   >;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
-  connectorId?: string;
+  connectorId: string;
   errorId: string;
   serviceName: string;
   environment?: string;
@@ -80,7 +80,7 @@ export interface GenerateErrorAiInsightParams {
 export async function generateErrorAiInsight({
   core,
   plugins,
-  connectorId: initialConnectorId,
+  connectorId,
   errorId,
   serviceName,
   environment,
@@ -91,17 +91,6 @@ export async function generateErrorAiInsight({
   inferenceStart,
   dataRegistry,
 }: GenerateErrorAiInsightParams): Promise<{ summary: string; context: string }> {
-  let connectorId = initialConnectorId;
-
-  if (!connectorId) {
-    const defaultConnector = await inferenceStart.getDefaultConnector(request);
-    connectorId = defaultConnector?.connectorId;
-  }
-
-  if (!connectorId) {
-    throw new Error('No default connector found');
-  }
-
   const errorContext = await fetchApmErrorContext({
     core,
     plugins,
