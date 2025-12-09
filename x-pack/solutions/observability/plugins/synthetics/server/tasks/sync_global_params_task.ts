@@ -23,7 +23,6 @@ const TASK_TYPE = 'Synthetics:Sync-Global-Params-Private-Locations';
 
 interface TaskState extends Record<string, unknown> {
   paramsSpaceToSync?: string;
-  syncAllSpaces: boolean;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -81,23 +80,13 @@ export class SyncGlobalParamsPrivateLocationsTask {
 
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
       if (allPrivateLocations.length > 0) {
-        if (paramsSpaceToSync) {
-          await this.deployPackagePolicies.syncPackagePolicies({
-            allPrivateLocations,
-            soClient,
-            encryptedSavedObjects,
-            spaceIdToSync: paramsSpaceToSync,
-          });
-          this.debugLog(`Sync of global params succeeded for space  ${paramsSpaceToSync}`);
-        } else if (taskInstance.state.syncAllSpaces) {
-          await this.deployPackagePolicies.syncPackagePolicies({
-            allPrivateLocations,
-            soClient,
-            encryptedSavedObjects,
-            spaceIdToSync: paramsSpaceToSync,
-          });
-          this.debugLog(`Sync of global params succeeded for all spaces`);
-        }
+        await this.deployPackagePolicies.syncPackagePolicies({
+          allPrivateLocations,
+          soClient,
+          encryptedSavedObjects,
+          spaceIdToSync: paramsSpaceToSync,
+        });
+        this.debugLog(`Sync of global params succeeded for space  ${paramsSpaceToSync}`);
       }
     } catch (error) {
       logger.error(`Sync of global params failed: ${error.message}`);
@@ -135,7 +124,7 @@ export const asyncGlobalParamsPropagation = async ({
       params: {},
       taskType: TASK_TYPE,
       runAt: new Date(Date.now() + 3 * 1000),
-      state: { syncAllSpaces: true } as TaskState,
+      state: { paramsSpaceToSync: ALL_SPACES_ID } as TaskState,
     });
   } else {
     for (const spaceId of paramsSpacesToSync) {
@@ -144,7 +133,7 @@ export const asyncGlobalParamsPropagation = async ({
         params: {},
         taskType: TASK_TYPE,
         runAt: new Date(Date.now() + 3 * 1000),
-        state: { paramsSpaceToSync: spaceId, syncAllSpaces: false } as TaskState,
+        state: { paramsSpaceToSync: spaceId } as TaskState,
       });
     }
   }
