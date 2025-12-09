@@ -99,9 +99,7 @@ export async function getSignatureHelp(
           .find((p) => param.startsWith(p.name));
         return {
           label: param,
-          documentation: paramDefinition?.description
-            ? `**${paramDefinition.name}:** ${paramDefinition?.description}`
-            : '',
+          documentation: paramDefinition?.description ? paramDefinition?.description : '',
         };
       }) || [],
   };
