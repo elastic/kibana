@@ -10,7 +10,6 @@ import type { ErrorCause } from 'elasticsearch-8.x/lib/api/types';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildFindUsersSearchBody, getAllUserNamesInAggregation } from '../queries';
-import type { AfterKey, StaleUsersAggregations } from '../../types';
 import { findStaleUsersFactory } from '../stale_users';
 import { createBulkUtilsService } from '../../../bulk';
 import { getErrorFromBulkResponse } from '../../utils';
