@@ -77,10 +77,6 @@ export function LensEditConfigurationFlyout({
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
 
-  const isDevMode = useMemo(() => {
-    return process.env.NODE_ENV === 'development';
-  }, []);
-
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
@@ -294,10 +290,19 @@ export function LensEditConfigurationFlyout({
     }
   };
 
-  if (isLoading) return null;
+  const isDevMode = useMemo(() => {
+    return process.env.NODE_ENV === 'development';
+  }, []);
 
-  const showConvertToEsqlButton = isDevMode;
+  const showConvertToEsqlButton = useMemo(() => {
+    return isDevMode && !textBasedMode;
+  }, [isDevMode, textBasedMode]);
+
+  // The button is disabled when the visualization cannot be converted to ES|QL
+  // It has more than one layer
   const isConvertToEsqlButtonDisbaled = false;
+
+  if (isLoading) return null;
 
   const toolbar = (
     <>
