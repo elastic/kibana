@@ -50,7 +50,7 @@ export const GenericEntityFlyoutFooter = ({
     assetCriticalityLevel,
   });
 
-  const isAgentBuilderEnabled = useAgentBuilderAvailability();
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const openDocumentFlyout = useCallback(() => {
     openFlyout({
@@ -90,7 +90,7 @@ export const GenericEntityFlyoutFooter = ({
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           {isPreviewMode && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
 
-          {showAssistant && !isAgentBuilderEnabled && (
+          {showAssistant && !isAgentChatExperienceEnabled && (
             <EuiFlexItem grow={false}>
               <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
             </EuiFlexItem>
