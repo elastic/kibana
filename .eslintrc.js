@@ -2740,6 +2740,8 @@ module.exports = {
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
         'x-pack/solutions/security/packages/test-api-clients/**',
+        // Will be migrated to automatic_import_v2 that relies on SOs
+        'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {
         '@kbn/eslint/require_kbn_fs': [
