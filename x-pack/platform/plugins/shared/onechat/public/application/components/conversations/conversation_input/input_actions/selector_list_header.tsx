@@ -18,7 +18,12 @@ const listHeaderHeightStyles = css`
 export const SelectorListHeader: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   return (
     <EuiPopoverTitle paddingSize="s" css={listHeaderHeightStyles}>
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
+      <EuiFlexGroup
+        responsive={false}
+        justifyContent="spaceBetween"
+        gutterSize="xs"
+        alignItems="center"
+      >
         {children}
       </EuiFlexGroup>
     </EuiPopoverTitle>

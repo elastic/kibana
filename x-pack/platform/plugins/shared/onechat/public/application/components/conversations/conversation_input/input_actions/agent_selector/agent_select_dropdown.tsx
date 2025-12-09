@@ -27,6 +27,7 @@ import { useSelectorListStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
 import { SelectorListHeader } from '../selector_list_header';
+import { AgentAvatar } from '../../../../common/agent_avatar';
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
 
@@ -35,6 +36,10 @@ const selectAgentAriaLabel = i18n.translate(
   {
     defaultMessage: 'Select an agent',
   }
+);
+const selectAgentFallbackButtonLabel = i18n.translate(
+  'xpack.onechat.conversationInput.agentSelector.fallbackButtonLabel',
+  { defaultMessage: 'Agents' }
 );
 const createAgentAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.agentSelector.createAgent.ariaLabel',
@@ -58,20 +63,21 @@ const agentListId = `${agentSelectId}_listbox`;
 
 const AgentSelectPopoverButton: React.FC<{
   isPopoverOpen: boolean;
-  selectedAgentName?: string;
+  selectedAgent?: AgentDefinition;
   onClick: () => void;
-}> = ({ isPopoverOpen, selectedAgentName, onClick }) => {
+}> = ({ isPopoverOpen, selectedAgent, onClick }) => {
   const hasActiveConversation = useHasActiveConversation();
+  const iconType = selectedAgent ? () => <AgentAvatar agent={selectedAgent} size="s" /> : RobotIcon;
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={hasActiveConversation}
-      iconType={RobotIcon}
+      iconType={iconType}
       onClick={onClick}
       aria-labelledby={agentSelectId}
       data-test-subj="agentBuilderAgentSelectorButton"
     >
-      {selectedAgentName}
+      {selectedAgent?.name ?? selectAgentFallbackButtonLabel}
     </InputPopoverButton>
   );
 };
@@ -132,7 +138,12 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     agents,
     selectedAgentId: selectedAgent?.id,
   });
-  const selectorListStyles = useSelectorListStyles({ listId: agentListId, withHeader: true });
+  const selectorListStyles = css`
+    ${useSelectorListStyles({ listId: agentListId, withHeader: true })}
+    &#${agentListId} .euiSelectableListItem {
+      align-items: flex-start;
+    }
+  `;
 
   return (
     <EuiPopover
@@ -141,7 +152,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       button={
         <AgentSelectPopoverButton
           isPopoverOpen={isPopoverOpen}
-          selectedAgentName={selectedAgent?.name}
+          selectedAgent={selectedAgent}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }
