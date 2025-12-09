@@ -97,7 +97,8 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
+          preferCached: true,
         },
       }),
       esTestCluster: {

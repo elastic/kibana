@@ -6,11 +6,10 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
-  EuiButton,
   EuiConfirmModal,
   EuiCallOut,
   EuiSpacer,
@@ -121,6 +120,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
   const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
+  const disabled = !isFormModified || hasErrors || isSaving;
 
   const onExecutionAction = useCallback(async () => {
     try {
@@ -263,29 +263,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 onFormModifiedChange={onFormModifiedChange}
               />
               {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
-              {showButtons && (
-                <EuiButton
-                  fill
-                  iconType={isSaved ? 'check' : undefined}
-                  color="primary"
-                  data-test-subj="edit-connector-flyout-save-btn"
-                  isLoading={isSaving}
-                  onClick={onClickSave}
-                  disabled={!isFormModified || hasErrors || isSaving}
-                >
-                  {isSaved ? (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
-                      defaultMessage="Changes Saved"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                      defaultMessage="Save"
-                    />
-                  )}
-                </EuiButton>
-              )}
             </>
           )}
         </>
@@ -308,12 +285,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     showFormErrors,
     onFormModifiedChange,
     preSubmitValidationErrorMessage,
-    showButtons,
-    isSaved,
-    isSaving,
-    onClickSave,
-    isFormModified,
-    hasErrors,
   ]);
 
   const renderTestTab = useCallback(() => {
@@ -343,6 +314,18 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
 
+  // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
+  const isExperimental: boolean | undefined = useMemo(() => {
+    if (
+      connector &&
+      'config' in connector &&
+      connector.config?.inferenceId === '.rainbow-sprinkles-elastic'
+    ) {
+      return false;
+    }
+    return actionTypeModel?.isExperimental;
+  }, [actionTypeModel, connector]);
+
   return (
     <>
       <EuiFlyout
@@ -360,7 +343,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           setTab={handleSetTab}
           selectedTab={selectedTab}
           icon={actionTypeModel?.iconClass}
-          isExperimental={actionTypeModel?.isExperimental}
+          isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
         />
         <EuiFlyoutBody>
@@ -368,7 +351,14 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           {selectedTab === EditConnectorTabs.Test && renderTestTab()}
           {selectedTab === EditConnectorTabs.Rules && renderConnectorRulesList()}
         </EuiFlyoutBody>
-        <FlyoutFooter onClose={closeFlyout} />
+        <FlyoutFooter
+          onClose={closeFlyout}
+          isSaving={isSaving}
+          isSaved={isSaved}
+          disabled={disabled}
+          showButtons={showButtons}
+          onClickSave={onClickSave}
+        />
       </EuiFlyout>
       {showConfirmModal && (
         <EuiConfirmModal
