@@ -84,11 +84,10 @@ export function StreamDetailEnrichmentContentImpl() {
   const context = useKibana();
   const isInteractiveMode = useStreamEnrichmentSelector(selectIsInteractiveMode);
   const isYamlMode = !isInteractiveMode;
-  // Bit clunky but it's just because at this top level we have concerns of both modes crossing over.
-  const interactiveModeWithStepUnderEdit = useStreamEnrichmentSelector((state) => {
-    const interactiveModeContext = state.context.interactiveModeRef?.getSnapshot().context;
-    return interactiveModeContext && Boolean(stepUnderEditSelector(interactiveModeContext));
-  });
+  const interactiveModeWithStepUnderEdit = useOptionalInteractiveModeSelector(
+    (state) => Boolean(stepUnderEditSelector(state.context)),
+    false
+  );
   const { appParams, core } = context;
 
   const getStreamEnrichmentState = useGetStreamEnrichmentState();
