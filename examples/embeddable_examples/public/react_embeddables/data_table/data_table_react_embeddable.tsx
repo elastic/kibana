@@ -39,7 +39,7 @@ export const getDataTableFactory = (
 ): EmbeddableFactory<DataTableSerializedState, DataTableApi> => ({
   type: DATA_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const state = initialState.rawState;
+    const state = initialState;
     const timeRangeManager = initializeTimeRangeManager(state);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const titleManager = initializeTitleManager(state);
@@ -53,14 +53,10 @@ export const getDataTableFactory = (
       toastNotifications: core.notifications.toasts,
     };
 
-    const serializeState = () => {
-      return {
-        rawState: {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-        },
-      };
-    };
+    const serializeState = () => ({
+      ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
+    });
 
     const unsavedChangesApi = initializeUnsavedChanges<DataTableSerializedState>({
       uuid,
@@ -74,9 +70,8 @@ export const getDataTableFactory = (
         };
       },
       onReset: (lastSaved) => {
-        const lastSavedState = lastSaved?.rawState;
-        timeRangeManager.reinitializeState(lastSavedState);
-        titleManager.reinitializeState(lastSavedState);
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
       },
     });
 

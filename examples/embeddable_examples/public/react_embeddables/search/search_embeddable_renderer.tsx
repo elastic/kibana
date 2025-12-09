@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
@@ -19,16 +19,6 @@ interface Props {
 }
 
 export function SearchEmbeddableRenderer(props: Props) {
-  const initialState = useMemo(() => {
-    return {
-      rawState: {
-        timeRange: undefined,
-      },
-      references: [],
-    };
-    // only run onMount
-  }, []);
-
   const searchApi = useSearchApi({ timeRange: props.timeRange });
 
   return (
@@ -36,7 +26,9 @@ export function SearchEmbeddableRenderer(props: Props) {
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => ({
         ...searchApi,
-        getSerializedStateForChild: () => initialState,
+        getSerializedStateForChild: () => ({
+          timeRange: undefined,
+        }),
       })}
       hidePanelChrome={true}
     />
