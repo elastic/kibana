@@ -24,7 +24,7 @@ import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { MessageEditor, useMessageEditor } from './message_editor';
 import { InputActions } from './input_actions';
-import { borderRadiusXlStyles } from '../conversation.styles';
+import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
 
