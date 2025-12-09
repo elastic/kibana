@@ -167,15 +167,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
-    await this.openLoadSavedSearchPanel();
-    await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
-    await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
-
     // TODO: remove in https://github.com/elastic/kibana/issues/239313
     if (await this.testSubjects.exists('nav-tour-skip-button')) {
       await this.testSubjects.click('nav-tour-skip-button');
       await this.testSubjects.waitForDeleted('nav-tour-skip-button');
     }
+
+    await this.openLoadSavedSearchPanel();
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
+    await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
 
     await this.header.waitUntilLoadingHasFinished();
   }
