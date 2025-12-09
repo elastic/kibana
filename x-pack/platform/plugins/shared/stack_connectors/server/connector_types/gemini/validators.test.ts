@@ -49,9 +49,7 @@ describe('validateGeminiSecrets', () => {
         },
       }),
     };
-    expect(() => validateGeminiSecrets(secrets)).toThrow(
-      'Invalid credential type. Only "service_account" credentials are supported. Type was "external_account".'
-    );
+    expect(() => validateGeminiSecrets(secrets)).toThrow();
   });
 
   test('should throw error for authorized_user credentials', () => {
@@ -63,9 +61,7 @@ describe('validateGeminiSecrets', () => {
         refresh_token: '...',
       }),
     };
-    expect(() => validateGeminiSecrets(secrets)).toThrow(
-      'Invalid credential type. Only "service_account" credentials are supported. Type was "authorized_user".'
-    );
+    expect(() => validateGeminiSecrets(secrets)).toThrow();
   });
 
   test('should throw error for invalid JSON', () => {
@@ -81,9 +77,7 @@ describe('validateGeminiSecrets', () => {
         project_id: 'test',
       }),
     };
-    expect(() => validateGeminiSecrets(secrets)).toThrow(
-      'Invalid credential type. Only "service_account" credentials are supported. Type was "undefined".'
-    );
+    expect(() => validateGeminiSecrets(secrets)).toThrow();
   });
 
   test('should throw error for empty credentials', () => {

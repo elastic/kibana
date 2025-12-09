@@ -31,7 +31,9 @@ export const validateGeminiSecrets = (secrets: Secrets) => {
   if (credentials.type !== 'service_account') {
     throw new Error(
       i18n.translate('xpack.stackConnectors.gemini.validation.invalidCredentialTypeError', {
-        defaultMessage: `Invalid credential type. Only "service_account" credentials are supported. Type was "${credentials.type}".`,
+        defaultMessage:
+          'Invalid credential type. Only "service_account" credentials are supported. Type was "{type}".',
+        values: { type: credentials.type },
       })
     );
   }
