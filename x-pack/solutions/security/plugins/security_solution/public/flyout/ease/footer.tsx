@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { TakeActionButton } from './components/take_action_button';
 import { useEaseDetailsContext } from './context';
 import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
@@ -49,7 +50,7 @@ export const PanelFooter = memo(() => {
       attachmentType: SecurityAgentBuilderAttachments.alert,
       attachmentData: {
         alert: stringifyEssentialAlertData(rawData),
-        attachmentLabel: rawData['kibana.alert.rule.name']?.[0],
+        attachmentLabel: rawData[ALERT_RULE_NAME]?.[0],
       },
       attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
     };
