@@ -9,10 +9,8 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { layoutVar, layoutVarName } from '@kbn/core-chrome-layout-constants';
+import { APP_CONTENT_AREA_GAP, layoutVar, layoutVarName } from '@kbn/core-chrome-layout-constants';
 import { useLayoutState } from './layout_state_context';
-
-const gap = 8; // 8px gap between layout areas, TODO: variable
 
 /**
  * Defines global CSS variables for layout structure using custom properties.
@@ -61,9 +59,9 @@ export const LayoutGlobalCSS = () => {
 
   const navigation = css`
     ${layoutVarName('navigation.top')}: ${bannerHeight + headerHeight}px;
-    ${layoutVarName('navigation.bottom')}: ${footerHeight + gap}px;
+    ${layoutVarName('navigation.bottom')}: ${footerHeight + APP_CONTENT_AREA_GAP}px;
     ${layoutVarName('navigation.left')}: 0;
-    ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth + gap}px);
+    ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth + APP_CONTENT_AREA_GAP}px);
     ${layoutVarName('navigation.height')}: calc(
       100vh - ${layoutVar('navigation.top')} - ${layoutVar('navigation.bottom')}
     );
@@ -83,9 +81,9 @@ export const LayoutGlobalCSS = () => {
 
   const application = css`
     ${layoutVarName('application.top')}: ${bannerHeight + headerHeight}px;
-    ${layoutVarName('application.bottom')}: ${footerHeight + gap}px;
-    ${layoutVarName('application.left')}: ${navigationWidth + gap}px;
-    ${layoutVarName('application.right')}: ${sidebarWidth + gap}px;
+    ${layoutVarName('application.bottom')}: ${footerHeight + APP_CONTENT_AREA_GAP}px;
+    ${layoutVarName('application.left')}: ${navigationWidth + APP_CONTENT_AREA_GAP}px;
+    ${layoutVarName('application.right')}: ${sidebarWidth + APP_CONTENT_AREA_GAP}px;
     ${layoutVarName('application.height')}: calc(
       100vh - ${layoutVar('application.top')} - ${layoutVar('application.bottom')}
     );

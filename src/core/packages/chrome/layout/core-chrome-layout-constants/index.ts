@@ -42,6 +42,11 @@ export const MAIN_CONTENT_SELECTORS = [
 ];
 
 /**
+ * The gap size (in pixels) used around the application area in the layout grid.
+ */
+export const APP_CONTENT_AREA_GAP = 8;
+
+/**
  * The selector for elements that should be included in the focus trap of a flyout.
  * This will allow the flyout focus trap to include header and sidenav by default.
  */

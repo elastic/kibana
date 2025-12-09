@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import { APP_CONTENT_AREA_GAP } from '@kbn/core-chrome-layout-constants';
 import type { LayoutState } from './layout.types';
 
 const cssProp = css`
@@ -31,8 +32,6 @@ const cssProp = css`
     'footer footer footer footer footer';
 `;
 
-const gap = 8; // gap between application side edges, TODO: variable
-
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
   const {
@@ -47,16 +46,16 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
   const style = {
     gridTemplateColumns: `
       ${navigationWidth}px
-      ${isSidePanelOpen ? gap : 0}px
+      ${isSidePanelOpen ? APP_CONTENT_AREA_GAP : 0}px
       1fr
-      ${gap}px
+      ${APP_CONTENT_AREA_GAP}px
       ${sidebarWidth}px
     `,
     gridTemplateRows: `
       ${bannerHeight}px
       ${headerHeight}px
       1fr
-      ${gap}px
+      ${APP_CONTENT_AREA_GAP}px
       ${footerHeight}px
     `,
   };
