@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-plugin",
-  "owner": "@elastic/streams-program-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
   "description": "A manager for Streams",
   "group": "platform",
   "visibility": "shared",

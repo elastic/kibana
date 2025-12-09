@@ -366,6 +366,7 @@ export class BackfillClient {
                 backfillClient: this,
                 actionsClient,
                 gaps: ruleGaps,
+                initiator: backfill.initiator,
               });
             })
           );

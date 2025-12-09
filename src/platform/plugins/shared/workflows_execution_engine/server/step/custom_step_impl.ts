@@ -8,11 +8,11 @@
  */
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
-import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
+import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -27,7 +27,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
     private node: AtomicGraphNode,
-    private stepDefinition: ServerStepDefinition<CommonStepDefinition>,
+    private stepDefinition: ServerStepDefinition,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
@@ -58,16 +58,21 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       const handlerContext = this.createHandlerContext(input);
       const result = await this.stepDefinition.handler(handlerContext);
 
-      return { input, output: result.output, error: result.error?.toString() };
-    } catch (error) {
-      return { input, output: undefined, error: error.toString() };
+      const stepResult: RunStepResult = { input, output: result.output, error: undefined };
+      if (result.error) {
+        stepResult.error = ExecutionError.fromError(result.error).toSerializableObject();
+      }
+      return stepResult;
+    } catch (err) {
+      const error = ExecutionError.fromError(err).toSerializableObject();
+      return { input, output: undefined, error };
     }
   }
 
   /**
    * Create the handler context
    */
-  private createHandlerContext(input: unknown): StepHandlerContext<unknown> {
+  private createHandlerContext(input: unknown): StepHandlerContext {
     return {
       input,
       contextManager: {
@@ -79,6 +84,9 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         },
         renderInputTemplate: (value) => {
           return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value);
+        },
+        getFakeRequest: () => {
+          return this.stepExecutionRuntime.contextManager.getFakeRequest();
         },
       },
       logger: {
