@@ -12,6 +12,8 @@ import type {
   PluginInitializerContext,
   ISavedObjectsRepository,
   CoreStart,
+  ISavedObjectTypeRegistry,
+  ISavedObjectsSerializer,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -45,6 +47,8 @@ export interface RulesClientFactoryOpts {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
+  savedObjectsTypeRegistry: ISavedObjectTypeRegistry;
+  savedObjectsSerializer: ISavedObjectsSerializer;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -71,6 +75,8 @@ export class RulesClientFactory {
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
+  private savedObjectsTypeRegistry!: ISavedObjectTypeRegistry;
+  private savedObjectsSerializer!: ISavedObjectsSerializer;
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
@@ -99,6 +105,8 @@ export class RulesClientFactory {
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
     this.internalSavedObjectsRepository = options.internalSavedObjectsRepository;
+    this.savedObjectsTypeRegistry = options.savedObjectsTypeRegistry;
+    this.savedObjectsSerializer = options.savedObjectsSerializer;
     this.actions = options.actions;
     this.eventLog = options.eventLog;
     this.kibanaVersion = options.kibanaVersion;
@@ -150,6 +158,8 @@ export class RulesClientFactory {
       namespace: this.spaceIdToNamespace(spaceId),
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
+      savedObjectsTypeRegistry: this.savedObjectsTypeRegistry,
+      savedObjectsSerializer: this.savedObjectsSerializer,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,

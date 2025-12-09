@@ -12,6 +12,8 @@ import type {
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
+  ISavedObjectTypeRegistry,
+  ISavedObjectsSerializer,
 } from '@kbn/core/server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
@@ -75,6 +77,8 @@ export interface RulesClientContext {
   readonly getEventLogClient: () => Promise<IEventLogClient>;
   readonly internalSavedObjectsRepository: ISavedObjectsRepository;
   readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  readonly savedObjectsTypeRegistry: ISavedObjectTypeRegistry;
+  readonly savedObjectsSerializer: ISavedObjectsSerializer;
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;

@@ -626,6 +626,8 @@ export class AlertingPlugin {
         GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
+      savedObjectsTypeRegistry: core.savedObjects.getTypeRegistry(),
+      savedObjectsSerializer: core.savedObjects.createSerializer(),
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
