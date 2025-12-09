@@ -66,28 +66,6 @@ describe('useDashboardListingTable', () => {
     coreServices.notifications.toasts.addError = jest.fn();
   });
 
-  test('should return the correct initial hasInitialFetchReturned state', () => {
-    const { result } = renderHook(() =>
-      useDashboardListingTable({
-        getDashboardUrl,
-        goToDashboard,
-      })
-    );
-
-    expect(result.current.hasInitialFetchReturned).toBe(false);
-  });
-
-  test('should return the correct initial pageDataTestSubject state', () => {
-    const { result } = renderHook(() =>
-      useDashboardListingTable({
-        getDashboardUrl,
-        goToDashboard,
-      })
-    );
-
-    expect(result.current.pageDataTestSubject).toBeUndefined();
-  });
-
   test('should return the correct refreshUnsavedDashboards function', () => {
     const { result } = renderHook(() =>
       useDashboardListingTable({

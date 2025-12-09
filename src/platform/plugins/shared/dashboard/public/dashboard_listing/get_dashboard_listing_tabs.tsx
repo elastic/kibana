@@ -29,8 +29,103 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingUserContent } from './types';
+import { TAB_IDS, type DashboardListingUserContent } from './types';
 import type { DashboardListingViewRegistry } from '../plugin';
+
+interface TabContentProps {
+  goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
+  getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
+  useSessionStorageIntegration?: boolean;
+  initialFilter?: string;
+  parentProps: TableListTabParentProps<DashboardListingUserContent>;
+}
+
+const DashboardsTabContent = ({
+  goToDashboard,
+  getDashboardUrl,
+  useSessionStorageIntegration,
+  initialFilter,
+  parentProps,
+}: TabContentProps) => {
+  const {
+    unsavedDashboardIds,
+    refreshUnsavedDashboards,
+    tableListViewTableProps,
+    contentInsightsClient,
+  } = useDashboardListingTable({
+    goToDashboard,
+    getDashboardUrl,
+    useSessionStorageIntegration,
+    initialFilter,
+    contentTypeFilter: TAB_IDS.DASHBOARDS,
+  });
+
+  const dashboardFavoritesClient = useMemo(() => {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
+      http: coreServices.http,
+      usageCollection: usageCollectionService,
+      userProfile: coreServices.userProfile,
+    });
+  }, []);
+
+  return (
+    <TableListViewKibanaProvider
+      {...{
+        core: coreServices,
+        savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
+        FormattedRelative,
+        favorites: dashboardFavoritesClient,
+        contentInsightsClient,
+        isKibanaVersioningEnabled: !serverlessService,
+      }}
+    >
+      <DashboardUnsavedListing
+        goToDashboard={goToDashboard}
+        unsavedDashboardIds={unsavedDashboardIds}
+        refreshUnsavedDashboards={refreshUnsavedDashboards}
+      />
+      <TableListViewTable<DashboardListingUserContent>
+        tableCaption={tableListViewTableProps.title}
+        {...tableListViewTableProps}
+        {...parentProps}
+      />
+    </TableListViewKibanaProvider>
+  );
+};
+
+const VisualizationsTabContent = ({
+  goToDashboard,
+  getDashboardUrl,
+  useSessionStorageIntegration,
+  initialFilter,
+  parentProps,
+}: TabContentProps) => {
+  const { tableListViewTableProps, contentInsightsClient } = useDashboardListingTable({
+    goToDashboard,
+    getDashboardUrl,
+    useSessionStorageIntegration,
+    initialFilter,
+    contentTypeFilter: TAB_IDS.VISUALIZATIONS,
+  });
+
+  return (
+    <TableListViewKibanaProvider
+      {...{
+        core: coreServices,
+        savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
+        FormattedRelative,
+        contentInsightsClient,
+        isKibanaVersioningEnabled: !serverlessService,
+      }}
+    >
+      <TableListViewTable<DashboardListingUserContent>
+        tableCaption={tableListViewTableProps.title}
+        {...tableListViewTableProps}
+        {...parentProps}
+      />
+    </TableListViewKibanaProvider>
+  );
+};
 
 interface GetDashboardListingTabsParams {
   goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
@@ -49,95 +144,30 @@ export const getDashboardListingTabs = ({
 }: GetDashboardListingTabsParams): TableListTab<DashboardListingUserContent>[] => {
   const dashboardsTab: TableListTab<DashboardListingUserContent> = {
     title: 'Dashboards',
-    id: 'dashboards',
-    getTableList: (parentProps: TableListTabParentProps<DashboardListingUserContent>) => {
-      const DashboardsTabContent = () => {
-        const {
-          unsavedDashboardIds,
-          refreshUnsavedDashboards,
-          tableListViewTableProps,
-          contentInsightsClient,
-        } = useDashboardListingTable({
-          goToDashboard,
-          getDashboardUrl,
-          useSessionStorageIntegration,
-          initialFilter,
-          contentTypeFilter: 'dashboards',
-          ...parentProps,
-        });
-
-        const dashboardFavoritesClient = useMemo(() => {
-          return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-            http: coreServices.http,
-            usageCollection: usageCollectionService,
-            userProfile: coreServices.userProfile,
-          });
-        }, []);
-
-        return (
-          <TableListViewKibanaProvider
-            {...{
-              core: coreServices,
-              savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-              FormattedRelative,
-              favorites: dashboardFavoritesClient,
-              contentInsightsClient,
-              isKibanaVersioningEnabled: !serverlessService,
-            }}
-          >
-            <DashboardUnsavedListing
-              goToDashboard={goToDashboard}
-              unsavedDashboardIds={unsavedDashboardIds}
-              refreshUnsavedDashboards={refreshUnsavedDashboards}
-            />
-            <TableListViewTable<DashboardListingUserContent>
-              tableCaption={tableListViewTableProps.title}
-              {...tableListViewTableProps}
-              {...parentProps}
-            />
-          </TableListViewKibanaProvider>
-        );
-      };
-
-      return <DashboardsTabContent />;
-    },
+    id: TAB_IDS.DASHBOARDS,
+    getTableList: (parentProps) => (
+      <DashboardsTabContent
+        goToDashboard={goToDashboard}
+        getDashboardUrl={getDashboardUrl}
+        useSessionStorageIntegration={useSessionStorageIntegration}
+        initialFilter={initialFilter}
+        parentProps={parentProps}
+      />
+    ),
   };
 
   const visualizationsTab: TableListTab<DashboardListingUserContent> = {
     title: 'Visualizations',
-    id: 'visualizations',
-    getTableList: (parentProps: TableListTabParentProps<DashboardListingUserContent>) => {
-      const VisualizationsTabContent = () => {
-        const { tableListViewTableProps, contentInsightsClient } = useDashboardListingTable({
-          goToDashboard,
-          getDashboardUrl,
-          useSessionStorageIntegration,
-          initialFilter,
-          contentTypeFilter: 'visualizations',
-          ...parentProps,
-        });
-
-        return (
-          <TableListViewKibanaProvider
-            {...{
-              core: coreServices,
-              savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-              FormattedRelative,
-              contentInsightsClient,
-              isKibanaVersioningEnabled: !serverlessService,
-            }}
-          >
-            <TableListViewTable<DashboardListingUserContent>
-              tableCaption={tableListViewTableProps.title}
-              {...tableListViewTableProps}
-              {...parentProps}
-            />
-          </TableListViewKibanaProvider>
-        );
-      };
-
-      return <VisualizationsTabContent />;
-    },
+    id: TAB_IDS.VISUALIZATIONS,
+    getTableList: (parentProps) => (
+      <VisualizationsTabContent
+        goToDashboard={goToDashboard}
+        getDashboardUrl={getDashboardUrl}
+        useSessionStorageIntegration={useSessionStorageIntegration}
+        initialFilter={initialFilter}
+        parentProps={parentProps}
+      />
+    ),
   };
 
   // Additional tabs from registry (e.g., annotation groups from Event Annotation Listing plugin)

@@ -20,7 +20,7 @@ import { QueryClientProvider } from '@kbn/react-query';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import type { DashboardListingProps } from './types';
+import { TAB_IDS, type DashboardListingProps } from './types';
 
 export const DashboardListing = ({
   children,
@@ -82,7 +82,7 @@ export const DashboardListing = ({
             headingId="dashboardListingHeading"
             title="Dashboards"
             tabs={tabs}
-            activeTabId={activeTab || 'dashboards'}
+            activeTabId={activeTab || TAB_IDS.DASHBOARDS}
             changeActiveTab={changeActiveTab}
           />
         </div>
