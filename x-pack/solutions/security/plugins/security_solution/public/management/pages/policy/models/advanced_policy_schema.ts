@@ -2727,17 +2727,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'mac.advanced.response_actions.get_file.upload_streams_count',
-    first_supported_version: '9.3',
-    documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.get_file.upload_streams_count',
-      {
-        defaultMessage:
-          'Number of parallel streams per upload for get-file response action. Default: 1.',
-      }
-    ),
-  },
-  {
     key: 'windows.advanced.response_actions.get_file.upload_streams_count',
     first_supported_version: '9.3',
     documentation: i18n.translate(
