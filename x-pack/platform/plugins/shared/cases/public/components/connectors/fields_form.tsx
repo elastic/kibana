@@ -13,9 +13,10 @@ import { getCaseConnectors } from '.';
 
 interface Props {
   connector: CaseActionConnector | null;
+  isInSidebarForm: boolean;
 }
 
-const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector }) => {
+const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isInSidebarForm }) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
@@ -37,7 +38,11 @@ const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector }) => {
           }
         >
           <div data-test-subj={'connector-fields'}>
-            <FieldsComponent connector={connector} key={connector.id} />
+            <FieldsComponent
+              connector={connector}
+              key={connector.id}
+              isInSidebarForm={isInSidebarForm}
+            />
           </div>
         </Suspense>
       ) : null}
