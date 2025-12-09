@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { Parser } from '../../../parser';
 import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/autocomplete';
-import type { ESQLColumnData, ESQLFieldWithMetadata, ICommandCallbacks } from '../../types';
+import type { ESQLColumnData, ICommandCallbacks } from '../../types';
 import { columnsAfter } from './columns_after';
 import { columnsAfter as statsColumnsAfter } from '../stats/columns_after';
 

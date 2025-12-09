@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 
@@ -13,8 +14,10 @@ export const NotionConnector: ConnectorSpec = {
   metadata: {
     id: '.notion',
     displayName: 'Notion',
-    description: 'Explore content and databases in Notion',
-    minimumLicense: 'gold',
+    description: i18n.translate('core.kibanaConnectorSpecs.notion.metadata.description', {
+      defaultMessage: 'Explore content and databases in Notion',
+    }),
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
 
@@ -28,7 +31,7 @@ export const NotionConnector: ConnectorSpec = {
   actions: {
     // https://developers.notion.com/reference/post-search
     searchPageOrDSByTitle: {
-      isTool: true,
+      isTool: false,
       input: z.object({
         query: z.string(),
         queryObjectType: z.enum(['page', 'data_source']),
@@ -59,7 +62,7 @@ export const NotionConnector: ConnectorSpec = {
 
     // https://developers.notion.com/reference/retrieve-a-page
     getPage: {
-      isTool: true,
+      isTool: false,
       input: z.object({ pageId: z.string() }),
       handler: async (ctx, input) => {
         const typedInput = input as { pageId: string };
@@ -73,7 +76,7 @@ export const NotionConnector: ConnectorSpec = {
 
     // https://developers.notion.com/reference/retrieve-a-data-source
     getDataSource: {
-      isTool: true,
+      isTool: false,
       input: z.object({ dataSourceId: z.string() }),
       handler: async (ctx, input) => {
         const typedInput = input as { dataSourceId: string };
@@ -87,7 +90,7 @@ export const NotionConnector: ConnectorSpec = {
 
     // https://developers.notion.com/reference/query-a-data-source
     queryDataSource: {
-      isTool: true,
+      isTool: false,
       input: z.object({
         dataSourceId: z.string(),
         filter: z.string().optional(),
@@ -121,7 +124,9 @@ export const NotionConnector: ConnectorSpec = {
   },
 
   test: {
-    description: 'Verifies Notion connection by fetching metadata about given data source',
+    description: i18n.translate('ore.kibanaConnectorSpecs.notion.test.description', {
+      defaultMessage: 'Verifies Notion connection by fetching metadata about given data source',
+    }),
     // TODO: might need to accept some input here in order to pass to the API endpoint to test
     // if listing all users feels a bit too much
     handler: async (ctx) => {
