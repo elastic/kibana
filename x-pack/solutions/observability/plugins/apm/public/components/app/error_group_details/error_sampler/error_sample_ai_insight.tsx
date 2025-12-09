@@ -24,12 +24,9 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 
-export function ErrorSampleAiInsight({
-  error,
-  transaction,
-}: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>) {
+export function ErrorSampleAiInsight({ error }: { error: APMError }) {
   const { onechat, core } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
@@ -56,6 +53,7 @@ export function ErrorSampleAiInsight({
 
   const errorId = error.error.id;
   const serviceName = error.service.name;
+  const traceId = error.trace?.id;
 
   const fetchAiInsights = async () => {
     setIsLoading(true);
@@ -66,8 +64,9 @@ export function ErrorSampleAiInsight({
           signal: null,
           params: {
             body: {
-              serviceName: error.service.name,
-              errorId: error.error.id,
+              errorId,
+              serviceName,
+              traceId,
               start,
               end,
               environment,

@@ -69,6 +69,7 @@ export interface GenerateErrorAiInsightParams {
   errorId: string;
   serviceName: string;
   environment?: string;
+  traceId?: string;
   start: string;
   end: string;
   logger: Logger;
@@ -84,6 +85,7 @@ export async function generateErrorAiInsight({
   errorId,
   serviceName,
   environment,
+  traceId,
   start,
   end,
   logger,
@@ -98,6 +100,7 @@ export async function generateErrorAiInsight({
     request,
     serviceName,
     environment: environment ?? '',
+    traceId,
     start,
     end,
     errorId,

@@ -27,9 +27,10 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         errorId: t.string,
         start: t.string,
         end: t.string,
-        environment: t.union([t.string, t.undefined, t.null]),
-        kuery: t.union([t.string, t.undefined, t.null]),
-        connectorId: t.union([t.string, t.undefined, t.null]),
+        environment: t.union([t.string, t.undefined]),
+        kuery: t.union([t.string, t.undefined]),
+        connectorId: t.union([t.string, t.undefined]),
+        traceId: t.union([t.string, t.undefined]),
       }),
     }),
     handler: async ({ request, core, plugins, dataRegistry, params, logger }) => {
@@ -40,6 +41,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         end,
         environment = '',
         connectorId: lastUsedConnectorId,
+        traceId,
       } = params.body;
 
       const [_, pluginsStart] = await core.getStartServices();
@@ -62,7 +64,8 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         serviceName,
         start,
         end,
-        environment: environment ?? '',
+        environment,
+        traceId,
         dataRegistry,
         request,
         inferenceStart: pluginsStart.inference,

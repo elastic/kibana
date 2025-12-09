@@ -295,7 +295,7 @@ export function ErrorSampleDetails({
       )}
 
       {onechat && isObservabilityAgentEnabled ? (
-        <ErrorSampleAiInsight error={error} transaction={transaction} />
+        <ErrorSampleAiInsight error={error} />
       ) : (
         <ErrorSampleContextualInsight error={error} transaction={transaction} />
       )}

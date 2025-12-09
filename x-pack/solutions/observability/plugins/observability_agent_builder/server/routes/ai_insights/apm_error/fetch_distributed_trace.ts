@@ -8,6 +8,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { UnflattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { getTypedSearch } from '../../../utils/get_typed_search';
 import { termFilter, timeRangeFilter } from '../../../utils/dsl_filters';
 
@@ -17,8 +18,8 @@ interface ServiceAggregate {
   error_count: number;
 }
 
-export interface TraceContext {
-  traceDocuments: Array<Record<string, unknown>>;
+export interface DistributedTrace {
+  traceDocuments: Array<UnflattenedApmEvent>;
   traceServiceAggregates: ServiceAggregate[];
 }
 
@@ -36,7 +37,7 @@ export async function fetchDistributedTrace({
   start: number;
   end: number;
   logger: Logger;
-}): Promise<TraceContext> {
+}): Promise<DistributedTrace> {
   const search = getTypedSearch(esClient.asCurrentUser);
   const indices = [apmIndices.transaction, apmIndices.span, apmIndices.error].join(',');
 
@@ -94,8 +95,8 @@ export async function fetchDistributedTrace({
     sort: [{ '@timestamp': 'asc' }],
   });
 
-  const traceDocuments = traceResponse.hits.hits.map((hit) =>
-    accessKnownApmEventFields(hit.fields ?? {}).unflatten()
+  const traceDocuments = traceResponse.hits.hits.map(
+    (hit) => accessKnownApmEventFields(hit.fields ?? {}).unflatten() as UnflattenedApmEvent
   );
 
   const serviceAggs = traceResponse.aggregations?.services.buckets ?? [];

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
+import { termFilter } from '../../../utils/dsl_filters';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -30,10 +32,18 @@ export interface FetchApmErrorContextParams {
   request: KibanaRequest;
   serviceName: string;
   environment?: string;
+  traceId?: string;
   start: string;
   end: string;
   errorId: string;
   logger: Logger;
+}
+
+interface ContextPart {
+  name: string;
+  start: string;
+  end: string;
+  handler: () => Promise<unknown>;
 }
 
 export async function fetchApmErrorContext({
@@ -43,15 +53,19 @@ export async function fetchApmErrorContext({
   request,
   serviceName,
   environment = '',
+  traceId,
   start,
   end,
   errorId,
   logger,
 }: FetchApmErrorContextParams): Promise<string> {
-  const contextParts: string[] = [];
+  const parsedStart = parseDatemath(start);
+  const parsedEnd = parseDatemath(end, { roundUp: true });
 
-  // Fetch the full error details with transaction (if available)
-  const details = await dataRegistry.getData('apmErrorDetails', {
+  const [coreStart] = await core.getStartServices();
+  const esClient = coreStart.elasticsearch.client.asScoped(request);
+
+  const errorDetailsPromise = dataRegistry.getData('apmErrorDetails', {
     request,
     errorId,
     serviceName,
@@ -60,52 +74,38 @@ export async function fetchApmErrorContext({
     serviceEnvironment: environment ?? '',
   });
 
-  contextParts.push(`<ErrorDetails>\n${JSON.stringify(details?.error, null, 2)}\n</ErrorDetails>`);
-
-  if (details?.transaction) {
-    contextParts.push(
-      `<TransactionDetails>\n${JSON.stringify(
-        details?.transaction,
-        null,
-        2
-      )}\n</TransactionDetails>`
-    );
-  }
-
-  try {
-    // Fetch the downstream dependencies for the service related to the error
-    const apmDownstreamDependencies = await dataRegistry.getData('apmDownstreamDependencies', {
-      request,
-      serviceName,
-      serviceEnvironment: environment ?? '',
+  const contextParts: ContextPart[] = [
+    {
+      name: 'ErrorDetails',
       start,
       end,
-    });
+      handler: async () => (await errorDetailsPromise)?.error,
+    },
+    {
+      name: 'TransactionDetails',
+      start,
+      end,
+      handler: async () => (await errorDetailsPromise)?.transaction,
+    },
+    {
+      name: 'DownstreamDependencies',
+      start,
+      end,
+      handler: () =>
+        dataRegistry.getData('apmDownstreamDependencies', {
+          request,
+          serviceName,
+          serviceEnvironment: environment ?? '',
+          start,
+          end,
+        }),
+    },
+  ];
 
-    if (apmDownstreamDependencies?.length) {
-      contextParts.push(
-        `<DownstreamDependencies>\n${JSON.stringify(
-          apmDownstreamDependencies,
-          null,
-          2
-        )}\n</DownstreamDependencies>`
-      );
-    }
-  } catch (error) {
-    logger.debug(`Error AI insight: apmDownstreamDependencies failed: ${error}`);
-  }
-
-  const traceId = details?.error?.trace?.id;
   if (traceId) {
-    const [coreStart] = await core.getStartServices();
-    const esClient = coreStart.elasticsearch.client.asScoped(request);
-    const parsedStart = parseDatemath(start);
-    const parsedEnd = parseDatemath(end, { roundUp: true });
-
-    try {
-      // Fetch the trace details for the error (transactions, spans, errors, and aggregated services)
+    const traceContextPromise = (async () => {
       const apmIndices = await getApmIndices({ core, plugins, logger });
-      const traceContext = await fetchDistributedTrace({
+      return fetchDistributedTrace({
         esClient,
         apmIndices,
         traceId,
@@ -113,67 +113,75 @@ export async function fetchApmErrorContext({
         end: parsedEnd,
         logger,
       });
+    })();
 
-      if (traceContext.traceDocuments.length) {
-        contextParts.push(
-          `<TraceDocuments>\n${JSON.stringify(
-            traceContext.traceDocuments,
-            null,
-            2
-          )}\n</TraceDocuments>`
-        );
-      }
+    contextParts.push({
+      name: 'TraceDocuments',
+      start,
+      end,
+      handler: async () => (await traceContextPromise).traceDocuments,
+    });
 
-      if (traceContext.traceServiceAggregates.length) {
-        contextParts.push(
-          `<TraceServices>\n${JSON.stringify(
-            traceContext.traceServiceAggregates,
-            null,
-            2
-          )}\n</TraceServices>`
-        );
-      }
-    } catch (error) {
-      logger.debug(`Error AI insight: Failed to fetch trace context for ${traceId}: ${error}`);
-    }
+    contextParts.push({
+      name: 'TraceServices',
+      start,
+      end,
+      handler: async () => (await traceContextPromise).traceServiceAggregates,
+    });
 
-    try {
-      // Fetch log categories for the trace
-      const logsIndices = await getLogsIndices({ core, logger });
+    contextParts.push({
+      name: 'TraceLogCategories',
+      start,
+      end,
+      handler: async () => {
+        const logsIndices = await getLogsIndices({ core, logger });
 
-      const logCategories = await getFilteredLogCategories({
-        esClient,
-        logsIndices,
-        boolQuery: {
-          filter: [
-            { term: { 'trace.id': traceId } },
-            { exists: { field: 'message' } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: parsedStart,
-                  lte: parsedEnd,
+        const logCategories = await getFilteredLogCategories({
+          esClient,
+          logsIndices,
+          boolQuery: {
+            filter: [
+              ...termFilter('trace.id', traceId),
+              { exists: { field: 'message' } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: parsedStart,
+                    lte: parsedEnd,
+                  },
                 },
               },
-            },
-          ],
-        },
-        logger,
-        categoryCount: 10,
-        terms: { 'trace.id': traceId },
-      });
+            ],
+          },
+          logger,
+          categoryCount: 10,
+          terms: { 'trace.id': traceId },
+        });
 
-      if (logCategories?.categories?.length) {
-        contextParts.push(
-          `<TraceLogCategories>\n${JSON.stringify(logCategories, null, 2)}\n</TraceLogCategories>`
-        );
-      }
-    } catch (error) {
-      logger.debug(
-        `Error AI insight: Failed to fetch log categories for trace ${traceId}: ${error}`
-      );
-    }
+        return logCategories?.categories;
+      },
+    });
   }
 
-  return contextParts.filter(Boolean).join('\n\n');
+  const results = await Promise.all(
+    contextParts.map(async ({ name, handler, start: partStart, end: partEnd }) => {
+      try {
+        const data = await handler();
+        if (!data || (Array.isArray(data) && data.length === 0)) {
+          return undefined;
+        }
+        return dedent`<${name}>
+          Time window: ${partStart} to ${partEnd}
+          \`\`\`json
+          ${JSON.stringify(data, null, 2)}
+          \`\`\`
+          </${name}>`;
+      } catch (err) {
+        logger.debug(`Error AI Insight: ${name} failed: ${err}`);
+        return undefined;
+      }
+    })
+  );
+
+  return results.filter(Boolean).join('\n\n');
 }
