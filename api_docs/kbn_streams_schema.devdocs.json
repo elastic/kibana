@@ -1975,7 +1975,7 @@
                 "section": "def-common.Condition",
                 "text": "Condition"
               },
-              "; type: string; } | undefined"
+              "; type: \"system\"; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
             "deprecated": false,
@@ -3145,7 +3145,7 @@
                 "section": "def-common.Condition",
                 "text": "Condition"
               },
-              "; } | undefined"
+              "; type: \"system\"; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
             "deprecated": false,
@@ -3642,21 +3642,6 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.keepFields",
-        "type": "Array",
-        "tags": [],
-        "label": "keepFields",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.MAX_NESTING_LEVEL",
         "type": "number",
         "tags": [],
@@ -3697,21 +3682,6 @@
           " & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.namespacePrefixes",
-        "type": "Array",
-        "tags": [],
-        "label": "namespacePrefixes",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4315,6 +4285,21 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.keepFields",
+        "type": "Object",
+        "tags": [],
+        "label": "keepFields",
+        "description": [],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.namedFieldDefinitionConfigSchema",
         "type": "Object",
         "tags": [],
@@ -4359,6 +4344,21 @@
           " & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.namespacePrefixes",
+        "type": "Object",
+        "tags": [],
+        "label": "namespacePrefixes",
+        "description": [],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4586,9 +4586,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">; }, \"strip\", ",
+          ">; type: ",
+          "ZodEnum",
+          "<[\"system\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; filter: ",
+          ", { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4596,7 +4598,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }, { name: string; filter: ",
+          "; }, { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4616,7 +4618,7 @@
           "ZodNumber",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          ", { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4624,7 +4626,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",

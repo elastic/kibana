@@ -50,6 +50,7 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from '../constants';
 
 export const resolveCase = async (caseId: string, signal: AbortSignal): Promise<ResolvedCase> =>
   Promise.resolve(basicResolvedCase);
@@ -85,6 +86,8 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    from: DEFAULT_FROM_DATE,
+    to: DEFAULT_TO_DATE,
   },
   queryParams = {
     page: 1,
