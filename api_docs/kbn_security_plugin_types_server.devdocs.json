@@ -4497,10 +4497,6 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
-                "plugin": "observabilityAgent",
-                "path": "x-pack/solutions/observability/plugins/observability_agent/server/tools/search_knowledge_base/search_knowledge_base.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
               },

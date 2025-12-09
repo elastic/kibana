@@ -20,6 +20,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorUsageCollector, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 import { createAndThrowUserError } from './create_and_throw_user_error';
+import { getBeforeRedirectFn } from './before_redirect';
 
 export const request = async <T = unknown>({
   axios,
@@ -67,19 +68,6 @@ export const request = async <T = unknown>({
     headers,
   });
 
-  function beforeRedirect(options: Record<string, unknown>) {
-    const hostname = options.hostname;
-    if (hostname == null) {
-      throw new Error('redirect hostname not provided by axios');
-    }
-
-    if (typeof hostname !== 'string') {
-      throw new Error('redirect hostname provided by axios was not a string');
-    }
-
-    configurationUtilities.ensureHostnameAllowed(hostname);
-  }
-
   try {
     const result = await axios(url, {
       ...restConfig,
@@ -92,7 +80,7 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
-      beforeRedirect,
+      beforeRedirect: getBeforeRedirectFn(configurationUtilities),
     });
 
     if (connectorUsageCollector) {

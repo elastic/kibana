@@ -204,7 +204,6 @@ describe('stripUnmappedKeys', () => {
 
   it('should drop references', () => {
     const dashboardState = {
-      panels: [],
       title: 'my dashboard',
       references: [],
     };
@@ -224,7 +223,6 @@ describe('stripUnmappedKeys', () => {
   it('should drop controlGroupInput', () => {
     const dashboardState = {
       controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
-      panels: [],
       title: 'my dashboard',
     };
     expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
@@ -319,7 +317,6 @@ describe('throwOnUnmappedKeys', () => {
 
   it('should throw when dashboard contains references', () => {
     const dashboardState = {
-      panels: [],
       title: 'my dashboard',
       references: [],
     };
@@ -329,7 +326,6 @@ describe('throwOnUnmappedKeys', () => {
   it('should throw when dashboard contains controlGroupInput', () => {
     const dashboardState = {
       controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
-      panels: [],
       title: 'my dashboard',
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();

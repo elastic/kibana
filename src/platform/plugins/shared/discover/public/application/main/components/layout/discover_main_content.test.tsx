@@ -37,6 +37,7 @@ import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { internalStateActions } from '../../state_management/redux';
 
 const mountComponent = async ({
   hideChart = false,
@@ -91,15 +92,23 @@ const mountComponent = async ({
   const dataView = stateContainer.savedSearchState
     .getState()
     .searchSource.getField('index') as DataView;
-  stateContainer.appState.update({
-    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
-    interval: 'auto',
-    hideChart,
-    columns: [],
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+      appState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        interval: 'auto',
+        hideChart,
+        columns: [],
+      },
+    })
+  );
 
   if (isEsqlMode) {
-    stateContainer.appState.update({ query: { esql: 'from * ' } });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: 'from * ' } },
+      })
+    );
   }
 
   const props: DiscoverMainContentProps = {

@@ -103,7 +103,7 @@ export const SecondaryMenuItemComponent = ({
   );
 
   return (
-    <li ref={activeItemRef}>
+    <li ref={activeItemRef} role="none">
       {isHighlighted ? (
         <EuiButton
           id={id}

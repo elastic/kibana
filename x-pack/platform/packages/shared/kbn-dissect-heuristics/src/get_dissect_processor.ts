@@ -42,8 +42,23 @@ export function getDissectProcessor(
  * Counts the number of delimiter sequences in a pattern
  */
 function countDelimiters(pattern: string): number {
-  // Count non-%{} sequences
-  const withoutFields = pattern.replace(/%\{[^}]+\}/g, '');
+  let withoutFields = '';
+  let searchPos = 0;
+  // Find position of %{field} patterns and skip them
+  while (searchPos < pattern.length) {
+    if (pattern[searchPos] === '%' && pattern[searchPos + 1] === '{') {
+      // Find closing '}'
+      const closingBracketPos = pattern.indexOf('}', searchPos + 2);
+      if (closingBracketPos !== -1) {
+        // Skip past this field
+        searchPos = closingBracketPos + 1;
+        continue;
+      }
+    }
+    // Otherwise, add char to result
+    withoutFields += pattern[searchPos];
+    searchPos++;
+  }
   // Count meaningful delimiter sequences (more than just whitespace)
   return withoutFields.split(/\s+/).filter((s) => s.length > 0).length;
 }

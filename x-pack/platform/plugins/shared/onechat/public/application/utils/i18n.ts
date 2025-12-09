@@ -15,15 +15,6 @@ export const labels = {
   },
   conversations: {
     title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Agent Chat' }),
-    manageAgents: i18n.translate('xpack.onechat.agents.manageAgents', {
-      defaultMessage: 'Manage agents',
-    }),
-    createAnAgent: i18n.translate('xpack.onechat.agents.createAnAgent', {
-      defaultMessage: 'Create an agent',
-    }),
-    selectAgentAriaLabel: i18n.translate('xpack.onechat.agents.selectAgentAriaLabel', {
-      defaultMessage: 'Select an agent',
-    }),
   },
   tools: {
     // Landing page

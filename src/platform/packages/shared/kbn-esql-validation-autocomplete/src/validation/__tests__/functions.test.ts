@@ -140,7 +140,7 @@ describe('function validation', () => {
 
         it('accepts nulls by default', async () => {
           const { expectErrors } = await setup();
-          expectErrors('FROM a_index | EVAL TEST(NULL)', []);
+          await expectErrors('FROM a_index | EVAL TEST(NULL)', []);
         });
       });
 
@@ -295,11 +295,13 @@ describe('function validation', () => {
 
           const { expectErrors } = await setup();
 
-          expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
+          await expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
             'Unknown column "missingColumn"',
           ]);
 
-          expectErrors('FROM a_index | EVAL foo=missingColumn', ['Unknown column "missingColumn"']);
+          await expectErrors('FROM a_index | EVAL foo=missingColumn', [
+            'Unknown column "missingColumn"',
+          ]);
         });
 
         describe('inline casts', () => {
@@ -1082,6 +1084,65 @@ describe('function validation', () => {
           ]);
         });
       });
+    });
+  });
+
+  describe('conditional function validation', () => {
+    beforeEach(() => {
+      const definitions: FunctionDefinition[] = [
+        {
+          name: 'conditional_mock',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: 'Mock function with isSignatureRepeating',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [
+                { name: 'condition', type: 'boolean' },
+                { name: 'value', type: 'any' },
+              ],
+              returnType: 'unknown',
+              minParams: 2,
+              isSignatureRepeating: true,
+            },
+          ],
+        },
+      ];
+
+      setTestFunctions(definitions);
+    });
+
+    it('accepts compatible value types (text + keyword)', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, textField, booleanField, keywordField)',
+        []
+      );
+    });
+
+    it('rejects incompatible value types', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, longField, booleanField, "d")',
+        [
+          getNoValidCallSignatureError('conditional_mock', [
+            'boolean',
+            'long',
+            'boolean',
+            'keyword',
+          ]),
+        ]
+      );
+    });
+
+    it('rejects string literal at condition position', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM index | EVAL result = CONDITIONAL_MOCK("string", keywordField)', [
+        getNoValidCallSignatureError('conditional_mock', ['keyword', 'keyword']),
+      ]);
     });
   });
 });

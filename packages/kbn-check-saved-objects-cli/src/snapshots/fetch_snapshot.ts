@@ -11,7 +11,7 @@ import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import * as os from 'os';
 import { basename, resolve } from 'path';
-import { downloadFile } from '../util/download_file';
+import { downloadFile } from '../util';
 import type { MigrationSnapshot } from '../types';
 
 const SO_MIGRATIONS_BUCKET_PREFIX = 'https://storage.googleapis.com/kibana-so-types-snapshots';

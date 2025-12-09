@@ -64,3 +64,7 @@ export type OptionsListComponentApi = PublishesField &
       allowExpensiveQueries$: PublishingSubject<boolean>;
     };
   };
+
+export interface OptionsListCustomStrings {
+  invalidSelectionsLabel?: string;
+}

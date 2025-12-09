@@ -85,7 +85,9 @@ const streams: StreamPutItem[] = [
             },
           ],
         },
-        failure_store: { lifecycle: { enabled: { data_retention: '30d' } } },
+        failure_store: {
+          lifecycle: { enabled: { data_retention: '30d' } },
+        },
       },
     },
     ...emptyAssets,

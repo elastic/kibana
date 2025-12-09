@@ -24,7 +24,7 @@
 import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -76,11 +76,24 @@ export interface ConnectorMetadata {
 
 // Auth schemas defined in ./auth_types
 
+export interface GetTokenOpts {
+  tokenUrl: string;
+  scope?: string;
+  clientId: string;
+  clientSecret: string;
+  additionalFields?: Record<string, unknown>;
+}
+
+export interface AuthContext {
+  getToken: (opts: GetTokenOpts) => Promise<string | null>;
+  logger: Logger;
+}
+
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
-  configure: (axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
+  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -171,11 +184,11 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 }
 
 export interface ActionContext {
-  auth: { method: string; headers: Record<string, string>; [key: string]: unknown };
-  log: Logger;
   client: AxiosInstance;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
+  log: Logger;
+  secrets?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -218,11 +231,18 @@ export interface ConnectorTest {
 export interface AuthTypeDef {
   type: string;
   defaults: Record<string, unknown>;
+  overrides?: {
+    meta?: Record<string, Record<string, unknown>>;
+    // can override other Zod fields here in the future if needed
+  };
 }
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
-  authTypes?: Array<string | AuthTypeDef>;
+  auth?: {
+    types: Array<string | AuthTypeDef>;
+    headers?: Record<string, AxiosHeaderValue>;
+  };
 
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })

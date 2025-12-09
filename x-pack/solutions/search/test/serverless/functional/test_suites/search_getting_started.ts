@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'apiKeys',
     'searchGettingStarted',
+    'solutionNavigation',
   ]);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -27,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('as viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
+        await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
       describe('Getting Started page is not accessible for viewer role', function () {
@@ -181,6 +183,53 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'href'
             );
             expect(href).to.contain('docs/solutions/search/get-started');
+          });
+        });
+
+        describe('Getting Started navigation', function () {
+          it('renders Getting Started side nav item', async () => {
+            await pageObjects.common.navigateToApp('searchGettingStarted');
+            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+              deepLinkId: 'searchGettingStarted',
+            });
+          });
+
+          it('navigate to Getting Started using search', async () => {
+            await pageObjects.svlCommonNavigation.search.showSearch();
+            // TODO: test something search project specific instead of generic discover
+            await pageObjects.svlCommonNavigation.search.searchFor('getting started');
+            await pageObjects.svlCommonNavigation.search.clickOnOption(0);
+            await pageObjects.svlCommonNavigation.search.hideSearch();
+
+            expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/getting_started');
+          });
+
+          it('Getting Started nav item shows correct breadcrumbs', async () => {
+            await pageObjects.common.navigateToApp('searchGettingStarted');
+            await testSubjects.existOrFail('gettingStartedHeader');
+            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+              deepLinkId: 'searchGettingStarted',
+            });
+            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+              text: 'Getting started',
+            });
+          });
+
+          it('renders tour for Getting Started', async () => {
+            await pageObjects.solutionNavigation.sidenav.tour.reset();
+            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
+              'sidenav-manage-data'
+            );
+            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
+              'sidenav-search-getting-started'
+            );
+            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+            await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
+            await browser.refresh();
+            await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
           });
         });
       });

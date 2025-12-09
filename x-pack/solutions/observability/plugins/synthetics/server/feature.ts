@@ -77,6 +77,27 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
+const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_read_param_values',
+      name: i18n.translate('xpack.synthetics.features.canReadParams.label', {
+        defaultMessage: 'Can read global parameter values',
+      }),
+      includeIn: 'none', // This ensures it is not granted by default
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canReadParamValues'],
+      /* Field level access is enforced for the VALUE of the param.
+       * The api is still accessible for SO operations to users without this privilege */
+      api: [],
+    },
+  ],
+};
+
 export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
@@ -171,6 +192,15 @@ export const syntheticsFeature = {
           'This feature allows you to manage your private locations, for example adding, or deleting them.',
       }),
       privilegeGroups: [canManagePrivateLocationsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.params', {
+        defaultMessage: 'Global Parameters',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.params.description', {
+        defaultMessage: 'This feature allows you to read global parameters values',
+      }),
+      privilegeGroups: [canReadParamsPrivilege],
     },
   ],
 };

@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchGettingStarted',
     'searchHomePage',
     'searchNavigation',
+    'solutionNavigation',
   ]);
   const searchSpace = getService('searchSpace');
   const browser = getService('browser');
@@ -33,6 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'search-getting-started-ftr'
         ));
         await searchSpace.navigateTo(spaceCreated.id);
+        await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
       after(async () => {
@@ -191,6 +193,41 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
             expect(href).to.contain('docs/solutions/search/get-started');
           });
+        });
+      });
+
+      describe('Getting Started navigation', function () {
+        it('renders Getting Started side nav item', async () => {
+          await pageObjects.searchNavigation.navigateToElasticsearchSearchGettingStartedPage();
+          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+            deepLinkId: 'searchGettingStarted',
+          });
+        });
+
+        it('Getting Started nav item is active and shows correct breadcrumbs', async () => {
+          await pageObjects.solutionNavigation.sidenav.clickLink({
+            deepLinkId: 'searchGettingStarted',
+          });
+          await testSubjects.existOrFail('gettingStartedHeader');
+          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+            deepLinkId: 'searchGettingStarted',
+          });
+          await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+            text: 'Getting started',
+          });
+        });
+
+        it('renders tour for Getting Started', async () => {
+          await pageObjects.solutionNavigation.sidenav.tour.reset();
+          await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+          await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+          await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
+            'sidenav-search-getting-started'
+          );
+          await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+          await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
+          await browser.refresh();
+          await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
         });
       });
     });
