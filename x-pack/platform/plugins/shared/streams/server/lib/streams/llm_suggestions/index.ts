@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export { FeatureClient } from './feature_client';
-export type { FeatureBulkOperation } from './feature_client';
-export { FeatureTypeRegistry } from './feature_type_registry';
-export type { FeatureTypeHandler } from './feature_type_handler';
-export { SystemFeatureHandler } from './handlers/system';
-export type { StoredFeature } from './stored_feature';
-export { storedFeatureSchema } from './stored_feature';
+export { LLMSuggestionClient } from './llm_suggestion_client';
+export type { StoredLLMSuggestion } from './stored_llm_suggestions';
+export { storedLLMSuggestionSchema } from './stored_llm_suggestions';

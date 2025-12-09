@@ -55,7 +55,7 @@ export class LLMSuggestionClient {
   toStorage(streamName: string, feature: LLMSuggestion): StoredLLMSuggestion {
     return {
       [STREAM_NAME]: streamName,
-      [LLM_SUGGESTION_UUID]: this.getFeatureUuid(streamName, feature.name),
+      [LLM_SUGGESTION_UUID]: this.getLLMSuggestionUuid(streamName, feature.name),
       [LLM_SUGGESTION_TYPE]: feature.type,
       [LLM_SUGGESTION_NAME]: feature.name,
       [LLM_SUGGESTION_DESCRIPTION]: feature.description,
@@ -124,7 +124,7 @@ export class LLMSuggestionClient {
     suggestion: Suggestion
   ): Promise<StorageClientIndexResponse> {
     const document = this.toStorage(name, suggestion);
-    const id = this.getFeatureUuid(name, suggestion.name);
+    const id = this.getLLMSuggestionUuid(name, suggestion.name);
 
     return await this.storageClient.index({
       id,
@@ -133,7 +133,7 @@ export class LLMSuggestionClient {
   }
 
   async unlinkSuggestion(name: string, suggestion: Suggestion): Promise<void> {
-    const id = this.getFeatureUuid(name, suggestion.name);
+    const id = this.getLLMSuggestionUuid(name, suggestion.name);
 
     const { result } = await this.storageClient.delete({ id });
     if (result === 'not_found') {
@@ -160,7 +160,7 @@ export class LLMSuggestionClient {
           };
         }
 
-        const id = this.getFeatureUuid(name, operation.delete.suggestion.name);
+        const id = this.getLLMSuggestionUuid(name, operation.delete.suggestion.name);
         return {
           delete: {
             _id: id,
@@ -175,7 +175,7 @@ export class LLMSuggestionClient {
     name: string,
     suggestion: { type: string; name: string }
   ): Promise<Suggestion> {
-    const id = this.getFeatureUuid(name, suggestion.name);
+    const id = this.getLLMSuggestionUuid(name, suggestion.name);
     const hit = await this.storageClient.get({ id });
 
     return this.fromStorage(hit._source!);
@@ -185,7 +185,7 @@ export class LLMSuggestionClient {
     name: string,
     suggestion: { type: string; name: string }
   ): Promise<StorageClientDeleteResponse> {
-    const id = this.getFeatureUuid(name, suggestion.name);
+    const id = this.getLLMSuggestionUuid(name, suggestion.name);
     return await this.storageClient.delete({ id });
   }
 
@@ -193,7 +193,7 @@ export class LLMSuggestionClient {
     name: string,
     suggestion: Suggestion
   ): Promise<StorageClientIndexResponse> {
-    const id = this.getFeatureUuid(name, suggestion.name);
+    const id = this.getLLMSuggestionUuid(name, suggestion.name);
     return await this.storageClient.index({
       document: this.toStorage(name, suggestion),
       id,
@@ -217,7 +217,7 @@ export class LLMSuggestionClient {
     };
   }
 
-  getFeatureUuid(streamName: string, llmSuggestionName: string): string {
+  getLLMSuggestionUuid(streamName: string, llmSuggestionName: string): string {
     // override required for bwc
     return objectHash({
       [STREAM_NAME]: streamName,
