@@ -3829,7 +3829,7 @@
         "label": "SECURITY_FEATURE_ID",
         "description": [],
         "signature": [
-          "\"siemV4\""
+          "\"siemV5\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,

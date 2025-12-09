@@ -19,12 +19,14 @@ const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
+  diskSizeGb: 105,
 };
 
 const FIPS_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-fips-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
+  diskSizeGb: 105,
 };
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
@@ -61,7 +63,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   return config;
 }
 
-const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
+const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
   const additionalProps =
     {
@@ -72,6 +74,7 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
   return {
     ...getAgentImageConfig(),
     machineType: `${kind}-standard-${cores}`,
+    ...(diskSizeGb ? { diskSizeGb } : {}),
     ...additionalProps,
   };
 };
