@@ -20,6 +20,7 @@ import { ExceptionItemImportError } from '@kbn/lists-plugin/server/exception_ite
 import { stringify } from '../../../endpoint/utils/stringify';
 import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
+  buildPerPolicyTag,
   getArtifactOwnerSpaceIds,
   isArtifactGlobal,
 } from '../../../../common/endpoint/service/artifacts/utils';
@@ -475,5 +476,45 @@ export class BaseValidator {
     }
 
     items.items = validatedItems;
+  }
+
+  protected async removeInvalidPolicyIds(item: ExceptionItemLikeOptions): Promise<void> {
+    if (this.isItemByPolicy(item)) {
+      const { packagePolicy, savedObjects } = this.endpointAppContext.getInternalFleetServices();
+      const policyIdsInArtifact = getPolicyIdsFromArtifact(item);
+      const soClient = savedObjects.createInternalUnscopedSoClient();
+
+      if (policyIdsInArtifact.length === 0) {
+        return;
+      }
+
+      const matchingPoliciesFromAllSpaces: PackagePolicy[] =
+        (await packagePolicy.getByIDs(soClient, policyIdsInArtifact, {
+          ignoreMissing: true,
+          spaceIds: ['*'],
+        })) ?? [];
+
+      const matchingPolicyIdsFromAllSpaces = new Set<string>();
+      matchingPoliciesFromAllSpaces.forEach(({ id }) => matchingPolicyIdsFromAllSpaces.add(id));
+
+      const invalidPolicyIds: string[] = policyIdsInArtifact.filter(
+        (policyId) => !matchingPolicyIdsFromAllSpaces.has(policyId)
+      );
+
+      const invalidPolicyIdTags = new Set<string>();
+      invalidPolicyIds.forEach((invalidPolicyId) =>
+        invalidPolicyIdTags.add(buildPerPolicyTag(invalidPolicyId))
+      );
+
+      if (invalidPolicyIdTags.size > 0) {
+        item.tags = item.tags.filter((tag) => !invalidPolicyIdTags.has(tag));
+
+        item.comments.push({
+          comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n${invalidPolicyIds
+            .map((id) => `- "${id}"`)
+            .join('\n')}`,
+        });
+      }
+    }
   }
 }
