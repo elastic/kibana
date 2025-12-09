@@ -48,7 +48,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['alertId', 'id', 'index', 'owner', 'rule', 'type', 'version', 'comment'],
   },
   paramsSchema: z.object({
     ...getShapeAt(update_case_comment_default_space_request, 'body'),

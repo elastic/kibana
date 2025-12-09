@@ -30,6 +30,7 @@ import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -610,7 +611,7 @@ export const buildUpsertStreamRequestPayload = (
   definition: Streams.ingest.all.GetResponse,
   steps: StreamlangStepWithUIAttributes[],
   fields?: FieldDefinition
-): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
+): { ingest: IngestUpsertRequest } => {
   const processing = convertUIStepsToDSL(steps);
 
   return Streams.WiredStream.GetResponse.is(definition)

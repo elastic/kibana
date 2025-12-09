@@ -314,7 +314,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         activePage: pageIndex,
         data: aggs,
         groupingLevel,
-        inspectButton: inspect,
+        additionalToolbarControls: [inspect],
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage,
