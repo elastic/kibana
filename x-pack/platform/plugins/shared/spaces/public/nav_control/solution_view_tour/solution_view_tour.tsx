@@ -62,7 +62,7 @@ export const SolutionViewTour: FC<Props> = ({
           <p>
             <FormattedMessage
               id="xpack.spaces.navControl.tour.content"
-              defaultMessage="Only {solution} features are visible.{br}To access feature from other solutions, edit your {spacesLink} or create new spaces.{br}{learnMore}"
+              defaultMessage="Only {solution} features are visible.{br}To access features from other solutions, edit your {spacesLink} or create new spaces."
               values={{
                 solution: solutionLabel,
                 spacesLink: (
@@ -78,13 +78,6 @@ export const SolutionViewTour: FC<Props> = ({
                   >
                     {i18n.translate('xpack.spaces.navControl.tour.spaceSettingsLink', {
                       defaultMessage: 'space settings',
-                    })}
-                  </EuiLink>
-                ),
-                learnMore: (
-                  <EuiLink href={manageSpacesDocsLink} target="_blank" external>
-                    {i18n.translate('xpack.spaces.navControl.tour.learnMore', {
-                      defaultMessage: 'Learn more',
                     })}
                   </EuiLink>
                 ),
