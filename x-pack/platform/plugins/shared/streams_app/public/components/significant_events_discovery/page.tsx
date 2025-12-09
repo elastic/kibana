@@ -15,29 +15,29 @@ import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { FeedbackButton } from '../feedback_button';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 
-export function SignificantEventsAnalyzerPage() {
+export function SignificantEventsDiscoveryPage() {
   const {
-    features: { significantEventsAnalyzer },
+    features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
 
   useStreamsAppBreadcrumbs(() => {
     return [
       {
-        title: i18n.translate('xpack.streams.significantEventsAnalyzer.breadcrumbTitle', {
-          defaultMessage: 'Significant events analyzer',
+        title: i18n.translate('xpack.streams.significantEventsDiscovery.breadcrumbTitle', {
+          defaultMessage: 'Significant events Discovery',
         }),
-        path: '/_analyzer',
+        path: '/_discovery',
       },
     ];
   }, []);
 
-  if (significantEventsAnalyzer === undefined) {
+  if (significantEventsDiscovery === undefined) {
     // Waiting to load license
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (!significantEventsAnalyzer.available || !significantEventsAnalyzer.enabled) {
+  if (!significantEventsDiscovery.available || !significantEventsDiscovery.enabled) {
     return <RedirectTo path="/" />;
   }
 
@@ -57,8 +57,8 @@ export function SignificantEventsAnalyzerPage() {
           >
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
-                {i18n.translate('xpack.streams.significantEventsAnalyzer.pageHeaderTitle', {
-                  defaultMessage: 'Significant events analyzer',
+                {i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
+                  defaultMessage: 'Significant events Discovery',
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -67,7 +67,7 @@ export function SignificantEventsAnalyzerPage() {
         }
       />
       <StreamsAppPageTemplate.Body grow>
-        {/* Significant events analyzer content goes here */}
+        {/* Significant events discovery content goes here */}
       </StreamsAppPageTemplate.Body>
     </>
   );
