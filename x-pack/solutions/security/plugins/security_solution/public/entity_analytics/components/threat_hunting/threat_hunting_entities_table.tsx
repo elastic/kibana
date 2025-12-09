@@ -380,7 +380,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
 };
 
 export const ThreatHuntingEntitiesTable: React.FC = () => {
-  const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
+  const { deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const [activePage, setActivePage] = useState(0);
   const [limit, setLimit] = useState(10);
   const { toggleStatus } = useQueryToggle(THREAT_HUNTING_TABLE_ID);
