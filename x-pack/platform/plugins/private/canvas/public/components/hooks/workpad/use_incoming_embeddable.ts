@@ -98,12 +98,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           // select new embeddable element
           dispatch(selectToplevelNodes([embeddableId]));
         } else {
-          const expression = embeddableInputToExpression(
-            incomingState,
-            type,
-            undefined,
-            true
-          );
+          const expression = embeddableInputToExpression(incomingState, type, undefined, true);
           dispatch(addElement(selectedPage.id, { expression }));
         }
       });

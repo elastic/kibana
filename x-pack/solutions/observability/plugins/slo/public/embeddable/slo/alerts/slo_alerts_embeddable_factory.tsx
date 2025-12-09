@@ -23,13 +23,13 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { createInitialState } from '@kbn/core-saved-objects-migration-server-internal/src/zdt/state';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
-import { createInitialState } from '@kbn/core/packages/saved-objects/migration-server-internal/src/zdt/state';
 const queryClient = new QueryClient();
 
 export const getAlertsPanelTitle = () =>
@@ -67,13 +67,10 @@ export function getAlertsEmbeddableFactory({
       }
 
       const titleManager = initializeTitleManager(initialState);
-      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(
-        createInitialState,
-        {
-          slos: [],
-          showAllGroupByInstances: false,
-        }
-      );
+      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(createInitialState, {
+        slos: [],
+        showAllGroupByInstances: false,
+      });
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 

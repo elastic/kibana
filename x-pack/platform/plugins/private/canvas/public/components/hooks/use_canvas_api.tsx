@@ -78,10 +78,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       lastSavedStateForChild$: (childId: string) => panelStateMap[childId] ?? of(undefined),
       // Canvas auto saves so lastSavedState is the same as currentState
       getLastSavedStateForChild: getSerializedStateForChild,
-      setSerializedStateForChild: (
-        childId: string,
-        serializePanelState: object
-      ) => {
+      setSerializedStateForChild: (childId: string, serializePanelState: object) => {
         if (!panelStateMap[childId]) {
           panelStateMap[childId] = new BehaviorSubject(serializePanelState);
           return;
