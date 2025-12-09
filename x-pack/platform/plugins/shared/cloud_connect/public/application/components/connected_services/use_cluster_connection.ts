@@ -20,6 +20,9 @@ export const updateServiceEnabled = (
   serviceKey: ServiceType,
   enabled: boolean
 ): ClusterDetails | null => {
+  // If cluster details haven't been loaded yet or the service doesn't exist,
+  // return the current state unchanged (no-op). This prevents updates before
+  // initial data load and ensures we don't try to update non-existent services.
   if (!clusterDetails || !clusterDetails.services[serviceKey]) {
     return clusterDetails;
   }

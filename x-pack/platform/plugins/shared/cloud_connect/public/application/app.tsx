@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   useCloudConnectedAppContext,
@@ -31,11 +31,16 @@ export const CloudConnectedAppMain: React.FC = () => {
     handleConnect,
   } = useClusterConnection();
 
-  if (clusterError && clusterError.statusCode !== 503) {
-    notifications.toasts.addError(clusterError as Error, {
-      title: 'Failed to load cluster details',
-    });
-  }
+  // Show error toast for cluster loading failures, except for 503.
+  // 503 is the expected state when a cluster hasn't been connected to Cloud Connect
+  // yet, so we show the onboarding page instead.
+  useEffect(() => {
+    if (clusterError && clusterError.statusCode !== 503) {
+      notifications.toasts.addError(clusterError as Error, {
+        title: 'Failed to load cluster details',
+      });
+    }
+  }, [clusterError, notifications.toasts]);
 
   const isLoading = isConfigLoading || (isClusterLoading && !clusterDetails);
 

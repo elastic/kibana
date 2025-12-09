@@ -26,13 +26,13 @@ import { OverviewSection } from './overview_section';
 import { ServicesSection } from './services_section';
 import { MigrationSection } from './migration_section';
 import { DisconnectClusterModal } from './disconnect_cluster_modal';
-import type { ClusterDetails } from '../../../types';
+import type { ClusterDetails, ServiceType } from '../../../types';
 
 export { useClusterConnection } from './use_cluster_connection';
 
 export interface ConnectedServicesPageProps {
   clusterDetails: ClusterDetails;
-  onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
+  onServiceUpdate: (serviceKey: ServiceType, enabled: boolean) => void;
   onDisconnect: () => void;
 }
 

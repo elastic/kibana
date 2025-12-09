@@ -16,7 +16,7 @@ interface DisableModalService {
 }
 
 interface UseServiceActionsParams {
-  onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
+  onServiceUpdate: (serviceKey: ServiceType, enabled: boolean) => void;
   services: {
     auto_ops?: CloudService;
     eis?: CloudService;
@@ -36,7 +36,7 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
    * Core function to enable or disable a service via API.
    * On success, optimistically updates the UI via onServiceUpdate callback.
    */
-  const handleServiceUpdate = async (serviceKey: string, enabled: boolean) => {
+  const handleServiceUpdate = async (serviceKey: ServiceType, enabled: boolean) => {
     setLoadingService(serviceKey);
 
     const { data, error } = await apiService.updateServices({
@@ -100,17 +100,17 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
   };
 
   // Enables a service directly without confirmation
-  const handleEnableService = (serviceKey: string) => handleServiceUpdate(serviceKey, true);
+  const handleEnableService = (serviceKey: ServiceType) => handleServiceUpdate(serviceKey, true);
 
   // Disables the service currently pending in the modal, then closes the modal
   const handleDisableService = async () => {
     if (!disableModalService) return;
-    await handleServiceUpdate(disableModalService.key, false);
+    await handleServiceUpdate(disableModalService.key as ServiceType, false);
     setDisableModalService(null);
   };
 
   // Opens the disable confirmation modal for a specific service
-  const showDisableModal = (serviceKey: string, serviceName: string) => {
+  const showDisableModal = (serviceKey: ServiceType, serviceName: string) => {
     setDisableModalService({ key: serviceKey, name: serviceName });
   };
 
@@ -119,11 +119,11 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     setDisableModalService(null);
   };
 
-  const handleEnableServiceByUrl = (serviceKey: string, url: string) => {
+  const handleEnableServiceByUrl = (serviceKey: ServiceType, url: string) => {
     // Track telemetry for external link click to enable service
     telemetryService.trackLinkClicked({
       destination_type: 'service_enable_url',
-      service_type: serviceKey as ServiceType,
+      service_type: serviceKey,
     });
 
     window.open(url, '_blank');
