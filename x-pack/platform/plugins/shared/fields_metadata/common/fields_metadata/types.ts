@@ -38,8 +38,9 @@ export const multiFieldRT = rt.type({
 export const baseOTELPropertyRT = rt.intersection([
   rt.type({
     stability: rt.keyof({
-      stable: null,
+      development: null,
       experimental: null,
+      stable: null,
     }),
   }),
   rt.partial({
@@ -99,8 +100,6 @@ const requiredBaseMetadataPlainRT = rt.type({
   name: rt.string,
 });
 
-const optionalBaseMetadataPlainRT = rt.partial(requiredBaseMetadataPlainRT.props);
-
 const optionalMetadataPlainRT = rt.partial({
   allowed_values: rt.array(allowedValueRT),
   beta: rt.string,
@@ -132,20 +131,20 @@ const optionalMetadataPlainRT = rt.partial({
   otel_equivalent: rt.string,
 });
 
-export const partialFieldMetadataPlainRT = rt.intersection([
-  optionalBaseMetadataPlainRT,
-  optionalMetadataPlainRT,
-]);
+export const partialFieldMetadataPlainRT = rt.partial({
+  ...requiredBaseMetadataPlainRT.props,
+  ...optionalMetadataPlainRT.props,
+});
 
 export const fieldMetadataPlainRT = rt.intersection([
   requiredBaseMetadataPlainRT,
   optionalMetadataPlainRT,
 ]);
 
-export const fieldAttributeRT = rt.union([
-  rt.keyof(requiredBaseMetadataPlainRT.props),
-  rt.keyof(optionalMetadataPlainRT.props),
-]);
+export const fieldAttributeRT = rt.keyof({
+  ...requiredBaseMetadataPlainRT.props,
+  ...optionalMetadataPlainRT.props,
+});
 
 export const fieldsMetadataDictionaryRT = rt.record(rt.string, fieldMetadataPlainRT);
 
