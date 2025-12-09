@@ -16,7 +16,6 @@ import {
   type ElasticsearchRequestLoggingOptions,
 } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';

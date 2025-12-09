@@ -8,7 +8,6 @@
 import type {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
-  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ElasticsearchClient,
