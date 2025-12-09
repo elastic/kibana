@@ -12,7 +12,6 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { History } from 'history';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { getDiscoverAppStateContainer, isEqualState } from './discover_app_state_container';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -33,7 +32,6 @@ import {
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
 
-let history: History;
 let stateStorage: IKbnUrlStateStorage;
 let internalState: InternalStateStore;
 let savedSearchState: DiscoverSavedSearchContainer;
@@ -46,7 +44,6 @@ describe('Test discover app state container', () => {
     const toasts = discoverServiceMock.core.notifications.toasts;
     stateStorage = createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
-      history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
     tabsStorageManager = createTabsStorageManager({
