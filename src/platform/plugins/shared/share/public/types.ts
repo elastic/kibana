@@ -398,7 +398,6 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   onClose?: () => void;
   publicAPIEnabled?: boolean;
   onSave?: () => Promise<void>;
-  totalHits?: number;
 }
 
 export interface ClientConfigType {

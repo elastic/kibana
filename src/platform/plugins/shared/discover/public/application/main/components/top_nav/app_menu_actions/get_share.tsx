@@ -151,12 +151,12 @@ export const getShareAppMenuItem = ({
           i18n.translate('discover.localMenu.fallbackReportTitle', {
             defaultMessage: 'Untitled Discover session',
           }),
+        totalHits: totalHitsState.result || 0,
       },
       isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
       onClose: () => {
         anchorElement?.focus();
       },
-      totalHits: totalHitsState.result || 0,
     });
   };
 
