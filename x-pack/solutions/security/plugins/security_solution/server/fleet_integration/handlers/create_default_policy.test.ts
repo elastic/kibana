@@ -456,7 +456,7 @@ describe('Create Default Policy tests ', () => {
         const policy = await createDefaultPolicyWithFeature();
 
         expect(removeLinuxDnsEventsSpy).toHaveBeenCalledTimes(1);
-        expect(policy.linux.events.dns).toBeUndefined();
+        expect(policy.linux.events).not.toHaveProperty('dns');
         expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
         expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
 

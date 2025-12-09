@@ -13,28 +13,20 @@ import React from 'react';
 import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
 import { LinuxEventCollectionCard } from './linux_event_collection_card';
 import { set } from '@kbn/safer-lodash-set';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
-
-jest.mock('../../../../../../../common/hooks/use_experimental_features');
 
 describe('Policy Linux Event Collection Card', () => {
-  const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
   const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;
 
+  let mockedContext: AppContextTestRender;
   let formProps: LinuxEventCollectionCardProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
 
   beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
+    mockedContext = createAppRootMockRenderer();
 
     // Mock linuxDnsEvents FF as enabled by default
-    mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
-      if (feature === 'linuxDnsEvents') {
-        return true;
-      }
-      return false;
-    });
+    mockedContext.setExperimentalFlag({ linuxDnsEvents: true });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -125,12 +117,7 @@ describe('Policy Linux Event Collection Card', () => {
 
   describe('when linuxDnsEvents feature flag is disabled', () => {
     beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
-        if (feature === 'linuxDnsEvents') {
-          return false;
-        }
-        return false;
-      });
+      mockedContext.setExperimentalFlag({ linuxDnsEvents: false });
       // Remove dns field from policy when FF is disabled
       delete formProps.policy.linux.events.dns;
     });
