@@ -1258,6 +1258,8 @@
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/platform/plugins/shared/ingest_pipelines/*"],
       "@kbn/ingest-pipelines-shared": ["x-pack/platform/packages/shared/ingest-pipelines"],
       "@kbn/ingest-pipelines-shared/*": ["x-pack/platform/packages/shared/ingest-pipelines/*"],
+      "@kbn/ink": ["x-pack/platform/packages/shared/kbn-ink"],
+      "@kbn/ink/*": ["x-pack/platform/packages/shared/kbn-ink/*"],
       "@kbn/input-control-vis-plugin": ["src/platform/plugins/private/input_control_vis"],
       "@kbn/input-control-vis-plugin/*": ["src/platform/plugins/private/input_control_vis/*"],
       "@kbn/inspect-component-plugin": ["src/platform/plugins/private/inspect_component"],
@@ -2479,7 +2481,9 @@
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
       "zod": ["typings/zod/v3"],
-      "zod/v4": ["typings/zod/v4"]
+      "zod/v4": ["typings/zod/v4"],
+      "vega-lite": ["typings/vega/vega_lite"],
+      "vega-tooltip": ["typings/vega/vega_tooltip"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
