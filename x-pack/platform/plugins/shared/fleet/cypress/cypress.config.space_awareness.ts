@@ -23,10 +23,10 @@ export default defineCypressConfig({
     grepFilterSpecs: false,
   },
 
-  screenshotsFolder: '../../../../../../target/kibana-fleet/cypress/screenshots',
+  screenshotsFolder: '../../../../../target/kibana-fleet/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../../../../target/kibana-fleet/cypress/videos',
+  videosFolder: '../../../../../target/kibana-fleet/cypress/videos',
   viewportHeight: 900,
   viewportWidth: 1440,
   screenshotOnRunFailure: true,
