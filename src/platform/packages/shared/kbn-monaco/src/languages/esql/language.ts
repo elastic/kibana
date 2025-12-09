@@ -16,9 +16,8 @@ import {
   getHoverItem,
   getSignatureHelp,
   inlineSuggest,
-  type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
-import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
+import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
