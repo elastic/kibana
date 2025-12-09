@@ -1,0 +1,80 @@
+version: '3'
+services:
+
+  # This is the elasticsearch container
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.0
+    ports:
+      - 9200:9200
+    environment:
+      node.name: elasticsearch
+      discovery.type: 'single-node'
+      bootstrap.memory_lock: 'true'
+      xpack.security.enabled: 'true'
+      xpack.license.self_generated.type: 'trial'
+      ELASTIC_PASSWORD: 'changeme'
+      ES_JAVA_OPTS: '-Xmx2g -Xms2g'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    post_start:
+      - command: >
+          sleep 15 &&
+          curl -v -X POST "http://localhost:9200/_security/user/kibana_system/_password" -H "Content-Type: application/json" -u elastic:changeme -d '{"password": "changeme"}'
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:9200"]
+      interval: 10s
+      retries: 2
+      start_period: 20s
+      timeout: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 6Gb
+
+  # The `kibana` container runs kibana and depends on `elasticsearch`
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.2.0
+    # If we want to define some extra config it can also be done like this
+    # volumes:
+    #   - ./docker-compose.kibana.yml:/user/share/kibana/config/kibana.yml
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=changeme
+      - SERVER_SSL_ENABLED=false
+      - XPACK_SECURITY_ENCRYPTIONKEY=xuveL6cPsCxD8aSuYt3dgTE43zrgHe8KMfcvcTFERCWUymqNCXJHFwBtUMcnmg8Cbg3c7wtW
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=xuveL6cPsCxD8aSuYt3dgTE43zrgHe8KMfcvcTFERCWUymqNCXJHFwBtUMcnmg8Cbg3c7wtW
+      - XPACK_REPORTING_ENCRYPTIONKEY=xuveL6cPsCxD8aSuYt3dgTE43zrgHe8KMfcvcTFERCWUymqNCXJHFwBtUMcnmg8Cbg3c7wtW
+    ports:
+      - 5601:5601
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:5601"]
+      interval: 10s
+      retries: 2
+      start_period: 20s
+      timeout: 10s
+    # Here we define the memory/CPU limits for kibana
+    # So results are reliable across different machines
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2Gb
+
+  # The `k6test` container runs the tests
+  # k6test:
+  #   image: grafana/k6
+  #   volumes:
+  #     - ./k6-performance-test.script.js:/app/task/script.js
+  #   depends_on:
+  #     kibana:
+  #       condition: service_healthy
+  #   command: >
+  #     run /app/task/script.js
