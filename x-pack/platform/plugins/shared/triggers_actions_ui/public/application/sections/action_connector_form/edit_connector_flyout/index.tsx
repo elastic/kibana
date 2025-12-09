@@ -22,7 +22,7 @@ import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
-import { SOURCE as ActionTypeSourceValue } from '@kbn/actions-types/action_types';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types/action_types';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -346,7 +346,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           icon={actionTypeModel?.iconClass}
           isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
-          isSpecConnector={actionTypeModel?.source !== ActionTypeSourceValue.stack}
+          isSpecConnector={actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack}
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}

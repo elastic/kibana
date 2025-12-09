@@ -13,7 +13,7 @@ import type { IconType, RecursivePartial } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionType, SubFeature } from '@kbn/actions-types';
 import type { SerializerFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { Source as ActionTypeSource } from '@kbn/actions-types/action_types';
+import type { ActionTypeSource } from '@kbn/actions-types/action_types';
 import type { RuleFormParamsErrors } from './rule_types';
 import type { TypeRegistry } from '../type_registry';
 

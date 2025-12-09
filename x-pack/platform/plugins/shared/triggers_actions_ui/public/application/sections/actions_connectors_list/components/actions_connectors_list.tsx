@@ -29,7 +29,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { SOURCE as AlertTypeSourceValues } from '@kbn/actions-types';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -321,7 +321,7 @@ const ActionsConnectorsList = ({
 
         const actionType = actionTypesIndex[item.actionTypeId];
         const showFixButton = item.isMissingSecrets && actionType?.enabled;
-        const isStackConnector = actionType.source === AlertTypeSourceValues.stack;
+        const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
 
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
