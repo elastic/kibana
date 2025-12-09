@@ -104,7 +104,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
        * followed by the ECS fields repository for base fields,
        * followed by the OpenTel fields repository for base fields.
        *
-       * Note: For prefixed fields (attributes.* and resource.attributes.*), 
+       * Note: For prefixed fields (attributes.* and resource.attributes.*),
        * OpenTelemetry takes priority over ECS when using getByName() to avoid
        * conflicts with namespaced ECS fields. However, when returning all fields,
        * we merge in this order to ensure ECS base fields are preferred, and the
