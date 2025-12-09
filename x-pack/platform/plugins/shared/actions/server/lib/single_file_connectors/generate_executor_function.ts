@@ -41,6 +41,7 @@ export const generateExecutorFunction = ({
       actionId: connectorId,
       config,
       connectorTokenClient,
+      globalAuthHeaders,
       params,
       secrets,
       logger,
@@ -49,8 +50,9 @@ export const generateExecutorFunction = ({
 
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
-      secrets,
       connectorTokenClient,
+      additionalHeaders: globalAuthHeaders,
+      secrets,
     });
 
     if (!actions[subAction]) {
@@ -59,7 +61,6 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
-    // TODO - we need to update ActionContext in the spec
     const actionContext = {
       log: logger,
       client: axiosInstance,

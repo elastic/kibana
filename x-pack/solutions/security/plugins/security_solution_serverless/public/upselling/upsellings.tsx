@@ -30,7 +30,6 @@ import {
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   AttackDiscoveryUpsellingPageLazy,
-  EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
@@ -74,13 +73,6 @@ export const upsellingPages: UpsellingPages = [
     pli: ProductFeatureKey.threatIntelligence,
     component: () => (
       <ThreatIntelligencePaywallLazy requiredPLI={ProductFeatureKey.threatIntelligence} />
-    ),
-  },
-  {
-    pageName: SecurityPageName.exceptions,
-    pli: ProductFeatureKey.endpointExceptions,
-    component: () => (
-      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
     ),
   },
   {
