@@ -24,9 +24,12 @@ import React from 'react';
 import { codeblockStyles } from './codeblock.styles';
 
 const labels = {
-  parameters: i18n.translate('xpack.agentBuilder.round.thinking.steps.thinkingItemLayout.parameters', {
-    defaultMessage: 'Parameters',
-  }),
+  parameters: i18n.translate(
+    'xpack.agentBuilder.round.thinking.steps.thinkingItemLayout.parameters',
+    {
+      defaultMessage: 'Parameters',
+    }
+  ),
   close: i18n.translate('xpack.agentBuilder.round.thinking.steps.thinkingItemLayout.close', {
     defaultMessage: 'Close',
   }),

@@ -52,7 +52,10 @@ import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
 import type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginStart,

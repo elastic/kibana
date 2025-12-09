@@ -123,10 +123,13 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                   defaultMessage: 'Active tools',
                 })}
                 valueText={`${activeToolsCount}/${warningThreshold}`}
-                aria-label={i18n.translate('xpack.agentBuilder.activeToolsStatus.progressAriaLabel', {
-                  defaultMessage: 'Progress: {current} out of {max} active tools',
-                  values: { current: activeToolsCount, max: warningThreshold },
-                })}
+                aria-label={i18n.translate(
+                  'xpack.agentBuilder.activeToolsStatus.progressAriaLabel',
+                  {
+                    defaultMessage: 'Progress: {current} out of {max} active tools',
+                    values: { current: activeToolsCount, max: warningThreshold },
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

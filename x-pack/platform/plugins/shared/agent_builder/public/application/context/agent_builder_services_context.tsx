@@ -8,4 +8,6 @@
 import { createContext } from 'react';
 import type { AgentBuilderInternalService } from '../../services';
 
-export const AgentBuilderServicesContext = createContext<AgentBuilderInternalService | undefined>(undefined);
+export const AgentBuilderServicesContext = createContext<AgentBuilderInternalService | undefined>(
+  undefined
+);

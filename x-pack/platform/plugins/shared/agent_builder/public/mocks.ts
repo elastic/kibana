@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup, AgentBuilderPluginStart, ConversationFlyoutRef } from './types';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  ConversationFlyoutRef,
+} from './types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {

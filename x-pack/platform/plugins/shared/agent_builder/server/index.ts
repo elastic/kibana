@@ -15,7 +15,12 @@ import type {
 } from './types';
 import { AgentBuilderPlugin } from './plugin';
 
-export type { AgentBuilderPluginSetup, AgentBuilderPluginStart, ToolsSetup, ToolsStart } from './types';
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  ToolsSetup,
+  ToolsStart,
+} from './types';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

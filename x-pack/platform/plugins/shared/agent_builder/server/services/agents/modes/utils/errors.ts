@@ -12,7 +12,10 @@ import {
 } from '@kbn/inference-common/src/chat_complete/errors';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
-import { createAgentExecutionError, isAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import {
+  createAgentExecutionError,
+  isAgentExecutionError,
+} from '@kbn/agent-builder-common/base/errors';
 
 const recoverableErrorCodes = [
   ErrCodes.toolNotFound,

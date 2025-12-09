@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ChatEventType, ToolProgressEventData, ChatEventBase } from '@kbn/agent-builder-common';
+import type {
+  ChatEventType,
+  ToolProgressEventData,
+  ChatEventBase,
+} from '@kbn/agent-builder-common';
 
 export type InternalToolProgressEventData = Omit<ToolProgressEventData, 'tool_call_id'>;
 

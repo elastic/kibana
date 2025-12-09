@@ -32,9 +32,13 @@ export type AgentBuilderError<
   TMeta extends Record<string, any> = Record<string, any>
 > = ServerSentEventError<TCode, TMeta>;
 
-export type SerializedAgentBuilderError = ReturnType<AgentBuilderError<AgentBuilderErrorCode>['toJSON']>;
+export type SerializedAgentBuilderError = ReturnType<
+  AgentBuilderError<AgentBuilderErrorCode>['toJSON']
+>;
 
-export const isAgentBuilderError = (err: unknown): err is AgentBuilderError<AgentBuilderErrorCode> => {
+export const isAgentBuilderError = (
+  err: unknown
+): err is AgentBuilderError<AgentBuilderErrorCode> => {
   return err instanceof AgentBuilderError;
 };
 
@@ -81,7 +85,10 @@ export const createBadRequestError = (
   message: string,
   meta: Record<string, any> = {}
 ): AgentBuilderBadRequestError => {
-  return new AgentBuilderError(AgentBuilderErrorCode.badRequest, message, { ...meta, statusCode: 400 });
+  return new AgentBuilderError(AgentBuilderErrorCode.badRequest, message, {
+    ...meta,
+    statusCode: 400,
+  });
 };
 
 /**
@@ -143,7 +150,8 @@ export const createAgentNotFoundError = ({
 /**
  * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
  */
-export type AgentBuilderConversationNotFoundError = AgentBuilderError<AgentBuilderErrorCode.conversationNotFound>;
+export type AgentBuilderConversationNotFoundError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationNotFound>;
 
 /**
  * Checks if the given error is a {@link AgentBuilderConversationNotFoundError}
@@ -173,7 +181,8 @@ export const createConversationNotFoundError = ({
 /**
  * Represents an internal error
  */
-export type AgentBuilderRequestAbortedError = AgentBuilderError<AgentBuilderErrorCode.requestAborted>;
+export type AgentBuilderRequestAbortedError =
+  AgentBuilderError<AgentBuilderErrorCode.requestAborted>;
 
 /**
  * Checks if the given error is a {@link AgentBuilderRequestAbortedError}

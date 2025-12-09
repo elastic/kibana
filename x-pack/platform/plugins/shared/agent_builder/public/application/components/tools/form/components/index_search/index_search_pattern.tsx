@@ -92,9 +92,12 @@ export const IndexSearchPattern: React.FC = () => {
           name: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.useAction', {
             defaultMessage: 'Use',
           }),
-          description: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.useActionDesc', {
-            defaultMessage: 'Use this value as the pattern',
-          }),
+          description: i18n.translate(
+            'xpack.agentBuilder.tools.indexPattern.pattern.useActionDesc',
+            {
+              defaultMessage: 'Use this value as the pattern',
+            }
+          ),
           icon: 'plusInCircle',
           type: 'icon',
           onClick: async (item: { name: string }) => {

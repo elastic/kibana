@@ -123,7 +123,11 @@ describe('AgentBuilder errors', () => {
 
     it('should include optional metadata', () => {
       const meta = { foo: 'bar' };
-      const error = createAgentBuilderError(AgentBuilderErrorCode.internalError, 'test error', meta);
+      const error = createAgentBuilderError(
+        AgentBuilderErrorCode.internalError,
+        'test error',
+        meta
+      );
       expect(error.meta).toEqual(meta);
     });
 

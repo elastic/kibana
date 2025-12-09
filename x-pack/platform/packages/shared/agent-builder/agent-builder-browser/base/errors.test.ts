@@ -25,7 +25,9 @@ describe('AgentBuilder errors', () => {
       expect(formatAgentBuilderErrorMessage(toolNotFoundError)).toBe('Tool missing-tool not found');
 
       const agentNotFoundError = createAgentNotFoundError({ agentId: 'missing-agent' });
-      expect(formatAgentBuilderErrorMessage(agentNotFoundError)).toBe('Agent missing-agent not found');
+      expect(formatAgentBuilderErrorMessage(agentNotFoundError)).toBe(
+        'Agent missing-agent not found'
+      );
     });
 
     it('should format generic JavaScript errors correctly', () => {

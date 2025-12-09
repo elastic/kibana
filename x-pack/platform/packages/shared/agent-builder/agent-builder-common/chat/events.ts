@@ -85,7 +85,9 @@ export interface ToolResultEventData {
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;
 
-export const isToolResultEvent = (event: AgentBuilderEvent<string, any>): event is ToolResultEvent => {
+export const isToolResultEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ToolResultEvent => {
   return event.type === ChatEventType.toolResult;
 };
 
@@ -100,7 +102,9 @@ export interface ReasoningEventData {
 
 export type ReasoningEvent = ChatEventBase<ChatEventType.reasoning, ReasoningEventData>;
 
-export const isReasoningEvent = (event: AgentBuilderEvent<string, any>): event is ReasoningEvent => {
+export const isReasoningEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ReasoningEvent => {
   return event.type === ChatEventType.reasoning;
 };
 

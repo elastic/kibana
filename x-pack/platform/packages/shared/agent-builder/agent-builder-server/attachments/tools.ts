@@ -7,7 +7,10 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { EsqlToolDefinition, ToolDefinition } from '@kbn/agent-builder-common';
-import type { IndexSearchToolDefinition, WorkflowToolDefinition } from '@kbn/agent-builder-common/tools';
+import type {
+  IndexSearchToolDefinition,
+  WorkflowToolDefinition,
+} from '@kbn/agent-builder-common/tools';
 import type { BuiltinToolDefinition } from '../tools/builtin';
 
 export type BuiltinAttachmentBoundedTool<RunInput extends ZodObject<any> = ZodObject<any>> = Omit<

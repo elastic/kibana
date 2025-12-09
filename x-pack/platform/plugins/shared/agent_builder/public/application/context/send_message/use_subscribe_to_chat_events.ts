@@ -17,7 +17,10 @@ import {
   isToolResultEvent,
   isThinkingCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { createReasoningStep, createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  createReasoningStep,
+  createToolCallStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import type { Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import { useConversationContext } from '../conversation/conversation_context';

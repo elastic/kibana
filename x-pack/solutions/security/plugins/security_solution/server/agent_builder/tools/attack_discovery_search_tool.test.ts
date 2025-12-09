@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ToolResultType, type TabularDataResult, type ErrorResult } from '@kbn/agent-builder-common';
+import {
+  ToolResultType,
+  type TabularDataResult,
+  type ErrorResult,
+} from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';

@@ -9,7 +9,11 @@ import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import type { RunToolReturn, ToolHandlerContext, ToolHandlerReturn } from '@kbn/agent-builder-server';
+import type {
+  RunToolReturn,
+  ToolHandlerContext,
+  ToolHandlerReturn,
+} from '@kbn/agent-builder-server';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,

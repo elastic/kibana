@@ -16,4 +16,7 @@ export const agentBuilderApiServices = {
   ...agentBuilderCommonServices,
 };
 
-export type AgentBuilderApiFtrProviderContext = GenericFtrProviderContext<typeof agentBuilderApiServices, {}>;
+export type AgentBuilderApiFtrProviderContext = GenericFtrProviderContext<
+  typeof agentBuilderApiServices,
+  {}
+>;

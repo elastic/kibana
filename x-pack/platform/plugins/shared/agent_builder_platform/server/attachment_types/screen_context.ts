@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AttachmentType, screenContextAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  screenContextAttachmentDataSchema,
+} from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 

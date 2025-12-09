@@ -17,9 +17,12 @@ import { EsqlParamSource } from '../types/tool_form_types';
 const esqlI18nMessages = {
   // Specific errors will be provided by the ES|QL editor
   esql: {
-    requiredError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.esql.requiredError', {
-      defaultMessage: 'ES|QL query is required.',
-    }),
+    requiredError: i18n.translate(
+      'xpack.agentBuilder.tools.newTool.validation.esql.requiredError',
+      {
+        defaultMessage: 'ES|QL query is required.',
+      }
+    ),
     esqlError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.esql.esqlError', {
       defaultMessage: 'Please fix the errors in your ES|QL query.',
     }),

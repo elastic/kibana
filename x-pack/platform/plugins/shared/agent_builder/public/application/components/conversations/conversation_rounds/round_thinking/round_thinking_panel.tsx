@@ -35,9 +35,12 @@ const closePanelLabel = i18n.translate('xpack.agentBuilder.conversation.closePan
 const reasoningLabel = i18n.translate('xpack.agentBuilder.conversation.reasoning', {
   defaultMessage: 'Reasoning',
 });
-const completedReasoningLabel = i18n.translate('xpack.agentBuilder.conversation.completedReasoning', {
-  defaultMessage: 'Completed reasoning',
-});
+const completedReasoningLabel = i18n.translate(
+  'xpack.agentBuilder.conversation.completedReasoning',
+  {
+    defaultMessage: 'Completed reasoning',
+  }
+);
 
 interface RoundThinkingPanelProps {
   steps: ConversationRoundStep[];

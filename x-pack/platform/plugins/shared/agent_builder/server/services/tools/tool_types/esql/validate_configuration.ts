@@ -6,7 +6,11 @@
  */
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParamValue } from '@kbn/agent-builder-common';
+import type {
+  EsqlToolConfig,
+  EsqlToolFieldTypes,
+  EsqlToolParamValue,
+} from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 

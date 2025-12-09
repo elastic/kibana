@@ -72,10 +72,13 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               </EuiTitle>
             </EuiFlexGroup>
             <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.agentBuilder.agents.form.settings.systemReferencesDescription', {
-                defaultMessage:
-                  "Used behind the scenes to identify and guide the agent's behavior. Not shown to end users.",
-              })}
+              {i18n.translate(
+                'xpack.agentBuilder.agents.form.settings.systemReferencesDescription',
+                {
+                  defaultMessage:
+                    "Used behind the scenes to identify and guide the agent's behavior. Not shown to end users.",
+                }
+              )}
             </EuiText>
             <EuiSpacer size="s" />
             <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} color="subdued">
@@ -102,10 +105,13 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 </EuiTitle>
 
                 <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.agentBuilder.agents.form.settings.instructionsDescription', {
-                    defaultMessage:
-                      'Guides how this agent behaves when interacting with tools or responding to queries. Use this to set tone, priorities, or special behaviors.',
-                  })}
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.instructionsDescription',
+                    {
+                      defaultMessage:
+                        'Guides how this agent behaves when interacting with tools or responding to queries. Use this to set tone, priorities, or special behaviors.',
+                    }
+                  )}
                 </EuiText>
               </EuiFlexGroup>
             </EuiPanel>
@@ -302,9 +308,12 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiSpacer size="s" />
                 <EuiTitle size="xxs">
                   <span>
-                    {i18n.translate('xpack.agentBuilder.agents.form.settings.presentationAvatarLabel', {
-                      defaultMessage: 'Avatar color and symbol',
-                    })}
+                    {i18n.translate(
+                      'xpack.agentBuilder.agents.form.settings.presentationAvatarLabel',
+                      {
+                        defaultMessage: 'Avatar color and symbol',
+                      }
+                    )}
                   </span>
                 </EuiTitle>
 
@@ -364,9 +373,12 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   rows={4}
                   disabled={isFormDisabled}
                   isInvalid={!!formState.errors.configuration?.instructions}
-                  aria-label={i18n.translate('xpack.agentBuilder.agents.form.descriptionAriaLabel', {
-                    defaultMessage: 'Agent display description text area',
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.agentBuilder.agents.form.descriptionAriaLabel',
+                    {
+                      defaultMessage: 'Agent display description text area',
+                    }
+                  )}
                   data-test-subj="agentSettingsDescriptionInput"
                 />
               )}
@@ -398,9 +410,12 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                       color={value}
                       disabled={isFormDisabled}
                       isInvalid={!!formState.errors.avatar_color}
-                      aria-label={i18n.translate('xpack.agentBuilder.agents.form.avatarColorAriaLabel', {
-                        defaultMessage: 'Agent avatar color picker',
-                      })}
+                      aria-label={i18n.translate(
+                        'xpack.agentBuilder.agents.form.avatarColorAriaLabel',
+                        {
+                          defaultMessage: 'Agent avatar color picker',
+                        }
+                      )}
                     />
                   )}
                 />
