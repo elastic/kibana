@@ -223,7 +223,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {flappingSettings && enabled && (
+        {enabled && (
           <>
             <EuiSpacer size="m" />
             <EuiHorizontalRule margin="none" />
@@ -235,7 +235,6 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     isDesktop,
     euiTheme,
     spaceFlappingSettings,
-    flappingSettings,
     canWriteFlappingSettingsUI,
     enabled,
     onEnabledChange,
