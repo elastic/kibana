@@ -50,7 +50,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
-  const { isAgentChatExperienceEnabled, hasAgentBuilderPrivilege } = useIsAgentBuilderEnabled();
+  const { isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
 
   const alertData = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
@@ -70,16 +70,16 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            {isAgentChatExperienceEnabled
-              ? hasAgentBuilderPrivilege && (
-                  <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
-                )
-              : showAssistant && (
-                  <NewChatByTitle
-                    showAssistantOverlay={showAssistantOverlay}
-                    text={ASK_AI_ASSISTANT}
-                  />
-                )}
+            {isAgentChatExperienceEnabled ? (
+              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            ) : (
+              showAssistant && (
+                <NewChatByTitle
+                  showAssistantOverlay={showAssistantOverlay}
+                  text={ASK_AI_ASSISTANT}
+                />
+              )
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeActionButton />

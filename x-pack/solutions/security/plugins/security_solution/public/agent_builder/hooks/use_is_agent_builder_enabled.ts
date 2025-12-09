@@ -13,11 +13,13 @@ import { useKibana } from '../../common/lib/kibana';
 
 const AGENT_BUILDER_FEATURE_ID = 'agentBuilder';
 
-export const useIsAgentBuilderEnabled = (): {
+interface UseIsAgentBuilderEnabled {
   isAgentBuilderEnabled: boolean;
   hasAgentBuilderPrivilege: boolean;
   isAgentChatExperienceEnabled: boolean;
-} => {
+}
+
+export const useIsAgentBuilderEnabled = (): UseIsAgentBuilderEnabled => {
   const [chatExperience] = useUiSetting$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
     AIChatExperience.Classic
@@ -28,11 +30,8 @@ export const useIsAgentBuilderEnabled = (): {
     const agentBuilderCapabilities = capabilities[AGENT_BUILDER_FEATURE_ID];
     const hasAgentBuilderPrivilege = agentBuilderCapabilities?.show === true;
     const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
+    const isAgentBuilderEnabled = hasAgentBuilderPrivilege && isAgentChatExperienceEnabled;
 
-    return {
-      isAgentBuilderEnabled: hasAgentBuilderPrivilege && isAgentChatExperienceEnabled,
-      hasAgentBuilderPrivilege,
-      isAgentChatExperienceEnabled,
-    };
+    return { isAgentBuilderEnabled, hasAgentBuilderPrivilege, isAgentChatExperienceEnabled };
   }, [capabilities, chatExperience]);
 };

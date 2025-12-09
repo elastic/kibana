@@ -22,7 +22,7 @@ describe('useIsAgentBuilderEnabled', () => {
     jest.clearAllMocks();
   });
 
-  it('returns true when agent builder privilege exists and chat experience is Agent', () => {
+  it('returns isAgentBuilderEnabled true when agent builder privilege exists and chat experience is Agent', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -39,10 +39,12 @@ describe('useIsAgentBuilderEnabled', () => {
 
     const { result } = renderHook(() => useIsAgentBuilderEnabled());
 
-    expect(result.current).toBe(true);
+    expect(result.current.isAgentBuilderEnabled).toBe(true);
+    expect(result.current.hasAgentBuilderPrivilege).toBe(true);
+    expect(result.current.isAgentChatExperienceEnabled).toBe(true);
   });
 
-  it('returns false when agent builder privilege is missing', () => {
+  it('returns isAgentBuilderEnabled false when agent builder privilege is missing', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -55,10 +57,12 @@ describe('useIsAgentBuilderEnabled', () => {
 
     const { result } = renderHook(() => useIsAgentBuilderEnabled());
 
-    expect(result.current).toBe(false);
+    expect(result.current.isAgentBuilderEnabled).toBe(false);
+    expect(result.current.hasAgentBuilderPrivilege).toBe(false);
+    expect(result.current.isAgentChatExperienceEnabled).toBe(true);
   });
 
-  it('returns false when agent builder privilege show is false', () => {
+  it('returns isAgentBuilderEnabled false when agent builder privilege show is false', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -75,10 +79,12 @@ describe('useIsAgentBuilderEnabled', () => {
 
     const { result } = renderHook(() => useIsAgentBuilderEnabled());
 
-    expect(result.current).toBe(false);
+    expect(result.current.isAgentBuilderEnabled).toBe(false);
+    expect(result.current.hasAgentBuilderPrivilege).toBe(false);
+    expect(result.current.isAgentChatExperienceEnabled).toBe(true);
   });
 
-  it('returns false when chat experience is Classic', () => {
+  it('returns isAgentBuilderEnabled false when chat experience is Classic', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -95,10 +101,12 @@ describe('useIsAgentBuilderEnabled', () => {
 
     const { result } = renderHook(() => useIsAgentBuilderEnabled());
 
-    expect(result.current).toBe(false);
+    expect(result.current.isAgentBuilderEnabled).toBe(false);
+    expect(result.current.hasAgentBuilderPrivilege).toBe(true);
+    expect(result.current.isAgentChatExperienceEnabled).toBe(false);
   });
 
-  it('returns false when agent builder capabilities is undefined', () => {
+  it('returns isAgentBuilderEnabled false when agent builder capabilities is undefined', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -113,10 +121,12 @@ describe('useIsAgentBuilderEnabled', () => {
 
     const { result } = renderHook(() => useIsAgentBuilderEnabled());
 
-    expect(result.current).toBe(false);
+    expect(result.current.isAgentBuilderEnabled).toBe(false);
+    expect(result.current.hasAgentBuilderPrivilege).toBe(false);
+    expect(result.current.isAgentChatExperienceEnabled).toBe(true);
   });
 
-  it('returns false when agent builder capabilities show is undefined', () => {
+  it('returns isAgentBuilderEnabled false when agent builder capabilities show is undefined', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -131,7 +141,9 @@ describe('useIsAgentBuilderEnabled', () => {
 
     const { result } = renderHook(() => useIsAgentBuilderEnabled());
 
-    expect(result.current).toBe(false);
+    expect(result.current.isAgentBuilderEnabled).toBe(false);
+    expect(result.current.hasAgentBuilderPrivilege).toBe(false);
+    expect(result.current.isAgentChatExperienceEnabled).toBe(true);
   });
 });
 

@@ -11,6 +11,7 @@ import React, { memo } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { onechatIconType } from '@kbn/onechat-plugin/public';
 import * as i18n from './translations';
+import { useIsAgentBuilderEnabled } from '../hooks/use_is_agent_builder_enabled';
 
 export interface NewAgentBuilderAttachmentProps {
   /**
@@ -47,6 +48,10 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   size = 'm',
   text = i18n.VIEW_IN_AGENT_BUILDER,
 }: NewAgentBuilderAttachmentProps) {
+  const { hasAgentBuilderPrivilege } = useIsAgentBuilderEnabled();
+  if (!hasAgentBuilderPrivilege) {
+    return null;
+  }
   return (
     <EuiButtonEmpty
       aria-label={text}

@@ -74,7 +74,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   const entitySummaryOrTitle =
     entitySummary != null && entitySummary.length > 0 ? entitySummary : title;
 
-  const { isAgentChatExperienceEnabled, hasAgentBuilderPrivilege } = useIsAgentBuilderEnabled();
+  const { isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
   const attackDiscoveryWithOriginalValues = useMemo(
     () =>
       // Agent builder is not anonymized
@@ -103,9 +103,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
 
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            hasAgentBuilderPrivilege && (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} size="xs" />
-            )
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} size="xs" />
           ) : (
             <ViewInAiAssistant
               compact={true}

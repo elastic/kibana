@@ -86,7 +86,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const filters = useMemo(() => buildAlertsKqlFilter('_id', originalAlertIds), [originalAlertIds]);
 
-  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
+  const { isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
   const attackDiscoveryWithOriginalValues = useMemo(
     () =>
       getAttackDiscoveryMarkdown({
@@ -145,9 +145,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            hasAgentBuilderPrivilege && (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
-            )
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
           ) : (
             <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
           )}
