@@ -315,7 +315,7 @@ const ActionsConnectorsList = ({
     {
       name: '',
       render: (item: ActionConnectorTableItem) => {
-        if (!actionTypesIndex) {
+        if (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]) {
           return null;
         }
 

@@ -67,6 +67,7 @@ export function createMockActionConnector<
     isDeprecated: false,
     isSystemAction: false,
     isConnectorTypeDeprecated: false,
+    source: 'stack',
     ...overrides,
   } as UserConfiguredActionConnector<Secrets, Config>;
 }
