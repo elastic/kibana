@@ -22,6 +22,7 @@ function withContextMock(context: KibanaExecutionContext | undefined, fn: () => 
 const createExecutionContextMock = () => {
   const mock: jest.Mocked<IExecutionContext> = {
     set: jest.fn(),
+    append: jest.fn(),
     setRequestId: jest.fn(),
     withContext: jest.fn(),
     get: jest.fn(),
@@ -40,6 +41,7 @@ const createInternalSetupContractMock = () => {
 const createSetupContractMock = () => {
   const mock: jest.Mocked<ExecutionContextSetup> = {
     withContext: jest.fn(),
+    append: jest.fn(),
     getAsLabels: jest.fn(),
   };
   mock.withContext.mockImplementation(withContextMock);

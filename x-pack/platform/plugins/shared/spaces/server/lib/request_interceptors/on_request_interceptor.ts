@@ -16,8 +16,12 @@ import { getSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {
   http: CoreSetup['http'];
+  executionContext: CoreSetup['executionContext'];
 }
-export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDeps) {
+export function initSpacesOnRequestInterceptor({
+  http,
+  executionContext,
+}: OnRequestInterceptorDeps) {
   http.registerOnPreRouting(async function spacesOnPreRoutingHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,
@@ -29,6 +33,8 @@ export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDep
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
     const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(path, serverBasePath);
+
+    executionContext.append({ space: spaceId });
 
     if (pathHasExplicitSpaceIdentifier) {
       const reqBasePath = `/s/${spaceId}`;
