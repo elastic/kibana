@@ -6,7 +6,7 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -14,7 +14,9 @@ import { i18n } from '@kbn/i18n';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
+  selectSyntheticsAlertsLoaded,
 } from '../../../state/alert_rules/selectors';
+import { getDefaultAlertingAction } from '../../../state/alert_rules/actions';
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
 import {
   selectAlertFlyoutVisibility,
@@ -28,8 +30,16 @@ export const useSyntheticsRules = (isOpen: boolean) => {
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
   const loading = useSelector(selectSyntheticsAlertsLoading);
+  const rulesLoaded = useSelector(selectSyntheticsAlertsLoaded);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewRule);
+
+  // Fetch default rules when popover opens if they haven't been loaded yet
+  useEffect(() => {
+    if (isOpen && !loading && rulesLoaded === null) {
+      dispatch(getDefaultAlertingAction.get());
+    }
+  }, [isOpen, loading, rulesLoaded, dispatch]);
 
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
