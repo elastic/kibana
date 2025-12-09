@@ -39,7 +39,6 @@ export const baseOTELPropertyRT = rt.intersection([
   rt.type({
     stability: rt.keyof({
       development: null,
-      experimental: null,
       stable: null,
     }),
   }),
