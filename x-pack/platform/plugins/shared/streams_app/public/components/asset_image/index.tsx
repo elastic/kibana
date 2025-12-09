@@ -106,6 +106,13 @@ const imageSets = {
       defaultMessage: 'Suggest pipeline',
     }),
   },
+  routingSuggestionEmptyState: {
+    light: () => import('./routing_suggestion_empty_state.svg'),
+    dark: () => import('./routing_suggestion_empty_state.svg'),
+    alt: i18n.translate('xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.image', {
+      defaultMessage: 'Suggest AI partitioning image for the streams app',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {
