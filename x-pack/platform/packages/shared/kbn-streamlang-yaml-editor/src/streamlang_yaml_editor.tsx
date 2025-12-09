@@ -72,8 +72,17 @@ export const StreamlangYamlEditor = ({
   const [internalValue, setInternalValue] = useState<string>(initialValue);
   const [isTyping, setIsTyping] = useState(false);
 
+  // Track whether simulation results are current (match the editor content)
+  // When content changes, we hide simulation decorations until a new simulation runs (an explicit action)
+  // This is because things like line mappings will fall out of sync as content is edited,
+  // but we also don't want to simulate on every key press (even if it's debounced).
+  const [simulationIsCurrent, setSimulationIsCurrent] = useState(true);
+
   // Track the last value we sent to onDslChange to avoid duplicate calls
   const lastNotifiedValueRef = useRef<string>(initialValue);
+
+  // Track processorsMetrics reference to detect when a new simulation has run
+  const previousProcessorsMetricsRef = useRef(processorsMetrics);
 
   // Create hover provider instance
   const hoverProvider = useMemo(() => createStreamlangHoverProvider(), []);
@@ -123,6 +132,17 @@ export const StreamlangYamlEditor = ({
       yamlLanguageService.release();
     };
   }, [schemas]);
+
+  // Detect when a new simulation has run by tracking processorsMetrics reference changes
+  useEffect(() => {
+    if (processorsMetrics !== previousProcessorsMetricsRef.current) {
+      previousProcessorsMetricsRef.current = processorsMetrics;
+      // New simulation results have arrived, mark them as current
+      if (processorsMetrics) {
+        setSimulationIsCurrent(true);
+      }
+    }
+  }, [processorsMetrics]);
 
   // Clear decorations immediately when user starts typing
   // Note: We keep yamlLineMap intact so that step actions and outlines continue to work
@@ -181,25 +201,33 @@ export const StreamlangYamlEditor = ({
   }, [...reinitializationDeps]);
 
   // Update decorations based on step summary (depends on simulation results)
+  // Only show decorations if simulation results are current (content hasn't changed since simulation)
   useEffect(() => {
-    if (hasSimulationResult && yamlLineMap && stepSummary && stepSummary.size > 0) {
+    if (
+      simulationIsCurrent &&
+      hasSimulationResult &&
+      yamlLineMap &&
+      stepSummary &&
+      stepSummary.size > 0
+    ) {
       const newDecorations = getStepDecorations(stepSummary, yamlLineMap);
       setDecorations(newDecorations);
     } else {
       setDecorations([]);
     }
-  }, [yamlLineMap, stepSummary, hasSimulationResult]);
+  }, [yamlLineMap, stepSummary, hasSimulationResult, simulationIsCurrent]);
 
   const { styles: decorationStyles } = useStepDecorations(editorRef.current, decorations);
 
   // Add gutter error markers based on processorsMetrics (also debounced via yamlLineMap)
+  // Only show simulation gutter markers if simulation results are current
   useGutterSimulationMarkers(
     editorRef.current,
     canRunSimulation,
-    hasSimulationResult,
-    processorsMetrics,
+    hasSimulationResult && simulationIsCurrent,
+    simulationIsCurrent ? processorsMetrics : undefined,
     yamlLineMap,
-    stepSummary
+    simulationIsCurrent ? stepSummary : undefined
   );
 
   // Add validation error gutter markers (independent of simulation)
@@ -291,6 +319,7 @@ export const StreamlangYamlEditor = ({
         setInternalValue(newValue);
         processChanges(newValue); // Debounced processing of the change
         setIsTyping(true); // Mark as typing to clear decorations immediately
+        setSimulationIsCurrent(false); // Mark simulation as stale until explicitly re-run
       }
     },
     [readOnly, processChanges]
