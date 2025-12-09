@@ -73,7 +73,7 @@ export const selectionComparators: StateComparators<
   singleSelect: 'referenceEquality',
 };
 
-export function initializeESQLControlSelections(
+export function initializeESQLControlManager(
   uuid: string,
   parentApi: unknown,
   initialState: ESQLControlState,
