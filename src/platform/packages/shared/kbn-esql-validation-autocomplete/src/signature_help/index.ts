@@ -91,7 +91,6 @@ export async function getSignatureHelp(
 
   const signature = {
     label: formattedSignature,
-    documentation: fnDefinition.description,
     parameters:
       parameters.map((param) => {
         const paramDefinition = fnDefinition.signatures

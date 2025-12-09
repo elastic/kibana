@@ -167,16 +167,6 @@ describe('getSignatureHelp', () => {
   field?:integer
 ): long`);
     });
-
-    it('should include function documentation when available', async () => {
-      const query = 'FROM logs | STATS COUNT(';
-      const offset = query.length;
-
-      const result = await getSignatureHelp(query, offset, mockCallbacks);
-
-      expect(result).toBeDefined();
-      expect(result?.signatures[0].documentation).toBeDefined();
-    });
   });
 
   describe('variadic functions', () => {
