@@ -248,6 +248,9 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
     expect(actualSchema.properties.enabled.type).toBe('boolean');
 
     // Verify validation works with AJV (same validator Monaco uses)
+    if (!jsonSchema) {
+      throw new Error('JSON schema is null');
+    }
     const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
     const validate = ajv.compile(jsonSchema);
 

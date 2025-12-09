@@ -103,21 +103,26 @@ export function useYamlValidation(
     // Build validation results - only include validations that don't require workflowDefinition
     // Monaco YAML's schema validation will show errors independently
     const validationResults: YamlValidationResult[] = [
-      validateStepNameUniqueness(yamlDocument),
-      validateLiquidTemplate(model.getValue()),
-      validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+      ...validateStepNameUniqueness(yamlDocument),
+      ...validateLiquidTemplate(model.getValue()),
+      ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
     ];
 
     // Only run validations that require workflowDefinition if it's available
     if (workflowGraph && workflowDefinition) {
       const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
       validationResults.push(
-        validateVariablesInternal(variableItems, workflowGraph, workflowDefinition, yamlDocument),
-        validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+        ...validateVariablesInternal(
+          variableItems,
+          workflowGraph,
+          workflowDefinition,
+          yamlDocument
+        ),
+        ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
       );
     }
 
-    for (const validationResult of validationResults.flat()) {
+    for (const validationResult of validationResults) {
       if (validationResult.owner === 'variable-validation') {
         if (validationResult.severity !== null) {
           markers.push({
