@@ -112,6 +112,8 @@ export const EntityHighlightsAccordion: React.FC<{
             onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
             setConnectorId={setConnectorId}
             connectorId={connectorId}
+            entityType={entityType}
+            entityIdentifier={entityIdentifier}
             closePopover={closePopover}
             openPopover={onButtonClick}
             isLoading={isLoading}

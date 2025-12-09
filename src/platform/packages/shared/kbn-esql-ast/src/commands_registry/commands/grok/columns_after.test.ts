@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata } from '../../types';
 import { columnsAfter, extractSemanticsFromGrok } from './columns_after';
 
 describe('GROK', () => {
