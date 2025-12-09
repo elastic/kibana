@@ -48,6 +48,7 @@ import { TimeoutCircuitBreaker } from './circuit_breakers/timeout_circuit_breake
 import { EventLoopUtilizationCircuitBreaker } from './circuit_breakers/event_loop_utilization_circuit_breaker';
 import { EventLoopDelayCircuitBreaker } from './circuit_breakers/event_loop_delay_circuit_breaker';
 import { ElasticsearchCircuitBreaker } from './circuit_breakers/elastic_search_circuit_breaker';
+import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
@@ -62,6 +63,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
   private _esClient?: ElasticsearchClient;
+  private telemetryConfigProvider?: TelemetryConfigProvider;
 
   constructor(logger: Logger) {
     const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
@@ -80,6 +82,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
     this.analytics = start.analytics;
     this._esClient = start.esClient;
+    this.telemetryConfigProvider = start.telemetryConfigProvider;
 
     await this.scheduleTask(start.taskManager);
   }
@@ -87,6 +90,10 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   public async runHealthDiagnosticQueries(
     lastExecutionByQuery: Record<string, number>
   ): Promise<HealthDiagnosticQueryStats[]> {
+    if (!this.telemetryConfigProvider?.getIsOptedIn()) {
+      this.logger.debug('Skipping health diagnostic task because telemetry is disabled');
+      return [];
+    }
     this.logger.debug('Running health diagnostic task');
 
     const queriesToRun = await this.getRunnableHealthQueries(lastExecutionByQuery, new Date());
