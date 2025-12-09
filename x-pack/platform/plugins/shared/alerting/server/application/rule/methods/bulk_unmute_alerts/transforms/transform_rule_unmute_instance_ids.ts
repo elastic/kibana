@@ -6,50 +6,22 @@
  */
 
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
-import type { BulkUpdateRuleSoParams } from '../../../../../data/rule/methods/bulk_update_rule_so';
 import type { RawRule } from '../../../../../saved_objects/schemas/raw_rule';
 import type { BulkMuteUnmuteAlertsParams } from '../../../types';
-
-export const transformUnmuteRequestToRuleAttributes = ({
-  paramRules,
-  savedRules,
-}: {
-  paramRules: BulkMuteUnmuteAlertsParams['rules'];
-  savedRules: SavedObjectsBulkResponse<RawRule>['saved_objects'];
-}) => {
-  return (
-    paramRules
-      .map((paramRule) => {
-        const savedRule = savedRules.find((rule) => rule.id === paramRule.id);
-        const newAttributes = removeInstanceIds({
-          alertInstanceIds: savedRule?.attributes.mutedInstanceIds ?? [],
-          removedInstanceIds: paramRule.alertInstanceIds,
-        });
-
-        if (!savedRule || !newAttributes) {
-          return;
-        }
-
-        return {
-          id: savedRule.id,
-          attributes: newAttributes,
-        };
-      })
-      // Removing undefined (in case all instanceIds are already muted)
-      .filter(Boolean) as BulkUpdateRuleSoParams['rules']
-  );
-};
+import { transformMuteUnmuteRequestToRuleAttributes } from '../../../transforms/transform_rule_mute_unmute_instance_ids';
 
 const removeInstanceIds = ({
-  alertInstanceIds,
-  removedInstanceIds,
+  existingInstanceIds,
+  instanceIdsFromRequest,
 }: {
-  alertInstanceIds: string[];
-  removedInstanceIds: string[];
+  existingInstanceIds: string[];
+  instanceIdsFromRequest: string[];
 }): Pick<RawRule, 'mutedInstanceIds' | 'updatedAt'> | undefined => {
-  const newMutedInstanceIds = alertInstanceIds.filter((id) => !removedInstanceIds.includes(id));
+  const newMutedInstanceIds = existingInstanceIds.filter(
+    (id) => !instanceIdsFromRequest.includes(id)
+  );
 
-  if (newMutedInstanceIds.length === alertInstanceIds.length) {
+  if (newMutedInstanceIds.length === existingInstanceIds.length) {
     // No changes needed
     return;
   }
@@ -58,4 +30,18 @@ const removeInstanceIds = ({
     mutedInstanceIds: newMutedInstanceIds,
     updatedAt: new Date().toISOString(),
   };
+};
+
+export const transformUnmuteRequestToRuleAttributes = ({
+  paramRules,
+  savedRules,
+}: {
+  paramRules: BulkMuteUnmuteAlertsParams['rules'];
+  savedRules: SavedObjectsBulkResponse<RawRule>['saved_objects'];
+}) => {
+  return transformMuteUnmuteRequestToRuleAttributes({
+    paramRules,
+    savedRules,
+    instanceIdCalculator: removeInstanceIds,
+  });
 };
