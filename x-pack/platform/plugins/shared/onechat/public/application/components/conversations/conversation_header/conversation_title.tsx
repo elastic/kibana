@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
@@ -34,6 +34,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
 }) => {
   const { title, isLoading } = useConversationTitle();
   const hasActiveConversation = useHasActiveConversation();
+  const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
 
   const shouldShow = hasActiveConversation && !isLoading && title;
@@ -55,6 +56,10 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
     return <RenameConversationInput onCancel={handleCancel} />;
   }
 
+  const titleStyles = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -65,7 +70,9 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
       data-test-subj="agentBuilderConversationTitle"
     >
       <EuiFlexItem grow={false}>
-        <h1 id={ariaLabelledBy}>{title}</h1>
+        <h4 id={ariaLabelledBy} css={titleStyles}>
+          {title}
+        </h4>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon

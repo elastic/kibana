@@ -231,7 +231,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',
   };
-  const showButtonIcon = isEmbeddedContext || hasActiveConversation;
+  const showButtonIcon = hasActiveConversation;
   const button = showButtonIcon ? (
     <EuiButtonIcon {...buttonProps} />
   ) : (
