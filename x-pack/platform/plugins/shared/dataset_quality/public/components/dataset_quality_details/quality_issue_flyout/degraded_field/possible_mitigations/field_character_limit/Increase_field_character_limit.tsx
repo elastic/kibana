@@ -5,36 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common/locators/streams_locator';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { BasicDataStream } from '../../../../../../../common/types';
 import { increaseFieldCharacterLimit } from '../../../../../../../common/translations';
 import { MitigationAccordion } from '../mitigation_accordion';
 
 export function IncreaseFieldCharacterLimit({
   isLoading,
-  datasetDetails,
-  streamsLocator,
+  schemaUrl,
 }: {
   isLoading: boolean;
-  datasetDetails: BasicDataStream;
-  streamsLocator?: LocatorPublic<StreamsAppLocatorParams>;
+  schemaUrl?: string;
 }) {
-  const schemaUrl = useMemo(() => {
-    if (!streamsLocator) {
-      return '';
-    }
-
-    return streamsLocator.getRedirectUrl({
-      name: datasetDetails.rawName,
-      managementTab: 'schema',
-    } as StreamsAppLocatorParams);
-  }, [streamsLocator, datasetDetails.rawName]);
-
   return (
     <MitigationAccordion
       title={increaseFieldCharacterLimit}
@@ -45,7 +29,7 @@ export function IncreaseFieldCharacterLimit({
         <ol>
           <li>
             <FormattedMessage
-              id="xpack.datasetQuality.details.degradedField.possibleMitigation.modifyFieldValueText1"
+              id="xpack.datasetQuality.details.degradedField.possibleMitigation.increaseFieldCharacterLimitText1"
               defaultMessage="Navigate to this stream's {schemaTab}."
               values={{
                 schemaTab: (
@@ -69,7 +53,7 @@ export function IncreaseFieldCharacterLimit({
           </li>
           <li>
             <FormattedMessage
-              id="xpack.datasetQuality.details.degradedField.possibleMitigation.modifyFieldValueText2"
+              id="xpack.datasetQuality.details.degradedField.possibleMitigation.increaseFieldCharacterLimitText2"
               defaultMessage="Use the {ignoreAboveParameter} parameter to increase the field's character limit."
               values={{
                 ignoreAboveParameter: (

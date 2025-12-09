@@ -5,43 +5,20 @@
  * 2.0.
  */
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common/locators/streams_locator';
 import { useDatasetQualityDetailsState } from '../../../../../../hooks';
 import { changeFieldType } from '../../../../../../../common/translations';
-import { useKibanaContextForPlugin } from '../../../../../../utils';
 import { MitigationAccordion } from '../mitigation_accordion';
 
 export const FieldMalformed = () => {
   const {
     loadingState: { integrationDetailsLoaded },
+    streamsUrls,
   } = useDatasetQualityDetailsState();
 
-  const {
-    services: {
-      share: {
-        url: { locators },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
-  const { datasetDetails } = useDatasetQualityDetailsState();
-
-  const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
-
-  const processingUrl = useMemo(() => {
-    if (!streamsLocator) {
-      return '';
-    }
-
-    return streamsLocator.getRedirectUrl({
-      name: datasetDetails.rawName,
-      managementTab: 'processing',
-    } as StreamsAppLocatorParams);
-  }, [streamsLocator, datasetDetails.rawName]);
+  const processingUrl = streamsUrls?.processingUrl;
 
   return (
     <>

@@ -5,36 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common/locators/streams_locator';
-import type { LocatorPublic } from '@kbn/share-plugin/common/url_service';
-import type { BasicDataStream } from '../../../../../../../common/types';
 import { modifyFieldValue } from '../../../../../../../common/translations';
 import { MitigationAccordion } from '../mitigation_accordion';
 
 export function ModifyFieldValue({
   isLoading,
-  datasetDetails,
-  streamsLocator,
+  processingUrl,
 }: {
   isLoading: boolean;
-  datasetDetails: BasicDataStream;
-  streamsLocator?: LocatorPublic<StreamsAppLocatorParams>;
+  processingUrl?: string;
 }) {
-  const processorUrl = useMemo(() => {
-    if (!streamsLocator) {
-      return '';
-    }
-
-    return streamsLocator.getRedirectUrl({
-      name: datasetDetails.rawName,
-      managementTab: 'processing',
-    } as StreamsAppLocatorParams);
-  }, [streamsLocator, datasetDetails.rawName]);
-
   return (
     <MitigationAccordion
       title={modifyFieldValue}
@@ -46,13 +30,13 @@ export function ModifyFieldValue({
           <li>
             <FormattedMessage
               id="xpack.datasetQuality.details.degradedField.possibleMitigation.modifyFieldValueText1"
-              defaultMessage="Navigate to this stream's {processingTab}"
+              defaultMessage="Navigate to this stream's {processingTab}."
               values={{
                 processingTab: (
                   <EuiLink
                     data-test-subj="datasetQualityDetailsFlyoutModifyFieldValueAccordionProcessingTabLink"
-                    data-test-url={processorUrl}
-                    href={processorUrl}
+                    data-test-url={processingUrl}
+                    href={processingUrl}
                     target="_blank"
                   >
                     {i18n.translate(

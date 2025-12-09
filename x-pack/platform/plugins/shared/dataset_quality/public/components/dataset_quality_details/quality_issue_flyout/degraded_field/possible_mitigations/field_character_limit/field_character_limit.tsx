@@ -6,9 +6,6 @@
  */
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common/locators/streams_locator';
-import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { useKibanaContextForPlugin } from '../../../../../../utils';
 import { useDatasetQualityDetailsState } from '../../../../../../hooks';
 import { ModifyFieldValue } from './modify_field_value';
 import { IncreaseFieldCharacterLimit } from './Increase_field_character_limit';
@@ -16,31 +13,19 @@ import { IncreaseFieldCharacterLimit } from './Increase_field_character_limit';
 export const FieldCharacterLimit = () => {
   const {
     loadingState: { integrationDetailsLoaded },
-    datasetDetails,
+    streamsUrls,
   } = useDatasetQualityDetailsState();
-
-  const {
-    services: {
-      share: {
-        url: { locators },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
-  const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
 
   return (
     <>
       <ModifyFieldValue
         isLoading={!integrationDetailsLoaded}
-        datasetDetails={datasetDetails}
-        streamsLocator={streamsLocator}
+        processingUrl={streamsUrls?.processingUrl}
       />
       <EuiSpacer size="m" />
       <IncreaseFieldCharacterLimit
         isLoading={!integrationDetailsLoaded}
-        datasetDetails={datasetDetails}
-        streamsLocator={streamsLocator}
+        schemaUrl={streamsUrls?.schemaUrl}
       />
       <EuiSpacer size="m" />
     </>
