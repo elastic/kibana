@@ -19750,6 +19750,7 @@ const caseDefinition: FunctionDefinition = {
       ],
       minParams: 2,
       returnType: 'unknown',
+      isSignatureRepeating: true,
     },
   ],
   locationsAvailable: [

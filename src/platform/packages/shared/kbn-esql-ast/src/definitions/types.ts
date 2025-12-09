@@ -159,6 +159,7 @@ export interface Signature {
   minParams?: number;
   returnType: FunctionReturnType;
   license?: LicenseType;
+  isSignatureRepeating?: boolean;
 }
 
 export interface FunctionDefinition {
