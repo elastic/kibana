@@ -18,6 +18,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
+import { LLMSuggestionService } from './lib/streams/llm_suggestions/llm_suggestions_service';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
@@ -110,7 +111,7 @@ export class StreamsPlugin
     const featureService = new FeatureService(core, this.logger, getDefaultFeatureRegistry());
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
-    const llmSuggestionsStorage = new LLMSuggestionsStorage(core, this.logger);
+    const llmSuggestionsStorage = new LLMSuggestionService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -180,12 +181,14 @@ export class StreamsPlugin
             attachmentClient,
             featureClient,
             contentClient,
+            llmSuggestionsClient,
           ] = await Promise.all([
             core.getStartServices(),
             assetService.getClientWithRequest({ request }),
             attachmentService.getClientWithRequest({ request }),
             featureService.getClientWithRequest({ request }),
             contentService.getClient(),
+            llmSuggestionsStorage.getClient(),
           ]);
 
           const [queryClient, uiSettingsClient] = await Promise.all([
@@ -223,6 +226,7 @@ export class StreamsPlugin
             fieldsMetadataClient,
             licensing,
             uiSettingsClient,
+            llmSuggestionsClient,
           };
         },
       },

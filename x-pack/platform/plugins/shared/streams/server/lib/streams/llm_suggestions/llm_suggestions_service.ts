@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { LLMSuggestionClient } from './llm_suggestion_client';
@@ -19,11 +19,7 @@ export class LLMSuggestionService {
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({
-    request,
-  }: {
-    request: KibanaRequest;
-  }): Promise<LLMSuggestionClient> {
+  async getClient(): Promise<LLMSuggestionClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<LLMSuggestionStorageSettings, StoredLLMSuggestion>(
