@@ -26,8 +26,14 @@ import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/register_routes';
 import type { SLORoutesDependencies } from './routes/types';
-import { SO_SLO_TYPE, slo } from './saved_objects';
-import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
+import {
+  SO_SLO_TYPE,
+  slo,
+  SO_SLO_SETTINGS_TYPE,
+  sloSettings,
+  sloTemplate,
+  SO_SLO_TEMPLATE_TYPE,
+} from './saved_objects';
 import {
   DefaultResourceInstaller,
   DefaultSummaryTransformManager,
@@ -75,7 +81,7 @@ export class SLOPlugin
     const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
+    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE, SO_SLO_TEMPLATE_TYPE];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
@@ -136,6 +142,7 @@ export class SLOPlugin
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
+    core.savedObjects.registerType(sloTemplate);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,
