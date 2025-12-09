@@ -21,7 +21,7 @@ export function EditRoutingStreamEntry({
   routingRule: RoutingDefinitionWithUIAttributes;
 }) {
   const { euiTheme } = useEuiTheme();
-  const { partitionName, prefix } = useChildStreamInput(routingRule.destination);
+  const { partitionName, prefix } = useChildStreamInput(routingRule.destination, true);
 
   return (
     <EuiPanel

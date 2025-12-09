@@ -30,7 +30,7 @@ export function NewRoutingStreamEntry() {
   }, []);
 
   const { setLocalStreamName, isStreamNameValid, partitionName, prefix, helpText, errorMessage } =
-    useChildStreamInput(currentRule.destination, false);
+    useChildStreamInput(currentRule.destination);
 
   return (
     <div ref={panelRef}>
