@@ -104,10 +104,6 @@
       "@kbn/apm-plugin/*": ["x-pack/solutions/observability/plugins/apm/*"],
       "@kbn/apm-sources-access-plugin": ["x-pack/platform/plugins/shared/apm_sources_access"],
       "@kbn/apm-sources-access-plugin/*": ["x-pack/platform/plugins/shared/apm_sources_access/*"],
-      "@kbn/apm-synthtrace": ["src/platform/packages/shared/kbn-apm-synthtrace"],
-      "@kbn/apm-synthtrace/*": ["src/platform/packages/shared/kbn-apm-synthtrace/*"],
-      "@kbn/apm-synthtrace-client": ["src/platform/packages/shared/kbn-apm-synthtrace-client"],
-      "@kbn/apm-synthtrace-client/*": ["src/platform/packages/shared/kbn-apm-synthtrace-client/*"],
       "@kbn/apm-types": ["x-pack/platform/packages/shared/kbn-apm-types"],
       "@kbn/apm-types/*": ["x-pack/platform/packages/shared/kbn-apm-types/*"],
       "@kbn/apm-types-shared": ["src/platform/packages/shared/kbn-apm-types-shared"],
@@ -794,6 +790,8 @@
       "@kbn/cypress-config/*": ["src/platform/packages/shared/kbn-cypress-config/*"],
       "@kbn/cypress-test-helper": ["src/platform/packages/shared/kbn-cypress-test-helper"],
       "@kbn/cypress-test-helper/*": ["src/platform/packages/shared/kbn-cypress-test-helper/*"],
+      "@kbn/dashboard-agent-plugin": ["x-pack/platform/plugins/shared/dashboard_agent"],
+      "@kbn/dashboard-agent-plugin/*": ["x-pack/platform/plugins/shared/dashboard_agent/*"],
       "@kbn/dashboard-enhanced-plugin": ["x-pack/platform/plugins/shared/dashboard_enhanced"],
       "@kbn/dashboard-enhanced-plugin/*": ["x-pack/platform/plugins/shared/dashboard_enhanced/*"],
       "@kbn/dashboard-markdown": ["src/platform/plugins/shared/dashboard_markdown"],
@@ -1254,6 +1252,8 @@
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/platform/plugins/shared/ingest_pipelines/*"],
       "@kbn/ingest-pipelines-shared": ["x-pack/platform/packages/shared/ingest-pipelines"],
       "@kbn/ingest-pipelines-shared/*": ["x-pack/platform/packages/shared/ingest-pipelines/*"],
+      "@kbn/ink": ["x-pack/platform/packages/shared/kbn-ink"],
+      "@kbn/ink/*": ["x-pack/platform/packages/shared/kbn-ink/*"],
       "@kbn/input-control-vis-plugin": ["src/platform/plugins/private/input_control_vis"],
       "@kbn/input-control-vis-plugin/*": ["src/platform/plugins/private/input_control_vis/*"],
       "@kbn/inspect-component-plugin": ["src/platform/plugins/private/inspect_component"],
@@ -1420,6 +1420,8 @@
       "@kbn/maps-plugin/*": ["x-pack/platform/plugins/shared/maps/*"],
       "@kbn/maps-vector-tile-utils": ["x-pack/platform/packages/private/maps/vector_tile_utils"],
       "@kbn/maps-vector-tile-utils/*": ["x-pack/platform/packages/private/maps/vector_tile_utils/*"],
+      "@kbn/mcp-client": ["x-pack/platform/packages/shared/kbn-mcp-client"],
+      "@kbn/mcp-client/*": ["x-pack/platform/packages/shared/kbn-mcp-client/*"],
       "@kbn/mcp-dev-server": ["src/platform/packages/shared/kbn-mcp-dev-server"],
       "@kbn/mcp-dev-server/*": ["src/platform/packages/shared/kbn-mcp-dev-server/*"],
       "@kbn/metrics": ["src/platform/packages/private/opentelemetry/kbn-metrics"],
@@ -1526,8 +1528,10 @@
       "@kbn/object-versioning/*": ["src/platform/packages/shared/kbn-object-versioning/*"],
       "@kbn/object-versioning-utils": ["src/platform/packages/shared/kbn-object-versioning-utils"],
       "@kbn/object-versioning-utils/*": ["src/platform/packages/shared/kbn-object-versioning-utils/*"],
-      "@kbn/observability-agent-plugin": ["x-pack/solutions/observability/plugins/observability_agent"],
-      "@kbn/observability-agent-plugin/*": ["x-pack/solutions/observability/plugins/observability_agent/*"],
+      "@kbn/observability-agent-builder": ["x-pack/solutions/observability/packages/agent-builder"],
+      "@kbn/observability-agent-builder/*": ["x-pack/solutions/observability/packages/agent-builder/*"],
+      "@kbn/observability-agent-builder-plugin": ["x-pack/solutions/observability/plugins/observability_agent_builder"],
+      "@kbn/observability-agent-builder-plugin/*": ["x-pack/solutions/observability/plugins/observability_agent_builder/*"],
       "@kbn/observability-ai-assistant-app-plugin": ["x-pack/solutions/observability/plugins/observability_ai_assistant_app"],
       "@kbn/observability-ai-assistant-app-plugin/*": ["x-pack/solutions/observability/plugins/observability_ai_assistant_app/*"],
       "@kbn/observability-ai-assistant-management-plugin": ["x-pack/platform/plugins/private/observability_ai_assistant_management"],
@@ -1754,6 +1758,8 @@
       "@kbn/response-ops-alerts-filters-form/*": ["src/platform/packages/shared/response-ops/alerts-filters-form/*"],
       "@kbn/response-ops-alerts-table": ["src/platform/packages/shared/response-ops/alerts-table"],
       "@kbn/response-ops-alerts-table/*": ["src/platform/packages/shared/response-ops/alerts-table/*"],
+      "@kbn/response-ops-form-generator": ["src/platform/packages/shared/response-ops/form-generator"],
+      "@kbn/response-ops-form-generator/*": ["src/platform/packages/shared/response-ops/form-generator/*"],
       "@kbn/response-ops-recurring-schedule-form": ["src/platform/packages/shared/response-ops/recurring-schedule-form"],
       "@kbn/response-ops-recurring-schedule-form/*": ["src/platform/packages/shared/response-ops/recurring-schedule-form/*"],
       "@kbn/response-ops-rule-form": ["src/platform/packages/shared/response-ops/rule_form"],
@@ -2200,6 +2206,10 @@
       "@kbn/synthetics-plugin/*": ["x-pack/solutions/observability/plugins/synthetics/*"],
       "@kbn/synthetics-private-location": ["x-pack/packages/kbn-synthetics-private-location"],
       "@kbn/synthetics-private-location/*": ["x-pack/packages/kbn-synthetics-private-location/*"],
+      "@kbn/synthtrace": ["src/platform/packages/shared/kbn-synthtrace"],
+      "@kbn/synthtrace/*": ["src/platform/packages/shared/kbn-synthtrace/*"],
+      "@kbn/synthtrace-client": ["src/platform/packages/shared/kbn-synthtrace-client"],
+      "@kbn/synthtrace-client/*": ["src/platform/packages/shared/kbn-synthtrace-client/*"],
       "@kbn/task-manager-dependencies-plugin": ["x-pack/platform/plugins/private/task_manager_dependencies"],
       "@kbn/task-manager-dependencies-plugin/*": ["x-pack/platform/plugins/private/task_manager_dependencies/*"],
       "@kbn/task-manager-fixture-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture"],
@@ -2320,8 +2330,6 @@
       "@kbn/ui-shared-deps-src/*": ["src/platform/packages/private/kbn-ui-shared-deps-src/*"],
       "@kbn/ui-theme": ["src/platform/packages/shared/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["src/platform/packages/shared/kbn-ui-theme/*"],
-      "@kbn/uiam-dev-cli": ["x-pack/platform/packages/private/security/kbn_uiam_dev_cli"],
-      "@kbn/uiam-dev-cli/*": ["x-pack/platform/packages/private/security/kbn_uiam_dev_cli/*"],
       "@kbn/unified-data-table": ["src/platform/packages/shared/kbn-unified-data-table"],
       "@kbn/unified-data-table/*": ["src/platform/packages/shared/kbn-unified-data-table/*"],
       "@kbn/unified-doc-viewer": ["src/platform/packages/shared/kbn-unified-doc-viewer"],
@@ -2432,16 +2440,16 @@
       "@kbn/workflows/*": ["src/platform/packages/shared/kbn-workflows/*"],
       "@kbn/workflows-execution-engine": ["src/platform/plugins/shared/workflows_execution_engine"],
       "@kbn/workflows-execution-engine/*": ["src/platform/plugins/shared/workflows_execution_engine/*"],
+      "@kbn/workflows-extensions": ["src/platform/plugins/shared/workflows_extensions"],
+      "@kbn/workflows-extensions/*": ["src/platform/plugins/shared/workflows_extensions/*"],
+      "@kbn/workflows-extensions-example": ["examples/workflows_extensions_example"],
+      "@kbn/workflows-extensions-example/*": ["examples/workflows_extensions_example/*"],
       "@kbn/workflows-management-plugin": ["src/platform/plugins/shared/workflows_management"],
       "@kbn/workflows-management-plugin/*": ["src/platform/plugins/shared/workflows_management/*"],
       "@kbn/workflows-ui": ["src/platform/packages/shared/kbn-workflows-ui"],
       "@kbn/workflows-ui/*": ["src/platform/packages/shared/kbn-workflows-ui/*"],
       "@kbn/workplace-ai-app": ["x-pack/solutions/workplaceai/plugins/workplace_ai_app"],
       "@kbn/workplace-ai-app/*": ["x-pack/solutions/workplaceai/plugins/workplace_ai_app/*"],
-      "@kbn/workplaceai-api-keys-components": ["x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components"],
-      "@kbn/workplaceai-api-keys-components/*": ["x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components/*"],
-      "@kbn/workplaceai-api-keys-server": ["x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server"],
-      "@kbn/workplaceai-api-keys-server/*": ["x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/*"],
       "@kbn/workspaces": ["src/platform/packages/shared/kbn-workspaces"],
       "@kbn/workspaces/*": ["src/platform/packages/shared/kbn-workspaces/*"],
       "@kbn/xstate-utils": ["src/platform/packages/shared/kbn-xstate-utils"],
@@ -2455,27 +2463,21 @@
       // END AUTOMATED PACKAGE LISTING
       // Map @elastic/kibana-d3-color to @types/d3-color for TypeScript compatibility.
       // Can be removed once we're able to update d3-color to the v3.1.0 ESM-only package.
-      "@elastic/kibana-d3-color": [
-        "node_modules/@types/d3-color"
-      ],
+      "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ],
+      "@emotion/core": ["typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": [
-        "typings/@elastic/opentelemetry-node/sdk"
-      ],
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
       "@opentelemetry/semantic-conventions/incubating": [
         "typings/@opentelemetry/semantic-conventions/incubating"
       ],
-      "@typescript-eslint/parser": [
-        "typings/@typescript-eslint/parser"
-      ],
-      "@a2a-js/sdk/server": [
-        "typings/@a2a-js-sdk/server"
-      ],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
+      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
+      "zod": ["typings/zod/v3"],
+      "zod/v4": ["typings/zod/v4"],
+      "vega-lite": ["typings/vega/vega_lite"],
+      "vega-tooltip": ["typings/vega/vega_tooltip"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

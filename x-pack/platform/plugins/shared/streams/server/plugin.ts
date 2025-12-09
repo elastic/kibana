@@ -119,9 +119,6 @@ export class StreamsPlugin
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID],
-      privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
-        defaultMessage: 'All Spaces is required for Streams access.',
-      }),
       alerting: alertingFeatures,
       privileges: {
         all: {
@@ -130,7 +127,6 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          requireAllSpaces: true,
           alerting: {
             rule: {
               all: alertingFeatures,
@@ -148,7 +144,6 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          requireAllSpaces: true,
           alerting: {
             rule: {
               read: alertingFeatures,

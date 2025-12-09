@@ -11,7 +11,6 @@ import React, { useMemo, useCallback } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
@@ -28,13 +27,14 @@ import { Pagination } from './pagination';
 import { useFilteredMetricFields, usePagination } from '../hooks';
 import { MetricsGridLoadingProgress } from './empty_state/empty_state';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
-    ChartSectionProps,
-    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'histogramCss'
+    UnifiedMetricsGridProps,
+    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
   > {
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
   isFieldsLoading?: boolean;
   isDiscoverLoading?: boolean;
@@ -47,9 +47,10 @@ export const MetricsExperienceGridContent = ({
   fetchParams,
   onBrushEnd,
   onFilter,
+  actions,
   histogramCss,
   isFieldsLoading = false,
-  isDiscoverLoading,
+  isDiscoverLoading = false,
 }: MetricsExperienceGridContentProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -69,6 +70,7 @@ export const MetricsExperienceGridContent = ({
     isLoading: isFilteredFieldsLoading,
   } = useFilteredMetricFields({
     allFields,
+    isFieldsLoading,
     dimensions,
     searchTerm,
     valueFilters,
@@ -158,7 +160,9 @@ export const MetricsExperienceGridContent = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>
-        {(isDiscoverLoading || isFilteredFieldsLoading) && <MetricsGridLoadingProgress />}
+        {(isDiscoverLoading || isFilteredFieldsLoading || isFieldsLoading) && (
+          <MetricsGridLoadingProgress />
+        )}
         <MetricsGrid
           columns={columns}
           dimensions={dimensions}
@@ -166,6 +170,7 @@ export const MetricsExperienceGridContent = ({
           services={services}
           fields={currentPageFields}
           onBrushEnd={onBrushEnd}
+          actions={actions}
           onFilter={onFilter}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}

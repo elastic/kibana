@@ -82,6 +82,8 @@ dependsOn:
   - '@kbn/core-ui-settings-common'
   - '@kbn/licensing-types'
   - '@kbn/react-query'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/alerting-types'
   - '@kbn/core-user-profile-browser-mocks'
 tags:
   - plugin

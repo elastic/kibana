@@ -88,4 +88,67 @@ describe('getGrokProcessor', () => {
       ],
     });
   });
+
+  it('collapses multi-column grouping when last component is GREEDYDATA', () => {
+    const grokPatternNodes: GrokPatternNode[] = [
+      { pattern: '[' },
+      {
+        id: 'field_1',
+        component: 'TIMESTAMP_ISO8601',
+        values: ['2025-08-07T09:01:01Z'],
+      },
+      { pattern: ']' },
+      { pattern: ' ' },
+      {
+        id: 'field_2',
+        component: 'NOTSPACE',
+        values: ['Error:'],
+      },
+      { pattern: ' ' },
+      {
+        id: 'field_3',
+        component: 'WORD',
+        values: ['Connection'],
+      },
+      { pattern: ' ' },
+      {
+        id: 'field_4',
+        component: 'DATA',
+        values: ['failed'],
+      },
+      { pattern: ' ' },
+      {
+        id: 'field_5',
+        component: 'GREEDYDATA',
+        values: ['at line 42'],
+      },
+    ];
+
+    // LLM groups field_2 through field_5 into a SINGLE multi-column entry
+    // This mimics what the LLM does when it follows the "group adjacent fields" instruction
+    const reviewResult = {
+      log_source: 'Application Error Log',
+      fields: [
+        {
+          name: '@timestamp',
+          columns: ['field_1'],
+          grok_components: ['TIMESTAMP_ISO8601'],
+        },
+        {
+          name: 'error.message',
+          columns: ['field_2', 'field_3', 'field_4', 'field_5'], // Multi-column grouping
+          grok_components: ['NOTSPACE', 'WORD', 'DATA', 'GREEDYDATA'],
+        },
+      ],
+    };
+
+    const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult);
+
+    // Should collapse to GREEDYDATA, not create a complex custom pattern
+    expect(grokProcessor).toEqual({
+      description: 'Application Error Log',
+      pattern_definitions: {},
+      patterns: ['\\[%{TIMESTAMP_ISO8601:@timestamp}\\] %{GREEDYDATA:error.message}'],
+    });
+  });
 });

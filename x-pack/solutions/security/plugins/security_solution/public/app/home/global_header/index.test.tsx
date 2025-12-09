@@ -49,6 +49,7 @@ describe('global header', () => {
     },
   };
   const store = createMockStore(state);
+  // mock capabilities to exclude Search AI Lake configurations
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
@@ -57,6 +58,7 @@ describe('global header', () => {
         ...mockUseKibana().services,
         application: {
           capabilities: {
+            ...mockUseKibana().services.application.capabilities,
             [SECURITY_FEATURE_ID]: {
               configurations: false,
             },
@@ -65,6 +67,7 @@ describe('global header', () => {
       },
     });
   });
+
   it('has add data link', () => {
     const { getByText } = render(
       <TestProviders store={store}>
@@ -94,6 +97,7 @@ describe('global header', () => {
             [SECURITY_FEATURE_ID]: {
               configurations: true,
             },
+            fleet: { read: true },
           },
         },
       },
