@@ -25,4 +25,5 @@ export interface ActionType {
   isSystemActionType: boolean;
   subFeature?: SubFeature;
   isDeprecated: boolean;
+  allowMultipleSystemActions?: boolean;
 }
