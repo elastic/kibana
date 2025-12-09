@@ -523,10 +523,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'agentBuilder:externalMcp': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'dataConnectors:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
