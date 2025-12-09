@@ -44,7 +44,7 @@ export async function unzipBuffer(buffer: Buffer): Promise<ZipEntry[]> {
   return zipEntries;
 }
 
-export async function createZipFile(entries: ZipEntry[], destination: string): Promise<Buffer> {
+export async function createZipFile(entries: ZipEntry[], destination: string): Promise<void> {
   const zipfile = new yazl.ZipFile();
 
   for (const entry of entries) {
