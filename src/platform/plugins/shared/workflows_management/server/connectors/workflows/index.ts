@@ -40,7 +40,7 @@ export interface WorkflowsRuleActionParams {
   subAction: 'run';
   subActionParams: {
     workflowId: string;
-    summary?: boolean;
+    summaryMode?: boolean;
   };
   [key: string]: unknown;
 }
@@ -170,7 +170,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           throw new Error(`Missing subActionParams. Received: ${JSON.stringify(params)}`);
         }
 
-        const { workflowId, summary = true } = subActionParams;
+        const { workflowId, summaryMode = true } = subActionParams;
         if (!workflowId) {
           throw new Error(
             `Missing required workflowId parameter. Received params: ${JSON.stringify(params)}`
@@ -191,7 +191,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId,
             inputs: { event: alertEvent },
             spaceId,
-            summary,
+            summaryMode,
           },
         };
       } catch (error) {
@@ -200,7 +200,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
-            summary: params?.subActionParams?.summary ?? true,
+            summaryMode: params?.subActionParams?.summaryMode ?? true,
           },
         };
       }

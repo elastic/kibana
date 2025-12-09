@@ -41,7 +41,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   index,
   errors,
 }) => {
-  const { workflowId, summary = true } = actionParams.subActionParams ?? {};
+  const { workflowId, summaryMode = true } = actionParams.subActionParams ?? {};
 
   const handleWorkflowChange = useCallback(
     (newWorkflowId: string) => {
@@ -56,11 +56,11 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
   const handleRunPerAlertChange = useCallback(
     (runPerAlert: boolean) => {
-      // When switch is ON (runPerAlert = true), summary should be false (run per alert)
-      // When switch is OFF (runPerAlert = false), summary should be true (summary mode)
+      // When switch is ON (runPerAlert = true), summaryMode should be false (run per alert)
+      // When switch is OFF (runPerAlert = false), summaryMode should be true (summary mode)
       editAction(
         'subActionParams',
-        { ...actionParams.subActionParams, summary: !runPerAlert },
+        { ...actionParams.subActionParams, summaryMode: !runPerAlert },
         index
       );
     },
@@ -73,10 +73,10 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       editAction('subAction', 'run', index);
     }
     if (!actionParams?.subActionParams) {
-      editAction('subActionParams', { workflowId: '', summary: true }, index);
-    } else if (actionParams.subActionParams.summary === undefined) {
-      // Ensure summary defaults to true for backward compatibility
-      editAction('subActionParams', { ...actionParams.subActionParams, summary: true }, index);
+      editAction('subActionParams', { workflowId: '', summaryMode: true }, index);
+    } else if (actionParams.subActionParams.summaryMode === undefined) {
+      // Ensure summaryMode defaults to true for backward compatibility
+      editAction('subActionParams', { ...actionParams.subActionParams, summaryMode: true }, index);
     }
   }, [actionParams, editAction, index]);
 
@@ -84,9 +84,9 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
   const validationError = typeof errorMessage === 'string' ? errorMessage : undefined;
 
-  // When summary is false, runPerAlert is true (switch ON)
-  // When summary is true, runPerAlert is false (switch OFF)
-  const runPerAlert = !summary;
+  // When summaryMode is false, runPerAlert is true (switch ON)
+  // When summaryMode is true, runPerAlert is false (switch OFF)
+  const runPerAlert = !summaryMode;
 
   return (
     <>

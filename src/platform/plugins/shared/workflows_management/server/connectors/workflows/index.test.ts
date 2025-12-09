@@ -64,7 +64,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             spaceId: 'default',
-            summary: true,
+            summaryMode: true,
             inputs: {
               event: {
                 alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
@@ -137,7 +137,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             spaceId: 'default',
-            summary: true,
+            summaryMode: true,
             inputs: {
               event: {
                 alerts: [],
@@ -186,7 +186,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             spaceId: 'default',
-            summary: true,
+            summaryMode: true,
           },
         },
         logger: mockLogger,
@@ -216,7 +216,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             spaceId: 'default',
-            summary: true,
+            summaryMode: true,
             inputs: {
               event: {
                 alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,

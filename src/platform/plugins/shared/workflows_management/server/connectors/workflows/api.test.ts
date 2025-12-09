@@ -35,7 +35,7 @@ describe('Workflows API', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        summary: true,
+        summaryMode: true,
         inputs: {
           event: {
             alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
@@ -135,7 +135,7 @@ describe('Workflows API', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        summary: false,
+        summaryMode: false,
         inputs: {
           event: {
             alerts: [
@@ -224,7 +224,7 @@ describe('Workflows API', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        summary: false,
+        summaryMode: false,
         inputs: {
           event: {
             alerts: [
@@ -272,7 +272,7 @@ describe('Workflows API', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        summary: false,
+        summaryMode: false,
         inputs: {
           event: {
             alerts: [

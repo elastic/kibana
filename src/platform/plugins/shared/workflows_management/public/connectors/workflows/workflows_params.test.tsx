@@ -123,7 +123,7 @@ describe('WorkflowsParamsFields', () => {
     expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', 0);
     expect(mockEditAction).toHaveBeenCalledWith(
       'subActionParams',
-      { workflowId: '', summary: true },
+      { workflowId: '', summaryMode: true },
       0
     );
   });
@@ -880,7 +880,7 @@ describe('WorkflowsParamsFields', () => {
     });
   });
 
-  describe('Action frequency (summary parameter)', () => {
+  describe('Action frequency (summaryMode parameter)', () => {
     test('should render Action frequency section with switch', async () => {
       await act(async () => {
         renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -893,14 +893,14 @@ describe('WorkflowsParamsFields', () => {
       });
     });
 
-    test('should initialize summary to true when missing', async () => {
+    test('should initialize summaryMode to true when missing', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
           subAction: 'run',
           subActionParams: {
             workflowId: 'test-workflow',
-            // summary is missing
+            // summaryMode is missing
           },
         } as any,
       };
@@ -912,13 +912,13 @@ describe('WorkflowsParamsFields', () => {
       await waitFor(() => {
         expect(mockEditAction).toHaveBeenCalledWith(
           'subActionParams',
-          { workflowId: 'test-workflow', summary: true },
+          { workflowId: 'test-workflow', summaryMode: true },
           0
         );
       });
     });
 
-    test('should initialize summary to true when subActionParams is missing', async () => {
+    test('should initialize summaryMode to true when subActionParams is missing', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
@@ -934,20 +934,20 @@ describe('WorkflowsParamsFields', () => {
       await waitFor(() => {
         expect(mockEditAction).toHaveBeenCalledWith(
           'subActionParams',
-          { workflowId: '', summary: true },
+          { workflowId: '', summaryMode: true },
           0
         );
       });
     });
 
-    test('should display switch as unchecked when summary is true', async () => {
+    test('should display switch as unchecked when summaryMode is true', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
           subAction: 'run',
           subActionParams: {
             workflowId: 'test-workflow',
-            summary: true,
+            summaryMode: true,
           },
         } as WorkflowsActionParams,
       };
@@ -963,14 +963,14 @@ describe('WorkflowsParamsFields', () => {
       });
     });
 
-    test('should display switch as checked when summary is false', async () => {
+    test('should display switch as checked when summaryMode is false', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
           subAction: 'run',
           subActionParams: {
             workflowId: 'test-workflow',
-            summary: false,
+            summaryMode: false,
           },
         } as WorkflowsActionParams,
       };
@@ -993,7 +993,7 @@ describe('WorkflowsParamsFields', () => {
           subAction: 'run',
           subActionParams: {
             workflowId: 'test-workflow',
-            summary: true,
+            summaryMode: true,
           },
         } as WorkflowsActionParams,
       };
@@ -1014,11 +1014,11 @@ describe('WorkflowsParamsFields', () => {
         fireEvent.click(switchElement);
       });
 
-      // Verify that editAction was called with summary: false
+      // Verify that editAction was called with summaryMode: false
       await waitFor(() => {
         expect(mockEditAction).toHaveBeenCalledWith(
           'subActionParams',
-          { workflowId: 'test-workflow', summary: false },
+          { workflowId: 'test-workflow', summaryMode: false },
           0
         );
       });
@@ -1031,7 +1031,7 @@ describe('WorkflowsParamsFields', () => {
           subAction: 'run',
           subActionParams: {
             workflowId: 'test-workflow',
-            summary: false,
+            summaryMode: false,
           },
         } as WorkflowsActionParams,
       };
@@ -1052,11 +1052,11 @@ describe('WorkflowsParamsFields', () => {
         fireEvent.click(switchElement);
       });
 
-      // Verify that editAction was called with summary: true
+      // Verify that editAction was called with summaryMode: true
       await waitFor(() => {
         expect(mockEditAction).toHaveBeenCalledWith(
           'subActionParams',
-          { workflowId: 'test-workflow', summary: true },
+          { workflowId: 'test-workflow', summaryMode: true },
           0
         );
       });
@@ -1077,14 +1077,14 @@ describe('WorkflowsParamsFields', () => {
       });
     });
 
-    test('should preserve summary value when updating workflowId', async () => {
+    test('should preserve summaryMode value when updating workflowId', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
           subAction: 'run',
           subActionParams: {
             workflowId: 'old-workflow',
-            summary: false,
+            summaryMode: false,
           },
         } as WorkflowsActionParams,
       };
@@ -1099,12 +1099,12 @@ describe('WorkflowsParamsFields', () => {
         expect(switchElement).toBeChecked();
       });
 
-      // The summary value should be preserved when workflowId changes
+      // The summaryMode value should be preserved when workflowId changes
       // This is tested implicitly through the component's handleWorkflowChange callback
       // which preserves existing subActionParams properties
       expect(mockEditAction).not.toHaveBeenCalledWith(
         'subActionParams',
-        expect.objectContaining({ summary: true }),
+        expect.objectContaining({ summaryMode: true }),
         0
       );
     });

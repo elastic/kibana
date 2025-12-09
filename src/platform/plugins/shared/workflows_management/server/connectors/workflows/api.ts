@@ -27,12 +27,12 @@ const run = async ({
     };
   }
 
-  const { workflowId, spaceId, inputs, summary = true } = params;
+  const { workflowId, spaceId, inputs, summaryMode = true } = params;
   const originalEvent = inputs.event;
   const { rule, ruleUrl, spaceId: eventSpaceId } = originalEvent;
 
   // Summary mode: execute workflow once with all alerts
-  if (summary) {
+  if (summaryMode) {
     const res = await externalService.runWorkflow({ workflowId, spaceId, inputs });
     return { workflowRunId: res.workflowRunId, status: res.status };
   }

@@ -19,7 +19,7 @@ export type WorkflowsActionParamsType = ExecutorParams;
 export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
-  summary?: boolean;
+  summaryMode?: boolean;
   inputs: {
     event: {
       alerts: AlertHit[];
