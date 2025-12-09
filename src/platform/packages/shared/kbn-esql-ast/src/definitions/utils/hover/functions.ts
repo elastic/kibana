@@ -160,6 +160,20 @@ function getFilteredSignatures(
     );
     if (matchingSignatures.length > 0) {
       signatures = matchingSignatures;
+    } else {
+      // Try again without the last argument (in case user is typing it and it's incomplete)
+      const argTypesWithoutLast = argTypes.slice(0, -1);
+      const literalMaskWithoutLast = literalMask.slice(0, -1);
+      const partialMatchingSignatures = getMatchingSignatures(
+        functionDef.signatures,
+        argTypesWithoutLast,
+        literalMaskWithoutLast,
+        false,
+        true
+      );
+      if (partialMatchingSignatures.length > 0) {
+        signatures = partialMatchingSignatures;
+      }
     }
   }
 

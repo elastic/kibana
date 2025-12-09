@@ -336,7 +336,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
 
     // Modifies the height of the popup to make it fit under the page header.
     .parameter-hints-widget > .phwrapper {
-      max-height: 85px !important;
+      max-height: 90px !important;
       overflow: auto;
     }
   `;

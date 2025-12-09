@@ -13,7 +13,7 @@ import {
   getFormattedFunctionSignature,
   getFunctionDefinition,
 } from '@kbn/esql-ast/src/definitions/utils';
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
@@ -112,7 +112,9 @@ export async function getSignatureHelp(
           .find((p) => param.startsWith(p.name));
         return {
           label: param,
-          documentation: paramDefinition?.description ?? '',
+          documentation: paramDefinition?.description
+            ? `**${paramDefinition.name}:** ${paramDefinition?.description}`
+            : '',
         };
       }) || [],
   };
