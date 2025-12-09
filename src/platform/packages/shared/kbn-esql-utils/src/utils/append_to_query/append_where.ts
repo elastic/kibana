@@ -8,7 +8,7 @@
  */
 
 import type { ESQLFunction } from '@kbn/esql-ast';
-import { EsqlQuery, mutate, Walker } from '@kbn/esql-ast';
+import { Parser, Walker } from '@kbn/esql-ast';
 import { sanitazeESQLInput } from '../sanitaze_input';
 import {
   getOperator,
@@ -193,8 +193,9 @@ export function appendWhereClauseToESQLQuery(
   operation: SupportedOperation,
   fieldType?: string
 ): string | undefined {
-  const ESQLQuery = EsqlQuery.fromSrc(baseESQLQuery);
-  const whereCommands = Array.from(mutate.commands.where.list(ESQLQuery.ast));
+  const { root } = Parser.parse(baseESQLQuery);
+  const lastCommand = root.commands[root.commands.length - 1];
+  const isLastCommandWhere = lastCommand.name === 'where';
 
   const { expression: filterExpression, isMultiValue } = createFilterExpression(
     field,
@@ -207,7 +208,7 @@ export function appendWhereClauseToESQLQuery(
     return baseESQLQuery;
   }
 
-  if (!whereCommands.length) {
+  if (!isLastCommandWhere) {
     return appendToESQLQuery(baseESQLQuery, `| WHERE ${filterExpression}`);
   }
 
@@ -215,8 +216,7 @@ export function appendWhereClauseToESQLQuery(
   // - we need to append with and if the filter doesn't exist
   // - we need to change the filter operator if the filter exists with different operator
   // - we do nothing if the filter exists with the same operator
-  const lastWhereCommand = whereCommands[whereCommands.length - 1];
-  const whereAstText = lastWhereCommand.text;
+  const whereAstText = lastCommand.text;
 
   const pipesArray = baseESQLQuery.split('|');
   const whereClause = pipesArray[pipesArray.length - 1];
@@ -230,7 +230,7 @@ export function appendWhereClauseToESQLQuery(
   if (isMultiValue) {
     return handleExistingFilterForMultiValues(
       baseESQLQuery,
-      lastWhereCommand,
+      lastCommand,
       field,
       value,
       operation as '+' | '-',
