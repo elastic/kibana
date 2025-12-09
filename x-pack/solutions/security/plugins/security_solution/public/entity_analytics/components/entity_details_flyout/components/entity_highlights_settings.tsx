@@ -116,7 +116,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     closePopover();
   }, [closePopover, openAgentBuilderFlyout]);
 
-
   const items = useMemo(
     () => [
       <EuiPanel color="transparent" paddingSize="none" key={'entity-highlights-settings-menu'}>
