@@ -29,7 +29,13 @@ export const ControlClone = ({
   width: number | undefined;
 }) => {
   const styles = useMemoCss(controlCloneStyles);
-  const panelTitle = (state?.rawState as { title?: string }).title;
+
+  const cloneTitle = useMemo(() => {
+    return (
+      (state?.rawState as { title?: string }).title ||
+      (state?.rawState as { fieldName?: string }).fieldName
+    );
+  }, [state]);
 
   const widthStyle = useMemo(() => {
     return width ? css({ width: `${width}px` }) : undefined;
@@ -41,9 +47,9 @@ export const ControlClone = ({
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
         </EuiFlexItem>
-        {panelTitle?.length && (
+        {cloneTitle?.length && (
           <EuiFlexItem>
-            <label>{panelTitle}</label>
+            <label>{cloneTitle}</label>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
