@@ -18,6 +18,7 @@ import {
   EuiHealth,
   EuiLoadingSpinner,
   euiFontSize,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -49,10 +50,10 @@ export const ConfirmTemplateDetailsSection = ({
 
   const phaseColors = useMemo(
     () => ({
-      hot: euiTheme.colors.vis.euiColorVis6,
-      warm: euiTheme.colors.vis.euiColorVis9,
-      cold: euiTheme.colors.vis.euiColorVis2,
-      frozen: euiTheme.colors.vis.euiColorVis4,
+      hot: euiTheme.colors.severity.risk,
+      warm: euiTheme.colors.severity.warning,
+      cold: euiTheme.colors.severity.neutral,
+      frozen: euiTheme.colors.vis.euiColorVis3,
     }),
     [euiTheme]
   );
@@ -156,7 +157,7 @@ export const ConfirmTemplateDetailsSection = ({
                   {ilmPhases.map((phase, idx) => (
                     <EuiFlexItem key={idx} grow={false}>
                       <EuiHealth textSize="xs" color={phase.color}>
-                        {phase.description}
+                        <EuiTextColor color="subdued">{phase.description}</EuiTextColor>
                       </EuiHealth>
                     </EuiFlexItem>
                   ))}
@@ -183,11 +184,11 @@ export const ConfirmTemplateDetailsSection = ({
           { defaultMessage: 'Component templates' }
         ),
         description: (
-          <>
+          <EuiFlexGroup direction="column" gutterSize="xs">
             {componentTemplates.map((ct, idx) => (
-              <div key={idx}>{ct}</div>
+              <EuiFlexItem key={idx}>{ct}</EuiFlexItem>
             ))}
-          </>
+          </EuiFlexGroup>
         ),
       });
     }

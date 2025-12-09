@@ -88,6 +88,16 @@ export const StreamNameInput = ({
         ${!isFirst ? 'border-top-left-radius: 0 ; border-bottom-left-radius: 0 ;' : ''}
       }
 
+      /* Remove border on connected sides to prevent double borders */
+      /* We use margin-right: -1px to overlap borders instead of removing them, */
+      /* which keeps the focus ring intact and correct */
+      ${!isLast ? 'margin-right: -1px;' : ''}
+
+      /* Ensure the focused element is on top */
+      &:focus-within {
+        z-index: 1;
+      }
+
       /* Prevent truncation on labels */
       .euiFormControlLayout__prepend,
       .euiFormControlLayout__append {
