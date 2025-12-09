@@ -17,7 +17,10 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { get_actions_connectors_request } from './schemas/kibana_openapi_zod.gen';
+import {
+  get_actions_connectors_request,
+  get_actions_connectors_response,
+} from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -50,5 +53,5 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ...getShapeAt(get_actions_connectors_request, 'query'),
     fetcher: FetcherConfigSchema,
   }),
-  outputSchema: z.optional(z.looseObject({})),
+  outputSchema: get_actions_connectors_response,
 };
