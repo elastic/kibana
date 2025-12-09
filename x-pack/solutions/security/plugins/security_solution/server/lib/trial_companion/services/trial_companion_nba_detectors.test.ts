@@ -12,6 +12,7 @@ import {
   installedPackagesM1,
   allSetM7,
   savedDiscoverySessionsM2,
+  detectionRulesInstalledM3,
 } from './trial_companion_nba_detectors';
 import type {
   Collector,
@@ -163,9 +164,46 @@ describe('Trial companion NBA detectors', () => {
         undefined,
       ],
       ['empty telemetry', {}, Milestone.M6],
-    ])('compares total cound of cases saved objects - %s', async (_tcName, telemetry, expected) => {
+    ])('compares total count of cases saved objects - %s', async (_tcName, telemetry, expected) => {
       (collector.fetch as jest.Mock).mockResolvedValue(telemetry);
       await expect(casesM6(deps)()).resolves.toEqual(expected);
+    });
+
+    describe('detectionRulesInstalledM3', () => {
+      it.each([
+        [
+          '0 rules',
+          {
+            detectionMetrics: {
+              detection_rules: {
+                detection_rule_usage: {
+                  custom_total: { enabled: 0 },
+                  elastic_total: { enabled: 0 },
+                },
+              },
+            },
+          },
+          Milestone.M3,
+        ],
+        [
+          'some rules',
+          {
+            detectionMetrics: {
+              detection_rules: {
+                detection_rule_usage: {
+                  custom_total: { enabled: 42 },
+                  elastic_total: { enabled: 31 },
+                },
+              },
+            },
+          },
+          undefined,
+        ],
+        ['empty telemetry', {}, Milestone.M3],
+      ])('compares total count of rules - %s', async (_tcName, telemetry, expected) => {
+        (collector.fetch as jest.Mock).mockResolvedValue(telemetry);
+        await expect(detectionRulesInstalledM3(deps)()).resolves.toEqual(expected);
+      });
     });
   });
 });
