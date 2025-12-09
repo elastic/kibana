@@ -48,6 +48,7 @@ export class FleetPolicyRevisionsCleanupTask {
   private taskInterval: string;
   private maxRevisions: number;
   private maxPoliciesPerRun: number;
+  private abortController = new AbortController();
 
   constructor(setupContract: FleetPolicyRevisionsCleanupTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -61,18 +62,14 @@ export class FleetPolicyRevisionsCleanupTask {
       [TYPE]: {
         title: TITLE,
         timeout: TASK_TIMEOUT,
-        createTaskRunner: ({
-          taskInstance,
-          abortController,
-        }: {
-          taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
-        }) => {
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, this.abortController);
             },
-            cancel: async () => {},
+            cancel: async () => {
+              this.abortController.abort(`${TITLE} timed out`);
+            },
           };
         },
       },
