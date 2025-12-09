@@ -43,7 +43,7 @@ Delete a note from a Timeline using the note ID.`,
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['noteId', 'noteIds'],
   },
   paramsSchema: z.object({
     ...getShapeAt(delete_note_request, 'body'),
