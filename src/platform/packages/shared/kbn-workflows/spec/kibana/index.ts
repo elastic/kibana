@@ -18,5 +18,19 @@ export function getKibanaConnectors(): InternalConnectorContract[] {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('./generated');
 
-  return GENERATED_KIBANA_CONNECTORS;
+  const {
+    KIBANA_OVERRIDES,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  } = require('./overrides');
+
+  const mergedConnectors: InternalConnectorContract[] = [];
+  for (const connector of GENERATED_KIBANA_CONNECTORS) {
+    if (KIBANA_OVERRIDES[connector.type]) {
+      mergedConnectors.push(KIBANA_OVERRIDES[connector.type]);
+    } else {
+      mergedConnectors.push(connector);
+    }
+  }
+
+  return mergedConnectors;
 }

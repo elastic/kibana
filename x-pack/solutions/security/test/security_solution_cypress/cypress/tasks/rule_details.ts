@@ -136,6 +136,19 @@ export const goToExecutionLogTab = () => {
   cy.get(EXECUTIONS_TAB).click();
 };
 
+export const waitForExecutionLogTabToBePopulated = (minRowCount = 1) => {
+  cy.waitUntil(
+    () => {
+      cy.log('Waiting for execution logs to appear in execution log table');
+      refreshRuleExecutionTable();
+      return getExecutionLogTableRow().then((rows) => {
+        return rows.length > minRowCount - 1;
+      });
+    },
+    { interval: 5000, timeout: 20000 }
+  );
+};
+
 export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
