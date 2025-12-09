@@ -19,6 +19,7 @@ import {
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { fieldConstants } from '@kbn/discover-utils';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
@@ -118,8 +119,10 @@ export function SimilarErrorsOccurrencesChart({
     return from(indexes.logs)
       .pipe(
         baseEsqlQuery,
-        stats('occurrences = COUNT(*) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)'),
-        sort('@timestamp')
+        stats(
+          `occurrences = COUNT(*) BY ${fieldConstants.TIMESTAMP_FIELD} = BUCKET(${fieldConstants.TIMESTAMP_FIELD}, 100, ?_tstart, ?_tend)`
+        ),
+        sort(fieldConstants.TIMESTAMP_FIELD)
       )
       .toString();
   }, [baseEsqlQuery, indexes.logs]);
