@@ -65,6 +65,17 @@ export async function getAlertAiInsight({
   return { summary, context: relatedContext };
 }
 
+// Time window offsets in minutes before alert start
+const TIME_WINDOWS = {
+  serviceSummary: 5,
+  downstream: 24 * 60, // 24 hours
+  errors: 15,
+  changePoints: 6 * 60, // 6 hours
+} as const;
+
+const hasContent = (data: unknown): boolean =>
+  Boolean(data) && (Array.isArray(data) ? data.length > 0 : true);
+
 async function fetchAlertContext({
   alertDoc,
   dataRegistry,
@@ -79,126 +90,80 @@ async function fetchAlertContext({
   const transactionType = alertDoc?.['transaction.type'];
   const transactionName = alertDoc?.['transaction.name'];
 
+  if (!serviceName) {
+    return 'No related signals available.';
+  }
+
   const alertTime = moment(alertDoc?.['kibana.alert.start']);
   const alertStart = alertTime.toISOString();
 
-  // Time ranges for different data providers
-  const serviceSummaryStart = alertTime.clone().subtract(5, 'minutes').toISOString();
-  const downstreamStart = alertTime.clone().subtract(24, 'hours').toISOString();
-  const errorsStart = alertTime.clone().subtract(15, 'minutes').toISOString();
-  const changePointsStart = alertTime.clone().subtract(6, 'hours').toISOString();
+  const getStart = (minutesBefore: number) =>
+    alertTime.clone().subtract(minutesBefore, 'minutes').toISOString();
 
+  // Config-driven fetch definitions
+  const fetchConfigs = [
+    {
+      key: 'apmServiceSummary' as const,
+      window: TIME_WINDOWS.serviceSummary,
+      params: { serviceName, serviceEnvironment, transactionType },
+    },
+    {
+      key: 'apmDownstreamDependencies' as const,
+      window: TIME_WINDOWS.downstream,
+      params: { serviceName, serviceEnvironment },
+    },
+    {
+      key: 'apmErrors' as const,
+      window: TIME_WINDOWS.errors,
+      params: { serviceName, serviceEnvironment },
+    },
+    {
+      key: 'apmServiceChangePoints' as const,
+      window: TIME_WINDOWS.changePoints,
+      params: { serviceName, serviceEnvironment, transactionType, transactionName },
+    },
+    {
+      key: 'apmExitSpanChangePoints' as const,
+      window: TIME_WINDOWS.changePoints,
+      params: { serviceName, serviceEnvironment },
+    },
+  ];
+
+  // Fire all fetches in parallel
+  const results = await Promise.allSettled(
+    fetchConfigs.map(async (config) => {
+      const start = getStart(config.window);
+      const data = await dataRegistry.getData(config.key, {
+        request,
+        ...config.params,
+        start,
+        end: alertStart,
+      });
+      return { config, data, start };
+    })
+  );
+
+  // Collect successful, non-empty results
   const contextParts: string[] = [];
 
-  if (serviceName) {
-    // APM Service Summary
-    try {
-      const apmServiceSummary = await dataRegistry.getData('apmServiceSummary', {
-        request,
-        serviceName,
-        serviceEnvironment,
-        start: serviceSummaryStart,
-        end: alertStart,
-        transactionType,
-      });
-      if (apmServiceSummary) {
-        contextParts.push(
-          `<APMServiceSummary>
-Time window: ${serviceSummaryStart} to ${alertStart}
-${JSON.stringify(apmServiceSummary, null, 2)}
-</APMServiceSummary>`
-        );
-      }
-    } catch (err) {
-      logger.debug(`AI insight: apmServiceSummary failed: ${err}`);
+  results.forEach((result, idx) => {
+    if (result.status === 'rejected') {
+      logger.debug(`AI insight: ${fetchConfigs[idx].key} failed: ${result.reason}`);
+      return;
     }
 
-    // APM Downstream Dependencies
-    try {
-      const apmDownstreamDependencies = await dataRegistry.getData('apmDownstreamDependencies', {
-        request,
-        serviceName,
-        serviceEnvironment,
-        start: downstreamStart,
-        end: alertStart,
-      });
-      if (apmDownstreamDependencies && apmDownstreamDependencies.length > 0) {
-        contextParts.push(
-          `<APMDownstreamDependencies>
-Time window: ${downstreamStart} to ${alertStart}
-${JSON.stringify(apmDownstreamDependencies, null, 2)}
-</APMDownstreamDependencies>`
-        );
-      }
-    } catch (err) {
-      logger.debug(`AI insight: apmDownstreamDependencies failed: ${err}`);
+    const { config, data, start } = result.value;
+    if (!hasContent(data)) {
+      return;
     }
 
-    // APM Errors
-    try {
-      const apmErrors = await dataRegistry.getData('apmErrors', {
-        request,
-        serviceName,
-        serviceEnvironment,
-        start: errorsStart,
-        end: alertStart,
-      });
-      if (apmErrors && apmErrors.length > 0) {
-        contextParts.push(
-          `<APMErrors>
-Time window: ${errorsStart} to ${alertStart}
-${JSON.stringify(apmErrors, null, 2)}
-</APMErrors>`
-        );
-      }
-    } catch (err) {
-      logger.debug(`AI insight: apmErrors failed: ${err}`);
-    }
-
-    // APM Service Change Points
-    try {
-      const serviceChangePoints = await dataRegistry.getData('apmServiceChangePoints', {
-        request,
-        serviceName,
-        serviceEnvironment,
-        transactionType,
-        transactionName,
-        start: changePointsStart,
-        end: alertStart,
-      });
-      if (serviceChangePoints && serviceChangePoints.length > 0) {
-        contextParts.push(
-          `<ServiceChangePoints>
-Time window: ${changePointsStart} to ${alertStart}
-${JSON.stringify(serviceChangePoints, null, 2)}
-</ServiceChangePoints>`
-        );
-      }
-    } catch (err) {
-      logger.debug(`AI insight: apmServiceChangePoints failed: ${err}`);
-    }
-
-    // APM Exit Span Change Points
-    try {
-      const exitSpanChangePoints = await dataRegistry.getData('apmExitSpanChangePoints', {
-        request,
-        serviceName,
-        serviceEnvironment,
-        start: changePointsStart,
-        end: alertStart,
-      });
-      if (exitSpanChangePoints && exitSpanChangePoints.length > 0) {
-        contextParts.push(
-          `<ExitSpanChangePoints>
-Time window: ${changePointsStart} to ${alertStart}
-${JSON.stringify(exitSpanChangePoints, null, 2)}
-</ExitSpanChangePoints>`
-        );
-      }
-    } catch (err) {
-      logger.debug(`AI insight: apmExitSpanChangePoints failed: ${err}`);
-    }
-  }
+    contextParts.push(
+      `<${config.key}>
+Time window: ${start} to ${alertStart}
+${JSON.stringify(data, null, 2)}
+</${config.key}>`
+    );
+  });
 
   return contextParts.length > 0 ? contextParts.join('\n\n') : 'No related signals available.';
 }
