@@ -82,7 +82,7 @@ export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
   rule: AlertRuleData;
 }
 
-export type MuteInstances = Array<{ ruleId: string; alertInstanceId?: string }>;
+export type MuteInstances = Array<{ ruleId: string; alertInstanceIds?: string[] }>;
 
 interface IAlertsService {
   /**
@@ -558,8 +558,8 @@ export class AlertsService implements IAlertsService {
 
     const shouldClauses: QueryDslQueryContainer[] = targets.map((target) => {
       const must: QueryDslQueryContainer[] = [{ term: { [ALERT_RULE_UUID]: target.ruleId } }];
-      if (target.alertInstanceId) {
-        must.push({ term: { [ALERT_INSTANCE_ID]: target.alertInstanceId } });
+      if (target.alertInstanceIds) {
+        must.push({ terms: { [ALERT_INSTANCE_ID]: target.alertInstanceIds } });
       }
       return { bool: { must } };
     });
@@ -609,7 +609,7 @@ export class AlertsService implements IAlertsService {
   }) {
     return this._updateMuteState({
       muted: true,
-      targets: [{ ruleId, alertInstanceId }],
+      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
       indices,
       logger,
     });
@@ -628,7 +628,7 @@ export class AlertsService implements IAlertsService {
   }) {
     return this._updateMuteState({
       muted: false,
-      targets: [{ ruleId, alertInstanceId }],
+      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
       indices,
       logger,
     });

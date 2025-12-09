@@ -2621,7 +2621,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceId\\":\\"alert-1\\"}) - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
           );
         });
 
@@ -2658,7 +2658,7 @@ describe('Alerts Service', () => {
                     bool: {
                       must: [
                         { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1'] } },
                       ],
                     },
                   },
@@ -2716,7 +2716,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceId\\":\\"alert-1\\"}) - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
           );
         });
 
@@ -2753,7 +2753,7 @@ describe('Alerts Service', () => {
                     bool: {
                       must: [
                         { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1'] } },
                       ],
                     },
                   },
@@ -2983,12 +2983,12 @@ describe('Alerts Service', () => {
 
           await expect(
             alertsService.muteAlertInstances({
-              targets: [{ ruleId: 'rule-1', alertInstanceId: 'alert-1' }],
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
               indices: [],
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceId\\":\\"alert-1\\"}) - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
           );
         });
 
@@ -3005,8 +3005,8 @@ describe('Alerts Service', () => {
 
           await alertsService.muteAlertInstances({
             targets: [
-              { ruleId: 'rule-1', alertInstanceId: 'alert-1' },
-              { ruleId: 'rule-2', alertInstanceId: 'alert-2' },
+              { ruleId: 'rule-1', alertInstanceIds: ['alert-1-1', 'alert-1-2'] },
+              { ruleId: 'rule-2', alertInstanceIds: ['alert-2'] },
             ],
             indices: ['.alerts-default'],
             logger,
@@ -3027,7 +3027,7 @@ describe('Alerts Service', () => {
                     bool: {
                       must: [
                         { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1-1', 'alert-1-2'] } },
                       ],
                     },
                   },
@@ -3035,7 +3035,7 @@ describe('Alerts Service', () => {
                     bool: {
                       must: [
                         { term: { 'kibana.alert.rule.uuid': 'rule-2' } },
-                        { term: { 'kibana.alert.instance.id': 'alert-2' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-2'] } },
                       ],
                     },
                   },
@@ -3064,7 +3064,7 @@ describe('Alerts Service', () => {
 
           await expect(
             alertsService.muteAlertInstances({
-              targets: [{ ruleId: 'rule-1', alertInstanceId: 'alert-1' }],
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
               indices: ['.alerts-default'],
               logger,
             })
@@ -3086,12 +3086,12 @@ describe('Alerts Service', () => {
 
           await expect(
             alertsService.unmuteAlertInstances({
-              targets: [{ ruleId: 'rule-1', alertInstanceId: 'alert-1' }],
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
               indices: [],
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceId\\":\\"alert-1\\"}) - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
           );
         });
 
@@ -3108,8 +3108,8 @@ describe('Alerts Service', () => {
 
           await alertsService.unmuteAlertInstances({
             targets: [
-              { ruleId: 'rule-1', alertInstanceId: 'alert-1' },
-              { ruleId: 'rule-2', alertInstanceId: 'alert-2' },
+              { ruleId: 'rule-1', alertInstanceIds: ['alert-1-1', 'alert-1-2'] },
+              { ruleId: 'rule-2', alertInstanceIds: ['alert-2'] },
             ],
             indices: ['.alerts-default'],
             logger,
@@ -3130,7 +3130,7 @@ describe('Alerts Service', () => {
                     bool: {
                       must: [
                         { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1-1', 'alert-1-2'] } },
                       ],
                     },
                   },
@@ -3138,7 +3138,7 @@ describe('Alerts Service', () => {
                     bool: {
                       must: [
                         { term: { 'kibana.alert.rule.uuid': 'rule-2' } },
-                        { term: { 'kibana.alert.instance.id': 'alert-2' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-2'] } },
                       ],
                     },
                   },
@@ -3167,7 +3167,7 @@ describe('Alerts Service', () => {
 
           await expect(
             alertsService.unmuteAlertInstances({
-              targets: [{ ruleId: 'rule-1', alertInstanceId: 'alert-1' }],
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
               indices: ['.alerts-default'],
               logger,
             })

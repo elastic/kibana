@@ -11,16 +11,14 @@ import type { BulkMuteUnmuteAlertsParams } from '../types';
 export const transformParamsRulesToAlertInstances = (
   rules: BulkMuteUnmuteAlertsParams['rules']
 ): MuteInstances => {
-  const alertInstances: Array<{ ruleId: string; alertInstanceId: string }> = [];
+  const alertInstances: MuteInstances = [];
 
   for (const rule of rules) {
     if (rule.alertInstanceIds && rule.alertInstanceIds.length > 0) {
-      for (const alertInstanceId of rule.alertInstanceIds) {
-        alertInstances.push({
-          ruleId: rule.id,
-          alertInstanceId,
-        });
-      }
+      alertInstances.push({
+        ruleId: rule.id,
+        alertInstanceIds: rule.alertInstanceIds,
+      });
     }
   }
 
