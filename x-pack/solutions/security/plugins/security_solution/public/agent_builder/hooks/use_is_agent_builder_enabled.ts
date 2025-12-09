@@ -22,7 +22,6 @@ export const useIsAgentBuilderEnabled = (): boolean => {
 
   return useMemo(() => {
     const agentBuilderCapabilities = capabilities[AGENT_BUILDER_FEATURE_ID];
-    console.log('agentBuilderCapabilities', agentBuilderCapabilities);
     const hasAgentBuilderPrivilege = agentBuilderCapabilities?.show === true;
     const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 

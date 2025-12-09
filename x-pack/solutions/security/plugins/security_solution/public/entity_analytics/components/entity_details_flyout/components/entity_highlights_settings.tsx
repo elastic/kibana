@@ -47,6 +47,7 @@ interface EntityHighlightsSettingsProps {
   } | null;
   closePopover: () => void;
   openPopover: () => void;
+  isAssistantVisible: boolean;
   isLoading: boolean;
   isPopoverOpen: boolean;
 }
@@ -63,7 +64,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   isPopoverOpen,
   entityType,
   entityIdentifier,
-
+  isAssistantVisible,
   assistantResult,
 }) => {
   const anonymizedEntityIdentifier = getAnonymizedEntityIdentifier(
@@ -173,26 +174,28 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
             />
           </EuiContextMenuItem>
         ) : (
-          <EuiContextMenuItem
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-              {
-                defaultMessage: 'Ask AI Assistant',
-              }
-            )}
-            key={'ask-ai-assistant'}
-            onClick={() => {
-              showAssistantOverlay();
-              closePopover();
-            }}
-            icon={<AssistantIcon />}
-            disabled={isLoading}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
-              defaultMessage="Ask AI Assistant"
-            />
-          </EuiContextMenuItem>
+          isAssistantVisible && (
+            <EuiContextMenuItem
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+                {
+                  defaultMessage: 'Ask AI Assistant',
+                }
+              )}
+              key={'ask-ai-assistant'}
+              onClick={() => {
+                showAssistantOverlay();
+                closePopover();
+              }}
+              icon={<AssistantIcon />}
+              disabled={isLoading}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
+                defaultMessage="Ask AI Assistant"
+              />
+            </EuiContextMenuItem>
+          )
         )}
 
         <EuiContextMenuItem

@@ -27,7 +27,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsAgentBuilderEnabled } from '../../../../agent_builder/hooks/use_is_agent_builder_enabled';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { EntityType } from '../../../../../common/search_strategy';
 import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
@@ -84,22 +83,10 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
-
   const disabled = useMemo(
-    () =>
-      (!hasAssistantPrivilege || !isAssistantVisible || !isAssistantEnabled) &&
-      !isAgentBuilderEnabled,
-    [hasAssistantPrivilege, isAgentBuilderEnabled, isAssistantEnabled, isAssistantVisible]
+    () => !hasAssistantPrivilege || !isAssistantEnabled,
+    [hasAssistantPrivilege, isAssistantEnabled]
   );
-  console.log('disabled', {
-    disabled,
-    original: !hasAssistantPrivilege || !isAssistantVisible || !isAssistantEnabled,
-    hasAssistantPrivilege,
-    isAssistantVisible,
-    isAssistantEnabled,
-    isAgentBuilderEnabled,
-  });
 
   const isLoading = useMemo(
     () => isChatLoading || isAnonymizationFieldsLoading,
@@ -139,6 +126,7 @@ export const EntityHighlightsAccordion: React.FC<{
             openPopover={onButtonClick}
             isLoading={isLoading}
             isPopoverOpen={isPopoverOpen}
+            isAssistantVisible={isAssistantVisible}
             entityType={entityType}
             entityIdentifier={entityIdentifier}
           />
