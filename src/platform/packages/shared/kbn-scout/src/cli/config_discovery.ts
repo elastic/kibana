@@ -32,10 +32,17 @@ const getTestTagsForTarget = (target: string): string[] => {
   }
 };
 
-const collectUniqueTags = (tests: Array<{ tags?: string[] }>): string[] => {
+const collectUniqueTags = (
+  tests: Array<{ tags?: string[]; expectedStatus?: string; location?: { file?: string } }>
+): string[] => {
   const tagSet = new Set<string>();
   for (const test of tests) {
-    if (test.tags) {
+    // Only collect tags from tests that have passed status and are spec files
+    if (
+      test.expectedStatus === 'passed' &&
+      test.location?.file?.endsWith('.spec.ts') &&
+      test.tags
+    ) {
       for (const tag of test.tags) {
         tagSet.add(tag);
       }
@@ -59,6 +66,40 @@ const countModulesByType = (
   return { plugins, packages };
 };
 
+/**
+ * Converts tags to run modes (e.g., --stateful, --serverless=es)
+ */
+const getRunModesFromTags = (testTags: string[]): string[] => {
+  const modes: string[] = [];
+  const tagSet = new Set(testTags);
+
+  // Map tags to run modes
+  if (tagSet.has('@ess')) {
+    modes.push('--stateful');
+  }
+  if (tagSet.has('@svlSearch')) {
+    modes.push('--serverless=es');
+  }
+  if (tagSet.has('@svlSecurity')) {
+    modes.push('--serverless=security');
+  }
+  if (tagSet.has('@svlOblt')) {
+    modes.push('--serverless=oblt');
+  }
+  // We don't run test against these targets for now
+  // if (tagSet.has('@svlLogsEssentials')) {
+  //   modes.push('--serverless=oblt-logs-essentials');
+  // }
+  // if (tagSet.has('@svlSecurityEssentials')) {
+  //   modes.push('--serverless=security-essentials');
+  // }
+  // if (tagSet.has('@svlSecurityEase')) {
+  //   modes.push('--serverless=security-ease');
+  // }
+
+  return modes;
+};
+
 export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
@@ -68,6 +109,7 @@ export interface ModuleDiscoveryInfo {
     path: string;
     hasTests: boolean;
     tags: string[];
+    runModes: string[];
     usesParallelWorkers: boolean;
   }[];
 }
@@ -95,6 +137,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
           path: config.path,
           hasTests: !!runnableTest,
           tags: allTags,
+          runModes: [], // Will be computed from filtered tags after cross-tag filtering
           usesParallelWorkers,
         };
       }),
@@ -103,15 +146,20 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 
   // Filter configs based on matching tags with targetTags
   // Keep only configs with matching tags, and filter each config's tags to only include cross tags
+  // Also compute runModes from the filtered tags
   const filteredModulesWithTests = modulesWithTests
     .map((module) => ({
       ...module,
       configs: module.configs
         .filter((config) => config.tags.some((tag) => targetTagsSet.has(tag)))
-        .map((config) => ({
-          ...config,
-          tags: config.tags.filter((tag) => targetTagsSet.has(tag)),
-        })),
+        .map((config) => {
+          const filteredTags = config.tags.filter((tag) => targetTagsSet.has(tag));
+          return {
+            ...config,
+            tags: filteredTags,
+            runModes: getRunModesFromTags(filteredTags),
+          };
+        }),
     }))
     .filter((module) => module.configs.length > 0);
 

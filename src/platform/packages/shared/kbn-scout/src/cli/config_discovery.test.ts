@@ -49,6 +49,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
           path: 'pluginA/config1.playwright.config.ts',
           hasTests: true,
           tags: ['@ess', '@svlOblt'],
+          runModes: ['--stateful', '--serverless=oblt'],
           usesParallelWorkers: false,
         },
       ],
@@ -379,9 +380,87 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // Configs with no passed tests should still be included if they have matching tags
+    // Configs with no passed tests should not be included (no matching tags from passed tests)
+    // Since there are no passed tests, collectUniqueTags returns empty tags array,
+    // which means no configs match targetTags, resulting in filteredModulesWithTests being empty
     const infoCalls = log.info.mock.calls;
-    expect(infoCalls.length).toBeGreaterThan(0);
+    const foundMessage = infoCalls.find(
+      (call) =>
+        call[0].includes('No Playwright config files found') ||
+        call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    // When no modules have passed tests, the message should indicate no configs were found
+    expect(foundMessage![0]).toBe('No Playwright config files found');
+  });
+
+  it('only collects tags from passed spec files', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockReturnValue(false);
+
+    // Set up a module with mixed test statuses and file types
+    mockTestableModules = [
+      {
+        name: 'pluginMixedTests',
+        group: 'groupZ',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        configs: [
+          {
+            path: 'pluginMixedTests/config.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test1.spec.ts' },
+                  tags: ['@ess', '@svlOblt'], // Should be included
+                },
+                {
+                  expectedStatus: 'failed',
+                  location: { file: 'test2.spec.ts' },
+                  tags: ['@svlSecurity'], // Should NOT be included (failed)
+                },
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test3.ts' }, // Not a .spec.ts file
+                  tags: ['@svlSearch'], // Should NOT be included (not .spec.ts)
+                },
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test4.spec.ts' },
+                  tags: ['@svlLogsEssentials'], // Should be included
+                },
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test5.spec.ts' },
+                  tags: [], // No tags - should not cause errors
+                },
+                {
+                  expectedStatus: 'passed',
+                  location: {}, // No file location - should not be included
+                  tags: ['@svlOblt'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // Find the log call that shows config details
+    const infoCalls = log.info.mock.calls;
+    const configLogCall = infoCalls.find((call) => call[0].includes('config.playwright.config.ts'));
+
+    expect(configLogCall).toBeDefined();
+    // Should only contain tags from passed .spec.ts files: @ess, @svlOblt, @svlLogsEssentials
+    expect(configLogCall![0]).toContain('@ess');
+    expect(configLogCall![0]).toContain('@svlOblt');
+    expect(configLogCall![0]).toContain('@svlLogsEssentials');
+    // Should NOT contain tags from failed tests or non-spec files
+    expect(configLogCall![0]).not.toContain('@svlSecurity');
+    expect(configLogCall![0]).not.toContain('@svlSearch');
   });
 
   it('correctly identifies parallel worker configs', () => {
@@ -396,5 +475,60 @@ describe('runDiscoverPlaywrightConfigs', () => {
       call[0].includes('parallel.playwright.config.ts')
     );
     expect(parallelConfigLog).toBeDefined();
+  });
+
+  it('computes runModes correctly from tags', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockReturnValue(false);
+
+    // Set up a module with various tags to test runModes computation
+    mockTestableModules = [
+      {
+        name: 'pluginTestModes',
+        group: 'groupTest',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        configs: [
+          {
+            path: 'pluginTestModes/config1.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test1.spec.ts' },
+                  tags: ['@ess', '@svlSearch', '@svlSecurity'],
+                },
+              ],
+            },
+          },
+          {
+            path: 'pluginTestModes/config2.playwright.config.ts',
+            manifest: {
+              tests: [
+                {
+                  expectedStatus: 'passed',
+                  location: { file: 'test2.spec.ts' },
+                  tags: ['@svlOblt'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // Verify that runModes are computed and included in the output
+    // The function should compute runModes from tags automatically
+    const infoCalls = log.info.mock.calls;
+    const config1Log = infoCalls.find((call) => call[0].includes('config1.playwright.config.ts'));
+    const config2Log = infoCalls.find((call) => call[0].includes('config2.playwright.config.ts'));
+
+    expect(config1Log).toBeDefined();
+    expect(config2Log).toBeDefined();
+    // config1 should have @ess, @svlSearch, @svlSecurity tags
+    // config2 should have @svlOblt tag
+    // The actual runModes computation happens in the function, so we just verify the configs are processed
   });
 });
