@@ -7,8 +7,7 @@
 
 import { useMemo } from 'react';
 import { useLicense } from '../../../common/hooks/use_license';
-import { useUserData } from '../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../common/utils/privileges';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 /**
@@ -16,21 +15,18 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
  */
 export const useGapAutoFillCapabilities = () => {
   const license = useLicense();
-  const [{ canUserCRUD, loading }] = useUserData();
   const gapAutoFillSchedulerEnabled = useIsExperimentalFeatureEnabled(
     'gapAutoFillSchedulerEnabled'
   );
   const hasEnterpriseLicense = license.isEnterprise();
-  const hasCrudPrivileges = hasUserCRUDPermission(canUserCRUD);
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
 
   return useMemo(
     () => ({
-      loading,
       hasEnterpriseLicense,
-      hasCrudPrivileges,
-      canAccessGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense,
-      canEditGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense && hasCrudPrivileges,
+      canAccessGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense && canReadRules,
+      canEditGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense && canEditRules,
     }),
-    [gapAutoFillSchedulerEnabled, hasEnterpriseLicense, hasCrudPrivileges, loading]
+    [gapAutoFillSchedulerEnabled, hasEnterpriseLicense, canEditRules, canReadRules]
   );
 };

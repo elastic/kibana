@@ -15,9 +15,9 @@ import { RuleSettingsModal } from '../rule_settings_modal';
 import { useGapAutoFillCapabilities } from '../../logic/use_gap_auto_fill_capabilities';
 
 export const GapAutoFillStatus = React.memo(() => {
-  const { canAccessGapAutoFill, loading } = useGapAutoFillCapabilities();
+  const { canAccessGapAutoFill } = useGapAutoFillCapabilities();
   const { data: gapAutoFillScheduler, isLoading: isGapAutoFillSchedulerLoading } =
-    useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill && !loading });
+    useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill });
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const isStatusLoading = isGapAutoFillSchedulerLoading && !gapAutoFillScheduler;
   const isEnabled = gapAutoFillScheduler?.enabled ?? false;
