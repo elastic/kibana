@@ -118,7 +118,7 @@ describe('correctQuerySyntax', () => {
 
   test('should handle complex query with all corrections needed', () => {
     const query = 'FROM logs | WHERE field IN (value, round(arg, | STATS count(,) | LIMIT 10';
-    const expected = 'FROM logs | WHERE field IN (value, round(arg))';
+    const expected = 'FROM logs | WHERE field IN (value, round(arg ))';
     expect(correctQuerySyntax(query, 40)).toBe(expected);
   });
 

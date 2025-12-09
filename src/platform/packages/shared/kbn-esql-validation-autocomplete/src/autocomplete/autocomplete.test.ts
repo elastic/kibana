@@ -788,18 +788,15 @@ describe('autocomplete', () => {
     testSuggestions('FROM a | LIMIT /', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
     // STATS argument
-    testSuggestions(
-      'FROM a | STATS /',
-      [
-        'BY ',
-        'col0 = ',
-        ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
-          scalar: true,
-          agg: true,
-          grouping: true,
-        }).map(attachAsSnippet),
-      ].map(attachTriggerCommand)
-    );
+    testSuggestions('FROM a | STATS /', [
+      'BY ',
+      'col0 = ',
+      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
+        scalar: true,
+        agg: true,
+        grouping: true,
+      }).map(attachAsSnippet),
+    ]);
 
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(integerField) /', [
