@@ -19,5 +19,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./bulk_delete'));
     loadTestFile(require.resolve('./purge_instances'));
     loadTestFile(require.resolve('./slo_settings'));
+    loadTestFile(require.resolve('./find_instances'));
   });
 }

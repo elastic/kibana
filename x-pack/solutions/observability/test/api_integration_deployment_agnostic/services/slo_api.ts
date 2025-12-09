@@ -11,6 +11,7 @@ import type {
   BulkDeleteInput,
   CreateSLOInput,
   FindSLODefinitionsResponse,
+  FindSLOInstancesResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -231,6 +232,23 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+
+    async findInstances(
+      sloId: string,
+      params: { search?: string; size?: string; searchAfter?: string },
+      roleAuthc: RoleCredentials
+    ): Promise<FindSLOInstancesResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/${sloId}/_instances`)
+        .query(params)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+    
     async getSettings(roleAuthc: RoleCredentials) {
       const { body } = await supertestWithoutAuth
         .get(`/internal/slo/settings`)
