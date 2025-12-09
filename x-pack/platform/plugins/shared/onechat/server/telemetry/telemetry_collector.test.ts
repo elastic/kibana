@@ -20,6 +20,10 @@ jest.mock('./query_utils', () => ({
     getConversationMetrics: jest.fn(),
     getCountersByPrefix: jest.fn(),
     calculatePercentilesFromBuckets: jest.fn(),
+    getTTFTMetrics: jest.fn(),
+    getTTLTMetrics: jest.fn(),
+    getLatencyByModel: jest.fn(),
+    getLatencyByAgentType: jest.fn(),
   })),
   isIndexNotFoundError: jest.fn(),
 }));
@@ -174,6 +178,44 @@ describe('telemetry_collector', () => {
           tokens_used: 50000,
           average_tokens_per_conversation: 500,
         }),
+        getTTFTMetrics: jest.fn().mockResolvedValue({
+          p50: 100,
+          p75: 200,
+          p90: 400,
+          p95: 600,
+          p99: 800,
+          mean: 150,
+          total_samples: 1000,
+        }),
+        getTTLTMetrics: jest.fn().mockResolvedValue({
+          p50: 1000,
+          p75: 2000,
+          p90: 4000,
+          p95: 6000,
+          p99: 8000,
+          mean: 1500,
+          total_samples: 1000,
+        }),
+        getLatencyByModel: jest.fn().mockResolvedValue([
+          {
+            model: 'gpt-4',
+            ttft_p50: 100,
+            ttft_p95: 500,
+            ttlt_p50: 1000,
+            ttlt_p95: 5000,
+            sample_count: 500,
+          },
+        ]),
+        getLatencyByAgentType: jest.fn().mockResolvedValue([
+          {
+            agent_id: 'default',
+            ttft_p50: 120,
+            ttft_p95: 550,
+            ttlt_p50: 1100,
+            ttlt_p95: 5500,
+            sample_count: 300,
+          },
+        ]),
         getCountersByPrefix: jest.fn().mockImplementation((domain, prefix) => {
           if (prefix === `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_`) {
             return Promise.resolve(
@@ -330,6 +372,26 @@ describe('telemetry_collector', () => {
           p99: 0,
           mean: 0,
         },
+        time_to_first_token: {
+          p50: 0,
+          p75: 0,
+          p90: 0,
+          p95: 0,
+          p99: 0,
+          mean: 0,
+          total_samples: 0,
+        },
+        time_to_last_token: {
+          p50: 0,
+          p75: 0,
+          p90: 0,
+          p95: 0,
+          p99: 0,
+          mean: 0,
+          total_samples: 0,
+        },
+        latency_by_model: [],
+        latency_by_agent_type: [],
         tool_calls: {
           total: 0,
           by_source: {
