@@ -28,8 +28,8 @@ import type { RuleUpdateProps } from '../../../../../../../common/api/detection_
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
-import { calculateRuleFieldsDiff } from '../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
 import type { RuleParams } from '../../../../rule_schema';
+import { calculateRuleFieldsDiff } from '../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
 
 interface UpdateRuleArguments {
   actionsClient: ActionsClient;
@@ -70,6 +70,7 @@ export const updateRule = async ({
   const ruleDiff = calculateRuleFieldsDiff({
     ruleA: existingRule,
     ruleB: ruleUpdate as RuleResponse,
+    isUpdateRuleRoute: true,
   });
 
   // gather all modified fields from ruleDiff
