@@ -135,6 +135,8 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
+    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+
     const onechatService: OnechatPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
@@ -179,33 +181,35 @@ export class OnechatPlugin
       },
     };
 
-    core.chrome.navControls.registerRight({
-      mount: (element) => {
-        ReactDOM.render(
-          <OnechatNavControlInitiator
-            coreStart={core}
-            pluginsStart={startDependencies}
-            onechatService={onechatService}
-          />,
-          element,
-          () => {}
-        );
+    if (hasAgentBuilder) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <OnechatNavControlInitiator
+              coreStart={core}
+              pluginsStart={startDependencies}
+              onechatService={onechatService}
+            />,
+            element,
+            () => {}
+          );
 
-        return () => {
-          ReactDOM.unmountComponentAtNode(element);
-        };
-      },
-      // right before the user profile
-      order: 1001,
-    });
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        // right before the user profile
+        order: 1001,
+      });
 
-    // open AI Agent flyout when chosen in modal
-    startDependencies.aiAssistantManagementSelection.openChat$.subscribe((selection) => {
-      if (selection === AIChatExperience.Agent) {
-        onechatService.openConversationFlyout();
-        startDependencies.aiAssistantManagementSelection.completeOpenChat();
-      }
-    });
+      // open AI Agent flyout when chosen in modal
+      startDependencies.aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+        if (selection === AIChatExperience.Agent) {
+          onechatService.openConversationFlyout();
+          startDependencies.aiAssistantManagementSelection.completeOpenChat();
+        }
+      });
+    }
 
     return onechatService;
   }

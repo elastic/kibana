@@ -199,6 +199,55 @@ describe('createGapFillAutoScheduler()', () => {
     );
   });
 
+  test('succeeds creating scheduler when disabled without scheduling task', async () => {
+    const params = getParams({ enabled: false });
+
+    const soDisabled: SavedObject<GapAutoFillSchedulerSO> = {
+      id: 'gap-1',
+      type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      attributes: {
+        id: 'gap-1',
+        name: 'auto-fill',
+        enabled: false,
+        schedule: { interval: '1h' },
+        gapFillRange: 'now-1d',
+        maxBackfills: 100,
+        numRetries: 3,
+        scope: ['scope-1'],
+        ruleTypes: [
+          { type: 'test-rule-type1', consumer: 'test-consumer' },
+          { type: 'test-rule-type2', consumer: 'test-consumer' },
+        ],
+        ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+      },
+      references: [],
+    };
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soDisabled);
+
+    const result = await rulesClient.createGapAutoFillScheduler(params);
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      expect.objectContaining({ name: 'auto-fill', enabled: false }),
+      expect.any(Object)
+    );
+
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+
+    expect(result).toEqual(
+      transformSavedObjectToGapAutoFillSchedulerResult({
+        savedObject: soDisabled,
+      })
+    );
+  });
+
   test('succeeds creating and scheduling task with custom id', async () => {
     const params = getParams({ id: 'custom-gap-id' });
     const soWithCustomId: SavedObject<GapAutoFillSchedulerSO> = getSavedObject('custom-gap-id');

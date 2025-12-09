@@ -131,7 +131,6 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
           AiAssistantNewChatLink: isAgentChatExperienceEnabled ? (
             <NewAgentBuilderAttachment
               onClick={openAgentBuilderFlyout}
-              text={i18n.ASK_AGENT_ERROR_BUTTON}
               size="xs"
             />
           ) : (

@@ -104,11 +104,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         </EuiCodeBlock>
         <>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment
-              onClick={openAgentBuilderFlyout}
-              color={color}
-              text={i18n.ASK_AGENT_ERROR_BUTTON}
-            />
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} color={color} />
           ) : (
             hasAssistantPrivilege && (
               <NewChat

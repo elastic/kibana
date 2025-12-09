@@ -105,6 +105,10 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     attachmentData: { identifierType: entityType, identifier: entityIdentifier },
     attachmentPrompt: `Investigate the entity and suggest next steps.`,
   });
+  const onAgentBuildAttachmentClick = useCallback(() => {
+    openAgentBuilderFlyout();
+    closePopover();
+  }, [closePopover, openAgentBuilderFlyout]);
 
   const items = useMemo(
     () => [
@@ -165,13 +169,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
             key={'ask-ai-assistant'}
             disabled={isLoading}
           >
-            <NewAgentBuilderAttachment
-              onClick={() => {
-                openAgentBuilderFlyout();
-                closePopover();
-              }}
-              size="s"
-            />
+            <NewAgentBuilderAttachment onClick={onAgentBuildAttachmentClick} size="s" />
           </EuiContextMenuItem>
         ) : (
           isAssistantVisible && (
@@ -221,13 +219,12 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       showAnonymizedValues,
       onChangeShowAnonymizedValues,
       selectedConversationHasAnonymizedValues,
-      isAgentBuilderEnabled,
-      isAssistantVisible,
       setConnectorId,
       connectorId,
-      openAgentBuilderFlyout,
-      closePopover,
       showAssistantOverlay,
+      closePopover,
+      isAgentBuilderEnabled,
+      openAgentBuilderFlyout,
     ]
   );
 
