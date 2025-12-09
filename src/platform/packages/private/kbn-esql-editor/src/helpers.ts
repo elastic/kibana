@@ -334,7 +334,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       white-space: normal !important;
     }
 
-    // Modifies the height of the popup to make it fit under the page header.
+    // Modifies the height of the signature popup to make it fit under the page header.
     .parameter-hints-widget > .phwrapper {
       max-height: 90px !important;
       overflow: auto;

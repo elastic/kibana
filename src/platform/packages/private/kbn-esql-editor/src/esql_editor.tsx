@@ -830,11 +830,8 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const signatureProvider = useMemo(() => {
-    return ESQLLang.getSignatureProvider?.({
-      ...esqlCallbacks,
-      telemetry: telemetryCallbacks,
-    });
-  }, [esqlCallbacks, telemetryCallbacks]);
+    return ESQLLang.getSignatureProvider?.(esqlCallbacks);
+  }, [esqlCallbacks]);
 
   const inlineCompletionsProvider = useMemo(() => {
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
@@ -1286,5 +1283,4 @@ const ESQLEditorInternal = function ESQLEditor({
 };
 
 export const ESQLEditor = withRestorableState(ESQLEditorInternal);
-
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

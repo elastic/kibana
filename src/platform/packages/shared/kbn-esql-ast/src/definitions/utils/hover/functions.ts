@@ -17,10 +17,9 @@ import { getMatchingSignatures } from '../expressions';
 
 /**
  * Formats a list of types with optional limiting and overflow indicator.
- * @param types Set of type strings to format
- * @param maxTypesToShow Optional maximum number of types to display
- * @param separator Optional separator between types (default: ' | ')
- * @returns Formatted type string with overflow indicator if truncated
+ * Examples:
+ * - "boolean | date | double"
+ * - "boolean | date | double|…+2 more" (when remainingCount > 1)
  */
 function formatTypesList(
   types: Set<string>,
@@ -30,8 +29,14 @@ function formatTypesList(
   const sortedTypes = Array.from(types).sort();
 
   if (maxTypesToShow !== undefined && sortedTypes.length > maxTypesToShow) {
-    const displayedTypes = sortedTypes.slice(0, maxTypesToShow);
     const remainingCount = sortedTypes.length - maxTypesToShow;
+
+    // If only one type is remaining, show it instead of "+1 more"
+    if (remainingCount === 1) {
+      return sortedTypes.join(separator);
+    }
+
+    const displayedTypes = sortedTypes.slice(0, maxTypesToShow);
     return `${displayedTypes.join(separator)}${i18n.translate(
       'kbn-esql-ast.esql.hover.functions.moreTypes',
       {
