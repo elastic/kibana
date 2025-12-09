@@ -24,7 +24,7 @@ import { toUIMessageStream } from '@ai-sdk/langchain';
 import type { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
-import type { ChatMessage, ElasticsearchRetrieverContentField } from '../types';
+import type { ChatMessage } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 

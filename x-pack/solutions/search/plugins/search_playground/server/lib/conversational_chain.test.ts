@@ -13,7 +13,6 @@ import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain, contextLimitCheck } from './conversational_chain';
 import type { ChatMessage } from '../types';
 import { MessageRole } from '../types';
-import { ContextModelLimitError } from '../../common';
 import type { UIMessageChunk } from 'ai';
 
 const readSseChunks = async (stream: ReadableStream<string>): Promise<UIMessageChunk[]> => {
