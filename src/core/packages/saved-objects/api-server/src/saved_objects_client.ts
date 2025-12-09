@@ -178,6 +178,11 @@ export interface SavedObjectsClientContract {
    *
    * @param options {@link SavedObjectsFindOptions} - options for the find operation
    * @returns the {@link SavedObjectsFindResponse}
+   *
+   * @remarks When using aggregations via the `aggs` option, be aware that certain Elasticsearch
+   * aggregation types can return data from documents outside the query scope, potentially bypassing
+   * security restrictions like Kibana Spaces. See the `aggs` documentation in {@link SavedObjectsFindOptions}
+   * for a list of aggregations to avoid.
    */
   find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
@@ -189,6 +194,9 @@ export interface SavedObjectsClientContract {
    * @returns the {@link SavedObjectsSearchResponse}
    *
    * @remarks While the `search` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Take care to ensure it is implemented correctly for your use case and appropriately stress tested. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+   * @remarks When using aggregations, certain Elasticsearch aggregation types can return data from documents
+   * outside the query scope, potentially bypassing security restrictions like Kibana Spaces. See
+   * {@link SavedObjectsSearchOptions} for a list of aggregations to avoid.
    * @remarks See tutorial https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects-search
    */
   search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
