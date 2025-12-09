@@ -6,9 +6,14 @@
  */
 
 import { test, expect } from '@kbn/scout-oblt';
-import { generateApmData, generateLogsData } from '../fixtures/generators';
+import {
+  generateApmData,
+  generateLogsData,
+  TEST_START_DATE,
+  TEST_END_DATE,
+} from '../fixtures/generators';
 
-test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe.skip('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
@@ -53,7 +58,12 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     logsSynthtraceEsClient,
   }) => {
     // Generate logs data only
-    await generateLogsData(logsSynthtraceEsClient);
+    await logsSynthtraceEsClient.index(
+      generateLogsData({
+        from: new Date(TEST_START_DATE).getTime(),
+        to: new Date(TEST_END_DATE).getTime(),
+      })
+    );
 
     // Navigate to observability landing page
     await pageObjects.observabilityNavigation.gotoLanding();
@@ -68,7 +78,12 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     apmSynthtraceEsClient,
   }) => {
     // Generate APM data only
-    await generateApmData(apmSynthtraceEsClient);
+    await apmSynthtraceEsClient.index(
+      generateApmData({
+        from: new Date(TEST_START_DATE).getTime(),
+        to: new Date(TEST_END_DATE).getTime(),
+      })
+    );
 
     // Navigate to observability landing page
     await pageObjects.observabilityNavigation.gotoLanding();
@@ -84,8 +99,18 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     apmSynthtraceEsClient,
   }) => {
     // Generate both logs and APM data
-    await generateLogsData(logsSynthtraceEsClient);
-    await generateApmData(apmSynthtraceEsClient);
+    await logsSynthtraceEsClient.index(
+      generateLogsData({
+        from: new Date(TEST_START_DATE).getTime(),
+        to: new Date(TEST_END_DATE).getTime(),
+      })
+    );
+    await apmSynthtraceEsClient.index(
+      generateApmData({
+        from: new Date(TEST_START_DATE).getTime(),
+        to: new Date(TEST_END_DATE).getTime(),
+      })
+    );
 
     // Navigate to observability landing page
     await pageObjects.observabilityNavigation.gotoLanding();

@@ -7,8 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
-import type { CreateRuleResponse } from './types';
-import { createRule } from './helpers';
+import { RULE_NAMES } from '../../fixtures/generators';
 
 test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -38,18 +37,12 @@ test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
 });
 
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  let createdRule: CreateRuleResponse['data'];
-  test.beforeAll(async ({ apiServices }) => {
-    createdRule = (await createRule(apiServices, { name: 'Admin Test Rule' })).data;
-  });
+  // Rule is created in global setup
+  const ruleName = RULE_NAMES.ADMIN_TEST;
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.rulesPage.goto();
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.alerting.rules.delete(createdRule.id);
   });
 
   test('should see the Rules Table container', async ({ pageObjects }) => {
@@ -59,14 +52,14 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test('should see an editable rule in the Rules Table', async ({ pageObjects }) => {
     await expect(pageObjects.rulesPage.ruleSearchField).toBeVisible();
     const editableRules = pageObjects.rulesPage.getEditableRules();
-    await expect(editableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
+    await expect(editableRules.filter({ hasText: ruleName })).toHaveCount(1);
   });
 
   test('should show the edit action button for an editable rule & open the edit rule flyout', async ({
     pageObjects,
   }) => {
     const editableRules = pageObjects.rulesPage.getEditableRules();
-    const ruleRow = editableRules.filter({ hasText: createdRule.name });
+    const ruleRow = editableRules.filter({ hasText: ruleName });
 
     // Verify the rule row exists & that the edit button visible on hover
     await expect(ruleRow).toBeVisible();

@@ -7,8 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
-import { createRule } from './helpers';
-import type { CreateRuleResponse } from './types';
+import { RULE_NAMES } from '../../fixtures/generators';
 
 test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -41,12 +40,8 @@ test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
 });
 
 test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  let createdRule: CreateRuleResponse['data'];
-
-  test.beforeAll(async ({ apiServices }) => {
-    // Create a test rule that will generate event log entries
-    createdRule = (await createRule(apiServices, { name: 'Logs Tab Test Rule' })).data;
-  });
+  // Rule is created in global setup
+  const ruleName = RULE_NAMES.LOGS_TAB_TEST;
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
@@ -54,13 +49,6 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.rulesPage.goto();
     // Verify we're on the rules page
     await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    // Clean up the created rule
-    if (createdRule?.id) {
-      await apiServices.alerting.rules.delete(createdRule.id);
-    }
   });
 
   test('should navigate to logs tab and display event log table', async ({ pageObjects }) => {
@@ -101,7 +89,7 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.rulesPage.waitForLogsTableToLoad();
 
     // Click on one of the rule links in the event logs
-    const ruleLinks = await pageObjects.rulesPage.getLogsTableRuleLinks('Logs Tab Test Rule');
+    const ruleLinks = await pageObjects.rulesPage.getLogsTableRuleLinks(ruleName);
     expect(ruleLinks.length).toBeGreaterThan(0);
     await pageObjects.rulesPage.clickOnRuleInEventLogs(ruleLinks[0]);
 
@@ -111,18 +99,12 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 });
 
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  let createdRule: CreateRuleResponse['data'];
-  test.beforeAll(async ({ apiServices }) => {
-    createdRule = (await createRule(apiServices, { name: 'Viewer Test Rule' })).data;
-  });
+  // Rule is created in global setup
+  const ruleName = RULE_NAMES.VIEWER_TEST;
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.rulesPage.goto();
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.alerting.rules.delete(createdRule.id);
   });
 
   test('should see the Rules Table container', async ({ pageObjects }) => {
@@ -131,7 +113,7 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('should see a non-editable rule in the Rules Table', async ({ pageObjects }) => {
     const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
-    await expect(nonEditableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
+    await expect(nonEditableRules.filter({ hasText: ruleName })).toHaveCount(1);
   });
 
   test('should not show the edit action button for a rule when logged in as viewer', async ({
@@ -139,7 +121,7 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     // As a viewer, rules appear as non-editable
     const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
-    const ruleRow = nonEditableRules.filter({ hasText: createdRule.name });
+    const ruleRow = nonEditableRules.filter({ hasText: ruleName });
 
     // Verify the rule row is visible (rule exists in table)
     await expect(ruleRow).toBeVisible();

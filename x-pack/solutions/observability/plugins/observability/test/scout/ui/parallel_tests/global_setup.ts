@@ -6,14 +6,31 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import { generateApmData, generateLogsData } from '../fixtures/generators';
+import {
+  generateApmData,
+  generateLogsData,
+  generateRulesData,
+  TEST_START_DATE,
+  TEST_END_DATE,
+} from '../fixtures/generators';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apmSynthtraceEsClient, logsSynthtraceEsClient, log }) => {
+  async ({ apmSynthtraceEsClient, logsSynthtraceEsClient, apiServices, log }) => {
     log.info('Generating Observability data...');
-    await generateApmData(apmSynthtraceEsClient);
-    await generateLogsData(logsSynthtraceEsClient);
+    await apmSynthtraceEsClient.index(
+      generateApmData({
+        from: new Date(TEST_START_DATE).getTime(),
+        to: new Date(TEST_END_DATE).getTime(),
+      })
+    );
+    await logsSynthtraceEsClient.index(
+      generateLogsData({
+        from: new Date(TEST_START_DATE).getTime(),
+        to: new Date(TEST_END_DATE).getTime(),
+      })
+    );
+    await generateRulesData(apiServices, log);
   }
 );
