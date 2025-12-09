@@ -17,6 +17,7 @@ import {
   useEuiTheme,
   EuiButtonEmpty,
   EuiText,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeModalProps } from './rule_type_modal';
@@ -94,6 +95,26 @@ export const TemplateList: React.FC<TemplateListProps> = ({
           padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}`,
         }}
       >
+        {templates.length === 0 && !isLoading && (
+          <EuiEmptyPrompt
+            color="subdued"
+            iconType="search"
+            title={
+              <h2>
+                {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.noTemplatesErrorTitle', {
+                  defaultMessage: 'No templates found',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.noTemplatesErrorBody', {
+                  defaultMessage: 'Try a different search or change your filter settings',
+                })}
+              </p>
+            }
+          />
+        )}
         {templates.map((tpl) => (
           <React.Fragment key={tpl.id}>
             {templateCard(tpl)}
@@ -111,7 +132,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
                   iconType="arrowDown"
                   data-test-subj="templateList-loadMore"
                 >
-                  {i18n.translate('responseOpsRuleForm.components.templateList.loadMoreButton', {
+                  {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.loadMoreTemplatesButton', {
                     defaultMessage: 'Load more',
                   })}
                 </EuiButtonEmpty>
