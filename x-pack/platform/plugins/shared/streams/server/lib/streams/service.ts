@@ -7,6 +7,7 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
 import type { AssetClient } from './assets/asset_client';
@@ -28,12 +29,14 @@ export class StreamsService {
     attachmentClient,
     queryClient,
     featureClient: featureClient,
+    fieldsMetadataClient,
   }: {
     request: KibanaRequest;
     assetClient: AssetClient;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
     featureClient: FeatureClient;
+    fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -51,6 +54,7 @@ export class StreamsService {
       scopedClusterClient,
       lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),
+      fieldsMetadataClient,
       request,
       isServerless,
       isDev: this.isDev,
