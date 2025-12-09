@@ -9,8 +9,8 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import { loadRuleTemplate } from '../apis/create_rule_from_template';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { loadRuleTemplate } from '../apis/create_rule_from_template';
 
 export interface UseRuleTemplateProps {
   http: HttpStart;

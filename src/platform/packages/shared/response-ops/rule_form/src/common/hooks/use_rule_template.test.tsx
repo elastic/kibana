@@ -14,7 +14,6 @@ import { loadRuleTemplate } from '../apis/create_rule_from_template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 
-
 // Mocks
 jest.mock('../apis/create_rule_from_template', () => ({
   loadRuleTemplate: jest.fn(),
