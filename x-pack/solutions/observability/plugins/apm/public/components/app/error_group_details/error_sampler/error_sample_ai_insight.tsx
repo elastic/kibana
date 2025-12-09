@@ -26,7 +26,7 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-export function ErrorSampleAgentBuilderAiInsight({
+export function ErrorSampleAiInsight({
   error,
   transaction,
 }: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>) {
