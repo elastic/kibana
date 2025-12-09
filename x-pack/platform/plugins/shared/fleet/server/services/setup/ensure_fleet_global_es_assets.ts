@@ -11,13 +11,8 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ensureDefaultComponentTemplates } from '../epm/elasticsearch/template/install';
-import {
-  ensureFleetEventIngestedPipelineIsInstalled,
-  ensureFleetFinalPipelineIsInstalled,
-} from '../epm/elasticsearch/ingest_pipeline/install';
+import { ensureFleetFinalPipelineIsInstalled } from '../epm/elasticsearch/ingest_pipeline/install';
 import { getInstallations, reinstallPackageForInstallation } from '../epm/packages';
-
-import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../../constants';
 
 /**
  * Ensure ES assets shared by all Fleet index template are installed
@@ -41,7 +36,6 @@ export async function ensureFleetGlobalEsAssets(
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
-    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
   ]);
 
   if (options?.reinstallPackages) {
@@ -63,7 +57,7 @@ export async function ensureFleetGlobalEsAssets(
             );
           });
         },
-        { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
+        { concurrency: 10 }
       );
     }
   }
