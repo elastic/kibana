@@ -20,6 +20,10 @@ export const configSchema = schema.object({
   enabled: schema.boolean({
     defaultValue: true,
   }),
+  /**
+   * Configures the interval for the standard product intercept which a user would be prompted to provide feedback about kibana
+   * Expects a limited subset of duration string; (d,m,h,s)
+   */
   interval: schema.string({
     defaultValue: '90d',
     validate(value) {
@@ -28,6 +32,10 @@ export const configSchema = schema.object({
       }
     },
   }),
+  /**
+   * Configures the interval for the trial product intercept which a user would be prompted to provide feedback about kibana
+   * Expects a limited subset of duration string; (d,m,h,s)
+   */
   trialInterceptInterval: schema.string({
     defaultValue: '7d',
     validate(value) {
@@ -36,6 +44,10 @@ export const configSchema = schema.object({
       }
     },
   }),
+  /**
+   * Configures the interval for the upgrade product intercept which a user would be prompted to provide feedback about kibana
+   * Expects a limited subset of duration string; (d,m,h,s)
+   */
   upgradeInterceptInterval: schema.string({
     defaultValue: '7d',
     validate(value) {
