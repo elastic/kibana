@@ -103,7 +103,7 @@ export async function fetchApmErrorContext({
     const parsedEnd = parseDatemath(end, { roundUp: true });
 
     try {
-      // Fetch the trace details for the error (trace items, aggregated services for the trace, trace errors)
+      // Fetch the trace details for the error (transactions, spans, errors, and aggregated services)
       const apmIndices = await getApmIndices({ core, plugins, logger });
       const traceContext = await fetchDistributedTrace({
         esClient,
@@ -114,15 +114,13 @@ export async function fetchApmErrorContext({
         logger,
       });
 
-      if (traceContext.traceItems.length) {
+      if (traceContext.traceDocuments.length) {
         contextParts.push(
-          `<TraceItems>\n${JSON.stringify(traceContext.traceItems, null, 2)}\n</TraceItems>`
-        );
-      }
-
-      if (traceContext.traceErrors.length) {
-        contextParts.push(
-          `<TraceErrors>\n${JSON.stringify(traceContext.traceErrors, null, 2)}\n</TraceErrors>`
+          `<TraceDocuments>\n${JSON.stringify(
+            traceContext.traceDocuments,
+            null,
+            2
+          )}\n</TraceDocuments>`
         );
       }
 
