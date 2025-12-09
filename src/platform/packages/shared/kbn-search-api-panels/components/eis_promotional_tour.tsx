@@ -13,11 +13,12 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiTourStep,
+  useEuiTheme,
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_PROMO_TOUR_CLOSE,
-  EIS_PROMO_TOUR_CTA,
+  EIS_TOUR_DISMISS,
+  EIS_TOUR_CTA,
   EIS_PROMO_TOUR_DESCRIPTION,
   EIS_PROMO_TOUR_TITLE,
 } from '../translations';
@@ -38,7 +39,8 @@ export const EisPromotionalTour = ({
   isCloudEnabled,
   children,
 }: EisPromotionalTourProps) => {
-  const { isPromoVisible, onSkipTour } = useShowEisPromotionalContent({
+  const { euiTheme } = useEuiTheme();
+  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}Tour`,
     isCloudEnabled,
   });
@@ -53,7 +55,7 @@ export const EisPromotionalTour = ({
       data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={EIS_PROMO_TOUR_TITLE}
-      maxWidth="400px"
+      maxWidth={`${euiTheme.base * 25}px`}
       content={
         <EuiText>
           <p>{EIS_PROMO_TOUR_DESCRIPTION}</p>
@@ -63,10 +65,10 @@ export const EisPromotionalTour = ({
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onSkipTour}
+      onFinish={onDismissTour}
       footerAction={[
-        <EuiButtonEmpty data-test-subj="eisPromoTourCloseBtn" onClick={onSkipTour}>
-          {EIS_PROMO_TOUR_CLOSE}
+        <EuiButtonEmpty data-test-subj="eisPromoTourCloseBtn" onClick={onDismissTour}>
+          {EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
@@ -77,7 +79,7 @@ export const EisPromotionalTour = ({
                 iconSide="right"
                 iconType="popout"
               >
-                {EIS_PROMO_TOUR_CTA}
+                {EIS_TOUR_CTA}
               </EuiButton>,
             ]
           : []),

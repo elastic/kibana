@@ -10,6 +10,7 @@ import { Readable } from 'stream';
 import type { CreateScriptRequestBody } from '../../api/endpoint/scripts_library';
 import { CreateScriptRequestSchema } from '../../api/endpoint/scripts_library';
 import type { HapiReadableStream } from '../../../server/types';
+import { ListScriptsRequestSchema } from '../../api/endpoint/scripts_library/list_scripts';
 
 describe('Scripts library schemas', () => {
   const createFileStream = (): HapiReadableStream => {
@@ -153,7 +154,7 @@ describe('Scripts library schemas', () => {
     // Field: `description`
     // Field: `instructions`
     // Field: `example`
-    // Field: `executable`
+    // Field: `pathToExecutable`
     // ------------------------------------
     const optionalStringFields: Array<
       keyof Pick<
@@ -186,6 +187,64 @@ describe('Scripts library schemas', () => {
 
       expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
         `[${field}]: Value can not be an empty string`
+      );
+    });
+  });
+
+  describe('List API request schema', () => {
+    it('should accept empty query (all query params are optional)', () => {
+      expect(ListScriptsRequestSchema.query.validate({})).toBeTruthy();
+    });
+
+    it('should accept a `page` param', () => {
+      expect(ListScriptsRequestSchema.query.validate({ page: 1 })).toBeTruthy();
+    });
+
+    it('should error if `page` value is less than 1', () => {
+      expect(() => ListScriptsRequestSchema.query.validate({ page: 0 })).toThrow();
+    });
+
+    it('should accept a `pageSize` param', () => {
+      expect(ListScriptsRequestSchema.query.validate({ pageSize: 1 })).toBeTruthy();
+    });
+
+    it('should error if `pageSize` is less than 1', () => {
+      expect(() => ListScriptsRequestSchema.query.validate({ pageSize: 0 })).toThrow();
+    });
+
+    it('should error if `pageSize` is greater than 1000', () => {
+      expect(() => ListScriptsRequestSchema.query.validate({ pageSize: 1001 })).toThrow();
+    });
+
+    it.each(['name', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'])(
+      'should accept a `sortField` param with value %s',
+      (sortField) => {
+        expect(ListScriptsRequestSchema.query.validate({ sortField })).toBeTruthy();
+      }
+    );
+
+    it('should error `sortField` has an invalid field name', () => {
+      expect(() => ListScriptsRequestSchema.query.validate({ sortField: 'foo' })).toThrow();
+    });
+
+    it.each(['asc', 'desc'])(
+      'should accept a `sortDirection` param with value of %s',
+      (sortDirection) => {
+        expect(ListScriptsRequestSchema.query.validate({ sortDirection })).toBeTruthy();
+      }
+    );
+
+    it('should error if `sortDirection` has invalid value', () => {
+      expect(() => ListScriptsRequestSchema.query.validate({ sortDirection: 'foo' })).toThrow();
+    });
+
+    it('should accept a `kuery` param', () => {
+      expect(ListScriptsRequestSchema.query.validate({ kuery: 'name:foo' })).toBeTruthy();
+    });
+
+    it('should error if `kuery` uses invalid fields', () => {
+      expect(() => ListScriptsRequestSchema.query.validate({ kuery: 'foo:bar' })).toThrow(
+        '[kuery]: Invalid KQL filter field: foo'
       );
     });
   });

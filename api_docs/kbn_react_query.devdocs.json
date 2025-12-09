@@ -12533,11 +12533,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_incident_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_severity.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_fields.tsx"
               },
               {
                 "plugin": "cases",
@@ -12739,15 +12735,15 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases_metrics.tsx"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_supported_action_connectors.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
               },
               {
                 "plugin": "cases",
@@ -12771,11 +12767,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_incident_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_severity.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_fields.tsx"
               },
               {
                 "plugin": "cases",
@@ -13163,6 +13155,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_get_missing_index_privileges/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review.ts"
               },
               {
@@ -13192,10 +13188,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/rules/logic/use_get_migration_privileges.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_get_missing_index_privileges/index.ts"
               },
               {
                 "plugin": "securitySolution",
