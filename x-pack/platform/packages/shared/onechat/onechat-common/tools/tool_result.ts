@@ -11,6 +11,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 export enum ToolResultType {
   resource = 'resource',
   tabularData = 'tabular_data',
+  dashboard = 'dashboard',
   query = 'query',
   visualization = 'visualization',
   other = 'other',
@@ -29,6 +30,15 @@ interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
   type: TType;
   data: TData;
 }
+
+export type DashboardResult = ToolResultMixin<
+  ToolResultType.dashboard,
+  {
+    id: string;
+    title?: string;
+    content: Record<string, unknown>;
+  }
+>;
 
 export type ResourceResult = ToolResultMixin<
   ToolResultType.resource,
@@ -81,6 +91,7 @@ export type ToolResult =
   | TabularDataResult
   | QueryResult
   | VisualizationResult
+  | DashboardResult
   | OtherResult
   | ErrorResult;
 

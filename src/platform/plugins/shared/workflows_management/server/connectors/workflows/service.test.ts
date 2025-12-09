@@ -130,6 +130,13 @@ describe('Workflows Service', () => {
         },
         mockRequest
       );
+
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Attempting to run workflow test-workflow-id via internal service'
+      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Successfully started workflow test-workflow-id, run ID: workflow-run-123'
+      );
     });
 
     it('should handle missing workflow service', async () => {
@@ -162,6 +169,9 @@ describe('Workflows Service', () => {
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
         'Workflows service not available. This connector requires workflows management plugin to be enabled.'
+      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Attempting to run workflow test-workflow-id via internal service'
       );
     });
 
