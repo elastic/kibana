@@ -205,15 +205,15 @@ and \`ip\` != "127.0.0.2/32"`
     });
 
     it('should append the limit clause to the query with comments', () => {
-      const queryString = 'FROM my_index | STATS BY meow // new comment';
+      const queryString = 'FROM my_index | LIMIT 50 | STATS BY meow // new comment';
       const updatedQueryString = appendLimitToQuery(queryString, 10);
-      expect(updatedQueryString).toBe('FROM my_index | STATS BY meow | LIMIT 10');
+      expect(updatedQueryString).toBe('FROM my_index | LIMIT 50 | STATS BY meow | LIMIT 10');
     });
 
     it('shouldappend the limit clause to the query with no commands', () => {
       const queryString = '';
       const updatedQueryString = appendLimitToQuery(queryString, 10);
-      expect(updatedQueryString).toBe('LIMIT 10');
+      expect(updatedQueryString).toBe(' | LIMIT 10');
     });
   });
 });

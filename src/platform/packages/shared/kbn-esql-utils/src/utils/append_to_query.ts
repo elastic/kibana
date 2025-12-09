@@ -156,6 +156,6 @@ export const appendStatsByToQuery = (queryString: string, column: string) => {
 
 export const appendLimitToQuery = (queryString: string, limit: number) => {
   const { root } = Parser.parse(queryString);
-  mutate.commands.limit.upsert(root, limit);
-  return BasicPrettyPrinter.print(root);
+  const prettyQueryString = BasicPrettyPrinter.print(root);
+  return `${prettyQueryString} | LIMIT ${limit}`;
 };
