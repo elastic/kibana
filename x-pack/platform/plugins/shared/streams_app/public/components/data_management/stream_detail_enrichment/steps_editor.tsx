@@ -27,7 +27,7 @@ import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { PipelineSuggestion } from './pipeline_suggestions/pipeline_suggestion';
-import { SuggestPipelineLoadingPrompt } from './pipeline_suggestions/suggest_pipeline_loading_prompt';
+import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_panel';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 
@@ -276,7 +276,7 @@ export const StepsEditor = React.memo(() => {
   if (aiFeatures && aiFeatures.enabled) {
     if (isLoadingSuggestion) {
       return (
-        <SuggestPipelineLoadingPrompt
+        <SuggestionLoadingPrompt
           onCancel={() => {
             cancelSuggestion();
           }}
