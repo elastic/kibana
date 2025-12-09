@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = (api) => ({
+module.exports = () => ({
   // Enables import-attributes syntax on imports
   generatorOpts: {
     importAttributesKeyword: 'with',
