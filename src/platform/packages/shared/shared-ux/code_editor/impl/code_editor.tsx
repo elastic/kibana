@@ -559,10 +559,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <ReBroadcastMouseDownEvents>
-          <RepositionSuggestionWidget
-            editor={_editor}
-            enableSuggestWidgetRepositioning
-          >
+          <RepositionSuggestionWidget editor={_editor} enableSuggestWidgetRepositioning>
             {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
             <MonacoEditor
               theme={theme}
