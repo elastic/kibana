@@ -36,11 +36,8 @@ function hasErrorLevel(formattedDoc: LogDocumentOverview): boolean {
     const isErrorLevel = ['error', 'fatal', 'critical', 'severe'].some((level) =>
       logLevelStr.includes(level)
     );
-    if (isErrorLevel) {
-      return true;
-    }
 
-    return false;
+    return isErrorLevel;
   }
   return false;
 }
