@@ -7,10 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type {
-  CollectorFetchContext,
-  UsageCollectionSetup,
-} from '@kbn/usage-collection-plugin/server';
+import type { CollectorFetchContext, ICollectorSet } from '@kbn/usage-collection-plugin/server';
 import { CASE_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DetectorF } from '../types';
@@ -19,7 +16,7 @@ import { Milestone } from '../../../../common/trial_companion/types';
 export interface UsageCollectorDeps {
   logger: Logger;
   collectorContext: CollectorFetchContext;
-  usageCollection: UsageCollectionSetup;
+  usageCollection: ICollectorSet;
 }
 
 export const installedPackagesM1 = (logger: Logger, packageService: PackageService): DetectorF => {

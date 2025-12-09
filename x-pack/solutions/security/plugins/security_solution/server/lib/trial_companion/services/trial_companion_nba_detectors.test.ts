@@ -8,13 +8,15 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
+  casesM6,
   installedPackagesM1,
   allSetM7,
   savedDiscoverySessionsM2,
 } from './trial_companion_nba_detectors';
 import type {
+  Collector,
   CollectorFetchContext,
-  UsageCollectionSetup,
+  ICollectorSet,
 } from '@kbn/usage-collection-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -29,15 +31,18 @@ describe('Trial companion NBA detectors', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
   let collectorContext: CollectorFetchContext;
-  const collectorByType: jest.Mocked<UsageCollectionSetup['getCollectorByType']> = jest.fn();
-  let usageCollection: jest.Mocked<UsageCollectionSetup>;
+  const collector: jest.Mocked<Collector<unknown, object>> = {
+    fetch: jest.fn(),
+  } as unknown as jest.Mocked<Collector<unknown, object>>;
+  let usageCollection: jest.Mocked<ICollectorSet>;
   let deps: UsageCollectorDeps;
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
     esClient = {} as jest.Mocked<ElasticsearchClient>;
     usageCollection = {
-      getCollectorByType: collectorByType,
-    } as jest.Mocked<UsageCollectionSetup>;
+      getCollectorByType: jest.fn(),
+    } as unknown as jest.Mocked<ICollectorSet>;
+    usageCollection.getCollectorByType.mockReturnValue(collector);
     collectorContext = {
       soClient,
       esClient,
@@ -127,6 +132,40 @@ describe('Trial companion NBA detectors', () => {
     it('propagates error from package service', async () => {
       packageClient.getPackages.mockRejectedValueOnce(new Error('test error'));
       await expect(installedPackagesM1(deps.logger, packageService)()).rejects.toThrowError();
+    });
+  });
+
+  describe('casesM6', () => {
+    it.each([
+      [
+        '0 cases',
+        {
+          by_type: [{ type: 'cases', count: 0 }],
+        },
+        Milestone.M6,
+      ],
+      [
+        'no cases',
+        {
+          by_type: [{ type: 'foo', count: 0 }],
+        },
+        Milestone.M6,
+      ],
+      [
+        'with cases',
+        {
+          by_type: [
+            { type: 'foo', count: 1 },
+            { type: 'bar', count: 2 },
+            { type: 'cases', count: 3 },
+          ],
+        },
+        undefined,
+      ],
+      ['empty telemetry', {}, Milestone.M6],
+    ])('compares total cound of cases saved objects - %s', async (_tcName, telemetry, expected) => {
+      (collector.fetch as jest.Mock).mockResolvedValue(telemetry);
+      await expect(casesM6(deps)()).resolves.toEqual(expected);
     });
   });
 });
