@@ -10,3 +10,11 @@ export { extractRound } from './extract_round';
 export { conversationToLangchainMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export { selectTools } from './select_tools';
+export {
+  prepareAttachmentPresentation,
+  getAttachmentSystemPrompt,
+  type AttachmentPresentation,
+  type AttachmentPresentationMode,
+  type AttachmentPresentationConfig,
+} from './attachment_presentation';
+export { cleanAttachmentToolCalls, isCleanedResult } from './clean_attachment_history';

@@ -23,6 +23,7 @@ import type {
   PersistentConversationRoundStep,
 } from './types';
 import type { ConversationProperties } from './storage';
+import { migrateRoundAttachments } from './migrate_attachments';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -98,10 +99,25 @@ export const fromEs = (document: Document): Conversation => {
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rounds = document._source!.rounds ?? document._source!.conversation_rounds;
+  const deserializedRounds = deserializeStepResults(rounds);
+
+  // Check if already has versioned attachments
+  if (document._source!.attachments?.length) {
+    return {
+      ...base,
+      rounds: deserializedRounds,
+      attachments: document._source!.attachments,
+    };
+  }
+
+  // LAZY MIGRATION: Extract attachments from rounds if any exist
+  const migratedAttachments = migrateRoundAttachments(deserializedRounds);
 
   return {
     ...base,
-    rounds: deserializeStepResults(rounds),
+    rounds: deserializedRounds,
+    // Only include attachments if migration found any
+    ...(migratedAttachments.length > 0 && { attachments: migratedAttachments }),
   };
 };
 
@@ -121,6 +137,8 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     // Explicitly omit rounds to ensure migration
     rounds: undefined,
     conversation_rounds: serializeStepResults(conversation.rounds),
+    // Always save with versioned attachments (may be empty array or undefined)
+    attachments: conversation.attachments ?? [],
   };
 };
 

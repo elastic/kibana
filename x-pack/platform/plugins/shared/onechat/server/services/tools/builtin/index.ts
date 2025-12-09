@@ -7,3 +7,9 @@
 
 export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
 export { createBuiltinProviderFn } from './builtin_provider';
+export {
+  createAttachmentTools,
+  attachmentToolIds,
+  inlineModeAttachmentToolIds,
+  summaryModeAttachmentToolIds,
+} from './attachment_tools';

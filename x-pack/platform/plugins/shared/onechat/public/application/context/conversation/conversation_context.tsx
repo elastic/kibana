@@ -7,7 +7,7 @@
 
 import { createContext, useContext } from 'react';
 import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/onechat-common/attachments';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -19,12 +19,19 @@ interface ConversationContextValue {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
   resetInitialMessage?: () => void;
+  /** Legacy: Round-level attachments (for backward compat) */
   attachments?: AttachmentInput[];
   resetAttachments?: () => void;
   removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
+  /** NEW: Conversation-level versioned attachments */
+  conversationAttachments?: VersionedAttachment[];
+  /** NEW: Delete a conversation-level attachment */
+  deleteConversationAttachment?: (attachmentId: string) => void;
+  /** NEW: Restore a deleted conversation-level attachment */
+  restoreConversationAttachment?: (attachmentId: string) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);

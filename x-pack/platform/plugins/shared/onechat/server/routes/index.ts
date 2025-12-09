@@ -14,6 +14,7 @@ import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversations';
 import { registerMCPRoutes } from './mcp';
 import { registerA2ARoutes } from './a2a';
+import { registerAttachmentRoutes } from './attachments';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -24,4 +25,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerConversationRoutes(dependencies);
   registerMCPRoutes(dependencies);
   registerA2ARoutes(dependencies);
+  registerAttachmentRoutes(dependencies);
 };

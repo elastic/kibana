@@ -7,13 +7,21 @@
 
 import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-common';
 import { createInternalError } from '@kbn/onechat-common';
-import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
+import type {
+  Attachment,
+  AttachmentInput,
+  VersionedAttachment,
+} from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import type {
   AttachmentRepresentation,
   AttachmentBoundedTool,
 } from '@kbn/onechat-server/attachments';
+import {
+  prepareAttachmentPresentation,
+  type AttachmentPresentation,
+} from './attachment_presentation';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
@@ -40,16 +48,23 @@ export interface ProcessedConversation {
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
   attachments: ProcessedAttachment[];
+  /** Conversation-level versioned attachments (if any) */
+  conversationAttachments?: VersionedAttachment[];
+  /** Prepared presentation for LLM context */
+  attachmentPresentation?: AttachmentPresentation;
 }
 
 export const prepareConversation = async ({
   previousRounds,
   nextInput,
   attachmentsService,
+  conversationAttachments,
 }: {
   previousRounds: ConversationRound[];
   nextInput: RawRoundInput;
   attachmentsService: AttachmentsService;
+  /** NEW: Conversation-level versioned attachments */
+  conversationAttachments?: VersionedAttachment[];
 }): Promise<ProcessedConversation> => {
   const processedNextInput = await prepareRoundInput({ input: nextInput, attachmentsService });
   const processedRounds = await Promise.all(
@@ -78,11 +93,18 @@ export const prepareConversation = async ({
     })
   );
 
+  // Prepare attachment presentation if conversation has versioned attachments
+  const attachmentPresentation = conversationAttachments?.length
+    ? prepareAttachmentPresentation(conversationAttachments)
+    : undefined;
+
   return {
     nextInput: processedNextInput,
     previousRounds: processedRounds,
     attachmentTypes,
     attachments: allAttachments,
+    conversationAttachments,
+    attachmentPresentation,
   };
 };
 

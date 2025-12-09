@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessage, ToolMessage, SystemMessage } from '@langchain/core/messages';
 import type { AssistantResponse, ToolCallWithResult } from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
 import {
@@ -21,6 +21,8 @@ import type {
   ProcessedConversationRound,
   ProcessedAttachment,
 } from './prepare_conversation';
+import { cleanAttachmentToolCalls } from './clean_attachment_history';
+import { getAttachmentSystemPrompt } from './attachment_presentation';
 
 /**
  * Converts a conversation to langchain format
@@ -34,7 +36,21 @@ export const conversationToLangchainMessages = ({
 }): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
-  for (const round of conversation.previousRounds) {
+  // Add conversation-level attachments context if present
+  if (conversation.attachmentPresentation?.content) {
+    messages.push(
+      new SystemMessage(
+        conversation.attachmentPresentation.content +
+          '\n' +
+          getAttachmentSystemPrompt(conversation.attachmentPresentation.mode)
+      )
+    );
+  }
+
+  // Clean attachment tool calls from history to save context tokens
+  const cleanedRounds = cleanAttachmentToolCalls(conversation.previousRounds);
+
+  for (const round of cleanedRounds) {
     messages.push(...roundToLangchain(round, { ignoreSteps }));
   }
 

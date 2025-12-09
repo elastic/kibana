@@ -27,6 +27,13 @@ export const platformCoreTools = {
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
+  // Attachment tools for versioned conversation-level attachments
+  attachmentRead: platformCoreTool('attachment_read'),
+  attachmentUpdate: platformCoreTool('attachment_update'),
+  attachmentAdd: platformCoreTool('attachment_add'),
+  attachmentDelete: platformCoreTool('attachment_delete'),
+  attachmentList: platformCoreTool('attachment_list'),
+  attachmentDiff: platformCoreTool('attachment_diff'),
 } as const;
 
 /**
