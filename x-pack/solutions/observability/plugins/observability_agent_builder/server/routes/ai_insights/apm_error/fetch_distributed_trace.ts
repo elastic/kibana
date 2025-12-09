@@ -13,9 +13,9 @@ import { getTypedSearch } from '../../../utils/get_typed_search';
 import { termFilter, timeRangeFilter } from '../../../utils/dsl_filters';
 
 interface ServiceAggregate {
-  'service.name': string;
+  serviceName: string;
   count: number;
-  error_count: number;
+  errorCount: number;
 }
 
 export interface DistributedTrace {
@@ -101,17 +101,17 @@ export async function fetchDistributedTrace({
     (hit) => accessKnownApmEventFields(hit.fields ?? {}).unflatten() as UnflattenedApmEvent
   );
 
+  const total = traceResponse.hits.total;
+  const isPartialTrace = total.relation === 'gte';
+
   const serviceAggs = traceResponse.aggregations?.services.buckets ?? [];
   const traceServiceAggregates = serviceAggs
     .map((bucket) => ({
-      'service.name': bucket.key,
+      serviceName: bucket.key as string,
       count: bucket.doc_count,
-      error_count: bucket.error_count?.doc_count ?? 0,
+      errorCount: bucket.error_count?.doc_count ?? 0,
     }))
-    .sort((a, b) => b.count - a.count) as ServiceAggregate[];
-
-  const total = traceResponse.hits.total;
-  const isPartialTrace = total.relation === 'gte';
+    .sort((a, b) => b.count - a.count);
 
   logger.debug(
     `Fetched distributed trace for ${traceId}: ${traceDocuments.length} documents, ${traceServiceAggregates.length} services, partial: ${isPartialTrace}`
