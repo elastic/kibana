@@ -24,7 +24,11 @@ import type {
 } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../commands_registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
-import { allStarConstant, valuePlaceholderConstant } from '../../../../../..';
+import {
+  allStarConstant,
+  valuePlaceholderConstant,
+  defaultValuePlaceholderConstant,
+} from '../../../../../..';
 
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
@@ -122,7 +126,9 @@ async function buildCompositeSuggestions(
     suggestions.push(allStarConstant);
   }
 
-  if (config.isRepeatingValuePosition) {
+  if (config.isAmbiguousPosition) {
+    suggestions.push(defaultValuePlaceholderConstant);
+  } else if (config.isRepeatingValuePosition) {
     suggestions.push(valuePlaceholderConstant);
   }
 
@@ -335,6 +341,7 @@ function getParamSuggestionConfig(
     acceptedTypes,
     shouldAddComma,
     isRepeatingValuePosition: analyzer.isRepeatingValuePosition,
+    isAmbiguousPosition: analyzer.isAmbiguousPosition,
   };
 }
 

@@ -69,18 +69,25 @@ export const allStarConstant: ISuggestionItem = {
   sortText: '1',
 };
 
-export const valuePlaceholderConstant: ISuggestionItem = withAutoSuggest({
-  label: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderLabel', {
-    defaultMessage: 'Add a value and let autocomplete "value"',
-  }),
-  text: '"${0:value}"',
-  asSnippet: true,
-  kind: 'Constant',
-  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderDetail', {
-    defaultMessage: 'Insert a value placeholder',
-  }),
-  category: SuggestionCategory.CONSTANT_VALUE,
-});
+function buildValuePlaceholder(placeholderType: 'value' | 'default' = 'value'): ISuggestionItem {
+  return withAutoSuggest({
+    label: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderLabel', {
+      defaultMessage: 'Insert {placeholderType} placeholder',
+      values: { placeholderType },
+    }),
+    text: `"\${0:${placeholderType}}"`,
+    asSnippet: true,
+    kind: 'Constant',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderDetail', {
+      defaultMessage: 'Insert a {placeholderType} to describe the condition',
+      values: { placeholderType },
+    }),
+    category: SuggestionCategory.CONSTANT_VALUE,
+  });
+}
+
+export const valuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('value');
+export const defaultValuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('default');
 
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
