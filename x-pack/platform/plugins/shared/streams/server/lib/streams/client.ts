@@ -24,6 +24,9 @@ import {
   getAncestors,
   getParentId,
 } from '@kbn/streams-schema';
+import type { LockManagerService } from '@kbn/lock-manager';
+import type { Condition } from '@kbn/streamlang';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
@@ -77,6 +80,7 @@ export class StreamsClient {
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       featureClient: FeatureClient;
+      fieldsMetadataClient: IFieldsMetadataClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
