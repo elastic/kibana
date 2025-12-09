@@ -162,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:check-deleted-files-task',
         'fleet:delete-unenrolled-agents-task',
         'fleet:deploy_agent_policies',
+        'fleet:policy-revisions-cleanup-task',
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
         'fleet:setup:upgrade_managed_package_policies',
