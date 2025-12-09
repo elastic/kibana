@@ -15,7 +15,12 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  Logger,
+  SavedObjectAccessControl,
+  SavedObjectReference,
+} from '@kbn/core/server';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
@@ -32,6 +37,7 @@ import type {
 interface DashboardSavedObjectAttributesAndReferences {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
+  accessControl: SavedObjectAccessControl | undefined;
 }
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
@@ -97,11 +103,9 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
         const controlsCollector = controlsCollectorFactory(embeddable);
         const processDashboards = (dashboards: DashboardSavedObjectAttributesAndReferences[]) => {
           for (const dashboard of dashboards) {
-            // TODO is this injecting references really necessary?
-            // const attributes = injectReferences(dashboard, {
-            //   embeddablePersistableStateService: embeddable,
-            // });
-
+            if (dashboard.accessControl?.accessMode === 'write_restricted') {
+              dashboardData.write_restricted.total += 1;
+            }
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
             dashboardData = collectDashboardSections(dashboard.attributes, dashboardData);
 
@@ -140,22 +144,23 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           let result = await esClient.search<{
             dashboard: DashboardSavedObjectAttributes;
             references: SavedObjectReference[];
+            accessControl?: SavedObjectAccessControl;
           }>(searchParams);
 
           dashboardData = processDashboards(
             result.hits.hits
               .map((h) => {
                 if (h._source) {
+                  const { dashboard: attributes, references, accessControl } = h._source;
                   return {
-                    attributes: h._source.dashboard,
-                    references: h._source.references,
+                    attributes,
+                    references,
+                    accessControl,
                   };
                 }
                 return undefined;
               })
-              .filter<DashboardSavedObjectAttributesAndReferences>(
-                (s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined
-              )
+              .filter((s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined)
           );
 
           while (result._scroll_id && result.hits.hits.length > 0) {
@@ -165,16 +170,16 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
               result.hits.hits
                 .map((h) => {
                   if (h._source) {
+                    const { dashboard: attributes, references, accessControl } = h._source;
                     return {
-                      attributes: h._source.dashboard,
-                      references: h._source.references,
+                      attributes,
+                      references,
+                      accessControl,
                     };
                   }
                   return undefined;
                 })
-                .filter<DashboardSavedObjectAttributesAndReferences>(
-                  (s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined
-                )
+                .filter((s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined)
             );
           }
 

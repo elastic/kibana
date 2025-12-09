@@ -25,6 +25,9 @@ export function registerDashboardUsageCollector(
       return await collectDashboardTelemetry(taskManager);
     },
     schema: {
+      write_restricted: {
+        total: { type: 'long' },
+      },
       panels: {
         total: { type: 'long' },
         by_reference: { type: 'long' },

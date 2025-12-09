@@ -27,6 +27,9 @@ import { emptyState, type LatestTaskStateSchema } from './task_state';
 // TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
 // LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).
 export interface DashboardCollectorData {
+  write_restricted: {
+    total: number;
+  };
   panels: {
     total: number;
     by_reference: number;
@@ -49,6 +52,9 @@ export interface DashboardCollectorData {
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
+  write_restricted: {
+    total: 0,
+  },
   panels: {
     total: 0,
     by_reference: 0,
