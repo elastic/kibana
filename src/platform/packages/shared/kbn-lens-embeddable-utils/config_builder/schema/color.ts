@@ -76,7 +76,7 @@ const colorByValueStepSchema = schema.object(
   }
 );
 
-const colorByValueStepsSchema = schema.arrayOf(colorByValueStepSchema, {
+export const colorByValueStepsSchema = schema.arrayOf(colorByValueStepSchema, {
   meta: {
     description: 'Array of ordered color steps defining the range each color is applied.',
   },
@@ -109,7 +109,7 @@ const colorByValueStepsSchema = schema.arrayOf(colorByValueStepSchema, {
   },
 });
 
-export const colorByValueSchema = schema.object({
+const colorByValueBaseSchema = schema.object({
   type: schema.literal('dynamic'),
 
   /**
@@ -128,9 +128,18 @@ export const colorByValueSchema = schema.object({
   steps: colorByValueStepsSchema,
 });
 
-export const colorByValueAbsoluteSchema = colorByValueSchema.extends({
+export const colorByValueAbsoluteSchema = colorByValueBaseSchema.extends({
   range: schema.literal('absolute'),
 });
+
+export const colorByValuePercentageSchema = colorByValueBaseSchema.extends({
+  range: schema.literal('percentage'),
+});
+
+export const colorByValueSchema = schema.oneOf([
+  colorByValueAbsoluteSchema,
+  colorByValuePercentageSchema,
+]);
 
 export const staticColorSchema = schema.object({
   type: schema.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'

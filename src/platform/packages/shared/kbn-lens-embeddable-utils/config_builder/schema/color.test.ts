@@ -10,7 +10,7 @@
 import { freeze, produce } from 'immer';
 
 import type { ColorByValueStep, ColorByValueType, ColorMappingType } from './color';
-import { allColoringTypeSchema, colorByValueSchema } from './color';
+import { allColoringTypeSchema, colorByValueStepsSchema } from './color';
 
 describe('Color Schema', () => {
   describe('colorByValue schema', () => {
@@ -26,7 +26,7 @@ describe('Color Schema', () => {
         ['lte only', { lte: 0 }],
       ])('should validate for %s', (_, constraints) => {
         const step: ColorByValueStep = { color, ...constraints };
-        const validated = colorByValueSchema.getPropSchemas().steps.validate([step]);
+        const validated = colorByValueStepsSchema.validate([step]);
         expect(validated).toEqual([step]);
       });
 
@@ -35,7 +35,7 @@ describe('Color Schema', () => {
           const step: ColorByValueStep = { color };
 
           expect(() => {
-            colorByValueSchema.getPropSchemas().steps.validate([step]);
+            colorByValueStepsSchema.validate([step]);
           }).toThrowErrorMatchingInlineSnapshot(
             `"[0]: At least one of \\"gte\\", \\"lt\\", or \\"lte\\" must be provided."`
           );
@@ -45,7 +45,7 @@ describe('Color Schema', () => {
           const step: ColorByValueStep = { color, lte: 50, lt: 100 };
 
           expect(() => {
-            colorByValueSchema.getPropSchemas().steps.validate([step]);
+            colorByValueStepsSchema.validate([step]);
           }).toThrowErrorMatchingInlineSnapshot(
             `"[0]: Cannot provide both \\"lt\\" and \\"lte\\" for the same step."`
           );
@@ -55,7 +55,7 @@ describe('Color Schema', () => {
           const step: ColorByValueStep = { color, gte: 100, lt: 50 };
 
           expect(() => {
-            colorByValueSchema.getPropSchemas().steps.validate([step]);
+            colorByValueStepsSchema.validate([step]);
           }).toThrowErrorMatchingInlineSnapshot(
             `"[0]: Inverted range: \\"gte\\" value must be less than the \\"lt\\" value"`
           );
@@ -65,7 +65,7 @@ describe('Color Schema', () => {
           const step: ColorByValueStep = { color, gte: 100, lte: 50 };
 
           expect(() => {
-            colorByValueSchema.getPropSchemas().steps.validate([step]);
+            colorByValueStepsSchema.validate([step]);
           }).toThrowErrorMatchingInlineSnapshot(
             `"[0]: Inverted range: \\"gte\\" value must be less than the \\"lte\\" value"`
           );
