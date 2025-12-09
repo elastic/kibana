@@ -23,6 +23,7 @@ import { setupRoutes } from './routes/setup_routes';
 import { isCloudDefendPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { onPackagePolicyPostCreateCallback } from './lib/fleet_util';
+import { registerCloudDefendUsageCollector } from './lib/telemetry/collectors/register';
 
 export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDefendPluginStart> {
   private readonly logger: Logger;
@@ -42,6 +43,9 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
       core,
       logger: this.logger,
     });
+
+    const coreStartServices = core.getStartServices();
+    registerCloudDefendUsageCollector(this.logger, coreStartServices, plugins.usageCollection);
 
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;
 

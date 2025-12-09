@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import * as Path from 'path';
 import type { Logger } from '@kbn/logging';
-import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SampleDataIngestConfig } from './config';
 import type {
@@ -58,7 +56,7 @@ export class SampleDataIngestPlugin
   start(core: CoreStart, { taskManager }: SampleDataStartDependencies): {} {
     const sampleDataManager = new SampleDataManager({
       kibanaVersion: this.context.env.packageInfo.version,
-      artifactsFolder: Path.join(getDataPath(), 'sample-data-artifacts'),
+      artifactsFolder: 'sample-data-artifacts',
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger,
