@@ -87,7 +87,7 @@ export const SecondaryMenuItemComponent = ({
 
   const content = (
     <div css={labelAndBadgeStyles}>
-      <span>{children}</span>
+      {children}
       {badgeType && <BetaBadge type={badgeType} />}
     </div>
   );

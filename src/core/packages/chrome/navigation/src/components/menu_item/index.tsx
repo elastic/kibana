@@ -65,6 +65,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const { euiTheme } = euiThemeContext;
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
+
     const iconWrapperClassName = `${NAVIGATION_SELECTOR_PREFIX}-iconWrapper`;
 
     const buttonStyles = css`

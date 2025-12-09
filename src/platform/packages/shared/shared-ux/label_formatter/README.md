@@ -18,4 +18,3 @@ formatLabel('settings'); // 'Settings'
 
 - Maintains a glossary of terms with special formatting requirements
 - Applies consistent first-letter capitalization for non-glossary terms
-- Handles non-string ReactNode types gracefully
