@@ -378,8 +378,13 @@ function visitOnFailure(
     graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
-  if (onFailureConfiguration.continue) {
-    graph = createContinue(stepId, graph);
+  // Here we can statically determine that 'continue' is needed if "continue" is boolean.
+  // If condition is a string (expression), we need to evaluate it at runtime, so we always create the continue node.
+  if (
+    typeof onFailureConfiguration.continue === 'string' ||
+    onFailureConfiguration.continue === true
+  ) {
+    graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
   context.stack.pop();
@@ -470,7 +475,11 @@ function handleWorkflowLevelOnFailure(
   return result;
 }
 
-function createContinue(stepId: string, innerGraph: WorkflowGraphType): WorkflowGraphType {
+function createContinue(
+  stepId: string,
+  condition: string | boolean,
+  innerGraph: WorkflowGraphType
+): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
   const enterContinueNodeId = `enterContinue_${stepId}`;
   const exitNodeId = `exitContinue_${stepId}`;
@@ -480,6 +489,9 @@ function createContinue(stepId: string, innerGraph: WorkflowGraphType): Workflow
     stepId,
     stepType: 'continue',
     exitNodeId,
+    configuration: {
+      condition,
+    },
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',

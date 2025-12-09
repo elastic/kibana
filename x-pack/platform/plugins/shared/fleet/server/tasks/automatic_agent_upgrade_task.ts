@@ -40,6 +40,8 @@ import {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
 
+import { throwIfAborted } from './utils';
+
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
 export const VERSION = '1.0.3';
 const TITLE = 'Fleet Automatic agent upgrades';
@@ -191,12 +193,6 @@ export class AutomaticAgentUpgradeTask {
     this.logger.info(`[AutomaticAgentUpgradeTask] runTask() ended${msg ? ': ' + msg : ''}`);
   }
 
-  private throwIfAborted(abortController: AbortController) {
-    if (abortController.signal.aborted) {
-      throw new Error('Task was aborted');
-    }
-  }
-
   private async checkAgentPoliciesForAutomaticUpgrades(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
@@ -218,7 +214,7 @@ export class AutomaticAgentUpgradeTask {
         return;
       }
       for (const agentPolicy of agentPolicyPageResults) {
-        this.throwIfAborted(abortController);
+        throwIfAborted(abortController);
         await this.checkAgentPolicyForAutomaticUpgrades(
           esClient,
           soClient,
@@ -439,7 +435,7 @@ export class AutomaticAgentUpgradeTask {
     let shouldProcessAgents = true;
 
     while (shouldProcessAgents) {
-      this.throwIfAborted(abortController);
+      throwIfAborted(abortController);
       numberOfAgentsForUpgrade = await this.findAndUpgradeCandidateAgents(
         esClient,
         soClient,
@@ -484,7 +480,7 @@ export class AutomaticAgentUpgradeTask {
     });
 
     for await (const retryingAgentsPageResults of retryingAgentsFetcher) {
-      this.throwIfAborted(abortController);
+      throwIfAborted(abortController);
       // This function will return the total number of agents marked for retry so they're included in the count of agents for upgrade.
       retriedAgentsCounter += retryingAgentsPageResults.length;
 

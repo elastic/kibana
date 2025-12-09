@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import type { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

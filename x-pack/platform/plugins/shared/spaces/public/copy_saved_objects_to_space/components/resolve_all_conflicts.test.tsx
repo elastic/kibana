@@ -95,7 +95,7 @@ describe('ResolveAllConflicts', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="resolveAllConflictsVisibilityPopover"
         isOpen={false}
         ownFocus={true}

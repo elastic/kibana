@@ -78,6 +78,9 @@ export interface UsageStats {
   'securitySolution:enableEsqlRiskScoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
+  'securitySolution:defaultValueReportMinutes': string;
+  'securitySolution:defaultValueReportRate': string;
+  'securitySolution:defaultValueReportTitle': string;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -179,6 +182,7 @@ export interface UsageStats {
   'cases:incrementalIdDisplay:enabled': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
+  'observability:streamsEnableSignificantEventsAnalyzer': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableGroupStreams': boolean;

@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiText, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import {
+  EuiBadge,
+  EuiText,
+  EuiSpacer,
+  EuiDescriptionList,
+  EuiListGroup,
+  EuiTablePagination,
+  EuiToken,
+  useEuiTheme,
+} from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { DimensionBadges } from './dimension_badges';
-import { categorizeDimensions } from '../../common/utils/dimensions';
+import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
 interface OverviewTabProps {
@@ -21,12 +29,61 @@ interface OverviewTabProps {
 }
 
 export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
-  const { requiredDimensions, optionalDimensions } = categorizeDimensions(
-    metric.dimensions || [],
-    metric.name
-  );
+  const { euiTheme } = useEuiTheme();
+  const [activePage, setActivePage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   const unitLabel = useMemo(() => getUnitLabel({ unit: metric.unit }), [metric.unit]);
+
+  // Sort dimensions alphabetically by name
+  const sortedDimensions = useMemo(() => {
+    if (!metric.dimensions || metric.dimensions.length === 0) {
+      return [];
+    }
+    return [...metric.dimensions].sort((a, b) => a.name.localeCompare(b.name));
+  }, [metric.dimensions]);
+
+  // Calculate pagination - 0 means show all
+  const pageSize = itemsPerPage === 0 ? sortedDimensions.length : itemsPerPage;
+  const pageCount = Math.ceil(sortedDimensions.length / pageSize);
+  const paginatedDimensions = sortedDimensions.slice(
+    activePage * pageSize,
+    (activePage + 1) * pageSize
+  );
+
+  // Map icon types for dimension field types
+  const iconMap = useMemo(
+    () =>
+      new Map<string, string>([
+        ['boolean', 'tokenBoolean'],
+        ['ip', 'tokenIP'],
+        ['keyword', 'tokenKeyword'],
+        ['long', 'tokenNumber'],
+        ['integer', 'tokenNumber'],
+        ['short', 'tokenNumber'],
+        ['byte', 'tokenNumber'],
+        ['unsigned_long', 'tokenNumber'],
+      ]),
+    []
+  );
+
+  // Create list items from dimensions
+  const dimensionListItems = paginatedDimensions.map((dimension: Dimension) => {
+    const hasIcon = iconMap.has(dimension.type);
+    return {
+      label: (
+        <div style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+          {hasIcon && <EuiToken iconType={iconMap.get(dimension.type)!} size="s" />}
+          <EuiText size="s">{dimension.name}</EuiText>
+          {!hasIcon && (
+            <EuiBadge color="hollow" style={{ marginLeft: euiTheme.size.xs }}>
+              {dimension.type}
+            </EuiBadge>
+          )}
+        </div>
+      ),
+    };
+  });
 
   return (
     <>
@@ -112,48 +169,54 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
       {metric.dimensions && metric.dimensions.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          {requiredDimensions.length > 0 && (
-            <>
-              <EuiText
-                size="s"
-                data-test-subj="metricsExperienceFlyoutOverviewTabRequiredDimensionsLabel"
-              >
-                <strong>
-                  {i18n.translate('metricsExperience.overviewTab.strong.requiredDimensionsLabel', {
-                    defaultMessage: 'Required dimensions',
-                  })}
-                </strong>
-              </EuiText>
-              <EuiSpacer size="xs" />
-              <DimensionBadges
-                dimensions={requiredDimensions}
-                metricName={metric.name}
-                maxDisplay={999}
-              />
-              {optionalDimensions.length > 0 && <EuiSpacer size="m" />}
-            </>
-          )}
-          {optionalDimensions.length > 0 && (
-            <>
-              <EuiText
-                size="s"
-                data-test-subj="metricsExperienceFlyoutOverviewTabAdditionalDimensionsLabel"
-              >
-                <strong>
-                  {i18n.translate(
-                    'metricsExperience.overviewTab.strong.additionalDimensionsLabel',
-                    { defaultMessage: 'Additional dimensions' }
-                  )}
-                </strong>
-              </EuiText>
-              <EuiSpacer size="xs" />
-              <DimensionBadges
-                dimensions={optionalDimensions}
-                metricName={metric.name}
-                maxDisplay={999}
-              />
-            </>
-          )}
+          <EuiText size="s" data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsLabel">
+            <strong>
+              {i18n.translate('metricsExperience.overviewTab.strong.dimensionsLabel', {
+                defaultMessage: 'Dimensions',
+              })}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
+            {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
+              defaultMessage: 'Showing {count} dimensions on page {page} of {total}. {dimensions}',
+              values: {
+                count: paginatedDimensions.length,
+                page: activePage + 1,
+                total: pageCount,
+                dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
+              },
+            })}
+          </div>
+          <EuiListGroup
+            data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
+            listItems={dimensionListItems}
+            flush
+            gutterSize="s"
+            wrapText={false}
+            css={css`
+              .euiListGroupItem__text {
+                padding-inline: 0;
+              }
+              gap: 0px;
+            `}
+          />
+          <EuiSpacer size="s" />
+          <EuiTablePagination
+            data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
+            aria-label={i18n.translate('metricsExperience.overviewTab.dimensionsPaginationLabel', {
+              defaultMessage: 'Dimensions pagination',
+            })}
+            pageCount={pageCount}
+            activePage={activePage}
+            onChangePage={setActivePage}
+            itemsPerPage={itemsPerPage}
+            onChangeItemsPerPage={(newItemsPerPage) => {
+              setItemsPerPage(newItemsPerPage);
+              setActivePage(0);
+            }}
+            itemsPerPageOptions={[0, 10, 20, 50]}
+          />
         </>
       )}
     </>

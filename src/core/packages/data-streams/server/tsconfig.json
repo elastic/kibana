@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/data-streams"
+    "@kbn/data-streams",
+    "@kbn/es-mappings"
   ],
   "exclude": [
     "target/**/*",

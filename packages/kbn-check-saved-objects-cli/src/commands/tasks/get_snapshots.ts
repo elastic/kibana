@@ -26,7 +26,7 @@ export const getSnapshots: Task = async (ctx, task) => {
     {
       title: `Take snapshot of current SO type definitions`,
       task: async () => {
-        ctx.to = await takeSnapshot(ctx.serverHandles!);
+        ctx.to = await takeSnapshot(ctx.registeredTypes!);
       },
     },
   ];
