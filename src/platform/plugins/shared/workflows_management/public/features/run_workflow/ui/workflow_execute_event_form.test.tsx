@@ -7,84 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import {
+  createCommonMockServices,
+  createEventFormKibanaMocks,
+  MockSearchBar,
+} from './test_utils/workflow_form_test_setup';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { useKibana } from '../../../hooks/use_kibana';
 
 jest.mock('../../../hooks/use_kibana');
 jest.mock('@kbn/unified-search-plugin/public', () => ({
-  SearchBar: ({ onQueryChange, onQuerySubmit, query }: any) => (
-    <div data-test-subj="search-bar">
-      <input
-        data-test-subj="query-input"
-        value={query?.query || ''}
-        onChange={(e) => {
-          const target = e.target as HTMLInputElement;
-          onQueryChange?.({ query: { query: target.value, language: 'kuery' } });
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            const target = e.target as HTMLInputElement;
-            onQuerySubmit?.({ query: { query: target.value, language: 'kuery' } });
-          }
-        }}
-      />
-    </div>
-  ),
+  SearchBar: MockSearchBar,
+}));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  useAlertsDataView: jest.fn(() => ({
+    isLoading: false,
+    dataView: {
+      id: 'test-data-view',
+      title: '.alerts-*-default',
+      timeFieldName: '@timestamp',
+      fields: [],
+    },
+  })),
+  useFetchUnifiedAlertsFields: jest.fn(() => ({
+    isLoading: false,
+    data: { fields: [] },
+  })),
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
+const queryClient = new QueryClient(testQueryClientConfig);
+
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+    <I18nProvider>{children}</I18nProvider>
+  </QueryClientProvider>
+);
+
 describe('WorkflowExecuteEventForm', () => {
   const mockSetValue = jest.fn();
   const mockSetErrors = jest.fn();
-  const mockSpaces = {
-    getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-  };
-  const mockDataViews = {
-    find: jest.fn().mockResolvedValue([]),
-    create: jest.fn().mockResolvedValue({
-      id: 'test-data-view',
-      title: '.alerts-*-default',
-      timeFieldName: '@timestamp',
-      refreshFields: jest.fn().mockResolvedValue(undefined),
-      getFieldByName: jest.fn().mockReturnValue(null),
-    }),
-    refreshFields: jest.fn().mockResolvedValue(undefined),
-  };
-  const mockData = {
-    search: {
-      search: jest.fn().mockReturnValue({
-        pipe: jest.fn().mockReturnValue({
-          toPromise: jest.fn().mockResolvedValue({
-            rawResponse: {
-              hits: {
-                hits: [
-                  {
-                    _id: '1',
-                    _index: '.alerts-default',
-                    _source: {
-                      '@timestamp': '2024-01-01T00:00:00Z',
-                      'kibana.alert.rule.name': 'Test Rule',
-                      'kibana.alert.reason': 'test event created',
-                      message: 'Test message',
-                    },
-                  },
-                ],
-              },
-            },
-          }),
-        }),
-      }),
-    },
-    fieldFormats: {
-      getDefaultInstance: jest.fn().mockReturnValue({
-        convert: jest.fn((date) => date.toISOString()),
-      }),
-    },
-  };
+  const { mockSpaces, mockSearchSource, mockData } = createEventFormKibanaMocks();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -92,44 +62,31 @@ describe('WorkflowExecuteEventForm', () => {
       services: {
         unifiedSearch: {
           ui: {
-            SearchBar: jest.fn(({ onQueryChange, onQuerySubmit, query }: any) => (
-              <div data-test-subj="search-bar">
-                <input
-                  data-test-subj="query-input"
-                  value={query?.query || ''}
-                  onChange={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    onQueryChange?.({ query: { query: target.value, language: 'kuery' } });
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const target = e.target as HTMLInputElement;
-                      onQuerySubmit?.({ query: { query: target.value, language: 'kuery' } });
-                    }
-                  }}
-                />
-              </div>
-            )),
+            SearchBar: MockSearchBar,
           },
         },
         spaces: mockSpaces as any,
-        dataViews: mockDataViews as any,
         data: mockData as any,
         fieldFormats: mockData.fieldFormats as any,
+        ...createCommonMockServices(),
       },
     } as any);
   });
 
+  afterEach(() => {
+    queryClient.clear();
+  });
+
   it('renders the form with search bar', async () => {
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteEventForm
           value=""
           setValue={mockSetValue}
           errors={null}
           setErrors={mockSetErrors}
         />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
@@ -139,114 +96,138 @@ describe('WorkflowExecuteEventForm', () => {
 
   it('creates data view for alerts index pattern', async () => {
     render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteEventForm
           value=""
           setValue={mockSetValue}
           errors={null}
           setErrors={mockSetErrors}
         />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
-      expect(mockDataViews.find).toHaveBeenCalledWith('.alerts-*-default');
+      expect(mockData.dataViews.create).toHaveBeenCalledWith({
+        title: '.alerts-*-default',
+        timeFieldName: '@timestamp',
+      });
     });
   });
 
-  it('transforms rule.* queries to kibana.alert.rule.*', async () => {
-    const { getByTestId } = render(
-      <I18nProvider>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </I18nProvider>
-    );
-
-    await waitFor(() => {
-      expect(getByTestId('search-bar')).toBeInTheDocument();
-    });
-
-    // Wait for data view to be created
-    await waitFor(() => {
-      expect(mockDataViews.create).toHaveBeenCalled();
-    });
-
-    // The query transformation happens in fetchAlerts when submittedQuery is set
-    // We can't easily test this without triggering a full search, but the transformation
-    // function should be called when a query with rule.* is submitted
-  });
-
-  it('displays alerts in table when fetched', async () => {
+  it('fetches and displays alerts in table', async () => {
     const { getByText } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteEventForm
           value=""
           setValue={mockSetValue}
           errors={null}
           setErrors={mockSetErrors}
         />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
-      expect(mockData.search.search).toHaveBeenCalled();
+      expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
 
-    // Wait for alerts to be displayed
-    await waitFor(
-      () => {
-        expect(getByText('Test Rule')).toBeInTheDocument();
-      },
-      { timeout: 3000 }
-    );
+    await waitFor(() => {
+      expect(getByText('Test Rule')).toBeInTheDocument();
+    });
   });
 
   it('displays message column in table', async () => {
-    const { getByText } = render(
-      <I18nProvider>
+    const { getByRole } = render(
+      <TestWrapper>
         <WorkflowExecuteEventForm
           value=""
           setValue={mockSetValue}
           errors={null}
           setErrors={mockSetErrors}
         />
-      </I18nProvider>
+      </TestWrapper>
     );
 
     await waitFor(() => {
-      expect(getByText('Message')).toBeInTheDocument();
+      expect(getByRole('columnheader', { name: 'Message' })).toBeInTheDocument();
     });
   });
 
   it('handles query change without triggering fetch', async () => {
     const { getByTestId } = render(
-      <I18nProvider>
+      <TestWrapper>
         <WorkflowExecuteEventForm
           value=""
           setValue={mockSetValue}
           errors={null}
           setErrors={mockSetErrors}
         />
-      </I18nProvider>
+      </TestWrapper>
     );
+
+    // Wait for initial data view creation and fetch
+    await waitFor(() => {
+      expect(mockData.dataViews.create).toHaveBeenCalled();
+    });
 
     await waitFor(() => {
       expect(getByTestId('search-bar')).toBeInTheDocument();
     });
 
-    const queryInput = getByTestId('query-input');
-    const initialCallCount = mockData.search.search.mock.calls.length;
-
-    // Simulate typing (onQueryChange)
-    queryInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-    // Should not trigger additional search calls
+    // Wait for initial fetch to complete
     await waitFor(() => {
-      expect(mockData.search.search.mock.calls.length).toBe(initialCallCount);
+      expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
+
+    const initialFetchCount = mockSearchSource.fetch$.mock.calls.length;
+    const queryInput = getByTestId('query-input') as HTMLInputElement;
+
+    // Simulate typing (onQueryChange) - this should NOT trigger a fetch
+    fireEvent.change(queryInput, { target: { value: 'test query' } });
+
+    // Wait a bit to ensure no additional fetch was triggered
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Should not trigger additional fetch calls (only submitting should)
+    expect(mockSearchSource.fetch$.mock.calls.length).toBe(initialFetchCount);
+  });
+
+  it('calls setValue when alerts are selected', async () => {
+    const { getByRole, getByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
+      </TestWrapper>
+    );
+
+    // Wait for alerts to load
+    await waitFor(() => {
+      expect(mockSearchSource.fetch$).toHaveBeenCalled();
+    });
+
+    // Wait for table to render with data
+    await waitFor(() => {
+      expect(getByRole('table')).toBeInTheDocument();
+    });
+
+    // Find and click the checkbox for the first row
+    const checkbox = getByTestId('checkboxSelectRow-1');
+    fireEvent.click(checkbox);
+
+    // Verify setValue was called with the selected alert data
+    await waitFor(() => {
+      expect(mockSetValue).toHaveBeenCalled();
+    });
+
+    const lastCall = mockSetValue.mock.calls[mockSetValue.mock.calls.length - 1][0];
+    const parsedValue = JSON.parse(lastCall);
+
+    expect(parsedValue.event).toBeDefined();
+    expect(parsedValue.event.alertIds).toHaveLength(1);
+    expect(parsedValue.event.alertIds[0]._id).toBe('1');
+    expect(parsedValue.event.triggerType).toBe('alert');
   });
 });

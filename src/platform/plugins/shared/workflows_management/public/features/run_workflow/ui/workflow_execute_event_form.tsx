@@ -18,15 +18,19 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { take } from 'rxjs';
 import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
 import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
 import { useKibana } from '../../../hooks/use_kibana';
+
+/** Index pattern for alerts based on space ID */
+const getAlertsIndexPattern = (spaceId: string) => `.alerts-*-${spaceId}`;
 
 interface Alert {
   _id: string;
@@ -68,6 +72,8 @@ export const WorkflowExecuteEventForm = ({
   const [query, setQuery] = useState<string>('');
   const [submittedQuery, setSubmittedQuery] = useState<string>('');
   const [filters, setFilters] = useState<Filter[]>([]);
+  const [dataView, setDataView] = useState<DataView | null>(null);
+  const dataViewCreatingRef = useRef(false);
 
   // Get space ID
   useEffect(() => {
@@ -78,8 +84,45 @@ export const WorkflowExecuteEventForm = ({
     }
   }, [spaces]);
 
-  const fetchAlerts = useCallback(async () => {
+  // Create and cache data view when space ID is available
+  useEffect(() => {
+    // Skip if already creating or if dependencies are not ready
     if (!dataService || !spaceId) {
+      return;
+    }
+
+    // Check ref synchronously before async operation
+    if (dataViewCreatingRef.current) {
+      return;
+    }
+
+    // Set ref synchronously before starting async operation
+    dataViewCreatingRef.current = true;
+
+    const createDataView = async () => {
+      try {
+        const indexPattern = getAlertsIndexPattern(spaceId);
+        const newDataView = await dataService.dataViews.create({
+          title: indexPattern,
+          timeFieldName: '@timestamp',
+        });
+        setDataView(newDataView);
+      } catch (err) {
+        setErrors(
+          i18n.translate('workflows.workflowExecuteEventForm.dataViewError', {
+            defaultMessage: 'Failed to create data view for alerts',
+          })
+        );
+      } finally {
+        dataViewCreatingRef.current = false;
+      }
+    };
+
+    createDataView();
+  }, [dataService, spaceId, setErrors]);
+
+  const fetchAlerts = useCallback(async () => {
+    if (!dataService || !spaceId || !dataView) {
       return;
     }
 
@@ -90,11 +133,6 @@ export const WorkflowExecuteEventForm = ({
       // Use SearchSource to match Discovery's behavior - this handles fields API, date formats, etc.
       const searchSource = await dataService.search.searchSource.create();
 
-      // Set the index pattern
-      const dataView = await dataService.dataViews.create({
-        title: `.alerts-*-${spaceId}`,
-        timeFieldName: '@timestamp',
-      });
       searchSource.setField('index', dataView);
 
       // Set query
@@ -163,18 +201,34 @@ export const WorkflowExecuteEventForm = ({
         setAlerts([]);
       }
     } catch (err) {
-      setErrors(err instanceof Error ? err.message : 'Failed to fetch alerts');
+      setErrors(
+        err instanceof Error
+          ? err.message
+          : i18n.translate('workflows.workflowExecuteEventForm.fetchError', {
+              defaultMessage: 'Failed to fetch alerts',
+            })
+      );
       setAlerts([]);
     } finally {
       setAlertsLoading(false);
     }
-  }, [dataService, setErrors, submittedQuery, timeRange.from, timeRange.to, spaceId, filters]);
+  }, [
+    dataService,
+    setErrors,
+    submittedQuery,
+    timeRange.from,
+    timeRange.to,
+    spaceId,
+    filters,
+    dataView,
+  ]);
 
   useEffect(() => {
-    if (spaceId) {
+    if (dataView) {
       fetchAlerts();
     }
-  }, [fetchAlerts, spaceId]);
+    // Only trigger fetch when dataView is ready and query/time/filters change
+  }, [dataView, submittedQuery, timeRange.from, timeRange.to, filters, fetchAlerts]);
 
   const updateEventData = (selectedAlerts: Alert[]) => {
     if (selectedAlerts.length > 0) {
@@ -245,13 +299,17 @@ export const WorkflowExecuteEventForm = ({
     },
     {
       field: '_source.kibana.alert.rule.name',
-      name: 'Rule',
+      name: i18n.translate('workflows.workflowExecuteEventForm.ruleColumnHeader', {
+        defaultMessage: 'Rule',
+      }),
       sortable: true,
       render: (name: string, item: Alert) => item._source['kibana.alert.rule.name'],
     },
     {
       field: '_source.message',
-      name: 'Message',
+      name: i18n.translate('workflows.workflowExecuteEventForm.messageColumnHeader', {
+        defaultMessage: 'Message',
+      }),
       sortable: true,
       render: (message: string, item: Alert) => {
         const originalMessage = item._source.message;
@@ -279,7 +337,10 @@ export const WorkflowExecuteEventForm = ({
           rangeTo={timeRange.to}
           showFilterBar={false}
           showSubmitButton={true}
-          placeholder="Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)"
+          placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
+            defaultMessage:
+              'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
+          })}
           ruleTypeIds={[]}
           http={http}
           toasts={notifications.toasts}
@@ -309,7 +370,9 @@ export const WorkflowExecuteEventForm = ({
             tableLayout="fixed"
             items={alerts}
             columns={columns}
-            tableCaption="Alerts list for workflow execution"
+            tableCaption={i18n.translate('workflows.workflowExecuteEventForm.tableCaption', {
+              defaultMessage: 'Alerts list for workflow execution',
+            })}
             selection={{
               onSelectionChange: updateEventData,
             }}
@@ -322,7 +385,9 @@ export const WorkflowExecuteEventForm = ({
         <EuiFlexItem>
           <EuiCallOut
             announceOnMount
-            title="Failed to load alerts"
+            title={i18n.translate('workflows.workflowExecuteEventForm.errorTitle', {
+              defaultMessage: 'Failed to load alerts',
+            })}
             color="warning"
             iconType="help"
             size="s"
