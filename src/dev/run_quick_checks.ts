@@ -21,7 +21,7 @@ const MAX_PARALLELISM = availableParallelism();
 const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const QUICK_CHECKS_COMMITS_FILE = join(REPO_ROOT, '.quick_checks_commits_marker');
+const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
 
 interface QuickCheck {
   script: string;
@@ -60,12 +60,12 @@ void run(async ({ log, flagsReader }) => {
   logger = log;
 
   // Clean up any existing marker file from previous runs
-  if (existsSync(QUICK_CHECKS_COMMITS_FILE)) {
-    unlinkSync(QUICK_CHECKS_COMMITS_FILE);
+  if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
+    unlinkSync(COLLECT_COMMITS_MARKER_FILE);
   }
 
   // Set environment variable so check scripts know where to write the marker file
-  process.env.QUICK_CHECKS_COMMITS_FILE = QUICK_CHECKS_COMMITS_FILE;
+  process.env.COLLECT_COMMITS_MARKER_FILE = COLLECT_COMMITS_MARKER_FILE;
 
   const checksToRun = collectScriptsToRun({
     targetFile: flagsReader.string('file'),
@@ -96,15 +96,15 @@ void run(async ({ log, flagsReader }) => {
   // avoiding multiple CI restarts when a PR has multiple offenses.
   // File-changing checks run with parallelism=1 (sequentially), so commits happen
   // one at a time without conflicts.
-  const commitsWereMade = existsSync(QUICK_CHECKS_COMMITS_FILE);
+  const commitsWereMade = existsSync(COLLECT_COMMITS_MARKER_FILE);
   if (commitsWereMade) {
     logger.write('--- Commits were made during checks. Pushing all changes now...');
     try {
       await pushCommits();
       logger.write('--- Successfully pushed all commits.');
       // Clean up marker file
-      if (existsSync(QUICK_CHECKS_COMMITS_FILE)) {
-        unlinkSync(QUICK_CHECKS_COMMITS_FILE);
+      if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
+        unlinkSync(COLLECT_COMMITS_MARKER_FILE);
       }
       // Still exit with error to fail the current build, a new build should be started after the push
       logger.write('--- Build will fail to trigger a new build with the fixes.');
@@ -222,7 +222,7 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
 
   return new Promise((resolve) => {
     validateScriptPath(script);
-    // Pass environment variables to child process, including QUICK_CHECKS_COMMITS_FILE
+    // Pass environment variables to child process, including COLLECT_COMMITS_MARKER_FILE
     const scriptProcess = execFile('bash', [script], {
       env: { ...process.env },
     });

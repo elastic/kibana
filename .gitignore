@@ -187,5 +187,5 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
 
-# Quick_checks marker
-.quick_checks_commits_marker
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker
