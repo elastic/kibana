@@ -6,11 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import React from 'react';
 
-export * from './specs/abuseipdb';
-export * from './specs/alienvault_otx';
-export * from './specs/greynoise';
-export * from './specs/notion';
-export * from './specs/shodan';
-export * from './specs/urlvoid';
-export * from './specs/virustotal';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../types';
+
+import notionIcon from './notion.png';
+
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={notionIcon} {...props} />;
+};
