@@ -230,11 +230,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
-  private async registerOnechatAttachmentsAndTools(
+  private registerOnechatAttachmentsAndTools(
     onechat: SecuritySolutionPluginSetupDependencies['onechat'],
     config: ConfigType,
     core: SecuritySolutionPluginCoreSetupDependencies
-  ): Promise<void> {
+  ): void {
     if (!onechat) {
       return;
     }
@@ -633,9 +633,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core).catch((error) => {
-      this.logger.error(`Error registering onechat attachments and tools: ${error}`);
-    });
+    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core);
 
     return {
       setProductFeaturesConfigurator:
