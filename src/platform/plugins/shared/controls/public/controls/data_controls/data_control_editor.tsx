@@ -36,7 +36,7 @@ import { CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import { type SerializedTitles } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -61,7 +61,7 @@ export interface ControlEditorProps<State extends DataControlEditorState = DataC
   initialDefaultPanelTitle?: string;
   parentApi: unknown;
   onCancel: (newState: Partial<State>) => void;
-  onSave: () => void;
+  onSave: (dataViewId?: string) => void;
   onUpdate: (newState: Partial<State>) => void;
   ariaLabelledBy: string;
   isPinned?: boolean;
@@ -469,7 +469,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     // the control already exists with the expected type, so just update it
                     onUpdate(transformedState ?? editorState);
                   }
-                  onSave();
+                  onSave(editorState.dataViewId);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getSaveChangesTitle()}

@@ -15,3 +15,17 @@ export const getFetchContextFilters = (fetchContext: FetchContext, useGlobalFilt
   }
   return fetchContext.filters;
 };
+
+export const getFetchContextTimeRange = (
+  fetchContext: FetchContext,
+  useGlobalFilters?: boolean
+) => {
+  if (!useGlobalFilters || !fetchContext.timeslice) {
+    return fetchContext.timeRange;
+  }
+  const [fromTimestamp, toTimestamp] = fetchContext.timeslice;
+  return {
+    from: new Date(fromTimestamp).toISOString(),
+    to: new Date(toTimestamp).toISOString(),
+  };
+};

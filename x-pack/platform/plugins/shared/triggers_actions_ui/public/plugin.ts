@@ -301,6 +301,7 @@ export class Plugin
             charts: pluginsStart.charts,
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
+            uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
@@ -319,7 +320,6 @@ export class Plugin
             fieldsMetadata: pluginsStart.fieldsMetadata,
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
-            uiActions: pluginsStart.uiActions,
           });
         },
       });
@@ -403,6 +403,7 @@ export class Plugin
             charts: pluginsStart.charts,
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
+            uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
@@ -419,7 +420,6 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
-            uiActions: pluginsStart.uiActions,
           });
         },
       });

@@ -38,7 +38,7 @@ import {
 import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 
 export const useChildrenApi = (
-  state: ControlGroupCreationOptions | undefined,
+  state: ControlGroupCreationOptions['initialState'] | undefined,
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
   const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
@@ -79,6 +79,9 @@ export const useChildrenApi = (
             }
           });
           currentChildState$Ref.current.next(result);
+        } else {
+          // this will trigger `input$` when there are no unsaved changes
+          currentChildState$Ref.current.next(lastSavedChildState$Ref.current?.value);
         }
       });
     return () => {

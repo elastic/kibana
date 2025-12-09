@@ -21,6 +21,9 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { ACTION_CREATE_CONTROL, ADD_PANEL_CONTROL_GROUP } from './constants';
 import type { CreateControlTypeContext } from './control_panel_actions';
+import { dataViewsService } from '../services/kibana_services';
+
+let lastUsedDataViewId: string | undefined;
 
 export const createControlAction = (): ActionDefinition<
   EmbeddableApiContext & { isPinned: boolean }
@@ -38,18 +41,21 @@ export const createControlAction = (): ActionDefinition<
     const publishedDataViewId = apiPublishesDataViews(embeddable)
       ? embeddable.dataViews$.value?.[0]?.id
       : undefined;
-    const parentDataViewId = defaultDataViewId ?? publishedDataViewId;
+    const parentDataViewId =
+      defaultDataViewId ??
+      lastUsedDataViewId ??
+      publishedDataViewId ??
+      (await dataViewsService.getDefaultDataView())?.id;
 
     openDataControlEditor({
       initialState: {
-        /** 
-          TODO: We probably don't want to hardcode these - in the old version of controls,
-          the last used values were persisted. Maybe we could use browser storage? :shrug:
-        */
         dataViewId: parentDataViewId,
       },
       parentApi: embeddable,
       isPinned,
+      setLastUsedDataViewId: (dataViewId) => {
+        lastUsedDataViewId = dataViewId;
+      },
     });
   },
   getDisplayName: () =>

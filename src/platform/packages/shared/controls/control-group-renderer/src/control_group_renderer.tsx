@@ -75,10 +75,13 @@ export const ControlGroupRenderer = ({
   const lastSavedState$Ref = useRef(new BehaviorSubject<ControlPanelsState>({}));
 
   /** Creation options management */
-  const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);
+  const { initialState, getEditorConfig } = useInitialControlGroupState(
+    getCreationOptions,
+    lastSavedState$Ref
+  );
   const input$ = useMemo(() => {
     if (!initialState) return;
-    return new BehaviorSubject<Partial<ControlGroupRuntimeState>>(initialState.initialState ?? {});
+    return new BehaviorSubject<Partial<ControlGroupRuntimeState>>(initialState ?? {});
   }, [initialState]);
 
   const { childrenApi, currentChildState$Ref } = useChildrenApi(initialState, lastSavedState$Ref);
@@ -96,17 +99,21 @@ export const ControlGroupRenderer = ({
     if (!childrenApi || !layoutApi) return;
 
     const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
+    const reload$ = new Subject<void>();
+
     return {
       ...childrenApi,
       ...layoutApi,
       ...searchApi,
       ...propsApi,
+      reload$,
+      getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {
         disabledActionIds$.next(ids);
       },
     };
-  }, [childrenApi, layoutApi, searchApi, propsApi]);
+  }, [childrenApi, layoutApi, searchApi, propsApi, getEditorConfig]);
 
   useEffect(() => {
     if (!parentApi || !input$) return;
@@ -138,8 +145,6 @@ export const ControlGroupRenderer = ({
   useEffect(() => {
     if (!parentApi || !input$) return;
 
-    const reload$ = new Subject<void>();
-
     /**
      * the ControlGroupRenderer will render before the children are available and combineCompatibleChildrenApis
      * will default to the empty value; however, we shouldn't publish this until the value is real
@@ -155,7 +160,9 @@ export const ControlGroupRenderer = ({
       esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
       appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
       appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
-      reload: () => reload$.next(),
+      reload: () => {
+        parentApi.reload$.next();
+      },
       getInput$: () => input$,
       getInput: () => input$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
@@ -174,22 +181,14 @@ export const ControlGroupRenderer = ({
       },
     };
 
-    const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] = async (
-      options
-    ) => {
-      const action = await uiActions.getAction('createControl');
-      action.execute({
-        embeddable: {
-          ...publicApi,
-          getEditorConfig: () => {
-            return {
-              ...(options?.editorConfig ?? {}),
-              controlStateTransform: options?.controlStateTransform,
-            };
-          },
-        },
-      } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
-    };
+    const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] =
+      async () => {
+        const action = await uiActions.getAction('createControl');
+        action.execute({
+          embeddable: publicApi,
+        } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
+      };
+
     onApiAvailable({
       ...publicApi,
       openAddDataControlFlyout,

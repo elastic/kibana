@@ -22,6 +22,7 @@ import type { AppliesFilters, AppliesTimeslice } from '@kbn/presentation-publish
 import type { controlGroupStateBuilder } from './control_group_state_builder';
 
 export type ControlGroupRendererApi = ControlsRendererParentApi &
+  HasEditorConfig &
   Pick<AppliesFilters, 'appliedFilters$'> &
   PublishesESQLVariables &
   AppliesTimeslice & {
@@ -49,10 +50,7 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
      */
     getInput: () => ControlGroupRuntimeState;
 
-    openAddDataControlFlyout: (options?: {
-      controlStateTransform?: ControlStateTransform;
-      editorConfig?: ControlGroupEditorConfig;
-    }) => void;
+    openAddDataControlFlyout: () => void;
   };
 
 /**
@@ -105,6 +103,7 @@ export interface ControlGroupRuntimeState<
 
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;
+  getEditorConfig?: () => ControlGroupEditorConfig | undefined;
 }
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;

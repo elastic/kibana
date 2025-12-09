@@ -306,7 +306,9 @@ export function loadEmbeddableData(
 
   const subscriptions: Subscription[] = [
     // on search context change, reload
-    fetch$(api).subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
+    fetch$(api)
+      .pipe(debounceTime(0))
+      .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {

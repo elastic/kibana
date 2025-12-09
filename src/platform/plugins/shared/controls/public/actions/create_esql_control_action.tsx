@@ -13,7 +13,12 @@ import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { ESQLControlState } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
+import {
+  ControlTriggerSource,
+  ESQLVariableType,
+  EsqlControlType,
+  apiPublishesESQLVariables,
+} from '@kbn/esql-types';
 import { ACTION_CREATE_ESQL_CONTROL, ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
@@ -52,6 +57,7 @@ export const createESQLControlAction = (): ActionDefinition<
             ? embeddable.addPinnedPanel
             : embeddable.addNewPanel)(newControl, { displaySuccessMessage: true });
         },
+        triggerSource: ControlTriggerSource.ADD_CONTROL_BTN,
       });
     } catch (e) {
       // eslint-disable-next-line no-console

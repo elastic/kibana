@@ -142,6 +142,16 @@ const defaultValueComparator =
     return isEqual(a, b);
   };
 
+const sortJsonKeys = (_: string, value: { [key: string]: unknown }) =>
+  value instanceof Object && !(value instanceof Array)
+    ? Object.keys(value)
+        .sort()
+        .reduce((sorted: { [key: string]: unknown }, key: string) => {
+          sorted[key] = value[key];
+          return sorted;
+        }, {})
+    : value;
+
 const fieldComparator = <K extends keyof DiscoverSessionTab>(
   _field: K,
   defaultValue: DiscoverSessionTab[K]
@@ -212,5 +222,13 @@ const TAB_COMPARATORS: TabComparators = {
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,
-  controlGroupJson: fieldComparator('controlGroupJson', '{}'),
+  controlGroupJson: (a, b) => {
+    // ignore the order of keys when comparing JSON strings
+    const testA = JSON.parse(a ?? '{}');
+    const testB = JSON.parse(b ?? '{}');
+    return fieldComparator('controlGroupJson', '{}')(
+      JSON.stringify(testA, sortJsonKeys),
+      JSON.stringify(testB, sortJsonKeys)
+    );
+  },
 };

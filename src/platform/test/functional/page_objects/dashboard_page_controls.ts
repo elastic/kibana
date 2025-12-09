@@ -64,12 +64,11 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async getAllControlIds() {
-    const controlFrames = await this.testSubjects.findAll('control-frame');
-    const ids = await Promise.all(
-      controlFrames.map(
-        async (controlFrame) => (await controlFrame.getAttribute('data-control-id')) ?? ''
-      )
-    );
+    const controls = await this.find.allByCssSelector('[data-control-id]');
+    const ids = await Promise.all([
+      ...controls.map(async (control) => (await control.getAttribute('data-control-id')) ?? ''),
+    ]);
+
     this.log.debug('Got all control ids:', ids);
     return ids;
   }
@@ -89,8 +88,8 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async getControlsCount() {
-    const allTitles = await this.getAllControlTitles();
-    return allTitles.length;
+    const allControlIds = await this.getAllControlIds();
+    return allControlIds.length;
   }
 
   public async clearAllControls() {
@@ -125,36 +124,50 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  /* -----------------------------------------------------------
-     Control group editor flyout
-     ----------------------------------------------------------- */
+  public async deleteAllPinnedControls() {
+    this.log.debug('Delete all pinned controls');
+    if ((await this.getControlsCount()) === 0) return;
 
-  public async openControlGroupSettingsFlyout() {
-    this.log.debug('Open controls group settings flyout');
-    await this.openControlsMenu();
-    await this.testSubjects.click('controls-settings-button');
+    const controlIds = await this.getAllControlIds();
+    let expectedRemainingPanelControls = 0;
+    for (const controlId of controlIds) {
+      await this.hideHoverActions();
+      // Ensure this control ID is in a control frame, and not just an embeddable panel
+      const controlFrame = await this.find.byCssSelector(
+        `[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`
+      );
+      if (controlFrame !== null) await this.removeExistingControl(controlId);
+      else expectedRemainingPanelControls++;
+    }
+    expect(await this.getControlsCount()).to.be(expectedRemainingPanelControls);
+  }
+
+  public async setPinnedControlWidth(controlId: string, width: ControlWidth) {
+    this.log.debug(`Setting control's ${controlId} width to ${width}`);
+    await this.hoverOverExistingControl(controlId);
+    await this.testSubjects.click(`control-action-${controlId}-editControlDisplaySettings`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('control-group-settings-flyout');
+      // wait for popover to open
+      await this.testSubjects.existOrFail(`controlDisplaySettings-${controlId}`);
+    });
+
+    await this.testSubjects.click(`controlWidthOption-${width}`);
+
+    await this.testSubjects.click(`control-action-${controlId}-editControlDisplaySettings`);
+    await this.retry.try(async () => {
+      // wait for popover to close
+      await this.testSubjects.missingOrFail(`controlDisplaySettings-${controlId}`);
     });
   }
 
-  public async deleteAllControls() {
-    this.log.debug('Delete all controls');
-    if ((await this.getControlsCount()) === 0) return;
-
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.click('delete-all-controls-button');
-    await this.testSubjects.click('confirmModalConfirmButton');
-    expect(await this.getControlsCount()).to.be(0);
+  public async checkForControlErrorStatus(controlId: string, hasError: boolean) {
+    const wrapper = await this.find.byCssSelector(`#control-title-${controlId}`);
+    expect(await this.testSubjects.descendantExists('embeddableError', wrapper)).to.be(hasError);
   }
 
-  public async adjustControlsLayout(layout: 'oneLine' | 'twoLine') {
-    this.log.debug(`Adjust controls layout to "${layout}"`);
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.existOrFail('control-group-layout-options');
-    await this.testSubjects.click(`control-editor-layout-${layout}`);
-    await this.testSubjects.click('control-group-editor-save');
-  }
+  /* -----------------------------------------------------------
+     Control editor flyout
+     ----------------------------------------------------------- */
 
   public async setSwitchState(goalState: boolean, subject: string) {
     await this.testSubjects.existOrFail(subject);
@@ -169,53 +182,11 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async updateValidationSetting(validate: boolean) {
-    this.log.debug(`Update control group validation setting to ${validate}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(validate, 'control-group-validate-selections');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateFilterSyncSetting(querySync: boolean) {
-    this.log.debug(`Update filter sync setting to ${querySync}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(querySync, 'control-group-filter-sync');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateTimeRangeSyncSetting(syncTimeRange: boolean) {
-    this.log.debug(`Update time range sync setting to ${syncTimeRange}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateShowApplyButtonSetting(showApplyButton: boolean) {
-    this.log.debug(`Update show apply button setting to ${showApplyButton}`);
-    await this.openControlGroupSettingsFlyout();
-    // the "showApplyButton" toggle has in inverse relationship with the `showApplyButton` seting - so, negate `showApplyButton`
-    await this.setSwitchState(!showApplyButton, 'control-group-auto-apply-selections');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async clickApplyButton() {
-    this.log.debug('Clicking the apply button');
-    await this.verifyApplyButtonEnabled();
-
-    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
-    await applyButton.click();
-
-    await this.verifyApplyButtonEnabled(false);
-  }
-
-  public async verifyApplyButtonEnabled(enabled: boolean = true) {
-    this.log.debug(
-      `Checking that control group apply button is ${enabled ? 'enabled' : 'not enabled'}`
-    );
-    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
-    await this.retry.try(async () => {
-      expect(await applyButton.isEnabled()).to.be(enabled);
-    });
+  public async updateValidationSetting(controlId: string, validate: boolean) {
+    this.log.debug(`Update control validation setting for ${controlId} to ${validate}`);
+    await this.editExistingControl(controlId);
+    await this.setSwitchState(validate, 'dataControl__ignoreValidationsAdditionalSetting');
+    await this.testSubjects.click('control-editor-save');
   }
 
   /* -----------------------------------------------------------
@@ -227,14 +198,14 @@ export class DashboardPageControls extends FtrService {
     const errorText = `Control frame ${controlId} could not be found`;
     let controlElement: WebElementWrapper | undefined;
     await this.retry.try(async () => {
-      const controlFrames = await this.testSubjects.findAll('control-frame');
-      const framesWithIds = await Promise.all(
-        controlFrames.map(async (frame) => {
-          const id = await frame.getAttribute('data-control-id');
-          return { id, element: frame };
+      const controls = await this.find.allByCssSelector('[data-control-id]');
+      const controlsWithIds = await Promise.all(
+        controls.map(async (control) => {
+          const id = await control.getAttribute('data-control-id');
+          return { id, element: control };
         })
       );
-      const foundControlFrame = framesWithIds.find(({ id }) => id === controlId);
+      const foundControlFrame = controlsWithIds.find(({ id }) => id === controlId);
       if (!foundControlFrame) throw new Error(errorText);
       controlElement = foundControlFrame.element;
     });
@@ -246,17 +217,13 @@ export class DashboardPageControls extends FtrService {
     controlType,
     dataViewTitle,
     fieldName,
-    grow,
     title,
-    width,
     additionalSettings,
   }: {
     controlType: string;
     title?: string;
     fieldName: string;
-    width?: ControlWidth;
     dataViewTitle?: string;
-    grow?: boolean;
     additionalSettings?: OptionsListAdditionalSettings | RangeSliderAdditionalSettings;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
@@ -268,8 +235,6 @@ export class DashboardPageControls extends FtrService {
       await this.controlsEditorSetControlType(controlType);
     }
     if (title) await this.controlEditorSetTitle(title);
-    if (width) await this.controlEditorSetWidth(width);
-    if (grow !== undefined) await this.controlEditorSetGrow(grow);
 
     if (additionalSettings) {
       if (controlType === OPTIONS_LIST_CONTROL) {
@@ -296,7 +261,17 @@ export class DashboardPageControls extends FtrService {
     const elementToHover = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-delete`);
+      await elementToHover.focus();
+      await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
+    });
+  }
+
+  public async hideHoverActions() {
+    await this.retry.try(async () => {
+      await this.browser.clickMouseButton({ x: 0, y: 0 });
+      await this.testSubjects.missingOrFail('presentationUtil__floatingActions', {
+        allowHidden: true,
+      });
     });
   }
 
@@ -304,27 +279,26 @@ export class DashboardPageControls extends FtrService {
     const elementToClick = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToClick.click();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-delete`);
+      await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
     });
   }
 
   public async editExistingControl(controlId: string) {
     this.log.debug(`Opening control editor for control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-edit`);
+    await this.testSubjects.click(`control-action-${controlId}-editPanel`);
   }
 
   public async removeExistingControl(controlId: string) {
     this.log.debug(`Removing control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-delete`);
-    await this.common.clickConfirmOnModal();
+    await this.testSubjects.click(`control-action-${controlId}-deletePanel`);
   }
 
   public async clearControlSelections(controlId: string) {
     this.log.debug(`clearing all selections from control ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-erase`);
+    await this.testSubjects.click(`control-action-${controlId}-clearControl`);
   }
 
   public async verifyControlType(controlId: string, expectedType: string) {
@@ -377,7 +351,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Getting selections string for Options List: ${controlId}`);
     await this.optionsListWaitForLoading(controlId);
     const controlElement = await this.getControlElementById(controlId);
-    return (await controlElement.getVisibleText()).split('\n')[1];
+    return (await controlElement.getVisibleText()).split('\n')[0];
   }
 
   public async isOptionsListPopoverOpen(controlId: string) {
@@ -575,11 +549,6 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.setValue('control-editor-title-input', title);
   }
 
-  public async controlEditorSetWidth(width: ControlWidth) {
-    this.log.debug(`Setting control width to ${width}`);
-    await this.testSubjects.click(`control-editor-width-${width}`);
-  }
-
   public async controlEditorSetGrow(grow: boolean) {
     this.log.debug(`Setting control grow to ${grow}`);
     const growSwitch = await this.testSubjects.find('control-editor-grow-switch');
@@ -732,7 +701,9 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
     this.log.debug(`Closing popover for Range Slider: ${controlId}`);
-    const controlLabel = await this.find.byXPath(`//li[@data-control-id='${controlId}']//label`);
+    const controlLabel = await this.find.byCssSelector(
+      `li:has([data-control-id='${controlId}']) label`
+    );
     await controlLabel.click();
     await this.testSubjects.waitForDeleted(`rangeSlider__slider`);
   }

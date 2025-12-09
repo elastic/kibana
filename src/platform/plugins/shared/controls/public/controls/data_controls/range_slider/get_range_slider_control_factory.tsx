@@ -88,7 +88,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           return {
             ...editorComparators,
             ...defaultDataControlComparators,
-            value: 'referenceEquality',
+            value: 'deepEquality',
           };
         },
         onReset: (lastSaved) => {
@@ -163,6 +163,12 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           }
           max$.next(max !== undefined ? Math.ceil(max) : undefined);
           min$.next(min !== undefined ? Math.floor(min) : undefined);
+
+          const [from, to] = selections.value$.getValue() ?? [];
+          if (max !== undefined && Number(to ?? -Infinity) > Math.ceil(max))
+            selections.setValue([from, String(Math.ceil(max))]);
+          if (min !== undefined && Number(from ?? Infinity) < Math.ceil(min))
+            selections.setValue([String(Math.floor(min)), to]);
         }
       );
 

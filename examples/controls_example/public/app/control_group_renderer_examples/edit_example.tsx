@@ -144,12 +144,7 @@ export const EditExample = ({ dataView }: Props) => {
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
                 if (!controlGroupAPI) return;
-                controlGroupAPI.openAddDataControlFlyout({
-                  controlStateTransform,
-                  editorConfig: {
-                    defaultDataViewId: dataView?.id,
-                  },
-                });
+                controlGroupAPI.openAddDataControlFlyout();
               }}
             >
               Add control
@@ -215,6 +210,10 @@ export const EditExample = ({ dataView }: Props) => {
               initialState: {
                 ...persistedState,
               },
+              getEditorOptions: () => ({
+                controlStateTransform,
+                defaultDataViewId: dataView?.id,
+              }),
             };
           }}
           viewMode={'edit'}

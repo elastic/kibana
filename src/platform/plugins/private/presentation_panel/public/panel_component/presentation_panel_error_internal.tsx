@@ -164,6 +164,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
   return (
     <div
       ref={panelRef}
+      className={'embeddableError'}
       data-test-subj="embeddableError"
       css={[styles.fullWidthAndHeight, styles.outerWrapperStyles]}
     >

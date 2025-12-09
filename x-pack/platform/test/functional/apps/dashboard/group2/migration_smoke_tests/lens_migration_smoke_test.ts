@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       // There should be 0 error embeddables on the dashboard
-      const errorEmbeddables = await testSubjects.findAll('embeddableStackError', 500);
+      const errorEmbeddables = await testSubjects.findAll('embeddableError', 500);
       expect(errorEmbeddables.length).to.be(0);
     });
 

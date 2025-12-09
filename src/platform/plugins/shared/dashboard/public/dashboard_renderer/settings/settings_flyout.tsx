@@ -288,9 +288,9 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                       defaultMessage: 'Auto apply filters',
                     }
                   )}
-                  checked={localSettings.autoApplyFilters}
+                  checked={localSettings.auto_apply_filters}
                   onChange={(event) => {
-                    updateDashboardSetting({ autoApplyFilters: event.target.checked });
+                    updateDashboardSetting({ auto_apply_filters: event.target.checked });
                   }}
                   data-test-subj="dashboardAutoApplyFiltersCheckbox"
                 />

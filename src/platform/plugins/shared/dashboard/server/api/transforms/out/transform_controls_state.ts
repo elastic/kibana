@@ -61,20 +61,20 @@ function injectControlReferences(
   controls.forEach((control) => {
     const transforms = embeddableService.getTransforms(control.type);
     const { config, ...rest } = control;
-    try {
-      if (transforms?.transformOut) {
+    if (transforms?.transformOut) {
+      try {
         transformedControls.push({
           ...rest,
           config: transforms.transformOut(config, references, control.uid),
         } as DashboardControlsState[number]);
-      } else {
-        transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
+      } catch (transformOutError) {
+        // do not prevent read on transformOutError
+        logger.warn(
+          `Unable to transform "${control.type}" embeddable state on read. Error: ${transformOutError.message}`
+        );
       }
-    } catch (transformOutError) {
-      // do not prevent read on transformOutError
-      logger.warn(
-        `Unable to transform "${control.type}" embeddable state on read. Error: ${transformOutError.message}`
-      );
+    } else {
+      transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
     }
   });
   return transformedControls;

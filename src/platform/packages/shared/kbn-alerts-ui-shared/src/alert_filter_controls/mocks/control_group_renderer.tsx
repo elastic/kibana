@@ -8,6 +8,7 @@
  */
 
 import type {
+  ControlGroupCreationOptions,
   ControlGroupRendererApi,
   ControlGroupRendererProps,
   ControlGroupStateBuilder,
@@ -26,7 +27,8 @@ export const addOptionsListControlMock = jest
   });
 
 export const getMockedControlGroupRenderer = (
-  controlGroupApiMock: ControlGroupRendererApi | undefined
+  controlGroupApiMock: ControlGroupRendererApi | undefined,
+  setCreateOptions?: (options: Partial<ControlGroupCreationOptions>) => void
 ) => {
   const controlGroupMock = controlGroupApiMock ?? getControlGroupMock();
 
@@ -40,9 +42,12 @@ export const getMockedControlGroupRenderer = (
       if (creationOptionsCalled) return;
       setCreationOptionsCalled(true);
       if (getCreationOptions) {
-        getCreationOptions({
-          addOptionsListControl: addOptionsListControlMock,
-        } as unknown as ControlGroupStateBuilder);
+        (async () => {
+          const result = await getCreationOptions({
+            addOptionsListControl: addOptionsListControlMock,
+          } as unknown as ControlGroupStateBuilder);
+          setCreateOptions?.(result);
+        })();
       }
     }, [getCreationOptions, creationOptionsCalled]);
 

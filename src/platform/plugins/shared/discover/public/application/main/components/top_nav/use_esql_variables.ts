@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -80,11 +80,18 @@ export const useESQLVariables = ({
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       if (input && input.initialChildControlState) {
         const controlGroupState = input.initialChildControlState as ControlPanelsState;
-
+        // drop unused keys for BWC
+        const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
+          return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
+        }, {});
         stateContainer.savedSearchState.updateControlState({
-          nextControlState: controlGroupState,
+          nextControlState: transformedState,
         });
-        dispatch(setControlGroupState({ controlGroupState }));
+        dispatch(
+          setControlGroupState({
+            controlGroupState: transformedState,
+          })
+        );
 
         if (pendingQueryUpdate.current) {
           onUpdateESQLQuery(pendingQueryUpdate.current);

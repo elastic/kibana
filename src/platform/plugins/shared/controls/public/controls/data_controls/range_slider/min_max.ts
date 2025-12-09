@@ -18,7 +18,7 @@ import type {
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { getFetchContextFilters } from '../utils';
+import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 
 export function minMax$({
   controlFetch$,
@@ -57,6 +57,7 @@ export function minMax$({
           dataView,
           field: dataViewField,
           ...controlFetchContext,
+          timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
           filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
         });
       } catch (error) {

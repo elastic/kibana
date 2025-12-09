@@ -30,10 +30,16 @@ interface SetupDeps {
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
   public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
-    registerDataControlTransforms(embeddable, OPTIONS_LIST_CONTROL, 'optionsListDataView');
+    registerDataControlTransforms(embeddable, OPTIONS_LIST_CONTROL, 'optionsListDataView', [
+      'optionsListDataView',
+      'optionsListControlDataView',
+    ]);
 
     embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
-    registerDataControlTransforms(embeddable, RANGE_SLIDER_CONTROL, 'rangeSliderDataView');
+    registerDataControlTransforms(embeddable, RANGE_SLIDER_CONTROL, 'rangeSliderDataView', [
+      'rangeSliderDataView',
+      'rangeSliderControlDataView',
+    ]);
 
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(esqlStaticControlPersistableStateServiceFactory());

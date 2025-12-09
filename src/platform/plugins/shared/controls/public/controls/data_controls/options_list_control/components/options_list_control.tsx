@@ -240,6 +240,7 @@ export const OptionsListControl = ({
       fullWidth
       compressed={isCompressed(componentApi)}
       css={optionListControlStyles.filterGroup}
+      data-control-id={componentApi.uuid}
     >
       <EuiInputPopover
         id={popoverId}

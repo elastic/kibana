@@ -114,7 +114,6 @@ export function getDashboardApi({
     unifiedSearchManager,
     filtersManager,
     projectRoutingManager,
-    getReferences,
   });
 
   function getState() {

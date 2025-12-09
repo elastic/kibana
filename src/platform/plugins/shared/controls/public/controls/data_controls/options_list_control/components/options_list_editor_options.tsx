@@ -12,14 +12,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import type { CustomOptionsComponentProps } from '../../types';
 import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
 import { OptionsListStrings } from '../options_list_strings';
 import { CustomOptionsAdditionalSettings } from '../../components';
-import { useOptionsListContext } from '../options_list_context_provider';
 
 const selectionOptions = [
   {
@@ -72,10 +70,6 @@ export const OptionsListEditorOptions = ({
   field,
   updateState,
 }: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
-  const { componentApi } = useOptionsListContext();
-
-  const allowExpensiveQueries = useStateFromPublishingSubject(componentApi.allowExpensiveQueries$);
-
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.runPastTimeout ?? false
@@ -141,7 +135,7 @@ export const OptionsListEditorOptions = ({
           name="selectionType"
         />
       </EuiFormRow>
-      {allowExpensiveQueries && compatibleSearchTechniques.length > 1 && (
+      {compatibleSearchTechniques.length > 1 && (
         <EuiFormRow
           label={OptionsListStrings.editor.getSearchOptionsTitle()}
           data-test-subj="optionsListControl__searchOptionsRadioGroup"
