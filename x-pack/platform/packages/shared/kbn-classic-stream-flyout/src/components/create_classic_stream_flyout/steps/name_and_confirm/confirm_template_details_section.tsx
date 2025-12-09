@@ -28,8 +28,54 @@ import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared
 import {
   formatDataRetention,
   getPhaseDescriptions,
+  type PhaseDescription,
   type IlmPolicyFetcher,
 } from '../../../../utils';
+
+interface RetentionDetailsProps {
+  ilmPolicyName: string;
+  isLoadingIlmPolicy: boolean;
+  ilmPhases: PhaseDescription[] | null;
+}
+
+const RetentionDetails = ({
+  ilmPolicyName,
+  isLoadingIlmPolicy,
+  ilmPhases,
+}: RetentionDetailsProps) => (
+  <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>{ilmPolicyName}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">
+            {i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.ilmBadgeLabel', {
+              defaultMessage: 'ILM',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    {isLoadingIlmPolicy && (
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="s" />
+      </EuiFlexItem>
+    )}
+    {ilmPhases && ilmPhases.length > 0 && (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" direction="row" responsive={false} wrap>
+          {ilmPhases.map((phase, idx) => (
+            <EuiFlexItem key={idx} grow={false}>
+              <EuiHealth textSize="xs" color={phase.color}>
+                <EuiTextColor color="subdued">{phase.description}</EuiTextColor>
+              </EuiHealth>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
 
 interface ConfirmTemplateDetailsSectionProps {
   template: TemplateDeserialized;
@@ -130,47 +176,11 @@ export const ConfirmTemplateDetailsSection = ({
           defaultMessage: 'Retention',
         }),
         description: (
-          <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>{ilmPolicyName}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {i18n.translate(
-                      'xpack.createClassicStreamFlyout.nameAndConfirmStep.ilmBadgeLabel',
-                      {
-                        defaultMessage: 'ILM',
-                      }
-                    )}
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {isLoadingIlmPolicy && (
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="s" />
-              </EuiFlexItem>
-            )}
-            {ilmPhases && ilmPhases.length > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  direction="row"
-                  responsive={false}
-                  wrap
-                >
-                  {ilmPhases.map((phase, idx) => (
-                    <EuiFlexItem key={idx} grow={false}>
-                      <EuiHealth textSize="xs" color={phase.color}>
-                        <EuiTextColor color="subdued">{phase.description}</EuiTextColor>
-                      </EuiHealth>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <RetentionDetails
+            ilmPolicyName={ilmPolicyName}
+            isLoadingIlmPolicy={isLoadingIlmPolicy}
+            ilmPhases={ilmPhases}
+          />
         ),
       });
     } else if (dataRetention) {
