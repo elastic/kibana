@@ -20,18 +20,18 @@ export const useShowEisPromotionalContent = ({
 }: UseShowEisPromotionalContentProps) => {
   const localStorageKey = `${promoId}Closed`;
   const [isPromoVisible, setIsPromoVisible] = useState<boolean>(false);
-  const onSkipTour = useCallback(() => {
+  const onDismissTour = useCallback(() => {
     localStorage.setItem(localStorageKey, 'true');
     setIsPromoVisible(false);
   }, [localStorageKey]);
 
   useEffect(() => {
-    const isTourSkipped = localStorage.getItem(localStorageKey) === 'true';
+    const isTourDismiss = localStorage.getItem(localStorageKey) === 'true';
 
-    if (!isTourSkipped && isCloudEnabled && !isPromoVisible) {
+    if (!isTourDismiss && isCloudEnabled && !isPromoVisible) {
       setIsPromoVisible(true);
     }
   }, [isCloudEnabled, isPromoVisible, localStorageKey]);
 
-  return { isPromoVisible, onSkipTour };
+  return { isPromoVisible, onDismissTour };
 };
