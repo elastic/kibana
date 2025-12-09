@@ -284,6 +284,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
+      if (cloudConnectorUpdate.accountType !== undefined) {
+        updateAttributes.accountType = cloudConnectorUpdate.accountType;
+      }
+
       if (cloudConnectorUpdate.vars) {
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }

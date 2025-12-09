@@ -25,6 +25,7 @@ export interface UpdateCloudConnectorRequest {
   vars?: CloudConnectorVars;
   packagePolicyCount?: number;
   cloudProvider?: CloudProvider;
+  accountType?: AccountType;
 }
 
 // Response interfaces following Fleet conventions

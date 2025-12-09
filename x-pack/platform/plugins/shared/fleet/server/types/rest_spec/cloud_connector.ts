@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -21,7 +23,7 @@ export const CreateCloudConnectorRequestSchema = {
       }
     ),
     accountType: schema.maybe(
-      schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')], {
+      schema.oneOf([schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)], {
         meta: {
           description:
             'The account type: single-account (single account/subscription) or organization-account (organization-wide).',
@@ -157,6 +159,14 @@ export const UpdateCloudConnectorRequestSchema = {
         minLength: 1,
         maxLength: 255,
         meta: { description: 'The name of the cloud connector.' },
+      })
+    ),
+    accountType: schema.maybe(
+      schema.oneOf([schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)], {
+        meta: {
+          description:
+            'The account type: single-account (single account/subscription) or organization-account (organization-wide).',
+        },
       })
     ),
     vars: schema.maybe(
