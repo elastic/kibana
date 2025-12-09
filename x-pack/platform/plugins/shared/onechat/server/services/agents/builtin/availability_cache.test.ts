@@ -6,18 +6,18 @@
  */
 
 import type {
-  ToolAvailabilityContext,
-  ToolAvailabilityConfig,
-  ToolAvailabilityResult,
-} from '@kbn/onechat-server';
+  AgentAvailabilityContext,
+  AgentAvailabilityConfig,
+  AgentAvailabilityResult,
+} from '@kbn/onechat-server/agents';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AgentAvailabilityCache } from './availability_cache';
 
 describe('AgentAvailabilityCache', () => {
   let cache: AgentAvailabilityCache;
-  let mockHandler: jest.Mock<Promise<ToolAvailabilityResult>>;
-  let context: ToolAvailabilityContext;
+  let mockHandler: jest.Mock<Promise<AgentAvailabilityResult>>;
+  let context: AgentAvailabilityContext;
 
   beforeEach(() => {
     cache = new AgentAvailabilityCache();
@@ -31,10 +31,10 @@ describe('AgentAvailabilityCache', () => {
 
   describe('getOrCompute', () => {
     it('calls the handler on cache miss', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };
@@ -47,10 +47,10 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('returns cached value on cache hit without calling handler', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };
@@ -66,13 +66,13 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('caches unavailable status', async () => {
-      const result: ToolAvailabilityResult = {
+      const result: AgentAvailabilityResult = {
         status: 'unavailable',
         reason: 'Feature disabled',
       };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };
@@ -88,10 +88,10 @@ describe('AgentAvailabilityCache', () => {
 
   describe('cache modes', () => {
     it('uses global cache mode correctly', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };
@@ -108,11 +108,11 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('uses space cache mode correctly', async () => {
-      const result1: ToolAvailabilityResult = { status: 'available' };
-      const result2: ToolAvailabilityResult = { status: 'unavailable' };
+      const result1: AgentAvailabilityResult = { status: 'available' };
+      const result2: AgentAvailabilityResult = { status: 'unavailable' };
       mockHandler.mockResolvedValueOnce(result1).mockResolvedValueOnce(result2);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'space',
       };
@@ -138,10 +138,10 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('bypasses cache when mode is none', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'none',
       };
@@ -157,10 +157,10 @@ describe('AgentAvailabilityCache', () => {
 
   describe('TTL behavior', () => {
     it('caches values and respects the cache', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
         cacheTtl: 300, // 5 minutes
@@ -178,11 +178,11 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('accepts custom TTL configuration in seconds', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
       // Test with a very short TTL to verify it's being set
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
         cacheTtl: 1, // 1 second
@@ -200,17 +200,17 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('allows different tools to have different TTL configurations', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       const handler1 = jest.fn().mockResolvedValue(result);
       const handler2 = jest.fn().mockResolvedValue(result);
 
-      const shortTtlConfig: ToolAvailabilityConfig = {
+      const shortTtlConfig: AgentAvailabilityConfig = {
         handler: handler1,
         cacheMode: 'global',
         cacheTtl: 1, // 1 second
       };
 
-      const longTtlConfig: ToolAvailabilityConfig = {
+      const longTtlConfig: AgentAvailabilityConfig = {
         handler: handler2,
         cacheMode: 'global',
         cacheTtl: 300, // 5 minutes
@@ -236,10 +236,10 @@ describe('AgentAvailabilityCache', () => {
 
   describe('clear', () => {
     it('clears all cached values', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };
@@ -261,10 +261,10 @@ describe('AgentAvailabilityCache', () => {
 
   describe('has', () => {
     it('returns true when value is cached', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };
@@ -277,10 +277,10 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('returns false when cache mode is none', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'none',
       };
@@ -291,15 +291,15 @@ describe('AgentAvailabilityCache', () => {
     });
 
     it('respects different cache modes', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
+      const result: AgentAvailabilityResult = { status: 'available' };
       mockHandler.mockResolvedValue(result);
 
-      const globalConfig: ToolAvailabilityConfig = {
+      const globalConfig: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };
 
-      const spaceConfig: ToolAvailabilityConfig = {
+      const spaceConfig: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'space',
       };
@@ -321,14 +321,14 @@ describe('AgentAvailabilityCache', () => {
 
   describe('concurrent requests', () => {
     it('handles concurrent requests for the same tool correctly', async () => {
-      const result: ToolAvailabilityResult = { status: 'available' };
-      let resolveHandler: (value: ToolAvailabilityResult) => void;
-      const handlerPromise = new Promise<ToolAvailabilityResult>((resolve) => {
+      const result: AgentAvailabilityResult = { status: 'available' };
+      let resolveHandler: (value: AgentAvailabilityResult) => void;
+      const handlerPromise = new Promise<AgentAvailabilityResult>((resolve) => {
         resolveHandler = resolve;
       });
       mockHandler.mockReturnValue(handlerPromise);
 
-      const config: ToolAvailabilityConfig = {
+      const config: AgentAvailabilityConfig = {
         handler: mockHandler,
         cacheMode: 'global',
       };

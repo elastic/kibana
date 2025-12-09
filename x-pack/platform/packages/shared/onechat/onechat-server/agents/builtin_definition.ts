@@ -41,11 +41,11 @@ export interface AgentAvailabilityContext {
  */
 export interface AgentAvailabilityResult {
   /**
-   * Whether the tool is available or not.
+   * Whether the agent is available or not.
    */
   status: 'available' | 'unavailable';
   /**
-   * Optional reason for why the tool is unavailable.
+   * Optional reason for why the agent is unavailable.
    */
   reason?: string;
 }
