@@ -9,13 +9,13 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicStepRegistry } from './step_registry';
+import { registerStepDefinitions } from './steps';
 import type {
   WorkflowsExtensionsPublicPluginSetup,
   WorkflowsExtensionsPublicPluginSetupDeps,
   WorkflowsExtensionsPublicPluginStart,
   WorkflowsExtensionsPublicPluginStartDeps,
 } from './types';
-import { registerStepDefinitions } from './steps';
 
 export class WorkflowsExtensionsPublicPlugin
   implements
