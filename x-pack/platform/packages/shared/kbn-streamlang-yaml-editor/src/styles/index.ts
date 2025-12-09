@@ -62,6 +62,12 @@ export const getEditorContainerStyles = ({
     height: 100% !important;
   }
 
+  /* Ensure Monaco's overlay widgets (hover, errors, etc.) appear above step actions */
+  .monaco-editor .overflowingContentWidgets,
+  .monaco-editor .monaco-hover {
+    z-index: 10 !important;
+  }
+
   /* Simulation glyph marker styles */
   .streamlang-sim-glyph {
     width: ${glyphSize} !important;
@@ -170,7 +176,7 @@ export const getStepDecorationsStyles = (euiTheme: EuiThemeComputed): Serialized
 export const getStepActionsStyles = (euiTheme: EuiThemeComputed): SerializedStyles => css`
   position: absolute;
   right: 28px;
-  z-index: 30;
+  z-index: 5;
   background: ${euiTheme.colors.emptyShade};
   border-radius: ${euiTheme.border.radius.medium};
   padding: ${euiTheme.size.xs} ${euiTheme.size.s};

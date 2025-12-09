@@ -46,7 +46,6 @@ import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 import { ProcessorErrors } from './processor_metrics';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { SetProcessorForm } from './set';
-import { useKibana } from '../../../../../../hooks/use_kibana';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
@@ -56,7 +55,6 @@ import { selectStreamType } from '../../../state_management/stream_enrichment_st
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
-  const { appParams, core } = useKibana();
 
   const getEnrichmentState = useGetStreamEnrichmentState();
 
