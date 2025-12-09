@@ -65,9 +65,17 @@ const getI18nComparator = (comparator?: COMPARATORS) => {
 const getPctAboveThreshold = (
   threshold: number[],
   comparator: COMPARATORS,
-  observedValue?: number
+  observedValue?: number,
+  isThereAWarningThreshold?: boolean
 ): string => {
-  if (!observedValue || !threshold || threshold.length > 1 || threshold[0] <= 0) return '';
+  if (
+    !observedValue ||
+    !threshold ||
+    threshold.length > 1 ||
+    threshold[0] <= 0 ||
+    isThereAWarningThreshold === true
+  )
+    return '';
 
   return i18n.translate('xpack.observability.alertFlyout.overview.aboveThresholdLabel', {
     defaultMessage: ' ({pctValue}% {comparator} the threshold)',
@@ -225,6 +233,14 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
+          pctAboveThreshold: getPctAboveThreshold(
+            threshold,
+            convertToBuiltInComparators(comparator),
+            observedValue,
+            criteria.warningThreshold !== undefined && criteria.warningComparator !== undefined
+              ? true
+              : false
+          ),
         } as unknown as FlyoutThresholdData;
 
         if (criteria.warningThreshold && criteria.warningComparator) {
@@ -285,7 +301,10 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           pctAboveThreshold: getPctAboveThreshold(
             thresholdFormatted,
             convertToBuiltInComparators(comparator),
-            observedValue
+            observedValue,
+            criteria.warningThreshold !== undefined && criteria.warningComparator !== undefined
+              ? true
+              : false
           ),
         } as unknown as FlyoutThresholdData;
 
