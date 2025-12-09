@@ -82,7 +82,7 @@ describe('validateGeminiSecrets', () => {
       }),
     };
     expect(() => validateGeminiSecrets(secrets)).toThrow(
-      'Invalid credential type. Only "service_account" credentials are supported. Type was "unknown".'
+      'Invalid credential type. Only "service_account" credentials are supported. Type was "undefined".'
     );
   });
 
