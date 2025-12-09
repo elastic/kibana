@@ -10,7 +10,6 @@ import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import moment from 'moment';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 
 /**
@@ -35,8 +34,8 @@ export interface AlertDocForInsight {
 
 interface GetAlertAiInsightParams {
   alertDoc: AlertDocForInsight;
-  inference: InferenceServerStart;
-  connectorId: string | undefined;
+  inferenceClient: InferenceClient;
+  connectorId: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
   logger: Logger;
@@ -49,21 +48,12 @@ interface AlertAiInsightResult {
 
 export async function getAlertAiInsight({
   alertDoc,
-  inference,
-  connectorId: initialConnectorId,
+  inferenceClient,
+  connectorId,
   dataRegistry,
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
-  const inferenceClient = inference.getClient({ request });
-  let connectorId = initialConnectorId;
-  if (!connectorId) {
-    const defaultConnector = await inference.getDefaultConnector(request);
-    connectorId = defaultConnector?.connectorId;
-  }
-  if (!connectorId) {
-    throw new Error('No default connector found');
-  }
   const relatedContext = await fetchAlertContext({ alertDoc, dataRegistry, request, logger });
   const summary = await generateAlertSummary({
     inferenceClient,

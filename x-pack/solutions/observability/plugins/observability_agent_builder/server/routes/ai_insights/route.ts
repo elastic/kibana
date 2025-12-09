@@ -34,17 +34,26 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       request,
       params,
     }): Promise<{ summary: string; context: string }> => {
-      const { alertId, connectorId } = params.body;
+      const { alertId, connectorId: bodyConnectorId } = params.body;
 
       const [, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
+
+      const connectorId =
+        bodyConnectorId ?? (await inference.getDefaultConnector(request))?.connectorId;
+
+      if (!connectorId) {
+        throw new Error('No default connector found');
+      }
+
+      const inferenceClient = inference.getClient({ request });
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
 
       const { summary, context } = await getAlertAiInsight({
         alertDoc,
-        inference,
+        inferenceClient,
         connectorId,
         dataRegistry,
         request,
