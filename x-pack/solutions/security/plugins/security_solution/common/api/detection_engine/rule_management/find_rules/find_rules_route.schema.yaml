@@ -77,6 +77,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: gap_fill_statuses
+          in: query
+          description: Gap fill statuses
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
       x-codeSamples:
         - lang: cURL
           source: |
