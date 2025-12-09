@@ -61,8 +61,7 @@ export const LinkContent = ({
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
-  const timeRange =
-    shareableUrlLocatorParams?.params?.time_range || shareableUrlLocatorParams?.params?.timeRange;
+  const timeRange = shareableUrlLocatorParams?.params?.timeRange;
 
   const { delegatedShareUrlHandler, draftModeCallOut } = objectConfig;
   const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};

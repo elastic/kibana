@@ -122,29 +122,15 @@ const getTimeRangeText = (timeRange: TimeRange) => {
     <AbsoluteTimeText date={timeRange.to} />
   );
 
-  // Determine test subject based on pattern
-  const testSubj =
-    !fromIsRelative && toIsRelative
-      ? 'relativeTimeInfoTextMixedAbsoluteFrom'
-      : fromIsRelative && !toIsRelative
-      ? 'relativeTimeInfoTextMixedAbsoluteTo'
-      : timeRange.from === 'now'
-      ? 'relativeTimeInfoTextFromNow'
-      : timeRange.to === 'now'
-      ? 'relativeTimeInfoTextToNow'
-      : 'relativeTimeInfoTextDefault';
-
   return (
-    <div data-test-subj={testSubj}>
-      <FormattedMessage
-        id="share.link.timeRange.relativeTimeInfoText"
-        defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
-        values={{
-          from: fromValue,
-          to: toValue,
-        }}
-      />
-    </div>
+    <FormattedMessage
+      id="share.link.timeRange.relativeTimeInfoText"
+      defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
+      values={{
+        from: fromValue,
+        to: toValue,
+      }}
+    />
   );
 };
 

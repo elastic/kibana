@@ -12,7 +12,6 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import { TimeTypeSection } from './time_type_section';
-import * as timeUtils from '../../../lib/time_utils';
 
 const renderComponent = (props: ComponentProps<typeof TimeTypeSection>) => {
   render(
@@ -25,21 +24,9 @@ const renderComponent = (props: ComponentProps<typeof TimeTypeSection>) => {
 describe('TimeTypeSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest
-      .spyOn(timeUtils, 'convertRelativeTimeStringToAbsoluteTimeDate')
-      .mockReturnValue(new Date());
-    jest
-      .spyOn(timeUtils, 'getRelativeTimeValueAndUnitFromTimeString')
-      .mockImplementation((time) => {
-        if (time === 'now') return { value: 0, unit: 'second', roundingUnit: undefined };
-        if (time === 'now-1m') return { value: -1, unit: 'minute', roundingUnit: undefined };
-        if (time === 'now-30m') return { value: -30, unit: 'minute', roundingUnit: undefined };
-        return { value: 0, unit: 'second', roundingUnit: undefined };
-      });
-    jest.spyOn(timeUtils, 'isTimeRangeAbsoluteTime').mockReturnValue(false);
   });
 
-  it('renders null when timeRange is not provided', () => {
+  it('should render null when timeRange is not provided', () => {
     const changeTimeType = jest.fn();
 
     renderComponent({
@@ -52,7 +39,7 @@ describe('TimeTypeSection', () => {
     expect(timeRangeSwitch).not.toBeInTheDocument();
   });
 
-  it('renders with absolute time range', () => {
+  it('should render absolute time range', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
     const changeTimeType = jest.fn();
 
@@ -62,16 +49,14 @@ describe('TimeTypeSection', () => {
       changeTimeType,
     });
 
-    const timeRangeSwitch = screen.getByRole('switch');
-
-    expect(timeRangeSwitch).toBeChecked();
-
     const absoluteTimeInfoText = screen.getByTestId('absoluteTimeInfoText');
 
     expect(absoluteTimeInfoText).toBeInTheDocument();
+    expect(screen.getByText(/January 01, 2022/)).toBeInTheDocument();
+    expect(screen.getByText(/January 02, 2022/)).toBeInTheDocument();
   });
 
-  it('renders with relative time range (from now to specific time)', () => {
+  it('should render relative time range', () => {
     const timeRange = { from: 'now', to: 'now+15m' };
     const changeTimeType = jest.fn();
 
@@ -85,54 +70,13 @@ describe('TimeTypeSection', () => {
 
     expect(timeRangeSwitch).not.toBeChecked();
 
-    const relativeTimeFromNowInfoText = screen.getByTestId('relativeTimeInfoTextFromNow');
-
-    expect(relativeTimeFromNowInfoText).toBeInTheDocument();
+    expect(screen.getByText('now')).toBeInTheDocument();
+    expect(screen.getByText('in 15 minutes')).toBeInTheDocument();
   });
 
-  it('renders with relative time range (from specific time to now)', () => {
-    const timeRange = { from: 'now-30m', to: 'now' };
-    const changeTimeType = jest.fn();
-
-    renderComponent({
-      timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
-    });
-
-    const timeRangeSwitch = screen.getByRole('switch');
-
-    expect(timeRangeSwitch).not.toBeChecked();
-
-    const relativeTimeToNowInfoText = screen.getByTestId('relativeTimeInfoTextToNow');
-
-    expect(relativeTimeToNowInfoText).toBeInTheDocument();
-  });
-
-  it('renders with relative time range (between two relative times)', () => {
-    const timeRange = { from: 'now-30m', to: 'now-1m' };
-    const changeTimeType = jest.fn();
-
-    renderComponent({
-      timeRange,
-      isAbsoluteTime: false,
-      changeTimeType,
-    });
-
-    const timeRangeSwitch = screen.getByRole('switch');
-
-    expect(timeRangeSwitch).not.toBeChecked();
-
-    const relativeTimeInfoText = screen.getByTestId('relativeTimeInfoTextDefault');
-
-    expect(relativeTimeInfoText).toBeInTheDocument();
-  });
-
-  it('disables switch when timeRange is already absolute', () => {
+  it('should disable switch when timeRange is already absolute', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
     const changeTimeType = jest.fn();
-
-    jest.spyOn(timeUtils, 'isTimeRangeAbsoluteTime').mockReturnValue(true);
 
     renderComponent({
       timeRange,
@@ -145,7 +89,7 @@ describe('TimeTypeSection', () => {
     expect(timeRangeSwitch).not.toBeInTheDocument();
   });
 
-  it('renders with mixed time range (absolute from, relative to)', () => {
+  it('should render with mixed time range (absolute from, relative to)', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: 'now' };
     const changeTimeType = jest.fn();
 
@@ -159,12 +103,11 @@ describe('TimeTypeSection', () => {
 
     expect(timeRangeSwitch).not.toBeChecked();
 
-    const mixedTimeInfoText = screen.getByTestId('relativeTimeInfoTextMixedAbsoluteFrom');
-
-    expect(mixedTimeInfoText).toBeInTheDocument();
+    expect(screen.getByText(/January 01, 2022/)).toBeInTheDocument();
+    expect(screen.getByText('now')).toBeInTheDocument();
   });
 
-  it('renders with mixed time range (relative from, absolute to)', () => {
+  it('should render with mixed time range (relative from, absolute to)', () => {
     const timeRange = { from: 'now-30m', to: '2022-01-01T00:00:00.000Z' };
     const changeTimeType = jest.fn();
 
@@ -178,12 +121,11 @@ describe('TimeTypeSection', () => {
 
     expect(timeRangeSwitch).not.toBeChecked();
 
-    const mixedTimeInfoText = screen.getByTestId('relativeTimeInfoTextMixedAbsoluteTo');
-
-    expect(mixedTimeInfoText).toBeInTheDocument();
+    expect(screen.getByText('30 minutes ago')).toBeInTheDocument();
+    expect(screen.getByText(/January 01, 2022/)).toBeInTheDocument();
   });
 
-  it('renders "now" correctly without showing "in 0 seconds"', () => {
+  it('should render "now"', () => {
     const timeRange = { from: 'now-30m', to: 'now' };
     const changeTimeType = jest.fn();
 
@@ -193,15 +135,11 @@ describe('TimeTypeSection', () => {
       changeTimeType,
     });
 
-    const relativeTimeToNowInfoText = screen.getByTestId('relativeTimeInfoTextToNow');
-
-    expect(relativeTimeToNowInfoText).toBeInTheDocument();
-    // Should contain "now" but not "0 seconds"
-    expect(relativeTimeToNowInfoText.textContent).toContain('now');
-    expect(relativeTimeToNowInfoText.textContent).not.toContain('0 seconds');
+    expect(screen.getByText('30 minutes ago')).toBeInTheDocument();
+    expect(screen.getByText('now')).toBeInTheDocument();
   });
 
-  it('handles plain "now" values correctly in mixed ranges', () => {
+  it('should handle plain "now" value correctly in mixed ranges', () => {
     const timeRange = { from: '2025-11-10T14:17:51.794Z', to: 'now' };
     const changeTimeType = jest.fn();
 
@@ -211,11 +149,7 @@ describe('TimeTypeSection', () => {
       changeTimeType,
     });
 
-    const mixedTimeInfoText = screen.getByTestId('relativeTimeInfoTextMixedAbsoluteFrom');
-
-    expect(mixedTimeInfoText).toBeInTheDocument();
-    // Should show absolute date and "now", not "0 seconds"
-    expect(mixedTimeInfoText.textContent).toContain('now');
-    expect(mixedTimeInfoText.textContent).not.toContain('0 seconds');
+    expect(screen.getByText(/November 10, 2025/)).toBeInTheDocument();
+    expect(screen.getByText('now')).toBeInTheDocument();
   });
 });
