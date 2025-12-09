@@ -701,23 +701,14 @@ async function replaceInMarkdown({
       return;
     }
 
-    let assetStr = JSON.stringify(kibanaAsset);
-    const originalAssetStr = assetStr;
+    const idsReplacements = getIdsReplacements(assetsWithDifferentIds);
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(kibanaAsset, idsReplacements);
 
-    for (const replacedAsset of assetsWithDifferentIds) {
-      const originId = replacedAsset.originId!;
-      const newId = replacedAsset.id;
-
-      const regex = new RegExp(`${originId}`, 'g');
-      assetStr = assetStr.replace(regex, newId);
-    }
-
-    if (originalAssetStr !== assetStr) {
+    if (updated) {
       logger.debug(
-        `Updating references in ${assetType} [id=${kibanaAsset.id}, originId=${kibanaAsset.originId}]`
+        `Updating references in ${assetType} [id=${updatedAsset.id}, originId=${updatedAsset.originId}]`
       );
 
-      const updatedAsset = JSON.parse(assetStr);
       assetsToInstall.push(updatedAsset);
 
       if (assetsToInstall.length >= MAX_ASSETS_TO_INSTALL_IN_PARALLEL) {
@@ -727,4 +718,37 @@ async function replaceInMarkdown({
   });
 
   await flushAssetsToInstall();
+}
+
+function getIdsReplacements(assets: KibanaAssetReference[]) {
+  const idReplacements: Record<string, string> = {};
+  for (const asset of assets) {
+    const assetType = asset.type as unknown as KibanaAssetType;
+    if (assetType !== KibanaAssetType.dashboard && assetType !== KibanaAssetType.visualization) {
+      continue;
+    }
+    if (asset.originId && asset.originId !== asset.id) {
+      idReplacements[asset.originId] = asset.id;
+    }
+  }
+  return idReplacements;
+}
+
+/**
+ * Exported only for testing
+ */
+export function replaceIdsInKibanaAsset(
+  kibanaAsset: SavedObjectToBe,
+  idReplacements: Record<string, string>
+): { updated: boolean; updatedAsset: SavedObjectToBe } {
+  let assetStr = JSON.stringify(kibanaAsset);
+  const originalAssetStr = assetStr;
+
+  for (const [originId, newId] of Object.entries(idReplacements)) {
+    const regex = new RegExp(`${originId}`, 'g');
+    assetStr = assetStr.replace(regex, newId);
+  }
+
+  const updatedAsset = JSON.parse(assetStr);
+  return { updated: originalAssetStr !== assetStr, updatedAsset };
 }
