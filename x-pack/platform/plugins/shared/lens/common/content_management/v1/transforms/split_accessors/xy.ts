@@ -27,15 +27,16 @@ export interface DeprecatedSplitAccessorState extends Omit<XYState, 'layers'> {
 
 export function convertToSplitAccessorsFn(state: DeprecatedSplitAccessorState | XYState): XYState {
   const hasDeprecatedSplitAccessor = state.layers.some((layer) => {
-    return layer.layerType === 'data' && 'splitAccessor' in layer;
+    return 'splitAccessor' in layer;
   });
 
   if (!hasDeprecatedSplitAccessor) return state as XYState;
 
   const convertedLayers = state.layers.map<XYLayerConfig>((layer) => {
-    if (layer.layerType === 'data' && 'splitAccessor' in layer) {
+    if ('splitAccessor' in layer) {
+      const { splitAccessor, ...rest } = layer;
       return {
-        ...layer,
+        ...rest,
         splitAccessors: [layer.splitAccessor],
       } satisfies XYDataLayerConfig;
     }
