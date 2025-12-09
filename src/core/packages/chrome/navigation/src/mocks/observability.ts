@@ -36,7 +36,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     iconType: 'info',
     href: '/overview',
   },
-  { id: 'alerts', label: 'Alerts', iconType: 'bell', href: '/alerts' },
+  { id: 'alerts', label: 'Alerts', iconType: 'bell', href: '/alerts', badgeType: 'new' },
   { id: 'cases', label: 'Cases', iconType: 'casesApp', href: '/cases', badgeType: 'techPreview' },
   {
     id: 'slos',
@@ -107,7 +107,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
             id: 'infrastructure-services',
             label: 'Services',
             href: '/infrastructure/services',
-            badgeType: 'new',
           },
         ],
       },
@@ -235,7 +234,6 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'project-integrations',
             label: 'Integrations',
             href: '/settings/project/integrations',
-            badgeType: 'new',
           },
           {
             id: 'project-fleet',
@@ -443,6 +441,13 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
         ],
       },
     ],
+  },
+  {
+    id: 'whats_new',
+    label: "What's new",
+    iconType: 'bell',
+    href: '/whats-new',
+    badgeType: 'new',
   },
 ];
 

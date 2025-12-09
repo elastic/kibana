@@ -319,6 +319,35 @@ describe('Expanded mode', () => {
         expect(tooltip).toBeInTheDocument();
         expect(flaskIcon).toBeInTheDocument();
       });
+
+      /**
+       * GIVEN the side navigation is in expanded mode
+       * AND a primary menu item is new
+       * WHEN I hover over that item
+       * THEN a tooltip shows up with a beta badge reading "New"
+       */
+      it('should show tooltip with new badge on hover', async () => {
+        render(
+          <TestComponent
+            isCollapsed={false}
+            items={observabilityMock.navItems}
+            logo={observabilityMock.logo}
+          />
+        );
+
+        const alertsLink = screen.getByTestId(primaryItemId('alerts'));
+
+        await user.hover(alertsLink);
+        flushPopoverTimers();
+
+        const tooltip = await screen.findByRole('tooltip');
+
+        expect(tooltip).toBeInTheDocument();
+
+        const badge = tooltip.querySelector('.euiBetaBadge');
+        expect(badge).toBeInTheDocument();
+        expect(badge).toHaveTextContent('New');
+      });
     });
 
     describe('More menu', () => {
