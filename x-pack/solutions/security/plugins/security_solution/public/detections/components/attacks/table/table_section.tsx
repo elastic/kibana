@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { EuiSwitch } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -33,6 +34,7 @@ import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { AlertsTable } from '../../alerts_table';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
+import * as i18n from './translations';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -85,6 +87,21 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
     },
     []
   );
+
+  // for showing / hiding anonymized data:
+  const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
+  const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
+  const showAnonymizedSwitch = useMemo(() => {
+    return (
+      <EuiSwitch
+        checked={showAnonymized}
+        compressed={true}
+        data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
+        label={i18n.SHOW_ANONYMIZED_LABEL}
+        onChange={onToggleShowAnonymized}
+      />
+    );
+  }, [onToggleShowAnonymized, showAnonymized]);
 
   // AlertsTable manages global filters itself, so not including `filters`
   const defaultFilters = useMemo(
@@ -149,6 +166,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         tableId={TableId.alertsOnAttacksPage}
         to={to}
         onAggregationsChange={onAggregationsChange}
+        additionalToolbarControls={[showAnonymizedSwitch]}
         pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
       />
     </div>
