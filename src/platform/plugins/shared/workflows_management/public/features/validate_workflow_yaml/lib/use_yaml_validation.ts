@@ -79,26 +79,18 @@ export function useYamlValidation(
       return;
     }
 
-    if (!yamlDocument || !workflowGraph || !workflowDefinition) {
-      let errorMessage = 'Error validating variables';
-      if (!yamlDocument) {
-        errorMessage += '. Yaml document is not loaded';
-      }
-      if (!workflowGraph) {
-        errorMessage += '. Workflow graph is not loaded';
-      }
-      if (!workflowDefinition) {
-        errorMessage += '. Workflow definition is not loaded';
-      }
+    // Allow Monaco YAML's native validation to work even when workflowDefinition is null
+    // Only require yamlDocument for basic validations - yamlDocument is parsed from YAML string
+    // and should exist even if schema validation fails
+    if (!yamlDocument) {
       setIsLoading(false);
-      setError(new Error(errorMessage));
+      setError(new Error('Error validating: YAML document is not loaded'));
       return;
     }
 
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
     const markers: monaco.editor.IMarkerData[] = [];
 
-    const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
     const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
@@ -108,15 +100,24 @@ export function useYamlValidation(
       absolute: true,
     });
 
+    // Build validation results - only include validations that don't require workflowDefinition
+    // Monaco YAML's schema validation will show errors independently
     const validationResults: YamlValidationResult[] = [
       validateStepNameUniqueness(yamlDocument),
-      validateVariablesInternal(variableItems, workflowGraph, workflowDefinition, yamlDocument),
       validateLiquidTemplate(model.getValue()),
       validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-      validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model),
-    ].flat();
+    ];
 
-    for (const validationResult of validationResults) {
+    // Only run validations that require workflowDefinition if it's available
+    if (workflowGraph && workflowDefinition) {
+      const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+      validationResults.push(
+        validateVariablesInternal(variableItems, workflowGraph, workflowDefinition, yamlDocument),
+        validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+      );
+    }
+
+    for (const validationResult of validationResults.flat()) {
       if (validationResult.owner === 'variable-validation') {
         if (validationResult.severity !== null) {
           markers.push({
