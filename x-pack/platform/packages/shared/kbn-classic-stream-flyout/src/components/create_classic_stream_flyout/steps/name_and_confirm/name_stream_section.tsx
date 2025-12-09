@@ -66,8 +66,9 @@ const getValidationErrorMessage = (
 export const NameStreamSection = ({
   indexPatterns,
   selectedIndexPattern,
+  streamNameParts,
   onIndexPatternChange,
-  onStreamNameChange,
+  onStreamNamePartsChange,
   validationError,
   conflictingIndexPattern,
 }: NameStreamSectionProps) => {
@@ -135,7 +136,8 @@ export const NameStreamSection = ({
       >
         <StreamNameInput
           indexPattern={currentPattern}
-          onChange={onStreamNameChange}
+          parts={streamNameParts}
+          onPartsChange={onStreamNamePartsChange}
           validationError={validationError}
           data-test-subj="streamNameInput"
         />

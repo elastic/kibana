@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   parseIndexPattern,
   createInputGroups,
-  countWildcards,
-  buildStreamName,
   type ValidationErrorType,
+  countWildcards,
 } from '../../utils';
 
 export interface StreamNameInputProps {
   /** The index pattern containing wildcards (e.g., "*-logs-*-*") */
   indexPattern: string;
-  /** Callback when the stream name changes */
-  onChange: (streamName: string) => void;
+  /** Current wildcard part values (controlled) */
+  parts: string[];
+  /** Callback when wildcard parts change */
+  onPartsChange: (parts: string[]) => void;
   /**
    * Validation error type. When 'empty', only empty inputs are highlighted.
    * For other error types, all inputs are highlighted.
@@ -32,7 +33,8 @@ export interface StreamNameInputProps {
 
 export const StreamNameInput = ({
   indexPattern,
-  onChange,
+  parts,
+  onPartsChange,
   validationError = null,
   'data-test-subj': dataTestSubj = 'streamNameInput',
 }: StreamNameInputProps) => {
@@ -40,34 +42,20 @@ export const StreamNameInput = ({
 
   const segments = useMemo(() => parseIndexPattern(indexPattern), [indexPattern]);
   const inputGroups = useMemo(() => createInputGroups(segments), [segments]);
-  const wildcardCount = useMemo(() => countWildcards(indexPattern), [indexPattern]);
 
-  // Internal state for wildcard values
-  const [parts, setParts] = useState<string[]>(() => Array(wildcardCount).fill(''));
-
-  // Reset parts when index pattern changes
-  useEffect(() => {
-    setParts(Array(wildcardCount).fill(''));
-  }, [indexPattern, wildcardCount]);
-
-  // Update stream name when wildcard values change
-  useEffect(() => {
-    const streamName = buildStreamName(indexPattern, parts);
-    onChange(streamName);
-  }, [indexPattern, parts, onChange]);
-
-  const handleWildcardChange = useCallback((wildcardIndex: number, newValue: string) => {
-    setParts((prevParts) => {
-      const newParts = [...prevParts];
+  const handleWildcardChange = useCallback(
+    (wildcardIndex: number, newValue: string) => {
+      const newParts = [...parts];
       while (newParts.length <= wildcardIndex) {
         newParts.push('');
       }
       newParts[wildcardIndex] = newValue;
-      return newParts;
-    });
-  }, []);
+      onPartsChange(newParts);
+    },
+    [parts, onPartsChange]
+  );
 
-  const hasMultipleWildcards = wildcardCount > 1;
+  const hasMultipleWildcards = inputGroups.length > 1;
 
   // Determine if a specific input should be marked as invalid
   const isInputInvalid = useCallback(
@@ -112,7 +100,7 @@ export const StreamNameInput = ({
   `;
 
   // If there are no wildcards, show the index pattern as a read-only field
-  if (wildcardCount === 0) {
+  if (countWildcards(indexPattern) === 0) {
     return (
       <EuiFieldText
         value={indexPattern}

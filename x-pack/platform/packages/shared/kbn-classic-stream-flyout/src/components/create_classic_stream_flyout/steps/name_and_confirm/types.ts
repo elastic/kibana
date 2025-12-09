@@ -10,8 +10,9 @@ import type { ValidationErrorType } from '../../../../utils';
 
 export interface NameAndConfirmBaseProps {
   selectedIndexPattern: string;
+  streamNameParts: string[];
   onIndexPatternChange: (pattern: string) => void;
-  onStreamNameChange: (streamName: string) => void;
+  onStreamNamePartsChange: (parts: string[]) => void;
   validationError: ValidationErrorType;
   conflictingIndexPattern?: string;
 }

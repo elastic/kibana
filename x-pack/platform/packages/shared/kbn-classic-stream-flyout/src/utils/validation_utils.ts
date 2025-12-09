@@ -83,23 +83,26 @@ export interface StreamNameValidationResult {
  */
 export type StreamNameValidator = (
   streamName: string,
-  selectedTemplate: TemplateDeserialized
+  selectedTemplate: TemplateDeserialized,
+  signal?: AbortSignal
 ) => Promise<{
   errorType: 'duplicate' | 'higherPriority' | null;
   conflictingIndexPattern?: string;
 }>;
 
 /**
- * Validates a stream name by checking format, empty wildcards, and running async validation.
+ * Validates a stream name by checking for empty strings, wildcards, format, and running async validation.
  * Returns the validation result with error type and optional conflicting index pattern.
+ * Throws an error if the validation was aborted.
  */
 export const validateStreamName = async (
   streamName: string,
   selectedTemplate: TemplateDeserialized,
-  onValidate?: StreamNameValidator
+  onValidate?: StreamNameValidator,
+  signal?: AbortSignal
 ): Promise<StreamNameValidationResult> => {
-  // Check for empty wildcards
-  if (hasEmptyWildcards(streamName)) {
+  // Check for empty string or wildcards
+  if (streamName === '' || hasEmptyWildcards(streamName)) {
     return { errorType: 'empty' };
   }
 
@@ -110,7 +113,7 @@ export const validateStreamName = async (
 
   // Run the external validator if provided
   if (onValidate) {
-    const result = await onValidate(streamName, selectedTemplate);
+    const result = await onValidate(streamName, selectedTemplate, signal);
 
     if (result.errorType === 'duplicate') {
       return { errorType: 'duplicate' };

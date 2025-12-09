@@ -27,8 +27,8 @@ import { EmptyState } from './empty_state';
 
 interface SelectTemplateStepProps {
   templates: TemplateDeserialized[];
-  selectedTemplate: TemplateDeserialized | null;
-  onTemplateSelect: (template: TemplateDeserialized | null) => void;
+  selectedTemplate: string | null;
+  onTemplateSelect: (templateName: string | null) => void;
   onCreateTemplate: () => void;
   hasErrorLoadingTemplates?: boolean;
   onRetryLoadTemplates: () => void;
@@ -52,7 +52,7 @@ export const SelectTemplateStep = ({
 
         return {
           label: template.name,
-          checked: template.name === selectedTemplate?.name ? 'on' : undefined,
+          checked: template.name === selectedTemplate ? 'on' : undefined,
           'data-test-subj': `template-option-${template.name}`,
           template,
           append: hasIlmPolicy ? (
@@ -110,9 +110,9 @@ export const SelectTemplateStep = ({
   };
 
   const handleTemplateChange = useCallback(
-    (newOptions: EuiSelectableOption<{ template: TemplateDeserialized }>[]) => {
+    (newOptions: EuiSelectableOption[]) => {
       const selected = newOptions.find((option) => option.checked === 'on');
-      onTemplateSelect(selected?.template ?? null);
+      onTemplateSelect(selected?.label ?? null);
     },
     [onTemplateSelect]
   );

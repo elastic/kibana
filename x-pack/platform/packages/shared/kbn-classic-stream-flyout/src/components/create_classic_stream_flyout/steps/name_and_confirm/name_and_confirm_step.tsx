@@ -13,8 +13,9 @@ import type { NameAndConfirmStepProps } from './types';
 export const NameAndConfirmStep = ({
   template,
   selectedIndexPattern,
+  streamNameParts,
   onIndexPatternChange,
-  onStreamNameChange,
+  onStreamNamePartsChange,
   validationError = null,
   conflictingIndexPattern,
 }: NameAndConfirmStepProps) => {
@@ -25,8 +26,9 @@ export const NameAndConfirmStep = ({
       <NameStreamSection
         indexPatterns={indexPatterns}
         selectedIndexPattern={selectedIndexPattern}
+        streamNameParts={streamNameParts}
         onIndexPatternChange={onIndexPatternChange}
-        onStreamNameChange={onStreamNameChange}
+        onStreamNamePartsChange={onStreamNamePartsChange}
         validationError={validationError}
         conflictingIndexPattern={conflictingIndexPattern}
       />
