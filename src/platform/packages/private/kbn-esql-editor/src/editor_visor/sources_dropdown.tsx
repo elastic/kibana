@@ -25,7 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getESQLSources } from '../helpers';
+import { getESQLSources } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
 import { DataSourcesList } from './datasources_list';
 import { generateIndexPatterns } from './utils';
