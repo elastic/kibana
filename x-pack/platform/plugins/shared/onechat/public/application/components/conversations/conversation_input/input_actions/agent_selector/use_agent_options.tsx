@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
+  EuiIconTip,
   EuiText,
   EuiTextColor,
   useEuiTheme,
@@ -17,6 +18,7 @@ import {
 import type { AgentDefinition } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { AgentAvatar } from '../../../../common/agent_avatar';
 
 type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
@@ -34,6 +36,10 @@ const usePaddingStyles = () => {
   return paddingStyles;
 };
 
+const readonlyAgentTooltip = i18n.translate('xpack.onechat.agentSelector.readonlyAgentTooltip', {
+  defaultMessage: 'This agent is read-only.',
+});
+
 const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
   const prependStyles = usePaddingStyles();
   return (
@@ -50,17 +56,41 @@ const AgentOption: React.FC<AgentOptionProps> = ({ agent, searchValue }) => {
   if (!agent) {
     return null;
   }
+
   return (
-    <EuiText size="s" css={optionStyles}>
-      <h4>
-        <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
-      </h4>
-      <p>
-        <EuiTextColor color="subdued">
-          <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
-        </EuiTextColor>
-      </p>
-    </EuiText>
+    <>
+      <EuiText size="s" css={optionStyles}>
+        <h4>
+          <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem component="span" grow={false}>
+              <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
+            </EuiFlexItem>
+            {agent.readonly && (
+              <EuiFlexItem component="span" grow={false}>
+                <EuiIconTip
+                  type="lock"
+                  size="m"
+                  content={readonlyAgentTooltip}
+                  anchorProps={{
+                    css: css`
+                      display: flex;
+                      justify-content: center;
+                    `,
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </h4>
+      </EuiText>
+      <EuiText size="s">
+        <p>
+          <EuiTextColor color="subdued">
+            <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </>
   );
 };
 

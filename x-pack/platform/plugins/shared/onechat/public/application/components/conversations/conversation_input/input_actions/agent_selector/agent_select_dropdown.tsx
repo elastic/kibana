@@ -29,7 +29,7 @@ import { InputPopoverButton } from '../input_popover_button';
 import { SelectorListHeader } from '../selector_list_header';
 import { AgentAvatar } from '../../../../common/agent_avatar';
 
-const AGENT_OPTION_ROW_HEIGHT = 88;
+const AGENT_OPTION_ROW_HEIGHT = 60;
 
 const selectAgentAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.agentSelector.selectAgent.ariaLabel',
@@ -138,12 +138,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     agents,
     selectedAgentId: selectedAgent?.id,
   });
-  const selectorListStyles = css`
-    ${useSelectorListStyles({ listId: agentListId, withHeader: true })}
-    &#${agentListId} .euiSelectableListItem {
-      align-items: flex-start;
-    }
-  `;
+  const selectorListStyles = useSelectorListStyles({ listId: agentListId, withHeader: true });
 
   return (
     <EuiPopover
