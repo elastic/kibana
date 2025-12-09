@@ -45,6 +45,9 @@ export type {
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  UiamAPIKeysService,
+  UiamAPIKeysServiceWithContext,
+  GrantUiamAPIKeyParams,
 } from './src/authentication/api_keys';
 
 export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';

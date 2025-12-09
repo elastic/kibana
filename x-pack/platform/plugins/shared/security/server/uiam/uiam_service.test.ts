@@ -12,6 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { UiamService } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
+import { HTTPAuthorizationHeader } from '../authentication';
 import { ConfigSchema } from '../config';
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
@@ -322,7 +323,7 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'access-token', 'my-api-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'my-api-key')
       ).resolves.toEqual({
         id: 'api-key-id',
         key: 'encoded-key-value',
@@ -362,7 +363,10 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('ApiKey', 'essu_api_key', 'api-key-from-grant')
+        uiamService.grantApiKey(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'),
+          'api-key-from-grant'
+        )
       ).resolves.toEqual({
         id: 'api-key-id',
         key: 'essu_api_key_from_grant',
@@ -402,7 +406,10 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'access-token', 'test-key-no-exp')
+        uiamService.grantApiKey(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          'test-key-no-exp'
+        )
       ).resolves.toEqual({
         id: 'api-key-id-no-exp',
         key: 'encoded-key-no-expiration',
@@ -442,7 +449,11 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'access-token', 'test-key-with-exp', '7d')
+        uiamService.grantApiKey(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          'test-key-with-exp',
+          '7d'
+        )
       ).resolves.toEqual({
         id: 'api-key-id-with-exp',
         key: 'encoded-key-with-expiration',
@@ -481,7 +492,7 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'access-token', 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
       ).rejects.toThrowError('Invalid request');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
@@ -515,7 +526,7 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'access-token', 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
       ).rejects.toThrowError('Unknown error');
     });
 
@@ -528,7 +539,7 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'invalid-token', 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'invalid-token'), 'test-key')
       ).rejects.toThrowError('Unauthorized');
     });
 
@@ -541,7 +552,7 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'access-token', 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
       ).rejects.toThrowError('Forbidden');
     });
 
@@ -554,7 +565,7 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey('Bearer', 'access-token', 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
       ).rejects.toThrowError('Internal Server Error');
     });
   });

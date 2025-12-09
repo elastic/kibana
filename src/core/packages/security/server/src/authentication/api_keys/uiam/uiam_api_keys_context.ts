@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+
+import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
+import type { GrantUiamAPIKeyParams } from './uiam_api_keys';
+
+/**
+ * Public UIAM API Keys service exposed through core context to manage
+ * UIAM-specific API key operations, including granting and invalidating
+ * API keys through the UIAM service.
+ */
+export interface UiamAPIKeysServiceWithContext {
+  /**
+   * Grants an API key via the UIAM service.
+   *
+   * @param params The parameters for creating the API key (name and optional expiration).
+   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details.
+   * @throws {Error} If the UIAM service is not available.
+   */
+  grantApiKey(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult>;
+
+  /**
+   * Invalidates an API key via the UIAM service.
+   *
+   * @param apiKeyId The ID of the API key to invalidate.
+   * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation.
+   * @throws {Error} If the license is not enabled or if the request does not contain an authorization header.
+   */
+  invalidateApiKey(apiKeyId: string): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Creates a scoped Elasticsearch client with UIAM authentication headers.
+   *
+   * This method checks if the request contains UIAM credentials (starting with 'essu_')
+   * and if so, creates a scoped client with the appropriate UIAM authentication headers.
+   * Otherwise, it returns a standard scoped client.
+   *
+   * @returns A scoped cluster client configured with UIAM authentication headers if applicable.
+   * @throws {Error} If the request does not contain an authorization header.
+   */
+  getScopedClusterClient(): IScopedClusterClient;
+}

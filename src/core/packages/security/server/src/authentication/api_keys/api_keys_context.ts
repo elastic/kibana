@@ -21,6 +21,7 @@ import type {
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
 } from './api_keys';
+import type { UiamAPIKeysServiceWithContext } from './uiam';
 
 /**
  * Public API Keys service exposed through core context to manage
@@ -91,4 +92,10 @@ export interface APIKeysServiceWithContext {
    * @throws Error if UIAM service is not available.
    */
   getScopedClusterClient(): IScopedClusterClient;
+
+  /**
+   * UIAM-specific API key operations.
+   * Provides methods for managing API keys through the UIAM service.
+   */
+  uiam: UiamAPIKeysServiceWithContext;
 }

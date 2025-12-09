@@ -694,8 +694,10 @@ describe('API Keys', () => {
           api_key: 'encoded-key-value',
         });
         expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
-          'Bearer',
-          'essu_access_token',
+          expect.objectContaining({
+            scheme: 'Bearer',
+            credentials: 'essu_access_token',
+          }),
           'test_api_key',
           undefined
         );
@@ -728,8 +730,10 @@ describe('API Keys', () => {
           api_key: 'encoded-key-value',
         });
         expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
-          'ApiKey',
-          prefixedCredential,
+          expect.objectContaining({
+            scheme: 'ApiKey',
+            credentials: prefixedCredential,
+          }),
           'test_api_key',
           undefined
         );
@@ -836,8 +840,10 @@ describe('API Keys', () => {
           )
         ).rejects.toThrowError('UIAM service error');
         expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
-          'Bearer',
-          'essu_access_token',
+          expect.objectContaining({
+            scheme: 'Bearer',
+            credentials: 'essu_access_token',
+          }),
           'test_api_key',
           undefined
         );

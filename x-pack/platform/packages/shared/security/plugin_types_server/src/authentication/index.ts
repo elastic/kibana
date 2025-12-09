@@ -14,6 +14,7 @@ export type {
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantUiamAPIKeyParams,
 } from '@kbn/core-security-server';
 
 export {

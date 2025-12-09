@@ -68,15 +68,13 @@ export interface UiamServicePublic {
 
   /**
    * Grants an API key using the UIAM service.
-   * @param authcScheme The authentication scheme (e.g., 'Bearer', 'ApiKey').
-   * @param credential The authentication credential (e.g., access token, API key).
+   * @param authorization The HTTP authorization header containing scheme and credentials.
    * @param name A descriptive name for the API key.
    * @param expiration Optional expiration time for the API key (e.g., '1d', '7d').
    * @returns A promise that resolves to an object containing the API key details.
    */
   grantApiKey(
-    authcScheme: string,
-    credential: string,
+    authorization: HTTPAuthorizationHeader,
     name: string,
     expiration?: string
   ): Promise<GrantApiKeyResponse>;
@@ -209,7 +207,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(authcScheme: string, credential: string, name: string, expiration?: string) {
+  async grantApiKey(authorization: HTTPAuthorizationHeader, name: string, expiration?: string) {
     try {
       this.#logger.debug('Attempting to grant API key.');
       const response = await UiamService.#parseUiamResponse(
@@ -218,7 +216,7 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: `${authcScheme} ${credential}`,
+            Authorization: authorization.toString(),
           },
           body: JSON.stringify({
             description: name,

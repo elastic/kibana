@@ -21,6 +21,7 @@ export type {
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantUiamAPIKeyParams,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,
