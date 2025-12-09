@@ -52,6 +52,7 @@ export interface UsageStats {
   'agentBuilder:enabled': boolean;
   'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
+  'agentBuilder:externalMcp': boolean;
   'dataConnectors:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
