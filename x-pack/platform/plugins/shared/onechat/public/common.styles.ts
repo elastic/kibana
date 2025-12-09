@@ -24,3 +24,10 @@ export const roundedBorderRadiusStyles = css`
 export const borderRadiusXlStyles = css`
   border-radius: ${ROUNDED_BORDER_RADIUS_EXTRA_LARGE};
 `;
+
+export const lineClampStyles = (numLines: number) => css`
+  display: -webkit-box;
+  -webkit-line-clamp: ${numLines};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;

@@ -20,6 +20,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AgentAvatar } from '../../../../common/agent_avatar';
+import { lineClampStyles } from '../../../../../../common.styles';
 
 type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
 
@@ -83,7 +84,7 @@ const AgentOption: React.FC<AgentOptionProps> = ({ agent, searchValue }) => {
           </EuiFlexGroup>
         </h4>
       </EuiText>
-      <EuiText size="s">
+      <EuiText size="s" css={lineClampStyles(3)}>
         <p>
           <EuiTextColor color="subdued">
             <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
@@ -114,6 +115,7 @@ export const useAgentOptions = ({
           searchableLabel: `${agent.name} ${agent.description}`,
           checked,
           prepend: <AgentOptionPrepend agent={agent} />,
+          textWrap: 'wrap',
           data: { agent },
         };
         return option;

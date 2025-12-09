@@ -35,6 +35,9 @@ export const useSelectorListStyles = ({
       :hover {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
       }
+      & .euiSelectableListItem__content {
+        block-size: 100%;
+      }
       & .euiSelectableListItem__text {
         text-decoration: none;
       }
