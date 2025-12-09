@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
+import { ToolType } from '@kbn/onechat-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -133,7 +134,9 @@ export function registerInternalToolsRoutes({
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
 
-      const toolTypes = tools.getToolDefinitions();
+      const toolTypes = tools
+        .getToolDefinitions()
+        .filter((toolDefinition) => toolDefinition.toolType !== ToolType.mcp); // TODO: temporarily hide MCP tool type
 
       return response.ok<GetToolTypeInfoResponse>({
         body: {
