@@ -48,8 +48,8 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   size = 'm',
   text = i18n.VIEW_IN_AGENT_BUILDER,
 }: NewAgentBuilderAttachmentProps) {
-  const { hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
-  if (!hasAgentBuilderPrivilege) {
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  if (!isAgentBuilderEnabled) {
     return null;
   }
   return (

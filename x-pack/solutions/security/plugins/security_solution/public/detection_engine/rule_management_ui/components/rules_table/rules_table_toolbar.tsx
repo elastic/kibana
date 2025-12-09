@@ -101,7 +101,7 @@ export const RulesTableToolbar = React.memo(() => {
     return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
   }, [selectedRuleNames]);
 
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const attachmentData = useMemo(
     () => ({ text: getPromptContextFromDetectionRules(selectedRules) }),
     [selectedRules]
@@ -120,7 +120,7 @@ export const RulesTableToolbar = React.memo(() => {
       <EuiFlexItem grow={false}>
         {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
           <>
-            {isAgentBuilderEnabled ? (
+            {isAgentChatExperienceEnabled ? (
               <NewAgentBuilderAttachment
                 onClick={openAgentBuilderFlyout}
                 iconType={'discuss'}
