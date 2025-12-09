@@ -221,6 +221,7 @@ export function AddSignificantEventFlyout({
 
   return (
     <EuiFlyout
+      data-test-subj="add_significant_event_flyout"
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
       size={isEditMode ? 's' : 'l'}

@@ -32,6 +32,7 @@ export function SeveritySelector({
 
   return (
     <EuiSuperSelect
+      data-test-subj="significant_events_form_severity_select"
       disabled={disabled}
       options={severityOptions}
       valueOfSelected={

@@ -16,6 +16,7 @@ import {
   EuiCodeBlockWrapper,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
+import type { StreamQueryKql } from '@kbn/streams-schema';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -857,9 +858,85 @@ export class StreamsApp {
   }
 
   /**
+   * Significant events utilities
+   */
+  async createManualSignificantEventEntry(hasFeatures: boolean = true) {
+    const id = hasFeatures
+      ? 'significant_events_manual_entry_button'
+      : 'significant_events_manual_entry_no_features_button';
+    await this.page.getByTestId(id).click();
+  }
+
+  async fillSignificantEventForm(query: StreamQueryKql) {
+    const flyout = this.page.getByTestId('add_significant_event_flyout');
+    await flyout.getByTestId('significant_events_form_title_input').fill(query.title);
+
+    await new EuiSuperSelectWrapper(this.page, {
+      dataTestSubj: 'significant_events_form_severity_select',
+    }).selectOption(query.severity_score?.toString() ?? '-1');
+
+    await new EuiSuperSelectWrapper(this.page, {
+      dataTestSubj: 'significant_events_form_feature_select',
+    }).selectOption(query.feature?.name ?? 'No feature');
+
+    const queryInput = flyout.getByTestId('kbnQueryBar').getByTestId('queryInput');
+    await queryInput.fill(query.kql?.query ?? '');
+    await queryInput.press('Space');
+    await queryInput.press('Backspace');
+    await queryInput.press('Enter');
+  }
+
+  async saveSignificantEvent(isEditMode: boolean = false) {
+    const id = isEditMode
+      ? 'significant_events_edit_save_button'
+      : 'significant_events_manual_entry_save_button';
+    await this.page.getByTestId(id).click();
+  }
+
+  async expectSignificantEventsTableVisible() {
+    await expect(this.page.getByTestId('significant_events_table')).toBeVisible();
+  }
+
+  async expectSignificantEvents(
+    queries: { title: string; feature: string; query: string; severity: string }[]
+  ) {
+    const rows = this.page.getByTestId('significant_events_table').locator('tbody>tr');
+    expect(await rows.count()).toEqual(queries.length);
+    for (const query of queries) {
+      const row = await this.getSignificantEventRow(query.title);
+      await expect(row).toBeVisible();
+      await expect(row.getByTestId('significant_events_table_title_column')).toContainText(
+        query.title
+      );
+      await expect(row.getByTestId('significant_events_table_severity_column')).toContainText(
+        query.severity
+      );
+      await expect(row.getByTestId('significant_events_table_query_column')).toContainText(
+        query.query
+      );
+      await expect(row.getByTestId('significant_events_table_feature_column')).toContainText(
+        query.feature
+      );
+    }
+  }
+
+  async getSignificantEventRow(title: string) {
+    return this.page
+      .getByTestId('significant_events_table')
+      .locator('tbody>tr')
+      .filter({ hasText: title })
+      .first();
+  }
+
+  async editSignificantEvent(title: string) {
+    const row = await this.getSignificantEventRow(title);
+    await expect(row).toBeVisible();
+    await row.getByTestId('significant_events_table_edit_query_action').click();
+  }
+
+  /**
    * Share utility methods
    */
-
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
