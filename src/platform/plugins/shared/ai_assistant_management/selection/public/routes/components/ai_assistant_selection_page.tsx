@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '@kbn/doc-links';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
@@ -34,9 +35,12 @@ export function AiAssistantSelectionPage() {
     buildFlavor,
     kibanaBranch,
     securityAIAssistantEnabled,
+    chatExperience,
   } = useAppContext();
 
-  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
+  const observabilityAIAssistantEnabled =
+    capabilities.observabilityAIAssistant?.show && chatExperience !== AIChatExperience.Agent;
+
   const securityAIAssistantVisibility = Boolean(
     capabilities.securitySolutionAssistant['ai-assistant']
   );

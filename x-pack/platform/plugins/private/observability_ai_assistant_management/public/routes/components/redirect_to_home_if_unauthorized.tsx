@@ -8,6 +8,8 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { aiAssistantCapabilities } from '@kbn/observability-ai-assistant-plugin/public';
 
 export function RedirectToHomeIfUnauthorized({
@@ -21,7 +23,14 @@ export function RedirectToHomeIfUnauthorized({
     application: { capabilities, navigateToApp },
   } = coreStart;
 
-  const allowed = capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false;
+  const chatExperience = coreStart.settings.client.get<AIChatExperience>(
+    AI_CHAT_EXPERIENCE_TYPE,
+    AIChatExperience.Classic
+  );
+
+  const allowed =
+    (capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false) &&
+    chatExperience !== AIChatExperience.Agent;
 
   if (!allowed) {
     navigateToApp('home');
