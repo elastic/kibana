@@ -81,7 +81,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           if (originalType !== type) {
             updatedState = incomingState;
           } else {
-            updatedState = { ...originalState, ...incomingState.rawState };
+            updatedState = { ...originalState, ...incomingState };
           }
           const expression = embeddableInputToExpression(updatedState, type, undefined, true);
 
@@ -99,7 +99,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           dispatch(selectToplevelNodes([embeddableId]));
         } else {
           const expression = embeddableInputToExpression(
-            incomingState.rawState,
+            incomingState,
             type,
             undefined,
             true

@@ -79,7 +79,7 @@ export const useMockDashboardApi = ({
         const newId = v4();
         otherPanels[newId] = {
           ...oldPanel,
-          explicitInput: { ...(newPanel.serializedState?.rawState ?? {}), id: newId },
+          explicitInput: { ...(newPanel.serializedState ?? {}), id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
         return newId;
@@ -106,7 +106,7 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...(panelPackage.serializedState?.rawState ?? {}),
+              ...(panelPackage.serializedState ?? {}),
               id: newId,
             },
           },

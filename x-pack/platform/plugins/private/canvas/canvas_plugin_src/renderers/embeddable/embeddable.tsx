@@ -86,7 +86,7 @@ const renderReactEmbeddable = ({
               // canvas auto-saves so update child state on any change
               container.setSerializedStateForChild(uuid, newState);
               const newExpression = embeddableInputToExpression(
-                newState.rawState,
+                newState,
                 type,
                 undefined,
                 true

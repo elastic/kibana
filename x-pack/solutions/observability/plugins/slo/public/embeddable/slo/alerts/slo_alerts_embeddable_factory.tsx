@@ -29,6 +29,7 @@ import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
+import { createInitialState } from '@kbn/core/packages/saved-objects/migration-server-internal/src/zdt/state';
 const queryClient = new QueryClient();
 
 export const getAlertsPanelTitle = () =>
@@ -65,9 +66,9 @@ export function getAlertsEmbeddableFactory({
         }
       }
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(
-        initialState.rawState,
+        createInitialState,
         {
           slos: [],
           showAllGroupByInstances: false,
@@ -78,10 +79,8 @@ export function getAlertsEmbeddableFactory({
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloAlertsStateManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloAlertsStateManager.getLatestState(),
         };
       }
 
@@ -96,8 +95,8 @@ export function getAlertsEmbeddableFactory({
           showAllGroupByInstances: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          sloAlertsStateManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
+          sloAlertsStateManager.reinitializeState(lastSaved);
         },
       });
 

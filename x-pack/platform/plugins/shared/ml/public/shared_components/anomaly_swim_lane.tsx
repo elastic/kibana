@@ -89,7 +89,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRange);
 
     return {
-      getSerializedStateForChild: () => ({ rawState }),
+      getSerializedStateForChild: () => rawState,
       filters$,
       setFilters: (newFilters) => {
         filters$.next(newFilters);
