@@ -37,8 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-metric-threshold';
 
-    // FLAKY: https://github.com/elastic/kibana/issues/241490
-    describe.skip('alert and action creation', () => {
+    describe('alert and action creation', () => {
       before(async () => {
         await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
           anomalyThreshold: 50,
@@ -128,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         await esClient.deleteByQuery({
           index: METRICS_ALERTS_INDEX,
           query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+          conflicts: 'proceed',
         });
         await esClient.deleteByQuery({
           index: '.kibana-event-log-*',

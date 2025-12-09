@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { useMemo } from 'react';
 import { RULES_FEATURE_ID } from '../../../common/constants';
 import type { Privilege } from '../../detections/containers/detection_engine/alerts/types';

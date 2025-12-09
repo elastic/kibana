@@ -119,6 +119,7 @@ export const Result: React.FC<ResultProps> = ({
                     tooltipRef.current?.showToolTip();
                   }}
                   aria-label={tooltipText}
+                  aria-selected={isExpanded}
                 />
               </EuiToolTip>
             </EuiFlexItem>

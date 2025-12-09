@@ -152,6 +152,7 @@ export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as cons
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
+export const ENTITY_ANALYTICS_THREAT_HUNTING_PATH = '/entity_analytics_threat_hunting' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -267,9 +268,6 @@ export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadine
 /** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
 export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
   'securitySolution:enablePrivilegedUserMonitoring' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable ESQL-based risk scoring */
-export const ENABLE_ESQL_RISK_SCORING = 'securitySolution:enableEsqlRiskScoring' as const;
 
 /**
  * Id for the notifications alerting type

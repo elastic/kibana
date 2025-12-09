@@ -109,6 +109,11 @@ export enum ProductFeatureSecurityKey {
 
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables graph visualization for alerts and events
+   */
+  graphVisualization = 'graph_visualization',
 }
 
 export enum ProductFeatureCasesKey {
