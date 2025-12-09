@@ -9,19 +9,22 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Callout } from './callout';
+import { getCalloutConfig } from './callout.config';
 import { GRAPH_CALLOUT_TEST_ID, GRAPH_CALLOUT_LINK_TEST_ID } from '../test_ids';
 
 describe('Callout', () => {
   describe('missingAllRequirements variant', () => {
+    const config = getCalloutConfig('missingAllRequirements');
+
     it('renders with correct title', () => {
-      render(<Callout variant="missingAllRequirements" />);
+      render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
       expect(screen.getByText('Enrich graph experience')).toBeInTheDocument();
     });
 
     it('renders two links with correct text opening in new tabs', () => {
-      render(<Callout variant="missingAllRequirements" />);
+      render(<Callout {...config} />);
 
       const links = screen.getAllByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
       expect(links).toHaveLength(2);
@@ -33,15 +36,17 @@ describe('Callout', () => {
   });
 
   describe('uninstalledIntegration variant', () => {
+    const config = getCalloutConfig('uninstalledIntegration');
+
     it('renders with correct title', () => {
-      render(<Callout variant="uninstalledIntegration" />);
+      render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
       expect(screen.getByText('Enrich graph experience')).toBeInTheDocument();
     });
 
     it('renders link with correct text opening in a new tab', () => {
-      render(<Callout variant="uninstalledIntegration" />);
+      render(<Callout {...config} />);
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
       expect(link).toHaveTextContent('Install Cloud Asset Discovery');
@@ -50,15 +55,17 @@ describe('Callout', () => {
   });
 
   describe('disabledEntityStore variant', () => {
+    const config = getCalloutConfig('disabledEntityStore');
+
     it('renders with correct title', () => {
-      render(<Callout variant="disabledEntityStore" />);
+      render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
       expect(screen.getByText('Enrich graph experience')).toBeInTheDocument();
     });
 
     it('renders link with correct text opening in a new tab', () => {
-      render(<Callout variant="disabledEntityStore" />);
+      render(<Callout {...config} />);
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
       expect(link).toHaveTextContent('Enable Entity Store');
@@ -67,15 +74,17 @@ describe('Callout', () => {
   });
 
   describe('unavailableEntityInfo variant', () => {
+    const config = getCalloutConfig('unavailableEntityInfo');
+
     it('renders with correct title', () => {
-      render(<Callout variant="unavailableEntityInfo" />);
+      render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
       expect(screen.getByText('Entity information unavailable')).toBeInTheDocument();
     });
 
     it('renders link with correct text opening in a new tab', () => {
-      render(<Callout variant="unavailableEntityInfo" />);
+      render(<Callout {...config} />);
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
       expect(link).toHaveTextContent('Verify Cloud Asset Discovery Data');
@@ -84,15 +93,17 @@ describe('Callout', () => {
   });
 
   describe('unknownEntityType variant', () => {
+    const config = getCalloutConfig('unknownEntityType');
+
     it('renders with correct title', () => {
-      render(<Callout variant="unknownEntityType" />);
+      render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
       expect(screen.getByText('Unknown entity type')).toBeInTheDocument();
     });
 
     it('renders link with correct text opening in a new tab', () => {
-      render(<Callout variant="unknownEntityType" />);
+      render(<Callout {...config} />);
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
       expect(link).toHaveTextContent('Verify Cloud Asset Discovery');
@@ -100,10 +111,37 @@ describe('Callout', () => {
     });
   });
 
+  describe('custom props', () => {
+    it('renders with custom title, message, and links', () => {
+      render(
+        <Callout
+          title="Custom Title"
+          message="Custom message content"
+          links={[
+            { text: 'Custom Link 1', href: '/custom-link-1' },
+            { text: 'Custom Link 2', href: '/custom-link-2' },
+          ]}
+        />
+      );
+
+      expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByText('Custom Title')).toBeInTheDocument();
+      expect(screen.getByText('Custom message content')).toBeInTheDocument();
+
+      const links = screen.getAllByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
+      expect(links).toHaveLength(2);
+      expect(links[0]).toHaveTextContent('Custom Link 1');
+      expect(links[0]).toHaveAttribute('href', '/custom-link-1');
+      expect(links[1]).toHaveTextContent('Custom Link 2');
+      expect(links[1]).toHaveAttribute('href', '/custom-link-2');
+    });
+  });
+
   describe('dismiss functionality', () => {
     it('calls onDismiss when close button is clicked', async () => {
       const mockOnDismiss = jest.fn();
-      render(<Callout variant="uninstalledIntegration" onDismiss={mockOnDismiss} />);
+      const config = getCalloutConfig('uninstalledIntegration');
+      render(<Callout {...config} onDismiss={mockOnDismiss} />);
 
       const dismissButton = screen.getByLabelText('Dismiss this callout');
       await userEvent.click(dismissButton);
@@ -112,7 +150,8 @@ describe('Callout', () => {
     });
 
     it('does not render close button when onDismiss is undefined', () => {
-      render(<Callout variant="uninstalledIntegration" />);
+      const config = getCalloutConfig('uninstalledIntegration');
+      render(<Callout {...config} />);
 
       expect(screen.queryByLabelText('Dismiss this callout')).not.toBeInTheDocument();
     });

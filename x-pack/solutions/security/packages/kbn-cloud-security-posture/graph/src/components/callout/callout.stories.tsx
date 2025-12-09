@@ -10,23 +10,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Callout, type CalloutProps } from './callout';
+import { getCalloutConfig } from './callout.config';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 export default {
   title: 'Components/Graph Components/Callout',
   component: Callout,
-  argTypes: {
-    variant: {
-      options: [
-        'missingAllRequirements',
-        'uninstalledIntegration',
-        'disabledEntityStore',
-        'unavailableEntityInfo',
-        'unknownEntityType',
-      ],
-      control: { type: 'radio' },
-    },
-  },
   decorators: [
     GlobalStylesStorybookDecorator,
     (Story) => (
@@ -41,35 +30,35 @@ const onDismiss = action('onDismiss');
 
 export const MissingAllRequirements: StoryObj<CalloutProps> = {
   args: {
-    variant: 'missingAllRequirements',
+    ...getCalloutConfig('missingAllRequirements'),
     onDismiss,
   },
 };
 
 export const UninstalledIntegration: StoryObj<CalloutProps> = {
   args: {
-    variant: 'uninstalledIntegration',
+    ...getCalloutConfig('uninstalledIntegration'),
     onDismiss,
   },
 };
 
 export const DisabledEntityStore: StoryObj<CalloutProps> = {
   args: {
-    variant: 'disabledEntityStore',
+    ...getCalloutConfig('disabledEntityStore'),
     onDismiss,
   },
 };
 
 export const UnavailableEntityInfo: StoryObj<CalloutProps> = {
   args: {
-    variant: 'unavailableEntityInfo',
+    ...getCalloutConfig('unavailableEntityInfo'),
     onDismiss,
   },
 };
 
 export const UnknownEntityType: StoryObj<CalloutProps> = {
   args: {
-    variant: 'unknownEntityType',
+    ...getCalloutConfig('unknownEntityType'),
     onDismiss,
   },
 };
