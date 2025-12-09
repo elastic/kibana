@@ -343,7 +343,7 @@ export class ProjectMonitorFormatter {
 
     return await this.routeContext.monitorConfigRepository.findDecryptedMonitors({
       filter: monitorFilter,
-      spaceId: this.spaceId,
+      spaceIds: [this.spaceId],
     });
   };
 

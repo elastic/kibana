@@ -123,7 +123,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       const [existingLocation, monitorsInLocation] = await Promise.all([
         repo.getPrivateLocation(locationId),
         routeContext.monitorConfigRepository.findDecryptedMonitors({
-          spaceId: ALL_SPACES_ID,
+          spaceIds: [ALL_SPACES_ID],
           filter: filtersStr,
         }),
       ]);

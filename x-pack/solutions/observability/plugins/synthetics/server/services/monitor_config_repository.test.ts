@@ -670,7 +670,7 @@ describe('MonitorConfigRepository', () => {
         pointInTimeFinderMock
       );
 
-      const result = await repository.findDecryptedMonitors({ spaceId, filter });
+      const result = await repository.findDecryptedMonitors({ spaceIds: [spaceId], filter });
 
       expect(
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser
@@ -709,7 +709,7 @@ describe('MonitorConfigRepository', () => {
         pointInTimeFinderMock
       );
 
-      const result = await repository.findDecryptedMonitors({ spaceId });
+      const result = await repository.findDecryptedMonitors({ spaceIds: [spaceId] });
 
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
       expect(result).toEqual([...mockDecryptedMonitors, ...mockDecryptedMonitors]);

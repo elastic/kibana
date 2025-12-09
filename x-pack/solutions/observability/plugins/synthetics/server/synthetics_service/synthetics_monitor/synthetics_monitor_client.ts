@@ -52,7 +52,7 @@ export class SyntheticsMonitorClient {
     const privateConfigs: PrivateConfig[] = [];
     const publicConfigs: ConfigData[] = [];
 
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceIds: [spaceId] });
     const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
 
     for (const monitorObj of monitors) {
@@ -99,7 +99,7 @@ export class SyntheticsMonitorClient {
     const publicConfigs: ConfigData[] = [];
     const deletedPublicConfigs: ConfigData[] = [];
 
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceIds: [spaceId] });
     const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
 
     for (const editedMonitor of monitors) {
@@ -188,7 +188,7 @@ export class SyntheticsMonitorClient {
     let privateConfig: PrivateConfig | undefined;
     let publicConfig: ConfigData | undefined;
 
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceIds: [spaceId] });
 
     const { formattedConfig, params, config } = await this.formatConfigWithParams(
       monitor,
@@ -303,7 +303,7 @@ export class SyntheticsMonitorClient {
   ) {
     const privateConfigs: PrivateConfig[] = [];
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({
-      spaceId,
+      spaceIds: [spaceId],
       canSave,
       hideParams,
     });
