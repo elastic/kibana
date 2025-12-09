@@ -38,6 +38,7 @@ import type {
   ChartSectionConfigurationExtensionParams,
   ChartSectionConfiguration,
 } from '../../../../context_awareness/types';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -141,6 +142,7 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+
   const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
     useMemo(() => {
       return {
@@ -152,13 +154,18 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
       };
     }, [dispatch, stateContainer.actions.updateESQLQuery]);
 
-  const chartSectionConfig = useMemo(
-    () =>
-      getChartConfigAccessor(() => ({
+  const isEsqlMode = useIsEsqlMode();
+  const chartSectionConfig = useMemo<ChartSectionConfiguration>(() => {
+    if (!isEsqlMode) {
+      return {
         replaceDefaultChart: false,
-      }))(chartSectionConfigurationExtParams),
-    [getChartConfigAccessor, chartSectionConfigurationExtParams]
-  );
+      };
+    }
+
+    return getChartConfigAccessor(() => ({
+      replaceDefaultChart: false,
+    }))(chartSectionConfigurationExtParams);
+  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, isEsqlMode]);
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(
