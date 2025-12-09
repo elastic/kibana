@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { ONECHAT_FEATURE_ID } from '@kbn/onechat-plugin/common/features';
+import { ONECHAT_FEATURE_ID } from '@kbn/onechat-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
 
 interface UseAgentBuilderAvailability {
