@@ -188,7 +188,10 @@ export const copyRowsAsTextToClipboard = async ({
     const isLast = index === columns.length - 1;
 
     if (format === CopyAsTextFormat.markdown) {
-      const escapedText = text.replace(/\|/g, '\\|');
+      const escapedText = text.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+      if (isFirst && isLast) {
+        return `| ${escapedText} |`;
+      }
       if (isFirst) {
         return `| ${escapedText}`;
       }
