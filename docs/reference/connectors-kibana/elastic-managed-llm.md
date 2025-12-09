@@ -7,7 +7,7 @@ applies_to:
 
 # Elastic Managed LLMs
 
-Elastic provides built-in LLMs through the Elastic Managed LLM connector vetted for GenAI product features across our platform.
+Elastic provides built-in LLMs through AI connectors vetted for GenAI product features across our platform.
 Currently, the following built-in LLMs are available:
 
 * [`anthropic-claude-4.5-sonnet`](#claude-45)
@@ -28,7 +28,7 @@ stack: ga 9.0
 serverless: ga
 ```
 
-`anthropic-claude-3.7-sonnet` is the default LLM for the Elastic Managed LLM connector.
+`anthropic-claude-3.7-sonnet` is the default LLM used by the AI connector.
 
 ::::{note}
 * The default LLM may change in the future based on evaluations of performance, security, and accuracy.
@@ -43,7 +43,7 @@ Details of the currently used model are available in the [model card](https://ra
 
 ## Region and hosting
 
-The Elastic Managed LLMs user a third party service provider for inference. Currently, this is AWS Bedrock in AWS US regions, beginning with `us-east-1`. Additional providers may be added in future.
+The Elastic Managed LLMs use a third party service provider for {{infer}}. Currently, this is AWS Bedrock in AWS US regions, beginning with `us-east-1`. Additional providers may be added in future.
 
 ## Data protection
 
@@ -54,7 +54,7 @@ Only request metadata is logged in AWS CloudWatch.
 No information related to prompts is retained.
 Logged metadata includes the timestamp, model used, region, and request status.
 
-Read more at our [AI Data FAQs](https://www.elastic.co/trust/ai-data-faq) to learn about our data practices for AI related features. 
+Read more at our [AI Data FAQs](https://www.elastic.co/trust/ai-data-faq) to learn about our data practices for AI related features.
 
 ## Pricing
 
