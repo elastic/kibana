@@ -232,7 +232,7 @@ export const ConfirmTemplateDetailsSection = ({
       <EuiDescriptionList
         listItems={
           templateDetails as Array<{
-            title: NonNullable<React.ReactNode>;
+            title: string;
             description: NonNullable<React.ReactNode>;
           }>
         }
