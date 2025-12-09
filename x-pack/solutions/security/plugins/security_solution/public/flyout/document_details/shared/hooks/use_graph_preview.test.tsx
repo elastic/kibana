@@ -63,6 +63,7 @@ describe('useGraphPreview', () => {
     // Default mock: UI setting is enabled
     mockUseUiSetting.mockReturnValue([true, jest.fn()]);
   });
+
   it(`should return false when missing actor and target`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (
@@ -190,7 +191,7 @@ describe('useGraphPreview', () => {
     });
 
     expect(hookResult.result.current).toStrictEqual({
-      hasGraphRepresentation: false,
+      shouldShowGraph: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -425,7 +426,7 @@ describe('useGraphPreview', () => {
     });
 
     expect(hookResult.result.current).toStrictEqual({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -464,7 +465,7 @@ describe('useGraphPreview', () => {
     });
 
     expect(hookResult.result.current).toStrictEqual({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['hostActorId'],
@@ -503,7 +504,7 @@ describe('useGraphPreview', () => {
     });
 
     expect(hookResult.result.current).toStrictEqual({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['serviceActorId'],
@@ -542,7 +543,7 @@ describe('useGraphPreview', () => {
     });
 
     expect(hookResult.result.current).toStrictEqual({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['entityActorId'],
@@ -550,5 +551,52 @@ describe('useGraphPreview', () => {
       targetIds: ['hostTargetId'],
       isAlert: true,
     });
+  });
+
+  it('should return false when all conditions are met but env does not have required license', () => {
+    mockUseHasGraphVisualizationLicense.mockReturnValue(false);
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData: alertMockGetFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current.shouldShowGraph).toBe(false);
+    expect(hookResult.result.current).toStrictEqual({
+      shouldShowGraph: false,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['userActorId'],
+      action: ['action'],
+      targetIds: ['entityTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it('should return false for shouldShowGraph when UI setting is disabled', () => {
+    mockUseUiSetting.mockReturnValue([false, jest.fn()]);
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData: alertMockGetFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current.shouldShowGraph).toBe(false);
   });
 });
