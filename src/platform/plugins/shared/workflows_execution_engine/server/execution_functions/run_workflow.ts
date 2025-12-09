@@ -8,7 +8,9 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ExecutionStatus } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
+import { ConcurrencyManager } from '../concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
@@ -41,6 +43,31 @@ export async function runWorkflow({
     workflowExecutionRepository,
     esClient,
   } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+
+  // Check concurrency before starting execution (for queued executions)
+  const workflowExecution = workflowExecutionState.getWorkflowExecution();
+  const concurrencyGroupKey = workflowExecution.context?.concurrencyGroupKey as string | undefined;
+
+  if (concurrencyGroupKey) {
+    const concurrencyManager = new ConcurrencyManager(
+      logger,
+      workflowExecutionRepository,
+      workflowTaskManager
+    );
+
+    const concurrencyCheck = await concurrencyManager.checkConcurrency(
+      workflowExecution.workflowId,
+      workflowExecution.spaceId,
+      concurrencyGroupKey,
+      workflowExecution.workflowDefinition?.settings,
+      workflowExecution.id
+    );
+
+    if (!concurrencyCheck.shouldProceed && workflowExecution.status === ExecutionStatus.PENDING) {
+      logger.debug(`Workflow execution ${workflowRunId} still queued due to concurrency limit`);
+      return;
+    }
+  }
 
   await workflowRuntime.start();
 

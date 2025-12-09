@@ -19,6 +19,8 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
+import { ConcurrencyManager } from './concurrency/concurrency_manager';
+import { handleConcurrencyCollision } from './concurrency/handle_concurrency_collision';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import {
@@ -39,6 +41,7 @@ import type {
 } from './types';
 
 import { generateExecutionTaskScope } from './utils';
+import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
@@ -249,20 +252,85 @@ export class WorkflowsExecutionEnginePlugin
                 triggeredBy: 'scheduled',
               };
 
-              const workflowExecution = {
+              // Create initial execution to build context for concurrency key evaluation
+              if (!workflow.definition) {
+                logger.error(`Workflow ${workflow.id} has no definition and cannot be executed`);
+                return;
+              }
+
+              const initialExecution: EsWorkflowExecution = {
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
-                yaml: workflow.yaml,
+                yaml: workflow.yaml ?? '',
                 context: executionContext,
                 status: ExecutionStatus.PENDING,
                 createdAt: workflowCreatedAt.toISOString(),
                 createdBy: '',
                 triggeredBy: 'scheduled',
+                scopeStack: [],
+                error: null,
+                startedAt: workflowCreatedAt.toISOString(),
+                finishedAt: '',
+                cancelRequested: false,
+                duration: 0,
               };
+
+              // Evaluate and store concurrency group key
+              const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
+              const concurrencyManager = new ConcurrencyManager(
+                logger,
+                workflowExecutionRepository,
+                workflowTaskManager
+              );
+
+              const workflowContext = buildWorkflowContext(
+                initialExecution,
+                coreStart,
+                dependencies
+              );
+              const concurrencyGroupKey =
+                ((executionContext as Record<string, unknown>).concurrencyGroupKey as
+                  | string
+                  | undefined) ??
+                concurrencyManager.evaluateConcurrencyKey(
+                  workflow.definition?.settings,
+                  workflowContext
+                );
+
+              const enrichedContext = {
+                ...executionContext,
+                concurrencyGroupKey: concurrencyGroupKey ?? undefined,
+              };
+
+              const workflowExecution = {
+                ...initialExecution,
+                context: enrichedContext,
+              };
+
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+
+              // Check concurrency and handle collisions
+              const concurrencyCheck = await concurrencyManager.checkConcurrency(
+                workflow.id,
+                spaceId,
+                concurrencyGroupKey,
+                workflow.definition?.settings,
+                workflowExecution.id
+              );
+
+              const shouldProceed = await handleConcurrencyCollision(
+                concurrencyCheck,
+                workflowExecution.id,
+                workflowExecutionRepository,
+                logger
+              );
+
+              if (!shouldProceed) {
+                return;
+              }
 
               await runWorkflow({
                 workflowRunId: workflowExecution.id,
@@ -313,20 +381,78 @@ export class WorkflowsExecutionEnginePlugin
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
-      const workflowExecution = {
+
+      // Create initial execution to build context for concurrency key evaluation
+      if (!workflow.definition) {
+        throw new Error(`Workflow ${workflow.id} has no definition and cannot be executed`);
+      }
+
+      const initialExecution: EsWorkflowExecution = {
         id: generateUuid(),
         spaceId: context.spaceId,
         workflowId: workflow.id,
-        isTestRun: workflow.isTestRun,
+        isTestRun: workflow.isTestRun ?? false,
         workflowDefinition: workflow.definition,
-        yaml: workflow.yaml,
+        yaml: workflow.yaml ?? '',
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available
-        triggeredBy, // <-- new field for scheduled workflows
+        triggeredBy,
+        scopeStack: [],
+        error: null,
+        startedAt: workflowCreatedAt.toISOString(),
+        finishedAt: '',
+        cancelRequested: false,
+        duration: 0,
       };
+
+      // Evaluate and store concurrency group key
+      const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
+      const concurrencyManager = new ConcurrencyManager(
+        this.logger,
+        workflowExecutionRepository,
+        workflowTaskManager
+      );
+
+      const workflowContext = buildWorkflowContext(initialExecution, coreStart, dependencies);
+      const concurrencyGroupKey =
+        (context.concurrencyGroupKey as string | undefined) ??
+        concurrencyManager.evaluateConcurrencyKey(workflow.definition?.settings, workflowContext);
+
+      const enrichedContext = {
+        ...context,
+        concurrencyGroupKey: concurrencyGroupKey ?? undefined,
+      };
+
+      const workflowExecution = {
+        ...initialExecution,
+        context: enrichedContext,
+      };
+
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+
+      // Check concurrency and handle collisions
+      const concurrencyCheck = await concurrencyManager.checkConcurrency(
+        workflow.id,
+        context.spaceId,
+        concurrencyGroupKey,
+        workflow.definition?.settings,
+        workflowExecution.id
+      );
+
+      const shouldProceed = await handleConcurrencyCollision(
+        concurrencyCheck,
+        workflowExecution.id,
+        workflowExecutionRepository,
+        this.logger
+      );
+
+      if (!shouldProceed) {
+        return {
+          workflowExecutionId: workflowExecution.id,
+        };
+      }
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       const isRunningInTaskManager =
