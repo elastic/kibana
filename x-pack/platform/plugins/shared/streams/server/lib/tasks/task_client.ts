@@ -24,7 +24,9 @@ export class TaskClient<TaskType extends string> {
     private readonly logger: Logger
   ) {}
 
-  public async get<TPayload extends {} = {}>(id: string): Promise<PersistedTask<TPayload>> {
+  public async get<TParams extends {} = {}, TPayload extends {} = {}>(
+    id: string
+  ): Promise<PersistedTask<TParams, TPayload>> {
     try {
       this.logger.debug(`Getting task ${id}`);
 
@@ -37,7 +39,7 @@ export class TaskClient<TaskType extends string> {
         throw new Error(`Task ${id} has no source`);
       }
 
-      return response._source as PersistedTask<TPayload>;
+      return response._source as PersistedTask<TParams, TPayload>;
     } catch (error) {
       if (isNotFoundError(error)) {
         return {
@@ -47,6 +49,9 @@ export class TaskClient<TaskType extends string> {
           space: '',
           stream: '',
           type: '',
+          task: {
+            params: {} as TParams,
+          },
         };
       }
 
@@ -54,13 +59,17 @@ export class TaskClient<TaskType extends string> {
     }
   }
 
+  // What if you want to cancel the current task and then re-schedule it?
   public async schedule<TParams extends {} = {}>({
     task,
     params,
     request,
   }: TaskRequest<TaskType, TParams>): Promise<PersistedTask> {
-    const taskDoc: PersistedTask = {
+    const taskDoc: PersistedTask<TParams> = {
       ...task,
+      task: {
+        params,
+      },
       status: 'in_progress',
       created_at: new Date().toISOString(),
     };
@@ -98,9 +107,9 @@ export class TaskClient<TaskType extends string> {
     return taskDoc;
   }
 
-  public async update<TPayload extends {} = {}>(
-    task: PersistedTask<TPayload>
-  ): Promise<PersistedTask<TPayload>> {
+  public async update<TParams extends {} = {}, TPayload extends {} = {}>(
+    task: PersistedTask<TParams, TPayload>
+  ): Promise<PersistedTask<TParams, TPayload>> {
     this.logger.debug(`Updating task ${task.id}`);
 
     await this.storageClient.index({
