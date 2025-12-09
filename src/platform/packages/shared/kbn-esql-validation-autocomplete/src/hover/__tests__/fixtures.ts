@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import type { FieldType } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata, EsqlFieldType } from '@kbn/esql-types';
 
-const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
+const types: EsqlFieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
 const fields: Array<ESQLFieldWithMetadata & { suggestedAs?: string }> = [
   ...types.map((type) => ({
