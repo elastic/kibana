@@ -25,11 +25,11 @@ jest.mock('../../../../rules_client/common', () => ({
 }));
 const retryIfBulkEditConflictsMock = retryIfBulkEditConflicts as jest.Mock;
 
-jest.mock('../bulk_mute_alerts/transforms/transform_rule_mute_instance_ids', () => ({
+jest.mock('./transforms/transform_rule_mute_instance_ids', () => ({
   transformMuteRequestToRuleAttributes: jest.fn(),
 }));
 
-jest.mock('../bulk_unmute_alerts/transforms/transform_rule_unmute_instance_ids', () => ({
+jest.mock('./transforms/transform_rule_unmute_instance_ids', () => ({
   transformUnmuteRequestToRuleAttributes: jest.fn(),
 }));
 
