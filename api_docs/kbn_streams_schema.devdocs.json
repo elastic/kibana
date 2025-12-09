@@ -1975,7 +1975,7 @@
                 "section": "def-common.Condition",
                 "text": "Condition"
               },
-              "; type: string; } | undefined"
+              "; type: \"system\"; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
             "deprecated": false,
@@ -3145,7 +3145,7 @@
                 "section": "def-common.Condition",
                 "text": "Condition"
               },
-              "; } | undefined"
+              "; type: \"system\"; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
             "deprecated": false,
@@ -4586,9 +4586,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">; }, \"strip\", ",
+          ">; type: ",
+          "ZodEnum",
+          "<[\"system\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; filter: ",
+          ", { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4596,7 +4598,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }, { name: string; filter: ",
+          "; }, { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4616,7 +4618,7 @@
           "ZodNumber",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          ", { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4624,7 +4626,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",

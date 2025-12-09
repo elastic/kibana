@@ -6,8 +6,19 @@
  */
 
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
+import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
@@ -46,8 +57,19 @@ import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 import { getMachineLearningJobId } from '../../../common/helpers';
 import type { TimeRange } from '../../../rule_gaps/types';
+import {
+  GAP_STATUS_HEADER,
+  GAP_STATUS_IN_PROGRESS_LABEL,
+  GAP_STATUS_UNFILLED_LABEL,
+  GAP_STATUS_FILLED_LABEL,
+  gapStatusTooltipInProgress,
+  gapStatusTooltipUnfilled,
+  gapStatusTooltipFilled,
+} from './translations';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+
+type GapSummaryEntry = GetGapsSummaryByRuleIdsResponseBody['data'][number];
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
@@ -468,6 +490,95 @@ export const useGapDurationColumn = () => {
   };
 };
 
+const GapFillStatusTooltip = ({
+  totalInProgressDurationMs,
+  totalUnfilledDurationMs,
+  totalFilledDurationMs,
+}: {
+  totalInProgressDurationMs: number;
+  totalUnfilledDurationMs: number;
+  totalFilledDurationMs: number;
+}) => {
+  const formatDurationHumanized = (duration: number) => {
+    return duration === 0 ? '0 ms' : moment.duration(duration, 'ms').humanize();
+  };
+  return (
+    <div>
+      <EuiText size="s">
+        {gapStatusTooltipInProgress(formatDurationHumanized(totalInProgressDurationMs ?? 0))}
+      </EuiText>
+      <EuiText size="s">
+        {gapStatusTooltipUnfilled(formatDurationHumanized(totalUnfilledDurationMs ?? 0))}
+      </EuiText>
+      <EuiText size="s">
+        {gapStatusTooltipFilled(formatDurationHumanized(totalFilledDurationMs ?? 0))}
+      </EuiText>
+    </div>
+  );
+};
+
+export const useGapStatusColumn = (): TableColumn => {
+  const { euiTheme } = useEuiTheme();
+
+  return useMemo(
+    () => ({
+      field: 'gap_info',
+      name: GAP_STATUS_HEADER,
+      render: (gapInfo: GapSummaryEntry | undefined) => {
+        const status = (gapInfo?.gap_fill_status ?? undefined) as GapFillStatus | undefined;
+        if (!gapInfo || !status) return getEmptyTagValue();
+
+        const totalInProgressDurationMs = gapInfo.total_in_progress_duration_ms;
+        const totalUnfilledDurationMs = gapInfo.total_unfilled_duration_ms;
+        const totalFilledDurationMs = gapInfo.total_filled_duration_ms;
+
+        const byStatus: Record<GapFillStatus, { color: string; label: string }> = {
+          [gapFillStatus.IN_PROGRESS]: {
+            color: euiTheme.colors.backgroundBaseWarning,
+            label: GAP_STATUS_IN_PROGRESS_LABEL,
+          },
+          [gapFillStatus.UNFILLED]: {
+            color: euiTheme.colors.backgroundBaseDanger,
+            label: GAP_STATUS_UNFILLED_LABEL,
+          },
+          [gapFillStatus.FILLED]: {
+            color: euiTheme.colors.backgroundBaseSuccess,
+            label: GAP_STATUS_FILLED_LABEL,
+          },
+        };
+
+        const color = byStatus[status]?.color;
+        const label = byStatus[status]?.label;
+
+        return (
+          <EuiToolTip
+            position="top"
+            content={
+              <GapFillStatusTooltip
+                totalInProgressDurationMs={totalInProgressDurationMs}
+                totalUnfilledDurationMs={totalUnfilledDurationMs}
+                totalFilledDurationMs={totalFilledDurationMs}
+              />
+            }
+          >
+            <EuiBadge tabIndex={0} color={color} data-test-subj="gapStatusBadge">
+              {label}
+            </EuiBadge>
+          </EuiToolTip>
+        );
+      },
+      sortable: false,
+      truncateText: true,
+      width: '120px',
+    }),
+    [
+      euiTheme.colors.backgroundBaseWarning,
+      euiTheme.colors.backgroundBaseDanger,
+      euiTheme.colors.backgroundBaseSuccess,
+    ]
+  );
+};
+
 export const TOTAL_UNFILLED_DURATION_COLUMN = {
   field: 'gap_info.total_unfilled_duration_ms',
   name: (
@@ -515,6 +626,7 @@ export const useMonitoringColumns = ({
     mlJobs,
   });
   const gapDurationColumn = useGapDurationColumn();
+  const gapStatusColumn = useGapStatusColumn();
 
   return useMemo(
     () => [
@@ -527,6 +639,7 @@ export const useMonitoringColumns = ({
       TAGS_COLUMN,
       INDEXING_DURATION_COLUMN,
       SEARCH_DURATION_COLUMN,
+      gapStatusColumn,
       gapDurationColumn,
       TOTAL_UNFILLED_DURATION_COLUMN,
       executionStatusColumn,
@@ -541,6 +654,7 @@ export const useMonitoringColumns = ({
       gapDurationColumn,
       hasCRUDPermissions,
       showRelatedIntegrations,
+      gapStatusColumn,
     ]
   );
 };

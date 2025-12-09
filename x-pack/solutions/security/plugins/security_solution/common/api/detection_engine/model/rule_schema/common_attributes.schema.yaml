@@ -786,3 +786,11 @@ components:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
       required:
         - groupBy
+
+    # Gap fill status used in aggregated rule gap summaries
+    GapFillStatus:
+      type: string
+      enum:
+        - unfilled
+        - in_progress
+        - filled
