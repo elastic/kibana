@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { ModelVersionIdentifier, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-import { latestVersion } from './versions';
+import { latestVersionIdentifier } from './versions';
 
 interface GetPreviousVersionTypeParams {
   type: SavedObjectsType<any>;
@@ -23,6 +23,7 @@ export function getPreviousVersionType({
   const mappings = previousMappings[type.name];
   const mvs = typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions;
   const modelVersions = { ...mvs }; // clone the object to prevent modifying the original
-  delete modelVersions[latestVersion(type)]; // delete the most recent model version
+  const latestMv = latestVersionIdentifier(type) as ModelVersionIdentifier;
+  delete modelVersions[latestMv]; // delete the most recent model version
   return { ...type, mappings, modelVersions };
 }

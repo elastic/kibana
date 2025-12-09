@@ -11,7 +11,8 @@ import { test, expect } from '../../../../../src/playwright';
 import { EuiFieldTextWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
-test.describe('EUI testing wrapper: EuiFieldText', { tag: ['@svlSecurity', '@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/244036
+test.describe.skip('EUI testing wrapper: EuiFieldText', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`fieldText`, async ({ page, log }) => {
     const selector = {
       locator: 'xpath=(//div[contains(@class, "euiFormControlLayout")])[1]',

@@ -481,8 +481,12 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
   }
 
-  public async isCopyAsButtonVisible() {
+  public async isCopyToLanguageButtonVisible() {
     return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  }
+
+  public async isSelectLanguageButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuSelectLanguage');
   }
 
   public async clickCopyAsCurlButton() {
@@ -491,30 +495,41 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
+    // Click "Select language" menu item to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
-    await changeLangButton.click();
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`languageOption-${language}`);
+    });
 
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
+
+    // Click "Copy code" button to copy with the selected language
+    await this.testSubjects.click('copyAsLanguageSubmit');
   }
 
   public async changeDefaultLanguage(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
+    // Click "Select language" menu item to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    const changeDefaultLangButton = await this.testSubjects.find(
-      `changeDefaultLanguageTo-${language}`
-    );
-    await changeDefaultLangButton.click();
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`languageOption-${language}`);
+    });
 
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
+
+    // Click "Set as default" button (moves the badge)
+    await this.testSubjects.click('setAsDefaultLanguage');
+
+    // Click "Cancel" to close modal and save the default
+    await this.testSubjects.click('closeCopyAsModal');
   }
 
-  public async clickCopyAsButton() {
+  public async clickCopyToLanguageButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }

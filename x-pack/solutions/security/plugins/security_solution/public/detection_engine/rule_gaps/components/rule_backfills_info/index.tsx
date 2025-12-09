@@ -14,16 +14,15 @@ import { BackfillStatusInfo } from './backfill_status';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import type { BackfillRow, BackfillStatus } from '../../types';
 import * as i18n from '../../translations';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
-import { useUserData } from '../../../../detections/components/user_info';
 import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const DEFAULT_PAGE_SIZE = 10;
 
-const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
+const getBackfillsTableColumns = (canEditRules: boolean) => {
   const stopAction = {
     name: i18n.BACKFILLS_TABLE_COLUMN_ACTION,
     render: (item: BackfillRow) => <StopBackfill backfill={item} />,
@@ -126,7 +125,7 @@ const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
     },
   ];
 
-  if (hasCRUDPermissions) {
+  if (canEditRules) {
     columns.push(stopAction);
   }
 
@@ -136,8 +135,7 @@ const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
 export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [{ canUserCRUD }] = useUserData();
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const { timelines } = useKibana().services;
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useFindBackfillsForRules({
     ruleIds: [ruleId],
@@ -147,7 +145,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
 
   const backfills: BackfillRow[] = getBackfillRowsFromResponse(data?.data ?? []);
 
-  const columns = getBackfillsTableColumns(hasCRUDPermissions);
+  const columns = getBackfillsTableColumns(canEditRules);
 
   const pagination = {
     pageIndex,

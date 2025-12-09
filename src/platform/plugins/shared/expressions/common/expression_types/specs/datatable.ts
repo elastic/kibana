@@ -116,7 +116,6 @@ export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceP
     obj &&
     typeof obj.indexPattern === 'string' &&
     typeof obj.sourceField === 'string' &&
-    typeof obj.operationType === 'string' &&
     (typeof obj.interval === 'number' || !obj.interval)
   );
 }

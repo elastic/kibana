@@ -7,20 +7,20 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
-import type { TaskRunnerFactory, ILicenseState, ActionExecutionSourceType } from './lib';
+import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
 import type {
   ActionType,
-  InMemoryConnector,
   ActionTypeConfig,
-  ActionTypeSecrets,
   ActionTypeParams,
+  ActionTypeSecrets,
+  InMemoryConnector,
 } from './types';
 
 export interface ActionTypeRegistryOpts {
@@ -274,6 +274,7 @@ export class ActionTypeRegistry {
             }
           : {}),
         isDeprecated: !!actionType.isDeprecated,
+        allowMultipleSystemActions: actionType.allowMultipleSystemActions,
       }));
   }
 

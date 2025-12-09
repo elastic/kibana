@@ -15,6 +15,8 @@ import type { Condition } from '../../../types/conditions';
 
 const DEFAULT_PIPE_TAB = '  ';
 
+export { conditionToESQLAst } from './condition_to_esql';
+
 export interface ESQLTranspilationOptions {
   pipeTab: BasicPrettyPrinterOptions['pipeTab'];
   sourceIndex?: string;

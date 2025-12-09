@@ -6,7 +6,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
 import { testData } from '../fixtures';
