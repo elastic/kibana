@@ -8,4 +8,5 @@
 export * from './types';
 export * from './utils';
 export * from './constants/feature_flags';
+export * from './constants/ai_chat_experience';
 export { getIsAiAgentsEnabled } from './utils/get_is_ai_agents_enabled';
