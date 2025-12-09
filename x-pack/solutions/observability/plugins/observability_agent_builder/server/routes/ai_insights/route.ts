@@ -42,12 +42,9 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
 
-      const inferenceClient = inference.getClient({ request });
-
       const { summary, context } = await getAlertAiInsight({
         alertDoc,
-        inferenceStart: inference,
-        inferenceClient,
+        inference,
         connectorId,
         dataRegistry,
         request,

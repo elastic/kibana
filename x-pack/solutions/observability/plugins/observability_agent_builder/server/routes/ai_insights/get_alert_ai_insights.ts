@@ -35,8 +35,7 @@ export interface AlertDocForInsight {
 
 interface GetAlertAiInsightParams {
   alertDoc: AlertDocForInsight;
-  inferenceClient: InferenceClient;
-  inferenceStart: InferenceServerStart;
+  inference: InferenceServerStart;
   connectorId: string | undefined;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
@@ -50,16 +49,16 @@ interface AlertAiInsightResult {
 
 export async function getAlertAiInsight({
   alertDoc,
-  inferenceClient,
-  inferenceStart,
+  inference,
   connectorId: initialConnectorId,
   dataRegistry,
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
+  const inferenceClient = inference.getClient({ request });
   let connectorId = initialConnectorId;
   if (!connectorId) {
-    const defaultConnector = await inferenceStart.getDefaultConnector(request);
+    const defaultConnector = await inference.getDefaultConnector(request);
     connectorId = defaultConnector?.connectorId;
   }
   if (!connectorId) {
