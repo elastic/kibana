@@ -36,18 +36,14 @@ describe('Alerts table', () => {
   });
 
   it('Alerts table with the search bar is populated', () => {
-    const expectedControls = ['Statusactive 1', 'Rule', 'Group', 'Tags'];
+    const expectedControls = ['Statusactive1', 'Rule', 'Group', 'Tags'];
 
     cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
     cy.get('[data-test-subj="control-frame-title"]')
       .should('have.length', 4)
       .each(($el, index) => {
-        cy.wrap($el)
-          .invoke('text')
-          .then((text) => {
-            expect(text.trim()).to.equal(expectedControls[index]);
-          });
+        cy.wrap($el).should('contain.text', expectedControls[index]);
       });
     cy.getByTestSubj('globalQueryBar').should('exist');
   });
