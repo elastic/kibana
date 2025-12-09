@@ -25,14 +25,21 @@ import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '60m';
+const TASK_SCHEDULE = '1m';
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
   lastTotalMWs: number;
+  lastTotalMWsPerSpace: Record<string, number>;
   hasAlreadyDoneCleanup: boolean;
   maxCleanUpRetries: number;
   disableAutoSync?: boolean;
+}
+
+interface SpaceIdAggs {
+  spacesIds: {
+    buckets: Array<{ key: string; doc_count: number }>;
+  };
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -106,7 +113,7 @@ export class SyncPrivateLocationMonitorsTask {
       );
 
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      const { hasMWsChanged } = await this.hasMWsChanged({
+      const { hasMWsChanged, spacesToSync } = await this.hasMWsChanged({
         soClient,
         taskState,
         lastStartedAt,
@@ -123,12 +130,12 @@ export class SyncPrivateLocationMonitorsTask {
           this.debugLog(`Syncing private location monitors because cleanup performed a change`);
         }
 
-        if (allPrivateLocations.length > 0) {
+        if (allPrivateLocations.length > 0 && spacesToSync.size > 0) {
           await this.deployPackagePolicies.syncPackagePolicies({
             allPrivateLocations,
             soClient,
             encryptedSavedObjects,
-            spaceIds: [ALL_SPACES_ID],
+            spaceIds: Array.from(spacesToSync),
           });
         } else {
           this.debugLog(`No private locations found, skipping sync`);
@@ -167,6 +174,7 @@ export class SyncPrivateLocationMonitorsTask {
     return {
       lastStartedAt: startedAt.toISOString(),
       lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
+      lastTotalMWsPerSpace: taskInstance.state.lastTotalMWsPerSpace || {},
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
       maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
@@ -212,32 +220,75 @@ export class SyncPrivateLocationMonitorsTask {
     const { lastTotalMWs } = taskState;
 
     const [editedMWs, totalMWs] = await Promise.all([
-      soClient.find({
+      soClient.find<unknown, SpaceIdAggs>({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         perPage: 0,
         namespaces: [ALL_SPACES_ID],
         filter: `${MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE}.updated_at > "${lastStartedAt}"`,
         fields: [],
+        aggs: {
+          spacesIds: {
+            terms: {
+              size: 1000,
+              field: 'namespaces',
+            },
+          },
+        },
       }),
-      soClient.find({
+      soClient.find<unknown, SpaceIdAggs>({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         perPage: 0,
         namespaces: [ALL_SPACES_ID],
         fields: [],
+        aggs: {
+          spacesIds: {
+            terms: {
+              size: 1000,
+              field: 'namespaces',
+            },
+          },
+        },
       }),
     ]);
     logger.debug(
       `Found ${editedMWs.total} maintenance windows updated and ${totalMWs.total} total maintenance windows`
     );
+    const updatedMWsBySpace: Record<string, number> = {};
+    (editedMWs.aggregations?.spacesIds.buckets || []).forEach((bucket) => {
+      updatedMWsBySpace[bucket.key] = bucket.doc_count;
+    });
+
     const updatedMWs = editedMWs.total;
     const noOfMWs = totalMWs.total;
+    const lastTotalMWsPerSpace = taskState.lastTotalMWsPerSpace || {};
+
+    // Check if any space has a different number of MWs than last time
+    for (const bucket of totalMWs.aggregations?.spacesIds.buckets || []) {
+      const spaceId = bucket.key;
+      const docCount = bucket.doc_count;
+      const lastDocCount = lastTotalMWsPerSpace[spaceId] || 0;
+      if (docCount !== lastDocCount) {
+        logger.debug(
+          `Number of maintenance windows changed in space ${spaceId} from ${lastDocCount} to ${docCount}`
+        );
+        updatedMWsBySpace[spaceId] = docCount - lastDocCount;
+      }
+    }
+
+    taskState.lastTotalMWsPerSpace = {};
+    (totalMWs.aggregations?.spacesIds.buckets || []).forEach((bucket) => {
+      taskState.lastTotalMWsPerSpace[bucket.key] = bucket.doc_count;
+    });
 
     const hasMWsChanged = updatedMWs > 0 || noOfMWs !== lastTotalMWs;
-
+    const spacesToSync = new Set<string>(
+      Object.keys(updatedMWsBySpace).filter((spaceId) => updatedMWsBySpace[spaceId] > 0)
+    );
     taskState.lastTotalMWs = noOfMWs;
 
     return {
       hasMWsChanged,
+      spacesToSync,
     };
   }
 
