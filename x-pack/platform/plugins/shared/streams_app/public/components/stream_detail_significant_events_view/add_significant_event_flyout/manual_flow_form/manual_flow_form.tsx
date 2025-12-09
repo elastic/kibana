@@ -141,7 +141,11 @@ export function ManualFlowForm({
               data-test-subj="significant_events_form_feature_select"
               options={options}
               valueOfSelected={
-                options.find((option) => option.value.name === query.feature?.name)?.value
+                options.find(
+                  (option) =>
+                    option.value.name === query.feature?.name &&
+                    option.value.type === query.feature?.type
+                )?.value
               }
               placeholder={i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
@@ -154,7 +158,11 @@ export function ManualFlowForm({
               onChange={(value) => {
                 setQuery({
                   ...query,
-                  feature: value,
+                  feature: {
+                    name: value.name,
+                    filter: value.filter,
+                    type: value.type,
+                  },
                 });
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
