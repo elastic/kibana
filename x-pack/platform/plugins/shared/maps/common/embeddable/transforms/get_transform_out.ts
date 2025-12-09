@@ -40,10 +40,15 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       return {
         ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        attributes: transformMapAttributesOut((state as MapByValueState).attributes, [
-          ...(panelReferences ?? []),
-          ...(containerReferences ?? []),
-        ]),
+        attributes: transformMapAttributesOut(
+          (state as MapByValueState).attributes,
+          (targetName: string) => {
+            const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
+            if (panelRef) return panelRef;
+
+            return (containerReferences ?? []).find(({ name }) => name === targetName);
+          }
+        ),
       };
     }
 
