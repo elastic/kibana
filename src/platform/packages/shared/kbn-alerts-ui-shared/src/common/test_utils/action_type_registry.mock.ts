@@ -36,6 +36,7 @@ const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): A
     validateParams: jest.fn(),
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
+    source: 'stack',
     ...actionType,
   };
 };

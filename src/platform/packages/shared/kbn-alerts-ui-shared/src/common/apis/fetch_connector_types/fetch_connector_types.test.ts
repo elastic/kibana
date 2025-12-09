@@ -43,6 +43,7 @@ describe('loadActionTypes', () => {
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ];
 
@@ -83,6 +84,7 @@ describe('loadActionTypes', () => {
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ];
 
@@ -139,6 +141,7 @@ describe('loadActionTypes', () => {
         minimumLicenseRequired: 'basic',
         isSystemActionType: true,
         isDeprecated: false,
+        source: 'stack',
       },
       {
         id: 'test',
@@ -150,6 +153,7 @@ describe('loadActionTypes', () => {
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ];
 
@@ -202,6 +206,7 @@ describe('loadActionTypes', () => {
         minimumLicenseRequired: 'basic',
         isSystemActionType: true,
         isDeprecated: false,
+        source: 'stack',
       },
       {
         id: 'test',
@@ -213,6 +218,7 @@ describe('loadActionTypes', () => {
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ];
 

@@ -327,6 +327,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     return actionTypeModel?.isExperimental;
   }, [actionTypeModel, connector]);
 
+  const isSpecConnector =
+    !actionTypeModel?.source || actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack;
+
   return (
     <>
       <EuiFlyout
@@ -346,7 +349,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           icon={actionTypeModel?.iconClass}
           isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
-          isSpecConnector={actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack}
+          isSpecConnector={isSpecConnector}
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}

@@ -20,6 +20,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import ActionForm from './action_form';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -45,6 +46,7 @@ describe('action_form', () => {
     },
     alertParamsExpression: () => <></>,
     requiresAppContext: false,
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const actionType = {
@@ -58,6 +60,7 @@ describe('action_form', () => {
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
     actionTypeTitle: 'action-type-title',
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const disabledByConfigActionType = {
@@ -70,6 +73,7 @@ describe('action_form', () => {
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const disabledByActionType = {
@@ -82,6 +86,7 @@ describe('action_form', () => {
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const disabledByLicenseActionType = {
@@ -94,6 +99,7 @@ describe('action_form', () => {
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const preconfiguredOnly = {
@@ -106,6 +112,7 @@ describe('action_form', () => {
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const systemActionType = {
@@ -119,6 +126,7 @@ describe('action_form', () => {
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
     actionTypeTitle: 'system-action-type-title',
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const workflowsSystemActionType = {
@@ -132,6 +140,7 @@ describe('action_form', () => {
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
     actionTypeTitle: 'workflows-system-action-title',
+    source: ACTION_TYPE_SOURCES.stack,
   };
 
   const allActions = [
@@ -144,6 +153,7 @@ describe('action_form', () => {
       config: {},
       isPreconfigured: false,
       isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.stack,
     },
     {
       secrets: {},
@@ -154,6 +164,7 @@ describe('action_form', () => {
       config: {},
       isPreconfigured: true,
       isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.stack,
     },
     {
       secrets: {},
@@ -164,6 +175,7 @@ describe('action_form', () => {
       config: {},
       isPreconfigured: true,
       isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.stack,
     },
     {
       secrets: {},
@@ -174,6 +186,7 @@ describe('action_form', () => {
       config: {},
       isPreconfigured: false,
       isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.stack,
     },
     {
       secrets: {},
@@ -184,6 +197,7 @@ describe('action_form', () => {
       config: {},
       isPreconfigured: false,
       isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.stack,
     },
     {
       secrets: {},
@@ -194,6 +208,7 @@ describe('action_form', () => {
       config: {},
       isPreconfigured: false,
       isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.stack,
     },
     {
       secrets: null,
@@ -204,6 +219,7 @@ describe('action_form', () => {
       config: {},
       isPreconfigured: false,
       isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.stack,
     },
     {
       secrets: {},
@@ -215,6 +231,7 @@ describe('action_form', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: true,
+      source: ACTION_TYPE_SOURCES.stack,
     },
   ];
 

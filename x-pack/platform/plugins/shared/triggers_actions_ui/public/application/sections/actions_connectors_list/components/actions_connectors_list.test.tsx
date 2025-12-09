@@ -172,6 +172,7 @@ describe('actions_connectors_list', () => {
           actionTypeTitle: 'Test Action',
           defaultActionParams: {},
           defaultRecoveredActionParams: {},
+          source: 'stack',
         };
       });
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -560,6 +561,7 @@ describe('actions_connectors_list', () => {
           actionTypeTitle: 'Test Action',
           defaultActionParams: {},
           defaultRecoveredActionParams: {},
+          source: 'stack',
         };
       });
 

@@ -60,6 +60,7 @@ const actionTypeIndexDefault: Record<string, ActionType> = {
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
     isDeprecated: false,
+    source: 'stack',
   },
 };
 

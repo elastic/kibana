@@ -70,6 +70,7 @@ export const getActionType = (id: string, overwrites?: Partial<ActionType>): Act
     supportedFeatureIds: ['stackAlerts'],
     isSystemActionType: false,
     isDeprecated: false,
+    source: 'stack',
     ...overwrites,
   };
 };

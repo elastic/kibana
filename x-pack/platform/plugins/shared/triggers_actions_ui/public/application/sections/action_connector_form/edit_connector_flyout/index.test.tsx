@@ -760,14 +760,14 @@ describe('EditConnectorFlyout', () => {
   });
 });
 
-describe('isSpecConnector', () => {
+describe('is spec connector', () => {
   let appMockRenderer: AppMockRenderer;
   const onClose = jest.fn();
   const onConnectorUpdated = jest.fn();
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     actionConnectorFields: lazy(() => import('../connector_mock')),
-    isSpecConnector: true,
+    source: 'spec',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -800,6 +800,6 @@ describe('isSpecConnector', () => {
     );
 
     expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('testConnectorTab')).toBeDisabled();
   });
 });

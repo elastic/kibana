@@ -24,6 +24,7 @@ describe('transformConnectorTypesResponse', () => {
         sub_feature: 'endpointSecurity',
         is_deprecated: false,
         allow_multiple_system_actions: true,
+        source: 'stack',
       },
       {
         id: 'actionType2Id',
@@ -35,6 +36,7 @@ describe('transformConnectorTypesResponse', () => {
         supported_feature_ids: ['stackAlerts'],
         is_system_action_type: false,
         is_deprecated: false,
+        source: 'stack',
       },
     ]);
 
