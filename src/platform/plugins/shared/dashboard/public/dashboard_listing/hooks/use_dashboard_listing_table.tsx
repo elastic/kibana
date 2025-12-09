@@ -93,7 +93,6 @@ export const useDashboardListingTable = ({
 }): UseDashboardListingTableReturnType => {
   const { getTableListTitle } = dashboardListingTableStrings;
 
-  // Use appropriate entity names based on contentTypeFilter (each tab shows different content type)
   const { entityName, entityNamePlural } = getEntityNames(contentTypeFilter);
 
   const title = getTableListTitle();
@@ -121,13 +120,11 @@ export const useDashboardListingTable = ({
           return;
 
         case TAB_IDS.ANNOTATIONS:
-          // For annotation groups, navigate to Lens
           coreServices.application.navigateToApp('lens', { path: '#/' });
           return;
 
         case TAB_IDS.DASHBOARDS:
         default:
-          // Create dashboard
           if (useSessionStorageIntegration && dashboardBackupService.dashboardHasUnsavedEdits()) {
             confirmCreateWithUnsaved(() => {
               dashboardBackupService.clearState();
@@ -141,14 +138,12 @@ export const useDashboardListingTable = ({
     [dashboardBackupService, goToDashboard, useSessionStorageIntegration, contentTypeFilter]
   );
 
-  // Close new visualization modal when navigating away (e.g., browser back button)
   useEffect(() => {
     return () => {
       closeNewVisModal.current();
     };
   }, [pathname]);
 
-  // Cleanup modal on unmount
   useUnmount(() => closeNewVisModal.current());
 
   const updateItemMeta = useCallback(

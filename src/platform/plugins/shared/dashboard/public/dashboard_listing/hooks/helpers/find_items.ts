@@ -49,7 +49,6 @@ export async function findDashboardListingItems(
     });
   };
 
-  // Visualizations tab
   if (tabId === TAB_IDS.VISUALIZATIONS) {
     const response = await findVisualizationListItems(
       visualizationsService,

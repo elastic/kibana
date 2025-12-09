@@ -131,8 +131,6 @@ describe('useDashboardListingTable', () => {
       initialFilter: 'myFilter',
       initialPageSize: 5,
       listingLimit: 20,
-      onFetchSuccess: expect.any(Function),
-      setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,
       contentEditor: {

@@ -18,7 +18,6 @@ import {
 } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
-import type { ViewMode } from '@kbn/presentation-publishing';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import {
@@ -29,16 +28,20 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { TAB_IDS, type DashboardListingUserContent } from './types';
-import type { DashboardListingViewRegistry } from '../plugin';
+import { TAB_IDS, type DashboardListingProps, type DashboardListingUserContent } from './types';
 
-interface TabContentProps {
-  goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
-  getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
-  useSessionStorageIntegration?: boolean;
-  initialFilter?: string;
+type GetDashboardListingTabsParams = Pick<
+  DashboardListingProps,
+  | 'goToDashboard'
+  | 'getDashboardUrl'
+  | 'useSessionStorageIntegration'
+  | 'initialFilter'
+  | 'listingViewRegistry'
+>;
+
+type TabContentProps = Omit<GetDashboardListingTabsParams, 'listingViewRegistry'> & {
   parentProps: TableListTabParentProps<DashboardListingUserContent>;
-}
+};
 
 const DashboardsTabContent = ({
   goToDashboard,
@@ -126,14 +129,6 @@ const VisualizationsTabContent = ({
     </TableListViewKibanaProvider>
   );
 };
-
-interface GetDashboardListingTabsParams {
-  goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
-  getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
-  useSessionStorageIntegration?: boolean;
-  initialFilter?: string;
-  listingViewRegistry: DashboardListingViewRegistry;
-}
 
 export const getDashboardListingTabs = ({
   goToDashboard,
