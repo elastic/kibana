@@ -17,7 +17,13 @@ import { TakeAction } from '.';
 
 const mockMutateAsyncBulk = jest.fn().mockResolvedValue({});
 const mockMutateAsyncStatus = jest.fn().mockResolvedValue({});
-
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn().mockReturnValue({
+    isAgentBuilderEnabled: false,
+    hasAgentBuilderPrivilege: true,
+    isAgentChatExperienceEnabled: false,
+  }),
+}));
 jest.mock('../../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: jest.fn(),
 }));
