@@ -122,10 +122,9 @@ export const connectorTypeResponseSchema = schema.object({
       },
     })
   ),
-  is_spec_action_type: schema.boolean({
+  source: schema.oneOf([schema.literal('yml'), schema.literal('spec'), schema.literal('stack')], {
     meta: {
-      description:
-        'Indicated whether the connector type is defined through a connector specification.',
+      description: 'The source of the connector type definition.',
     },
   }),
 });

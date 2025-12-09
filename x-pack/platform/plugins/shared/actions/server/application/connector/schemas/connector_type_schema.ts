@@ -23,7 +23,7 @@ export const connectorTypeSchema = schema.object({
   ]),
   supportedFeatureIds: schema.arrayOf(schema.string()),
   isSystemActionType: schema.boolean(),
-  isSpecActionType: schema.boolean({ defaultValue: false }),
+  source: schema.oneOf([schema.literal('yml'), schema.literal('spec'), schema.literal('stack')]),
   isDeprecated: schema.boolean({ defaultValue: false }),
   subFeature: schema.maybe(schema.oneOf([schema.literal('endpointSecurity')])),
   allowMultipleSystemActions: schema.maybe(schema.boolean()),

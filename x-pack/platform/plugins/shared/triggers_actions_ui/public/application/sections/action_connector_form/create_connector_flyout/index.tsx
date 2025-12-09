@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { SOURCE as ActionTypeSourceValues } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
@@ -332,7 +333,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         isSaving={isSaving}
         onSubmit={onSubmit}
         testConnector={testConnector}
-        isSpecConnector={actionTypeModel?.isSpecConnector}
+        isSpecConnector={actionTypeModel?.source !== ActionTypeSourceValues.stack}
       />
     </EuiFlyout>
   );

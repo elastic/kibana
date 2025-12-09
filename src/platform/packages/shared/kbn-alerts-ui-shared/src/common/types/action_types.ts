@@ -13,6 +13,7 @@ import type { IconType, RecursivePartial } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionType, SubFeature } from '@kbn/actions-types';
 import type { SerializerFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { Source as ActionTypeSource } from '@kbn/actions-types/action_types';
 import type { RuleFormParamsErrors } from './rule_types';
 import type { TypeRegistry } from '../type_registry';
 
@@ -44,7 +45,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   isSystemAction: boolean;
   isMissingSecrets?: boolean;
   isConnectorTypeDeprecated: boolean;
-  isSpecConnector?: boolean;
+  source?: ActionTypeSource;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
@@ -149,7 +150,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   getHideInUi?: (actionTypes: ActionType[]) => boolean;
-  isSpecConnector?: boolean;
+  source?: ActionTypeSource;
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;

@@ -6,6 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { SOURCE as ActionTypeSource } from '@kbn/actions-types';
 
 import type {
   ActionTypeParams,
@@ -41,6 +42,6 @@ export const createConnectorTypeFromSpec = (
     },
     executor,
     globalAuthHeaders: spec.auth?.headers,
-    isSpecActionType: true,
+    source: ActionTypeSource.spec,
   };
 };
