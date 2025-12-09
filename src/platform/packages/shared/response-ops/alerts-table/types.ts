@@ -279,6 +279,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   showAlertStatusWithFlapping?: boolean;
   /**
+   * Whether to fetch muted alerts for the table. Security Solution, for
+   * example, does not use muted alerts. Defaults to true.
+   */
+  mutedAlertsEnabled?: boolean;
+  /**
    * Customizations to the data grid toolbar
    */
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
