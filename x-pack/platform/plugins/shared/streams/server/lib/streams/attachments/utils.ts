@@ -11,11 +11,12 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import type { SanitizedRule } from '@kbn/alerting-types';
 import type {
   AttachmentLink,
   AttachmentDocument,
   AttachmentType,
-  Attachment,
+  AttachmentData,
   DashboardSOAttributes,
   SloSOAttributes,
 } from './types';
@@ -44,7 +45,7 @@ export const getAttachmentDocument = (attachment: {
 
 const processDashboardResults = (
   savedObjects: Array<SavedObject<DashboardSOAttributes>>
-): Attachment[] => {
+): AttachmentData[] => {
   return savedObjects
     .filter((savedObject) => !savedObject.error)
     .map((savedObject) => ({
@@ -53,10 +54,13 @@ const processDashboardResults = (
       type: 'dashboard',
       title: savedObject.attributes.title,
       tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
+      description: savedObject.attributes.description,
+      createdAt: savedObject.created_at,
+      updatedAt: savedObject.updated_at,
     }));
 };
 
-const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): Attachment[] => {
+const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): AttachmentData[] => {
   return savedObjects
     .filter((savedObject) => !savedObject.error)
     .map((savedObject) => ({
@@ -65,7 +69,32 @@ const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): A
       type: 'slo',
       title: savedObject.attributes.name,
       tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
+      description: savedObject.attributes.description,
+      createdAt: savedObject.created_at,
+      updatedAt: savedObject.updated_at,
     }));
+};
+
+export const processRuleResults = (rules: SanitizedRule[]): AttachmentData[] => {
+  return rules.map((rule) => ({
+    id: rule.id,
+    redirectId: rule.id,
+    type: 'rule',
+    title: rule.name,
+    tags: rule.tags,
+    createdAt: rule.createdAt.toISOString(),
+    updatedAt: rule.updatedAt.toISOString(),
+  }));
+};
+
+/**
+ * Map of saved object types for each attachment type when querying across all spaces.
+ * TypeScript will enforce that all attachment types have corresponding saved object types.
+ */
+export const attachmentTypeToSavedObjectTypeMap: Record<AttachmentType, string> = {
+  dashboard: 'dashboard',
+  slo: 'slo',
+  rule: 'alert',
 };
 
 /**
@@ -80,15 +109,15 @@ export const getSoByIds = async ({
   soClient: SavedObjectsClientContract;
   attachmentType: Extract<AttachmentType, 'dashboard' | 'slo'>;
   ids: string[];
-}): Promise<Attachment[]> => {
+}): Promise<AttachmentData[]> => {
   if (attachmentType === 'dashboard') {
     const result = await soClient.bulkGet<DashboardSOAttributes>(
-      ids.map((id) => ({ id, type: attachmentType }))
+      ids.map((id) => ({ id, type: attachmentTypeToSavedObjectTypeMap[attachmentType] }))
     );
     return processDashboardResults(result.saved_objects);
   } else if (attachmentType === 'slo') {
     const result = await soClient.bulkGet<SloSOAttributes>(
-      ids.map((id) => ({ id, type: attachmentType }))
+      ids.map((id) => ({ id, type: attachmentTypeToSavedObjectTypeMap[attachmentType] }))
     );
     return processSloResults(result.saved_objects);
   } else {
@@ -112,7 +141,7 @@ export const getSuggestedSo = async ({
   query: string;
   tags?: string[];
   perPage: number;
-}): Promise<Attachment[]> => {
+}): Promise<AttachmentData[]> => {
   const searchOptions: SavedObjectsFindOptions = {
     type: attachmentType,
     search: query,

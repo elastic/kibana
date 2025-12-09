@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { RULES_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { IconIntegrations } from '../../../../../common/icons/integrations';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
@@ -28,5 +29,8 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilitiesRequired: [['fleet.read', `${SECURITY_FEATURE_ID}.detections`]],
+  capabilitiesRequired: [
+    ['fleet.read', `${SECURITY_FEATURE_ID}.detections`],
+    ['fleet.read', RULES_UI_DETECTIONS_PRIVILEGE],
+  ],
 };

@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/plugins/shared/data_sources_registry
 dependsOn:
   - '@kbn/core'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
