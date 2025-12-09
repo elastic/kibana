@@ -79,7 +79,7 @@ export class SyncGlobalParamsPrivateLocationsTask {
       const soClient = savedObjects.createInternalRepository();
 
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      if (allPrivateLocations.length > 0) {
+      if (allPrivateLocations.length > 0 && paramsSpaceToSync) {
         await this.deployPackagePolicies.syncPackagePolicies({
           allPrivateLocations,
           soClient,
@@ -92,14 +92,11 @@ export class SyncGlobalParamsPrivateLocationsTask {
       logger.error(`Sync of global params failed: ${error.message}`);
       return {
         error,
-        state: { paramsSpaceToSync, syncAllSpaces: false },
+        state: {},
       };
     }
     return {
-      state: {
-        paramsSpacesToSync: [],
-        syncAllSpaces: false,
-      },
+      state: {},
     };
   }
 
