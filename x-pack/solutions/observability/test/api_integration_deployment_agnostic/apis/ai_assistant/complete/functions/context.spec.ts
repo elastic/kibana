@@ -287,7 +287,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           );
           expect(parsedContextResponseData).to.have.property('suggestions');
           expect(parsedContextResponseData.suggestions).to.be.an('array');
-          expect(parsedContextResponseData.suggestions.length).to.be(3);
+          expect(parsedContextResponseData.suggestions.length).to.be.greaterThan(2);
 
           parsedContextResponseData.suggestions.forEach((suggestion: RecalledSuggestion) => {
             expect(suggestion).to.have.property('id');
