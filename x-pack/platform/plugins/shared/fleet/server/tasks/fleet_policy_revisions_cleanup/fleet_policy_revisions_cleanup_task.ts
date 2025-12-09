@@ -65,7 +65,7 @@ export class FleetPolicyRevisionsCleanupTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, this.abortController);
             },
             cancel: async () => {
               this.abortController.abort(`${TITLE} timed out`);
