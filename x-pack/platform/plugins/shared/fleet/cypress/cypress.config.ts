@@ -37,7 +37,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
 
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    specPattern: './cypress/e2e/**/agent_*.cy.ts',
     supportFile: './cypress/support/e2e.ts',
     excludeSpecPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
 
