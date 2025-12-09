@@ -39,3 +39,10 @@ export interface FilterOptionsBase {
 export interface MigrationStats extends MigrationTaskStats {
   status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
 }
+
+export enum SplunkDataInputStep {
+  Upload = 1,
+  Macros = 2,
+  Lookups = 3,
+  End = 10,
+}

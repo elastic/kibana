@@ -18,11 +18,10 @@ import type {
   UseMigrationStepsProps,
 } from '../../types';
 import * as i18n from './translations';
-import { SplunkDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import { useMissingResources } from '../hooks/use_missing_resources';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -31,14 +30,11 @@ interface MacrosDataInputSubStepsProps {
 }
 
 export const MacrosDataInput = React.memo<UseMigrationStepsProps>(
-  ({ dataInputStep, migrationStats, migrationSource, setMigrationDataInputStep }) => {
-    const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
-      setMigrationDataInputStep,
-    });
+  ({ dataInputStep, migrationStats, missingResourcesIndexed, onMissingResourcesFetched }) => {
     const missingMacros = useMemo(() => missingResourcesIndexed?.macros, [missingResourcesIndexed]);
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(SplunkDataInputStep.Macros, dataInputStep[migrationSource]),
-      [dataInputStep, migrationSource]
+      () => getEuiStepStatus(SplunkDataInputStep.Macros, dataInputStep),
+      [dataInputStep]
     );
 
     return (

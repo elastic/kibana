@@ -23,8 +23,6 @@ import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type { DataInputStep } from './steps/constants';
-import { QradarDataInputStep, SplunkDataInputStep } from './steps/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { MigrationSource, type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
@@ -32,6 +30,8 @@ import { useMigrationSourceStep } from '../migration_source_step/use_migration_s
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { STEP_COMPONENTS } from '../../configs';
+import { useMissingResources } from './steps/hooks/use_missing_resources';
+import { SplunkDataInputStep } from '../../../common/types';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -65,17 +65,11 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const [dataInputStep, setDataInputStep] = useState<DataInputStep>({
-      [MigrationSource.SPLUNK]: SplunkDataInputStep.Rules,
-      [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
-    });
+    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
 
-    const setMigrationDataInputStep = useCallback(
-      (step: DataInputStep[MigrationSource]) => {
-        setDataInputStep((prev) => ({ ...prev, ...{ [migrationSource]: step } }));
-      },
-      [migrationSource]
-    );
+    const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
+      setDataInputStep,
+    });
 
     const onMigrationCreated = useCallback(
       (createdMigrationStats: RuleMigrationStats) => {
@@ -147,8 +141,11 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                     <step.Component
                       dataInputStep={dataInputStep}
                       migrationSource={migrationSource}
+                      migrationStats={migrationStats}
+                      missingResourcesIndexed={missingResourcesIndexed}
                       onMigrationCreated={onMigrationCreated}
-                      setMigrationDataInputStep={setMigrationDataInputStep}
+                      onMissingResourcesFetched={onMissingResourcesFetched}
+                      setDataInputStep={setDataInputStep}
                     />
                   </EuiFlexItem>
                 )) ?? <CenteredLoadingSpinner />}

@@ -18,12 +18,12 @@ import type {
   UseMigrationStepsProps,
 } from '../../types';
 import * as i18n from './translations';
-import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
+import { QradarDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
 import { MigrationSource } from '../../../../types';
-import { useMissingResources } from '../hooks/use_missing_resources';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 export const RulesDataInput = React.memo<UseMigrationStepsProps>(
   ({
@@ -31,14 +31,13 @@ export const RulesDataInput = React.memo<UseMigrationStepsProps>(
     migrationStats,
     migrationSource,
     onMigrationCreated,
-    setMigrationDataInputStep,
+    onMissingResourcesFetched,
   }) => {
-    const { onMissingResourcesFetched } = useMissingResources({ setMigrationDataInputStep });
     const dataInputNumber = useMemo(
       () =>
         migrationSource === MigrationSource.QRADAR
           ? QradarDataInputStep.Rules
-          : SplunkDataInputStep.Rules,
+          : SplunkDataInputStep.Upload,
       [migrationSource]
     );
     const dataInputStatus = useMemo(
@@ -46,8 +45,8 @@ export const RulesDataInput = React.memo<UseMigrationStepsProps>(
         getEuiStepStatus(
           migrationSource === MigrationSource.QRADAR
             ? QradarDataInputStep.Rules
-            : SplunkDataInputStep.Rules,
-          dataInputStep[migrationSource]
+            : SplunkDataInputStep.Upload,
+          dataInputStep
         ),
       [dataInputStep, migrationSource]
     );

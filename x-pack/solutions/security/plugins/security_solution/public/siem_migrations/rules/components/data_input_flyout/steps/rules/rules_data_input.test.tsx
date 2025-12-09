@@ -8,20 +8,19 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RulesDataInput } from './rules_data_input';
-import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { MigrationSource } from '../../../../types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 describe('RulesDataInput', () => {
   const defaultProps = {
     migrationStats: undefined,
     onMigrationCreated: jest.fn(),
-    dataInputStep: {
-      [MigrationSource.SPLUNK]: SplunkDataInputStep.Rules,
-      [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
-    },
+    dataInputStep: SplunkDataInputStep.Upload,
     migrationSource: MigrationSource.SPLUNK,
-    setMigrationDataInputStep: jest.fn(),
+    setDataInputStep: jest.fn(),
+    onMissingResourcesFetched: jest.fn(),
+    missingResourcesIndexed: { lookups: [], macros: [] },
   };
 
   it('renders the step number', () => {
@@ -61,10 +60,7 @@ describe('RulesDataInput', () => {
       <TestProviders>
         <RulesDataInput
           {...defaultProps}
-          dataInputStep={{
-            [MigrationSource.SPLUNK]: SplunkDataInputStep.Macros,
-            [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
-          }}
+          dataInputStep={SplunkDataInputStep.Macros}
           migrationSource={MigrationSource.SPLUNK}
         />
       </TestProviders>

@@ -25,25 +25,28 @@ import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_statu
 import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
-import { DashboardUploadSteps } from '../constants';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
-
+import type { UseMigrationStepsProps } from '../../../../../rules/components/data_input_flyout/types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 interface LookupsDataInputSubStepsProps {
   migrationStats: DashboardMigrationTaskStats;
   missingLookups: string[];
   onAllLookupsCreated: OnResourcesCreated;
 }
-interface LookupsDataInputProps
-  extends Omit<LookupsDataInputSubStepsProps, 'migrationStats' | 'missingLookups'> {
-  dataInputStep: DashboardUploadSteps;
-  migrationStats?: DashboardMigrationTaskStats;
-  missingLookups?: string[];
-}
-export const LookupsDataInput = React.memo<LookupsDataInputProps>(
-  ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
+
+export const LookupsDataInput = React.memo<UseMigrationStepsProps>(
+  ({ dataInputStep, migrationStats, setDataInputStep, missingResourcesIndexed }) => {
+    const missingLookups = useMemo(
+      () => missingResourcesIndexed?.lookups,
+      [missingResourcesIndexed]
+    );
+    const onAllLookupsCreated = useCallback(() => {
+      setDataInputStep(SplunkDataInputStep.End);
+    }, [setDataInputStep]);
+
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(DashboardUploadSteps.LookupsUpload, dataInputStep),
+      () => getEuiStepStatus(SplunkDataInputStep.Lookups, dataInputStep),
       [dataInputStep]
     );
 
@@ -56,7 +59,7 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
                 <EuiStepNumber
                   data-test-subj="lookupsUploadStepNumber"
                   titleSize="xs"
-                  number={DashboardUploadSteps.LookupsUpload}
+                  number={SplunkDataInputStep.Lookups}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>

@@ -5,23 +5,9 @@
  * 2.0.
  */
 
-import type { MigrationSource } from '../../../types';
-
-export enum SplunkDataInputStep {
-  Rules = 1,
-  Macros = 2,
-  Lookups = 3,
-  End = 10,
-}
-
 export enum QradarDataInputStep {
   Rules = 1,
   End = 10,
-}
-
-export interface DataInputStep {
-  [MigrationSource.SPLUNK]: SplunkDataInputStep;
-  [MigrationSource.QRADAR]: QradarDataInputStep;
 }
 
 export enum SplunkDataInputStepId {

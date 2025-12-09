@@ -7,13 +7,7 @@
 
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import type { MigrationSource, RuleMigrationStats } from '../../types';
-import type {
-  DataInputStep,
-  QradarDataInputStep,
-  QradarDataInputStepId,
-  SplunkDataInputStep,
-  SplunkDataInputStepId,
-} from './steps/constants';
+import type { QradarDataInputStepId, SplunkDataInputStepId } from './steps/constants';
 
 export type OnMigrationCreated = (migrationStats: RuleMigrationStats) => void;
 export type OnResourcesCreated = () => void;
@@ -21,13 +15,19 @@ export type OnMissingResourcesFetched = (missingResources: SiemMigrationResource
 
 type DataInputStepId = SplunkDataInputStepId | QradarDataInputStepId;
 
+interface MissingResourcesIndexed {
+  macros: string[];
+  lookups: string[];
+}
+
 export interface UseMigrationStepsProps {
-  dataInputStep: DataInputStep;
+  dataInputStep: number;
   migrationSource: MigrationSource;
   migrationStats?: RuleMigrationStats;
   onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
-  onMissingResourcesFetched?: OnMissingResourcesFetched;
-  setMigrationDataInputStep: (step: SplunkDataInputStep | QradarDataInputStep) => void;
+  onMissingResourcesFetched: OnMissingResourcesFetched;
+  setDataInputStep: (step: number) => void;
+  missingResourcesIndexed?: MissingResourcesIndexed;
 }
 
 export interface Step<
@@ -41,7 +41,7 @@ export interface Step<
 export type Steps = Array<Step>;
 
 export interface RulesDataInputSubStepsProps {
-  dataInputStep: DataInputStep;
+  dataInputStep: number;
   migrationSource: MigrationSource;
   migrationStats?: RuleMigrationStats;
   onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;

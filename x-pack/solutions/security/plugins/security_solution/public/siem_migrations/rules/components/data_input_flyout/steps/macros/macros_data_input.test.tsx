@@ -8,7 +8,6 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MacrosDataInput } from './macros_data_input';
-import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
@@ -16,11 +15,12 @@ import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
 import { MigrationSource } from '../../../../types';
 import { useMissingResources } from '../hooks/use_missing_resources';
+import type { UseMigrationStepsProps } from '../../types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockReportSetupMacrosQueryCopied = jest.fn();
-const mockUseMissingResources = useMissingResources as jest.Mock;
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
@@ -48,28 +48,34 @@ jest.mock('../hooks/use_missing_resources', () => ({
   useMissingResources: jest.fn().mockReturnValue({
     missingResourcesIndexed: {
       macros: ['macro1', 'macro2'],
+      lookups: [],
     },
+    onMissingResourcesFetched: jest.fn(),
   }),
 }));
 
 describe('MacrosDataInput', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
-  const defaultProps = {
+  const defaultProps: UseMigrationStepsProps = {
     onMissingResourcesFetched: jest.fn(),
-    dataInputStep: {
-      [MigrationSource.SPLUNK]: SplunkDataInputStep.Macros,
-      [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
-    },
+    dataInputStep: SplunkDataInputStep.Macros,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     migrationSource: MigrationSource.SPLUNK,
-    setMigrationDataInputStep: jest.fn(),
+    setDataInputStep: jest.fn(),
     onMigrationCreated: jest.fn(),
   };
 
   beforeEach(() => {
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.mocked(useAppToasts).mockReturnValue(appToastsMock);
+    jest.mocked(useMissingResources).mockReturnValue({
+      missingResourcesIndexed: {
+        macros: ['macro1', 'macro2'],
+        lookups: [],
+      },
+      onMissingResourcesFetched: jest.fn(),
+    });
   });
 
   afterEach(() => {
@@ -99,13 +105,7 @@ describe('MacrosDataInput', () => {
   it('does not render sub-steps when dataInputStep is not MacrosUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput
-          {...defaultProps}
-          dataInputStep={{
-            [MigrationSource.SPLUNK]: SplunkDataInputStep.Rules,
-            [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
-          }}
-        />
+        <MacrosDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Macros} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();
@@ -121,10 +121,9 @@ describe('MacrosDataInput', () => {
   });
 
   it('does not render sub-steps when missingMacros is missing', () => {
-    mockUseMissingResources.mockReturnValue({
-      missingResourcesIndexed: {
-        macros: undefined,
-      },
+    jest.mocked(useMissingResources).mockReturnValue({
+      missingResourcesIndexed: undefined,
+      onMissingResourcesFetched: jest.fn(),
     });
     const { queryByTestId } = render(
       <TestProviders>

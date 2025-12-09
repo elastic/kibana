@@ -8,11 +8,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { LookupsDataInput } from './lookups_data_input';
-import { DashboardUploadSteps } from '../constants';
 import * as i18n from './translations';
 import { getDashboardMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
+import { MigrationSource } from '../../../../../rules/types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -37,10 +38,13 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
 
 describe('LookupsDataInput', () => {
   const defaultProps = {
-    onAllLookupsCreated: jest.fn(),
-    dataInputStep: DashboardUploadSteps.LookupsUpload,
+    dataInputStep: SplunkDataInputStep.Lookups,
     migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    missingLookups: ['lookup1', 'lookup2'],
+    missingResourcesIndexed: { lookups: ['lookup1', 'lookup2'], macros: [] },
+    setDataInputStep: jest.fn(),
+    migrationSource: MigrationSource.SPLUNK,
+    onMigrationCreated: jest.fn(),
+    onMissingResourcesFetched: jest.fn(),
   };
 
   afterEach(() => {
@@ -82,7 +86,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when dataInputStep is not LookupsUpload', () => {
     const { queryByText } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} dataInputStep={DashboardUploadSteps.DashboardsUpload} />
+        <LookupsDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
     expect(queryByText(i18n.LOOKUPS_DATA_INPUT_DESCRIPTION)).not.toBeInTheDocument();
@@ -100,7 +104,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when missingLookups is missing', () => {
     const { queryByText } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} missingLookups={undefined} />
+        <LookupsDataInput {...defaultProps} missingResourcesIndexed={undefined} />
       </TestProviders>
     );
     expect(queryByText(i18n.LOOKUPS_DATA_INPUT_DESCRIPTION)).not.toBeInTheDocument();

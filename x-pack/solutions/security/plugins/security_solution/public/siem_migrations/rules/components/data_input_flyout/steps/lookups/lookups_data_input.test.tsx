@@ -8,16 +8,14 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { LookupsDataInput } from './lookups_data_input';
-import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
 import { MigrationSource } from '../../../../types';
-import { useMissingResources } from '../hooks/use_missing_resources';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
-const mockUseMissingResources = useMissingResources as jest.Mock;
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
@@ -40,24 +38,15 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_missing_resources', () => ({
-  useMissingResources: jest.fn().mockReturnValue({
-    missingResourcesIndexed: {
-      lookups: ['lookup1', 'lookup2'],
-    },
-  }),
-}));
-
 describe('LookupsDataInput', () => {
   const defaultProps = {
-    dataInputStep: {
-      [MigrationSource.SPLUNK]: SplunkDataInputStep.Lookups,
-      [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
-    },
+    dataInputStep: SplunkDataInputStep.Lookups,
     migrationSource: MigrationSource.SPLUNK,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    setMigrationDataInputStep: jest.fn(),
+    setDataInputStep: jest.fn(),
     onMigrationCreated: jest.fn(),
+    onMissingResourcesFetched: jest.fn(),
+    missingResourcesIndexed: { lookups: ['lookup1', 'lookup2'], macros: [] },
   };
 
   afterEach(() => {
@@ -99,13 +88,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when dataInputStep is not LookupsUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <LookupsDataInput
-          {...defaultProps}
-          dataInputStep={{
-            [MigrationSource.SPLUNK]: SplunkDataInputStep.Rules,
-            [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
-          }}
-        />
+        <LookupsDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
     expect(queryByTestId('lookupsUploadDescription')).not.toBeInTheDocument();
@@ -121,14 +104,9 @@ describe('LookupsDataInput', () => {
   });
 
   it('does not render description when missingLookups is missing', () => {
-    mockUseMissingResources.mockReturnValue({
-      missingResourcesIndexed: {
-        lookups: undefined,
-      },
-    });
     const { queryByTestId } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} />
+        <LookupsDataInput {...defaultProps} missingResourcesIndexed={undefined} />
       </TestProviders>
     );
     expect(queryByTestId('lookupsUploadDescription')).not.toBeInTheDocument();

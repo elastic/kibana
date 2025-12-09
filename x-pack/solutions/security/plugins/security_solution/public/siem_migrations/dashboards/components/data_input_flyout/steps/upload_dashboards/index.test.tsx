@@ -9,13 +9,18 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DashboardsUploadStep } from '.';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
-import { DashboardUploadSteps } from '../constants';
+import { MigrationSource } from '../../../../../rules/types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 describe('DashboardsUploadStep', () => {
   const defaultProps = {
     migrationStats: undefined,
     onMigrationCreated: jest.fn(),
     onMissingResourcesFetched: jest.fn(),
+    dataInputStep: SplunkDataInputStep.Upload,
+    migrationSource: MigrationSource.SPLUNK,
+    setDataInputStep: jest.fn(),
+    missingResourcesIndexed: { lookups: [], macros: [] },
   };
 
   it('renders the step number', () => {
@@ -43,10 +48,7 @@ describe('DashboardsUploadStep', () => {
   it('renders sub-steps when the step is current', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <DashboardsUploadStep
-          {...defaultProps}
-          dataInputStep={DashboardUploadSteps.DashboardsUpload}
-        />
+        <DashboardsUploadStep {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
 
@@ -56,10 +58,7 @@ describe('DashboardsUploadStep', () => {
   it('does not render sub-steps when the step is not current', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <DashboardsUploadStep
-          {...defaultProps}
-          dataInputStep={DashboardUploadSteps.LookupsUpload}
-        />
+        <DashboardsUploadStep {...defaultProps} dataInputStep={SplunkDataInputStep.Lookups} />
       </TestProviders>
     );
 
