@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, merge } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { i18n } from '@kbn/i18n';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   type PublishingSubject,
