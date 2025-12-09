@@ -43,7 +43,7 @@ Details of the currently used model are available in the [model card](https://ra
 
 ## Region and hosting
 
-The Elastic Managed LLMs use a third party service provider for {{infer}}. Currently, this is AWS Bedrock in AWS US regions, beginning with `us-east-1`. Additional providers may be added in future.
+The Elastic Managed LLMs use a third party service provider for inference. Currently, this is AWS Bedrock in AWS US regions, beginning with `us-east-1`. Additional providers may be added in future.
 
 ## Data protection
 
