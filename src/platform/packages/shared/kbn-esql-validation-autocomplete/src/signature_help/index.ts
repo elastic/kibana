@@ -67,7 +67,16 @@ export async function getSignatureHelp(
   }
 
   // Calculate the argument to highlight based on cursor position
-  const currentArgIndex = getArgumentToHighlightIndex(innerText, fnNode, offset);
+  let currentArgIndex = getArgumentToHighlightIndex(innerText, fnNode, offset);
+  // Handle repeating signatures like CASE(cond, value, cond, value...).
+  const isSignatureRepeating =
+    fnDefinition.signatures?.some((sig) => sig.isSignatureRepeating) ?? false;
+  if (isSignatureRepeating) {
+    const maxParams = Math.max(
+      ...(fnDefinition.signatures?.map((sig) => sig.params.length) ?? [1])
+    );
+    currentArgIndex = currentArgIndex % maxParams;
+  }
 
   // Gets the columns map of the query, to do type matching for the function arguments
   const { subQuery } = findSubquery(root, offset);
