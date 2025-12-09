@@ -174,9 +174,13 @@ export class ObservabilityAIAssistantAppPlugin
       )
     );
 
-    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-      getObsAIAssistantConnectorType(service)
-    );
+    const isObservabilityAIAssistantEnabled = service.isEnabled();
+    if (isObservabilityAIAssistantEnabled) {
+      pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+        getObsAIAssistantConnectorType(service)
+      );
+    }
+
     return {
       RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
     };
