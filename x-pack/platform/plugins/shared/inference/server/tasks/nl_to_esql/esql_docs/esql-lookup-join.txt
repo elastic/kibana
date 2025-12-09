@@ -24,7 +24,7 @@ Can be one of the following:
 If using join on a single field or a field list, the fields used must exist in both your current query results and in the lookup index. If the fields contains multi-valued entries, those entries will not match anything (the added fields will contain null for those rows).
 
 
-#### Examples
+### Syntax Examples
 
 ```
 LOOKUP JOIN <lookup_index> ON <field_name>
@@ -37,13 +37,7 @@ LOOKUP JOIN <lookup_index> ON MATCH(lookup_field, "search term") AND <left_field
 
 ```
 
-#### field_name
-
-The field to join on. This field must exist in both the current query results and the lookup index. If the field contains multi-valued entries, those entries will not match anything, and the added fields will contain `null` for those rows.
-
-If no rows match in the lookup index, the incoming row is retained, and `null` values are added. If multiple rows in the lookup index match, one row is added per match.
-
-## Examples
+## Query Examples
 
 ### Example 1: Enriching Firewall Logs with Threat Data
 
@@ -166,11 +160,13 @@ This query:
 |10.0.0.55      | allow  | 2048              |
 |10.0.0.200     | block  | 0                 |
 
+
 ## Limitations
 
+The following are the current limitations with LOOKUP JOIN:
 - Indices in `lookup` mode are always single-sharded.
-- Cross-cluster search is not supported; both source and lookup indices must be local.
 - Only equality-based matching is supported.
 - `LOOKUP JOIN` can only use a single match field and a single index.
 - Wildcards, aliases, datemath, and datastreams are not supported.
 - The query may circuit break if there are too many matching documents in the lookup index or if the documents are too large. `LOOKUP JOIN` processes data in batches of approximately 10,000 rows, which can require significant heap space for large matching documents.
+- Cross-cluster `LOOKUP JOIN` can not be used after aggregations (`STATS`), `SORT` and `LIMIT` commands, and coordinator-side `ENRICH` commands.
