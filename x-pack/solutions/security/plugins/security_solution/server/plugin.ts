@@ -19,6 +19,8 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -230,12 +232,21 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
-  private registerOnechatAttachmentsAndTools(
+  private async registerOnechatAttachmentsAndTools(
     onechat: SecuritySolutionPluginSetupDependencies['onechat'],
     config: ConfigType,
     core: SecuritySolutionPluginCoreSetupDependencies
-  ): void {
-    if (!onechat || !config.experimentalFeatures.agentBuilderEnabled) {
+  ): Promise<void> {
+    if (!onechat) {
+      return;
+    }
+
+    const chatExperience = await core.uiSettings.client.get<AIChatExperience>(
+      AI_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+
+    if (chatExperience !== AIChatExperience.Agent) {
       return;
     }
 
@@ -633,7 +644,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core);
+    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core).catch((error) => {
+      this.logger.error(`Error registering onechat attachments and tools: ${error}`);
+    });
 
     return {
       setProductFeaturesConfigurator:

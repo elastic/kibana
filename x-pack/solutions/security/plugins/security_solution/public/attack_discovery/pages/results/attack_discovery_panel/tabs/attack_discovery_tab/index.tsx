@@ -25,7 +25,7 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_mark
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { useIsAgentBuilderEnabled } from '../../../../../../agent_builder/hooks/use_is_agent_builder_enabled';
 import { NewAgentBuilderAttachment } from '../../../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../../../agent_builder/hooks/use_agent_builder_attachment';
 
@@ -86,7 +86,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const filters = useMemo(() => buildAlertsKqlFilter('_id', originalAlertIds), [originalAlertIds]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
   const attackDiscoveryWithOriginalValues = useMemo(
     () =>
       getAttackDiscoveryMarkdown({

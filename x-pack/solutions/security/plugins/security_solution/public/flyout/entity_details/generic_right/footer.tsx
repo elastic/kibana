@@ -23,7 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
 import type { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsAgentBuilderEnabled } from '../../../agent_builder/hooks/use_is_agent_builder_enabled';
 
 interface GenericEntityFlyoutFooterProps {
   entityId: EntityEcs['id'];
@@ -50,7 +50,7 @@ export const GenericEntityFlyoutFooter = ({
     assetCriticalityLevel,
   });
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
 
   const openDocumentFlyout = useCallback(() => {
     openFlyout({

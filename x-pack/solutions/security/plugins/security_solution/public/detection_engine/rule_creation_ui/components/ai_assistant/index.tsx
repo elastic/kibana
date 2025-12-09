@@ -18,7 +18,7 @@ import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/tele
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsAgentBuilderEnabled } from '../../../../agent_builder/hooks/use_is_agent_builder_enabled';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
@@ -100,7 +100,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
   }, [getFields]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
   const attachmentData = useMemo(() => {
     const queryField = getFields().queryBar;
     const { query } = (queryField.value as DefineStepRule['queryBar']).query;

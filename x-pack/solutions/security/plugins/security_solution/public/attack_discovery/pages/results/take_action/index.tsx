@@ -33,7 +33,7 @@ import { UpdateAlertsModal } from './update_alerts_modal';
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsAgentBuilderEnabled } from '../../../../agent_builder/hooks/use_is_agent_builder_enabled';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 interface Props {
@@ -208,7 +208,7 @@ const TakeActionComponent: React.FC<Props> = ({
     showAssistantOverlay?.();
   }, [closePopover, showAssistantOverlay]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : null;
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
     attachmentType: SecurityAgentBuilderAttachments.alert,

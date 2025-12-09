@@ -17,7 +17,7 @@ import { getPromptContextFromDetectionRules } from '../../../../assistant/helper
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsAgentBuilderEnabled } from '../../../../agent_builder/hooks/use_is_agent_builder_enabled';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -101,7 +101,7 @@ export const RulesTableToolbar = React.memo(() => {
     return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
   }, [selectedRuleNames]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
   const attachmentData = useMemo(
     () => ({ text: getPromptContextFromDetectionRules(selectedRules) }),
     [selectedRules]

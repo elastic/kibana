@@ -24,7 +24,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsAgentBuilderEnabled } from '../../../../agent_builder/hooks/use_is_agent_builder_enabled';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAskAiAssistant } from '../tabs/risk_inputs/use_ask_ai_assistant';
@@ -97,7 +97,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     replacements: assistantResult?.replacements,
   });
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const isAgentBuilderEnabled = useIsAgentBuilderEnabled();
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
     attachmentType: SecurityAgentBuilderAttachments.entity,
