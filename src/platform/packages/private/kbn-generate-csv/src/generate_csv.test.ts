@@ -1581,7 +1581,6 @@ describe('CsvGenerator', () => {
             "rows": 5,
           },
         },
-        "user_error": true,
         "warnings": Array [
           "Your export would have generated 100 total rows, but was limited to the maximum recommended row limit of 5. This limit can be configured in kibana.yml, but increasing it may impact performance.",
         ],
@@ -1667,7 +1666,6 @@ describe('CsvGenerator', () => {
             "rows": 5,
           },
         },
-        "user_error": true,
         "warnings": Array [
           "Your export would have generated 100 total rows, but was limited to the maximum recommended row limit of 5.",
         ],
