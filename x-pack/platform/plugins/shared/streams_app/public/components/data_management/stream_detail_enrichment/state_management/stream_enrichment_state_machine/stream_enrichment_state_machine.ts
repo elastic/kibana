@@ -15,9 +15,13 @@ import {
   checkAdditiveChanges,
   validateStreamlangModeCompatibility,
   validateStreamlang,
-  stripCustomIdentifiers,
 } from '@kbn/streamlang';
-import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang/types/streamlang';
+import {
+  isStreamlangDSLSchema,
+  streamlangDSLSchema,
+  type StreamlangDSL,
+} from '@kbn/streamlang/types/streamlang';
+import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
@@ -148,9 +152,7 @@ export const streamEnrichmentMachine = setup({
     }),
     updateDSL: assign(({ context }, params: { dsl: StreamlangDSL }) => ({
       nextStreamlangDSL: params.dsl,
-      hasChanges:
-        JSON.stringify(stripCustomIdentifiers(params.dsl).steps) !==
-        JSON.stringify(stripCustomIdentifiers(context.previousStreamlangDSL).steps),
+      hasChanges: hasChanges(params.dsl, context.previousStreamlangDSL),
     })),
     /* Mode machine spawning */
     spawnInteractiveMode: assign(({ context, spawn, self }) => {
@@ -251,11 +253,9 @@ export const streamEnrichmentMachine = setup({
     canUpdateStream: ({ context }) => {
       const hasSchemaErrors = context.schemaErrors.length > 0;
       const hasValidationErrors = context.validationErrors.size > 0;
-      const hasChanges =
-        JSON.stringify(stripCustomIdentifiers(context.previousStreamlangDSL)) !==
-        JSON.stringify(stripCustomIdentifiers(context.nextStreamlangDSL));
+      const hasDslChanges = hasChanges(context.nextStreamlangDSL, context.previousStreamlangDSL);
 
-      return !hasSchemaErrors && !hasValidationErrors && hasChanges;
+      return !hasSchemaErrors && !hasValidationErrors && hasDslChanges;
     },
     canSwitchToInteractiveMode: ({ context }) => {
       // Can't switch to interactive mode if there are schema errors
@@ -608,3 +608,18 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
+
+const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
+  const isValidSchema = isStreamlangDSLSchema(nextStreamlangDSL);
+
+  // Previous DSL is always a valid schema since it comes from a saved definition
+  // We don't want to try and strip identifiers etc on potentially partial schemas
+  if (!isValidSchema) {
+    return true;
+  } else {
+    return (
+      JSON.stringify(sanitiseForEditing(nextStreamlangDSL)) !==
+      JSON.stringify(sanitiseForEditing(previousStreamlangDSL))
+    );
+  }
+};
