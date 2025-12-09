@@ -266,9 +266,6 @@ export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadine
 export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
   'securitySolution:enablePrivilegedUserMonitoring' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable ESQL-based risk scoring */
-export const ENABLE_ESQL_RISK_SCORING = 'securitySolution:enableEsqlRiskScoring' as const;
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
