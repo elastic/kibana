@@ -65,13 +65,15 @@ export class AIAssistantManagementSelectionPlugin
       });
     }
 
-    // Register chat experience setting for both stateful and serverless
-    core.uiSettings.register({
-      [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
-        ...chatExperienceSetting,
-        value: this.config.preferredChatExperience ?? AIChatExperience.Classic,
-      },
-    });
+    // Register chat experience setting for both stateful and serverless (except workplaceai)
+    if (serverlessProjectType !== 'workplaceai') {
+      core.uiSettings.register({
+        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
+          ...chatExperienceSetting,
+          value: this.config.preferredChatExperience ?? AIChatExperience.Classic,
+        },
+      });
+    }
   }
 
   public start(core: CoreStart) {

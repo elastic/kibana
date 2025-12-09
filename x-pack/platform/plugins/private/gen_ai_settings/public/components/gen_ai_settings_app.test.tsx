@@ -69,6 +69,9 @@ describe('GenAiSettingsApp', () => {
           spaces: true,
         },
       },
+      observabilityAIAssistant: { show: true },
+      securitySolutionAssistant: { 'ai-assistant': true },
+      agentBuilder: { show: true },
     };
 
     // Mock feature flags to enable AI Agents by default

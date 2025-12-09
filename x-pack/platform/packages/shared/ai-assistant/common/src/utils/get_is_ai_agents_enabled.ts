@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '../..';
 
 /**
  * Checks if the AI Agents feature is enabled via feature flag.
- * @param coreStart - Core start services
- * @returns Promise resolving to boolean indicating if AI Agents are enabled
+ * @param featureFlags - Feature flags service
+ * @returns Boolean indicating if AI Agents are enabled
  */
-export async function getIsAiAgentsEnabled(coreStart: CoreStart): Promise<boolean> {
-  const isFeatureFlagEnabled = await coreStart.featureFlags.getBooleanValue(
-    AI_AGENTS_FEATURE_FLAG,
-    AI_AGENTS_FEATURE_FLAG_DEFAULT
-  );
-  return isFeatureFlagEnabled;
+export function getIsAiAgentsEnabled(featureFlags: FeatureFlagsStart): boolean {
+  return featureFlags.getBooleanValue(AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT);
 }
