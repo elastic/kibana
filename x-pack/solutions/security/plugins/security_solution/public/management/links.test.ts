@@ -282,4 +282,36 @@ describe('links', () => {
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.endpoints));
     });
   });
+
+  describe('Serverless environment', () => {
+    it('should exclude cloudDefendPolicies link when in serverless environment', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+
+      const serverlessEnvPlugins = {
+        ...getPlugins(),
+        cloud: {
+          isServerlessEnabled: true,
+        },
+      } as StartPlugins;
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, serverlessEnvPlugins);
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.cloudDefendPolicies));
+    });
+
+    it('should include cloudDefendPolicies link when NOT in serverless environment', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+
+      const echEnvPlugins = {
+        ...getPlugins(),
+        cloud: {
+          isServerlessEnabled: false,
+        },
+      } as StartPlugins;
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, echEnvPlugins);
+
+      expect(filteredLinks).toEqual(links);
+    });
+  });
 });

@@ -36,10 +36,6 @@ export enum SecurityPageName {
   cloudSecurityPostureVulnerabilityDashboard = 'cloud_security_posture-vulnerability_dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud defend page names must match `CloudDefendPageId` in x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/types.ts
-   */
   cloudDefend = 'cloud_defend',
   cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
