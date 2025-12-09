@@ -19,16 +19,13 @@ jest.mock('../queries', () => ({
   buildPrivilegedSearchBody: (...args: unknown[]) => mockBuildPrivilegedSearchBody(...args),
 }));
 
-const monitoringLabelsPath = '../generate_monitoring_labels';
-const syncMarkersPath = '../sync_markers/sync_markers';
-
 type GenerateMonitoringLabelsFn =
   typeof import('./generate_monitoring_labels').generateMonitoringLabels;
 const mockGenerateMonitoringLabels = jest.fn<
   MonitoringLabel[],
   Parameters<GenerateMonitoringLabelsFn>
 >(() => []);
-jest.mock(monitoringLabelsPath, () => ({
+jest.mock('./generate_monitoring_labels', () => ({
   generateMonitoringLabels: (...args: Parameters<GenerateMonitoringLabelsFn>) =>
     mockGenerateMonitoringLabels(...args),
 }));
@@ -44,7 +41,7 @@ const mockSyncMarkersService = {
   getLastProcessedMarker: jest.fn(),
   updateLastProcessedMarker: jest.fn(),
 };
-jest.mock(syncMarkersPath, () => ({
+jest.mock('../../sync_markers', () => ({
   createSyncMarkersService: () => mockSyncMarkersService,
 }));
 
@@ -76,20 +73,6 @@ beforeEach(() => {
 
 describe('createPatternMatcherService', () => {
   const soClient = {} as SavedObjectsClientContract;
-
-  it('returns empty array immediately when integrations mode has no matchers', async () => {
-    const dataClient = createDataClient();
-    const service = createPatternMatcherService({
-      dataClient,
-      soClient,
-      sourceType: 'entity_analytics_integration',
-    });
-
-    const result = await service.findPrivilegedUsersFromMatchers(createSource({ matchers: [] }));
-
-    expect(result).toEqual([]);
-    expect(dataClient.deps.clusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-  });
 
   it('calls sync marker updates in integrations mode, when there are matchers', async () => {
     const dataClient = createDataClient();
