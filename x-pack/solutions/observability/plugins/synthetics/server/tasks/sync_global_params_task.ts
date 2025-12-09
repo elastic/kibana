@@ -115,23 +115,19 @@ export const asyncGlobalParamsPropagation = async ({
   const {
     pluginsStart: { taskManager },
   } = server;
-  if (paramsSpacesToSync.includes(ALL_SPACES_ID)) {
-    await taskManager.ensureScheduled({
-      id: `${TASK_TYPE}:${uuidv4()}`,
-      params: {},
-      taskType: TASK_TYPE,
-      runAt: new Date(Date.now() + 3 * 1000),
-      state: { paramsSpaceToSync: ALL_SPACES_ID } as TaskState,
-    });
-  } else {
-    for (const spaceId of paramsSpacesToSync) {
+  const spacesToUpdate = paramsSpacesToSync.includes(ALL_SPACES_ID)
+    ? [ALL_SPACES_ID]
+    : paramsSpacesToSync;
+
+  await Promise.all(
+    spacesToUpdate.map(async (spaceId) => {
       await taskManager.ensureScheduled({
         id: `${TASK_TYPE}:${uuidv4()}`,
         params: {},
         taskType: TASK_TYPE,
         runAt: new Date(Date.now() + 3 * 1000),
-        state: { paramsSpaceToSync: spaceId } as TaskState,
+        state: { paramsSpaceToSync: spaceId },
       });
-    }
-  }
+    })
+  );
 };
