@@ -757,6 +757,20 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
       expect(getByTestId('executeActionButton')).toBeDisabled();
     });
+
+    it('should not disable the test tab', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
+      expect(screen.queryByTestId('testConnectorTab')).toBeEnabled();
+    });
   });
 });
 

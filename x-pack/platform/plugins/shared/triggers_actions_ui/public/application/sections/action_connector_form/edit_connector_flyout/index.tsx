@@ -328,7 +328,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   }, [actionTypeModel, connector]);
 
   const isSpecConnector =
-    !actionTypeModel?.source || actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack;
+    Boolean(actionTypeModel?.source) && actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack;
 
   return (
     <>

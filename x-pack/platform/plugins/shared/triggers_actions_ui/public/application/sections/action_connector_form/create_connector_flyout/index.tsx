@@ -110,7 +110,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
   const isSpecConnector =
-    !actionTypeModel?.source && actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack;
+    Boolean(actionTypeModel?.source) && actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype

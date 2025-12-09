@@ -90,7 +90,6 @@ describe('connector_add_modal', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
-      source: 'stack',
     };
 
     loadActionTypes.mockResolvedValue([actionType, newActionType]);

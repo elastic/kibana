@@ -34,7 +34,6 @@ describe('checkActionTypeEnabled', () => {
       enabledInLicense: true,
       isSystemActionType: false,
       isDeprecated: false,
-      source: 'stack',
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -54,7 +53,6 @@ describe('checkActionTypeEnabled', () => {
       enabledInLicense: false,
       isSystemActionType: false,
       isDeprecated: false,
-      source: 'stack',
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
       Object {
@@ -91,7 +89,6 @@ describe('checkActionTypeEnabled', () => {
       enabledInLicense: true,
       isSystemActionType: false,
       isDeprecated: false,
-      source: 'stack',
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -116,7 +113,6 @@ describe('checkActionTypeEnabled', () => {
       enabledInLicense: true,
       isSystemActionType: false,
       isDeprecated: false,
-      source: 'stack',
     };
 
     const isPreconfiguredConnector = true;
@@ -164,7 +160,6 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabledInLicense: true,
       isSystemActionType: false,
       isDeprecated: false,
-      source: 'stack',
     };
 
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
@@ -186,7 +181,6 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabledInLicense: true,
       isSystemActionType: false,
       isDeprecated: false,
-      source: 'stack',
     };
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`
