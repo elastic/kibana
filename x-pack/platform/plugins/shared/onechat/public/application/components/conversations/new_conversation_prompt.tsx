@@ -10,7 +10,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationInput } from './conversation_input/conversation_input';
-import { conversationElementWidthStyles } from './conversation.styles';
+import {
+  conversationElementPaddingStyles,
+  conversationElementWidthStyles,
+} from './conversation.styles';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { TechPreviewBadge } from '../common/tech_preview';
 
@@ -48,7 +51,12 @@ export const NewConversationPrompt: React.FC<{}> = () => {
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <ConversationInput />
+      <EuiFlexItem
+        grow={false}
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+      >
+        <ConversationInput />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

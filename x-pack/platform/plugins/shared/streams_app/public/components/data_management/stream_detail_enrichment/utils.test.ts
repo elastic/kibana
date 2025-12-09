@@ -227,9 +227,10 @@ describe('utils', () => {
       stream: {
         name: 'wired-stream',
         description: 'A wired stream',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { dsl: { data_retention: '1d' } },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           wired: {
             fields: { '@timestamp': { type: 'date' } },
@@ -252,9 +253,10 @@ describe('utils', () => {
       stream: {
         name: 'classic-stream',
         description: 'A classic stream',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { dsl: { data_retention: '1d' } },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           classic: {
             field_overrides: { '@timestamp': { type: 'date' } },
