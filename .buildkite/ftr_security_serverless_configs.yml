@@ -39,6 +39,7 @@ enabled:
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.basic.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.essentials.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.agentless.ts
+  - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.complete.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts
