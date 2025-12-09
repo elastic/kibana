@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { MonitoringEntitySource } from '../../../../../../../../../common/api/entity_analytics';
-import type { PrivilegeMonitoringDataClient } from '../../../../../engine/data_client';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
+import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 
 export interface ValidateTimeStampArgs {
   completedEventTimeStamp: string | undefined;

@@ -59,32 +59,5 @@ export const createIndexDeletionDetectionService = (
     }
   };
 
-  /**
-   * TODO: remove once testing of getAllUserNamesInAggregation complete
-   * - desk testing AND unit / FTR tests
-   */
-  const getAllUserNames = async (source: MonitoringEntitySource) => {
-    let afterKey: AfterKey | undefined;
-    const pageSize = 100;
-    let fetchMore = true;
-    const usersInIndex: string[] = [];
-    while (fetchMore) {
-      const privilegedMonitoringUsers = await esClient.search<never, StaleUsersAggregations>({
-        index: source.indexPattern,
-        ...buildFindUsersSearchBody({
-          afterKey,
-          pageSize,
-        }),
-      });
-      const buckets = privilegedMonitoringUsers?.aggregations?.users?.buckets;
-      if (buckets) {
-        usersInIndex.push(...buckets.map((bucket) => bucket.key.username));
-      }
-      afterKey = privilegedMonitoringUsers.aggregations?.users?.after_key;
-      fetchMore = Boolean(afterKey);
-    }
-    return usersInIndex;
-  };
-
   return { deletionDetection };
 };
