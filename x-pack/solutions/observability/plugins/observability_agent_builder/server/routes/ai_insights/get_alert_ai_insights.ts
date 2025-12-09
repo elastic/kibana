@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
+import moment from 'moment';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 
@@ -89,14 +90,14 @@ async function fetchAlertContext({
   const transactionType = alertDoc?.['transaction.type'];
   const transactionName = alertDoc?.['transaction.name'];
 
-  const alertTime = new Date(String(alertDoc?.['kibana.alert.start'])).getTime();
-  const alertStart = new Date(alertTime).toISOString();
+  const alertTime = moment(alertDoc?.['kibana.alert.start']);
+  const alertStart = alertTime.toISOString();
 
   // Time ranges for different data providers
-  const serviceSummaryStart = new Date(alertTime - 5 * 60 * 1000).toISOString(); // 5 min before
-  const downstreamStart = new Date(alertTime - 24 * 60 * 60 * 1000).toISOString(); // 24 hours before
-  const errorsStart = new Date(alertTime - 15 * 60 * 1000).toISOString(); // 15 min before
-  const changePointsStart = new Date(alertTime - 6 * 60 * 60 * 1000).toISOString(); // 6 hours before
+  const serviceSummaryStart = alertTime.clone().subtract(5, 'minutes').toISOString();
+  const downstreamStart = alertTime.clone().subtract(24, 'hours').toISOString();
+  const errorsStart = alertTime.clone().subtract(15, 'minutes').toISOString();
+  const changePointsStart = alertTime.clone().subtract(6, 'hours').toISOString();
 
   const contextParts: string[] = [];
 
