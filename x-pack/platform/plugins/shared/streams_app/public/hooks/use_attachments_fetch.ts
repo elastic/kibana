@@ -67,7 +67,7 @@ export const useAttachmentsFetch = ({
       );
 
       telemetryClient.trackAttachmentCounts({
-        name,
+        name: streamName,
         dashboard: attachmentCounts.dashboard ?? 0,
         rule: attachmentCounts.rule ?? 0,
         slo: attachmentCounts.slo ?? 0,
