@@ -14,9 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   AWS_SINGLE_ACCOUNT_TEST_SUBJ,
-  AWS_ORGANIZATION_ACCOUNT,
-  AWS_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { updatePolicyWithInputs } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
@@ -28,7 +27,7 @@ const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undef
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
-    id: AWS_ORGANIZATION_ACCOUNT,
+    id: ORGANIZATION_ACCOUNT,
     label: i18n.translate(
       'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.organizationLabel',
       {
@@ -47,7 +46,7 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
     testId: AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   },
   {
-    id: AWS_SINGLE_ACCOUNT,
+    id: SINGLE_ACCOUNT,
     label: i18n.translate(
       'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.singleAccountLabel',
       {
@@ -89,7 +88,7 @@ export const AwsAccountTypeSelect = ({
 
           {
             'aws.account_type': {
-              value: awsOrganizationEnabled ? AWS_ORGANIZATION_ACCOUNT : AWS_SINGLE_ACCOUNT,
+              value: awsOrganizationEnabled ? ORGANIZATION_ACCOUNT : SINGLE_ACCOUNT,
               type: 'text',
             },
           }
@@ -135,7 +134,7 @@ export const AwsAccountTypeSelect = ({
         size="m"
         name="accountType"
       />
-      {getAwsAccountType(input) === AWS_ORGANIZATION_ACCOUNT && (
+      {getAwsAccountType(input) === ORGANIZATION_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
@@ -146,7 +145,7 @@ export const AwsAccountTypeSelect = ({
           </EuiText>
         </>
       )}
-      {getAwsAccountType(input) === AWS_SINGLE_ACCOUNT && (
+      {getAwsAccountType(input) === SINGLE_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
