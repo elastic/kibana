@@ -42,7 +42,6 @@ const comparators: StateComparators<DashboardSettings> = {
   time_restore: 'referenceEquality',
   use_margins: 'referenceEquality',
   project_routing_restore: 'referenceEquality',
-
   tags: 'deepEquality',
 };
 

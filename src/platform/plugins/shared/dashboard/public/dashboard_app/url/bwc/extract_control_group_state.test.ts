@@ -12,7 +12,7 @@ import { extractDashboardState } from './extract_dashboard_state';
 describe('extractDashboardState', () => {
   describe('>=9.4 state', () => {
     test('should extract controls', () => {
-      const controlGroupInput93 = {
+      const controlGroupInput94 = {
         controls: [
           {
             config: {
@@ -37,9 +37,9 @@ describe('extractDashboardState', () => {
         ],
       };
       const dashboardState = extractDashboardState({
-        controlGroupInput: controlGroupInput93,
+        controlGroupInput: controlGroupInput94,
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual(controlGroupInput93.controls);
+      expect(dashboardState.controlGroupInput?.controls).toEqual(controlGroupInput94.controls);
     });
   });
 

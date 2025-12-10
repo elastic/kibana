@@ -15,7 +15,7 @@ export function extractOptions(state: { [key: string]: unknown }): Partial<Dashb
     return state.options as Partial<DashboardOptions>;
   }
 
-  // <9.4 Options state spread directly into DashboardState
+  // <9.3 Options state spread directly into DashboardState
   const options: Partial<Writable<DashboardOptions>> = {};
 
   if (typeof state.hidePanelTitles === 'boolean') {

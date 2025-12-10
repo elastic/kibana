@@ -11,7 +11,7 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
-  describe('< 9.4 panels state', () => {
+  describe('< 9.3 panels state', () => {
     test('should remove "i" from grid', () => {
       const { panels } = extractPanelsState({
         panels: [
