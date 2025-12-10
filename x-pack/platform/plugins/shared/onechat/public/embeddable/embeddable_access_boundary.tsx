@@ -15,72 +15,23 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../../common/features';
 import { useOnechatServices } from '../application/hooks/use_onechat_service';
-import { useKibana } from '../application/hooks/use_kibana';
+import { useUiPrivileges } from '../application/hooks/use_ui_privileges';
 import { UpgradeLicensePrompt } from '../application/components/access/prompts/upgrade_license_prompt';
 import { AddLlmConnectionPrompt } from '../application/components/access/prompts/add_llm_connection_prompt';
 import { NoPrivilegePrompt } from '../application/components/access/prompts/no_privilege_prompt';
 
-export interface EmbeddableAccessBoundaryProps {
+const closeButtonLabel = i18n.translate('xpack.onechat.embeddable.accessBoundary.closeButton', {
+  defaultMessage: 'Close',
+});
+
+interface AccessDeniedWrapperProps {
   children: ReactNode;
   onClose?: () => void;
 }
 
-interface AccessState {
-  isLoading: boolean;
-  hasShowPrivilege: boolean;
-  hasRequiredLicense: boolean;
-  hasLlmConnector: boolean;
-}
-
-export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> = ({
-  children,
-  onClose,
-}) => {
-  const { accessChecker } = useOnechatServices();
-  const {
-    services: { application },
-  } = useKibana();
+const AccessDeniedWrapper: React.FC<AccessDeniedWrapperProps> = ({ children, onClose }) => {
   const { euiTheme } = useEuiTheme();
-
-  const [accessState, setAccessState] = useState<AccessState>({
-    isLoading: true,
-    hasShowPrivilege: false,
-    hasRequiredLicense: false,
-    hasLlmConnector: false,
-  });
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      try {
-        // Check user capabilities for 'show' privilege
-        const { capabilities } = application;
-        const hasShowPrivilege = Boolean(capabilities[ONECHAT_FEATURE_ID]?.[uiPrivileges.show]);
-
-        // Initialize and get access checker results
-        await accessChecker.initAccess();
-        const { hasRequiredLicense, hasLlmConnector } = accessChecker.getAccess();
-
-        setAccessState({
-          isLoading: false,
-          hasShowPrivilege,
-          hasRequiredLicense,
-          hasLlmConnector,
-        });
-      } catch (error) {
-        // If access check fails, deny access
-        setAccessState({
-          isLoading: false,
-          hasShowPrivilege: false,
-          hasRequiredLicense: false,
-          hasLlmConnector: false,
-        });
-      }
-    };
-
-    checkAccess();
-  }, [application, accessChecker]);
 
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
@@ -104,11 +55,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
     }
   `;
 
-  const closeButtonLabel = i18n.translate('xpack.onechat.embeddable.accessBoundary.closeButton', {
-    defaultMessage: 'Close',
-  });
-
-  const renderAccessDenied = (prompt: React.ReactNode) => (
+  return (
     <>
       <EuiFlyoutHeader css={headerStyles}>
         {onClose && (
@@ -120,24 +67,88 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
           />
         )}
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={bodyStyles}>{prompt}</EuiFlyoutBody>
+      <EuiFlyoutBody css={bodyStyles}>{children}</EuiFlyoutBody>
     </>
   );
+};
+
+export interface EmbeddableAccessBoundaryProps {
+  children: ReactNode;
+  onClose?: () => void;
+}
+
+interface AccessState {
+  isLoading: boolean;
+  hasRequiredLicense: boolean;
+  hasLlmConnector: boolean;
+}
+
+export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> = ({
+  children,
+  onClose,
+}) => {
+  const { accessChecker } = useOnechatServices();
+  const { show: hasShowPrivilege } = useUiPrivileges();
+
+  const [accessState, setAccessState] = useState<AccessState>({
+    isLoading: true,
+    hasRequiredLicense: false,
+    hasLlmConnector: false,
+  });
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        await accessChecker.initAccess();
+        const { hasRequiredLicense, hasLlmConnector } = accessChecker.getAccess();
+
+        setAccessState({
+          isLoading: false,
+          hasRequiredLicense,
+          hasLlmConnector,
+        });
+      } catch (error) {
+        setAccessState({
+          isLoading: false,
+          hasRequiredLicense: false,
+          hasLlmConnector: false,
+        });
+      }
+    };
+
+    checkAccess();
+  }, [accessChecker]);
 
   if (accessState.isLoading) {
-    return renderAccessDenied(<EuiLoadingSpinner size="xl" />);
+    return (
+      <AccessDeniedWrapper onClose={onClose}>
+        <EuiLoadingSpinner size="xl" />
+      </AccessDeniedWrapper>
+    );
   }
 
   if (!accessState.hasRequiredLicense) {
-    return renderAccessDenied(<UpgradeLicensePrompt variant="embeddable" />);
+    return (
+      <AccessDeniedWrapper onClose={onClose}>
+        <UpgradeLicensePrompt variant="embeddable" />
+      </AccessDeniedWrapper>
+    );
   }
 
-  if (!accessState.hasShowPrivilege) {
-    return renderAccessDenied(<NoPrivilegePrompt variant="embeddable" />);
+  if (!hasShowPrivilege) {
+    return (
+      <AccessDeniedWrapper onClose={onClose}>
+        <NoPrivilegePrompt variant="embeddable" />
+      </AccessDeniedWrapper>
+    );
   }
 
   if (!accessState.hasLlmConnector) {
-    return renderAccessDenied(<AddLlmConnectionPrompt variant="embeddable" />);
+    return (
+      <AccessDeniedWrapper onClose={onClose}>
+        <AddLlmConnectionPrompt variant="embeddable" />
+      </AccessDeniedWrapper>
+    );
   }
 
   return children;
