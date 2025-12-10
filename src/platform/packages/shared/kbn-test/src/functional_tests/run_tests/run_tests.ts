@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
-import { applyFipsOverrides } from '../lib/fips_overrides';
+import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
@@ -70,9 +70,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       }
 
       let config: Config;
-      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
-      } else {
+      if (fipsIsEnabled()) {
         config = await readConfigFile(
           log,
           options.esVersion,
@@ -80,6 +78,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           settingOverrides,
           applyFipsOverrides
         );
+      } else {
+        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
       }
 
       const hasTests = await checkForEnabledTestsInFtrConfig({
