@@ -227,6 +227,60 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         },
         width: '20%',
       },
+      {
+        field: SIMILARITIES_FIELD,
+        name: i18n.SIMILARITY_ALERT_VALUES,
+        sortable: false,
+        render: (similarities: SimilarCaseUI['similarities']) => {
+          const similarAlertValues = similarities.alertIds;
+
+          if (similarAlertValues.length > 0) {
+            const clampedBadges = (
+              <EuiBadgeGroup
+                data-test-subj="similar-cases-table-column-similarities"
+                css={getLineClampedCss}
+                gutterSize="xs"
+              >
+                {similarAlertValues.map((similarAlertValue: string, index: number) => (
+                  <EuiBadge
+                    color="hollow"
+                    key={`${similarAlertValue}-${index}`}
+                    data-test-subj={`similar-cases-table-column-similarities-${similarAlertValue}`}
+                  >
+                    {similarAlertValue}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            );
+
+            const unclampedBadges = (
+              <EuiBadgeGroup data-test-subj="similar-cases-table-column-similarities">
+                {similarAlertValues.map((similarAlertValue: string, index: number) => (
+                  <EuiBadge
+                    color="hollow"
+                    key={`${similarAlertValue}-${index}`}
+                    data-test-subj={`similar-cases-table-column-similarities-${similarAlertValue}`}
+                  >
+                    {similarAlertValue}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            );
+
+            return (
+              <EuiToolTip
+                data-test-subj="similar-cases-table-column-similarities-tooltip"
+                position="left"
+                content={unclampedBadges}
+              >
+                {clampedBadges}
+              </EuiToolTip>
+            );
+          }
+          return getEmptyCellValue();
+        },
+        width: '20%',
+      },
     ],
     [
       casesColumnsConfig.category.field,
