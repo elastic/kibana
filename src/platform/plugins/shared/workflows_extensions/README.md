@@ -103,34 +103,34 @@ Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
 import { myStepCommonDefinition } from '../../common/step_types/my_step';
 
-// Handler function that executes the step logic
-const myStepHandler: StepHandler = async (context) => {
-  try {
-    const { message, count } = context.input;
+export const getMyStepDefinition = (coreSetup: CoreSetup) =>
+  createServerStepDefinition({
+    ...myStepCommonDefinition,
+    handler: async (context) => {
+      try {
+        const [coreStart, depsStart] = await coreSetup.getStartServices();
+        const { http } = coreStart;
+        const { message, count } = context.input;
 
-    // Access workflow context
-    const workflowContext = context.contextManager.getContext();
+        // Access workflow context
+        const workflowContext = context.contextManager.getContext();
 
-    // Use the scoped Elasticsearch client if needed
-    const esClient = context.contextManager.getScopedEsClient();
+        // Use the scoped Elasticsearch client if needed
+        const esClient = context.contextManager.getScopedEsClient();
 
-    // Log information
-    context.logger.info(`Processing step with message: ${message}`);
+        // Log information
+        context.logger.info(`Processing step with message: ${message}`);
 
-    // Perform your step logic here
-    const result = `Processed: ${message}${count ? ` (count: ${count})` : ''}`;
+        // Perform your step logic here
+        const result = `Processed: ${message}${count ? ` (count: ${count})` : ''}`;
 
-    return { output: { result } };
-  } catch (error) {
-    context.logger.error('My step execution failed', error);
-    return { error };
-  }
-};
-
-export const myStepDefinition: ServerStepDefinition = {
-  ...myStepCommonDefinition,
-  handler: myStepHandler,
-};
+        return { output: { result } };
+      } catch (error) {
+        context.logger.error('My step execution failed', error);
+        return { error };
+      }
+    }
+  })
 ```
 
 ### Step 3: Implement Public-Side Definition
@@ -183,15 +183,20 @@ Register the step definitions in both server and public plugin setup:
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { myStepDefinition } from './workflows/step_types/my_step';
+import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
+
 
 export interface MyPluginServerSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export class MyPlugin implements Plugin {
-  public setup(_core: CoreSetup, plugins: MyPluginServerSetupDeps) {
-    // Register server-side step definitions
-    plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
+  public setup(core: CoreSetup, plugins: MyPluginServerSetupDeps) {
+    // Create the step definition passing the necessary dependencies to factory function
+    const stepDefinition = getMyStepDefinition(core);
+
+    // Register server-side step definition using its factory function result
+    plugins.workflowsExtensions.registerStepDefinition(stepDefinition);
   }
 }
 ```
