@@ -175,7 +175,7 @@ export const yamlModeMachine = setup({
   },
   states: {
     editing: {
-      entry: 'sendStepsToSimulator',
+      entry: ['sendStepsToSimulator', 'sendDSLToParent'],
       on: {
         'yaml.contentChanged': {
           guard: 'hasSimulatePrivileges',
