@@ -61,6 +61,7 @@ describe('generateLayer', () => {
                 "type": "alias",
               },
             },
+            "subobjects": false,
           },
           "settings": Object {},
         },
@@ -141,6 +142,7 @@ describe('generateLayer', () => {
                 "type": "alias",
               },
             },
+            "subobjects": false,
           },
           "settings": Object {
             "index": Object {
@@ -168,5 +170,40 @@ describe('generateLayer', () => {
         "version": 1,
       }
     `);
+  });
+
+  it('should generate valid mappings with hierarchical field names (e.g., foo and foo.bar)', () => {
+    // This test verifies that subobjects: false is set at the mappings level,
+    // which allows Elasticsearch to accept field patterns like "foo" + "foo.bar"
+    // without treating them as conflicting object/non-object mappings.
+    const definitionWithHierarchicalFields: Streams.WiredStream.Definition = {
+      name: 'logs.test',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        wired: {
+          routing: [],
+          fields: {
+            '@timestamp': { type: 'date' },
+            'attributes.client': { type: 'keyword' },
+            'attributes.client.ip': { type: 'ip' },
+          },
+        },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+      },
+    };
+
+    const result = generateLayer('logs.test', definitionWithHierarchicalFields, false);
+
+    // Verify subobjects: false is set at the mappings level
+    expect(result.template.mappings).toHaveProperty('subobjects', false);
+
+    // Verify both fields are present (using bracket notation since keys contain dots)
+    const properties = result.template.mappings?.properties as Record<string, unknown>;
+    expect(properties['attributes.client']).toEqual({ type: 'keyword' });
+    expect(properties['attributes.client.ip']).toEqual({ type: 'ip' });
   });
 });
