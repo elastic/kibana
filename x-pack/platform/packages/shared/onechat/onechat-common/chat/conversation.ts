@@ -8,7 +8,7 @@
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
 import type { Attachment, AttachmentInput } from '../attachments';
-import { InterruptRequest } from './interruptions';
+import type { InterruptRequest } from './interruptions';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -17,11 +17,15 @@ export interface RoundInput {
   /**
    * A text message from the user.
    */
-  message: string;
+  message?: string;
   /**
    * Optional attachments to provide to the agent.
    */
   attachments?: Attachment[];
+  /**
+   * Response from the user to an interrupt request.
+   */
+  interrupt_response?: Record<string, unknown>;
 }
 
 /**
@@ -31,11 +35,15 @@ export interface RawRoundInput {
   /**
    * A text message from the user.
    */
-  message: string;
+  message?: string;
   /**
    * Optional attachments to provide to the agent.
    */
   attachments?: AttachmentInput[];
+  /**
+   * Response from the user to an interrupt request.
+   */
+  interrupt_response?: Record<string, unknown>;
 }
 
 /**

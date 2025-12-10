@@ -60,9 +60,11 @@ export function registerChatRoutes({
         },
       })
     ),
-    input: schema.string({
-      meta: { description: 'The user input message to send to the agent.' },
-    }),
+    input: schema.maybe(
+      schema.string({
+        meta: { description: 'The user input message to send to the agent.' },
+      })
+    ),
     attachments: schema.maybe(
       schema.arrayOf(
         schema.object({
@@ -166,9 +168,12 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      confirm,
       capabilities,
       browser_api_tools: browserApiTools,
     } = payload;
+
+    const interruptResponse = confirm !== undefined ? { confirm } : {};
 
     return chatService.converse({
       agentId,
@@ -179,6 +184,7 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: {
         message: input,
+        interrupt_response: interruptResponse,
         attachments,
       },
       request,

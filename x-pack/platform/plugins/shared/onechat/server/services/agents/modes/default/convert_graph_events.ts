@@ -18,8 +18,9 @@ import type {
   ToolCallEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
+  ToolInterruptEvent,
   ReasoningEvent,
-} from '@kbn/onechat-common';
+} from '@kbn/onechat-common/chat';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
   matchGraphName,
@@ -56,6 +57,7 @@ export type ConvertedEvents =
   | MessageCompleteEvent
   | ThinkingCompleteEvent
   | ToolCallEvent
+  | ToolInterruptEvent
   | BrowserToolCallEvent
   | ToolResultEvent
   | ReasoningEvent;
