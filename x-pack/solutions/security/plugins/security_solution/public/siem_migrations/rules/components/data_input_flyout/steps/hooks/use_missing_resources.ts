@@ -7,22 +7,13 @@
 
 import { useCallback, useState } from 'react';
 import type { SiemMigrationResourceBase } from '../../../../../../../common/siem_migrations/model/common.gen';
-import type { UseMigrationStepsProps } from '../../../../../common/types';
+import type { MigrationStepProps, MissingResourcesIndexed } from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
-import type { RuleMigrationStats } from '../../../../types';
-import type { DashboardMigrationStats } from '../../../../../dashboards/types';
-
-interface MissingResourcesIndexed {
-  macros: string[];
-  lookups: string[];
-}
 
 export const useMissingResources = ({
   setDataInputStep,
 }: {
-  setDataInputStep: UseMigrationStepsProps<
-    RuleMigrationStats | DashboardMigrationStats
-  >['setDataInputStep'];
+  setDataInputStep: MigrationStepProps['setDataInputStep'];
 }) => {
   const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
     MissingResourcesIndexed | undefined

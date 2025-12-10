@@ -17,7 +17,7 @@ import path from 'path';
 import os from 'os';
 import { splunkTestRules } from './splunk_rules.test.data';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { MigrationSource } from '../../../../../../types';
+import { MigrationSource } from '../../../../../../../common/types';
 
 const mockCreateMigration: CreateMigration = jest.fn();
 const mockOnRulesFileChanged = jest.fn();
@@ -31,7 +31,6 @@ const defaultProps: RulesFileUploadProps = {
   isLoading: false,
   isCreated: false,
   migrationName,
-  migrationSource: MigrationSource.SPLUNK,
 };
 
 const renderTestComponent = (props: Partial<RulesFileUploadProps> = {}) => {

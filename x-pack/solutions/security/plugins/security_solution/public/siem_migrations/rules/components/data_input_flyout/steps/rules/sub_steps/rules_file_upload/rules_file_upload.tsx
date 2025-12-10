@@ -25,7 +25,7 @@ import type { OriginalRule } from '../../../../../../../../../common/siem_migrat
 import * as i18n from './translations';
 import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
 import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
-import type { MigrationSource } from '../../../../../../types';
+import { MigrationSource } from '../../../../../../../common/types';
 
 type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;
 
@@ -35,29 +35,24 @@ export interface RulesFileUploadProps {
   isCreated: boolean;
   onRulesFileChanged: (files: FileList | null) => void;
   migrationName: string | undefined;
-  migrationSource: MigrationSource;
   apiError: string | undefined;
 }
 
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
-  ({
-    createMigration,
-    migrationName,
-    migrationSource,
-    apiError,
-    isLoading,
-    isCreated,
-    onRulesFileChanged,
-  }) => {
+  ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRulesRequestBody>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {
       if (migrationName) {
         filePickerRef.current?.removeFiles();
-        createMigration({ migrationName, rules: rulesToUpload, migrationSource });
+        createMigration({
+          migrationName,
+          rules: rulesToUpload,
+          migrationSource: MigrationSource.SPLUNK,
+        });
       }
-    }, [createMigration, migrationName, migrationSource, rulesToUpload]);
+    }, [createMigration, migrationName, rulesToUpload]);
 
     const onFileParsed = useCallback((content: string) => {
       const rules = parseContent(content).map(formatRuleRow);

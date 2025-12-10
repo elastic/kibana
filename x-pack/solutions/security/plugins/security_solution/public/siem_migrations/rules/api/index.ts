@@ -105,12 +105,16 @@ export interface AddRulesToQradarMigrationParams {
   signal?: AbortSignal;
 }
 
+interface AddRulesToQradarMigrationResponse {
+  count: number;
+}
+
 export const addRulesToQRadarMigration = async ({
   migrationId,
   body,
   signal,
 }: AddRulesToQradarMigrationParams) => {
-  return KibanaServices.get().http.post<void>(
+  return KibanaServices.get().http.post<AddRulesToQradarMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_QRADAR_RULES_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );

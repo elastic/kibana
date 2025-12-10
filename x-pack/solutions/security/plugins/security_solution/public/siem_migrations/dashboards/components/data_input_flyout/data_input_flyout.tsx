@@ -28,10 +28,10 @@ import { useMigrationDataInputContext } from '../../../common/components/migrati
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-import type { MigrationSettingsBase, Step, UseMigrationStepsProps } from '../../../common/types';
+import type { MigrationSettingsBase } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { useMissingResources } from '../../../rules/components/data_input_flyout/steps/hooks/use_missing_resources';
-import { STEP_COMPONENTS } from '../../configs';
+import { STEP_COMPONENTS } from './configs';
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -118,21 +118,19 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           <EuiFlyoutBody>
             <EuiFlexGroup direction="column" gutterSize="m">
               <>
-                {STEP_COMPONENTS[MigrationSource.SPLUNK].map(
-                  (step: Step<UseMigrationStepsProps<DashboardMigrationStats>>) => (
-                    <EuiFlexItem key={step.id}>
-                      <step.Component
-                        dataInputStep={dataInputStep}
-                        migrationSource={MigrationSource.SPLUNK}
-                        migrationStats={migrationStats}
-                        missingResourcesIndexed={missingResourcesIndexed}
-                        onMigrationCreated={onMigrationCreated}
-                        onMissingResourcesFetched={onMissingResourcesFetched}
-                        setDataInputStep={setDataInputStep}
-                      />
-                    </EuiFlexItem>
-                  )
-                )}
+                {STEP_COMPONENTS[MigrationSource.SPLUNK].map((step) => (
+                  <EuiFlexItem key={step.id}>
+                    <step.Component
+                      dataInputStep={dataInputStep}
+                      migrationSource={MigrationSource.SPLUNK}
+                      migrationStats={migrationStats}
+                      missingResourcesIndexed={missingResourcesIndexed}
+                      onMigrationCreated={onMigrationCreated}
+                      onMissingResourcesFetched={onMissingResourcesFetched}
+                      setDataInputStep={setDataInputStep}
+                    />
+                  </EuiFlexItem>
+                ))}
               </>
             </EuiFlexGroup>
           </EuiFlyoutBody>

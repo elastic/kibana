@@ -26,7 +26,7 @@ import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
-import type { UseMigrationStepsProps } from '../../../../../common/types';
+import type { MigrationStepProps } from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
 import type { DashboardMigrationStats } from '../../../../types';
 interface LookupsDataInputSubStepsProps {
@@ -35,7 +35,7 @@ interface LookupsDataInputSubStepsProps {
   onAllLookupsCreated: OnResourcesCreated;
 }
 
-export const LookupsDataInput = React.memo<UseMigrationStepsProps<DashboardMigrationStats>>(
+export const LookupsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats, setDataInputStep, missingResourcesIndexed }) => {
     const missingLookups = useMemo(
       () => missingResourcesIndexed?.lookups,

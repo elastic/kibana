@@ -7,12 +7,7 @@
 
 import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/model/rule_migration.gen';
-import type {
-  MigrationSettingsBase,
-  StatusFilterBase,
-  Step,
-  UseMigrationStepsProps,
-} from '../common/types';
+import type { MigrationSettingsBase, StatusFilterBase } from '../common/types';
 
 export interface RuleMigrationStats extends RuleMigrationTaskStats {
   status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
@@ -37,5 +32,3 @@ export interface RulesFilterOptions {
 export interface RuleMigrationSettings extends MigrationSettingsBase {
   skipPrebuiltRulesMatching: boolean;
 }
-
-export type Steps = Array<Step<UseMigrationStepsProps<RuleMigrationStats>>>;

@@ -65,7 +65,6 @@ export const useRulesFileUploadStep = ({
       <Component
         createMigration={createMigration}
         migrationName={migrationName}
-        migrationSource={migrationSource}
         isLoading={isLoading}
         isCreated={isCreated}
         apiError={error?.message}

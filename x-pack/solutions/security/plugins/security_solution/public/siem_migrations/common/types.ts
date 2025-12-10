@@ -50,12 +50,7 @@ export enum SplunkDataInputStep {
   End = 10,
 }
 
-export interface Step<Props, C extends React.ComponentType<Props> = React.ComponentType<Props>> {
-  id: string;
-  Component: C;
-}
-
-interface MissingResourcesIndexed {
+export interface MissingResourcesIndexed {
   macros: string[];
   lookups: string[];
 }
@@ -66,12 +61,22 @@ export enum MigrationSource {
   SPLUNK = 'splunk',
   QRADAR = 'qradar',
 }
-export interface UseMigrationStepsProps<T> {
+export interface MigrationStepProps {
   dataInputStep: number;
   migrationSource: MigrationSource;
-  migrationStats?: T;
-  onMigrationCreated: (createdMigrationStats: T) => void;
+  migrationStats?: MigrationStats;
+  onMigrationCreated: (createdMigrationStats: MigrationStats) => void;
   onMissingResourcesFetched: OnMissingResourcesFetched;
   setDataInputStep: (step: number) => void;
   missingResourcesIndexed?: MissingResourcesIndexed;
 }
+
+export interface Step<
+  Props = MigrationStepProps,
+  C extends React.ComponentType<Props> = React.ComponentType<Props>
+> {
+  id: string;
+  Component: C;
+}
+
+export type Steps = Array<Step<MigrationStepProps>>;

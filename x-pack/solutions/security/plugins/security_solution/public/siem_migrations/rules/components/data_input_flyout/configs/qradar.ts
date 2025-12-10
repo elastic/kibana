@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-export enum QradarDataInputStep {
-  Rules = 1,
-  End = 10,
-}
+import type { Steps } from '../../../../common/types';
+import { RulesDataInput } from '../steps/rules/rules_data_input';
 
-export enum SplunkDataInputStepId {
-  Rules = 'splunk_rules',
-  Macros = 'splunk_macros',
-  Lookups = 'splunk_lookups',
-}
-
-export enum QradarDataInputStepId {
+enum QradarDataInputStepId {
   Rules = 'qradar_rules',
 }
+
+export const QRADAR_MIGRATION_STEPS: Steps = [
+  { id: QradarDataInputStepId.Rules, Component: RulesDataInput },
+] as const;

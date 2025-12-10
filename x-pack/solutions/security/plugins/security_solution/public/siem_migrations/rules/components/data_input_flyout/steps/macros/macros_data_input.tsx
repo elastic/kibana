@@ -17,12 +17,8 @@ import * as i18n from './translations';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import type {
-  OnMissingResourcesFetched,
-  UseMigrationStepsProps,
-} from '../../../../../common/types';
+import type { MigrationStepProps, OnMissingResourcesFetched } from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
-import type { RuleMigrationStats } from '../../../../types';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -30,7 +26,7 @@ interface MacrosDataInputSubStepsProps {
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
 
-export const MacrosDataInput = React.memo<UseMigrationStepsProps<RuleMigrationStats>>(
+export const MacrosDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats, missingResourcesIndexed, onMissingResourcesFetched }) => {
     const missingMacros = useMemo(() => missingResourcesIndexed?.macros, [missingResourcesIndexed]);
     const dataInputStatus = useMemo(

@@ -119,6 +119,7 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
                 message: `Successfully imported ${rulesCount} QRadar rule${
                   rulesCount !== 1 ? 's' : ''
                 }`,
+                count: rulesCount,
               },
             });
           } catch (error) {

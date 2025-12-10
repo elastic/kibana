@@ -10,16 +10,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@e
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import * as i18n from '../translations';
 import { DashboardsUploadSubSteps } from './sub_steps';
-import type { UseMigrationStepsProps } from '../../../../../common/types';
+import type { MigrationStepProps } from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
-import type { DashboardMigrationStats } from '../../../../types';
 
 export const DashboardsUploadStep = ({
   dataInputStep = 1, // Default value if not provided
   migrationStats,
   onMigrationCreated,
   onMissingResourcesFetched,
-}: UseMigrationStepsProps<DashboardMigrationStats>) => {
+}: MigrationStepProps) => {
   const dataInputStatus = useMemo(
     () => getEuiStepStatus(SplunkDataInputStep.Upload, dataInputStep),
     [dataInputStep]

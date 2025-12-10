@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MigrationSource } from '../../common/types';
-import type { Steps } from '../types';
-import { SPLUNK_MIGRATION_STEPS } from './splunk';
 
-export const STEP_COMPONENTS: {
-  [MigrationSource.SPLUNK]: Steps;
-} = {
+import { SPLUNK_MIGRATION_STEPS } from './splunk';
+import { QRADAR_MIGRATION_STEPS } from './qradar';
+import type { Steps } from '../../../../common/types';
+import { MigrationSource } from '../../../../common/types';
+
+export const STEP_COMPONENTS: Record<MigrationSource, Steps> = {
   [MigrationSource.SPLUNK]: SPLUNK_MIGRATION_STEPS,
+  [MigrationSource.QRADAR]: QRADAR_MIGRATION_STEPS,
 };

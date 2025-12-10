@@ -16,7 +16,7 @@ import type { CreateMigration } from '../../../../../../service/hooks/use_create
 import * as i18n from './translations';
 import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
-import type { MigrationSource } from '../../../../../../types';
+import { MigrationSource } from '../../../../../../../common/types';
 
 export interface RulesXMLFileUploadProps {
   createMigration: CreateMigration;
@@ -24,29 +24,24 @@ export interface RulesXMLFileUploadProps {
   isCreated: boolean;
   onRulesFileChanged: (files: FileList | null) => void;
   migrationName: string | undefined;
-  migrationSource: MigrationSource;
   apiError: string | undefined;
 }
 
 export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
-  ({
-    createMigration,
-    migrationName,
-    migrationSource,
-    apiError,
-    isLoading,
-    isCreated,
-    onRulesFileChanged,
-  }) => {
+  ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [rulesToUpload, setRulesToUpload] = useState<string>();
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {
       if (migrationName && rulesToUpload) {
         filePickerRef.current?.removeFiles();
-        createMigration({ migrationName, rules: rulesToUpload, migrationSource });
+        createMigration({
+          migrationName,
+          rules: { xml: rulesToUpload },
+          migrationSource: MigrationSource.QRADAR,
+        });
       }
-    }, [createMigration, migrationName, migrationSource, rulesToUpload]);
+    }, [createMigration, migrationName, rulesToUpload]);
 
     const onXMLFileParsed = useCallback((content: string) => {
       setRulesToUpload(content);

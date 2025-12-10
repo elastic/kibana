@@ -7,10 +7,11 @@
 
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
-import type { MigrationSource, RuleMigrationStats } from '../../types';
+import type { RuleMigrationStats } from '../../types';
+import type { CreateRuleMigrationParams } from '../rule_migrations_service';
+import { MigrationSource } from '../../../common/types';
 
 export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title',
@@ -30,11 +31,7 @@ export type CreateMigration = ({
   rules,
   migrationName,
   migrationSource,
-}: {
-  migrationName: string;
-  migrationSource: MigrationSource;
-  rules: CreateRuleMigrationRulesRequestBody | string;
-}) => void;
+}: CreateRuleMigrationParams) => void;
 export type OnSuccess = (migrationStats: RuleMigrationStats) => void;
 
 export const useCreateMigration = (onSuccess: OnSuccess) => {
@@ -42,11 +39,24 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const createMigration = useCallback<CreateMigration>(
-    ({ migrationName, rules }) => {
+    ({ migrationName, migrationSource, rules }) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const migrationId = await siemMigrations.rules.createRuleMigration(rules, migrationName);
+          let migrationId: string;
+          if (migrationSource === MigrationSource.QRADAR) {
+            migrationId = await siemMigrations.rules.createRuleMigration({
+              migrationName,
+              migrationSource: MigrationSource.QRADAR,
+              rules,
+            });
+          } else {
+            migrationId = await siemMigrations.rules.createRuleMigration({
+              migrationName,
+              migrationSource: MigrationSource.SPLUNK,
+              rules,
+            });
+          }
           const stats = await siemMigrations.rules.api.getRuleMigrationStats({
             migrationId,
           });

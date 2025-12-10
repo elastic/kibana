@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import * as i18n from './translations';
 import type { MigrationSourceDropdownProps } from './use_migration_source_step';
-import type { MigrationSource } from '../../types';
+import type { MigrationSource } from '../../../common/types';
 
 export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
   ({ migrationSource, setMigrationSource, disabled, migrationSourceOptions }) => {

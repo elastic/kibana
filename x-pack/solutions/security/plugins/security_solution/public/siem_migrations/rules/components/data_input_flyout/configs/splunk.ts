@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { SplunkDataInputStepId } from '../components/data_input_flyout/steps/constants';
-import { LookupsDataInput } from '../components/data_input_flyout/steps/lookups/lookups_data_input';
-import { MacrosDataInput } from '../components/data_input_flyout/steps/macros/macros_data_input';
-import { RulesDataInput } from '../components/data_input_flyout/steps/rules/rules_data_input';
-import type { Steps } from '../types';
+import type { Steps } from '../../../../common/types';
+import { LookupsDataInput } from '../steps/lookups/lookups_data_input';
+import { MacrosDataInput } from '../steps/macros/macros_data_input';
+import { RulesDataInput } from '../steps/rules/rules_data_input';
+
+enum SplunkDataInputStepId {
+  Rules = 'splunk_rules',
+  Macros = 'splunk_macros',
+  Lookups = 'splunk_lookups',
+}
 
 export const SPLUNK_MIGRATION_STEPS: Steps = [
   { id: SplunkDataInputStepId.Rules, Component: RulesDataInput },
