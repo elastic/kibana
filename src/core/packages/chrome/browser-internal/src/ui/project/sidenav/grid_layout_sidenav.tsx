@@ -40,11 +40,7 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
           }
         `}
       />
-      <Navigation
-        isCollapsed={isCollapsed}
-        setWidth={setWidth}
-        {...navProps}
-      />
+      <Navigation isCollapsed={isCollapsed} setWidth={setWidth} {...navProps} />
     </>
   );
 };

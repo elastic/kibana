@@ -72,4 +72,3 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
     </div>
   );
 };
-

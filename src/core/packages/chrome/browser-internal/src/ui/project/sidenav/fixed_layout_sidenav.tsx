@@ -29,15 +29,9 @@ export const FixedLayoutProjectSideNav: FunctionComponent<CollapsibleNavigationP
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
 
   return (
-      <CollapsibleNavigationFlyout>
-        {({ setWidth }) => (
-        <Navigation
-          {...navProps}
-          isCollapsed={isCollapsed}
-          setWidth={setWidth}
-        />
-        )}
-      </CollapsibleNavigationFlyout>
+    <CollapsibleNavigationFlyout>
+      {({ setWidth }) => <Navigation {...navProps} isCollapsed={isCollapsed} setWidth={setWidth} />}
+    </CollapsibleNavigationFlyout>
   );
 };
 

@@ -537,10 +537,7 @@ export class ChromeService {
 
     const getProjectSideNavComponentForGridLayout = () => {
       return (
-        <GridLayoutProjectSideNav
-          isCollapsed$={this.isSideNavCollapsed$}
-          navProps={navProps}
-        />
+        <GridLayoutProjectSideNav isCollapsed$={this.isSideNavCollapsed$} navProps={navProps} />
       );
     };
 
