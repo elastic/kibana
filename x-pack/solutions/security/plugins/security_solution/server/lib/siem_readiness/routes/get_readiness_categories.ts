@@ -99,7 +99,7 @@ export const getReadinessCategoriesRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const searchResult = await esClient.search<unknown, AggregationResponse>({
+          const searchResult = await esClient.search({
             index: '*',
             size: 0,
             body: {
@@ -125,7 +125,8 @@ export const getReadinessCategoriesRoute = (
           // Format the ES aggregation response into raw category groups
           const rawCategoryMap: Record<string, IndexInfo[]> = {};
 
-          searchResult.aggregations.by_index?.buckets?.forEach((indexBucket: IndexBucket) => {
+          const aggregations = searchResult.aggregations as AggregationResponse | undefined;
+          aggregations?.by_index?.buckets?.forEach((indexBucket: IndexBucket) => {
             const indexName = indexBucket.key;
 
             indexBucket.by_category?.buckets?.forEach((categoryBucket: CategoryBucket) => {

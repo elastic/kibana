@@ -30,6 +30,7 @@ interface VisibilityBox {
   id: VisibilityTabId;
   title: string;
   status: VisibilityStatus; // For now, random status - will be computed later
+  illustration: string;
   statusDescriptions: {
     healthy: string;
     actionsRequired: string;
@@ -192,8 +193,8 @@ export const VisibilitySectionBoxes: React.FC<VisibilitySectionBoxesProps> = ({
               paddingSize="m"
               style={{
                 minHeight: '120px',
-                border: isSelected && `1px solid ${euiTheme.colors.primary}`,
-                backgroundColor: isSelected && euiTheme.colors.lightestShade,
+                border: isSelected ? `1px solid ${euiTheme.colors.primary}` : undefined,
+                backgroundColor: isSelected ? euiTheme.colors.lightestShade : undefined,
               }}
               onClick={() => onTabSelect(box.id)}
             >

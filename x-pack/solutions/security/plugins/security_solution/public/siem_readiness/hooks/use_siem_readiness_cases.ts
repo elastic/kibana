@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useState, useEffect } from 'react';
+import { useKibana } from '../../common/lib/kibana';
 
 interface CaseFlyoutParams {
   title: string;
@@ -18,7 +18,11 @@ export const useSiemReadinessCases = () => {
   const { services } = useKibana();
   const { useCasesAddToNewCaseFlyout } = services.cases.hooks;
 
-  const [formParams, setFormParams] = useState({});
+  const [formParams, setFormParams] = useState<CaseFlyoutParams>({
+    title: '',
+    description: '',
+    tags: [],
+  });
 
   const genericCase = useCasesAddToNewCaseFlyout({
     initialValue: formParams,
