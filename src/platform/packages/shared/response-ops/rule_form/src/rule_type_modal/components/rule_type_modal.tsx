@@ -166,7 +166,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem 
+                  <EuiFlexItem
                     grow={1}
                     style={{
                       paddingRight: euiTheme.size.base, // match the column layout for rule type categories
@@ -186,10 +186,10 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                       isFullWidth={true}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem 
+                  <EuiFlexItem
                     grow={3}
                     style={{
-                      marginRight: '8px', // the header is already padded on the right which matches the rule type list container, but we need to add the 8px margin from the card itself. 
+                      marginRight: '8px', // the header is already padded on the right which matches the rule type list container, but we need to add the 8px margin from the card itself.
                     }}
                   >
                     <EuiFieldSearch
