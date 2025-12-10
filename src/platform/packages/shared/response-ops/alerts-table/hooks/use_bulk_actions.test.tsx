@@ -558,6 +558,22 @@ describe('bulk action hooks', () => {
                 "label": "Edit tags",
                 "onClick": [Function],
               },
+              Object {
+                "data-test-subj": "bulk-mute",
+                "disableOnQuery": true,
+                "disabledLabel": "Mute selected",
+                "key": "bulk-mute",
+                "label": "Mute selected",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "bulk-unmute",
+                "disableOnQuery": true,
+                "disabledLabel": "Unmute selected",
+                "key": "bulk-unmute",
+                "label": "Unmute selected",
+                "onClick": [Function],
+              },
             ],
           },
         ]
