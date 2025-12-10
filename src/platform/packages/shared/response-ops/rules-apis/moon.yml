@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/triggers-actions-ui-types'
   - '@kbn/alerting-types'
   - '@kbn/react-query'
-  - '@kbn/alerting-plugin'
 tags:
   - shared-browser
   - package

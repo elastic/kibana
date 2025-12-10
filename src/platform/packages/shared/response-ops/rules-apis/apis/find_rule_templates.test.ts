@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FindRuleTemplatesApiResponse } from './find_rule_templates';
 import { findRuleTemplates, rewriteTemplatesBodyRes } from './find_rule_templates';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { FindRuleTemplatesResponseV1 } from '@kbn/alerting-plugin/common/routes/rule_template/apis/find';
 
 const http = httpServiceMock.createStartContract();
 
@@ -19,7 +19,7 @@ describe('findRuleTemplates', () => {
   });
 
   it('should call the find templates API with correct parameters', async () => {
-    const mockResponse: FindRuleTemplatesResponseV1 = {
+    const mockResponse: FindRuleTemplatesApiResponse = {
       data: [
         {
           id: 'template-1',
@@ -94,7 +94,7 @@ describe('findRuleTemplates', () => {
   });
 
   it('should handle optional parameters', async () => {
-    const mockResponse: FindRuleTemplatesResponseV1 = {
+    const mockResponse: FindRuleTemplatesApiResponse = {
       data: [],
       total: 0,
       page: 1,
@@ -134,7 +134,7 @@ describe('findRuleTemplates', () => {
   });
 
   it('should handle pagination correctly', async () => {
-    const mockResponse: FindRuleTemplatesResponseV1 = {
+    const mockResponse: FindRuleTemplatesApiResponse = {
       data: [
         {
           id: 'template-11',
@@ -166,7 +166,7 @@ describe('findRuleTemplates', () => {
 
 describe('rewriteTemplatesBodyRes', () => {
   it('should transform snake_case API response to camelCase', () => {
-    const apiResponse: FindRuleTemplatesResponseV1 = {
+    const apiResponse: FindRuleTemplatesApiResponse = {
       data: [
         {
           id: 'template-1',
@@ -200,7 +200,7 @@ describe('rewriteTemplatesBodyRes', () => {
   });
 
   it('should handle empty data array', () => {
-    const apiResponse: FindRuleTemplatesResponseV1 = {
+    const apiResponse: FindRuleTemplatesApiResponse = {
       data: [],
       total: 0,
       page: 1,
@@ -218,7 +218,7 @@ describe('rewriteTemplatesBodyRes', () => {
   });
 
   it('should handle templates with empty tags', () => {
-    const apiResponse: FindRuleTemplatesResponseV1 = {
+    const apiResponse: FindRuleTemplatesApiResponse = {
       data: [
         {
           id: 'template-no-tags',

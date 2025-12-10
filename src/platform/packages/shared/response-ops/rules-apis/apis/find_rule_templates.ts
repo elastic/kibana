@@ -8,7 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { FindRuleTemplatesResponseV1 } from '@kbn/alerting-plugin/common/routes/rule_template/apis/find';
+import type { AsApiContract } from '@kbn/actions-types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
 
 export interface FindRuleTemplatesParams {
@@ -23,29 +23,39 @@ export interface FindRuleTemplatesParams {
   tags?: string[];
 }
 
+// i really want to import this from @kbn/alerts-ui-shared but can't because of circular dependencies.
+// i can't move this type to @kbn/alerting-types because the `Rule` type there uses a legacy format that is not compatible with the templates API.
+// defining the type here isn't a huge deal, but it means we have to manually add any new/additional fields here to use them in the UI.
+interface RuleTemplate {
+  id: string;
+  name: string;
+  ruleTypeId: string;
+  tags: string[];
+}
+
 export interface FindRuleTemplatesResponse {
   total: number;
   page: number;
   perPage: number;
-  data: Array<{
-    id: string;
-    name: string;
-    tags: string[];
-    ruleTypeId: string;
-  }>;
+  data: RuleTemplate[];
+}
+
+export interface FindRuleTemplatesApiResponse {
+  total: number;
+  page: number;
+  per_page: number;
+  data: AsApiContract<RuleTemplate>[];
 }
 
 export const rewriteTemplatesBodyRes = (
-  response: FindRuleTemplatesResponseV1
+  response: FindRuleTemplatesApiResponse
 ): FindRuleTemplatesResponse => ({
   page: response.page,
   perPage: response.per_page,
   total: response.total,
-  data: response.data.map((template) => ({
-    id: template.id,
-    name: template.name,
-    tags: template.tags,
-    ruleTypeId: template.rule_type_id,
+  data: response.data.map(({ rule_type_id: ruleTypeId, ...rest }) => ({
+    ruleTypeId,
+    ...rest,
   })),
 });
 
@@ -60,7 +70,7 @@ export async function findRuleTemplates({
   ruleTypeId,
   tags,
 }: FindRuleTemplatesParams): Promise<FindRuleTemplatesResponse> {
-  const res = await http.get<FindRuleTemplatesResponseV1>(
+  const res = await http.get<FindRuleTemplatesApiResponse>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule_template/_find`,
     {
       query: {
