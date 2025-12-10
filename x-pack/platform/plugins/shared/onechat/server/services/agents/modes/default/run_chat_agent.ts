@@ -23,6 +23,7 @@ import {
   selectTools,
   conversationToLangchainMessages,
   prepareConversation,
+  processVisualizationResults,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -177,6 +178,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       logger,
       startTime,
     }),
+    // Process create_visualization results to create attachments
+    processVisualizationResults(attachmentStateManager),
     finalize(() => manualEvents$.complete())
   );
 

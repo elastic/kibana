@@ -9,6 +9,7 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 
@@ -32,7 +33,7 @@ export function VisualizeLens({
   /** Callback to open an existing attachment in the viewer */
   onOpenAttachment?: (attachmentId: string) => void;
 }) {
-  const { lensInput, setLensInput, isLoading } = useLensInput({
+  const { lensInput, setLensInput, isLoading, error } = useLensInput({
     lens,
     dataViews,
     lensConfig,
@@ -40,6 +41,18 @@ export function VisualizeLens({
 
   // Check if this visualization is already an attachment
   const existingAttachment = findExistingVisualizationAttachment?.(lensConfig);
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <>
+        <EuiCallOut title="Visualization Error" color="danger" iconType="error" size="s">
+          <p>{error.message}</p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
 
   return (
     <BaseVisualization

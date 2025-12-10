@@ -18,3 +18,4 @@ export {
   type AttachmentPresentationConfig,
 } from './attachment_presentation';
 export { cleanAttachmentToolCalls, isCleanedResult } from './clean_attachment_history';
+export { processVisualizationResults } from './process_visualization_results';

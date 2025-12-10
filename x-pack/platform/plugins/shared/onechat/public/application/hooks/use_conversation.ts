@@ -190,6 +190,29 @@ export interface ConversationContextEstimate {
 }
 
 /**
+ * Check if a tool result has been cleaned (attachment operation results are cleaned from history)
+ */
+const isCleanedResult = (data: unknown): boolean => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    '__cleaned__' in data &&
+    (data as { __cleaned__: boolean }).__cleaned__ === true
+  );
+};
+
+/**
+ * Check if a tool result is an attachment operation (these are cleaned from history)
+ */
+const isAttachmentOperationResult = (data: unknown): boolean => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    '__attachment_operation__' in data
+  );
+};
+
+/**
  * Hook to estimate the context size for the next LLM request.
  * This estimates how many tokens will be sent in the next request,
  * NOT the cumulative tokens used across all rounds.
@@ -211,9 +234,16 @@ export const useConversationContextEstimate = (): ConversationContextEstimate =>
         if (step.type === 'tool_call') {
           // Tool call params
           historyTokens += estimateTokensFromString(JSON.stringify(step.params));
-          // Tool results
+          // Tool results (skip cleaned/attachment operation results as they're replaced with summaries)
           for (const result of step.results) {
-            historyTokens += estimateTokensFromString(JSON.stringify(result.data));
+            // Cleaned results and attachment operations are replaced with minimal summaries
+            // Don't count the original large data, just estimate for the summary
+            if (isCleanedResult(result.data) || isAttachmentOperationResult(result.data)) {
+              // Minimal tokens for cleaned summary
+              historyTokens += 20;
+            } else {
+              historyTokens += estimateTokensFromString(JSON.stringify(result.data));
+            }
           }
         } else if (step.type === 'reasoning') {
           // Reasoning content (if included in context)

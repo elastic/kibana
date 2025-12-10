@@ -20,6 +20,8 @@ const ATTACHMENT_TOOL_IDS = [
   platformCoreTools.attachmentDelete,
   platformCoreTools.attachmentList,
   platformCoreTools.attachmentDiff,
+  // create_visualization results are converted to attachments, so clean them too
+  platformCoreTools.createVisualization,
 ];
 
 /**
@@ -121,6 +123,12 @@ const getCleanedSummary = (toolId: string, data: Record<string, unknown>): strin
       const changeType = data.change_type ?? 'changed';
       const summary = data.summary ?? '';
       return `Diff for ${attachmentId}: ${changeType}${summary ? ` - ${summary}` : ''}`;
+    }
+
+    case platformCoreTools.createVisualization: {
+      const attachmentId = data.attachment_id ?? 'unknown';
+      const chartType = data.chart_type ?? 'visualization';
+      return `Created ${chartType} visualization attachment ${attachmentId}`;
     }
 
     default:
