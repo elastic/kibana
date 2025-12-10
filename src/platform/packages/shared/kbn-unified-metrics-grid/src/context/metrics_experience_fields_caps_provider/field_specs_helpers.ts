@@ -12,6 +12,7 @@ import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { MetricField, Dimension } from '../../types';
 import { getTimeSeriesMetric, hasValue } from '../../common/utils/fields';
+import { DIMENSION_TYPES } from '../../common/constants';
 
 const FILTER_OUT_FIELDS = new Set([
   '_id',
@@ -67,19 +68,24 @@ export const createFieldSpecs = ({
       continue;
     }
 
-    const timeSeriesMetric = getTimeSeriesMetric(fieldSpec, columnByName);
+    const esqlColumn = columnByName.get(fieldName);
+    const timeSeriesMetric = getTimeSeriesMetric(fieldSpec, esqlColumn);
+
     if (Boolean(timeSeriesMetric)) {
       metricFields.push({
         index,
         name: fieldName,
-        type: columnByName.get(fieldName)?.meta?.esType || 'unknown',
+        type: esqlColumn?.meta?.esType || 'unknown',
         instrument: timeSeriesMetric,
         dimensions: [],
       });
-    } else if (Boolean(fieldSpec.timeSeriesDimension)) {
+    } else if (
+      Boolean(fieldSpec.timeSeriesDimension) ||
+      DIMENSION_TYPES.includes(esqlColumn?.meta?.esType as ES_FIELD_TYPES)
+    ) {
       dimensions.push({
         name: fieldName,
-        type: columnByName.get(fieldName)?.meta?.esType as ES_FIELD_TYPES,
+        type: esqlColumn?.meta?.esType as ES_FIELD_TYPES,
       });
     }
   }

@@ -8,22 +8,14 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
-
-export const isMetricField = (
-  fieldSpec: FieldSpec,
-  columnByName: Map<string, DatatableColumn>
-): boolean => Boolean(getTimeSeriesMetric(fieldSpec, columnByName));
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 export const getTimeSeriesMetric = (
   fieldSpec: FieldSpec,
-  columnByName: Map<string, DatatableColumn>
+  column?: DatatableColumn
 ): estypes.MappingTimeSeriesMetricType | undefined => {
-  if (
-    !fieldSpec.timeSeriesMetric &&
-    columnByName.get(fieldSpec.name)?.meta?.esType?.startsWith('counter_')
-  ) {
+  if (!fieldSpec.timeSeriesMetric && column?.meta?.esType?.startsWith('counter_')) {
     return 'counter';
   }
 
