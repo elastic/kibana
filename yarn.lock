@@ -9412,7 +9412,7 @@
     "@aws-sdk/client-kendra" "^3.750.0"
     "@aws-sdk/credential-provider-node" "^3.750.0"
 
-"@langchain/classic@1.0.5":
+"@langchain/classic@1.0.5", "@langchain/classic@^1.0.5":
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@langchain/classic/-/classic-1.0.5.tgz#27d6e7c164852217717ad0e816397b5296f89e6d"
   integrity sha512-yMlcuQ80iG0SAEzgym95oLS+bJZJlmsFrMb+qkwg5mzHfL9DzAIFyvaMPiDnwKM0iv52u7iwD/aucLljZul9mQ==
