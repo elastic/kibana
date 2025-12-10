@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/presentation-panel-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/ebt-tools'
+  - '@kbn/es-query'
 tags:
   - shared-browser
   - package
