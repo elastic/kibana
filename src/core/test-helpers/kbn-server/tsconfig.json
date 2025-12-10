@@ -20,7 +20,6 @@
     "@kbn/es",
     "@kbn/dev-utils",
     "@kbn/safer-lodash-set",
-    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",
