@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -17,12 +17,11 @@ import {
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { TryItButton } from '../try_it_button';
 import { KubernetesAssetImage } from './kubernetes_asset_image';
 
 const OTEL_DOCS_URL = 'https://www.elastic.co/docs/reference/integrations/kubernetes_otel';
+const OTEL_K8S_DASHBOARDS_PATH = '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")';
 
 const OpenTelemetryLink = () => (
   <EuiLink
@@ -51,7 +50,7 @@ export const OtelKubernetesDashboardCard = ({
   });
 
   const otelKubernetesDashboardUrl = getUrlForApp('dashboards', {
-    path: '#/view/kubernetes_otel-cluster-overview',
+    path: OTEL_K8S_DASHBOARDS_PATH,
   });
 
   const handleClose = () => {
@@ -131,9 +130,9 @@ export const OtelKubernetesDashboardCard = ({
                   >
                     {hasIntegrationInstalled
                       ? i18n.translate(
-                          'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.viewDashboardLink',
+                          'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.viewDashboardsLink',
                           {
-                            defaultMessage: 'View Dashboard',
+                            defaultMessage: 'View Dashboards',
                           }
                         )
                       : i18n.translate(
@@ -173,32 +172,25 @@ export const OtelKubernetesDashboardCard = ({
     </EuiPanel>
   );
 };
-const LOCAL_STORAGE_KEY = 'inventoryUI:otelK8sDashboardClicked';
 
 export const OtelKubernetesButton = () => {
-  const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
-  const clickedRef = useRef<boolean | undefined>(clicked);
+  const { services } = useKibanaContextForPlugin();
+  const { getUrlForApp } = services.application;
+  const otelKubernetesDashboardUrl = getUrlForApp('dashboards', {
+    path: OTEL_K8S_DASHBOARDS_PATH,
+  });
+
   return (
-    <TryItButton
-      color={clickedRef.current ? 'primary' : 'accent'}
-      label={i18n.translate('xpack.infra.bottomDrawer.otelKubernetesDashboardsLink', {
-        defaultMessage: 'Kubernetes OpenTelemetry Dashboards',
+    <EuiLink
+      aria-label={i18n.translate('xpack.infra.bottomDrawer.otelKubernetesDashboardsLink', {
+        defaultMessage: 'Kubernetes OpenTelemetry',
       })}
       data-test-subj="inventory-otelKubernetesDashboard-link"
-      link={{
-        app: 'dashboards',
-        hash: '/list',
-        search: {
-          _g: '()',
-          s: 'tag:("Kubernetes OpenTelemetry Assets")',
-        },
-      }}
-      onClick={() => {
-        if (!clickedRef.current) {
-          setClicked(true);
-        }
-      }}
-      hideBadge={clickedRef.current}
-    />
+      href={otelKubernetesDashboardUrl}
+    >
+      {i18n.translate('xpack.infra.bottomDrawer.otelKubernetesDashboardsLink', {
+        defaultMessage: 'Kubernetes OpenTelemetry',
+      })}
+    </EuiLink>
   );
 };

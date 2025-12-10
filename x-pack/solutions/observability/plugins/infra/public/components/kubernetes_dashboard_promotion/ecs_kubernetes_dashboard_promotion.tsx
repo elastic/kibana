@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -17,12 +17,11 @@ import {
   EuiText,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { TryItButton } from '../try_it_button';
 import { KubernetesAssetImage } from './kubernetes_asset_image';
 
 const ECS_DOCS_URL = 'https://www.elastic.co/docs/reference/integrations/kubernetes';
+const ECS_K8S_DASHBOARDS_PATH = '#/list?_g=()&s=tag:(Kubernetes)';
 
 const EcsKubernetesIntegrationLink = () => (
   <EuiLink
@@ -50,7 +49,7 @@ export const KubernetesDashboardCard = ({
   });
 
   const ecsKubernetesDashboardUrl = getUrlForApp('dashboards', {
-    path: '#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+    path: ECS_K8S_DASHBOARDS_PATH,
   });
 
   return (
@@ -122,9 +121,9 @@ export const KubernetesDashboardCard = ({
                   >
                     {hasIntegrationInstalled
                       ? i18n.translate(
-                          'xpack.infra.inventoryUI.kubernetesPodsDashboard.viewDashboardLink',
+                          'xpack.infra.inventoryUI.kubernetesPodsDashboard.viewDashboardsLink',
                           {
-                            defaultMessage: 'View Dashboard',
+                            defaultMessage: 'View Dashboards',
                           }
                         )
                       : i18n.translate(
@@ -162,31 +161,24 @@ export const KubernetesDashboardCard = ({
   );
 };
 
-const LOCAL_STORAGE_KEY = 'inventoryUI:k8sDashboardClicked';
 export const KubernetesButton = () => {
-  const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
-  const clickedRef = useRef<boolean | undefined>(clicked);
+  const { services } = useKibanaContextForPlugin();
+  const { getUrlForApp } = services.application;
+  const kubernetesDashboardUrl = getUrlForApp('dashboards', {
+    path: ECS_K8S_DASHBOARDS_PATH,
+  });
+
   return (
-    <TryItButton
-      color={clickedRef.current ? 'primary' : 'accent'}
-      label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
-        defaultMessage: 'Kubernetes Integration Dashboards',
+    <EuiLink
+      aria-label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
+        defaultMessage: 'Kubernetes Integration',
       })}
       data-test-subj="inventory-kubernetesDashboard-link"
-      link={{
-        app: 'dashboards',
-        hash: '/list',
-        search: {
-          _g: '()',
-          s: 'kubernetes tag:(Managed)',
-        },
-      }}
-      onClick={() => {
-        if (!clickedRef.current) {
-          setClicked(true);
-        }
-      }}
-      hideBadge={clickedRef.current}
-    />
+      href={kubernetesDashboardUrl}
+    >
+      {i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
+        defaultMessage: 'Kubernetes Integration',
+      })}
+    </EuiLink>
   );
 };
