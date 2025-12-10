@@ -30,8 +30,7 @@ import { createLegend } from '../lib/create_legend';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
-import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/ecs_kubernetes_dashboard_promotion';
-import { OtelKubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/otel_kubernetes_dashboard_promotion';
+import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/kubernetes_dashboard_promotion';
 import { useInstalledIntegration } from '../../../../hooks/use_installed_integration';
 
 interface Props {
@@ -182,6 +181,7 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
                 {showEcsK8sDashboardCard && (
                   <EuiFlexItem>
                     <KubernetesDashboardCard
+                      integrationType="ecs"
                       onClose={() => setEcsK8sCardDismissed(true)}
                       hasIntegrationInstalled={hasEcsK8sIntegration}
                     />
@@ -189,7 +189,8 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
                 )}
                 {showOtelK8sDashboardCard && (
                   <EuiFlexItem>
-                    <OtelKubernetesDashboardCard
+                    <KubernetesDashboardCard
+                      integrationType="otel"
                       onClose={() => setOtelK8sCardDismissed(true)}
                       hasIntegrationInstalled={hasOtelK8sIntegration}
                     />
