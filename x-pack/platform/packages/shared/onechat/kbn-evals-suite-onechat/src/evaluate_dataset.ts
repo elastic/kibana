@@ -125,15 +125,18 @@ export function createEvaluateDataset({
               steps?: Array<{
                 type: string;
                 tool_id?: string;
-                results?: Array<{ data?: { reference?: { id?: string } } }>;
+                results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
               }>;
             }
           )?.steps ?? [];
         return steps
           .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
           .flatMap((step) => step.results ?? [])
-          .map((result) => result.data?.reference?.id)
-          .filter((id): id is string => typeof id === 'string');
+          .map((result) => ({
+            index: result.data?.reference?.index ?? '',
+            id: result.data?.reference?.id ?? '',
+          }))
+          .filter((doc) => doc.id && doc.index);
       },
       extractGroundTruth: (metadata: DatasetExample['metadata']) => metadata?.groundTruth ?? {},
     });

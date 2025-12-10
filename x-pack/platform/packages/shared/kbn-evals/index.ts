@@ -50,4 +50,5 @@ export type {
   RagEvaluatorConfig,
   RetrievedDocsExtractor,
   GroundTruthExtractor,
+  RetrievedDoc,
 } from './src/evaluators/rag/types';

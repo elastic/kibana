@@ -6,7 +6,7 @@
  */
 
 import type { Evaluator } from '../../types';
-import type { RagEvaluatorConfig, GroundTruth } from './types';
+import type { RagEvaluatorConfig, GroundTruth, RetrievedDoc } from './types';
 import {
   DEFAULT_RELEVANCE_THRESHOLD,
   getRelevantDocs,
@@ -14,11 +14,21 @@ import {
   calculatePrecision,
   calculateRecall,
   calculateF1,
+  filterDocsByGroundTruthIndices,
 } from './utils';
 
 const PRECISION_EVALUATOR_NAME = 'Precision@K';
 const RECALL_EVALUATOR_NAME = 'Recall@K';
 const F1_EVALUATOR_NAME = 'F1@K';
+
+function shouldFilterByGroundTruthIndices(config: {
+  filterByGroundTruthIndices?: boolean;
+}): boolean {
+  if (config.filterByGroundTruthIndices !== undefined) {
+    return config.filterByGroundTruthIndices;
+  }
+  return process.env.INDEX_FOCUSED_RAG_EVAL === 'true';
+}
 
 interface RagMetrics {
   precision: number;
@@ -42,7 +52,12 @@ function computeRagMetrics<TOutput, TMetadata>(
     return null;
   }
 
-  const allRetrievedDocs = extractRetrievedDocs(output);
+  let allRetrievedDocs: RetrievedDoc[] = extractRetrievedDocs(output);
+
+  if (shouldFilterByGroundTruthIndices(config)) {
+    allRetrievedDocs = filterDocsByGroundTruthIndices(allRetrievedDocs, groundTruth);
+  }
+
   const topKDocs = allRetrievedDocs.slice(0, k);
   const relevantInTopK = getRelevantDocs(topKDocs, groundTruth, threshold);
   const hits = relevantInTopK.length;

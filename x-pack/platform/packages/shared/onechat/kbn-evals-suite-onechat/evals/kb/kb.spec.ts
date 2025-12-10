@@ -44,7 +44,9 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Factual',
               groundTruth: {
-                '49d9e88fadbf11fa4e685c847590078ff9394c2fe7566094f504f53ca4aca465': 1,
+                wix_knowledge_base: {
+                  '49d9e88fadbf11fa4e685c847590078ff9394c2fe7566094f504f53ca4aca465': 1,
+                },
               },
             },
           },
@@ -60,7 +62,9 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Procedural',
               groundTruth: {
-                '06535db983ea0ffe0214af14497a1d158f279d92c92f211e87b8820aa95dbe43': 1,
+                wix_knowledge_base: {
+                  '06535db983ea0ffe0214af14497a1d158f279d92c92f211e87b8820aa95dbe43': 1,
+                },
               },
             },
           },
@@ -75,7 +79,9 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Procedural',
               groundTruth: {
-                de6e96935f0b3321cf29416ec164482247b5035f1d2e12b36e203be8126ca8b8: 1,
+                wix_knowledge_base: {
+                  de6e96935f0b3321cf29416ec164482247b5035f1d2e12b36e203be8126ca8b8: 1,
+                },
               },
             },
           },
@@ -91,8 +97,10 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Factual',
               groundTruth: {
-                a513a215c1798f329293330cb5f5e975a18978954b5ee27d84441e029f900d51: 1,
-                b9ba8c318ee75f49eaa89c1d5b8d461fa2b4c27167381b869aeb31027d7187f9: 1,
+                wix_knowledge_base: {
+                  a513a215c1798f329293330cb5f5e975a18978954b5ee27d84441e029f900d51: 1,
+                  b9ba8c318ee75f49eaa89c1d5b8d461fa2b4c27167381b869aeb31027d7187f9: 1,
+                },
               },
             },
           },
@@ -108,7 +116,9 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Procedural',
               groundTruth: {
-                '8cc75fbcc571336d1ef1768e7727bd9d1e6c1333f22eeb5366232b9a1a066418': 1,
+                wix_knowledge_base: {
+                  '8cc75fbcc571336d1ef1768e7727bd9d1e6c1333f22eeb5366232b9a1a066418': 1,
+                },
               },
             },
           },
@@ -124,9 +134,11 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Issue Resolution',
               groundTruth: {
-                f346781bc6cf23c95342ce003927de9d985a99eeb7561c69f03e65da7c10f2fb: 1,
-                '163d579af227160c8072dc465c81d8edea4b507d7e8789078b680f88633aefab': 1,
-                '2df694686b70b35ed389ff590354cfaf19aafc07659b12b02078f2ebcf015ac8': 1,
+                wix_knowledge_base: {
+                  f346781bc6cf23c95342ce003927de9d985a99eeb7561c69f03e65da7c10f2fb: 1,
+                  '163d579af227160c8072dc465c81d8edea4b507d7e8789078b680f88633aefab': 1,
+                  '2df694686b70b35ed389ff590354cfaf19aafc07659b12b02078f2ebcf015ac8': 1,
+                },
               },
             },
           },
@@ -142,7 +154,9 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Procedural',
               groundTruth: {
-                '5f02fc2f8937d16a4d8cdca47da36ae34429e0b279fb0cc56af72e2d91991a28': 1,
+                wix_knowledge_base: {
+                  '5f02fc2f8937d16a4d8cdca47da36ae34429e0b279fb0cc56af72e2d91991a28': 1,
+                },
               },
             },
           },
@@ -158,8 +172,10 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Procedural',
               groundTruth: {
-                '65806b123ff355cef16c8abe4301f1df982e2c3bddcd33b81ed446b92a79e336': 1,
-                db6a6c4be5c11fae531b4fdd546601bab6d4a26b669a8a7ea6063c62a045e9d4: 1,
+                wix_knowledge_base: {
+                  '65806b123ff355cef16c8abe4301f1df982e2c3bddcd33b81ed446b92a79e336': 1,
+                  db6a6c4be5c11fae531b4fdd546601bab6d4a26b669a8a7ea6063c62a045e9d4: 1,
+                },
               },
             },
           },
@@ -175,8 +191,10 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             metadata: {
               query_intent: 'Procedural',
               groundTruth: {
-                '39158650c97235d1f9b98a71be41c5222ddb3ee3e497cfb1d10ef3bd0bc166cf': 1,
-                e9366441d1e037a1470c9bad57455dbadc24db0ca931791edd0f3b026ea6a58f: 1,
+                wix_knowledge_base: {
+                  '39158650c97235d1f9b98a71be41c5222ddb3ee3e497cfb1d10ef3bd0bc166cf': 1,
+                  e9366441d1e037a1470c9bad57455dbadc24db0ca931791edd0f3b026ea6a58f: 1,
+                },
               },
             },
           },

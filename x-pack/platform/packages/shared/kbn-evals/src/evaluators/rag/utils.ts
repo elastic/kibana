@@ -5,25 +5,49 @@
  * 2.0.
  */
 
-import type { GroundTruth } from './types';
+import type { GroundTruth, RetrievedDoc } from './types';
 
 export const DEFAULT_RELEVANCE_THRESHOLD = 1;
 
-export function isRelevant(docId: string, groundTruth: GroundTruth, threshold: number): boolean {
-  const score = groundTruth[docId];
+export function isRelevant(
+  doc: RetrievedDoc,
+  groundTruth: GroundTruth,
+  threshold: number
+): boolean {
+  const indexGroundTruth = groundTruth[doc.index];
+  if (!indexGroundTruth) {
+    return false;
+  }
+  const score = indexGroundTruth[doc.id];
   return score !== undefined && score >= threshold;
 }
 
 export function getRelevantDocs(
-  retrievedDocs: string[],
+  retrievedDocs: RetrievedDoc[],
   groundTruth: GroundTruth,
   threshold: number
-): string[] {
-  return retrievedDocs.filter((docId) => isRelevant(docId, groundTruth, threshold));
+): RetrievedDoc[] {
+  return retrievedDocs.filter((doc) => isRelevant(doc, groundTruth, threshold));
 }
 
 export function countRelevantInGroundTruth(groundTruth: GroundTruth, threshold: number): number {
-  return Object.values(groundTruth).filter((score) => score >= threshold).length;
+  let count = 0;
+  for (const indexDocs of Object.values(groundTruth)) {
+    count += Object.values(indexDocs).filter((score) => score >= threshold).length;
+  }
+  return count;
+}
+
+export function getGroundTruthIndices(groundTruth: GroundTruth): string[] {
+  return Object.keys(groundTruth);
+}
+
+export function filterDocsByGroundTruthIndices(
+  docs: RetrievedDoc[],
+  groundTruth: GroundTruth
+): RetrievedDoc[] {
+  const indices = new Set(getGroundTruthIndices(groundTruth));
+  return docs.filter((doc) => indices.has(doc.index));
 }
 
 /**

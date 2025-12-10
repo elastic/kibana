@@ -6,17 +6,26 @@
  */
 
 /**
- * Ground truth mapping document IDs to relevance scores.
- * Higher scores indicate more relevant documents.
- * Example: { "doc_A": 1, "doc_B": 2, "doc_C": 1 }
+ * Represents a retrieved document with its index and ID.
  */
-export type GroundTruth = Record<string, number>;
+export interface RetrievedDoc {
+  index: string;
+  id: string;
+}
 
 /**
- * Function to extract retrieved document IDs from task output.
+ * Ground truth mapping index names to document relevance scores.
+ * Structure: { indexName: { docId: relevanceScore } }
+ * Higher scores indicate more relevant documents.
+ * Example: { "my-index": { "doc_A": 1, "doc_B": 2 }, "other-index": { "doc_C": 1 } }
+ */
+export type GroundTruth = Record<string, Record<string, number>>;
+
+/**
+ * Function to extract retrieved documents from task output.
  * Implement this based on your specific task output structure.
  */
-export type RetrievedDocsExtractor<T = unknown> = (output: T) => string[];
+export type RetrievedDocsExtractor<T = unknown> = (output: T) => RetrievedDoc[];
 
 /**
  * Function to extract ground truth from example metadata.
@@ -29,8 +38,10 @@ export interface RagEvaluatorConfig<TOutput = unknown, TMetadata = unknown> {
   k: number;
   /** Minimum score in ground truth to consider a document relevant. Default: 1 */
   relevanceThreshold?: number;
-  /** Function to extract retrieved doc IDs from task output */
+  /** Function to extract retrieved docs from task output */
   extractRetrievedDocs: RetrievedDocsExtractor<TOutput>;
   /** Function to extract ground truth from example metadata */
   extractGroundTruth: GroundTruthExtractor<TMetadata>;
+  /** Filter evaluation to only indices present in ground truth. Default: from env var INDEX_FOCUSED_RAG_EVAL */
+  filterByGroundTruthIndices?: boolean;
 }

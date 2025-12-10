@@ -11,10 +11,10 @@ import {
   createF1AtKEvaluator,
   createRagEvaluators,
 } from '.';
-import type { RagEvaluatorConfig, GroundTruth } from './types';
+import type { RagEvaluatorConfig, GroundTruth, RetrievedDoc } from './types';
 
 interface TestOutput {
-  retrievedDocs: string[];
+  retrievedDocs: RetrievedDoc[];
 }
 
 interface TestMetadata {
@@ -30,11 +30,15 @@ describe('RAG Evaluators', () => {
   };
 
   const groundTruth: GroundTruth = {
-    doc_1: 1,
-    doc_2: 2,
-    doc_3: 1,
-    doc_4: 1,
+    'test-index': {
+      doc_1: 1,
+      doc_2: 2,
+      doc_3: 1,
+      doc_4: 1,
+    },
   };
+
+  const createDoc = (id: string, index = 'test-index'): RetrievedDoc => ({ index, id });
 
   describe('createPrecisionAtKEvaluator', () => {
     it('should calculate precision correctly', async () => {
@@ -42,7 +46,15 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2', 'doc_X', 'doc_Y', 'doc_3'] },
+        output: {
+          retrievedDocs: [
+            createDoc('doc_1'),
+            createDoc('doc_2'),
+            createDoc('doc_X'),
+            createDoc('doc_Y'),
+            createDoc('doc_3'),
+          ],
+        },
         expected: {},
         metadata: { groundTruth },
       });
@@ -57,7 +69,7 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2'] },
+        output: { retrievedDocs: [createDoc('doc_1'), createDoc('doc_2')] },
         expected: {},
         metadata: { groundTruth: {} },
       });
@@ -71,7 +83,7 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2'] },
+        output: { retrievedDocs: [createDoc('doc_1'), createDoc('doc_2')] },
         expected: {},
         metadata: { groundTruth },
       });
@@ -93,7 +105,15 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2', 'doc_X', 'doc_Y', 'doc_3'] },
+        output: {
+          retrievedDocs: [
+            createDoc('doc_1'),
+            createDoc('doc_2'),
+            createDoc('doc_X'),
+            createDoc('doc_Y'),
+            createDoc('doc_3'),
+          ],
+        },
         expected: {},
         metadata: { groundTruth },
       });
@@ -108,7 +128,7 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1'] },
+        output: { retrievedDocs: [createDoc('doc_1')] },
         expected: {},
         metadata: { groundTruth: {} },
       });
@@ -130,7 +150,15 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2', 'doc_X', 'doc_Y', 'doc_3'] },
+        output: {
+          retrievedDocs: [
+            createDoc('doc_1'),
+            createDoc('doc_2'),
+            createDoc('doc_X'),
+            createDoc('doc_Y'),
+            createDoc('doc_3'),
+          ],
+        },
         expected: {},
         metadata: { groundTruth },
       });
@@ -146,7 +174,7 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1'] },
+        output: { retrievedDocs: [createDoc('doc_1')] },
         expected: {},
         metadata: { groundTruth: {} },
       });
@@ -182,7 +210,15 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2', 'doc_3', 'doc_4', 'doc_X'] },
+        output: {
+          retrievedDocs: [
+            createDoc('doc_1'),
+            createDoc('doc_2'),
+            createDoc('doc_3'),
+            createDoc('doc_4'),
+            createDoc('doc_X'),
+          ],
+        },
         expected: {},
         metadata: { groundTruth },
       });
@@ -201,12 +237,133 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2', 'doc_3', 'doc_4', 'doc_X'] },
+        output: {
+          retrievedDocs: [
+            createDoc('doc_1'),
+            createDoc('doc_2'),
+            createDoc('doc_3'),
+            createDoc('doc_4'),
+            createDoc('doc_X'),
+          ],
+        },
         expected: {},
         metadata: { groundTruth },
       });
 
       // Only doc_2 has score >= 2
+      expect(result.score).toBe(0.2);
+    });
+  });
+
+  describe('multi-index ground truth', () => {
+    const multiIndexGroundTruth: GroundTruth = {
+      'index-a': { doc_1: 1, doc_2: 1 },
+      'index-b': { doc_3: 1, doc_4: 1 },
+    };
+
+    it('should match docs across multiple indices', async () => {
+      const evaluator = createRecallAtKEvaluator(config);
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: {
+          retrievedDocs: [
+            { index: 'index-a', id: 'doc_1' },
+            { index: 'index-b', id: 'doc_3' },
+            { index: 'index-a', id: 'doc_X' },
+          ],
+        },
+        expected: {},
+        metadata: { groundTruth: multiIndexGroundTruth },
+      });
+
+      // 2 relevant docs retrieved out of 4 total relevant
+      expect(result.score).toBe(0.5);
+    });
+
+    it('should not match docs from wrong index', async () => {
+      const evaluator = createPrecisionAtKEvaluator(config);
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: {
+          retrievedDocs: [
+            { index: 'wrong-index', id: 'doc_1' },
+            { index: 'wrong-index', id: 'doc_2' },
+            { index: 'wrong-index', id: 'doc_3' },
+            { index: 'wrong-index', id: 'doc_4' },
+            { index: 'wrong-index', id: 'doc_5' },
+          ],
+        },
+        expected: {},
+        metadata: { groundTruth: multiIndexGroundTruth },
+      });
+
+      // No docs match because index is wrong
+      expect(result.score).toBe(0);
+    });
+  });
+
+  describe('filterByGroundTruthIndices', () => {
+    const multiIndexGroundTruth: GroundTruth = {
+      'index-a': { doc_1: 1 },
+    };
+
+    it('should filter docs to only ground truth indices when enabled via config', async () => {
+      const filterConfig: RagEvaluatorConfig<TestOutput, TestMetadata> = {
+        ...config,
+        filterByGroundTruthIndices: true,
+      };
+
+      const evaluator = createPrecisionAtKEvaluator(filterConfig);
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: {
+          retrievedDocs: [
+            { index: 'index-a', id: 'doc_1' },
+            { index: 'index-b', id: 'doc_X' },
+            { index: 'index-b', id: 'doc_Y' },
+            { index: 'index-a', id: 'doc_Z' },
+            { index: 'index-c', id: 'doc_W' },
+          ],
+        },
+        expected: {},
+        metadata: { groundTruth: multiIndexGroundTruth },
+      });
+
+      // After filtering: only index-a docs remain: [doc_1, doc_Z]
+      // doc_1 is relevant, doc_Z is not
+      // Precision = 1/5 = 0.2
+      expect(result.score).toBe(0.2);
+    });
+
+    it('should not filter when filterByGroundTruthIndices is false', async () => {
+      const noFilterConfig: RagEvaluatorConfig<TestOutput, TestMetadata> = {
+        ...config,
+        filterByGroundTruthIndices: false,
+      };
+
+      const evaluator = createPrecisionAtKEvaluator(noFilterConfig);
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: {
+          retrievedDocs: [
+            { index: 'index-a', id: 'doc_1' },
+            { index: 'index-b', id: 'doc_X' },
+            { index: 'index-b', id: 'doc_Y' },
+            { index: 'index-a', id: 'doc_Z' },
+            { index: 'index-c', id: 'doc_W' },
+          ],
+        },
+        expected: {},
+        metadata: { groundTruth: multiIndexGroundTruth },
+      });
+
+      // No filtering: all 5 docs are considered
+      // Only doc_1 is relevant
+      // Precision = 1/5 = 0.2
       expect(result.score).toBe(0.2);
     });
   });
@@ -230,7 +387,9 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['unknown_1', 'unknown_2', 'unknown_3'] },
+        output: {
+          retrievedDocs: [createDoc('unknown_1'), createDoc('unknown_2'), createDoc('unknown_3')],
+        },
         expected: {},
         metadata: { groundTruth },
       });
@@ -246,7 +405,14 @@ describe('RAG Evaluators', () => {
 
       const result = await evaluator.evaluate({
         input: {},
-        output: { retrievedDocs: ['doc_1', 'doc_2', 'doc_3', 'doc_4'] },
+        output: {
+          retrievedDocs: [
+            createDoc('doc_1'),
+            createDoc('doc_2'),
+            createDoc('doc_3'),
+            createDoc('doc_4'),
+          ],
+        },
         expected: {},
         metadata: { groundTruth },
       });

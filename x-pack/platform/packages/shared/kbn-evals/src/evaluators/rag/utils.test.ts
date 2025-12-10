@@ -12,57 +12,99 @@ import {
   calculatePrecision,
   calculateRecall,
   calculateF1,
+  getGroundTruthIndices,
+  filterDocsByGroundTruthIndices,
 } from './utils';
-import type { GroundTruth } from './types';
+import type { GroundTruth, RetrievedDoc } from './types';
 
 describe('RAG Utils', () => {
   describe('isRelevant', () => {
-    const groundTruth: GroundTruth = { doc_a: 1, doc_b: 2, doc_c: 3 };
+    const groundTruth: GroundTruth = {
+      'index-a': { doc_a: 1, doc_b: 2, doc_c: 3 },
+      'index-b': { doc_d: 1 },
+    };
 
     it('should return true when doc score meets threshold', () => {
-      expect(isRelevant('doc_a', groundTruth, 1)).toBe(true);
-      expect(isRelevant('doc_b', groundTruth, 2)).toBe(true);
-      expect(isRelevant('doc_c', groundTruth, 1)).toBe(true);
+      expect(isRelevant({ index: 'index-a', id: 'doc_a' }, groundTruth, 1)).toBe(true);
+      expect(isRelevant({ index: 'index-a', id: 'doc_b' }, groundTruth, 2)).toBe(true);
+      expect(isRelevant({ index: 'index-a', id: 'doc_c' }, groundTruth, 1)).toBe(true);
+      expect(isRelevant({ index: 'index-b', id: 'doc_d' }, groundTruth, 1)).toBe(true);
     });
 
     it('should return false when doc score is below threshold', () => {
-      expect(isRelevant('doc_a', groundTruth, 2)).toBe(false);
-      expect(isRelevant('doc_b', groundTruth, 3)).toBe(false);
+      expect(isRelevant({ index: 'index-a', id: 'doc_a' }, groundTruth, 2)).toBe(false);
+      expect(isRelevant({ index: 'index-a', id: 'doc_b' }, groundTruth, 3)).toBe(false);
     });
 
     it('should return false for unknown documents', () => {
-      expect(isRelevant('unknown_doc', groundTruth, 1)).toBe(false);
+      expect(isRelevant({ index: 'index-a', id: 'unknown_doc' }, groundTruth, 1)).toBe(false);
+    });
+
+    it('should return false for unknown indices', () => {
+      expect(isRelevant({ index: 'unknown-index', id: 'doc_a' }, groundTruth, 1)).toBe(false);
     });
 
     it('should handle zero score correctly', () => {
-      const gtWithZero: GroundTruth = { doc_zero: 0 };
-      expect(isRelevant('doc_zero', gtWithZero, 0)).toBe(true);
-      expect(isRelevant('doc_zero', gtWithZero, 1)).toBe(false);
+      const gtWithZero: GroundTruth = { 'index-x': { doc_zero: 0 } };
+      expect(isRelevant({ index: 'index-x', id: 'doc_zero' }, gtWithZero, 0)).toBe(true);
+      expect(isRelevant({ index: 'index-x', id: 'doc_zero' }, gtWithZero, 1)).toBe(false);
     });
   });
 
   describe('getRelevantDocs', () => {
-    const groundTruth: GroundTruth = { doc_a: 1, doc_b: 2, doc_c: 1 };
+    const groundTruth: GroundTruth = {
+      'index-a': { doc_a: 1, doc_b: 2, doc_c: 1 },
+      'index-b': { doc_d: 1 },
+    };
 
     it('should filter retrieved docs by relevance threshold', () => {
-      const retrieved = ['doc_a', 'doc_b', 'doc_c', 'doc_d'];
-      expect(getRelevantDocs(retrieved, groundTruth, 1)).toEqual(['doc_a', 'doc_b', 'doc_c']);
-      expect(getRelevantDocs(retrieved, groundTruth, 2)).toEqual(['doc_b']);
+      const retrieved: RetrievedDoc[] = [
+        { index: 'index-a', id: 'doc_a' },
+        { index: 'index-a', id: 'doc_b' },
+        { index: 'index-a', id: 'doc_c' },
+        { index: 'index-a', id: 'doc_unknown' },
+      ];
+      expect(getRelevantDocs(retrieved, groundTruth, 1)).toEqual([
+        { index: 'index-a', id: 'doc_a' },
+        { index: 'index-a', id: 'doc_b' },
+        { index: 'index-a', id: 'doc_c' },
+      ]);
+      expect(getRelevantDocs(retrieved, groundTruth, 2)).toEqual([
+        { index: 'index-a', id: 'doc_b' },
+      ]);
     });
 
     it('should return empty array when no docs are relevant', () => {
-      const retrieved = ['doc_X', 'doc_Y'];
+      const retrieved: RetrievedDoc[] = [
+        { index: 'index-a', id: 'doc_X' },
+        { index: 'index-a', id: 'doc_Y' },
+      ];
       expect(getRelevantDocs(retrieved, groundTruth, 1)).toEqual([]);
     });
 
     it('should handle empty retrieved docs', () => {
       expect(getRelevantDocs([], groundTruth, 1)).toEqual([]);
     });
+
+    it('should match docs across multiple indices', () => {
+      const retrieved: RetrievedDoc[] = [
+        { index: 'index-a', id: 'doc_a' },
+        { index: 'index-b', id: 'doc_d' },
+        { index: 'index-c', id: 'doc_e' },
+      ];
+      expect(getRelevantDocs(retrieved, groundTruth, 1)).toEqual([
+        { index: 'index-a', id: 'doc_a' },
+        { index: 'index-b', id: 'doc_d' },
+      ]);
+    });
   });
 
   describe('countRelevantInGroundTruth', () => {
-    it('should count documents meeting threshold', () => {
-      const groundTruth: GroundTruth = { doc_a: 1, doc_b: 2, doc_c: 3, doc_d: 1 };
+    it('should count documents meeting threshold across all indices', () => {
+      const groundTruth: GroundTruth = {
+        'index-a': { doc_a: 1, doc_b: 2, doc_c: 3 },
+        'index-b': { doc_d: 1 },
+      };
       expect(countRelevantInGroundTruth(groundTruth, 1)).toBe(4);
       expect(countRelevantInGroundTruth(groundTruth, 2)).toBe(2);
       expect(countRelevantInGroundTruth(groundTruth, 3)).toBe(1);
@@ -71,6 +113,64 @@ describe('RAG Utils', () => {
 
     it('should handle empty ground truth', () => {
       expect(countRelevantInGroundTruth({}, 1)).toBe(0);
+    });
+
+    it('should handle empty indices', () => {
+      const groundTruth: GroundTruth = { 'index-a': {} };
+      expect(countRelevantInGroundTruth(groundTruth, 1)).toBe(0);
+    });
+  });
+
+  describe('getGroundTruthIndices', () => {
+    it('should return all indices from ground truth', () => {
+      const groundTruth: GroundTruth = {
+        'index-a': { doc_a: 1 },
+        'index-b': { doc_b: 1 },
+        'index-c': { doc_c: 1 },
+      };
+      expect(getGroundTruthIndices(groundTruth)).toEqual(['index-a', 'index-b', 'index-c']);
+    });
+
+    it('should return empty array for empty ground truth', () => {
+      expect(getGroundTruthIndices({})).toEqual([]);
+    });
+  });
+
+  describe('filterDocsByGroundTruthIndices', () => {
+    const groundTruth: GroundTruth = {
+      'index-a': { doc_a: 1 },
+      'index-b': { doc_b: 1 },
+    };
+
+    it('should filter docs to only those in ground truth indices', () => {
+      const docs: RetrievedDoc[] = [
+        { index: 'index-a', id: 'doc_1' },
+        { index: 'index-b', id: 'doc_2' },
+        { index: 'index-c', id: 'doc_3' },
+        { index: 'index-a', id: 'doc_4' },
+      ];
+      expect(filterDocsByGroundTruthIndices(docs, groundTruth)).toEqual([
+        { index: 'index-a', id: 'doc_1' },
+        { index: 'index-b', id: 'doc_2' },
+        { index: 'index-a', id: 'doc_4' },
+      ]);
+    });
+
+    it('should return empty array when no docs match ground truth indices', () => {
+      const docs: RetrievedDoc[] = [
+        { index: 'index-c', id: 'doc_1' },
+        { index: 'index-d', id: 'doc_2' },
+      ];
+      expect(filterDocsByGroundTruthIndices(docs, groundTruth)).toEqual([]);
+    });
+
+    it('should handle empty docs array', () => {
+      expect(filterDocsByGroundTruthIndices([], groundTruth)).toEqual([]);
+    });
+
+    it('should handle empty ground truth', () => {
+      const docs: RetrievedDoc[] = [{ index: 'index-a', id: 'doc_1' }];
+      expect(filterDocsByGroundTruthIndices(docs, {})).toEqual([]);
     });
   });
 
