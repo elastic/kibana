@@ -21,7 +21,6 @@ import {
   getRuleServices,
   RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
-  THIRTY_MINUTES_TO_MILLIS,
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
@@ -36,7 +35,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     createEsDocumentsInGroups,
     createGroupedEsDocumentsInGroups,
     removeAllAADDocs,
-    getAllAADDocs,
+    getAADDocsForRule,
     deleteDocs,
     getEndDate,
   } = getRuleServices(getService);
@@ -44,6 +43,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   describe('rule', () => {
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
+
+    before(async () => {
+      await removeAllAADDocs();
+    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -65,19 +68,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await removeAllAADDocs();
     });
 
-    it('runs correctly: threshold on ungrouped hit count < >', async () => {
+    it('runs correctly: alerts as expected', async () => {
       // this test runs the rules twice, injecting data between each run
       // the always firing rule should fire each time, triggering an index action each time
       // the never firing rule should not fire or trigger any actions
 
       // Run 1:
-      // 1 - write source documents, dated 30 minutes in the past
+      // 1 - write source documents
       // 2 - create the rules - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createGroupedEsDocumentsInGroups(
-        ES_GROUPS_TO_WRITE,
-        getEndDate(-1 * THIRTY_MINUTES_TO_MILLIS)
-      );
+      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       const neverFireRuleId = await createESQLRule(
         supertest,
         objectRemover,
@@ -95,10 +95,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       let docs = await waitForDocs(1);
 
       // Run 2:
-      // 1 - write source documents, dated now
+      // 1 - write more source documents
       // 2 - manually run the rules with runSoon
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       await Promise.all([runSoon(neverFireRuleId), runSoon(alwaysFireRuleId)]);
 
       // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
@@ -117,7 +117,50 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(hits).not.to.be.empty();
       }
 
-      const aadDocs = await getAllAADDocs(1);
+      const aadDocs = await getAADDocsForRule(alwaysFireRuleId, 1);
+
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      expect(alertDoc[ALERT_REASON]).to.match(
+        /Document count is \d+.?\d* in the last 1h. Alert when greater than 0./
+      );
+      expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
+      const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+      expect(value).greaterThan(0);
+      expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+    });
+
+    it('runs correctly: threshold on ungrouped hit count < >', async () => {
+      // this test runs the rule once, injecting data before the first run
+      // the rule should fire each time, triggering an index action each time
+
+      // Run 1:
+      // 1 - write source documents
+      // 2 - create the rule - it runs one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      const ruleId = await createESQLRule(
+        supertest,
+        objectRemover,
+        connectorId,
+        { name: 'always fire' },
+        'from kibana-alerting-test-data | stats c = count(date) by group | where c > 0'
+      );
+      const docs = await waitForDocs(1);
+
+      const doc = docs[0];
+      const { hits } = doc._source;
+      const { name, title, message } = doc._source.params;
+
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
+      expect(message).to.match(
+        /Document count is \d+.?\d* in the last 1h. Alert when greater than 0./
+      );
+      expect(hits).not.to.be.empty();
+
+      const aadDocs = await getAADDocsForRule(ruleId, 1);
 
       const alertDoc = aadDocs.body.hits.hits[0]._source;
       expect(alertDoc[ALERT_REASON]).to.match(
@@ -132,23 +175,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: threshold on grouped hit with stats...by', async () => {
-      // this test runs the rules once, injecting data before the first run
-      // the always firing rule should fire and trigger an index action for each group
-      // the never firing rule should never fire or trigger any actions
+      // this test runs the rule once, injecting data before the first run
+      // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
-      // 2 - create the rules - they run one time on creation
-      // 3 - wait for output docs to be written, indicating rule is done running
-      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
-      await createESQLRule(
-        supertest,
-        objectRemover,
-        connectorId,
-        { name: 'never fire', groupBy: 'row' },
-        'from kibana-alerting-test-data | stats c = count(date) by group | where c < 0'
-      );
-      await createESQLRule(
+      // 1 - write source documents
+      // 2 - create the rule - it runs one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      const ruleId = await createESQLRule(
         supertest,
         objectRemover,
         connectorId,
@@ -174,7 +209,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(grouping).to.match(groupPattern);
       }
 
-      const aadDocs = await getAllAADDocs(3, ALERT_INSTANCE_ID);
+      const aadDocs = await getAADDocsForRule(ruleId, 3, ALERT_INSTANCE_ID);
+
       for (let i = 0; i < aadDocs.body.hits.hits.length; i++) {
         const alertDoc = aadDocs.body.hits.hits[i]._source;
         expect(alertDoc[ALERT_INSTANCE_ID]).to.be(`group-${i}`);
@@ -189,23 +225,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: threshold on grouped hit with METADATA _id', async () => {
-      // this test runs the rules once, injecting data before the first run
-      // the always firing rule should fire and trigger an index action for each group
-      // the never firing rule should never fire or trigger any actions
+      // this test runs the rule once, injecting data before the first run
+      // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
-      // 2 - create the rules - they run one time on creation
-      // 3 - wait for output docs to be written, indicating rule is done running
-      await createGroupedEsDocumentsInGroups(1, getEndDate(0));
-      await createESQLRule(
-        supertest,
-        objectRemover,
-        connectorId,
-        { name: 'never fire', groupBy: 'row' },
-        'from kibana-alerting-test-data METADATA _id | KEEP group, _id | limit 0'
-      );
-      await createESQLRule(
+      // 1 - write source documents
+      // 2 - create the rule - it runs one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createGroupedEsDocumentsInGroups(1, getEndDate());
+      const ruleId = await createESQLRule(
         supertest,
         objectRemover,
         connectorId,
@@ -236,7 +264,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(grouping).to.match(groupPattern);
       }
 
-      const aadDocs = await getAllAADDocs(2);
+      const aadDocs = await getAADDocsForRule(ruleId, 2);
       for (let i = 0; i < aadDocs.body.hits.hits.length; i++) {
         const alertDoc = aadDocs.body.hits.hits[i]._source;
         expect(alertDoc[ALERT_INSTANCE_ID]).to.match(idPattern);
@@ -256,23 +284,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // or otherwise change the grouping values that result.
       const columnsToDrop = ['tags'];
 
-      // this test runs the rules once, injecting data before the first run
-      // the always firing rule should fire and trigger an index action for each group
-      // the never firing rule should never fire or trigger any actions
+      // this test runs the rule once, injecting data before the first run
+      // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
-      // 2 - create the rules - they run one time on creation
-      // 3 - wait for output docs to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
-      await createESQLRule(
-        supertest,
-        objectRemover,
-        connectorId,
-        { name: 'never fire', groupBy: 'row' },
-        `from kibana-alerting-test-data | drop ${columnsToDrop} | limit 0`
-      );
-      await createESQLRule(
+      // 1 - write source documents
+      // 2 - create the rule - it runs one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      const ruleId = await createESQLRule(
         supertest,
         objectRemover,
         connectorId,
@@ -308,7 +328,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(grouping.testedValueFloat).to.be.ok();
       }
 
-      const aadDocs = await getAllAADDocs(3);
+      const aadDocs = await getAADDocsForRule(ruleId, 3);
       for (let i = 0; i < aadDocs.body.hits.hits.length; i++) {
         const alertDoc = aadDocs.body.hits.hits[i]._source;
         expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
@@ -322,55 +342,32 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
-      // this test runs the rules twice, injecting data between each run
-      // the always firing rule should fire each time, triggering an index action each time
-      // the never firing rule should not fire or trigger any actions
+      // this test runs the rule once, injecting data before the first run
+      // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated 30 minutes in the past
-      // 2 - create the rules - they run one time on creation
+      // 1 - write source documents
+      // 2 - create the rule - it runs one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(
-        ES_GROUPS_TO_WRITE,
-        getEndDate(-1 * THIRTY_MINUTES_TO_MILLIS)
-      );
-      const neverFireRuleId = await createESQLRule(
-        supertest,
-        objectRemover,
-        connectorId,
-        { name: 'never fire', timeField: 'date_epoch_millis' },
-        'from kibana-alerting-test-data | stats c = count(date) | where c < 0'
-      );
-      const alwaysFireRuleId = await createESQLRule(
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await createESQLRule(
         supertest,
         objectRemover,
         connectorId,
         { name: 'always fire', timeField: 'date_epoch_millis' },
         'from kibana-alerting-test-data | stats c = count(date) | where c > 0'
       );
-      let docs = await waitForDocs(1);
+      const docs = await waitForDocs(1);
 
-      // Run 2:
-      // 1 - write source documents, dated now
-      // 2 - manually run the rules with runSoon
-      // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
-      await Promise.all([runSoon(neverFireRuleId), runSoon(alwaysFireRuleId)]);
+      const doc = docs[0];
+      const { hits } = doc._source;
+      const { name, title, message } = doc._source.params;
 
-      // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
-      docs = await waitForDocs(2);
-
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { hits } = doc._source;
-        const { name, title, message } = doc._source.params;
-
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 1h. Alert when greater than 0./;
-        expect(message).to.match(messagePattern);
-        expect(hits).not.to.be.empty();
-      }
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
+      const messagePattern = /Document count is \d+ in the last 1h. Alert when greater than 0./;
+      expect(message).to.match(messagePattern);
+      expect(hits).not.to.be.empty();
     });
 
     it('runs correctly: no matches', async () => {
@@ -384,30 +381,28 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
 
       const docs = await waitForDocs(1);
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { hits } = doc._source;
-        const { name, title, message } = doc._source.params;
+      const doc = docs[0];
+      const { hits } = doc._source;
+      const { name, title, message } = doc._source.params;
 
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 1h. Alert when greater than 0./;
-        expect(message).to.match(messagePattern);
-        expect(hits).not.to.be.empty();
-      }
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
+      const messagePattern = /Document count is \d+ in the last 1h. Alert when greater than 0./;
+      expect(message).to.match(messagePattern);
+      expect(hits).not.to.be.empty();
     });
 
     it('runs correctly and populates recovery context', async () => {
       // This rule should be active initially when the number of documents is below the threshold
       // and then recover when we add more documents.
 
-      // this test runs the rules twice, injecting data after the first run
+      // this test runs the rule twice, injecting data after the first run
       // the rule should fire the first run when there is no data in the index and
       // then recover the second run after data is injected
 
       // Run 1:
       // 1 - skip writing source documents
-      // 2 - create the rules - they run one time on creation
+      // 2 - create the rule - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
       const ruleId = await createESQLRule(
         supertest,
@@ -434,10 +429,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
 
       // Run 2:
-      // 1 - write source documents, dated now
+      // 1 - write source documents
       // 2 - manually run the rule with runSoon
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(1, getEndDate(0));
+      await createEsDocumentsInGroups(1, getEndDate());
       await runSoon(ruleId);
       docs = await waitForDocs(2);
       const recoveredDoc = docs[1];
@@ -455,16 +450,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly and populates source data', async () => {
-      // this test runs the rules once, injecting data before the first run
-      // the always firing rule should fire and trigger an index action for each group
-      // the never firing rule should never fire or trigger any actions
+      // this test runs the rule once, injecting data before the first run
+      // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
-      // 2 - create the rules - they run one time on creation
-      // 3 - wait for output docs to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
-      await createESQLRule(
+      // 1 - write source documents
+      // 2 - create the rule - it runs one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      const ruleId = await createESQLRule(
         supertest,
         objectRemover,
         connectorId,
@@ -475,18 +469,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const docs = await waitForDocs(1);
       const messagePattern = /Document count is \d+ in the last 1h. Alert when greater than 0./;
 
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { hits } = doc._source;
-        const { name, title, message } = doc._source.params;
+      const doc = docs[0];
+      const { hits } = doc._source;
+      const { name, title, message } = doc._source.params;
 
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
-        expect(message).to.match(messagePattern);
-        expect(hits).not.to.be.empty();
-      }
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
+      expect(message).to.match(messagePattern);
+      expect(hits).not.to.be.empty();
 
-      const aadDocs = await getAllAADDocs(1);
+      const aadDocs = await getAADDocsForRule(ruleId, 1);
 
       const alertDoc = aadDocs.body.hits.hits[0]._source;
       expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
@@ -500,63 +492,40 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     it('runs correctly over a data stream: threshold on hit count < >', async () => {
       // This runs the same test as above but specifically targets a data stream index
 
-      // this test runs the rules twice, injecting data between each run
-      // the always firing rule should fire each time, triggering an index action each time
-      // the never firing rule should not fire or trigger any actions
+      // this test runs the rule once, injecting data before the first run
+      // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated 30 minutes in the past
-      // 2 - create the rules - they run one time on creation
+      // 1 - write source documents
+      // 2 - create the rule - it runs one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
       await createEsDocumentsInGroups(
         ES_GROUPS_TO_WRITE,
-        getEndDate(-1 * THIRTY_MINUTES_TO_MILLIS),
+        getEndDate(),
         esTestIndexToolDataStream,
         ES_TEST_DATA_STREAM_NAME
       );
-      const neverFireRuleId = await createESQLRule(
-        supertest,
-        objectRemover,
-        connectorId,
-        { name: 'never fire' },
-        'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c < 0'
-      );
-      const alwaysFireRuleId = await createESQLRule(
+      const ruleId = await createESQLRule(
         supertest,
         objectRemover,
         connectorId,
         { name: 'always fire' },
         'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c > 0'
       );
-      let docs = await waitForDocs(1);
-
-      // Run 2:
-      // 1 - write source documents, dated now
-      // 2 - manually run the rules with runSoon
-      // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(
-        ES_GROUPS_TO_WRITE,
-        getEndDate(0),
-        esTestIndexToolDataStream,
-        ES_TEST_DATA_STREAM_NAME
-      );
-      await Promise.all([runSoon(neverFireRuleId), runSoon(alwaysFireRuleId)]);
-      docs = await waitForDocs(2);
+      const docs = await waitForDocs(1);
 
       const messagePattern = /Document count is \d+ in the last 1h. Alert when greater than 0./;
 
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { hits } = doc._source;
-        const { name, title, message } = doc._source.params;
+      const doc = docs[0];
+      const { hits } = doc._source;
+      const { name, title, message } = doc._source.params;
 
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
-        expect(message).to.match(messagePattern);
-        expect(hits).not.to.be.empty();
-      }
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
+      expect(message).to.match(messagePattern);
+      expect(hits).not.to.be.empty();
 
-      const aadDocs = await getAllAADDocs(1);
+      const aadDocs = await getAADDocsForRule(ruleId, 1);
 
       const alertDoc = aadDocs.body.hits.hits[0]._source;
       expect(alertDoc[ALERT_REASON]).to.match(messagePattern);

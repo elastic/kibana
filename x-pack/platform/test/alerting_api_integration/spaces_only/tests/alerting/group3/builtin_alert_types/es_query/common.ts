@@ -25,8 +25,6 @@ export const RULE_INTERVAL_SECONDS = 6;
 export const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 export const ES_GROUPS_TO_WRITE = 3;
 
-export const THIRTY_MINUTES_TO_MILLIS = 30 * 60 * 1000;
-
 export async function createConnector(
   supertest: any,
   objectRemover: ObjectRemover,
@@ -286,6 +284,32 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     return await esTestIndexToolAAD.getAll(size, sort);
   }
 
+  async function getAADDocsForRule(ruleId: string, size: number, sort?: string): Promise<any> {
+    return await retry.try(async () => {
+      const result = await es.search(
+        {
+          index: `.alerts-${STACK_AAD_INDEX_NAME}.alerts-default`,
+          size: 100,
+          sort: sort ? [{ [sort]: 'asc' as const }] : undefined,
+          query: {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
+            },
+          },
+        },
+        { meta: true }
+      );
+      const value =
+        typeof result.body.hits.total === 'number'
+          ? result.body.hits.total
+          : result.body.hits.total?.value;
+      if (value! < size) {
+        throw new Error(`Expected ${size} alert docs but received ${value}.`);
+      }
+      return result;
+    });
+  }
+
   async function waitForAADDocs(numDocs: number = 1) {
     return await retry.try(async () => {
       const searchResult = await getAllAADDocs(numDocs);
@@ -319,7 +343,7 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     ]);
   }
 
-  function getEndDate(millisOffset: number) {
+  function getEndDate(millisOffset: number = 0) {
     const endDateMillis = Date.now() + millisOffset;
     return new Date(endDateMillis).toISOString();
   }
@@ -334,6 +358,7 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     createGroupedEsDocumentsInGroups,
     waitForDocs,
     getAllAADDocs,
+    getAADDocsForRule,
     waitForAADDocs,
     removeAllAADDocs,
     deleteDocs,

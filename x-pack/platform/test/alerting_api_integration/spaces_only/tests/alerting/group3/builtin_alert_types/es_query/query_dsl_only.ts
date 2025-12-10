@@ -21,7 +21,6 @@ import {
   ES_TEST_OUTPUT_INDEX_NAME,
   getRuleServices,
   createDSLRule,
-  THIRTY_MINUTES_TO_MILLIS,
 } from './common';
 
 const TEST_HOSTNAME = 'test.alerting.example.com';
@@ -35,7 +34,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     esTestIndexToolOutput,
     createEsDocumentsInGroups,
     waitForDocs,
-    waitForAADDocs,
+    getAADDocsForRule,
     removeAllAADDocs,
     deleteDocs,
     getEndDate,
@@ -44,6 +43,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   describe('Query DSL only', () => {
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
+
+    before(async () => {
+      await removeAllAADDocs();
+    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -54,7 +57,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
       connectorId = await createConnector(supertest, objectRemover, ES_TEST_OUTPUT_INDEX_NAME);
       await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
-      await removeAllAADDocs();
     });
 
     afterEach(async () => {
@@ -71,13 +73,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated 30 minutes in the past
+      // 1 - write source documents
       // 2 - create the rules - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(
-        ES_GROUPS_TO_WRITE,
-        getEndDate(-1 * THIRTY_MINUTES_TO_MILLIS)
-      );
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       const ruleId = await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
@@ -111,7 +110,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // 1 - write source documents, dated now
       // 2 - manually run the rules with runSoon
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       await runSoon(ruleId);
 
       // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
@@ -140,14 +139,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it(`runs correctly: fetches wildcard fields in esQuery search type`, async () => {
-      // this test runs the rules once, injecting data before the run
+      // this test runs the rule once, injecting data before the run
       // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
+      // 1 - write source documents
       // 2 - create the rules - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
@@ -186,15 +185,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it(`runs correctly: fetches field formatting in esQuery search type`, async () => {
-      // this test runs the rules once, injecting data before the run
+      // this test runs the rule once, injecting data before the run
       // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
+      // 1 - write source documents
       // 2 - create the rules - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
       const reIsNumeric = /^\d+$/;
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
@@ -232,14 +231,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it(`runs correctly: _source: false field for esQuery search type`, async () => {
-      // this test runs the rules once, injecting data before the run
+      // this test runs the rule once, injecting data before the run
       // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
+      // 1 - write source documents
       // 2 - create the rules - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
@@ -268,14 +267,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it(`runs correctly: _source field for esQuery search type`, async () => {
-      // this test runs the rules once, injecting data before the run
+      // this test runs the rule once, injecting data before the run
       // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
+      // 1 - write source documents
       // 2 - create the rules - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate(0));
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
@@ -307,18 +306,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it(`runs correctly: copies fields from groups into alerts`, async () => {
-      // this test runs the rules once, injecting data before the run
+      // this test runs the rule once, injecting data before the run
       // the rule should fire each time, triggering an index action each time
 
       // Run 1:
-      // 1 - write source documents, dated now
+      // 1 - write source documents
       // 2 - create the rules - they run one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
       const tag = 'example-tag-A';
       const ruleName = 'group by tag';
       await createDocWithTags([tag]);
 
-      await createDSLRule(supertest, objectRemover, connectorId, {
+      const ruleId = await createDSLRule(supertest, objectRemover, connectorId, {
         name: ruleName,
         esQuery: JSON.stringify({ query: { match_all: {} } }),
         timeField: '@timestamp',
@@ -332,8 +331,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         wrapInBrackets: true,
       });
 
-      const docs = await waitForAADDocs(1);
-      const alert = docs[0]._source || {};
+      const aadDocs = await getAADDocsForRule(ruleId, 1);
+      const alert = aadDocs.body.hits.hits[0]._source || {};
       expect(alert['kibana.alert.rule.name']).to.be(ruleName);
       expect(alert['kibana.alert.evaluation.value']).to.be('1');
 
