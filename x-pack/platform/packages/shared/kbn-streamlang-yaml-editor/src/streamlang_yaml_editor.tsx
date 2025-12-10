@@ -356,9 +356,23 @@ export const StreamlangYamlEditor = ({
             lineDecorationsWidth: 0,
             lineNumbersMinChars: 2,
             renderLineHighlight: 'line',
+            // YAML indentation settings
+            tabSize: 2,
+            insertSpaces: true,
+            formatOnType: true,
             scrollbar: {
               vertical: 'auto',
               horizontal: 'auto',
+            },
+            // Enable automatic suggestions as you type
+            quickSuggestions: {
+              other: true,
+              comments: false,
+              strings: true,
+            },
+            suggest: {
+              snippetsPreventQuickSuggestions: false,
+              showSnippets: true,
             },
           }}
           editorDidMount={handleEditorDidMount}

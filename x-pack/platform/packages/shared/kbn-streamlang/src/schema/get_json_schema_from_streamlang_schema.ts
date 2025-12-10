@@ -12,6 +12,7 @@
 import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { z } from '@kbn/zod';
+import { i18n } from '@kbn/i18n';
 import { ACTION_METADATA_MAP } from '../actions/action_metadata';
 import type { StreamType } from '../../types/streamlang';
 
@@ -307,7 +308,9 @@ function enhanceActionSchema(actionUnionSchema: any, streamType?: StreamType): v
  */
 function enhanceWhereSchema(rootSchema: any, whereSchema: any): void {
   if (!whereSchema.title) {
-    whereSchema.title = 'Condition block';
+    whereSchema.title = i18n.translate('xpack.streams.streamlangSchema.whereBlock.title', {
+      defaultMessage: 'Condition block',
+    });
   }
 
   ensureRequiredProperty(whereSchema, 'condition');
@@ -317,8 +320,15 @@ function enhanceWhereSchema(rootSchema: any, whereSchema: any): void {
   // Provide multiple snippet options for common condition patterns
   whereSchema.defaultSnippets = [
     {
-      label: 'Condition block',
-      description: 'Conditional step execution with field equals condition',
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlock.label', {
+        defaultMessage: 'Condition block',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.conditionBlock.description',
+        {
+          defaultMessage: 'Conditional step execution with field equals condition',
+        }
+      ),
       body: {
         condition: {
           field: '${1:field.name}',
@@ -328,8 +338,15 @@ function enhanceWhereSchema(rootSchema: any, whereSchema: any): void {
       },
     },
     {
-      label: 'Condition block (AND)',
-      description: 'Execute steps if all conditions are true',
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlockAnd.label', {
+        defaultMessage: 'Condition block (AND)',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.conditionBlockAnd.description',
+        {
+          defaultMessage: 'Execute steps if all conditions are true',
+        }
+      ),
       body: {
         condition: {
           and: [
@@ -347,8 +364,15 @@ function enhanceWhereSchema(rootSchema: any, whereSchema: any): void {
       },
     },
     {
-      label: 'Condition block (OR)',
-      description: 'Execute steps if any condition is true',
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlockOr.label', {
+        defaultMessage: 'Condition block (OR)',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.conditionBlockOr.description',
+        {
+          defaultMessage: 'Execute steps if any condition is true',
+        }
+      ),
       body: {
         condition: {
           or: [
@@ -546,7 +570,343 @@ function cloneAndAddStepsToCondition(
   }
 
   const clonedSchema = deepClone(conditionSchema);
-  return recursivelyAddStepsProperty(clonedSchema, stepsPropertySchema, shouldRequireSteps);
+  const enhanced = recursivelyAddStepsProperty(
+    clonedSchema,
+    stepsPropertySchema,
+    shouldRequireSteps
+  );
+
+  // Add defaultSnippets for filter condition operators to help Monaco suggest them
+  addFilterConditionSnippets(enhanced);
+
+  return enhanced;
+}
+
+/**
+ * Add defaultSnippets and titles to filter condition variants to improve autocomplete.
+ * This helps Monaco suggest eq, neq, lt, gte, etc. inside condition blocks with clear labels.
+ */
+function addFilterConditionSnippets(conditionSchema: any): void {
+  if (!conditionSchema || typeof conditionSchema !== 'object') {
+    return;
+  }
+
+  // Find and enhance filter condition variants in anyOf/oneOf arrays
+  const unionType = getUnionType(conditionSchema);
+  if (unionType && Array.isArray(conditionSchema[unionType])) {
+    conditionSchema[unionType].forEach((variant: any) => {
+      // Check if this variant looks like a filter condition (has 'field' property)
+      if (variant?.properties?.field && !variant?.properties?.and && !variant?.properties?.or) {
+        variant.title = i18n.translate('xpack.streams.streamlangSchema.filterCondition.title', {
+          defaultMessage: 'Filter condition',
+        });
+        variant.description = i18n.translate(
+          'xpack.streams.streamlangSchema.filterCondition.description',
+          {
+            defaultMessage: 'Compare a field value using operators like eq, neq, lt, gt, contains',
+          }
+        );
+        addOperatorSnippetsToFilterCondition(variant);
+      }
+      // Add titles and snippets for logical operators (and, or, not)
+      if (variant?.properties?.and) {
+        variant.title = i18n.translate('xpack.streams.streamlangSchema.andCondition.title', {
+          defaultMessage: 'AND condition',
+        });
+        variant.description = i18n.translate(
+          'xpack.streams.streamlangSchema.andCondition.description',
+          {
+            defaultMessage: 'All conditions must be true',
+          }
+        );
+        addLogicalOperatorSnippet(variant, 'and');
+      }
+      if (variant?.properties?.or) {
+        variant.title = i18n.translate('xpack.streams.streamlangSchema.orCondition.title', {
+          defaultMessage: 'OR condition',
+        });
+        variant.description = i18n.translate(
+          'xpack.streams.streamlangSchema.orCondition.description',
+          {
+            defaultMessage: 'At least one condition must be true',
+          }
+        );
+        addLogicalOperatorSnippet(variant, 'or');
+      }
+      if (variant?.properties?.not) {
+        variant.title = i18n.translate('xpack.streams.streamlangSchema.notCondition.title', {
+          defaultMessage: 'NOT condition',
+        });
+        variant.description = i18n.translate(
+          'xpack.streams.streamlangSchema.notCondition.description',
+          {
+            defaultMessage: 'Negate a condition',
+          }
+        );
+        addNotOperatorSnippet(variant);
+      }
+      // Also recurse into nested unions
+      addFilterConditionSnippets(variant);
+    });
+  }
+}
+
+/**
+ * Add snippet for logical AND/OR operator schema variant.
+ */
+function addLogicalOperatorSnippet(schema: any, operator: 'and' | 'or'): void {
+  if (!schema || schema.defaultSnippets) {
+    return;
+  }
+
+  const label =
+    operator === 'and'
+      ? i18n.translate('xpack.streams.streamlangSchema.snippets.andCondition.label', {
+          defaultMessage: 'AND condition',
+        })
+      : i18n.translate('xpack.streams.streamlangSchema.snippets.orCondition.label', {
+          defaultMessage: 'OR condition',
+        });
+
+  const description =
+    operator === 'and'
+      ? i18n.translate('xpack.streams.streamlangSchema.snippets.andCondition.description', {
+          defaultMessage: 'Combine conditions with AND logic',
+        })
+      : i18n.translate('xpack.streams.streamlangSchema.snippets.orCondition.description', {
+          defaultMessage: 'Combine conditions with OR logic',
+        });
+
+  schema.defaultSnippets = [
+    {
+      label,
+      description,
+      body: {
+        [operator]: [
+          {
+            field: '${1:field1.name}',
+            eq: '${2:value1}',
+          },
+          {
+            field: '${3:field2.name}',
+            eq: '${4:value2}',
+          },
+        ],
+      },
+    },
+  ];
+}
+
+/**
+ * Add snippet for logical NOT operator schema variant.
+ */
+function addNotOperatorSnippet(schema: any): void {
+  if (!schema || schema.defaultSnippets) {
+    return;
+  }
+
+  schema.defaultSnippets = [
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.notCondition.label', {
+        defaultMessage: 'NOT condition',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.notCondition.description',
+        {
+          defaultMessage: 'Negate a condition',
+        }
+      ),
+      body: {
+        not: {
+          field: '${1:field.name}',
+          eq: '${2:value}',
+        },
+      },
+    },
+  ];
+}
+
+/**
+ * Add operator defaultSnippets to a filter condition schema variant.
+ */
+function addOperatorSnippetsToFilterCondition(filterConditionSchema: any): void {
+  if (!filterConditionSchema || filterConditionSchema.defaultSnippets) {
+    return;
+  }
+
+  filterConditionSchema.defaultSnippets = [
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldEquals.label', {
+        defaultMessage: 'Field equals',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldEquals.description',
+        {
+          defaultMessage: 'Check if field equals a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        eq: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldNotEquals.label', {
+        defaultMessage: 'Field not equals',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldNotEquals.description',
+        {
+          defaultMessage: 'Check if field does not equal a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        neq: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldLessThan.label', {
+        defaultMessage: 'Field less than',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldLessThan.description',
+        {
+          defaultMessage: 'Check if field is less than a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        lt: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldLessThanOrEqual.label', {
+        defaultMessage: 'Field less than or equal',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldLessThanOrEqual.description',
+        {
+          defaultMessage: 'Check if field is less than or equal to a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        lte: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldGreaterThan.label', {
+        defaultMessage: 'Field greater than',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldGreaterThan.description',
+        {
+          defaultMessage: 'Check if field is greater than a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        gt: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldGreaterThanOrEqual.label',
+        {
+          defaultMessage: 'Field greater than or equal',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldGreaterThanOrEqual.description',
+        {
+          defaultMessage: 'Check if field is greater than or equal to a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        gte: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldContains.label', {
+        defaultMessage: 'Field contains',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldContains.description',
+        {
+          defaultMessage: 'Check if field contains a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        contains: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldStartsWith.label', {
+        defaultMessage: 'Field starts with',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldStartsWith.description',
+        {
+          defaultMessage: 'Check if field starts with a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        startsWith: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldEndsWith.label', {
+        defaultMessage: 'Field ends with',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldEndsWith.description',
+        {
+          defaultMessage: 'Check if field ends with a value',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        endsWith: '${2:value}',
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldExists.label', {
+        defaultMessage: 'Field exists',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldExists.description',
+        {
+          defaultMessage: 'Check if field exists',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        exists: true,
+      },
+    },
+    {
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldRange.label', {
+        defaultMessage: 'Field range',
+      }),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.fieldRange.description',
+        {
+          defaultMessage: 'Check if field is within a range',
+        }
+      ),
+      body: {
+        field: '${1:field.name}',
+        range: {
+          gte: '${2:minValue}',
+          lte: '${3:maxValue}',
+        },
+      },
+    },
+  ];
 }
 
 /**
