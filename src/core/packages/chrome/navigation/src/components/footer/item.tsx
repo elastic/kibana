@@ -95,12 +95,12 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
     };
 
     const menuItem = (
-      <Suspense fallback={<EuiButtonIcon buttonRef={ref} {...buttonProps} />}>
-        <div css={buttonWrapperStyles}>
+      <div css={buttonWrapperStyles}>
+        <Suspense fallback={<EuiButtonIcon buttonRef={ref} {...buttonProps} />}>
           <EuiButtonIcon buttonRef={ref} {...buttonProps} iconType={iconType || 'empty'} />
-          {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
-        </div>
-      </Suspense>
+        </Suspense>
+        {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
+      </div>
     );
 
     if (!hasContent) {
