@@ -61,11 +61,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Disables ESQL-based risk scoring
-   */
-  disableESQLRiskScoring: false,
-
-  /**
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: true,
@@ -209,10 +204,18 @@ export const allowedExperimentalValues = Object.freeze({
    */
   trialCompanionEnabled: false,
 
+   * Enables the Gap Auto Fill Scheduler feature.
+   */
+  gapAutoFillSchedulerEnabled: false,
   /**
    * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
    */
   agentBuilderEnabled: false,
+  /**
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
+   */
+  linuxDnsEvents: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

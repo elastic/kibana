@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
       const title = 'Hello world dashboard';
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       const id = `bar-${Date.now()}-${Math.random()}`;
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       const spaceId = 'space-1';
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
       const id = 'be3733a0-9efe-11e7-acb3-3dab96693fab';
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
