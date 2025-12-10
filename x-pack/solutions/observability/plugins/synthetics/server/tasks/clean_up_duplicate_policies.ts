@@ -99,7 +99,6 @@ export async function cleanUpDuplicatedPackagePolicies(
       );
       await fleet.packagePolicyService.delete(soClient, esClient, packagePoliciesToDelete, {
         force: true,
-        spaceIds: ['*'],
       });
     }
     taskState.hasAlreadyDoneCleanup = true;
