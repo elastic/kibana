@@ -60,7 +60,7 @@ export const EditModeToggle = () => {
   const getTooltipContent = () => {
     if (hasErrors) {
       return i18n.translate('xpack.streams.enrichment.editMode.errorsTooltip', {
-        defaultMessage: 'Please fix errors before switching modes',
+        defaultMessage: 'Fix errors before switching modes',
       });
     }
     if (interactiveModeIsUnavailable) {

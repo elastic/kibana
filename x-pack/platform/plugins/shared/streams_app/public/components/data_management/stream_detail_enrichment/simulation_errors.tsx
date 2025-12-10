@@ -22,7 +22,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
             <p>
               <FormattedMessage
                 id="xpack.streams.streamDetailView.managementTab.enrichment.definitionError"
-                defaultMessage="Please fix this error before saving: {error}"
+                defaultMessage="Fix the following error before saving: {error}"
                 values={{ error: errors.definition_error.message }}
               />
             </p>
@@ -47,7 +47,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
               <p>
                 <FormattedMessage
                   id="xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.ignoredFieldsFailure.fieldsList"
-                  defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
+                  defaultMessage="The following fields are malformed and won’t be stored correctly: {fields}"
                   values={{
                     fields: errors.ignoredFields.map((field) => (
                       <>
@@ -62,7 +62,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
                   'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
                   {
                     defaultMessage:
-                      'This can happen due to type mismatches or fields exceeding configured limits.',
+                      'Potential causes include type mismatches or fields exceeding configured limits.',
                   }
                 )}
               </p>
@@ -95,7 +95,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
               <p>
                 <FormattedMessage
                   id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
-                  defaultMessage="These are some mapping failures that occurred during the simulation:"
+                  defaultMessage="The following mapping failures occurred during the simulation:"
                 />
               </p>
               <ul>

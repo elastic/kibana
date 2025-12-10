@@ -31,7 +31,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'Grok',
     }),
     description: i18n.translate('xpack.streamlang.actionMetadata.grok.description', {
-      defaultMessage: 'Extract structured data from unstructured text using grok patterns',
+      defaultMessage: 'Extract structured data from unstructured text using grok patterns.',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.grok.usage', {
       defaultMessage:
