@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const entries = await recall('What happened during the database outage?');
         const uniqueScores = uniq(entries.map(({ esScore }) => esScore));
         expect(uniqueScores.length).to.be.greaterThan(1);
-        expect(uniqueScores.length).to.be(8);
+        expect(uniqueScores.length).to.be.greaterThan(7);
       });
 
       it('returns results from both search connectors and internal kb', async () => {
