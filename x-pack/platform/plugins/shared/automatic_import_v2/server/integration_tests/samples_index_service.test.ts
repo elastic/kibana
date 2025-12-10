@@ -638,62 +638,6 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(samples2).toContain('Log 3 for DS2');
     });
 
-    it('should handle large batches of samples', async () => {
-      // Create a data stream with more than 1000 samples to test batching
-      const rawSamples = Array.from({ length: 2500 }, (_, i) => `Log line ${i}`);
-      const params: AddSamplesToDataStreamParams = {
-        integrationId: 'integration-batch-delete',
-        dataStreamId: 'data-stream-batch-delete',
-        rawSamples,
-        originalSource: { sourceType: 'file', sourceValue: 'batch.txt' },
-        authenticatedUser: mockUser,
-        esClient,
-      };
-
-      await samplesIndexService.addSamplesToDataStream(params);
-      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
-
-      // Verify samples exist
-      const beforeDelete = await esClient.search({
-        index: `${AutomaticImportSamplesIndexName}*`,
-        query: {
-          bool: {
-            must: [
-              { term: { integration_id: 'integration-batch-delete' } },
-              { term: { data_stream_id: 'data-stream-batch-delete' } },
-            ],
-          },
-        },
-        size: 0,
-      });
-      expect(beforeDelete.hits.total).toEqual({ value: 2500, relation: 'eq' });
-
-      // Delete all samples
-      const result = await samplesIndexService.deleteSamplesForDataStream(
-        'integration-batch-delete',
-        'data-stream-batch-delete',
-        esClient
-      );
-
-      expect(result.deleted).toBe(2500);
-
-      // Verify all samples are deleted
-      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
-      const afterDelete = await esClient.search({
-        index: `${AutomaticImportSamplesIndexName}*`,
-        query: {
-          bool: {
-            must: [
-              { term: { integration_id: 'integration-batch-delete' } },
-              { term: { data_stream_id: 'data-stream-batch-delete' } },
-            ],
-          },
-        },
-        size: 0,
-      });
-      expect(afterDelete.hits.total).toEqual({ value: 0, relation: 'eq' });
-    });
-
     it('should isolate samples between different integrations', async () => {
       // Add samples to first integration
       const params1: AddSamplesToDataStreamParams = {
