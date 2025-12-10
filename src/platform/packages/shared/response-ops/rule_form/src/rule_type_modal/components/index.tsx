@@ -8,16 +8,13 @@
  */
 
 import { countBy } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import type {
-  FindRuleTemplatesRequestQueryV1,
-  FindRuleTemplatesResponseV1,
-} from '@kbn/alerting-plugin/common/routes/rule_template/apis/find';
 import { useDebounceFn } from '@kbn/react-hooks';
+import { useFindTemplatesQuery } from '@kbn/response-ops-rules-apis/hooks/use_find_templates_query';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 
@@ -44,18 +41,15 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   const [selectedProducer, setSelectedProducer] = useState<string | null>(null);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedMode, setSelectedMode] = useState<'ruleType' | 'template'>('ruleType');
-  const [templatesLoading, setTemplatesLoading] = useState<boolean>(false);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalTemplates, setTotalTemplates] = useState<number>(0);
-  const [rawTemplates, setRawTemplates] = useState<
-    Array<{
-      id: string;
-      name: string;
-      tags: string[];
-      ruleTypeId: string;
-    }>
-  >([]);
+
+  // Debounce search string for template API calls to avoid excessive requests
+  const [debouncedSearchString, setDebouncedSearchString] = useState<string>('');
+
+  const { run: updateDebouncedSearch } = useDebounceFn(setDebouncedSearchString, DEBOUNCE_OPTIONS);
+
+  useEffect(() => {
+    updateDebouncedSearch(searchString);
+  }, [searchString, updateDebouncedSearch]);
 
   const registeredRuleTypesWithAppContext = registeredRuleTypes.filter(
     ({ requiresAppContext }) => !requiresAppContext
@@ -82,81 +76,21 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     [ruleTypeIndex, searchString, selectedProducer]
   );
 
-  // Debounce search string for template API calls to avoid excessive requests
-  const [debouncedSearchString, setDebouncedSearchString] = useState(searchString);
-
-  const updateSearchAndResetPage = useCallback((value: string) => {
-    setDebouncedSearchString(value);
-    setCurrentPage(1); // Reset to first page when search changes
-  }, []);
-
-  const { run: updateDebouncedSearch } = useDebounceFn(updateSearchAndResetPage, DEBOUNCE_OPTIONS);
-
-  useEffect(() => {
-    updateDebouncedSearch(searchString);
-  }, [searchString, updateDebouncedSearch]);
-
-  // Fetch templates when in Template mode
-  useEffect(() => {
-    let ignore = false;
-    if (selectedMode !== 'template') {
-      return;
-    }
-
-    // we offload the searching to the API here which is a little different to how we fetch rule types.
-    // this is appropriate since the number of templates may be large, and the API offers paginated search.
-    const fetchTemplates = async () => {
-      // Only show full loading state on initial load (page 1), otherwise just loading indicator on button
-      if (currentPage === 1) {
-        setTemplatesLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
-
-      try {
-        const queryParams: FindRuleTemplatesRequestQueryV1 = {
-          per_page: 10,
-          page: currentPage,
-          sort_field: 'name',
-          sort_order: 'asc',
-          search: debouncedSearchString ? debouncedSearchString : undefined,
-        };
-
-        const res = await http.get<FindRuleTemplatesResponseV1>(
-          '/internal/alerting/rule_template/_find',
-          {
-            query: queryParams,
-          }
-        );
-        if (ignore) return;
-        const items = res.data.map((template) => ({
-          id: template.id,
-          name: template.name,
-          tags: template.tags,
-          ruleTypeId: template.rule_type_id,
-        }));
-        setTotalTemplates(res.total);
-        // Append to existing templates for pagination, or replace if page 1
-        setRawTemplates((prev) => (currentPage === 1 ? items : [...prev, ...items]));
-      } catch (e) {
-        if (!ignore) {
-          toasts.addDanger({
-            title: 'Error loading templates',
-            text: e?.message ?? String(e),
-          });
-        }
-      } finally {
-        if (!ignore) {
-          setTemplatesLoading(false);
-          setLoadingMore(false);
-        }
-      }
-    };
-    fetchTemplates();
-    return () => {
-      ignore = true;
-    };
-  }, [http, toasts, selectedMode, debouncedSearchString, currentPage]);
+  const {
+    templates: rawTemplates,
+    hasNextPage: hasMoreTemplates,
+    fetchNextPage: loadMoreTemplates,
+    isLoading: templatesLoading,
+    isFetchingNextPage: templatesLoadingMore,
+  } = useFindTemplatesQuery({
+    http,
+    toasts,
+    enabled: selectedMode === 'template',
+    perPage: 10,
+    sortField: 'name',
+    sortOrder: 'asc',
+    search: debouncedSearchString || undefined,
+  });
 
   // Enrich templates with rule type metadata
   const templates = useMemo(() => {
@@ -165,16 +99,9 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
       return {
         ...t,
         ruleTypeName: rt?.name,
-        producer: rt?.producer,
       };
     });
   }, [rawTemplates, ruleTypeIndex]);
-
-  const hasMoreTemplates = rawTemplates.length < totalTemplates;
-
-  const handleLoadMore = () => {
-    setCurrentPage((prev) => prev + 1);
-  };
 
   return (
     <RuleTypeModal
@@ -191,9 +118,9 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
       onChangeMode={setSelectedMode}
       templates={templates}
       templatesLoading={templatesLoading}
-      loadingMore={loadingMore}
-      hasMoreTemplates={hasMoreTemplates}
-      onLoadMoreTemplates={handleLoadMore}
+      templatesLoadingMore={templatesLoadingMore}
+      hasMoreTemplates={hasMoreTemplates ?? false}
+      onLoadMoreTemplates={loadMoreTemplates}
     />
   );
 };

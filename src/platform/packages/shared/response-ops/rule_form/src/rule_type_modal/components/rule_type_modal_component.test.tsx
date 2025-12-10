@@ -15,6 +15,7 @@ import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { RuleTypeModalComponent } from '.';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { testQueryClientConfig } from '@kbn/response-ops-rules-apis/test_utils';
 
 // Mock useDebounceFn to execute immediately without debouncing
 jest.mock('@kbn/react-hooks', () => ({
@@ -121,9 +122,10 @@ jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query', () => (
 }));
 
 function render(ui: React.ReactElement) {
+  const queryClient = new QueryClient(testQueryClientConfig);
   return rtlRender(ui, {
     wrapper: ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     ),
   });
 }
@@ -504,7 +506,7 @@ describe('RuleTypeModalComponent', () => {
       // Should show error toast
       await waitFor(() => {
         expect(mockToastsAddDanger).toHaveBeenCalledWith({
-          title: 'Error loading templates',
+          title: 'Unable to load rule templates',
           text: errorMessage,
         });
       });

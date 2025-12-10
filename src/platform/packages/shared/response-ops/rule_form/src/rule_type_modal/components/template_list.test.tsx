@@ -46,7 +46,7 @@ describe('TemplateList', () => {
     onSelectTemplate: jest.fn(),
     hasMore: false,
     onLoadMore: jest.fn(),
-    isLoading: false,
+    loadingMore: false,
   };
 
   beforeEach(() => {
@@ -173,8 +173,8 @@ describe('TemplateList', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  it('should show loading indicator on load more button when isLoading is true', () => {
-    render(<TemplateList {...defaultProps} hasMore={true} isLoading={true} />);
+  it('should show loading indicator on load more button when loadingMore is true', () => {
+    render(<TemplateList {...defaultProps} hasMore={true} loadingMore={true} />);
 
     const loadMoreButton = screen.getByTestId('templateList-loadMore');
     // EUI adds a loading spinner when isLoading is true

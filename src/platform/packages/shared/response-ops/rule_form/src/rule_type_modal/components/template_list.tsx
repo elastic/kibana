@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,51 +27,59 @@ interface TemplateListProps {
   onSelectTemplate: (templateId: string) => void;
   hasMore: boolean;
   onLoadMore: () => void;
-  isLoading: boolean;
+  loadingMore: boolean;
 }
 
-export const TemplateList: React.FC<TemplateListProps> = ({
-  templates,
-  onSelectTemplate,
-  hasMore,
-  onLoadMore,
-  isLoading,
-}) => {
+interface TemplateCardProps {
+  template: RuleTypeModalProps['templates'][number];
+  onSelectTemplate: (templateId: string) => void;
+}
+
+const TemplateCard: React.FC<TemplateCardProps> = React.memo(({ template, onSelectTemplate }) => {
   const { euiTheme } = useEuiTheme();
 
-  const templateCard = (tpl: RuleTypeModalProps['templates'][number]) => (
+  const handleClick = useCallback(() => {
+    onSelectTemplate(template.id);
+  }, [onSelectTemplate, template.id]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelectTemplate(template.id);
+      }
+    },
+    [onSelectTemplate, template.id]
+  );
+
+  return (
     <EuiCard
       titleSize="xs"
       textAlign="left"
       hasBorder
-      title={tpl.name}
-      onClick={() => onSelectTemplate(tpl.id)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSelectTemplate(tpl.id);
-        }
-      }}
+      title={template.name}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       description=""
       style={{ marginRight: '8px', flexGrow: 0 }}
-      data-test-subj={`${tpl.id}-SelectOption`}
+      data-test-subj={`${template.id}-SelectOption`}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
-        {tpl.ruleTypeName && (
+        {template.ruleTypeName && (
           <EuiFlexItem grow={false}>
             <EuiText
               color="subdued"
               size="xs"
               style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
             >
-              {tpl.ruleTypeName}
+              {template.ruleTypeName}
             </EuiText>
           </EuiFlexItem>
         )}
-        {!!tpl.tags?.length && (
+        {!!template.tags?.length && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {tpl.tags.map((t) => (
+              {template.tags.map((t) => (
                 <EuiFlexItem key={t} grow={false}>
                   <EuiBadge color="hollow">{t}</EuiBadge>
                 </EuiFlexItem>
@@ -82,6 +90,18 @@ export const TemplateList: React.FC<TemplateListProps> = ({
       </EuiFlexGroup>
     </EuiCard>
   );
+});
+
+TemplateCard.displayName = 'TemplateCard';
+
+export const TemplateList: React.FC<TemplateListProps> = ({
+  templates,
+  onSelectTemplate,
+  hasMore,
+  onLoadMore,
+  loadingMore,
+}) => {
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexGroup
@@ -95,7 +115,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
           padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}`,
         }}
       >
-        {templates.length === 0 && !isLoading && (
+        {templates.length === 0 && (
           <EuiEmptyPrompt
             color="subdued"
             iconType="search"
@@ -123,7 +143,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
         )}
         {templates.map((tpl) => (
           <React.Fragment key={tpl.id}>
-            {templateCard(tpl)}
+            <TemplateCard template={tpl} onSelectTemplate={onSelectTemplate} />
             <EuiSpacer size="s" />
           </React.Fragment>
         ))}
@@ -134,7 +154,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   onClick={onLoadMore}
-                  isLoading={isLoading}
+                  isLoading={loadingMore}
                   iconType="arrowDown"
                   data-test-subj="templateList-loadMore"
                 >

@@ -49,7 +49,7 @@ export interface RuleTypeModalProps {
     producer?: string;
   }>;
   templatesLoading: boolean;
-  loadingMore: boolean;
+  templatesLoadingMore: boolean;
   hasMoreTemplates: boolean;
   onLoadMoreTemplates: () => void;
 }
@@ -66,6 +66,19 @@ const loadingPrompt = (
       <h2>
         {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.loadingRuleTypes', {
           defaultMessage: 'Loading rule types',
+        })}
+      </h2>
+    }
+    icon={<EuiLoadingSpinner size="xl" />}
+  />
+);
+
+const loadingTemplatesPrompt = (
+  <EuiEmptyPrompt
+    title={
+      <h2>
+        {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.loadingTemplates', {
+          defaultMessage: 'Loading templates',
         })}
       </h2>
     }
@@ -93,7 +106,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   showCategories,
   templates,
   templatesLoading,
-  loadingMore,
+  templatesLoadingMore,
   hasMoreTemplates,
   onLoadMoreTemplates,
 }) => {
@@ -198,14 +211,14 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 showCategories={showCategories}
               />
             ) : templatesLoading ? (
-              loadingPrompt
+              loadingTemplatesPrompt
             ) : (
               <TemplateList
                 templates={templates}
                 onSelectTemplate={onSelectTemplate}
                 hasMore={hasMoreTemplates}
                 onLoadMore={onLoadMoreTemplates}
-                isLoading={loadingMore}
+                loadingMore={templatesLoadingMore}
               />
             )}
           </EuiFlexItem>
