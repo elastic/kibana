@@ -18,8 +18,6 @@ import {
   type FieldSpecId,
 } from '../../common/utils/fields';
 
-const INVALID_FIELD_NAME = '_metric_names_hash';
-
 const FILTER_OUT_FIELDS = new Set([
   '_id',
   '_index',
@@ -31,10 +29,10 @@ const FILTER_OUT_FIELDS = new Set([
   '_routing',
   '_meta',
   '_tier',
+  '_metric_names_hash',
 ]);
 
-const shouldSkipField = (fieldName: string) =>
-  FILTER_OUT_FIELDS.has(fieldName) || fieldName === INVALID_FIELD_NAME;
+const shouldSkipField = (fieldName: string) => FILTER_OUT_FIELDS.has(fieldName);
 
 /**
  * Builds sorted dimensions for an index.
