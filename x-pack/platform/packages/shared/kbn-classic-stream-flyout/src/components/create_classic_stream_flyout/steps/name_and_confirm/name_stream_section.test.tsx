@@ -51,7 +51,7 @@ describe('NameStreamSection', () => {
 
       expect(
         getByText(
-          'Name your classic stream by filling in the wildcard (*) portions of the index pattern.'
+          'Name your classic stream by entering values in the wildcard (*) portions of the index pattern.'
         )
       ).toBeInTheDocument();
     });
