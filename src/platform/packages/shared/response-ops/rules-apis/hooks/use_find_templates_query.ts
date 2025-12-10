@@ -12,7 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SetOptional } from 'type-fest';
-import type { FindRuleTemplatesParams, FindRuleTemplatesResponse } from '../apis/find_rule_templates';
+import type {
+  FindRuleTemplatesParams,
+  FindRuleTemplatesResponse,
+} from '../apis/find_rule_templates';
 import { findRuleTemplates } from '../apis/find_rule_templates';
 
 export interface UseFindTemplatesQueryParams extends SetOptional<FindRuleTemplatesParams, 'page'> {
@@ -74,9 +77,7 @@ export const useFindTemplatesQuery = ({
     });
   };
 
-  const getNextPageParam = (
-    lastPage: FindRuleTemplatesResponse
-  ) => {
+  const getNextPageParam = (lastPage: FindRuleTemplatesResponse) => {
     const loadedCount = lastPage.page * lastPage.perPage;
     if (loadedCount >= lastPage.total) {
       return undefined;
