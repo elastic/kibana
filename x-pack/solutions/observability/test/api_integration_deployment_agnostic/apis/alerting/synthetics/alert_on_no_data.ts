@@ -71,6 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         query: { match_all: {} },
         ignore_unavailable: true,
         conflicts: 'proceed',
+        refresh: true,
       });
       await server.savedObjects.clean({ types: ['rule'] });
     });
