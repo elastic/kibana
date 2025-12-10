@@ -2,8 +2,9 @@
   "type": "shared-server",
   "id": "@kbn/apm-synthtrace",
   "owner": [
-    "@elastic/obs-ux-infra_services-team",
-    "@elastic/obs-onboarding-team"
+    "@elastic/obs-presentation-team",
+    "@elastic/obs-onboarding-team",
+    "@elastic/obs-exploration-team"
   ],
   "group": "platform",
   "visibility": "shared",

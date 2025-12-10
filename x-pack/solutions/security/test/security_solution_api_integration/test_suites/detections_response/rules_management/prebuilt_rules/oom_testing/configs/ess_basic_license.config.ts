@@ -12,9 +12,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../configs/ess/rules_management.basic.config')
   );
 
+  const parentConfig = functionalConfig.getAll();
+
   const testConfig = {
-    ...functionalConfig.getAll(),
+    ...parentConfig,
     testFiles: [require.resolve('..')],
+    mochaOpts: {
+      ...parentConfig.mochaOpts,
+      // Fleet doesn't have [Spacetime][Fleet] Introduce airgapped config for bundled packages
+      // https://github.com/elastic/kibana/pull/202435 backported to 8.19. It blocks package
+      // removal when it's unable to find it in the registry.
+      //
+      // Fixing this issue by skipping global hooks installing the prebuilt rules package.
+      rootHooks: {},
+    },
     junit: {
       reportName: 'Rules Management - Prebuilt Rules OOM Testing - ESS Basic License',
     },

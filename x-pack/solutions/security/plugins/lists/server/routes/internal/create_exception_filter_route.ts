@@ -93,6 +93,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
             startedAt: new Date(),
           });
 
+          // @ts-expect-error upgrade typescript v5.9.3
           return response.ok({ body: { filter } ?? {} });
         } catch (err) {
           const error = transformError(err);

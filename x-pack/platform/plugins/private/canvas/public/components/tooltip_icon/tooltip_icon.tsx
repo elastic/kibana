@@ -33,5 +33,6 @@ export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {
 };
 
 TooltipIcon.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   icon: PropTypes.string,
 };
