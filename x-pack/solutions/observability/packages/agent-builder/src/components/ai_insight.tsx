@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { StartConversationButton } from './start_conversation_button';
+import { AiInsightErrorBanner } from './ai_insight_error_banner';
 
 export interface AiInsightProps {
   title: string;
@@ -82,25 +83,28 @@ export function AiInsight({
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={(open) => {
           setIsOpen(open);
-          if (open && onOpen) {
+          if (open && onOpen && !content && !isLoading) {
             onOpen();
           }
         }}
       >
         <EuiSpacer size="m" />
-        <EuiPanel hasBorder={false} hasShadow={false} color="subdued">
-          {isLoading ? (
+        {isLoading ? (
+          <EuiPanel color="subdued">
             <EuiSkeletonText lines={3} />
-          ) : error ? (
-            <EuiText size="s" color="danger">
-              <p>{error}</p>
-            </EuiText>
-          ) : (
-            <EuiMarkdownFormat textSize="s">{content ?? ''}</EuiMarkdownFormat>
-          )}
-        </EuiPanel>
+          </EuiPanel>
+        ) : error || (content !== undefined && (!content || !content.trim())) ? (
+          <AiInsightErrorBanner
+            error={error}
+            isEmptyResponse={content !== undefined && (!content || !content.trim()) && !error}
+            onRetry={onOpen}
+            data-test-subj={dataTestSubj}
+          />
+        ) : (
+          <EuiMarkdownFormat textSize="s">{content ?? ''}</EuiMarkdownFormat>
+        )}
 
-        {onStartConversation && Boolean(content && content.trim()) ? (
+        {!isLoading && onStartConversation && Boolean(content && content.trim()) ? (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
