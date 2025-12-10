@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import React, { useMemo } from 'react';
+import { type Attachment } from '@kbn/onechat-common/attachments';
 import { ROUNDED_BORDER_RADIUS_LARGE } from '../conversation.styles';
 import { AttachmentPillsRow } from '../conversation_input/attachment_pills_row';
 import { RoundResponseActions } from './round_response/round_response_actions';
@@ -73,7 +73,7 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
       </EuiPanel>
       {visibleAttachments.length > 0 && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} />
+          <AttachmentPillsRow attachments={visibleAttachments} justifyContent="flexEnd" />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>

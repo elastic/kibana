@@ -6,11 +6,15 @@
  */
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { DataVisualizerCoreSetup } from '../../../../plugin';
-import { FIELD_STATS_EMBEDDABLE_TYPE } from './constants';
+import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
 
 export const registerEmbeddables = (embeddable: EmbeddableSetup, core: DataVisualizerCoreSetup) => {
   embeddable.registerReactEmbeddableFactory(FIELD_STATS_EMBEDDABLE_TYPE, async () => {
     const { getFieldStatsChartEmbeddableFactory } = await import('./field_stats_factory');
     return getFieldStatsChartEmbeddableFactory(core.getStartServices);
+  });
+  embeddable.registerLegacyURLTransform(FIELD_STATS_EMBEDDABLE_TYPE, async () => {
+    const { transformOut } = await import('../../../../../common/embeddables/transform_out');
+    return transformOut;
   });
 };
