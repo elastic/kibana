@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dimensionsRoutes } from './dimensions/route';
-import { fieldsRoutes } from './fields/route';
-
-export const routeRepository = {
-  ...dimensionsRoutes,
-  ...fieldsRoutes,
-};
-
-export type MetricsExperienceRouteRepository = typeof routeRepository;
+export type {
+  MetricField,
+  MetricFieldsResponse,
+  MetricFieldType,
+  MetricUnit,
+} from './fields/types';
+export type { Dimension, DimensionFilters } from './dimensions/types';

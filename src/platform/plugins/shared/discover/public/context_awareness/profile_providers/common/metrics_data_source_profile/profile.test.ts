@@ -105,6 +105,7 @@ describe('metricsDataSourceProfileProvider', () => {
     it.each([
       'FROM metrics-* | STATS count() BY @timestamp',
       'FROM metrics-* | WHERE host.name="foo"',
+      'TS metrics-* | WHERE host.name="foo"',
       'TS metrics-* | STATS count() BY @timestamp',
     ])('when query contains commands that are not supported: %s', async (query) => {
       const result = await provider.resolve(

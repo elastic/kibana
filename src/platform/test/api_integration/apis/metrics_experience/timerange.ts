@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dimensionsRoutes } from './dimensions/route';
-import { fieldsRoutes } from './fields/route';
-
-export const routeRepository = {
-  ...dimensionsRoutes,
-  ...fieldsRoutes,
+export const timerange = {
+  min: '2025-08-13T23:52:14.198Z',
+  max: '2025-08-13T23:55:14.198Z',
 };
-
-export type MetricsExperienceRouteRepository = typeof routeRepository;

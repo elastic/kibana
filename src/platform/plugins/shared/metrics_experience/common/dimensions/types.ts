@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dimensionsRoutes } from './dimensions/route';
-import { fieldsRoutes } from './fields/route';
+import { type ES_FIELD_TYPES } from '@kbn/field-types';
 
-export const routeRepository = {
-  ...dimensionsRoutes,
-  ...fieldsRoutes,
-};
+export interface Dimension {
+  name: string;
+  type: ES_FIELD_TYPES;
+}
 
-export type MetricsExperienceRouteRepository = typeof routeRepository;
+export type DimensionFilters = Record<string, string[]>;

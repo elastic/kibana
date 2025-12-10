@@ -7,9 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+import type { Dimension } from '../dimensions/types';
 
-export type FieldCapsResponse = Record<
-  string,
-  Record<string, Record<string, FieldCapsFieldCapability>>
->;
+export type MetricFieldType = 'metric' | 'dimension';
+export interface MetricField {
+  name: string;
+  index: string;
+  dimensions: Dimension[];
+  type: string;
+  instrument?: MappingTimeSeriesMetricType;
+  unit?: MetricUnit;
+  display?: string;
+  scope?: string;
+  noData?: boolean;
+}
+
+export interface MetricFieldsResponse {
+  fields: MetricField[];
+  total: number;
+  error?: string;
+}
+
+export type MetricUnit =
+  | 'ns'
+  | 'us'
+  | 'ms'
+  | 's'
+  | 'm'
+  | 'h'
+  | 'd'
+  | 'percent'
+  | 'bytes'
+  | 'count'
+  | `{${string}}`; // otel special units of count

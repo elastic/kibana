@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dimensionsRoutes } from './dimensions/route';
-import { fieldsRoutes } from './fields/route';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export const routeRepository = {
-  ...dimensionsRoutes,
-  ...fieldsRoutes,
-};
-
-export type MetricsExperienceRouteRepository = typeof routeRepository;
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('metrics_experience', () => {
+    loadTestFile(require.resolve('./dimensions'));
+    loadTestFile(require.resolve('./fields'));
+  });
+}

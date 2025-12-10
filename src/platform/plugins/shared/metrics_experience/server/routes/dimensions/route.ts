@@ -12,17 +12,39 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { createRoute } from '../create_route';
+import { getDimensions } from './get_dimensions';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
-import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
 
-export const getFieldCapsRoute = createRoute({
-  endpoint: 'GET /internal/metrics_experience/field_caps',
+export const getDimensionsRoute = createRoute({
+  endpoint: 'GET /internal/metrics_experience/dimensions',
   security: { authz: { enabled: false, reason: 'Authorization provided by Elasticsearch' } },
   params: z.object({
     query: z.object({
-      index: z.string().default('metrics-*'),
+      dimensions: z
+        .string()
+        .transform((str) => {
+          try {
+            const parsed = JSON.parse(str);
+            return parsed;
+          } catch {
+            throw new Error('Invalid JSON');
+          }
+        })
+        .pipe(z.array(z.string()).min(1).max(10)),
+      indices: z
+        .string()
+        .optional()
+        .transform((str) => {
+          if (!str) return ['metrics-*'];
+          try {
+            const parsed = JSON.parse(str);
+            return parsed;
+          } catch {
+            throw new Error('Invalid JSON');
+          }
+        })
+        .pipe(z.array(z.string())),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
         .string()
@@ -35,45 +57,26 @@ export const getFieldCapsRoute = createRoute({
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
+    const { dimensions, indices, from, to } = params.query;
     const esClient = elasticsearch.client.asCurrentUser;
-
-    const indexFieldCapsMap = await retrieveFieldCaps({
+    const values = await getDimensions({
       esClient: createTracedEsClient({
-        logger,
         client: esClient,
+        logger,
         plugin: 'metrics_experience',
         abortSignal: getRequestAbortedSignal(request.events.aborted$),
-      }).client,
-      indexPattern: params.query.index,
-      timerange: { from: params.query.from, to: params.query.to },
+      }),
+      dimensions,
+      indices,
+      from,
+      to,
+      logger,
     });
 
-    const response: Record<string, Record<string, Record<string, FieldCapsFieldCapability>>> = {};
-    for (const [index, fields] of indexFieldCapsMap) {
-      const filteredFields: Record<string, Record<string, FieldCapsFieldCapability>> = {};
-      for (const fieldName of Object.keys(fields)) {
-        const fieldCapsByType = fields[fieldName];
-        let includeField = false;
-        for (const type of Object.keys(fieldCapsByType)) {
-          const typeCaps = fieldCapsByType[type];
-          if (typeCaps.time_series_metric || typeCaps.time_series_dimension) {
-            includeField = true;
-            break;
-          }
-        }
-        if (includeField) {
-          filteredFields[fieldName] = fieldCapsByType;
-        }
-      }
-      if (Object.keys(filteredFields).length > 0) {
-        response[index] = filteredFields;
-      }
-    }
-
-    return response;
+    return { values };
   },
 });
 
-export const fieldCapsRoutes = {
-  ...getFieldCapsRoute,
+export const dimensionsRoutes = {
+  ...getDimensionsRoute,
 };

@@ -12,7 +12,9 @@ import { getMetricsContextService } from '../data_types';
 
 export const createMetricsContextServiceMock = () => {
   const metricsExperienceClient: MetricsExperienceClient = {
-    getFieldCaps: jest.fn().mockResolvedValue([]),
+    getDimensions: jest.fn().mockResolvedValue([]),
+    getFields: jest.fn().mockResolvedValue([]),
+    searchFields: jest.fn().mockResolvedValue([]),
   };
 
   return getMetricsContextService({
