@@ -233,7 +233,7 @@ describe('When the tabular page is loaded', () => {
     expect(rows[11]).not.toHaveTextContent(preconfigured);
   });
 
-  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
+  it('should show tech preview badge only for reranker-v1 model, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const techPreview = 'TECH PREVIEW';
@@ -244,7 +244,7 @@ describe('When the tabular page is loaded', () => {
     expect(rows[3]).not.toHaveTextContent(techPreview);
     expect(rows[4]).toHaveTextContent(techPreview);
     expect(rows[5]).toHaveTextContent(techPreview);
-    expect(rows[6]).toHaveTextContent(techPreview);
+    expect(rows[6]).not.toHaveTextContent(techPreview);
     expect(rows[7]).not.toHaveTextContent(techPreview);
     expect(rows[8]).toHaveTextContent(techPreview);
     expect(rows[9]).not.toHaveTextContent(techPreview);

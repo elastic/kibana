@@ -17,13 +17,7 @@ import {
 import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
-import { licenseService } from '../../../common/hooks/use_license';
-import {
-  getMissingCapabilitiesChecker,
-  type MissingCapability,
-  type CapabilitiesLevel,
-} from './capabilities';
+import { type MissingCapability, type CapabilitiesLevel } from './capabilities';
 import { MigrationsStorage } from './storage';
 import * as i18n from './translations';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../types';
@@ -38,6 +32,9 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
   protected abstract fetchMigrationStats(params: GetMigrationStatsParams): Promise<T>;
   protected abstract fetchMigrationsStatsAll(params: GetMigrationsStatsAllParams): Promise<T[]>;
   protected abstract sendFinishedMigrationNotification(taskStats: T): void;
+
+  public abstract isAvailable(): boolean;
+  public abstract getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[];
 
   private readonly latestStats$: BehaviorSubject<T[] | null>;
   private isPolling = false;
@@ -58,7 +55,9 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
 
     this.plugins.spaces.getActiveSpace().then((space) => {
       this.connectorIdStorage.setSpaceId(space.id);
-      this.startPolling();
+      if (this.isAvailable()) {
+        this.startPolling();
+      }
     });
   }
 
@@ -67,24 +66,9 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
     return this.latestStats$.asObservable().pipe(distinctUntilChanged(isEqual));
   }
 
-  /** Returns any missing capabilities for the user to use this feature */
-  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
-    const getMissingCapabilities = getMissingCapabilitiesChecker();
-    return getMissingCapabilities(this.core.application.capabilities, level);
-  }
-
   /** Checks if the user has any missing capabilities for this feature */
   public hasMissingCapabilities(level?: CapabilitiesLevel): boolean {
     return this.getMissingCapabilities(level).length > 0;
-  }
-
-  /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */
-  public isAvailable() {
-    return (
-      !ExperimentalFeaturesService.get().siemMigrationsDisabled &&
-      licenseService.isEnterprise() &&
-      !this.hasMissingCapabilities('minimum')
-    );
   }
 
   /** Starts polling the migrations stats if not already polling and if the feature is available to the user */
