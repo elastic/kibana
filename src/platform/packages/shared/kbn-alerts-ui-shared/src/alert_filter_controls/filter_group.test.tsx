@@ -13,7 +13,6 @@ import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
-  ControlGroupCreationOptions,
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
 } from '@kbn/control-group-renderer';
@@ -50,12 +49,8 @@ const updateControlGroupOutputMock = (newOutput: ControlGroupOutput) => {
   controlGroupFilterOutputMock$.next(newOutput.filters);
 };
 
-let creationOptions: Partial<ControlGroupCreationOptions> | undefined;
 const mockControlGroupRenderer = getMockedControlGroupRenderer(
-  controlGroupMock as unknown as ControlGroupRendererApi,
-  (options) => {
-    creationOptions = options;
-  }
+  controlGroupMock as unknown as ControlGroupRendererApi
 );
 
 jest.mock('@kbn/control-group-renderer', () => ({
