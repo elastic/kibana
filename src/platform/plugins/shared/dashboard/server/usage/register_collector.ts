@@ -25,8 +25,10 @@ export function registerDashboardUsageCollector(
       return await collectDashboardTelemetry(taskManager);
     },
     schema: {
-      write_restricted: {
-        total: { type: 'long' },
+      access_mode: {
+        DYNAMIC_KEY: {
+          total: { type: 'long' },
+        },
       },
       panels: {
         total: { type: 'long' },

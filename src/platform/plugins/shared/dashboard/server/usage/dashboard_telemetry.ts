@@ -36,9 +36,7 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
   sections: {
     total: 0,
   },
-  write_restricted: {
-    total: 0,
-  },
+  access_mode: {},
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -85,8 +83,13 @@ export const collectDashboardInfo = (
   dashboard: DashboardSavedObjectInfo,
   collectorData: DashboardCollectorData
 ) => {
-  collectorData.write_restricted.total +=
-    dashboard.accessControl?.accessMode === 'write_restricted' ? 1 : 0;
+  if (dashboard.accessControl?.accessMode) {
+    const mode = dashboard.accessControl.accessMode;
+    if (!collectorData.access_mode[mode]) {
+      collectorData.access_mode[mode] = { total: 0 };
+    }
+    collectorData.access_mode[mode].total += 1;
+  }
   collectorData.sections.total += dashboard.attributes.sections?.length ?? 0;
   return collectorData;
 };

@@ -43,8 +43,6 @@ export const emptyState: LatestTaskStateSchema = {
     sections: {
       total: 0,
     },
-    write_restricted: {
-      total: 0,
-    },
+    access_mode: {},
   },
 };

@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import { upMigration } from './migration';
 
 describe('upMigration', () => {
-  it('should preserve existing v1 state and add write_restricted field', () => {
+  it('should preserve existing v1 state and add empty access_mode field', () => {
     const v1State = {
       runs: 5,
       telemetry: {
@@ -47,14 +47,12 @@ describe('upMigration', () => {
       ...v1State,
       telemetry: {
         ...v1State.telemetry,
-        write_restricted: {
-          total: 0,
-        },
+        access_mode: {},
       },
     });
   });
 
-  it('should preserve existing write_restricted value if already present', () => {
+  it('should preserve existing access mode value if already present', () => {
     const stateWithWriteRestricted = {
       runs: 3,
       telemetry: {
@@ -74,14 +72,20 @@ describe('upMigration', () => {
         sections: {
           total: 0,
         },
-        write_restricted: {
-          total: 7,
+        access_mode: {
+          write_restricted: {
+            total: 7,
+          },
+          default: {
+            total: 15,
+          },
         },
       },
     };
 
     const result = upMigration(cloneDeep(stateWithWriteRestricted));
 
-    expect(result.telemetry.write_restricted.total).toBe(7);
+    expect(result.telemetry.access_mode.write_restricted.total).toBe(7);
+    expect(result.telemetry.access_mode.default.total).toBe(15);
   });
 });

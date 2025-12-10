@@ -98,9 +98,6 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
         const controlsCollector = controlsCollectorFactory(embeddable);
         const processDashboards = (dashboards: DashboardSavedObjectInfo[]) => {
           for (const dashboard of dashboards) {
-            if (dashboard.accessControl?.accessMode === 'write_restricted') {
-              dashboardData.write_restricted.total += 1;
-            }
             dashboardData = collectDashboardInfo(dashboard, dashboardData);
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
 
@@ -150,7 +147,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                   return {
                     attributes,
                     references,
-                    accessControl,
+                    ...(accessControl && { accessControl }),
                   };
                 }
                 return undefined;
@@ -169,7 +166,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                     return {
                       attributes,
                       references,
-                      accessControl,
+                      ...(accessControl && { accessControl }),
                     };
                   }
                   return undefined;

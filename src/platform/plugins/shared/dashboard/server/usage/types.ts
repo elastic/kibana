@@ -33,13 +33,15 @@ export interface DashboardCollectorData {
   sections: {
     total: number;
   };
-  write_restricted: {
-    total: number;
+  access_mode: {
+    [key: string]: {
+      total: number;
+    };
   };
 }
 
 export interface DashboardSavedObjectInfo {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
-  accessControl: SavedObjectAccessControl | undefined;
+  accessControl?: SavedObjectAccessControl;
 }

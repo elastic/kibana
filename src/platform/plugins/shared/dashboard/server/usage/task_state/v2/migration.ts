@@ -17,9 +17,7 @@ export const upMigration = (state: Record<string, any>): VersionSchema => {
     runs: typeof state.runs === 'number' ? state.runs : 0,
     telemetry: {
       ...state.telemetry,
-      write_restricted: {
-        total: state.telemetry.write_restricted ?? 0,
-      },
+      access_mode: state.telemetry?.access_mode ?? {},
     },
   };
 };

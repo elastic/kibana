@@ -12,6 +12,6 @@ import { versionSchema as v1VersionSchema } from '../v1/schema';
 
 export const versionSchema = v1VersionSchema.extends({
   telemetry: v1VersionSchema.getPropSchemas().telemetry.extends({
-    write_restricted: schema.object({ total: schema.number() }),
+    access_mode: schema.recordOf(schema.string(), schema.object({ total: schema.number() })),
   }),
 });
