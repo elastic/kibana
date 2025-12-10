@@ -190,11 +190,12 @@ export function TableGrid({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={isDetails}
+          isESQLMode={isEsqlMode}
           onFindSearchTermMatch={onFindSearchTermMatch}
         />
       );
     },
-    [searchTerm, rows, onFindSearchTermMatch]
+    [searchTerm, rows, isEsqlMode, onFindSearchTermMatch]
   );
 
   const renderCellPopover = useCallback(

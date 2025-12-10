@@ -121,6 +121,7 @@ export const AttributesTable = ({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={false}
+          isESQLMode={isEsqlMode}
         />
       )}
       columnVisibility={{
