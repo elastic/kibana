@@ -157,7 +157,7 @@ export async function getWorkflowInputsSuggestions(
 
   for (const input of workflow.inputs) {
     const matchesPrefix =
-      !lowerSearchPrefix || input.name.toLowerCase().includes(lowerSearchPrefix);
+      !lowerSearchPrefix || input.name.toLowerCase().startsWith(lowerSearchPrefix);
 
     if (matchesPrefix) {
       suggestions.push(createInputSuggestion(input, range));
