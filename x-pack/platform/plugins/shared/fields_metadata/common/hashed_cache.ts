@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { LRUCache } from 'lru-cache';
-import stringify from 'fast-json-stable-stringify';
+import stringify from 'json-stable-stringify';
 
 export interface IHashedCache<KeyType, ValueType> {
   get(key: KeyType): ValueType | undefined;
