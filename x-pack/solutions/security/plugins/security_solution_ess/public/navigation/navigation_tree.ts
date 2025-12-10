@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   ATTACKS_ALERTS_ALIGNMENT_ENABLED,
   SecurityPageName,
@@ -13,6 +14,7 @@ import {
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import {
   defaultNavigationTree,
+  LazyIconAgentBuilder,
   LazyIconFindings,
   LazyIconIntelligence,
   LazyIconWorkflow,
@@ -49,6 +51,16 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       link: 'workflows',
       badgeType: 'techPreview' as const,
     },
+    ...(services.application.capabilities.agentBuilder?.show === true &&
+    services.uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false) === true
+      ? [
+          {
+            // TODO: update icon to 'robot' once it's available in EUI
+            icon: LazyIconAgentBuilder,
+            link: 'agent_builder' as AppDeepLinkId,
+          },
+        ]
+      : []),
     {
       id: SecurityPageName.attackDiscovery,
       icon: 'bolt',
