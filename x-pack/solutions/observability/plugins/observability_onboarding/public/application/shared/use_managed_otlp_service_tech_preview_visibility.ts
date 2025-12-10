@@ -18,7 +18,7 @@ import { useManagedOtlpServiceAvailability } from './use_managed_otlp_service_av
  * - mOTLP service is available (URL is configured and feature flag enabled)
  * - mOTLP is not yet GA (managedOtlpGa feature flag is false)
  */
-export function useOtelTechPreviewBadgeVisibility(): boolean {
+export function useManagedOtlpServiceTechPreviewVisibility(): boolean {
   const {
     services: {
       featureFlags,

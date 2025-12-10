@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useOtelTechPreviewBadgeVisibility } from '../../shared/use_otel_tech_preview_badge_visibility';
+import { useManagedOtlpServiceTechPreviewVisibility } from '../../shared/use_managed_otlp_service_tech_preview_visibility';
 
 export function ManagedOtlpCallout() {
-  const showTechPreviewBadge = useOtelTechPreviewBadgeVisibility();
+  const isTechnicalPreview = useManagedOtlpServiceTechPreviewVisibility();
 
-  if (!showTechPreviewBadge) {
+  if (!isTechnicalPreview) {
     return null;
   }
 

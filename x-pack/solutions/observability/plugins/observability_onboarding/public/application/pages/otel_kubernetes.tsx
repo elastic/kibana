@@ -10,10 +10,10 @@ import React from 'react';
 import { OtelKubernetesPanel } from '../quickstart_flows/otel_kubernetes/otel_kubernetes_panel';
 import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
-import { useOtelTechPreviewBadgeVisibility } from '../shared/use_otel_tech_preview_badge_visibility';
+import { useManagedOtlpServiceTechPreviewVisibility } from '../shared/use_managed_otlp_service_tech_preview_visibility';
 
 export const OtelKubernetesPage = () => {
-  const showTechPreviewBadge = useOtelTechPreviewBadgeVisibility();
+  const showTechPreviewBadge = useManagedOtlpServiceTechPreviewVisibility();
 
   return (
     <PageTemplate
