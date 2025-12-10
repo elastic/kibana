@@ -172,6 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:deploy_agent_policies',
         'fleet:migrate_action:retry',
         'fleet:packages-bulk-operations',
+        'fleet:policy-revisions-cleanup-task',
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
         'fleet:setup',
