@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/session-view-plugin'
   - '@kbn/repo-info'
-  - '@kbn/es-archiver'
   - '@kbn/serverless-security-settings'
   - '@kbn/rison'
   - '@kbn/core-chrome-browser'

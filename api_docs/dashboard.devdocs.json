@@ -1895,6 +1895,21 @@
     "misc": [
       {
         "parentPluginId": "dashboard",
+        "id": "def-server.DASHBOARD_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/dashboards\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-server.DashboardAttributes",
         "type": "Type",
         "tags": [],
@@ -2147,21 +2162,6 @@
           "{ readonly y: number; readonly w: number; readonly h: number; readonly x: number; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-server.PUBLIC_API_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "PUBLIC_API_PATH",
-        "description": [],
-        "signature": [
-          "\"/api/dashboards/dashboard\""
-        ],
-        "path": "src/platform/plugins/shared/dashboard/server/api/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
