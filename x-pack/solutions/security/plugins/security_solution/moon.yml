@@ -264,6 +264,10 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/tour-queue'
   - '@kbn/shared-ux-file-types'
+  - '@kbn/onechat-common'
+  - '@kbn/onechat-plugin'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/onechat-browser'
 tags:
   - plugin
   - prod

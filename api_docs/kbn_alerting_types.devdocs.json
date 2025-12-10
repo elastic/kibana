@@ -1152,6 +1152,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Flapping.enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
             "id": "def-common.Flapping.lookBackWindow",
             "type": "number",
             "tags": [],
@@ -4162,6 +4176,14 @@
             "text": "JsonValue"
           },
           "[] | undefined; \"kibana.alert.maintenance_window_ids\"?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          "[] | undefined; \"kibana.alert.maintenance_window_names\"?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

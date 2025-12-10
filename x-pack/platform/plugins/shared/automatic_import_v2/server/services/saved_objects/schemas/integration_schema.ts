@@ -19,7 +19,7 @@ export const integrationSchemaV1 = schema.object({
   ),
   metadata: schema.object(
     {
-      title: schema.maybe(schema.string()),
+      title: schema.string(),
       version: schema.maybe(
         schema.string({
           minLength: MIN_VERSION_LENGTH,
@@ -31,7 +31,8 @@ export const integrationSchemaV1 = schema.object({
           },
         })
       ),
-      description: schema.maybe(schema.string()),
+      logo: schema.maybe(schema.string()),
+      description: schema.string(),
       created_at: schema.maybe(schema.string()),
       // allow other fields not explicitly defined here
     },
