@@ -8,7 +8,7 @@
 import React from 'react';
 import { useSelector } from '@xstate5/react';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { isWhereBlock } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 import { ActionBlock } from './blocks/action';
 import { WhereBlock } from './blocks/where';
 import type { RootLevelMap } from '../state_management/stream_enrichment_state_machine/utils';
@@ -28,5 +28,5 @@ export interface StepConfigurationProps {
 
 export const StepsListItem = (props: StepConfigurationProps) => {
   const step = useSelector(props.stepRef, (snapshot) => snapshot.context.step);
-  return <>{isWhereBlock(step) ? <WhereBlock {...props} /> : <ActionBlock {...props} />}</>;
+  return <>{isConditionBlock(step) ? <WhereBlock {...props} /> : <ActionBlock {...props} />}</>;
 };

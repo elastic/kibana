@@ -13,7 +13,7 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangDSL,
-  StreamlangWhereBlock,
+  StreamlangConditionBlock,
 } from '@kbn/streamlang';
 import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
@@ -65,7 +65,7 @@ export const useStreamEnrichmentEvents = () => {
         service.send({ type: 'step.duplicateProcessor', processorStepId: id });
       },
       addCondition: (
-        step?: StreamlangWhereBlock,
+        step?: StreamlangConditionBlock,
         options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
       ) => {
         service.send({ type: 'step.addCondition', step, options });

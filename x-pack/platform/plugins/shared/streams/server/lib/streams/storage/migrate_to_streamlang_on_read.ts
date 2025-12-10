@@ -213,7 +213,7 @@ type OldRoutingDefinition = Record<string, unknown> & {
 
 /**
  * Legacy where block format (before condition property rename)
- * @deprecated Use StreamlangWhereBlock with 'condition' property instead
+ * @deprecated Use StreamlangConditionBlock with 'condition' property instead
  */
 export interface LegacyWhereBlock {
   customIdentifier?: string;

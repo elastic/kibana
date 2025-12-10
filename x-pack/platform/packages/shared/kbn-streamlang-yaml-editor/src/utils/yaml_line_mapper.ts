@@ -7,7 +7,7 @@
 
 import YAML from 'yaml';
 import type { StreamlangDSL, StreamlangStep } from '@kbn/streamlang/types/streamlang';
-import { addIdentifierToStep, isWhereBlock } from '@kbn/streamlang';
+import { addIdentifierToStep, isConditionBlock } from '@kbn/streamlang';
 import type { StepDecoration, StepSummary } from '../types';
 
 export interface YamlLineMap {
@@ -75,8 +75,8 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
           lineEnd: endLine,
         };
 
-        // Handle nested where blocks recursively
-        if (isWhereBlock(dslStep) && dslStep.condition?.steps) {
+        // Handle nested condition blocks recursively
+        if (isConditionBlock(dslStep) && dslStep.condition?.steps) {
           const conditionNode = stepNode.get && stepNode.get('condition');
           const nestedStepsNode = conditionNode && conditionNode.get && conditionNode.get('steps');
 

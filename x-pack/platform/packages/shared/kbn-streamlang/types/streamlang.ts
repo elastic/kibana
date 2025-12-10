@@ -33,37 +33,37 @@ export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(()
 export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
 
 /**
- * Nested where block (recursive)
+ * Nested condition block (recursive)
  */
-export interface StreamlangWhereBlock {
+export interface StreamlangConditionBlock {
   customIdentifier?: string;
   condition: ConditionWithSteps;
 }
 
 /**
- * Zod schema for a where block
+ * Zod schema for a condition block
  */
-export const streamlangWhereBlockSchema: z.ZodType<StreamlangWhereBlock> = z.object({
+export const streamlangConditionBlockSchema: z.ZodType<StreamlangConditionBlock> = z.object({
   customIdentifier: z.string().optional(),
   condition: conditionWithStepsSchema,
 });
 
-export const isWhereBlockSchema = (obj: any): obj is StreamlangWhereBlock => {
-  return isSchema(streamlangWhereBlockSchema, obj);
+export const isConditionBlockSchema = (obj: any): obj is StreamlangConditionBlock => {
+  return isSchema(streamlangConditionBlockSchema, obj);
 };
 
 // Cheap check that bypasses having to do full schema checks.
-// This is useful for quickly identifying where blocks without full recursive validation.
-export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
+// This is useful for quickly identifying condition blocks without full recursive validation.
+export const isConditionBlock = (obj: any): obj is StreamlangConditionBlock => {
   return 'condition' in obj && !('action' in obj);
 };
 
 /**
- * A step can be either a processor or a where block (optionally recursive)
+ * A step can be either a processor or a condition block (optionally recursive)
  */
-export type StreamlangStep = StreamlangProcessorDefinition | StreamlangWhereBlock;
+export type StreamlangStep = StreamlangProcessorDefinition | StreamlangConditionBlock;
 export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(() =>
-  z.union([streamlangProcessorSchema, streamlangWhereBlockSchema])
+  z.union([streamlangProcessorSchema, streamlangConditionBlockSchema])
 );
 
 export const isActionBlockSchema = (obj: any): obj is StreamlangProcessorDefinition => {

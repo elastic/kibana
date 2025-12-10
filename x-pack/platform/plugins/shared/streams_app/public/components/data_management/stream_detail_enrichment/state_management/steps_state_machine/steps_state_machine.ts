@@ -9,7 +9,7 @@ import { and, assign, forwardTo, sendTo, setup } from 'xstate5';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import type { ProcessorResources, StepContext, StepEvent, StepInput } from './types';
@@ -48,7 +48,7 @@ export const stepMachine = setup({
       (
         { context },
         params: {
-          step: StreamlangWhereBlockWithUIAttributes;
+          step: StreamlangConditionBlockWithUIAttributes;
         }
       ) => {
         return {

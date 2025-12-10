@@ -10,7 +10,7 @@ import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 
 export type StepToParentEvent =
@@ -56,7 +56,7 @@ export type StepEvent =
     }
   | {
       type: 'step.changeCondition';
-      step: StreamlangWhereBlockWithUIAttributes;
+      step: StreamlangConditionBlockWithUIAttributes;
     }
   | {
       type: 'step.changeDescription';

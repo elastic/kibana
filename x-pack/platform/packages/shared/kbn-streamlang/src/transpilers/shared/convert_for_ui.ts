@@ -7,7 +7,11 @@
 
 import { htmlIdGenerator } from '@elastic/eui';
 import type { StreamlangStepWithUIAttributes } from '../../../types/ui';
-import { isWhereBlock, type StreamlangDSL, type StreamlangStep } from '../../../types/streamlang';
+import {
+  isConditionBlock,
+  type StreamlangDSL,
+  type StreamlangStep,
+} from '../../../types/streamlang';
 
 const createId = htmlIdGenerator();
 
@@ -20,7 +24,7 @@ export const convertStepsForUI = (dsl: StreamlangDSL): StreamlangStepWithUIAttri
 
       // If this is a Where block with nested steps, unnest them.
       // Remove the steps property, as these will now become flattened items.
-      if (isWhereBlock(step) && Array.isArray(step.condition.steps)) {
+      if (isConditionBlock(step) && Array.isArray(step.condition.steps)) {
         // Add the where block itself
         result.push(stepWithUI);
         // Recursively unnest children, passing the current id as parentId
@@ -45,7 +49,7 @@ export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep
 
   // If this is a where step, remove condition.steps.
   // UI versions of the steps keep a flat array and work off parentId to represent hierarchy.
-  if (isWhereBlock(step) && Array.isArray(step.condition.steps)) {
+  if (isConditionBlock(step) && Array.isArray(step.condition.steps)) {
     const { steps, ...conditionWithoutSteps } = step.condition;
     return {
       customIdentifier: id,
@@ -74,7 +78,7 @@ export const convertUIStepsToDSL = (
     const { customIdentifier, parentId, ...rest } = step;
     const stepObj: Omit<StreamlangStepWithUIAttributes, 'parentId'> = { ...rest, customIdentifier };
     // Where block
-    if (isWhereBlock(stepObj)) {
+    if (isConditionBlock(stepObj)) {
       // Ensure condition is always present and has steps
       stepObj.condition = { ...stepObj.condition, steps: [] };
       idToStep[customIdentifier] = { ...stepObj, parentId } as StreamlangStepWithParentId;
@@ -88,7 +92,7 @@ export const convertUIStepsToDSL = (
     const { parentId } = step;
     if (parentId && idToStep[parentId]) {
       const parent = idToStep[parentId];
-      if (isWhereBlock(parent)) {
+      if (isConditionBlock(parent)) {
         parent.condition.steps.push(step);
       }
     } else {
@@ -101,7 +105,7 @@ export const convertUIStepsToDSL = (
     step: StreamlangStepWithParentId,
     removeCustomIdentifiers: boolean
   ): StreamlangStep {
-    if (isWhereBlock(step)) {
+    if (isConditionBlock(step)) {
       const { parentId, customIdentifier, ...whereRest } = step;
       return {
         ...(removeCustomIdentifiers ? { ...whereRest } : { ...whereRest, customIdentifier }),

@@ -9,7 +9,7 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
-import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamlangDSL, StreamlangConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type { IToasts, NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -92,7 +92,7 @@ export type InteractiveModeEvent =
   | {
       type: 'step.changeCondition';
       id: string;
-      step: StreamlangWhereBlock;
+      step: StreamlangConditionBlock;
     }
   | { type: 'step.change'; id: string }
   | { type: 'step.delete'; id: string }
@@ -104,7 +104,7 @@ export type InteractiveModeEvent =
     }
   | {
       type: 'step.addCondition';
-      condition?: StreamlangWhereBlock;
+      condition?: StreamlangConditionBlock;
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.duplicateProcessor'; processorStepId: string }

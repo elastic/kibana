@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
+import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import type { StepStatus } from '@kbn/streamlang-yaml-editor';
 import {
@@ -93,7 +93,7 @@ export const useYamlStepsProcessingSummary = () => {
         }
 
         // Recursively process nested steps in where blocks
-        if (isWhereBlock(step) && step.condition?.steps) {
+        if (isConditionBlock(step) && step.condition?.steps) {
           traverseSteps(step.condition.steps);
         }
       });

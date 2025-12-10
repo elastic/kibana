@@ -94,12 +94,13 @@ export const StepActions = memo<StepActionsProps>(
     let tooltipContent: string;
     if (!isCompleteSimulation && !isAdditiveStep) {
       tooltipContent = i18n.translate('xpack.streamlang.yamlEditor.stepActions.notAdditiveStep', {
-        defaultMessage: 'Only new steps that add processing without modifying existing behavior can be simulated.',
+        defaultMessage:
+          'Only new steps that add processing without modifying existing behavior can be simulated.',
       });
     } else if (!canRunSimulation) {
       tooltipContent = i18n.translate('xpack.streamlang.yamlEditor.stepActions.cannotRun', {
         defaultMessage:
-          'Simulation can't run. Ensure the YAML is valid and changes for partial data sources are strictly additive.',
+          "Simulation can't run. Ensure the YAML is valid and changes for partial data sources are strictly additive.",
       });
     } else {
       tooltipContent = i18n.translate('xpack.streamlang.yamlEditor.stepActions.runUpToStep', {

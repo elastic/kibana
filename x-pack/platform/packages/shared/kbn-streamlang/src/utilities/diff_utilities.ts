@@ -7,7 +7,7 @@
 
 import objectHash from 'object-hash';
 import type { StreamlangDSL, StreamlangStep } from '../../types/streamlang';
-import { isActionBlock, isWhereBlock } from '../../types/streamlang';
+import { isActionBlock, isConditionBlock } from '../../types/streamlang';
 
 /**
  * Recursively removes customIdentifier from all steps in the DSL.
@@ -19,7 +19,7 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
     return steps.map((step) => {
       const { customIdentifier, ...restOfStep } = step;
 
-      if (isWhereBlock(step)) {
+      if (isConditionBlock(step)) {
         // Handle where blocks with nested steps
         return {
           ...restOfStep,
@@ -60,7 +60,7 @@ export function addStepIdentifiers(steps: StreamlangStep[], path = 'root') {
       const { stepPath } = addIdentifierToStep(step, path, i);
 
       // Only recurse into nested steps for where blocks
-      if (isWhereBlock(step) && Array.isArray(step.condition?.steps)) {
+      if (isConditionBlock(step) && Array.isArray(step.condition?.steps)) {
         addStepIdentifiers(step.condition.steps, stepPath);
       }
     });
@@ -117,7 +117,7 @@ const collectStepIds = (steps: StreamlangStep[], target: Set<string>) => {
       target.add(step.customIdentifier);
     }
 
-    if (isWhereBlock(step) && step.condition?.steps) {
+    if (isConditionBlock(step) && step.condition?.steps) {
       collectStepIds(step.condition.steps, target);
     }
   }
@@ -139,7 +139,7 @@ const stripNestedStepsForComparison = (step: StreamlangStep) => {
     customIdentifier?: string;
   };
 
-  if (isWhereBlock(step) && step.condition) {
+  if (isConditionBlock(step) && step.condition) {
     const { steps, ...conditionWithoutSteps } = step.condition;
     return {
       ...restOfStep,
@@ -189,7 +189,7 @@ const diffStepsForAdditions = (
       return { isPurelyAdditive: false };
     }
 
-    if (isWhereBlock(previousStep) && isWhereBlock(nextStep)) {
+    if (isConditionBlock(previousStep) && isConditionBlock(nextStep)) {
       const previousNested = previousStep.condition?.steps ?? [];
       const nextNested = nextStep.condition?.steps ?? [];
 
@@ -256,7 +256,7 @@ export const getProcessorsCount = (dsl: StreamlangDSL): number => {
       if (isActionBlock(step)) {
         // Count action blocks
         count++;
-      } else if (isWhereBlock(step) && step.condition?.steps) {
+      } else if (isConditionBlock(step) && step.condition?.steps) {
         // Recursively traverse nested steps in where blocks
         traverseSteps(step.condition.steps);
       }

@@ -23,7 +23,7 @@ import {
   convertUIStepsToDSL,
   convertStepsForUI,
 } from '@kbn/streamlang';
-import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamlangDSL, StreamlangConditionBlock } from '@kbn/streamlang/types/streamlang';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { stepMachine } from '../steps_state_machine';
 import { getDefaultGrokProcessor, stepConverter } from '../../utils';
@@ -144,7 +144,7 @@ export const interactiveModeMachine = setup({
           condition,
           options,
         }: {
-          condition?: StreamlangWhereBlock;
+          condition?: StreamlangConditionBlock;
           options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
         }
       ) => {

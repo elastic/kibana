@@ -6,7 +6,7 @@
  */
 
 import type { StreamlangDSL, StreamlangStep } from '@kbn/streamlang/types/streamlang';
-import { isWhereBlock } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 
 /**
  * Recursively removes customIdentifier from all steps in the DSL.
@@ -16,8 +16,8 @@ import { isWhereBlock } from '@kbn/streamlang';
 export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
   const stripFromSteps = (steps: StreamlangStep[]): StreamlangStep[] => {
     return steps.map((step) => {
-      if (isWhereBlock(step)) {
-        // Handle where blocks with nested steps
+      if (isConditionBlock(step)) {
+        // Handle condition blocks with nested steps
         const { customIdentifier, ...restOfStep } = step as any;
         return {
           ...restOfStep,

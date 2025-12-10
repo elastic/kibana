@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { isActionBlock, isWhereBlock, type StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import {
+  isActionBlock,
+  isConditionBlock,
+  type StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
 import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_machine';
 import type { InteractiveModeContext } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
@@ -50,7 +54,7 @@ export function getStepsForSimulation({
     .map((procRef) => procRef.getSnapshot())
     .filter(
       (snapshot) =>
-        isWhereBlock(snapshot.context.step) ||
+        isConditionBlock(snapshot.context.step) ||
         (simulationMode === 'partial' ? snapshot.context.isNew : true)
     );
 

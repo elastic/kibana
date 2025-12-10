@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isWhereBlock } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 import React from 'react';
 import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
@@ -32,7 +32,7 @@ export const WhereBlockSummary = ({
     stepRef.send({ type: 'step.edit' });
   };
 
-  if (!isWhereBlock(step)) return null;
+  if (!isConditionBlock(step)) return null;
 
   return (
     <EuiFlexGroup

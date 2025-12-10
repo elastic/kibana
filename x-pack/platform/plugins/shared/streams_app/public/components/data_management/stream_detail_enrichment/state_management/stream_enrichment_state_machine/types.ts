@@ -12,7 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type {
-  StreamlangWhereBlock,
+  StreamlangConditionBlock,
   StreamlangProcessorDefinition,
   StreamlangDSL,
   StreamlangStepWithUIAttributes,
@@ -117,7 +117,7 @@ export type StreamEnrichmentEvent =
     }
   | {
       type: 'step.addCondition';
-      step?: StreamlangWhereBlock;
+      step?: StreamlangConditionBlock;
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }

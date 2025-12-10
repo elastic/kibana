@@ -208,9 +208,9 @@ function enhanceStreamlangSchemaForEditor(schema: any, streamType?: StreamType):
     return;
   }
 
-  // Find action steps (union with anyOf, not a where block) and where blocks (have 'condition' property)
+  // Find action steps (union with anyOf, not a condition block) and condition blocks (have 'condition' property)
   // Action steps are represented as a union (anyOf) of different action schemas
-  // Where blocks have a 'condition' property at the top level
+  // Condition blocks have a 'condition' property at the top level
   const actionUnionSchema = stepOptions.find(
     (option: unknown) =>
       option &&
@@ -219,14 +219,14 @@ function enhanceStreamlangSchemaForEditor(schema: any, streamType?: StreamType):
       !(option as { properties?: Record<string, unknown> }).properties?.condition
   );
 
-  const whereSchema = stepOptions.find(
+  const conditionBlockSchema = stepOptions.find(
     (option: unknown) =>
       option &&
       typeof option === 'object' &&
       (option as { properties?: Record<string, unknown> }).properties?.condition
   );
 
-  if (!actionUnionSchema || !whereSchema) {
+  if (!actionUnionSchema || !conditionBlockSchema) {
     return;
   }
 
@@ -235,9 +235,9 @@ function enhanceStreamlangSchemaForEditor(schema: any, streamType?: StreamType):
     enhanceActionSchema(actionUnionSchema, streamType);
   }
 
-  // Enhance where blocks with metadata and flattened condition property
-  if (typeof whereSchema === 'object') {
-    enhanceWhereSchema(schema, whereSchema);
+  // Enhance condition blocks with metadata and flattened condition property
+  if (typeof conditionBlockSchema === 'object') {
+    enhanceConditionBlockSchema(schema, conditionBlockSchema);
   }
 }
 
@@ -304,21 +304,24 @@ function enhanceActionSchema(actionUnionSchema: any, streamType?: StreamType): v
 }
 
 /**
- * Add metadata and flatten condition property for where block schema.
+ * Add metadata and flatten condition property for condition block schema.
  */
-function enhanceWhereSchema(rootSchema: any, whereSchema: any): void {
-  if (!whereSchema.title) {
-    whereSchema.title = i18n.translate('xpack.streams.streamlangSchema.whereBlock.title', {
-      defaultMessage: 'Condition block',
-    });
+function enhanceConditionBlockSchema(rootSchema: any, conditionBlockSchema: any): void {
+  if (!conditionBlockSchema.title) {
+    conditionBlockSchema.title = i18n.translate(
+      'xpack.streams.streamlangSchema.conditionBlock.title',
+      {
+        defaultMessage: 'Condition block',
+      }
+    );
   }
 
-  ensureRequiredProperty(whereSchema, 'condition');
-  ensureObjectType(whereSchema);
+  ensureRequiredProperty(conditionBlockSchema, 'condition');
+  ensureObjectType(conditionBlockSchema);
 
   // Add defaultSnippets for better autocomplete experience
   // Provide multiple snippet options for common condition patterns
-  whereSchema.defaultSnippets = [
+  conditionBlockSchema.defaultSnippets = [
     {
       label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlock.label', {
         defaultMessage: 'Condition block',
@@ -393,7 +396,7 @@ function enhanceWhereSchema(rootSchema: any, whereSchema: any): void {
 
   // Flatten the condition allOf intersection for Monaco's benefit
   // This makes the `steps` property directly visible in autocomplete
-  enhanceConditionPropertyForEditor(rootSchema, whereSchema);
+  enhanceConditionPropertyForEditor(rootSchema, conditionBlockSchema);
 }
 
 /**

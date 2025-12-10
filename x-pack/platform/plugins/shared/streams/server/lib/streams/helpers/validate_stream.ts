@@ -29,7 +29,7 @@ import {
   isFilterCondition,
   isNotCondition,
   isOrCondition,
-  isWhereBlock,
+  isConditionBlock,
 } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
@@ -148,7 +148,7 @@ const actionStepValidators: {
 
 function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
   for (const step of steps) {
-    if (isWhereBlock(step)) {
+    if (isConditionBlock(step)) {
       validateCondition(step.condition as Condition);
       // Nested steps are within a where block
       validateSteps(step.condition.steps, true);
