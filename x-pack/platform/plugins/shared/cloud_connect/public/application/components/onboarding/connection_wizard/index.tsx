@@ -45,6 +45,8 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
   const [error, setError] = useState<string | null>(null);
 
   const clusterParams = buildClusterQueryParams(clusterConfig);
+  const signupParams = clusterParams ? `&${clusterParams}` : '';
+  const loginParams = clusterParams ? `%3F${clusterParams}` : '';
 
   const handleConnect = async () => {
     if (!apiKey.trim()) {
@@ -97,7 +99,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              href={`${cloudUrl}/registration?onboarding_service_type=ccm${clusterParams}`}
+              href={`${cloudUrl}/registration?onboarding_service_type=ccm${signupParams}`}
               target="_blank"
               iconType="popout"
               iconSide="right"
@@ -109,7 +111,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              href={`${cloudUrl}/login?redirectTo=%2Fconnect-cluster-services${clusterParams}`}
+              href={`${cloudUrl}/login?redirectTo=%2Fconnect-cluster-services${loginParams}`}
               target="_blank"
               iconType="popout"
               iconSide="right"

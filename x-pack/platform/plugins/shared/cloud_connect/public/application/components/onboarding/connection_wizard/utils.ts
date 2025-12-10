@@ -33,6 +33,5 @@ export const buildClusterQueryParams = (
     params.append('license_uid', clusterConfig.license.uid);
   }
 
-  const queryString = params.toString();
-  return queryString ? `&${queryString}` : '';
+  return params.toString();
 };
