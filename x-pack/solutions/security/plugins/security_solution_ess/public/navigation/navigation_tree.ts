@@ -175,6 +175,15 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               title: i18nStrings.stackManagementV2.home.title,
               breadcrumbStatus: 'hidden',
             },
+            // Only show Cloud Connect in on-prem deployments (not cloud)
+            ...(services.cloud?.isCloudEnabled
+              ? []
+              : [
+                  {
+                    id: 'cloud_connect',
+                    link: 'cloud_connect',
+                  },
+                ]),
             { link: 'monitoring' },
           ],
         },
