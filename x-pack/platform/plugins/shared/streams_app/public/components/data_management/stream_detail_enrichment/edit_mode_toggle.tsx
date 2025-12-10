@@ -66,7 +66,7 @@ export const EditModeToggle = () => {
     if (interactiveModeIsUnavailable) {
       return i18n.translate('xpack.streams.enrichment.editMode.interactiveDisabledTooltip', {
         defaultMessage:
-          'The current YAML configuration contains features that cannot be represented in the interactive editor',
+          'The current YAML configuration contains features that cannot be represented in the interactive editor.',
       });
     }
     return undefined;
