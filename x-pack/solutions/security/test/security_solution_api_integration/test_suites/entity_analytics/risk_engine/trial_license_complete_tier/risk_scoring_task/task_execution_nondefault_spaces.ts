@@ -24,9 +24,8 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
-  const doTests = () => {
+  describe('@ess Risk Scoring Task in non-default space', () => {
     describe('with alerts in a non-default space', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -113,27 +112,6 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
             .sort()
         );
       });
-    });
-  };
-
-  describe('@ess Risk Scoring Task in non-default space', () => {
-    describe('ESQL', () => {
-      doTests();
-    });
-
-    describe('Scripted metric', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
     });
   });
 };

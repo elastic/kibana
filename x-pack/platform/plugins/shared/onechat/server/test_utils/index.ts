@@ -46,3 +46,4 @@ export {
   type ConversationServiceMock,
   type ConversationClientMock,
 } from './conversations';
+export { createFormatContextMock } from './attachments';
