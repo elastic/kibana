@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/fleet-plugin'
+  - '@kbn/cypress-config'
 tags:
   - functional-tests
   - package
