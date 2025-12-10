@@ -40,19 +40,17 @@ export interface FindRuleTemplatesResponse {
   data: RuleTemplate[];
 }
 
-export interface FindRuleTemplatesApiResponse {
-  total: number;
-  page: number;
-  per_page: number;
+export interface FindRuleTemplatesApiResponse 
+  extends Omit<AsApiContract<FindRuleTemplatesResponse>, 'data'> {
   data: AsApiContract<RuleTemplate>[];
 }
 
 export const rewriteTemplatesBodyRes = (
   response: FindRuleTemplatesApiResponse
 ): FindRuleTemplatesResponse => ({
+  total: response.total,
   page: response.page,
   perPage: response.per_page,
-  total: response.total,
   data: response.data.map(({ rule_type_id: ruleTypeId, ...rest }) => ({
     ruleTypeId,
     ...rest,
