@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_ID } from '../components/graph_visualization';
@@ -22,7 +21,6 @@ const mockSessionViewTestId = 'session-view';
 
 // Mock all required dependencies
 jest.mock('../../shared/hooks/use_graph_preview');
-jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../shared/context');
 jest.mock('../components/graph_visualization', () => ({
@@ -65,7 +63,7 @@ describe('VisualizeTab', () => {
     jest.clearAllMocks();
 
     (useGraphPreview as jest.Mock).mockReturnValue({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
     });
 
     (useExpandableFlyoutState as jest.Mock).mockReturnValue({
@@ -83,8 +81,10 @@ describe('VisualizeTab', () => {
     });
   });
 
-  it('should not render GraphVisualization component when feature flag is disabled', () => {
-    (useUiSetting$ as jest.Mock).mockImplementation((setting) => [false]);
+  it('should not render GraphVisualization component when graph is not available', () => {
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      shouldShowGraph: false,
+    });
 
     renderVisualizeTab();
 
@@ -95,8 +95,10 @@ describe('VisualizeTab', () => {
     expect(screen.getByTestId(mockSessionViewTestId)).toBeInTheDocument();
   });
 
-  it('should render GraphVisualization component when feature flag is enabled', () => {
-    (useUiSetting$ as jest.Mock).mockImplementation((setting) => [true]);
+  it('should render GraphVisualization component when graph is available', () => {
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      shouldShowGraph: true,
+    });
 
     renderVisualizeTab();
 

@@ -2671,4 +2671,24 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'mac.advanced.events.script_capture',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_capture',
+      {
+        defaultMessage: 'Capture script content for process create events. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.script_max_size',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_max_size',
+      {
+        defaultMessage: 'Maximum size of script being captured in bytes. Default 1024.',
+      }
+    ),
+  },
 ];
