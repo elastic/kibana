@@ -8,8 +8,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { EsWorkflow, WorkflowExecuteStep, WorkflowRepository } from '@kbn/workflows';
-import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
+import type {
+  EsWorkflow,
+  WorkflowExecuteAsyncStep,
+  WorkflowExecuteStep,
+  WorkflowRepository,
+} from '@kbn/workflows';
+import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
@@ -25,7 +30,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
   private asyncExecutor: WorkflowExecuteAsyncStrategy;
 
   constructor(
-    private node: WorkflowExecuteGraphNode,
+    private node: WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
     private workflowRepository: WorkflowRepository,
@@ -59,8 +64,10 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     this.stepExecutionRuntime.startStep();
     await this.stepExecutionRuntime.flushEventLogs();
 
-    const step = this.node.configuration as WorkflowExecuteStep;
-    const { 'workflow-id': workflowId, inputs = {}, await: shouldAwait = true } = step.with;
+    const step = this.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
+    const { 'workflow-id': workflowId, inputs = {} } = step.with;
+    // Determine if we should await based on step type
+    const shouldAwait = this.node.type === 'workflow.execute';
 
     try {
       const targetWorkflow = await this.getWorkflow(workflowId);

@@ -348,7 +348,11 @@ export async function getWorkflowSuggestions(
     return [];
   }
 
-  if (focusedStepInfo && focusedStepInfo.stepType !== 'workflow.execute') {
+  if (
+    focusedStepInfo &&
+    focusedStepInfo.stepType !== 'workflow.execute' &&
+    focusedStepInfo.stepType !== 'workflow.executeAsync'
+  ) {
     return [];
   }
 

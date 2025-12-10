@@ -21,6 +21,7 @@ import type {
   ExitNormalPathNode,
   ExitRetryNode,
   HttpGraphNode,
+  WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
@@ -253,6 +254,7 @@ export class NodesFactory {
           stepLogger
         );
       case 'workflow.execute':
+      case 'workflow.executeAsync':
         if (!this.dependencies.workflowsExecutionEngine) {
           throw new Error('WorkflowsExecutionEngine is not available in dependencies');
         }
@@ -272,7 +274,7 @@ export class NodesFactory {
           throw new Error('request is not available in dependencies');
         }
         return new WorkflowExecuteStepImpl(
-          node as WorkflowExecuteGraphNode,
+          node as WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           this.dependencies.workflowRepository,

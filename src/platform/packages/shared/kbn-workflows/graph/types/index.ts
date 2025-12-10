@@ -20,6 +20,8 @@ export type {
   KibanaGraphNodeSchema,
   WorkflowExecuteGraphNode,
   WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,

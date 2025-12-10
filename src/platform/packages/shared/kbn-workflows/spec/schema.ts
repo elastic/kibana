@@ -372,19 +372,27 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
-export const WorkflowExecuteStepSchema = BaseStepSchema.extend({
-  type: z.literal('workflow.execute'),
+// Base schema shared by both workflow.execute and workflow.executeAsync
+const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: z.object({
     'workflow-id': z.string().min(1),
     inputs: z.record(z.string(), z.any()).optional(),
-    await: z.boolean().default(true),
   }),
 })
   .extend(StepWithIfConditionSchema.shape)
   .extend(StepWithForEachSchema.shape)
   .extend(TimeoutPropSchema.shape)
   .extend(StepWithOnFailureSchema.shape);
+
+export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.execute'),
+});
 export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
+
+export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.executeAsync'),
+});
+export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
 
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
@@ -462,6 +470,7 @@ const StepSchema = z.lazy(() =>
     ParallelStepSchema,
     MergeStepSchema,
     WorkflowExecuteStepSchema,
+    WorkflowExecuteAsyncStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -475,6 +484,7 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type.value,
   HttpStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
+  WorkflowExecuteAsyncStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 

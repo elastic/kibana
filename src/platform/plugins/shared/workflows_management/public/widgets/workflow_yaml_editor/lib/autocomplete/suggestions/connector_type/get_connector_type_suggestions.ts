@@ -16,6 +16,7 @@ import {
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
@@ -236,7 +237,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
     },
     {
       schema: WorkflowExecuteStepSchema,
-      description: 'Execute another workflow',
+      description: 'Execute another workflow (synchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowExecuteAsyncStepSchema,
+      description: 'Execute another workflow (asynchronous)',
       icon: monaco.languages.CompletionItemKind.Function,
     },
   ];

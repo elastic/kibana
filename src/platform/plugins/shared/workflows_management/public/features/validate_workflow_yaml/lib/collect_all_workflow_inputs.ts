@@ -101,7 +101,7 @@ export function collectAllWorkflowInputs(
     return workflowInputsItems;
   }
 
-  // Find all workflow.execute steps
+  // Find all workflow.execute and workflow.executeAsync steps
   const stepNodes = getStepNodesWithType(yamlDocument);
   for (const stepNode of stepNodes) {
     // Find the step's type
@@ -110,7 +110,8 @@ export function collectAllWorkflowInputs(
         isPair(item) && isScalar(item.key) && item.key.value === 'type'
     );
 
-    if (typePair && isScalar(typePair.value) && typePair.value.value === 'workflow.execute') {
+    const stepType = typePair && isScalar(typePair.value) ? typePair.value.value : null;
+    if (stepType === 'workflow.execute' || stepType === 'workflow.executeAsync') {
       const workflowIdPair = findWorkflowIdPair(stepNode);
       const inputsPair = findInputsPair(stepNode);
 
