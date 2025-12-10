@@ -6,15 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButton,
-  EuiIcon,
-  EuiPortal,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -23,7 +15,9 @@ import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
+  HierarchicalActionsMenu,
 } from '../../components';
+import type { MenuItem } from '../../components';
 import { useAuthz, useLicense } from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
@@ -77,10 +71,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const agentPrivilegeLevelChangeEnabled =
     ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
+
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const closeMenu = () => setIsMenuOpen(false);
-  const onClickMenu = () => setIsMenuOpen(!isMenuOpen);
 
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
@@ -120,190 +113,226 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const { generateReportingJobCSV } = useExportCSV();
 
-  const menuItems = [
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.addRemoveTags"
-          data-test-subj="agentBulkActionsAddRemoveTags"
-          defaultMessage="Add / remove tags"
-        />
-      ),
-      icon: <EuiIcon type="tag" size="m" />,
-      disabled: !authz.fleet.allAgents,
-      onClick: (event: any) => {
-        setTagsPopoverButton((event.target as Element).closest('button')!);
-        setIsTagAddVisible(!isTagAddVisible);
+  // Build hierarchical menu items
+  const menuItems: MenuItem[] = useMemo(() => {
+    const items: MenuItem[] = [
+      // Top-level items
+      {
+        id: 'tags',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.addRemoveTags"
+            defaultMessage="Add / remove tags"
+          />
+        ),
+        icon: 'tag',
+        disabled: !authz.fleet.allAgents,
+        keepMenuOpen: true,
+        onClick: (event) => {
+          setTagsPopoverButton((event.target as Element).closest('button')!);
+          setIsTagAddVisible(!isTagAddVisible);
+        },
+        'data-test-subj': 'agentBulkActionsAddRemoveTags',
       },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
-          data-test-subj="agentBulkActionsBulkMigrate"
-          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="cluster" size="m" />,
-      disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
-      onClick: (event: any) => {
-        closeMenu();
-        setIsMigrateModalOpen(true);
+      {
+        id: 'reassign',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.reassignPolicy"
+            defaultMessage="Assign to new policy"
+          />
+        ),
+        icon: 'pencil',
+        disabled: !authz.fleet.allAgents,
+        onClick: () => {
+          setIsReassignFlyoutOpen(true);
+        },
+        'data-test-subj': 'agentBulkActionsReassign',
       },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.reassignPolicy"
-          data-test-subj="agentBulkActionsReassign"
-          defaultMessage="Assign to new policy"
-        />
-      ),
-      icon: <EuiIcon type="pencil" size="m" />,
-      disabled: !authz.fleet.allAgents,
-      onClick: () => {
-        closeMenu();
-        setIsReassignFlyoutOpen(true);
+      {
+        id: 'upgrade',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.upgradeAgents"
+            defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
+            values={{ agentCount }}
+          />
+        ),
+        icon: 'refresh',
+        disabled: !authz.fleet.allAgents,
+        onClick: () => {
+          setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
+        },
+        'data-test-subj': 'agentBulkActionsUpgrade',
       },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.upgradeAgents"
-          data-test-subj="agentBulkActionsUpgrade"
-          defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="refresh" size="m" />,
-      disabled: !authz.fleet.allAgents,
-      onClick: () => {
-        closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
+      // Upgrade management submenu
+      {
+        id: 'upgrade-management',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.upgradeManagement"
+            defaultMessage="Upgrade management"
+          />
+        ),
+        panelTitle: 'Upgrade management',
+        children: [
+          {
+            id: 'schedule-upgrade',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
+                defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'timeRefresh',
+            disabled: !authz.fleet.allAgents || !isLicenceAllowingScheduleUpgrade,
+            onClick: () => {
+              setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
+            },
+            'data-test-subj': 'agentBulkActionsScheduleUpgrade',
+          },
+          {
+            id: 'restart-upgrade',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
+                defaultMessage="Restart upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'refresh',
+            disabled: !authz.fleet.allAgents,
+            onClick: () => {
+              setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
+            },
+            'data-test-subj': 'agentBulkActionsRestartUpgrade',
+          },
+        ],
       },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
-          data-test-subj="agentBulkActionsScheduleUpgrade"
-          defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="timeRefresh" size="m" />,
-      disabled: !authz.fleet.allAgents || !isLicenceAllowingScheduleUpgrade,
-      onClick: () => {
-        closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
+      // Maintenance and diagnostics submenu
+      {
+        id: 'maintenance',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.maintenanceAndDiagnostics"
+            defaultMessage="Maintenance and diagnostics"
+          />
+        ),
+        panelTitle: 'Maintenance and diagnostics',
+        children: [
+          {
+            id: 'migrate',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
+                defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'cluster',
+            disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
+            onClick: () => {
+              setIsMigrateModalOpen(true);
+            },
+            'data-test-subj': 'agentBulkActionsBulkMigrate',
+          },
+          {
+            id: 'diagnostics',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.requestDiagnostics"
+                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'download',
+            disabled: !authz.fleet.readAgents,
+            onClick: () => {
+              setIsRequestDiagnosticsModalOpen(true);
+            },
+            'data-test-subj': 'agentBulkActionsRequestDiagnostics',
+          },
+          {
+            id: 'export',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.exportAgents"
+                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'exportAction',
+            disabled: !authz.fleet.readAgents,
+            onClick: () => {
+              setIsExportCSVModalOpen(true);
+            },
+            'data-test-subj': 'bulkAgentExportBtn',
+          },
+        ],
       },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
-          data-test-subj="agentBulkActionsRestartUpgrade"
-          defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="refresh" size="m" />,
-      disabled: !authz.fleet.allAgents,
-      onClick: () => {
-        closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
+      // Security and removal submenu
+      {
+        id: 'security',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.securityAndRemoval"
+            defaultMessage="Security and removal"
+          />
+        ),
+        panelTitle: 'Security and removal',
+        children: [
+          ...(agentPrivilegeLevelChangeEnabled
+            ? [
+                {
+                  id: 'remove-root',
+                  name: (
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.bulkChangeAgentsPrivilegeLevel"
+                      defaultMessage="Remove root access for {agentCount, plural, one {# agent} other {# agents}}"
+                      values={{ agentCount }}
+                    />
+                  ),
+                  icon: 'lock' as const,
+                  disabled: !authz.fleet.allAgents,
+                  onClick: () => {
+                    setIsAgentPrivilegeChangeModalOpen(true);
+                  },
+                  'data-test-subj': 'agentBulkActionsBulkChangeAgentsPrivilegeLevel',
+                },
+              ]
+            : []),
+          {
+            id: 'unenroll',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.unenrollAgents"
+                defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'trash',
+            iconColor: 'danger',
+            disabled: !authz.fleet.allAgents,
+            onClick: () => {
+              setIsUnenrollModalOpen(true);
+            },
+            'data-test-subj': 'agentBulkActionsUnenroll',
+          },
+        ],
       },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.requestDiagnostics"
-          data-test-subj="agentBulkActionsRequestDiagnostics"
-          defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      disabled: !authz.fleet.readAgents,
-      icon: <EuiIcon type="download" size="m" />,
-      onClick: () => {
-        closeMenu();
-        setIsRequestDiagnosticsModalOpen(true);
-      },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.unenrollAgents"
-          data-test-subj="agentBulkActionsUnenroll"
-          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      disabled: !authz.fleet.allAgents,
-      icon: <EuiIcon type="trash" size="m" />,
-      onClick: () => {
-        closeMenu();
-        setIsUnenrollModalOpen(true);
-      },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.exportAgents"
-          data-test-subj="bulkAgentExportBtn"
-          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      disabled: !authz.fleet.readAgents,
-      icon: <EuiIcon type="exportAction" size="m" />,
-      onClick: () => {
-        closeMenu();
-        setIsExportCSVModalOpen(true);
-      },
-    },
-  ];
-  if (agentPrivilegeLevelChangeEnabled) {
-    menuItems.push({
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.bulkChangeAgentsPrivilegeLevel"
-          data-test-subj="agentBulkActionsBulkChangeAgentsPrivilegeLevel"
-          defaultMessage="Remove root privilege for {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="lock" size="m" />,
-      disabled: !authz.fleet.allAgents,
-      onClick: () => {
-        closeMenu();
-        setIsAgentPrivilegeChangeModalOpen(true);
-      },
-    });
-  }
-  const panels = [
-    {
-      id: 0,
-      items: menuItems,
-    },
-  ];
+    ];
+
+    return items;
+  }, [
+    authz.fleet.allAgents,
+    authz.fleet.readAgents,
+    agentCount,
+    isTagAddVisible,
+    isLicenceAllowingScheduleUpgrade,
+    doesLicenseAllowMigration,
+    agentPrivilegeLevelChangeEnabled,
+  ]);
 
   const getSelectedTagsFromAgents = useMemo(
     () => getCommonTags(agents, agentsOnCurrentPage ?? [], agentPolicies),
@@ -377,7 +406,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           }}
           onClosePopover={() => {
             setIsTagAddVisible(false);
-            closeMenu();
+            setIsMenuOpen(false);
           }}
         />
       )}
@@ -426,29 +455,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="agentBulkActionsMenu"
-            button={
-              <EuiButton
-                fill
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={onClickMenu}
-                data-test-subj="agentBulkActionsButton"
-              >
+          <HierarchicalActionsMenu
+            items={menuItems}
+            isOpen={isMenuOpen}
+            anchorPosition="downLeft"
+            onToggle={setIsMenuOpen}
+            button={{
+              props: {
+                iconType: 'arrowDown',
+                iconSide: 'right',
+                fill: true,
+              },
+              children: (
                 <FormattedMessage
                   id="xpack.fleet.agentBulkActions.actions"
                   defaultMessage="Actions"
                 />
-              </EuiButton>
-            }
-            isOpen={isMenuOpen}
-            closePopover={closeMenu}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenu initialPanelId={0} panels={panels} />
-          </EuiPopover>
+              ),
+            }}
+            data-test-subj="agentBulkActionsButton"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

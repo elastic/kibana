@@ -11,8 +11,8 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
- * Generated at: 2025-12-02T17:55:14.379Z
- * Source: /oas_docs/output/kibana.yaml (521 APIs)
+ * Generated at: 2025-12-08T09:00:02.630Z
+ * Source: /oas_docs/output/kibana.yaml (523 APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -187,6 +187,7 @@ import { GET_ENDPOINT_METADATA_CONTRACT } from './kibana.get_endpoint_metadata.g
 import { GET_POLICY_RESPONSE_CONTRACT } from './kibana.get_policy_response.gen';
 import { GET_PROTECTION_UPDATES_NOTE_CONTRACT } from './kibana.get_protection_updates_note.gen';
 import { CREATE_UPDATE_PROTECTION_UPDATES_NOTE_CONTRACT } from './kibana.create_update_protection_updates_note.gen';
+import { ENDPOINT_SCRIPT_LIBRARY_LIST_SCRIPTS_CONTRACT } from './kibana.endpoint_script_library_list_scripts.gen';
 import { DELETE_MONITORING_ENGINE_CONTRACT } from './kibana.delete_monitoring_engine.gen';
 import { DISABLE_MONITORING_ENGINE_CONTRACT } from './kibana.disable_monitoring_engine.gen';
 import { INIT_MONITORING_ENGINE_CONTRACT } from './kibana.init_monitoring_engine.gen';
@@ -283,6 +284,7 @@ import { POST_FLEET_CLOUD_CONNECTORS_CONTRACT } from './kibana.post_fleet_cloud_
 import { DELETE_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT } from './kibana.delete_fleet_cloud_connectors_cloudconnectorid.gen';
 import { GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT } from './kibana.get_fleet_cloud_connectors_cloudconnectorid.gen';
 import { PUT_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT } from './kibana.put_fleet_cloud_connectors_cloudconnectorid.gen';
+import { GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_USAGE_CONTRACT } from './kibana.get_fleet_cloud_connectors_cloudconnectorid_usage.gen';
 import { GET_FLEET_DATA_STREAMS_CONTRACT } from './kibana.get_fleet_data_streams.gen';
 import { GET_FLEET_ENROLLMENT_API_KEYS_CONTRACT } from './kibana.get_fleet_enrollment_api_keys.gen';
 import { POST_FLEET_ENROLLMENT_API_KEYS_CONTRACT } from './kibana.post_fleet_enrollment_api_keys.gen';
@@ -711,6 +713,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   GET_POLICY_RESPONSE_CONTRACT,
   GET_PROTECTION_UPDATES_NOTE_CONTRACT,
   CREATE_UPDATE_PROTECTION_UPDATES_NOTE_CONTRACT,
+  ENDPOINT_SCRIPT_LIBRARY_LIST_SCRIPTS_CONTRACT,
   DELETE_MONITORING_ENGINE_CONTRACT,
   DISABLE_MONITORING_ENGINE_CONTRACT,
   INIT_MONITORING_ENGINE_CONTRACT,
@@ -807,6 +810,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   DELETE_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT,
   GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT,
   PUT_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT,
+  GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_USAGE_CONTRACT,
   GET_FLEET_DATA_STREAMS_CONTRACT,
   GET_FLEET_ENROLLMENT_API_KEYS_CONTRACT,
   POST_FLEET_ENROLLMENT_API_KEYS_CONTRACT,

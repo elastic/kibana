@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
+  - '@kbn/core-notifications-browser-internal'
 tags:
   - plugin
   - prod

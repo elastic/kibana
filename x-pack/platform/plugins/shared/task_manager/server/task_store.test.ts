@@ -23,7 +23,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes, IBasePath } from '@kbn/core/server';
+import type { SavedObjectAttributes, IBasePath, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
@@ -1168,6 +1168,8 @@ describe('TaskStore', () => {
   describe('bulkUpdate', () => {
     let store: TaskStore;
     const logger = mockLogger();
+    let mockGetScopedClient: jest.Mock;
+
     const bulkUpdateTask = {
       runAt: mockedDate,
       scheduledAt: mockedDate,
@@ -1184,7 +1186,19 @@ describe('TaskStore', () => {
       traceparent: '',
     };
 
-    beforeAll(() => {
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+    const mockUserScope = {
+      apiKeyId: 'apiKeyId',
+      apiKeyCreatedByUser: false,
+      spaceId: 'testSpace',
+    };
+
+    beforeEach(() => {
+      mockGetScopedClient = jest.fn();
+      const mockSavedObjectsService = {
+        getScopedClient: mockGetScopedClient,
+      };
       store = new TaskStore({
         logger,
         index: 'tasky',
@@ -1198,11 +1212,17 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
-        savedObjectsService: coreStart.savedObjects,
+        savedObjectsService: mockSavedObjectsService as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
       });
+      store.registerEncryptedSavedObjectsClient(esoClient);
+    });
+
+    afterEach(() => {
+      adHocTaskCounter.reset();
+      jest.resetAllMocks();
     });
 
     test(`doesn't validate whenever validate:false is passed-in`, async () => {
@@ -1392,6 +1412,286 @@ describe('TaskStore', () => {
             type: 'task',
             version: bulkUpdateTask.version,
             attributes: taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('bulk update task with API key when api key, user scope and request are available', async () => {
+      const mockScopedClient = {
+        bulkUpdate: jest.fn().mockResolvedValue({
+          saved_objects: [
+            {
+              id: '324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                apiKey: mockApiKey,
+                userScope: mockUserScope,
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+            },
+          ],
+        }),
+      };
+
+      mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+      await store.bulkUpdate(
+        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        }
+      );
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
+        { ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope },
+        {
+          validate: false,
+        }
+      );
+
+      expect(mockGetScopedClient).toHaveBeenCalledWith(mockRequest, {
+        includedHiddenTypes: ['task'],
+        excludedExtensions: ['security', 'spaces'],
+      });
+      expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+          },
+        ],
+        { refresh: false }
+      );
+
+      expect(logger.debug).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    test('uses regular repository when request is provided but docs have no apiKey', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([bulkUpdateTask], {
+        validate: false,
+        mergeAttributes: false,
+        options: { request: mockRequest },
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+        )
+      );
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('uses regular repository when request is provided but docs have no userScope', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([{ ...bulkUpdateTask, apiKey: mockApiKey }], {
+        validate: false,
+        mergeAttributes: false,
+        options: { request: mockRequest },
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+        )
+      );
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('uses regular repository when no request is provided even if docs have apiKey and userScope', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate(
+        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: {},
+        }
+      );
+
+      expect(logger.debug).not.toHaveBeenCalled();
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('uses regular repository when security is disabled even with request and encrypted fields', async () => {
+      // Create store with security disabled
+      const storeWithoutSecurity = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: {
+          getScopedClient: mockGetScopedClient,
+        } as unknown as SavedObjectsServiceStart,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
+      });
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await storeWithoutSecurity.bulkUpdate(
+        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        }
+      );
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
           },
         ],
         { refresh: false }
