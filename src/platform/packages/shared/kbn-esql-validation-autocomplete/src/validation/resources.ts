@@ -10,8 +10,8 @@
 import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLAstAllCommands, ESQLCommand } from '@kbn/esql-ast/src/types';
 import { Walker } from '@kbn/esql-ast';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
-import type { ESQLCallbacks } from '../shared/types';
 
 function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
   const arrMap = new Map<string, T>();

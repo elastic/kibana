@@ -139,7 +139,11 @@ export function ManualFlowForm({
             <EuiSuperSelect
               options={options}
               valueOfSelected={
-                options.find((option) => option.value.name === query.feature?.name)?.value
+                options.find(
+                  (option) =>
+                    option.value.name === query.feature?.name &&
+                    option.value.type === query.feature?.type
+                )?.value
               }
               placeholder={i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
@@ -155,6 +159,7 @@ export function ManualFlowForm({
                   feature: {
                     name: value.name,
                     filter: value.filter,
+                    type: value.type,
                   },
                 });
                 setTouched((prev) => ({ ...prev, feature: true }));
