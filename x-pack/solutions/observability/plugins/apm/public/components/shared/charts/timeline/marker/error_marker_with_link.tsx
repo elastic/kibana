@@ -25,15 +25,18 @@ export function ErrorMarkerWithLink({ mark }: { mark: ErrorMark }) {
 
   const serviceGroup = 'serviceGroup' in query ? query.serviceGroup : '';
 
+  const traceId = mark.error.trace?.id;
+  const transactionId = mark.error.transaction?.id;
+
+  const kueryParts = [
+    traceId && `${TRACE_ID} : "${traceId}"`,
+    transactionId && `${TRANSACTION_ID} : "${transactionId}"`,
+  ].filter(Boolean);
+
   const queryParam = {
     ...query,
     serviceGroup,
-    kuery: [
-      ...(mark.error.trace?.id ? [`${TRACE_ID} : "${mark.error.trace?.id}"`] : []),
-      ...(mark.error.transaction?.id
-        ? [`${TRANSACTION_ID} : "${mark.error.transaction?.id}"`]
-        : []),
-    ].join(' and '),
+    kuery: kueryParts.join(' and '),
   };
 
   return <ErrorMarker mark={mark} query={queryParam} />;

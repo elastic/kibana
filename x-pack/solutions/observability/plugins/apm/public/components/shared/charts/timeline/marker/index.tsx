@@ -28,10 +28,10 @@ export function Marker({ mark, x }: Props) {
   return (
     <MarkerContainer style={{ left: x - legendWidth / 2 }}>
       {mark.type === 'errorMark' ? (
-        mark.withLink ? (
-          <ErrorMarkerWithLink mark={mark} />
-        ) : (
+        mark.onClick ? (
           <ErrorMarker mark={mark} />
+        ) : (
+          <ErrorMarkerWithLink mark={mark} />
         )
       ) : (
         <AgentMarker mark={mark} />

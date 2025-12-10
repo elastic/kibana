@@ -92,7 +92,6 @@ export function useTraceWaterfall({
         errorMarks,
       };
     } catch (e) {
-      console.log('### caue ~ useTraceWaterfall ~ e:', e);
       return {
         traceState: TraceDataState.Invalid,
         message: INSTRUMENTATION_WARNING,
@@ -132,8 +131,7 @@ function getWaterfallErrorsMarks({
       verticalLine: false,
       offset: error.timestamp.us - rootTimestampUs,
       skew: getClockSkew({ itemTimestamp: error.timestamp.us, itemDuration: 0, parent }),
-      serviceColor: '',
-      withLink: false,
+      serviceColor: parent?.color ?? '',
       onClick:
         onErrorClick && docId
           ? () => {

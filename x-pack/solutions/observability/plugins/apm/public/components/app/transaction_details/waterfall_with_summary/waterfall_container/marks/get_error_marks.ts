@@ -14,7 +14,6 @@ export interface ErrorMark extends Mark {
   type: 'errorMark';
   error: Error;
   serviceColor: string;
-  withLink?: boolean;
   onClick?: () => void;
 }
 
@@ -33,6 +32,5 @@ export const getErrorMarks = (errorItems: IWaterfallError[]): ErrorMark[] => {
     id: error.id,
     error: error.doc,
     serviceColor: error.color,
-    withLink: true,
   }));
 };
