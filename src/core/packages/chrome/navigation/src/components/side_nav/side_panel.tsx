@@ -27,7 +27,7 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
+const getPanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   box-sizing: border-box;
   position: relative;
   display: flex;
@@ -58,7 +58,7 @@ export interface SidePanelProps {
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const scrollStyles = useScroll();
-  const wrapperStyles = useMemo(() => getWrapperStyles(euiThemeContext), [euiThemeContext]);
+  const wrapperStyles = useMemo(() => getPanelWrapperStyles(euiThemeContext), [euiThemeContext]);
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',
   });

@@ -22,14 +22,14 @@ import { SecondaryMenu } from '../secondary_menu';
 import { SidePanel } from './side_panel';
 import { NAVIGATION_ROOT_SELECTOR } from '../../constants';
 
-const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
+const getNavWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
   box-sizing: border-box;
   background-color: ${theme.colors.backgroundTransparent};
   display: flex;
   flex-direction: column;
   gap: ${isCollapsed ? theme.size.s : theme.size.m};
   height: 100%;
-  padding-bottom: ${theme.size.base};
+  padding-bottom: ${theme.size.xs};
   width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
 `;
 
@@ -61,7 +61,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   const { euiTheme } = useEuiTheme();
 
   const wrapperStyles = useMemo(
-    () => getWrapperStyles(euiTheme, isCollapsed),
+    () => getNavWrapperStyles(euiTheme, isCollapsed),
     [euiTheme, isCollapsed]
   );
 
