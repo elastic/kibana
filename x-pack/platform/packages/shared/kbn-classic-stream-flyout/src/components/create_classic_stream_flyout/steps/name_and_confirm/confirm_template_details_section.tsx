@@ -211,7 +211,7 @@ export const ConfirmTemplateDetailsSection = ({
     const dataRetention = formatDataRetention(template);
     const componentTemplates = template.composedOf ?? [];
 
-    const items: Array<{ title: string; description: React.ReactNode }> = [];
+    const items: Array<{ title: string; description: NonNullable<React.ReactNode> }> = [];
 
     // Version
     if (template.version !== undefined) {
@@ -289,12 +289,7 @@ export const ConfirmTemplateDetailsSection = ({
       <EuiSpacer size="m" />
 
       <EuiDescriptionList
-        listItems={
-          templateDetails as Array<{
-            title: string;
-            description: NonNullable<React.ReactNode>;
-          }>
-        }
+        listItems={templateDetails}
         type="column"
         columnWidths={[1, 3]}
         compressed
