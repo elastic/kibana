@@ -207,14 +207,18 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
               {flappingLabel}
             </EuiText>
             {isCustom && (
-              <EuiBadge color="primary" style={{ height: '100%' }}>
+              <EuiBadge
+                data-test-subj="rulesSettingsFlappingCustomBadge"
+                color="primary"
+                style={{ height: '100%' }}
+              >
                 {flappingOverrideLabel}
               </EuiBadge>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSwitch
-              data-test-subj="ruleFormAdvancedOptionsOverrideSwitch"
+              data-test-subj="rulesSettingsFlappingEnableSwitch"
               compressed
               label={enabled ? enabledOnLabel : enabledOffLabel}
               checked={enabled}
@@ -272,6 +276,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
       <EuiFlexItem>
         <EuiSwitch
           compressed
+          data-test-subj="rulesSettingsFlappingCustomSwitch"
           checked={!!flappingSettings}
           label={flappingOverrideConfiguration}
           disabled={!canWriteFlappingSettingsUI || disableOverride}
