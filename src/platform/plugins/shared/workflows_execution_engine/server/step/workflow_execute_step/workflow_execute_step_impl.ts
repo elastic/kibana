@@ -53,35 +53,50 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
   }
 
   async run(): Promise<void> {
+    // Start step execution to ensure stepType and stepId are set
+    // This is important for frontend rendering even if the step fails early
+    this.stepExecutionRuntime.startStep();
+    await this.stepExecutionRuntime.flushEventLogs();
+
     const step = this.node.configuration as WorkflowExecuteStep;
     const { workflow, inputs = {}, await: shouldAwait = true } = step.with;
 
-    // Resolve workflow by ID or name
-    const targetWorkflow = await this.resolveWorkflow(workflow);
-    if (!targetWorkflow) {
-      const error = new Error(`Workflow not found: ${JSON.stringify(workflow)}`);
-      this.stepExecutionRuntime.failStep(error);
-      this.workflowExecutionRuntime.navigateToNextNode();
-      return;
-    }
-
-    // Validate permissions and same-space
     try {
-      await this.validateWorkflowAccess(targetWorkflow);
+      // Resolve workflow by ID or name
+      const targetWorkflow = await this.resolveWorkflow(workflow);
+      if (!targetWorkflow) {
+        const error = new Error(`Workflow not found: ${JSON.stringify(workflow)}`);
+        this.stepExecutionRuntime.failStep(error);
+        this.workflowExecutionRuntime.navigateToNextNode();
+        await this.stepExecutionRuntime.flushEventLogs();
+        return;
+      }
+
+      // Validate permissions and same-space
+      try {
+        await this.validateWorkflowAccess(targetWorkflow);
+      } catch (error) {
+        this.stepExecutionRuntime.failStep(error as Error);
+        this.workflowExecutionRuntime.navigateToNextNode();
+        await this.stepExecutionRuntime.flushEventLogs();
+        return;
+      }
+
+      // Map inputs using template engine
+      const mappedInputs = this.mapInputs(inputs);
+
+      // Route to appropriate execution strategy
+      if (shouldAwait) {
+        await this.syncExecutor.execute(targetWorkflow, mappedInputs, this.spaceId, this.request);
+      } else {
+        await this.asyncExecutor.execute(targetWorkflow, mappedInputs, this.spaceId, this.request);
+      }
     } catch (error) {
+      // Catch any unexpected errors during execution
       this.stepExecutionRuntime.failStep(error as Error);
       this.workflowExecutionRuntime.navigateToNextNode();
-      return;
-    }
-
-    // Map inputs using template engine
-    const mappedInputs = this.mapInputs(inputs);
-
-    // Route to appropriate execution strategy
-    if (shouldAwait) {
-      await this.syncExecutor.execute(targetWorkflow, mappedInputs, this.spaceId, this.request);
-    } else {
-      await this.asyncExecutor.execute(targetWorkflow, mappedInputs, this.spaceId, this.request);
+    } finally {
+      await this.stepExecutionRuntime.flushEventLogs();
     }
   }
 

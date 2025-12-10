@@ -172,6 +172,8 @@ export class StepExecutionRuntime {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
       finishedAt: new Date().toISOString(),

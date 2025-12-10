@@ -159,12 +159,15 @@ export class WorkflowExecutionState {
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
-    this.stepExecutions.set(step.id!, {
-      ...this.stepExecutions.get(step.id!),
+    const existingStep = this.stepExecutions.get(step.id!);
+    const updatedStep = {
+      ...existingStep,
       ...step,
-    } as EsWorkflowStepExecution);
+    } as EsWorkflowStepExecution;
+    this.stepExecutions.set(step.id!, updatedStep);
+    // Merge with the existing step execution (not just stepDocumentsChanges) to preserve all fields
     this.stepDocumentsChanges.set(step.id as string, {
-      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
+      ...existingStep,
       ...step,
     });
   }
