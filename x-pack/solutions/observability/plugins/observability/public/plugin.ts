@@ -314,7 +314,6 @@ export class Plugin
         'logs',
         'metrics',
         'apm',
-        'slo',
         'performance',
         'trace',
         'agent',
