@@ -15,4 +15,3 @@ export {
   type FindUserPromptsParams,
   type FindUserPromptsResult,
 } from './client';
-

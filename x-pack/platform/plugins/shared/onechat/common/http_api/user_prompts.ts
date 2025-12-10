@@ -69,4 +69,3 @@ export type BulkDeleteUserPromptResult =
 export interface BulkDeleteUserPromptsResponse {
   results: BulkDeleteUserPromptResult[];
 }
-
