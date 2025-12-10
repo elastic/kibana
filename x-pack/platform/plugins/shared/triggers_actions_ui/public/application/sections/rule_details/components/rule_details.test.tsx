@@ -700,6 +700,7 @@ describe('rule_details', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
