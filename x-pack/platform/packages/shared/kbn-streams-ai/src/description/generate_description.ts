@@ -7,8 +7,7 @@
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
-import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { Streams, SystemFeature } from '@kbn/streams-schema';
+import { conditionToQueryDsl, type Condition } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { GenerateStreamDescriptionPrompt } from './prompt';
 
@@ -17,7 +16,7 @@ import { GenerateStreamDescriptionPrompt } from './prompt';
  */
 export async function generateStreamDescription({
   stream,
-  feature,
+  filter,
   start,
   end,
   esClient,
@@ -25,8 +24,8 @@ export async function generateStreamDescription({
   signal,
   logger,
 }: {
-  stream: Streams.all.Definition;
-  feature?: SystemFeature;
+  stream: { name: string };
+  filter?: Condition;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -34,11 +33,7 @@ export async function generateStreamDescription({
   signal: AbortSignal;
   logger: Logger;
 }): Promise<{ description: string; tokensUsed?: ChatCompletionTokenCount }> {
-  logger.debug(
-    `Generating stream description for stream ${stream.name}${
-      feature ? ` using feature ${feature.name}` : ''
-    }`
-  );
+  logger.debug(`Generating stream description for stream ${stream.name}`);
 
   logger.trace('Describing dataset for stream description');
   const analysis = await withSpan('describe_dataset_for_stream_description', () =>
@@ -47,7 +42,7 @@ export async function generateStreamDescription({
       end,
       esClient,
       index: stream.name,
-      filter: feature ? conditionToQueryDsl(feature.filter) : undefined,
+      filter: filter ? conditionToQueryDsl(filter) : undefined,
     })
   );
 
@@ -65,7 +60,7 @@ export async function generateStreamDescription({
   const response = await withSpan('generate_stream_description', () =>
     inferenceClient.prompt({
       input: {
-        name: feature?.name || stream.name,
+        name: stream.name,
         dataset_analysis: JSON.stringify(formattedAnalysis),
       },
       prompt: GenerateStreamDescriptionPrompt,
