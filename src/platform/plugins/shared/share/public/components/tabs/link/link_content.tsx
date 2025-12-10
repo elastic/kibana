@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
-  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
