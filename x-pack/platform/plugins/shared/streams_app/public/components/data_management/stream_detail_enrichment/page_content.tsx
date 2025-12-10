@@ -10,7 +10,8 @@ import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
@@ -78,6 +79,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
 export function StreamDetailEnrichmentContentImpl() {
   const context = useKibana();
   const { appParams, core } = context;
+  const { onPageReady } = usePerformanceContext();
 
   const getStreamEnrichmentState = useGetStreamEnrichmentState();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
@@ -146,6 +148,13 @@ export function StreamDetailEnrichmentContentImpl() {
 
     return result;
   }, [detectedFields, fieldsInSamples, definitionFields]);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (isReady && definition) {
+      onPageReady();
+    }
+  }, [isReady, definition, onPageReady]);
 
   const hasDefinitionError = useSimulatorSelector((snapshot) =>
     Boolean(snapshot.context.simulation?.definition_error)

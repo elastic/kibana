@@ -19,11 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
@@ -60,6 +61,8 @@ export function StreamDetailAttachments({
     notifications,
   } = core;
 
+  const { onPageReady } = usePerformanceContext();
+
   const attachmentFilters = useMemo(
     () => ({
       ...(filters.debouncedQuery && { query: filters.debouncedQuery }),
@@ -76,6 +79,13 @@ export function StreamDetailAttachments({
   const { addAttachments, removeAttachments } = useAttachmentsApi({
     name: definition.stream.name,
   });
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !attachmentsFetch.loading) {
+      onPageReady();
+    }
+  }, [definition, attachmentsFetch.loading, onPageReady]);
 
   const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {

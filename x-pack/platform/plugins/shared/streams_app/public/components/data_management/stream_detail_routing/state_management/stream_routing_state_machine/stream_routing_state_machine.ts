@@ -653,6 +653,7 @@ export const createStreamRoutingMachineImplementations = ({
       createRoutingSamplesMachineImplementations({
         data,
         timeState$,
+        telemetryClient,
       })
     ),
   },

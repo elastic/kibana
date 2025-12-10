@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -72,6 +73,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
 
 export function StreamDetailRoutingImpl() {
   const { appParams, core } = useKibana();
+  const { onPageReady } = usePerformanceContext();
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
@@ -97,6 +99,13 @@ export function StreamDetailRoutingImpl() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, definition] // Refetch streams when the definition changes
   );
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
+      onPageReady();
+    }
+  }, [streamsListFetch, onPageReady]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges:

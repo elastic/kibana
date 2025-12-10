@@ -13,10 +13,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 
 export const GroupStreamDetailView = ({ stream }: { stream: Streams.GroupStream.GetResponse }) => {
+  const { onPageReady } = usePerformanceContext();
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (stream) {
+      onPageReady();
+    }
+  }, [stream, onPageReady]);
+
   const meta = [
     {
       title: i18n.translate('xpack.streams.groupStreamDetailView.descriptionLabel', {
