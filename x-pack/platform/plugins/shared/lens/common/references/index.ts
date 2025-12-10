@@ -25,10 +25,7 @@ export const injectLensReferences = (
     const name = reference.name.split(':').at(-1); // name can be dashboard or panel reference name
 
     if (name) {
-      acc.set(name, {
-        ...reference,
-        name, // panel reference name
-      });
+      acc.set(name, reference);
     }
 
     return acc;
@@ -36,7 +33,9 @@ export const injectLensReferences = (
 
   const newReferences = clonedState.attributes.references.map((lensRef) => {
     const panelReference = panelReferencesMap.get(lensRef.name);
-    return panelReference?.type === lensRef.type ? panelReference : lensRef;
+    return panelReference?.type === lensRef.type
+      ? { ...panelReference, name: lensRef.name }
+      : lensRef;
   });
 
   clonedState.attributes.references = newReferences;
