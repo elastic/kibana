@@ -20,7 +20,7 @@ import {
   OPEN_TELEMETRY_BASE_AGENT_NAMES,
   RUM_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils/src/agent_names';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
@@ -772,12 +772,15 @@ export const tasks: TelemetryTask[] = [
         fields: asMutableArray([OBSERVER_VERSION] as const),
       });
 
-      const event = unflattenKnownApmEventFields(response.hits.hits[0]?.fields);
-      if (!event || !event.observer?.version) {
+      const fields = response.hits.hits[0]?.fields;
+
+      const observerVersion = fields && accessKnownApmEventFields(fields)[OBSERVER_VERSION];
+
+      if (!observerVersion) {
         return {};
       }
 
-      const [major, minor, patch] = event.observer.version.split('.').map((part) => Number(part));
+      const [major, minor, patch] = observerVersion.split('.').map((part) => Number(part));
 
       return {
         version: {
