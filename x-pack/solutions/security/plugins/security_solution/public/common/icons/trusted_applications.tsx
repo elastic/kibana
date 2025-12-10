@@ -43,21 +43,31 @@ export const IconTrustedApplications: React.FC<SVGProps<SVGSVGElement>> = ({ ...
   const dark = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 32 32"
       width={16}
       height={16}
+      fill="none"
+      viewBox="0 0 32 32"
       {...props}
     >
-      <g fill="#fff" clipPath="url(#a)">
-        <path fillRule="evenodd" d="M27 7.962H2v-2h25zM6 5H4V3h2zM10 5H8V3h2z" clipRule="evenodd" />
-        <path d="M27 0a2 2 0 0 1 2 2v7h-2V2H2v19.037l16-.023v2l-15.996.023a2 2 0 0 1-2.003-2V2a2 2 0 0 1 2-2z" />
+      <g clipPath="url(#a)">
         <path
+          fill="#48efcf"
+          fillRule="evenodd"
+          d="M27 7.962H2v-2h25zM6 5H4V3h2zM10 5H8V3h2z"
+          clipRule="evenodd"
+        />
+        <path
+          fill="#fff"
+          d="M27 0a2 2 0 0 1 2 2v7h-2V2H2v19.037l16-.023v2l-15.996.023a2 2 0 0 1-2.003-2V2a2 2 0 0 1 2-2z"
+        />
+        <path
+          fill="#fff"
           fillRule="evenodd"
           d="M29 11h-8a1 1 0 0 0-1 1v17a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V12a1 1 0 0 0-1-1m-8-2a3 3 0 0 0-3 3v17a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V12a3 3 0 0 0-3-3z"
           clipRule="evenodd"
         />
         <path
+          fill="#48efcf"
           fillRule="evenodd"
           d="M20 14.038h10v2H20zM26.001 28.962h-2v-2h2z"
           clipRule="evenodd"

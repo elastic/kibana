@@ -38,10 +38,10 @@ export const IconPolicies: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =>
   const dark = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 32 32"
       width={16}
       height={16}
+      fill="none"
+      viewBox="0 0 32 32"
       {...props}
     >
       <path
@@ -49,7 +49,7 @@ export const IconPolicies: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =>
         d="M20 0a7 7 0 0 1 6.325 4H29a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3h-2v12a7 7 0 0 1-7 7H1V0zM3 30h17a5 5 0 0 0 5-5V7a5 5 0 0 0-5-5H3zm28 0h-2v-6h2zm0-9h-2v-6h2zm-4-10h2a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2z"
       />
       <path
-        fill="#fff"
+        fill="#48efcf"
         d="M10 24.5v2H7v-2zm11 2h-9v-2h9zM10 21H7v-2h3zm11 0h-9v-2h9zm-11-6H7v-2h3zm11 0h-9v-2h9zM10 9H7V7h3zm11 0h-9V7h9z"
       />
     </svg>

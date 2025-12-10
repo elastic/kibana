@@ -38,10 +38,10 @@ export const IconBlocklist: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =
   const dark = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 32 32"
       width={16}
       height={16}
+      fill="none"
+      viewBox="0 0 32 32"
       {...props}
     >
       <path
@@ -51,7 +51,7 @@ export const IconBlocklist: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =
         clipRule="evenodd"
       />
       <path
-        fill="#fff"
+        fill="#48efcf"
         fillRule="evenodd"
         d="M11 23h2v-5h-2zM12 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-3.815V7h-2v3.185A2.995 2.995 0 0 0 9 13c0 1.654 1.346 3 3 3s3-1.346 3-3a2.995 2.995 0 0 0-2-2.815M19 12h2V7h-2zM20 18a1 1 0 1 1 0-2 1 1 0 0 1 0 2m3-1c0-1.654-1.346-3-3-3s-3 1.346-3 3c0 1.302.839 2.401 2 2.815V23h2v-3.185A2.995 2.995 0 0 0 23 17"
         clipRule="evenodd"

@@ -45,10 +45,10 @@ export const IconHostIsolationExceptions: React.FC<SVGProps<SVGSVGElement>> = ({
   const dark = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 32 32"
       width={16}
       height={16}
+      fill="none"
+      viewBox="0 0 32 32"
       {...props}
     >
       <path
@@ -61,7 +61,13 @@ export const IconHostIsolationExceptions: React.FC<SVGProps<SVGSVGElement>> = ({
       <path
         fill="#fff"
         fillRule="evenodd"
-        d="m24.525 13.273 5.427 2.087v2.774a7.88 7.88 0 0 1-5.049 7.351l-.003.001-.376.143-.376-.144a7.88 7.88 0 0 1-5.049-7.35V15.36zm-3.426 3.46v1.401a5.88 5.88 0 0 0 3.427 5.341 5.88 5.88 0 0 0 3.426-5.34v-1.402l-3.427-1.317zM15 18H8v-2h7zM18 14H8v-2h10zM24 10H8V8h16z"
+        d="m24.525 13.273 5.427 2.087v2.774a7.88 7.88 0 0 1-5.049 7.351l-.003.001-.376.143-.376-.144a7.88 7.88 0 0 1-5.049-7.35V15.36zm-3.426 3.46v1.401a5.88 5.88 0 0 0 3.427 5.341 5.88 5.88 0 0 0 3.426-5.34v-1.402l-3.427-1.317z"
+        clipRule="evenodd"
+      />
+      <path
+        fill="#48efcf"
+        fillRule="evenodd"
+        d="M15 18H8v-2h7zM18 14H8v-2h10zM24 10H8V8h16z"
         clipRule="evenodd"
       />
     </svg>

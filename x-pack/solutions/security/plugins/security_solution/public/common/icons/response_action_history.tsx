@@ -40,14 +40,14 @@ export const IconResponseActionHistory: React.FC<SVGProps<SVGSVGElement>> = ({ .
   const dark = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 32 32"
       width={16}
       height={16}
+      fill="none"
+      viewBox="0 0 32 32"
       {...props}
     >
       <path
-        fill="#fff"
+        fill="#48efcf"
         d="M8 9h23V7H8zM11 14h7v-2h-7zM21 14h7v-2h-7zM11 19h7v-2h-7zM21 19h7v-2h-7zM11 24h7v-2h-7zM21 24h7v-2h-7z"
       />
       <path

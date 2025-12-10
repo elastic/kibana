@@ -42,9 +42,16 @@ export const IconTrustedDevices: React.FC<SVGProps<SVGSVGElement>> = ({ ...props
   );
 
   const dark = (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={16} height={16} {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={16}
+      height={16}
+      fill="none"
+      viewBox="0 0 32 32"
+      {...props}
+    >
       <path
-        fill="#fff"
+        fill="#48efcf"
         fillRule="evenodd"
         d="m9.232 5.724 8.569 6.93-2.56 1.478 1 1.732-1.732 1-1-1.732-2.56 1.478zm3.239 7.698 1.808-1.045-2.261-1.828z"
         clipRule="evenodd"
@@ -60,7 +67,7 @@ export const IconTrustedDevices: React.FC<SVGProps<SVGSVGElement>> = ({ ...props
         d="M20 14a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3zm3-1a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V14a1 1 0 0 0-1-1z"
         clipRule="evenodd"
       />
-      <path fill="#fff" fillRule="evenodd" d="M22 15h8v2h-8zM25 26h2v2h-2z" clipRule="evenodd" />
+      <path fill="#48efcf" fillRule="evenodd" d="M22 15h8v2h-8zM25 26h2v2h-2z" clipRule="evenodd" />
     </svg>
   );
 
