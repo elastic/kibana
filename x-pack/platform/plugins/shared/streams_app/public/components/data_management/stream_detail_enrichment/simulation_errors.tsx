@@ -95,7 +95,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
               <p>
                 <FormattedMessage
                   id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
-                  defaultMessage="These are some mapping failures that occurred during the simulation:"
+                  defaultMessage="The following mapping failures occurred during the simulation:"
                 />
               </p>
               <ul>
