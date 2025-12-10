@@ -33,9 +33,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { ENTITY_STORE_HEALTH_REPORT_EVENT } from '../../../../telemetry/event_based/events';
 import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
 import type { AppClientFactory } from '../../../../../client';
-import { PrivilegeMonitoringDataClient } from '../../../privilege_monitoring/engine/data_client';
-import { createPrivmonIndexService } from '../../../privilege_monitoring/engine/elasticsearch/indices';
-import { checkandInitPrivilegeMonitoringResourcesNoContext } from '../../../privilege_monitoring/check_and_init_privmon_resources';
 import type { GetEntityStoreStatusResponse } from '../../../../../../common/api/entity_analytics/entity_store/status.gen';
 
 const getTaskName = (): string => TYPE;
@@ -120,22 +117,6 @@ export const registerEntityStoreHealthTask = ({
       isServerless,
     });
 
-    // as we have added the privmon index to the list of indices
-    // for existing customers, this index may not exist so we need to create it
-    const privmonDataClient = new PrivilegeMonitoringDataClient({
-      logger,
-      clusterClient,
-      namespace,
-      savedObjects: core.savedObjects,
-      taskManager: taskManagerStart,
-      auditLogger,
-      kibanaVersion,
-      telemetry,
-      experimentalFeatures,
-    });
-    const privmonIndexService = createPrivmonIndexService(privmonDataClient);
-    await checkandInitPrivilegeMonitoringResourcesNoContext(privmonIndexService, logger);
-
     const statusResponse = await entityStoreClient.status({ include_components: true });
     telemetry.reportEvent(
       ENTITY_STORE_HEALTH_REPORT_EVENT.eventType,
@@ -210,14 +191,12 @@ export const removeEntityStoreHealthTask = async ({
 
 export const runEntityStoreHealthTask = async ({
   getStatus,
-  isCancelled,
   logger,
   taskInstance,
   telemetry,
   experimentalFeatures,
 }: {
   logger: Logger;
-  isCancelled: () => boolean;
   getStatus: (namespace: string) => Promise<void>;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
@@ -279,20 +258,17 @@ const createEntityStoreHealthTaskRunnerFactory =
     experimentalFeatures: ExperimentalFeatures;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-    let cancelled = false;
-    const isCancelled = () => cancelled;
     return {
       run: async () =>
         runEntityStoreHealthTask({
           getStatus,
-          isCancelled,
           logger,
           taskInstance,
           telemetry,
           experimentalFeatures,
         }),
       cancel: async () => {
-        cancelled = true;
+        logger.warn(`[Entity Store]  Task ${TYPE} timed out`);
       },
     };
   };
