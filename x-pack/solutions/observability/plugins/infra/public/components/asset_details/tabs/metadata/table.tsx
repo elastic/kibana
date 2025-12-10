@@ -181,7 +181,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
       searchFormat="text"
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}
-      message={
+      noItemsMessage={
         loading ? (
           <div data-test-subj="infraAssetDetailsMetadataLoading">{LOADING}</div>
         ) : (

@@ -1,6 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
+  agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 10000
   aiops: 15359
   alerting: 26932
@@ -23,7 +24,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 564938
+  core: 566392
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -90,7 +91,7 @@ pageLoadAssetSize:
   inspectComponent: 4900
   inspector: 17954
   interactiveSetup: 36524
-  intercepts: 19011
+  intercepts: 21246
   kibanaOverview: 6339
   kibanaReact: 22503
   kibanaUsageCollection: 1736
@@ -113,7 +114,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 14703
+  navigation: 18999
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
@@ -123,7 +124,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 25218
+  onechat: 28638
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418

@@ -15,6 +15,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
@@ -94,6 +95,11 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_MAINTENANCE_WINDOW_IDS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: {
     type: 'keyword',
     array: true,
     required: false,

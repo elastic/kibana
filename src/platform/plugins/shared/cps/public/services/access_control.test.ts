@@ -10,7 +10,6 @@
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   getProjectRoutingAccess,
-  getReadonlyMessage,
   DEFAULT_ACCESS_CONTROL_CONFIG,
   type AccessControlConfig,
 } from './access_control';
@@ -56,22 +55,11 @@ describe('Access Control Configuration', () => {
         );
       });
 
-      it('should return READONLY for lens editor pages with hash only', () => {
-        expect(getProjectRoutingAccess('lens', '#/edit/my-lens')).toBe(
-          ProjectRoutingAccess.READONLY
-        );
-      });
-
-      it('should return READONLY for lens editor pages with full path', () => {
+      it('should return EDITABLE for lens editor pages with full path', () => {
         expect(getProjectRoutingAccess('lens', '/app/lens#/edit/my-lens')).toBe(
-          ProjectRoutingAccess.READONLY
+          ProjectRoutingAccess.EDITABLE
         );
       });
-
-      it('should return READONLY for lens listing page', () => {
-        expect(getProjectRoutingAccess('lens', '#/')).toBe(ProjectRoutingAccess.READONLY);
-      });
-
       it('should return DISABLED for unknown apps', () => {
         expect(getProjectRoutingAccess('management', '#/')).toBe(ProjectRoutingAccess.DISABLED);
       });
@@ -146,34 +134,6 @@ describe('Access Control Configuration', () => {
     });
   });
 
-  describe('getReadonlyMessage', () => {
-    it('should return custom message from default config for lens', () => {
-      expect(getReadonlyMessage('lens')).toBe(
-        'Please adjust project scope for each layer in the Lens editor.'
-      );
-    });
-
-    it('should return undefined for apps without custom message', () => {
-      expect(getReadonlyMessage('dashboards')).toBeUndefined();
-    });
-
-    it('should return custom message from custom config', () => {
-      const config: AccessControlConfig = {
-        myApp: {
-          defaultAccess: ProjectRoutingAccess.READONLY,
-          readonlyMessage: 'Custom message here',
-        },
-      };
-
-      expect(getReadonlyMessage('myApp', config)).toBe('Custom message here');
-    });
-
-    it('should return undefined for unconfigured apps', () => {
-      const config: AccessControlConfig = {};
-      expect(getReadonlyMessage('unknownApp', config)).toBeUndefined();
-    });
-  });
-
   describe('DEFAULT_ACCESS_CONTROL_CONFIG', () => {
     it('should have configuration for expected apps', () => {
       expect(DEFAULT_ACCESS_CONTROL_CONFIG).toHaveProperty('dashboards');
@@ -184,10 +144,6 @@ describe('Access Control Configuration', () => {
 
     it('should have route rules for dashboards', () => {
       expect(DEFAULT_ACCESS_CONTROL_CONFIG.dashboards.routeRules).toHaveLength(1);
-    });
-
-    it('should have readonly message for lens', () => {
-      expect(DEFAULT_ACCESS_CONTROL_CONFIG.lens.readonlyMessage).toBeDefined();
     });
   });
 });
