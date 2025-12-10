@@ -31,13 +31,6 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, toggle, navProps }: Pro
     [updateLayout]
   );
 
-  const handleSidePanelStateChange = useCallback(
-    (isOpen: boolean) => {
-      updateLayout({ isSidePanelOpen: isOpen });
-    },
-    [updateLayout]
-  );
-
   return (
     <>
       <Global
@@ -51,7 +44,6 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, toggle, navProps }: Pro
       <Navigation
         isCollapsed={isCollapsed}
         setWidth={setWidth}
-        onSidePanelStateChange={handleSidePanelStateChange}
         onToggleCollapsed={toggle}
         {...navProps}
       />

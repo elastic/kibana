@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, type ReactNode } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -59,10 +59,6 @@ export interface NavigationProps {
    */
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /**
-   * (optional) Callback fired when the side panel (secondary nav) state changes.
-   */
-  onSidePanelStateChange?: (isOpen: boolean) => void;
-  /**
    * (optional) Callback fired when the collapse button is toggled.
    */
   onToggleCollapsed?: (isCollapsed: boolean) => void;
@@ -82,7 +78,6 @@ export const Navigation = ({
   items,
   logo,
   onItemClick,
-  onSidePanelStateChange,
   onToggleCollapsed,
   setWidth,
   sidePanelFooter,
@@ -113,11 +108,6 @@ export const Navigation = ({
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
-
-  // Notify the layout when the side panel state changes
-  useEffect(() => {
-    onSidePanelStateChange?.(isSidePanelOpen);
-  }, [isSidePanelOpen, onSidePanelStateChange]);
 
   // Create the collapse button if a toggle callback is provided
   const collapseButton = onToggleCollapsed ? (
