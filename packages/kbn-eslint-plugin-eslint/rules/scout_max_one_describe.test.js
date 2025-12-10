@@ -12,7 +12,7 @@ const rule = require('./scout_max_one_describe');
 const dedent = require('dedent');
 
 const ERROR_MSG =
-  'Only one describe block is allowed per test type (apiTest, test, or spaceTest). This is required for auto-skip functionality in CI.';
+  'Only one root-level describe block is allowed per file. This is required for auto-skip functionality in CI.';
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -65,30 +65,9 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
         });
       `,
     },
-    // Different test types can each have one describe
+    // Single bare describe()
     {
       code: dedent`
-        test.describe('test suite', () => {
-          test('should work', () => {
-            expect(true).toBe(true);
-          });
-        });
-
-        apiTest.describe('api test suite', () => {
-          apiTest('should work', () => {
-            expect(true).toBe(true);
-          });
-        });
-      `,
-    },
-    // Multiple bare describe() calls are allowed - rule only checks fixture methods
-    {
-      code: dedent`
-        describe('my test suite', () => {
-          test('should work', () => {
-            expect(true).toBe(true);
-          });
-        });
         describe('my test suite', () => {
           test('should work', () => {
             expect(true).toBe(true);
@@ -99,6 +78,26 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
   ],
 
   invalid: [
+    // Two bare describe() calls
+    {
+      code: dedent`
+        describe('my test suite', () => {
+          test('should work', () => {
+            expect(true).toBe(true);
+          });
+        });
+        describe('my test suite', () => {
+          test('should work', () => {
+            expect(true).toBe(true);
+          });
+        });
+      `,
+      errors: [
+        {
+          message: ERROR_MSG,
+        },
+      ],
+    },
     // Two apiTest.describe() calls
     {
       code: dedent`
@@ -150,6 +149,23 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
         },
       ],
     },
+    // Mixed bare and method describe calls
+    {
+      code: dedent`
+        describe('bare describe', () => {
+          test('test 1', () => {});
+        });
+
+        test.describe('method describe', () => {
+          test('test 2', () => {});
+        });
+      `,
+      errors: [
+        {
+          message: ERROR_MSG,
+        },
+      ],
+    },
     // Three test.describe() calls - should report 2 errors
     {
       code: dedent`
@@ -174,7 +190,7 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
         },
       ],
     },
-    // Multiple types with violations
+    // Multiple root describes of different types - now all count as violations
     {
       code: dedent`
         test.describe('test suite 1', () => {
@@ -194,6 +210,9 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
         });
       `,
       errors: [
+        {
+          message: ERROR_MSG,
+        },
         {
           message: ERROR_MSG,
         },

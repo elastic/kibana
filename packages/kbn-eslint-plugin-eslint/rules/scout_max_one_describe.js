@@ -9,32 +9,31 @@
 
 /** @typedef {import("eslint").Rule.RuleModule} Rule */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
-/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.MemberExpression} MemberExpression */
 
 const ERROR_MSG =
-  'Only one describe block is allowed per test type (apiTest, test, or spaceTest). This is required for auto-skip functionality in CI.';
-
-const TEST_FIXTURES = new Set(['apiTest', 'test', 'spaceTest']);
+  'Only one root-level describe block is allowed per file. This is required for auto-skip functionality in CI.';
 
 /**
- * Checks if a node represents apiTest.describe(), test.describe(), or spaceTest.describe()
+ * Checks if a node represents a describe() call (bare or method)
  * @param {CallExpression} node
- * @returns {string | null} The test type ('apiTest', 'test', 'spaceTest') or null if not a match
+ * @returns {boolean} True if this is a describe call
  */
-const getDescribeTestType = (node) => {
+const isDescribeCall = (node) => {
+  // Check for bare describe() call
+  if (node.callee.type === 'Identifier' && node.callee.name === 'describe') {
+    return true;
+  }
+
   // Check for *.describe() pattern
   if (
     node.callee.type === 'MemberExpression' &&
     node.callee.property.type === 'Identifier' &&
-    node.callee.property.name === 'describe' &&
-    node.callee.object.type === 'Identifier'
+    node.callee.property.name === 'describe'
   ) {
-    const objectName = node.callee.object.name;
-    if (TEST_FIXTURES.has(objectName)) {
-      return objectName;
-    }
+    return true;
   }
-  return null;
+
+  return false;
 };
 
 /** @type {Rule} */
@@ -42,33 +41,36 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description:
-        'Ensure at most one describe block per test type (apiTest, test, or spaceTest) in Scout tests',
+      description: 'Ensure at most one root-level describe block in Scout tests',
       category: 'Best Practices',
     },
     fixable: null,
     schema: [],
   },
   create: (context) => {
-    // Track count of each test type's describe calls
-    const describeCounts = {
-      apiTest: 0,
-      test: 0,
-      spaceTest: 0,
-    };
+    let rootDescribeCount = 0;
+    let depth = 0;
 
     return {
       CallExpression(node) {
-        const testType = getDescribeTestType(node);
-        if (testType) {
-          describeCounts[testType]++;
-          // Report error if this is the second or subsequent occurrence
-          if (describeCounts[testType] > 1) {
-            context.report({
-              node,
-              message: ERROR_MSG,
-            });
+        if (isDescribeCall(node)) {
+          // Only count root-level describe calls (depth === 0)
+          if (depth === 0) {
+            rootDescribeCount++;
+            // Report error if this is the second or subsequent occurrence
+            if (rootDescribeCount > 1) {
+              context.report({
+                node,
+                message: ERROR_MSG,
+              });
+            }
           }
+          depth++;
+        }
+      },
+      'CallExpression:exit'(node) {
+        if (isDescribeCall(node)) {
+          depth--;
         }
       },
     };
