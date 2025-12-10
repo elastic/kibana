@@ -803,7 +803,7 @@ describe('is spec connector', () => {
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });
 
-  it('should disable the test tab', async () => {
+  it('should not render the test tab', async () => {
     const { getByTestId } = appMockRenderer.render(
       <EditConnectorFlyout
         actionTypeRegistry={actionTypeRegistry}
