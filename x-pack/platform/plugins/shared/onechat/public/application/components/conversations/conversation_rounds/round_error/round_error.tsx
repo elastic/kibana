@@ -46,8 +46,6 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
     <GenericRoundError error={error} />
   );
 
-  console.log({ error, errorSteps });
-
   return (
     <EuiFlexGroup
       direction="column"
