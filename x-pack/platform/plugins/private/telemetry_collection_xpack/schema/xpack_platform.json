@@ -6682,6 +6682,16 @@
                   "type": "integer"
                 }
               }
+            },
+            "slo_template": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
