@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable import/no-default-export */
-
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
