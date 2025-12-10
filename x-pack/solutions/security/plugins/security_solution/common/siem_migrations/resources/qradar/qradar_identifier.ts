@@ -17,7 +17,7 @@ import { QradarRulesXmlParser } from '../../parsers/qradar/rules_xml';
  * @returns Array of identified resources with type 'lookup' and reference set names
  */
 export const qradarResourceIdentifier: VendorResourceIdentifier = async (ruleData: string) => {
-  const qRadarXmlParser = new QradarRulesXmlParser('</>');
+  const qRadarXmlParser = new QradarRulesXmlParser();
   let referenceSets: string[] = [];
 
   try {

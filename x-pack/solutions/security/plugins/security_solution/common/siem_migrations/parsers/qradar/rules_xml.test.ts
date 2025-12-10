@@ -140,7 +140,7 @@ describe('QradarRulesXmlParser', () => {
           </responses>
         </rule>
       `;
-      const parser = new QradarRulesXmlParser('');
+      const parser = new QradarRulesXmlParser();
       const severity = await parser.parseSeverityFromRuleData(ruleDataWithSeverity);
       expect(severity).toBe('8');
     });
