@@ -8,7 +8,11 @@
 export type { StreamlangDSL } from './types/streamlang';
 export { streamlangDSLSchema, isActionBlock, isWhereBlock } from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
-export { transpile as transpileEsql, conditionToESQL } from './src/transpilers/esql';
+export {
+  transpile as transpileEsql,
+  conditionToESQL,
+  conditionToESQLAst,
+} from './src/transpilers/esql';
 export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';
@@ -16,6 +20,7 @@ export * from './src/conditions/helpers';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
+export * from './src/validation/validate_streamlang';
 export { validateMathExpression } from './src/transpilers/shared/math/ast_validator';
 export { getMathExpressionLanguageDocSections } from './src/transpilers/shared/math/docs';
 export { extractFieldReferencesFromMathExpression } from './src/transpilers/shared/math/field_extractor';

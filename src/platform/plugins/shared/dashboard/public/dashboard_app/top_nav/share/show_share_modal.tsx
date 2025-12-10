@@ -127,10 +127,10 @@ export function ShowShareModal({
   const locatorParams: DashboardLocatorParams = {
     dashboardId: savedObjectId,
     preserveSavedFilters: true,
-    refreshInterval: undefined, // We don't share refresh interval externally
+    refresh_interval: undefined, // We don't share refresh interval externally
     viewMode: 'view', // For share locators we always load the dashboard in view mode
     useHash: false,
-    timeRange: dataService.query.timefilter.timefilter.getTime(),
+    time_range: dataService.query.timefilter.timefilter.getTime(),
     ...unsavedDashboardStateForLocator,
   };
 
@@ -215,7 +215,7 @@ export function ShowShareModal({
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR
       ) as LocatorPublic<DashboardLocatorParams>,
-      params: locatorParams,
+      params: { ...locatorParams, timeRange: locatorParams.time_range },
     },
   });
 }

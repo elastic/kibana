@@ -31,6 +31,7 @@ import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -78,7 +79,7 @@ interface RecalcColumnWidthsParams {
   visibleColumns: string[];
 }
 
-const PRIORITIZED_CONTENT_FIELDS = [
+export const PRIORITIZED_CONTENT_FIELDS = [
   'message',
   'body.text',
   'error.message',
@@ -97,7 +98,7 @@ const PRIORITIZED_DATE_FIELDS = [
   'attributes.custom.timestamp',
 ];
 
-const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
   // Count occurrences of well-known text fields in the sample documents
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
     Object.keys(doc).filter((key) => prioritizedFields.includes(key))
@@ -116,6 +117,27 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
 
   const mostCommonField = sortedFields[0];
   return mostCommonField ? mostCommonField[0] : '';
+};
+
+/**
+ * Checks if the sample documents have valid message fields with actual content
+ * that can be used for pipeline suggestion generation.
+ */
+export const hasValidMessageFieldsForSuggestion = (sampleDocs: FlattenRecord[]): boolean => {
+  if (!sampleDocs || sampleDocs.length === 0) {
+    return false;
+  }
+
+  // Check if any of the prioritized content fields exist with non-empty values
+  const docsWithValidFields = sampleDocs.filter((doc) => {
+    return PRIORITIZED_CONTENT_FIELDS.some((fieldName) => {
+      const value = doc[fieldName];
+      return value !== undefined && value !== null && String(value).trim().length > 0;
+    });
+  });
+
+  // Require at least 50% of documents to have valid message fields
+  return docsWithValidFields.length >= sampleDocs.length * 0.5;
 };
 
 const defaultConvertProcessorFormState = (): ConvertFormState => ({
@@ -619,7 +641,7 @@ export const buildUpsertStreamRequestPayload = (
   definition: Streams.ingest.all.GetResponse,
   steps: StreamlangStepWithUIAttributes[],
   fields?: FieldDefinition
-): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
+): { ingest: IngestUpsertRequest } => {
   const processing = convertUIStepsToDSL(steps);
 
   return Streams.WiredStream.GetResponse.is(definition)
