@@ -6,13 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import {
-  SecurityPageName,
-  SECURITY_FEATURE_ID,
-  SIEM_MIGRATIONS_RULES_PATH,
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+  SIEM_MIGRATIONS_FEATURE_ID,
+} from '@kbn/security-solution-features/constants';
+import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
+  SIEM_MIGRATIONS_RULES_PATH,
+  SecurityPageName,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { IconDashboards } from '../common/icons/dashboards';
@@ -29,7 +32,7 @@ const subLinks: LinkItem[] = [
     }),
     landingIcon: IconRules,
     path: SIEM_MIGRATIONS_RULES_PATH,
-    capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
@@ -47,7 +50,7 @@ const subLinks: LinkItem[] = [
     ),
     landingIcon: IconDashboards,
     path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
-    capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    capabilities: [[`dashboard_v2.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
@@ -67,7 +70,10 @@ export const links: LinkItem = {
     defaultMessage: 'Migrations',
   }),
   path: SIEM_MIGRATIONS_LANDING_PATH,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+  capabilities: [
+    [SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+    [RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+  ],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
       defaultMessage: 'Migrations',
