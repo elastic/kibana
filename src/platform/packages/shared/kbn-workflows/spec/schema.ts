@@ -56,10 +56,16 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
+export const CollisionStrategySchema = z.enum(['queue', 'drop', 'cancel-in-progress']);
+export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
+
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
+  concurrency_key: z.string().optional(), // e.g., '{{ event.host.name }}'
+  collision_strategy: CollisionStrategySchema.optional().default('queue'), // 'queue', 'drop', or 'cancel-in-progress'
+  max_concurrency_per_group: z.number().int().min(1).optional().default(1), // Max concurrent runs per concurrency group
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
