@@ -39,7 +39,7 @@ const request = httpServerMock.createKibanaRequest();
 describe('getApmToolAvailability', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    // default: spaces returns allowed solution 'oblt'
+
     (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
       {} as any,
       {
