@@ -86,7 +86,7 @@ export function SloEditPage() {
             }),
         bottomBorder: false,
       }}
-      data-test-subj="slosEditPage"
+      data-test-subj="sloEditPage"
     >
       <HeaderMenu />
       {isEditMode && isLoadingSlo ? (

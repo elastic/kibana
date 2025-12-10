@@ -331,7 +331,7 @@ describe('SLO Edit Page', () => {
 
         const { queryByTestId } = render(<SloEditPage />);
 
-        expect(queryByTestId('slosEditPage')).toBeTruthy();
+        expect(queryByTestId('sloEditPage')).toBeTruthy();
         expect(queryByTestId('sloForm')).toBeTruthy();
 
         expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
@@ -361,7 +361,7 @@ describe('SLO Edit Page', () => {
 
         const { queryByTestId } = render(<SloEditPage />);
 
-        expect(queryByTestId('slosEditPage')).toBeTruthy();
+        expect(queryByTestId('sloEditPage')).toBeTruthy();
         expect(queryByTestId('sloForm')).toBeTruthy();
 
         expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
@@ -388,7 +388,7 @@ describe('SLO Edit Page', () => {
 
         const { queryByTestId } = render(<SloEditPage />);
 
-        expect(queryByTestId('slosEditPage')).toBeTruthy();
+        expect(queryByTestId('sloEditPage')).toBeTruthy();
         expect(queryByTestId('sloForm')).toBeTruthy();
 
         // all sections are visible

@@ -14,7 +14,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import {
   transformPartialSLOStateToFormState,
-  transformSloResponseToCreateSloForm,
+  transformSloResponseToFormState,
 } from '../helpers/process_slo_form_values';
 import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
@@ -39,7 +39,7 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
     ? transformPartialSLOStateToFormState(initialValues)
     : undefined;
   const sloFormValuesFromUrlState = useParseUrlState();
-  const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
+  const sloFormValuesFromSloResponse = transformSloResponseToFormState(slo);
 
   const form = useForm<CreateSLOForm>({
     defaultValues: isFlyoutMode
