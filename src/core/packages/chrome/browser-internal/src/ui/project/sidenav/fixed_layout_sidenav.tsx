@@ -44,11 +44,16 @@ export const FixedLayoutProjectSideNav: FunctionComponent<CollapsibleNavigationP
 };
 
 const CollapsibleNavigationFlyout: FunctionComponent<{
-  children: (props: { setWidth: (width: number) => void }) => React.ReactNode;
+  children: (props: { setWidth: (width: number, metadata: { isSidePanelOpen: boolean }) => void }) => React.ReactNode;
 }> = ({ children }) => {
   const [width, setWidth] = React.useState<number>(0);
 
-  const childrenProps = React.useMemo(() => ({ setWidth }), [setWidth]);
+  const setWidthCallback = React.useCallback(
+    (w: number, _metadata: { isSidePanelOpen: boolean }) => setWidth(w),
+    []
+  );
+
+  const childrenProps = React.useMemo(() => ({ setWidth: setWidthCallback }), [setWidthCallback]);
 
   return (
     <>

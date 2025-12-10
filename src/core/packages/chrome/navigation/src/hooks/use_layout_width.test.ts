@@ -22,7 +22,7 @@ describe('useLayoutWidth', () => {
 
     renderHook(() => useLayoutWidth({ isCollapsed: true, isSidePanelOpen: false, setWidth }));
 
-    expect(setWidth).toHaveBeenCalledWith(COLLAPSED_WIDTH);
+    expect(setWidth).toHaveBeenCalledWith(COLLAPSED_WIDTH, { isSidePanelOpen: false });
   });
 
   it('adds the side panel width when the side panel is open', () => {
@@ -30,7 +30,7 @@ describe('useLayoutWidth', () => {
 
     renderHook(() => useLayoutWidth({ isCollapsed: false, isSidePanelOpen: true, setWidth }));
 
-    expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH);
+    expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH, { isSidePanelOpen: true });
   });
 
   it('updates when dependencies change', () => {
@@ -47,6 +47,6 @@ describe('useLayoutWidth', () => {
 
     rerender({ isCollapsed: true, isSidePanelOpen: true });
 
-    expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH);
+    expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH, { isSidePanelOpen: true });
   });
 });

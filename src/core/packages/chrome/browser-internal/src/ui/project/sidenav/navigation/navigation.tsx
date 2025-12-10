@@ -32,7 +32,7 @@ import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
 export interface ChromeNavigationProps {
   // sidenav state
   isCollapsed: boolean;
-  setWidth: (width: number) => void;
+  setWidth: (width: number, metadata: { isSidePanelOpen: boolean }) => void;
 
   // kibana deps
   basePath: BasePath;

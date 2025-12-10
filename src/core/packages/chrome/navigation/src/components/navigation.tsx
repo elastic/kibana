@@ -52,7 +52,7 @@ export interface NavigationProps {
   /**
    * Required by the grid layout to set the width of the navigation slot.
    */
-  setWidth: (width: number) => void;
+  setWidth: (width: number, metadata: { isSidePanelOpen: boolean }) => void;
   /**
    * (optional) Callback fired when a navigation item is clicked.
    */
