@@ -39,8 +39,8 @@ const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) 
       content: '';
       position: absolute;
       top: 0;
-      left: 8px;
-      right: 8px;
+      left: ${theme.size.s};
+      right: ${theme.size.s};
       height: ${theme.border.width.thin};
       background-color: ${theme.colors.borderBaseSubdued};
     }
@@ -53,8 +53,8 @@ const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) 
       content: '';
       position: absolute;
       top: 0;
-      left: 8px;
-      right: 8px;
+      left: ${theme.size.s};
+      right: ${theme.size.s};
       height: ${theme.border.width.thin};
       background-color: ${theme.colors.borderBaseSubdued};
     }

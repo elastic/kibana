@@ -233,8 +233,8 @@ export const ProjectHeader = ({
     &::before {
       content: '';
       position: absolute;
-      top: 10px;
-      bottom: 10px;
+      top: calc(${euiTheme.size.s} * 1.25);
+      bottom: calc(${euiTheme.size.s} * 1.25);
       width: ${euiTheme.border.width.thin};
       background-color: ${euiTheme.colors.borderBaseSubdued};
     }
