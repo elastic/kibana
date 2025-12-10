@@ -20,10 +20,10 @@ export interface UiamAPIKeys {
   /**
    * Grants an API key via the UIAM service.
    *
-   * @param request Request instance.
+   * @param request The Kibana request instance containing the authorization header.
    * @param params The parameters for creating the API key (name and optional expiration).
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
-   * @throws {Error} If the UIAM service is not available.
+   * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
   grantApiKey(
     request: KibanaRequest,
