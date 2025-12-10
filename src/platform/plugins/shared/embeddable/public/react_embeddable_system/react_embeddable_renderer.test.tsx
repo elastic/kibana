@@ -10,13 +10,13 @@
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { registerReactEmbeddableFactory } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
 import type { EmbeddableFactory } from './types';
-import { EuiThemeProvider } from '@elastic/eui';
 
 const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
   type: 'test',

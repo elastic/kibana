@@ -314,10 +314,12 @@ export const DiscoverTopNav = ({
                   <ControlGroupRenderer
                     onApiAvailable={setControlGroupApi}
                     timeRange={timeRange}
-                    getCreationOptions={async () => {
-                      const initialChildControlState = getActivePanels() ?? {};
+                    getCreationOptions={async (initialState) => {
+                      const initialChildControlState =
+                        getActivePanels() ?? initialState.initialChildControlState ?? {};
                       return {
                         initialState: {
+                          ...initialState,
                           initialChildControlState,
                         },
                       };

@@ -42,7 +42,7 @@ export function injectReferences(
   let { dataViewRefName } = state;
   let dataViewRef: Reference | undefined;
   if (!dataViewRefName && id) {
-    // backwards compatibility for when we didn't store the ref name with the saved object (<v9.2.0)
+    // backwards compatibility for when we didn't store the ref name with the saved object (<9.4)
     for (const refName of refNames) {
       dataViewRefName = getLegacyReferenceName(id, refName);
       dataViewRef = references.find(({ name }) => name === dataViewRefName);
