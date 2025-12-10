@@ -82,6 +82,8 @@ describe('workflow.execute step', () => {
   });
 
   describe('async mode (await: false)', () => {
+    let childExecution: EsWorkflowExecution;
+
     beforeEach(async () => {
       // Create a child workflow
       const childWorkflow: EsWorkflow = {
@@ -115,6 +117,37 @@ describe('workflow.execute step', () => {
         deleted_at: null,
       };
       workflowRepositoryMock.workflows.set('child-workflow-id', childWorkflow);
+
+      // Create child execution that will be fetched by async strategy
+      const childStartedAt = new Date().toISOString();
+      childExecution = {
+        id: childWorkflowExecutionId,
+        spaceId: 'fake_space_id',
+        workflowId: 'child-workflow-id',
+        isTestRun: false,
+        status: ExecutionStatus.PENDING,
+        context: {
+          inputs: {},
+          parentWorkflowId: 'fake_foreach_id',
+          parentWorkflowExecutionId: 'fake_workflow_execution_id',
+          parentStepId: 'executeChild',
+        },
+        workflowDefinition: childWorkflow.definition as WorkflowYaml,
+        yaml: '',
+        scopeStack: [],
+        createdAt: new Date().toISOString(),
+        error: null,
+        createdBy: 'system',
+        startedAt: childStartedAt,
+        finishedAt: '',
+        cancelRequested: false,
+        duration: 0,
+        triggeredBy: 'workflow-step',
+      };
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
+        childWorkflowExecutionId,
+        childExecution
+      );
 
       await workflowRunFixture.runWorkflow({
         workflowYaml: `
@@ -177,7 +210,22 @@ steps:
         executionId: childWorkflowExecutionId,
         awaited: false,
         status: 'pending',
+        startedAt: childExecution.startedAt,
       });
+    });
+
+    it('should include startedAt in async execution output', async () => {
+      const executeStepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepId === 'executeChild');
+
+      expect(executeStepExecutions.length).toBe(1);
+      const output = executeStepExecutions[0].output as Record<string, unknown>;
+      expect(output.startedAt).toBeDefined();
+      expect(output.startedAt).toBe(childExecution.startedAt);
+      expect(typeof output.startedAt).toBe('string');
+      // Should not have completedAt for async execution (workflow still running)
+      expect(output.completedAt).toBeUndefined();
     });
 
     it('should continue to next step without waiting', async () => {
@@ -344,7 +392,8 @@ steps:
 
       expect(executeStepExecutions.length).toBe(1);
       expect(executeStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
-      expect(executeStepExecutions[0].output).toEqual({
+      const output = executeStepExecutions[0].output as Record<string, unknown>;
+      expect(output).toEqual({
         workflowId: 'child-workflow-id',
         executionId: childWorkflowExecutionId,
         awaited: true,
@@ -356,6 +405,19 @@ steps:
         startedAt: expect.any(String),
         completedAt: expect.any(String),
       });
+      // Verify timing fields are valid ISO strings
+      expect(typeof output.startedAt).toBe('string');
+      expect(typeof output.completedAt).toBe('string');
+      expect(new Date(output.startedAt as string).toISOString()).toBe(output.startedAt);
+      expect(new Date(output.completedAt as string).toISOString()).toBe(output.completedAt);
+      // Verify completedAt is after or equal to startedAt
+      expect(new Date(output.completedAt as string).getTime()).toBeGreaterThanOrEqual(
+        new Date(output.startedAt as string).getTime()
+      );
+      // Verify startedAt matches the child execution's startedAt
+      expect(output.startedAt).toBe(childExecution.startedAt);
+      // Verify completedAt matches the child execution's finishedAt
+      expect(output.completedAt).toBe(childExecution.finishedAt);
     });
 
     it('should continue polling if child workflow is still running', async () => {

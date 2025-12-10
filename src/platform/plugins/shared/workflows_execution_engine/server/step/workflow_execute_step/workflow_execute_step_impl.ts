@@ -46,6 +46,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     );
     this.asyncExecutor = new WorkflowExecuteAsyncStrategy(
       workflowsExecutionEngine,
+      workflowExecutionRepository,
       stepExecutionRuntime,
       workflowExecutionRuntime,
       workflowLogger

@@ -9,6 +9,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -17,6 +18,7 @@ import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 export class WorkflowExecuteAsyncStrategy {
   constructor(
     private workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart,
+    private workflowExecutionRepository: WorkflowExecutionRepository,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
@@ -48,13 +50,25 @@ export class WorkflowExecuteAsyncStrategy {
 
       this.workflowLogger.logInfo(`Started async sub-workflow execution: ${workflowExecutionId}`);
 
-      // Finish step immediately with execution ID
-      this.stepExecutionRuntime.finishStep({
+      // Fetch the execution to get startedAt timestamp
+      const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
+        workflowExecutionId,
+        spaceId
+      );
+
+      // Finish step immediately with execution ID and timing information
+      const stepOutput: Record<string, unknown> = {
         workflowId: workflow.id,
         executionId: workflowExecutionId,
         awaited: false,
         status: 'pending',
-      });
+      };
+
+      if (execution?.startedAt) {
+        stepOutput.startedAt = execution.startedAt;
+      }
+
+      this.stepExecutionRuntime.finishStep(stepOutput);
     } catch (error) {
       this.stepExecutionRuntime.failStep(error as Error);
     }

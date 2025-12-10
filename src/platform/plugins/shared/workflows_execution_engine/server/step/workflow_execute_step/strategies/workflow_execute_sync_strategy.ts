@@ -139,6 +139,12 @@ export class WorkflowExecuteSyncStrategy {
         const output = this.getWorkflowOutput(stepExecutionDtos);
 
         // Finish step with results
+        // Use finishedAt if available, otherwise use current time (execution is terminal)
+        const completedAt =
+          execution.finishedAt && execution.finishedAt.trim() !== ''
+            ? execution.finishedAt
+            : new Date().toISOString();
+
         this.stepExecutionRuntime.finishStep({
           workflowId: state.workflowId,
           executionId: state.executionId,
@@ -147,7 +153,7 @@ export class WorkflowExecuteSyncStrategy {
           output,
           error: execution.error,
           startedAt: execution.startedAt,
-          completedAt: execution.finishedAt,
+          completedAt,
         });
 
         // If sub-workflow failed, fail this step too
