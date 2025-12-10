@@ -149,6 +149,7 @@ import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deplo
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
+import { FleetPolicyRevisionsCleanupTask } from './tasks/fleet_policy_revisions_cleanup/fleet_policy_revisions_cleanup_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -202,6 +203,7 @@ export interface FleetAppContext {
   deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
   updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
+  fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
@@ -311,6 +313,7 @@ export class FleetPlugin
   private updateAgentlessDeploymentsTask?: UpgradeAgentlessDeploymentsTask;
   private syncIntegrationsTask?: SyncIntegrationsTask;
   private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
+  private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -676,6 +679,16 @@ export class FleetPlugin
         retryDelays: config.autoUpgrades?.retryDelays,
       },
     });
+    this.fleetPolicyRevisionsCleanupTask = new FleetPolicyRevisionsCleanupTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        maxRevisions: config.fleetPolicyRevisionsCleanup?.maxRevisions,
+        interval: config.fleetPolicyRevisionsCleanup?.interval,
+        maxPoliciesPerRun: config.fleetPolicyRevisionsCleanup?.maxPoliciesPerRun,
+      },
+    });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
@@ -730,6 +743,7 @@ export class FleetPlugin
       fetchUsage: this.fetchUsage,
       syncIntegrationsTask: this.syncIntegrationsTask!,
       lockManagerService: this.lockManagerService,
+      fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -748,6 +762,9 @@ export class FleetPlugin
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
       .catch(() => {});
     this.syncIntegrationsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.fleetPolicyRevisionsCleanupTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
