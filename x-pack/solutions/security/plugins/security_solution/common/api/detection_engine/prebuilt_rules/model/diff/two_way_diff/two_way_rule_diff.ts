@@ -22,6 +22,7 @@ import type { TwoWayFieldsDiff } from './two_way_fields_diff';
 export type TwoWayRuleDiffCommonFields = Omit<
   BaseResponseProps,
   | 'actions'
+  | 'exceptions_list'
   | 'enabled'
   | 'author'
   | 'license'

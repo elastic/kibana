@@ -85,7 +85,6 @@ const commonFieldComparators: TwoWayFieldsDiffAlgorithmsFor<TwoWayRuleDiffCommon
   references: orderAgnosticArrayDiffAlgorithm,
   false_positives: deepEqualityDiffAlgorithm,
   threat: deepEqualityDiffAlgorithm,
-  exceptions_list: deepEqualityDiffAlgorithm,
   note: deepEqualityDiffAlgorithm,
   setup: deepEqualityDiffAlgorithm,
   related_integrations: deepEqualityDiffAlgorithm,
