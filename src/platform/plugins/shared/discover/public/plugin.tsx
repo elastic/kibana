@@ -207,6 +207,7 @@ export class DiscoverPlugin
           ebtManager,
           scopedHistory: this.scopedHistory,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          setHeaderActionMenuBeta: params.setHeaderActionMenuBeta,
         });
 
         // make sure the data view list is up to date
@@ -320,12 +321,14 @@ export class DiscoverPlugin
     ebtManager,
     scopedHistory,
     setHeaderActionMenu,
+    setHeaderActionMenuBeta,
   }: {
     core: CoreStart;
     plugins: DiscoverStartPlugins;
     ebtManager: DiscoverEBTManager;
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+    setHeaderActionMenuBeta?: AppMountParameters['setHeaderActionMenuBeta'];
   }) {
     const [
       { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
@@ -344,6 +347,7 @@ export class DiscoverPlugin
         ebtManager,
         scopedHistory,
         setHeaderActionMenu,
+        setHeaderActionMenuBeta,
       }),
     ]);
 
@@ -366,6 +370,7 @@ export class DiscoverPlugin
     ebtManager,
     scopedHistory,
     setHeaderActionMenu,
+    setHeaderActionMenuBeta,
   }: {
     core: CoreStart;
     plugins: DiscoverStartPlugins;
@@ -373,6 +378,7 @@ export class DiscoverPlugin
     ebtManager: DiscoverEBTManager;
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+    setHeaderActionMenuBeta?: AppMountParameters['setHeaderActionMenuBeta'];
   }) => {
     const [{ buildServices }, historyService] = await Promise.all([
       getSharedServices(),
@@ -391,6 +397,7 @@ export class DiscoverPlugin
       profilesManager,
       ebtManager,
       setHeaderActionMenu,
+      setHeaderActionMenuBeta,
     });
   };
 

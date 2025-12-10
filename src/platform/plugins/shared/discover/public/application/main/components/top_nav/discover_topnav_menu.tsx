@@ -13,6 +13,7 @@ import React, {
   useContext,
   useState,
   useLayoutEffect,
+  useEffect,
 } from 'react';
 import {
   TopNavMenu,
@@ -55,7 +56,7 @@ const PLACEHOLDER_MENU_ITEMS: TopNavMenuData[] = [
 ];
 
 export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
-  const { setHeaderActionMenu } = useDiscoverServices();
+  const { setHeaderActionMenu, setHeaderActionMenuBeta } = useDiscoverServices();
   const [topNavMenuContext] = useState<DiscoverTopNavMenuContext>(() => createTopNavMenuContext());
 
   const topNavMenu = useObservable(
@@ -72,6 +73,20 @@ export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
     topNavMenuContext.topNavBadges$.next(undefined);
     topNavMenuContext.topNavMenu$.next(undefined);
   });
+
+  useEffect(() => {
+    setHeaderActionMenuBeta({
+      items: [
+        {
+          label: 'Test',
+          run: () => {},
+          order: 1,
+          id: 'placeholder',
+          iconType: 'gear',
+        },
+      ],
+    });
+  }, [setHeaderActionMenuBeta]);
 
   return (
     <>

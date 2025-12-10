@@ -107,6 +107,7 @@ export interface DiscoverServices {
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenuBeta: AppMountParameters['setHeaderActionMenuBeta'];
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   filterManager: FilterManager;
@@ -165,6 +166,7 @@ export const buildServices = ({
   profilesManager,
   ebtManager,
   setHeaderActionMenu = noop,
+  setHeaderActionMenuBeta = noop,
 }: {
   core: CoreStart;
   plugins: DiscoverStartPlugins;
@@ -178,6 +180,7 @@ export const buildServices = ({
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenuBeta?: AppMountParameters['setHeaderActionMenuBeta'];
 }): DiscoverServices => {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
@@ -207,6 +210,7 @@ export const buildServices = ({
     history,
     getScopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
     setHeaderActionMenu,
+    setHeaderActionMenuBeta,
     dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
     metadata: {
