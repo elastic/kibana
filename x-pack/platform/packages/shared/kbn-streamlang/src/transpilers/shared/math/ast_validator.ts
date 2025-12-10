@@ -134,7 +134,7 @@ export function validateMathExpression(expression: string): ValidationResult {
     const message = parseError instanceof Error ? parseError.message : String(parseError);
     return {
       valid: false,
-      errors: [`Failed to parse expression: ${message}`],
+      errors: [message],
     };
   }
 
