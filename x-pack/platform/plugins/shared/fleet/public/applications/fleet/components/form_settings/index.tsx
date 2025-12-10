@@ -59,10 +59,9 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...se
             onChange={(value) => handleChange({ target: { value } })}
             disabled={disabled}
             placeholder={i18n.translate(
-              'xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsPlaceholder',
+              'xpack.fleet.settings.agentPolicyAdvanced.yamlSettingsPlaceholder',
               {
-                defaultMessage:
-                  '# YAML settings here will be added to the agent.internal section of the agent policy.',
+                defaultMessage: '# Add YAML settings here',
               }
             )}
             data-test-subj={fieldKey}
