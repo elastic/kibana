@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiInsight } from '@kbn/observability-agent-builder';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
 // Constants in the observability_agent_builder plugin:
