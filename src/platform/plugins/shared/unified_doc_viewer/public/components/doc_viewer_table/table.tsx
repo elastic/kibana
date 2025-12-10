@@ -116,8 +116,9 @@ export const DocViewerTable = ({
 
   const flattened = hit.flattened;
   const shouldShowFieldHandler = useMemo(
-    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
-    [flattened, dataView, showMultiFields]
+    () =>
+      getShouldShowFieldHandler(Object.keys(flattened), dataView, isEsqlMode || showMultiFields),
+    [flattened, dataView, isEsqlMode, showMultiFields]
   );
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
