@@ -44,7 +44,9 @@ The default AI connector configured for the workflow will be used.`,
     prompt: "Analyze this data: {{ steps.previous_step.output }}"
 \`\`\``,
 
-      `## AI prompt with structured output schema
+      `## AI prompt with structured output schema. 
+Output schema must be a valid JSON Schema object.
+See this [JSON Schema reference](https://json-schema.org/learn/getting-started-step-by-step) for details.
 \`\`\`yaml
 - name: extract_info
   type: ${AiPromptStepTypeId}
@@ -60,6 +62,29 @@ The default AI connector configured for the workflow will be used.`,
           type: "array"
           items:
             type: "string"
+\`\`\``,
+
+      `## AI prompt with structured output schema (JSON object syntax)
+See this [JSON Schema reference](https://json-schema.org/learn/getting-started-step-by-step) for details.
+\`\`\`yaml
+- name: extract_info
+  type: ${AiPromptStepTypeId}
+  with:
+    connectorId: my-ai-connector
+    prompt: "Extract key information from this text: {{ workflow.input }}"
+    outputSchema: {
+      "type":"object",
+      "properties":{
+        "summary":{
+          "type":"string"
+        },
+        "key_points":{
+          "type":"array",
+          "items":{
+            "type":"string"
+          }
+        }
+      }
 \`\`\``,
 
       `## Use AI response in subsequent steps
