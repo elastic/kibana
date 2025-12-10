@@ -538,14 +538,29 @@ export function createInferenceEndpointToCompletionItem(
  * If the suggestion item already has a custom command, it will preserve it.
  */
 export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionItem {
+  const triggerAutoSuggestCommand = {
+    title: 'Trigger Suggestion Dialog',
+    id: 'editor.action.triggerSuggest',
+  };
+
+  // If the suggestion already has a command, use multiCommands to execute the existing one
+  // and then trigger the suggest dialog
+  const command =
+    suggestionItem.command && suggestionItem.command.id !== 'editor.action.triggerSuggest'
+      ? {
+          id: 'esql.multiCommands',
+          title: suggestionItem.command.title,
+          arguments: [
+            {
+              commands: JSON.stringify([suggestionItem.command, triggerAutoSuggestCommand]),
+            },
+          ],
+        }
+      : triggerAutoSuggestCommand;
+
   return {
     ...suggestionItem,
-    command: suggestionItem.command
-      ? suggestionItem.command
-      : {
-          title: 'Trigger Suggestion Dialog',
-          id: 'editor.action.triggerSuggest',
-        },
+    command,
   };
 }
 

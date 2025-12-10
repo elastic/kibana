@@ -22,6 +22,7 @@ import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types'
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
+  attachParameterHelperCommand,
   attachTriggerCommand,
   createCustomCallbackMocks,
   fields,
@@ -788,15 +789,20 @@ describe('autocomplete', () => {
     testSuggestions('FROM a | LIMIT /', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
     // STATS argument
-    testSuggestions('FROM a | STATS /', [
-      'BY ',
-      'col0 = ',
-      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
-        scalar: true,
-        agg: true,
-        grouping: true,
-      }).map(attachAsSnippet),
-    ]);
+    testSuggestions(
+      'FROM a | STATS /',
+      [
+        'BY ',
+        'col0 = ',
+        ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
+          scalar: true,
+          agg: true,
+          grouping: true,
+        })
+          .map(attachAsSnippet)
+          .map(attachParameterHelperCommand),
+      ].map(attachTriggerCommand)
+    );
 
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(integerField) /', [
