@@ -147,16 +147,7 @@ export const createAgentGraph = ({
   };
 
   const prepareToAnswer = async (state: StateType) => {
-    const lastAction = state.mainActions[state.mainActions.length - 1];
-    const maxCycleReached = state.currentCycle > state.cycleLimit;
-
-    if (maxCycleReached && !isHandoverAction(lastAction)) {
-      return {
-        mainActions: [handoverAction('', true)],
-      };
-    } else {
-      return {};
-    }
+    throw new Error('Test error in prepareToAnswer');
   };
 
   const answeringModel = chatModel.withConfig({
