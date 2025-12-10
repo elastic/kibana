@@ -5,14 +5,13 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import { i18n } from '@kbn/i18n';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
@@ -22,6 +21,7 @@ import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
+import { WaterfallFoldButton } from './waterfall_fold_button';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -106,30 +106,7 @@ function TraceWaterfallComponent() {
             `}
           >
             {showAccordion && (
-              <EuiButtonIcon
-                data-test-subj="apmWaterfallButton"
-                size="m"
-                css={css`
-                  position: absolute;
-                  z-index: ${euiTheme.levels.menu};
-                  padding: ${euiTheme.size.m};
-                  width: auto;
-                `}
-                aria-label={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
-                  defaultMessage: 'Click to {isAccordionOpen} the waterfall',
-                  values: {
-                    isAccordionOpen: isAccordionOpen
-                      ? i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.fold', {
-                          defaultMessage: 'fold',
-                        })
-                      : i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.unfold', {
-                          defaultMessage: 'unfold',
-                        }),
-                  },
-                })}
-                iconType={isAccordionOpen ? 'fold' : 'unfold'}
-                onClick={toggleAccordionOpen}
-              />
+              <WaterfallFoldButton isOpen={isAccordionOpen} onClick={toggleAccordionOpen} />
             )}
             <TimelineAxisContainer
               xMax={duration}
