@@ -92,11 +92,11 @@ export const getNodeDocumentMode = (
 };
 
 /**
- * Checks if a node has an entity field in its documentsData.
+ * Checks if a node has entity store enrichment.
  * Only relevant for single-entity mode - returns false for all other modes.
- * For single-entity nodes, checks if at least one document contains an 'entity' field.
+ * For single-entity nodes, checks if at least one document has entity.availableInEntityStore === true.
  */
-export const hasNodeEntityField = (node: NodeViewModel): boolean => {
+export const isEntityNodeEnriched = (node: NodeViewModel): boolean => {
   const docMode = getNodeDocumentMode(node);
 
   if (docMode !== 'single-entity') {
@@ -107,7 +107,7 @@ export const hasNodeEntityField = (node: NodeViewModel): boolean => {
     'documentsData' in node &&
     Array.isArray(node.documentsData) &&
     node.documentsData.length > 0 &&
-    node.documentsData.some((doc) => 'entity' in doc)
+    node.documentsData.some((doc) => doc.entity?.availableInEntityStore === true)
   );
 };
 

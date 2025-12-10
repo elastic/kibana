@@ -27,7 +27,7 @@ import {
   DOCUMENT_TYPE_ALERT,
   DOCUMENT_TYPE_ENTITY,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { hasNodeEntityField } from '@kbn/cloud-security-posture-graph/src/components/utils';
+import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
@@ -147,7 +147,7 @@ export const GraphVisualization: React.FC = memo(() => {
           docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
           singleDocumentData.index
         );
-      } else if (docMode === 'single-entity' && singleDocumentData && hasNodeEntityField(node)) {
+      } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
         showEntityPreview(singleDocumentData);
       } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         openPreviewPanel({
@@ -166,7 +166,7 @@ export const GraphVisualization: React.FC = memo(() => {
                 type: doc.entity?.type,
                 subType: doc.entity?.sub_type,
                 icon: node.icon,
-                isEntityEnriched: !!doc.entity,
+                availableInEntityStore: !!doc.entity?.availableInEntityStore,
               })),
           },
         });
@@ -210,7 +210,7 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
-            isEngineMetadataExist: !!item.isEntityEnriched,
+            isEngineMetadataExist: !!item.availableInEntityStore,
           },
         });
       } else {

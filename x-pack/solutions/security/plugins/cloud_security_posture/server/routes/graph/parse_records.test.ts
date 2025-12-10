@@ -44,10 +44,10 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"actor1","type":"entity","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
         ],
         targetsDocData: [
-          '{"id":"target1","type":"entity","entityParentField":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
+          '{"id":"target1","type":"entity","entity":{"name":"Server 01","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -118,8 +118,12 @@ describe('parseRecords', () => {
         targetEntityType: '',
         actorIdsCount: 1,
         targetIdsCount: 1,
-        actorsDocData: ['{"id":"actor1","type":"entity","entityParentField":"entity"}'],
-        targetsDocData: ['{"id":"target1","type":"entity","entityParentField":"entity"}'],
+        actorsDocData: [
+          '{"id":"actor1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+        ],
+        targetsDocData: [
+          '{"id":"target1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+        ],
         badge: 1,
         uniqueEventsCount: 1,
         uniqueAlertsCount: 0,
@@ -158,10 +162,10 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"actor1","type":"entity","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
         ],
         targetsDocData: [
-          '{"id":"target1","type":"entity","entityParentField":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
+          '{"id":"target1","type":"entity","entity":{"name":"Server 01","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -186,10 +190,10 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"actor1","type":"entity","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
         ],
         targetsDocData: [
-          '{"id":"target1","type":"entity","entityParentField":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
+          '{"id":"target1","type":"entity","entity":{"name":"Server 01","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -243,8 +247,12 @@ describe('parseRecords', () => {
           targetEntityType: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","entityParentField":"entity"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","entityParentField":"entity"}'],
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+          ],
           action: 'alert',
           docs: ['{"foo":"bar"}'],
           badge: 1,
@@ -275,8 +283,12 @@ describe('parseRecords', () => {
           targetEntityType: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","entityParentField":"entity"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","entityParentField":"entity"}'],
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+          ],
           action: 'alert',
           docs: ['{"foo":"bar"}'],
           badge: 1,
@@ -307,8 +319,12 @@ describe('parseRecords', () => {
       targetEntityType: '',
       actorIdsCount: 1,
       targetIdsCount: 1,
-      actorsDocData: ['{"id":"actor1","type":"entity","entityParentField":"entity"}'],
-      targetsDocData: ['{"id":"target1","type":"entity","entityParentField":"entity"}'],
+      actorsDocData: [
+        '{"id":"actor1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+      ],
+      targetsDocData: [
+        '{"id":"target1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+      ],
       docs: ['{"foo":"bar"}'],
       badge: 1,
       uniqueEventsCount: 0,
@@ -370,11 +386,11 @@ describe('parseRecords', () => {
         actorIdsCount: 2,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"a1","type":"entity","entityParentField":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
-          '{"id":"a2","type":"entity","entityParentField":"user","entity":{"name":"Actor 2","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"a1","type":"entity","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
+          '{"id":"a2","type":"entity","entity":{"name":"Actor 2","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
         ],
         targetsDocData: [
-          '{"id":"t1","type":"entity","entityParentField":"host","entity":{"name":"Target 1","type":"host","sub_type":"Server"}}',
+          '{"id":"t1","type":"entity","entity":{"name":"Target 1","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -397,11 +413,11 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 2,
         actorsDocData: [
-          '{"id":"a3","type":"entity","entityParentField":"service","entity":{"name":"Actor 3","type":"service","sub_type":"Services"}}',
+          '{"id":"a3","type":"entity","entity":{"name":"Actor 3","type":"service","sub_type":"Services","ecsParentField":"service","availableInEntityStore":true}}',
         ],
         targetsDocData: [
-          '{"id":"t2","type":"entity","entityParentField":"entity","entity":{"name":"Target 2","type":"entity","sub_type":"Entity"}}',
-          '{"id":"t3","type":"entity","entityParentField":"entity","entity":{"name":"Target 3","type":"entity","sub_type":"Entity"}}',
+          '{"id":"t2","type":"entity","entity":{"name":"Target 2","type":"entity","sub_type":"Entity","ecsParentField":"entity","availableInEntityStore":true}}',
+          '{"id":"t3","type":"entity","entity":{"name":"Target 3","type":"entity","sub_type":"Entity","ecsParentField":"entity","availableInEntityStore":true}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -575,7 +591,7 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 0,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"Threat Actor","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entity":{"name":"Threat Actor","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [],
           badge: 1,
@@ -630,8 +646,12 @@ describe('parseRecords', () => {
           targetEntityType: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","entityParentField":"user"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","entityParentField":"entity"}'],
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"ecsParentField":"user","availableInEntityStore":false}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+          ],
           badge: 1,
           uniqueEventsCount: 1,
           uniqueAlertsCount: 0,
@@ -668,10 +688,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"entity","entity":{"name":"Actor 1","type":"malware","sub_type":"Malware"}}',
+            '{"id":"actor1","type":"entity","entity":{"name":"Actor 1","type":"malware","sub_type":"Malware","ecsParentField":"entity","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","entityParentField":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System","ecsParentField":"entity","availableInEntityStore":true}}',
           ],
           badge: 1,
           uniqueEventsCount: 0,
@@ -709,10 +729,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","entityParentField":"entity","entity":{"name":"Target 1","type":"server","sub_type":"Server"}}',
+            '{"id":"target1","type":"entity","entity":{"name":"Target 1","type":"server","sub_type":"Server","ecsParentField":"entity","availableInEntityStore":true}}',
           ],
           badge: 3,
           uniqueEventsCount: 3,
@@ -754,10 +774,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","entityParentField":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System","ecsParentField":"entity","availableInEntityStore":true}}',
           ],
           badge: 5,
           uniqueEventsCount: 3,
@@ -806,10 +826,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"Global Users","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entity":{"name":"Global Users","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","entityParentField":"entity","entity":{"name":"Distributed Systems","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entity":{"name":"Distributed Systems","type":"system","sub_type":"System","ecsParentField":"entity","availableInEntityStore":true}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -858,10 +878,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"Local Users","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entity":{"name":"Local Users","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","entityParentField":"entity","entity":{"name":"Local Systems","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entity":{"name":"Local Systems","type":"system","sub_type":"System","ecsParentField":"entity","availableInEntityStore":true}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -909,8 +929,12 @@ describe('parseRecords', () => {
           targetEntityName: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","entityParentField":"user"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","entityParentField":"service"}'],
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"ecsParentField":"user","availableInEntityStore":false}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"ecsParentField":"service","availableInEntityStore":false}}',
+          ],
           badge: 1,
           uniqueEventsCount: 1,
           uniqueAlertsCount: 0,
@@ -929,13 +953,17 @@ describe('parseRecords', () => {
       const userNode = result.nodes.find((n) => n.label === 'actor1') as EntityNodeDataModel;
       expect(userNode).toBeDefined();
       expect(userNode.documentsData).toEqual([
-        { id: 'actor1', type: 'entity', entityParentField: 'user' },
+        { id: 'actor1', type: 'entity', entity: { ecsParentField: 'user', availableInEntityStore: false } },
       ]);
 
       const serviceNode = result.nodes.find((n) => n.label === 'target1') as EntityNodeDataModel;
       expect(serviceNode).toBeDefined();
       expect(serviceNode.documentsData).toEqual([
-        { id: 'target1', type: 'entity', entityParentField: 'service' },
+        {
+          id: 'target1',
+          type: 'entity',
+          entity: { ecsParentField: 'service', availableInEntityStore: false },
+        },
       ]);
     });
   });
@@ -952,10 +980,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"non-enriched-actor-123","type":"entity","entityParentField":"entity"}',
+            '{"id":"non-enriched-actor-123","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
           ],
           targetsDocData: [
-            '{"id":"non-enriched-target-456","type":"entity","entityParentField":"entity"}',
+            '{"id":"non-enriched-target-456","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -1007,13 +1035,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"entity1","type":"entity","entityParentField":"entity"}',
-            '{"id":"entity2","type":"entity","entityParentField":"entity"}',
-            '{"id":"entity3","type":"entity","entityParentField":"entity"}',
+            '{"id":"entity1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+            '{"id":"entity2","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+            '{"id":"entity3","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
           ],
           targetsDocData: [
-            '{"id":" target1","type":"entity","entityParentField":"entity"}',
-            '{"id":"target2","type":"entity","entityParentField":"entity"}',
+            '{"id":" target1","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
+            '{"id":"target2","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
           ],
           badge: 5,
           uniqueEventsCount: 5,
@@ -1072,10 +1100,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","entityParentField":"host","entity":{"name":"web-server-01","type":"host","sub_type":"Server"}}',
+            '{"id":"target1","type":"entity","entity":{"name":"web-server-01","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -1125,13 +1153,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"user1","type":"entity","entityParentField":"user","entity":{"name":"User 1","type":"user","sub_type":"Identity Users"}}',
-            '{"id":"user2","type":"entity","entityParentField":"user","entity":{"name":"User 2","type":"user","sub_type":"Identity Users"}}',
-            '{"id":"user3","type":"entity","entityParentField":"user","entity":{"name":"User 3","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"user1","type":"entity","entity":{"name":"User 1","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
+            '{"id":"user2","type":"entity","entity":{"name":"User 2","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
+            '{"id":"user3","type":"entity","entity":{"name":"User 3","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"host1","type":"entity","entityParentField":"host","entity":{"name":"Host 1","type":"host","sub_type":"Server"}}',
-            '{"id":"host2","type":"entity","entityParentField":"host","entity":{"name":"Host 2","type":"host","sub_type":"Server"}}',
+            '{"id":"host1","type":"entity","entity":{"name":"Host 1","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
+            '{"id":"host2","type":"entity","entity":{"name":"Host 2","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
           ],
           badge: 5,
           uniqueEventsCount: 5,
@@ -1188,13 +1216,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"user1","type":"entity","entityParentField":"user","entity":{"name":"User 1","type":"user","sub_type":""}}',
-            '{"id":"user2","type":"entity","entityParentField":"user","entity":{"name":"User 2","type":"user","sub_type":""}}',
-            '{"id":"user3","type":"entity","entityParentField":"user","entity":{"name":"User 3","type":"user","sub_type":""}}',
+            '{"id":"user1","type":"entity","entity":{"name":"User 1","type":"user","sub_type":"","ecsParentField":"user","availableInEntityStore":true}}',
+            '{"id":"user2","type":"entity","entity":{"name":"User 2","type":"user","sub_type":"","ecsParentField":"user","availableInEntityStore":true}}',
+            '{"id":"user3","type":"entity","entity":{"name":"User 3","type":"user","sub_type":"","ecsParentField":"user","availableInEntityStore":true}}',
           ],
           targetsDocData: [
-            '{"id":"host1","type":"entity","entityParentField":"host","entity":{"name":"Host 1","type":"host","sub_type":""}}',
-            '{"id":"host2","type":"entity","entityParentField":"host","entity":{"name":"Host 2","type":"host","sub_type":""}}',
+            '{"id":"host1","type":"entity","entity":{"name":"Host 1","type":"host","sub_type":"","ecsParentField":"host","availableInEntityStore":true}}',
+            '{"id":"host2","type":"entity","entity":{"name":"Host 2","type":"host","sub_type":"","ecsParentField":"host","availableInEntityStore":true}}',
           ],
           badge: 5,
           uniqueEventsCount: 5,
@@ -1241,8 +1269,8 @@ describe('parseRecords', () => {
     });
   });
 
-  describe('entityParentField handling', () => {
-    it('returns actor and target documentsData with entityParentField when there is no matching entity enrichment - single actor and target', () => {
+  describe('ecsParentField handling', () => {
+    it('returns actor and target documentsData with ecsParentField when there is no matching entity enrichment - single actor and target', () => {
       const records: GraphEdge[] = [
         {
           action: 'login',
@@ -1254,8 +1282,12 @@ describe('parseRecords', () => {
           targetEntityName: 'Service',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","entityParentField":"user"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","entityParentField":"service"}'],
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"ecsParentField":"user","availableInEntityStore":false}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"ecsParentField":"service","availableInEntityStore":false}}',
+          ],
           badge: 1,
           uniqueEventsCount: 1,
           uniqueAlertsCount: 0,
@@ -1276,7 +1308,7 @@ describe('parseRecords', () => {
       expect(actorNode.documentsData![0]).toEqual({
         id: 'actor1',
         type: 'entity',
-        entityParentField: 'user',
+        entity: { ecsParentField: 'user', availableInEntityStore: false },
       });
       const targetNode = result.nodes.find((n) => n.id === 'target1') as EntityNodeDataModel;
       expect(targetNode).toBeDefined();
@@ -1284,11 +1316,11 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![0]).toEqual({
         id: 'target1',
         type: 'entity',
-        entityParentField: 'service',
+        entity: { ecsParentField: 'service', availableInEntityStore: false },
       });
     });
 
-    it('returns target documentData with entityParentField when the target has matching entity enrichment - multiple targets', () => {
+    it('returns target documentData with ecsParentField when the target has matching entity enrichment - multiple targets', () => {
       const records: GraphEdge[] = [
         {
           action: 'login',
@@ -1301,11 +1333,13 @@ describe('parseRecords', () => {
           targetEntityName: ['service1', 'service2', 'service3'],
           actorIdsCount: 1,
           targetIdsCount: 3,
-          actorsDocData: ['{"id":"user1","type":"entity","entityParentField":"user"}'],
+          actorsDocData: [
+            '{"id":"user1","type":"entity","entity":{"ecsParentField":"user","availableInEntityStore":false}}',
+          ],
           targetsDocData: [
-            '{"id":"service1","type":"entity","entityParentField":"service", "entity":{"name":"Service 1","type":"service","sub_type":"Service Instance"}}',
-            '{"id":"service2","type":"entity","entityParentField":"service", "entity":{"name":"Service 2","type":"service","sub_type":"Service Instance"}}',
-            '{"id":"service3","type":"entity","entityParentField":"service", "entity":{"name":"Service 3","type":"service","sub_type":"Service Instance"}}',
+            '{"id":"service1","type":"entity","entity":{"name":"Service 1","type":"service","sub_type":"Service Instance","ecsParentField":"service","availableInEntityStore":true}}',
+            '{"id":"service2","type":"entity","entity":{"name":"Service 2","type":"service","sub_type":"Service Instance","ecsParentField":"service","availableInEntityStore":true}}',
+            '{"id":"service3","type":"entity","entity":{"name":"Service 3","type":"service","sub_type":"Service Instance","ecsParentField":"service","availableInEntityStore":true}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -1330,37 +1364,40 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![0]).toEqual({
         id: 'service1',
         type: 'entity',
-        entityParentField: 'service',
         entity: {
           name: 'Service 1',
           type: 'service',
           sub_type: 'Service Instance',
+          ecsParentField: 'service',
+          availableInEntityStore: true,
         },
       });
       expect(targetNode.documentsData![1]).toEqual({
         id: 'service2',
         type: 'entity',
-        entityParentField: 'service',
         entity: {
           name: 'Service 2',
           type: 'service',
           sub_type: 'Service Instance',
+          ecsParentField: 'service',
+          availableInEntityStore: true,
         },
       });
       expect(targetNode.documentsData![2]).toEqual({
         id: 'service3',
         type: 'entity',
-        entityParentField: 'service',
         entity: {
           name: 'Service 3',
           type: 'service',
           sub_type: 'Service Instance',
+          ecsParentField: 'service',
+          availableInEntityStore: true,
         },
       });
       expect(targetNode.label).toBe('Service Instance');
     });
 
-    it('returns multiple actors and targets documentsData with entityParentField when there is no entity enrichment', () => {
+    it('returns multiple actors and targets documentsData with ecsParentField when there is no entity enrichment', () => {
       const records: GraphEdge[] = [
         {
           action: 'access',
@@ -1373,13 +1410,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","entityParentField":"user"}',
-            '{"id":"actor2","type":"entity","entityParentField":"user"}',
-            '{"id":"actor3","type":"entity","entityParentField":"host"}',
+            '{"id":"actor1","type":"entity","entity":{"ecsParentField":"user","availableInEntityStore":false}}',
+            '{"id":"actor2","type":"entity","entity":{"ecsParentField":"user","availableInEntityStore":false}}',
+            '{"id":"actor3","type":"entity","entity":{"ecsParentField":"host","availableInEntityStore":false}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","entityParentField":"service"}',
-            '{"id":"target2","type":"entity","entityParentField":"entity"}',
+            '{"id":"target1","type":"entity","entity":{"ecsParentField":"service","availableInEntityStore":false}}',
+            '{"id":"target2","type":"entity","entity":{"ecsParentField":"entity","availableInEntityStore":false}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -1404,17 +1441,17 @@ describe('parseRecords', () => {
       expect(actorNode.documentsData![0]).toEqual({
         id: 'actor1',
         type: 'entity',
-        entityParentField: 'user',
+        entity: { ecsParentField: 'user', availableInEntityStore: false },
       });
       expect(actorNode.documentsData![1]).toEqual({
         id: 'actor2',
         type: 'entity',
-        entityParentField: 'user',
+        entity: { ecsParentField: 'user', availableInEntityStore: false },
       });
       expect(actorNode.documentsData![2]).toEqual({
         id: 'actor3',
         type: 'entity',
-        entityParentField: 'host',
+        entity: { ecsParentField: 'host', availableInEntityStore: false },
       });
       expect(actorNode.label).toBeUndefined();
       expect(actorNode.tag).toBe('Entities');
@@ -1430,12 +1467,12 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![0]).toEqual({
         id: 'target1',
         type: 'entity',
-        entityParentField: 'service',
+        entity: { ecsParentField: 'service', availableInEntityStore: false },
       });
       expect(targetNode.documentsData![1]).toEqual({
         id: 'target2',
         type: 'entity',
-        entityParentField: 'entity',
+        entity: { ecsParentField: 'entity', availableInEntityStore: false },
       });
       expect(targetNode.label).toBeUndefined();
       expect(targetNode.tag).toBe('Entities');

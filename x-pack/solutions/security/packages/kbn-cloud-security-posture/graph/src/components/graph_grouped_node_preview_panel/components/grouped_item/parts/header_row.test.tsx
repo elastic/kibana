@@ -29,7 +29,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        isEntityEnriched: true,
+        availableInEntityStore: true,
       };
 
       const { getByTestId } = render(<HeaderRow item={item} />);
@@ -42,7 +42,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        isEntityEnriched: true,
+        availableInEntityStore: true,
       };
       const next = jest.fn();
       const sub = groupedItemClick$.subscribe(next);
@@ -62,7 +62,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-dup',
         label: 'Dup',
-        isEntityEnriched: true,
+        availableInEntityStore: true,
       };
       const next = jest.fn();
       const sub = groupedItemClick$.subscribe(next);
@@ -84,7 +84,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        isEntityEnriched: false,
+        availableInEntityStore: false,
       };
 
       const { getByTestId } = render(<HeaderRow item={item} />);
@@ -97,7 +97,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        isEntityEnriched: false,
+        availableInEntityStore: false,
       };
       const next = jest.fn();
       const sub = groupedItemClick$.subscribe(next);
@@ -111,7 +111,7 @@ describe('<HeaderRow />', () => {
       sub.unsubscribe();
     });
 
-    it('renders EuiText when isEntityEnriched is undefined', () => {
+    it('renders EuiText when availableInEntityStore is undefined', () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-3',

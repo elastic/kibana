@@ -58,6 +58,8 @@ export const entitySchema = schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
+  availableInEntityStore: schema.maybe(schema.boolean()),
+  ecsParentField: schema.maybe(schema.string()),
 });
 
 export const nodeDocumentDataSchema = schema.object({
@@ -79,7 +81,6 @@ export const nodeDocumentDataSchema = schema.object({
     })
   ),
   entity: schema.maybe(entitySchema),
-  entityParentField: schema.maybe(schema.string()),
 });
 
 export const REACHED_NODES_LIMIT = 'REACHED_NODES_LIMIT';

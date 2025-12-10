@@ -275,8 +275,13 @@ ${
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
         ""
       ),
+      ",\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
     "}"),
-    ""
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+    "}")
   )
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
@@ -303,13 +308,24 @@ ${
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
         ""
       ),
+      ",\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
     "}"),
-    ""
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+    "}")
   )
 `
     : `
-| EVAL actorEntityField = ""
-| EVAL targetEntityField = ""
+| EVAL actorEntityField = CONCAT(",\\"entity\\":", "{",
+    "\\"availableInEntityStore\\":false",
+    ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+  "}")
+| EVAL targetEntityField = CONCAT(",\\"entity\\":", "{",
+    "\\"availableInEntityStore\\":false",
+    ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+  "}")
 // Fallback to null string with non-enriched entity metadata
 | EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
@@ -321,18 +337,16 @@ ${
 | EVAL targetHostIp = TO_STRING(null)
 `
 }
-// Create actor and target data with entityParentField
+// Create actor and target data with entity data
 
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actorEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entityParentField\\":\\"", actorEntityFieldHint, "\\"",
     actorEntityField,
   "}")
 | EVAL targetDocData = CONCAT("{",
     "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entityParentField\\":\\"", targetEntityFieldHint, "\\"",
     targetEntityField,
   "}")
 

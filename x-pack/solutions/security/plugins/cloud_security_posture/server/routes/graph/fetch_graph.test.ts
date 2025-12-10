@@ -229,7 +229,8 @@ describe('fetchGraph', () => {
       // Verify that actorDocData and targetDocData are created with minimal structure (not null)
       expect(query).toMatch(/EVAL\s+actorDocData\s*=\s*CONCAT\(/);
       expect(query).toMatch(/EVAL\s+targetDocData\s*=\s*CONCAT\(/);
-      expect(query).toContain('entityParentField');
+      expect(query).toContain('availableInEntityStore');
+      expect(query).toContain('ecsParentField');
 
       expect(result).toEqual([{ id: 'dummy' }]);
     });

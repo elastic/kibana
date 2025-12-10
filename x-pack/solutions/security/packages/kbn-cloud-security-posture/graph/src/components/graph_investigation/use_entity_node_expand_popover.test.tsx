@@ -49,8 +49,8 @@ jest.mock('./use_node_expand_graph_popover', () => ({
 
 const createMockNode = (
   docMode: 'single-entity' | 'grouped-entities',
-  entityParentField?: string,
-  hasEntityField: boolean = true
+  ecsParentField?: string,
+  hasEntityEnrichment: boolean = true
 ): NodeProps => {
   const baseNode = {
     id: 'test-node-id',
@@ -77,15 +77,16 @@ const createMockNode = (
     const docData: Record<string, unknown> = {
       id: 'entity-123',
       type: 'entity' as const,
-      entityParentField,
+      entity: {
+        ecsParentField,
+        availableInEntityStore: hasEntityEnrichment,
+      },
     };
 
-    // Only add entity field if hasEntityField is true
-    if (hasEntityField) {
-      docData.entity = {
-        name: 'Test Entity',
-        type: 'User',
-      };
+    // Only add enrichment fields if hasEntityEnrichment is true
+    if (hasEntityEnrichment && docData.entity) {
+      (docData.entity as Record<string, unknown>).name = 'Test Entity';
+      (docData.entity as Record<string, unknown>).type = 'User';
     }
 
     return {
@@ -102,14 +103,15 @@ const createMockNode = (
       const docData: Record<string, unknown> = {
         id,
         type: 'entity' as const,
-        entityParentField,
+        entity: {
+          ecsParentField,
+          availableInEntityStore: hasEntityEnrichment,
+        },
       };
 
-      if (hasEntityField) {
-        docData.entity = {
-          name: 'Test Entity',
-          type: 'User',
-        };
+      if (hasEntityEnrichment && docData.entity) {
+        (docData.entity as Record<string, unknown>).name = 'Test Entity';
+        (docData.entity as Record<string, unknown>).type = 'User';
       }
 
       return docData;

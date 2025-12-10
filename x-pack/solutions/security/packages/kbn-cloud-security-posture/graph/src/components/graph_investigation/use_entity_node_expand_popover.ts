@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
-import { getNodeDocumentMode, hasNodeEntityField, type NodeProps } from '../../..';
+import { getNodeDocumentMode, isEntityNodeEnriched, type NodeProps } from '../../..';
 import {
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
@@ -29,14 +29,14 @@ import { addFilter, containsFilter, removeFilter } from './search_filters';
 type NodeToggleAction = 'show' | 'hide';
 
 /**
- * Helper function to extract entityParentField from the first document in a node's documentsData.
+ * Helper function to extract ecsParentField from the entity object in the first document.
  * This determines which ECS namespace field (user/host/service/entity) to use for filtering.
  */
 const getSourceNamespaceFromNode = (node: NodeProps): string | undefined => {
   if ('documentsData' in node.data) {
     const documentsData = node.data.documentsData;
     if (Array.isArray(documentsData) && documentsData.length > 0) {
-      return documentsData[0].entityParentField;
+      return documentsData[0].entity?.ecsParentField;
     }
   }
   return undefined;
@@ -143,7 +143,7 @@ export const useEntityNodeExpandPopover = (
       const shouldDisableEntityDetailsListItem =
         !onShowEntityDetailsClick ||
         !['single-entity', 'grouped-entities'].includes(docMode) ||
-        (docMode === 'single-entity' && !hasNodeEntityField(node.data));
+        (docMode === 'single-entity' && !isEntityNodeEnriched(node.data));
 
       // Create the entity details item (shared between both modes - single-entity and grouped-entities)
       const entityDetailsItem: ItemExpandPopoverListItemProps = {
