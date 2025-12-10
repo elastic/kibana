@@ -83,6 +83,7 @@ export function generateLayer(
       settings: getTemplateSettings(definition, isServerless),
       mappings: {
         dynamic: false,
+        subobjects: false,
         properties: isRoot(name)
           ? {
               ...baseMappings,
