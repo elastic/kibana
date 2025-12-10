@@ -40,7 +40,7 @@ describe('deleteDuplicatePackagePolicies', () => {
 
     expect(deleteMock).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith(
-      ` [PrivateLocationCleanUpTask] Found 0 duplicate package policies to delete: `
+      `[PrivateLocationCleanUpTask] Found 0 duplicate package policies to delete.`
     );
   });
 
@@ -57,11 +57,11 @@ describe('deleteDuplicatePackagePolicies', () => {
     expect(logger.info).toHaveBeenCalledTimes(2);
     expect(logger.info).toHaveBeenNthCalledWith(
       1,
-      ` [PrivateLocationCleanUpTask] Found ${
-        packages.length
-      } duplicate package policies to delete: ${packages.join(', ')}`
+      `[PrivateLocationCleanUpTask] Found ${packages.length} duplicate package policies to delete.`
     );
-    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Deleting batch 1/1'));
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Deleting batch 1/1 (size=3), with ids [p-1, p-2, p-3]')
+    );
     expect(deleteMock).toHaveBeenCalledTimes(1);
     expect(deleteMock).toHaveBeenCalledWith(soClient, esClient, packages, {
       force: true,
@@ -84,9 +84,7 @@ describe('deleteDuplicatePackagePolicies', () => {
     expect(logger.info).toHaveBeenCalledTimes(1 + expectedBatches);
     expect(logger.info).toHaveBeenNthCalledWith(
       1,
-      ` [PrivateLocationCleanUpTask] Found ${total} duplicate package policies to delete: ${packages.join(
-        ', '
-      )}`
+      `[PrivateLocationCleanUpTask] Found ${total} duplicate package policies to delete.`
     );
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Deleting batch 1/3'));
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Deleting batch 2/3'));
