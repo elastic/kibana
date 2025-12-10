@@ -15,7 +15,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useLayoutEffect, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
+import { SHORT_CONTAINER_QUERY, FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
 import { MarkdownRenderer } from './markdown_renderer';
 
 interface EuiMarkdownEditorRef {
@@ -24,6 +24,11 @@ interface EuiMarkdownEditorRef {
 }
 
 const componentStyles = {
+  rootContainer: css({
+    display: 'flex',
+    width: '100%',
+    containerType: 'size',
+  }),
   container: css({
     width: '100%',
   }),
@@ -42,6 +47,13 @@ const componentStyles = {
       },
       textarea: {
         minBlockSize: 'initial',
+      },
+      [SHORT_CONTAINER_QUERY]: {
+        blockSize: `100%`,
+        // TODO: Do not use data-test-subj to style - should be fixed in EUI
+        '[data-test-subj="euiMarkdownEditorToolbar"]': {
+          display: 'none',
+        },
       },
     }),
 };
@@ -82,7 +94,7 @@ export const MarkdownEditor = ({
   const isSaveable = Boolean(value === '' || value !== content);
 
   return (
-    <>
+    <div css={styles.rootContainer}>
       <div
         css={[styles.container, isPreview && styles.componentInvisible]}
         onKeyDown={(e) => {
@@ -117,7 +129,7 @@ export const MarkdownEditor = ({
         cancelButtonRef={cancelButtonRef}
         isSaveable={isSaveable}
       />
-    </>
+    </div>
   );
 };
 

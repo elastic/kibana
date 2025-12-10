@@ -12,7 +12,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { createCasesServiceMock } from '../mocks/cases.mock';
@@ -24,15 +24,18 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
 jest.mock('../apis/bulk_get_cases');
 jest.mock('../contexts/alerts_table_context');
-jest.mocked(useAlertsTableContext).mockReturnValue(
-  createPartialObjectMock<RenderContext<AdditionalContext>>({
-    bulkActionsStore: [{}, jest.fn()],
-  })
-);
-
 const mockCasesService = createCasesServiceMock();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
+jest.mocked(useAlertsTableContext).mockReturnValue(
+  createPartialObjectMock<RenderContext<AdditionalContext>>({
+    bulkActionsStore: [{}, jest.fn()],
+    services: {
+      http,
+      notifications,
+    },
+  })
+);
 const application = applicationServiceMock.createStartContract();
 application.capabilities = { ...application.capabilities, infrastructure: { show: true } };
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -467,7 +470,7 @@ describe('bulk action hooks', () => {
         .mockReturnValue({ create: true, read: true });
     });
 
-    it('appends the case and untrack bulk actions', async () => {
+    it('appends the internal bulk actions correctly for non siem rule types', async () => {
       const { result } = renderHook(
         () =>
           useBulkActions({
@@ -512,6 +515,14 @@ describe('bulk action hooks', () => {
                 "disabledLabel": "Mark as untracked",
                 "key": "mark-as-untracked",
                 "label": "Mark as untracked",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "edit-tags",
+                "disableOnQuery": true,
+                "disabledLabel": "Edit tags",
+                "key": "edit-tags",
+                "label": "Edit tags",
                 "onClick": [Function],
               },
             ],

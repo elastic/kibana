@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
 import { isColumn } from '../../../ast/is';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
@@ -20,7 +20,7 @@ import { type ISuggestionItem, type ICommandContext } from '../../types';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -34,7 +34,9 @@ export async function autocomplete(
     return [pipeCompleteItem, commaCompleteItem];
   }
 
-  const alreadyDeclaredFields = command.args.filter(isColumn).map((arg) => arg.name);
+  const alreadyDeclaredFields = (command as ESQLCommand).args
+    .filter(isColumn)
+    .map((arg) => arg.name);
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(

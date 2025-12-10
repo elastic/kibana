@@ -17,7 +17,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
-import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
+import { LENS_EDIT_PAGESIZE_ACTION } from '@kbn/lens-common';
 import type { DatatableRenderProps } from './types';
 import type { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
@@ -135,7 +135,6 @@ describe('DatatableComponent', () => {
       }),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
-      renderMode: 'edit' as const,
       interactive: true,
       syncColors: false,
       renderComplete,
@@ -183,8 +182,8 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
-    renderDatatableComponent({ renderMode: 'view' });
+  test('it should render hide, reset, and sort actions on header', async () => {
+    renderDatatableComponent();
     await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)

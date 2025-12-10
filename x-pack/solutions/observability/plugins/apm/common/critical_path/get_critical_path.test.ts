@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmFields } from '@kbn/apm-synthtrace-client';
-import { apm, dedot } from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/synthtrace-client';
+import { apm, dedot } from '@kbn/synthtrace-client';
 import { getWaterfall } from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { Span } from '../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../typings/es_schemas/ui/transaction';

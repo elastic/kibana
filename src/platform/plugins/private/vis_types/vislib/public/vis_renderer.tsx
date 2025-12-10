@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import type { VisTypeVislibCoreSetup } from './plugin';

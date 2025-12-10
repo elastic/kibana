@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
@@ -40,6 +41,7 @@ export interface EditRuleFormProps {
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
   initialMetadata?: RuleTypeMetaData;
   initialEditStep?: RuleFormStepId;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
@@ -245,6 +247,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         onCancel={onCancel}
         onChangeMetaData={onChangeMetaData}
         initialEditStep={initialEditStep}
+        focusTrapProps={props.focusTrapProps}
       />
     </RuleFormStateProvider>
   );

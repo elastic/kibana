@@ -9,7 +9,6 @@
 
 import React, { useMemo } from 'react';
 
-import { RedirectAppLinksContainer } from '@kbn/shared-ux-link-redirect-app';
 import type { NoDataCardProps as Props } from '@kbn/shared-ux-card-no-data-types';
 
 import { NoDataCard as Component } from './no_data_card.component';
@@ -31,14 +30,12 @@ export const NoDataCard = ({ href: srcHref, ...props }: Props) => {
   }, [addBasePath, srcHref]);
 
   return (
-    <RedirectAppLinksContainer>
-      <Component
-        {...{
-          ...props,
-          href,
-          canAccessFleet: props.canAccessFleet ?? canAccessFleet,
-        }}
-      />
-    </RedirectAppLinksContainer>
+    <Component
+      {...{
+        ...props,
+        href,
+        canAccessFleet: props.canAccessFleet ?? canAccessFleet,
+      }}
+    />
   );
 };

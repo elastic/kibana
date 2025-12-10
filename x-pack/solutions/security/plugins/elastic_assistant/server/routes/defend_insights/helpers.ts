@@ -527,7 +527,7 @@ export const invokeDefendInsightsGraph = async ({
       runName: DEFEND_INSIGHTS_GRAPH_RUN_NAME,
       tags,
     }
-  )) as DefendInsightsGraphState;
+  )) as unknown as DefendInsightsGraphState;
   const {
     insights,
     anonymizedDocuments: anonymizedEvents,

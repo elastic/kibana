@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-export type { FormulaIndexPatternColumn } from './formula';
 export { formulaOperation } from './formula';
 
 export { insertOrReplaceFormulaColumn } from './parse';
 
-export type { MathIndexPatternColumn } from './math';
 export { mathOperation } from './math';
 
-export type {
-  TimeRangeIndexPatternColumn,
-  NowIndexPatternColumn,
-  IntervalIndexPatternColumn,
-} from './context_variables';
 export { timeRangeOperation, nowOperation, intervalOperation } from './context_variables';

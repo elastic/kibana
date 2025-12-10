@@ -17,7 +17,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
         class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
       />
       <span
-        class="css-18y6396-AuthenticationStatePage"
+        class="css-333keb-AuthenticationStatePage"
         data-test-subj="secAuthenticationStatePageLogo"
       >
         <span

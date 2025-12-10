@@ -23,7 +23,7 @@ import type {
   SupportedDataType,
 } from '../types';
 import { getFunctionDefinition } from './functions';
-import { isArrayType } from './operators';
+import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
@@ -190,19 +190,75 @@ export function getMatchingSignatures(
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
   literalMask: boolean[],
-  acceptUnknown: boolean
+  acceptUnknown: boolean,
+  acceptPartialMatches: boolean = false
 ): Signature[] {
   return signatures.filter((sig) => {
-    if (!matchesArity(sig, givenTypes.length)) {
+    if (sig.isSignatureRepeating && !areRepeatingValueTypesConsistent(givenTypes)) {
+      return false;
+    }
+
+    if (!acceptPartialMatches && !matchesArity(sig, givenTypes.length)) {
       return false;
     }
 
     return givenTypes.every((givenType, index) => {
-      // safe to assume the param is there, because we checked the length above
-      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
-      return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
+      let param;
+      const totalArgs = givenTypes.length;
+      // Default is the last argument when total args is odd (e.g. CASE(cond, val, default))
+      const isDefault = sig.isSignatureRepeating && totalArgs % 2 === 1 && index === totalArgs - 1;
+
+      if (sig.isSignatureRepeating && sig.params.length > 0 && index >= sig.params.length) {
+        if (isDefault) {
+          param = sig.params[1];
+        } else {
+          const paramIndex = index % sig.params.length;
+          param = sig.params[paramIndex];
+        }
+      } else {
+        param = getParamAtPosition(sig, index);
+      }
+
+      if (!param) {
+        return false;
+      }
+
+      const expectedType = unwrapArrayOneLevel(param.type);
+      // Bypass PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING for boolean conditions
+      // Default position is not a condition even though index % 2 === 0
+      const isConditionPosition = sig.isSignatureRepeating && index % 2 === 0 && !isDefault;
+      const effectiveIsLiteral =
+        isConditionPosition && expectedType === 'boolean' ? false : literalMask[index];
+
+      return argMatchesParamType(givenType, expectedType, effectiveIsLiteral, acceptUnknown);
     });
   });
+}
+
+/**
+ * Checks if all value positions in repeating signatures have compatible types.
+ * Values: odd positions (1, 3, 5...) + default (last if odd total).
+ */
+function areRepeatingValueTypesConsistent(
+  givenTypes: Array<SupportedDataType | 'unknown'>
+): boolean {
+  const { length } = givenTypes;
+  const isValue = (i: number) => i % 2 === 1 || (length % 2 === 1 && i === length - 1);
+  const valueTypes = givenTypes.filter((_, i) => isValue(i));
+  const [first, ...rest] = valueTypes;
+
+  if (!first || first === 'unknown' || first === 'param') {
+    return true;
+  }
+
+  return rest.every(
+    (type) =>
+      type === 'unknown' ||
+      type === 'param' ||
+      type === first ||
+      bothStringTypes(first, type) ||
+      (first === 'long' && type === 'integer')
+  );
 }
 
 /**
@@ -284,7 +340,7 @@ function matchesArity(signature: FunctionDefinition['signatures'][number], arity
  * @param position
  * @returns
  */
-function getParamAtPosition(
+export function getParamAtPosition(
   { params, minParams }: FunctionDefinition['signatures'][number],
   position: number
 ) {
@@ -349,12 +405,16 @@ export function isExpressionComplete(
   expressionType: SupportedDataType | 'unknown',
   innerText: string
 ) {
-  return (
-    expressionType !== 'unknown' &&
-    // see https://github.com/elastic/kibana/issues/199401
-    // for the reason we need this string check.
-    !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
-  );
+  if (expressionType === 'unknown') {
+    return false;
+  }
+
+  // Check for incomplete IS NULL / IS NOT NULL
+  if (isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText)) {
+    return false;
+  }
+
+  return true;
 }
 
 // #endregion expression completeness

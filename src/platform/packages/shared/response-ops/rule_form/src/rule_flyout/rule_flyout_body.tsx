@@ -158,6 +158,7 @@ export const RuleFlyoutBody = ({
         {hasActionsDisabled && (
           <>
             <EuiCallOut
+              announceOnMount
               size="s"
               color="danger"
               iconType="error"

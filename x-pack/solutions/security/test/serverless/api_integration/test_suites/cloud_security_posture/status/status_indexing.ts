@@ -11,7 +11,7 @@ import {
   FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 import { EsIndexDataProvider } from '../utils';
 import type { FtrProviderContext } from '../../../ftr_provider_context';

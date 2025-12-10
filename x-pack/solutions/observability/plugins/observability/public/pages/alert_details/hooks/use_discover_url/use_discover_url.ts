@@ -12,22 +12,21 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+  LOG_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import type { TopAlert } from '../../../../typings/alerts';
 import { useKibana } from '../../../../utils/kibana_react';
-import {
-  syntheticsMonitorStatusAlertParamsToKqlQuery,
-  syntheticsTlsAlertParamsToKqlQuery,
-} from './synthetics_alert_params_to_kql';
 import {
   getCustomThresholdRuleData,
   getEsQueryRuleData,
   getSLOBurnRateRuleData,
+  getSyntheticsStatusRuleData,
+  getSyntheticsTlsRuleData,
+  getAlertsIndexPatternRuleData,
 } from './get_rule_data';
 
 const viewInDiscoverSupportedRuleTypes = [
@@ -36,6 +35,9 @@ const viewInDiscoverSupportedRuleTypes = [
   SYNTHETICS_TLS_RULE,
   ES_QUERY_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+  LOG_THRESHOLD_ALERT_TYPE_ID,
 ] as const;
 
 type ViewInDiscoverSupportedRuleType = (typeof viewInDiscoverSupportedRuleTypes)[number];
@@ -49,26 +51,6 @@ const isViewInDiscoverSupportedRuleType = (
   );
 };
 
-const SYNTHETICS_TEMP_DATA_VIEW: DataViewSpec = {
-  title: 'synthetics-*',
-  timeFieldName: '@timestamp',
-};
-/**
- * For certain rule types, we create a temporary data view.
- * Otherwise, returns undefined, and an existing saved data view must be specified.
- * @param rule an Observability alerting rule
- * @returns A temporary data view spec, or undefined
- */
-const getCustomDataViewParams = (rule?: Rule): DataViewSpec | undefined => {
-  switch (rule?.ruleTypeId) {
-    case SYNTHETICS_TLS_RULE:
-    case SYNTHETICS_STATUS_RULE:
-      return SYNTHETICS_TEMP_DATA_VIEW;
-    default:
-      return undefined;
-  }
-};
-
 const getLocatorParamsMap: Record<
   (typeof viewInDiscoverSupportedRuleTypes)[number],
   (params: { rule: Rule; alert: TopAlert }) => {
@@ -76,35 +58,14 @@ const getLocatorParamsMap: Record<
     discoverUrl?: string;
   }
 > = {
-  [SYNTHETICS_STATUS_RULE]: ({ rule }) => {
-    const params = rule.params as SyntheticsMonitorStatusRuleParams;
-    const query = syntheticsMonitorStatusAlertParamsToKqlQuery(params);
-    return {
-      discoverAppLocatorParams: {
-        query: {
-          language: 'kuery',
-          query,
-        },
-        dataViewSpec: getCustomDataViewParams(rule),
-      },
-    };
-  },
-  [SYNTHETICS_TLS_RULE]: ({ rule }) => {
-    const params = rule.params as TLSRuleParams;
-    const query = syntheticsTlsAlertParamsToKqlQuery(params);
-    return {
-      discoverAppLocatorParams: {
-        query: {
-          language: 'kuery',
-          query,
-        },
-        dataViewSpec: getCustomDataViewParams(rule),
-      },
-    };
-  },
+  [SYNTHETICS_STATUS_RULE]: getSyntheticsStatusRuleData,
+  [SYNTHETICS_TLS_RULE]: getSyntheticsTlsRuleData,
   [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: getCustomThresholdRuleData,
   [ES_QUERY_ID]: getEsQueryRuleData,
   [SLO_BURN_RATE_RULE_TYPE_ID]: getSLOBurnRateRuleData,
+  [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
+  [METRIC_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
+  [LOG_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
 };
 
 export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?: Rule }) => {

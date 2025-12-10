@@ -188,4 +188,47 @@ describe('generateXmlTree', () => {
       expect(generateXmlTree(tree, { indentChar: '\t', initialIndentLevel: 1 })).toBe(expected);
     });
   });
+
+  describe('escapeContent option', () => {
+    test('should escape content by default', () => {
+      const node: XmlNode = {
+        tagName: 'code',
+        children: ['<div>Hello</div>'],
+      };
+      expect(generateXmlTree(node)).toBe('<code>&lt;div&gt;Hello&lt;/div&gt;</code>');
+    });
+
+    test('should not escape content when escapeContent is false', () => {
+      const node: XmlNode = {
+        tagName: 'code',
+        children: ['<div>Hello</div>'],
+      };
+      expect(generateXmlTree(node, { escapeContent: false })).toBe('<code><div>Hello</div></code>');
+    });
+
+    test('should not escape nested string children when escapeContent is false', () => {
+      const tree: XmlNode = {
+        tagName: 'wrapper',
+        children: [{ tagName: 'item', children: ['<b>bold</b>'] }, '<raw>content</raw>'],
+      };
+      const expected = [
+        '<wrapper>',
+        '  <item><b>bold</b></item>',
+        '  <raw>content</raw>',
+        '</wrapper>',
+      ].join('\n');
+      expect(generateXmlTree(tree, { escapeContent: false })).toBe(expected);
+    });
+
+    test('should still escape attribute values even when escapeContent is false', () => {
+      const node: XmlNode = {
+        tagName: 'div',
+        attributes: { 'data-info': '<test>' },
+        children: ['<span>raw</span>'],
+      };
+      expect(generateXmlTree(node, { escapeContent: false })).toBe(
+        '<div data-info="&lt;test&gt;"><span>raw</span></div>'
+      );
+    });
+  });
 });

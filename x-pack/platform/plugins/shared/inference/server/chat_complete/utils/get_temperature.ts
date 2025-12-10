@@ -13,8 +13,14 @@ export const getTemperatureIfValid = (
   temperature?: number,
   { connector, modelName }: { connector?: InferenceConnector; modelName?: string } = {}
 ) => {
-  if (temperature === undefined) return {};
+  // If user sets temperature in the connector config, use it by default
+  if (connector?.config?.temperature) {
+    return { temperature: connector.config.temperature };
+  }
 
+  if (temperature === undefined || temperature < 0) return {};
+
+  // Else, use the temperature from the request
   const model =
     modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
 
@@ -24,6 +30,7 @@ export const getTemperatureIfValid = (
     model
   ) {
     const normalizedModelName = model.toLowerCase();
+
     const shouldExcludeTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some(
       //  e.g openai/gpt-5 or gpt-5-xxx
       (m) => normalizedModelName.startsWith(m) || normalizedModelName.endsWith(m)

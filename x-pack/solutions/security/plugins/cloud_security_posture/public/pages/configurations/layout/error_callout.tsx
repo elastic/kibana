@@ -28,6 +28,7 @@ export const ErrorCallout = ({ error }: { error: Error }) => {
       <EuiFlexItem grow={false}>
         <EuiPanel paddingSize="l" grow>
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.translate('xpack.csp.findings.errorCallout.pageSearchErrorTitle', {
               defaultMessage: 'We encountered an error retrieving search results',
             })}

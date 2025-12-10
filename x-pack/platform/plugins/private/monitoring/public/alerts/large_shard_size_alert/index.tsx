@@ -17,8 +17,9 @@ import {
 import type { MonitoringConfig } from '../../types';
 import type { LazyExpressionProps } from '../components/param_details_form/lazy_expression';
 import { LazyExpression } from '../components/param_details_form/lazy_expression';
+import { getDescriptionFields } from '../get_description_fields';
 
-interface ValidateOptions extends RuleTypeParams {
+export interface ValidateOptions extends RuleTypeParams {
   indexPattern: string;
 }
 
@@ -58,5 +59,6 @@ export function createLargeShardSizeAlertType(
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+    getDescriptionFields,
   };
 }

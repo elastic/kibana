@@ -29,7 +29,7 @@ There are currently three context levels supported in Discover:
 
 Discover uses a concept called "composable profiles" to support context awareness. Composable profiles are implementations of a core `Profile` interface (or a subset of it) containing all of the available extension points Discover supports. A composable profile can be implemented at any context level through a "profile provider", responsible for defining the composable profile and its associated context resolution method, called `resolve`. Each provider's `resolve` method is passed a parameters object specific to its context level, which it uses to determine if its associated `profile` is a match. In cases where it is a match, the `resolve` method also returns related metadata in a `context` object.
 
-Within Discover there is always one resolved root profile, one resolved data source profile (as long as search results exist), and a resolved document profile for each search result in the data grid. Profile providers have access to the `context` objects of higher level providers within their `resolve` method (`root` > `data source` > `document`), making it possible to create context-dependent profiles. For example, an `oblt-logs-data-source` profile which is used when the current solution type is Observability, and the current data source contains logs data.
+Within Discover there is always one resolved root profile, one resolved data source profile per Discover tab (as long as search results exist), and a resolved document profile for each search result in the data grid. Profile providers have access to the `context` objects of higher level providers within their `resolve` method (`root` > `data source` > `document`), making it possible to create context-dependent profiles. For example, an `oblt-logs-data-source` profile which is used when the current solution type is Observability, and the current data source contains logs data.
 
 Definitions for the core `Profile` interface are located in the [`types.ts`](types.ts) file.
 
@@ -54,7 +54,7 @@ The context awareness framework is driven by two main supporting services called
 
 Each context level has a dedicated profile service, e.g. `RootProfileService`, which is responsible for accepting profile provider registrations and looping over each provider in order during context resolution to identify a matching profile. Each resolution call can result in only one matching profile, which is the first to return a match based on execution order.
 
-A single `ProfilesManager` is instantiated on Discover load, or one per Discover session panel in a dashboard. The profiles manager is responsible for the following:
+A single `ProfilesManager` is instantiated on Discover load, or one per Discover session panel in a dashboard. The purpose of the main profiles manager is to resolve the root profile and instantiate a `ScopedProfilesManager` per Discover tab, which handle resolving the tab-level data source and document profiles. Together the profiles managers are responsible for the following:
 
 - Managing state associated with the current Discover context.
 - Coordinating profile services and exposing resolution methods for each context level.
@@ -64,7 +64,7 @@ A single `ProfilesManager` is instantiated on Discover load, or one per Discover
 
 `ProfileService` definitions and implementation are located in the [`profiles_service.ts`](./profile_service.ts) file.
 
-The `ProfilesManager` implementation is located in the [`profiles_manager.ts`](./profiles_manager.ts) file.
+The `ProfilesManager` and `ScopedProfilesManager` implementations are located in the [`profiles_manager.ts`](./profiles_manager/profiles_manager.ts) and [`scoped_profiles_manager.ts`](./profiles_manager/scoped_profiles_manager.ts) files.
 
 ### Putting it all together
 
@@ -95,7 +95,7 @@ By ensuring all Discover profiles use the same IoC mechanism, changes or improve
 In order to register a Discover profile, follow these steps:
 
 1. Identify at which [context level](#context-levels) your profile should be implemented.
-2. Create a subfolder for your profile provider within the [`profile_providers`](./profile_providers) folder. Common Discover providers should be created within the `profile_providers/common` subfolder, while solution specific providers should be created within a `profile_providers/{SOLUTION_TYPE}` subfolder, e.g. `profile_providers/security/security_root_profile`.
+2. Create a subfolder for your profile provider within the [`profile_providers`](./profile_providers) folder. Common Discover providers should be created within the `profile_providers/common` subfolder, while solution specific providers should be created within a `profile_providers/{SOLUTION_TYPE}` subfolder, e.g. `profile_providers/security`. Subfolder names for individual providers should indicate their context level for clarity, e.g. `profile_providers/security/security_root_profile`.
 3. Create a `profile.ts(x)` file within your provider subfolder that exports a factory function which optionally accepts a `ProfileProviderServices` parameter and returns your provider implementation, e.g. `createSecurityRootProfileProvider(services: ProfileProviderServices) => RootProfileProvider`.
 4. **If your provider is not ready for GA or should only be enabled for specific configurations, make sure to set the `isExperimental` flag to `true` in your profile provider.** This will ensure the profile is disabled by default, and can be enabled in `kibana.yml` like this: `discover.experimental.enabledProfiles: [{YOUR_PROFILE_ID}]`.
 5. Call and return the result of your provider factory function from the corresponding factory function in [`register_profile_providers.ts`](./profile_providers/register_profile_providers.ts), e.g. `createRootProfileProviders`. The order of providers in the returned array determines the execution order during context resolution.
@@ -113,11 +113,9 @@ Example profile provider implementations are located in [`profile_providers/exam
 
 import React from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DataSourceType, isDataSourceType } from '../../../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
 // Export profile provider factory function, optionally accepting ProfileProviderServices,
 // and returning a profile provider for a specific context level
@@ -150,18 +148,8 @@ export const createExampleDataSourceProfileProvider = (
   // passed a params object with props specific to the context level,
   // as well as providing access to higher level context objects
   resolve: (params) => {
-    let indexPattern: string | undefined;
-
     // Extract the index pattern from the current ES|QL query or data view
-    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
-      if (!isOfAggregateQueryType(params.query)) {
-        return { isMatch: false };
-      }
-
-      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
-    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
-      indexPattern = params.dataView.getIndexPattern();
-    }
+    const indexPattern = extractIndexPatternFrom(params);
 
     // If the profile is not a match, return isMatch: false in the result
     if (indexPattern !== 'my-example-logs') {

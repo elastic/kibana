@@ -75,7 +75,6 @@ export class AttackDiscoveryScheduleDataClient {
     const { enabled = false, actions: _, ...restScheduleAttributes } = ruleToCreate;
     const { actions, systemActions } = convertScheduleActionsToAlertingActions({
       actionsClient: this.options.actionsClient,
-      logger: this.options.logger,
       scheduleActions: ruleToCreate.actions,
     });
     const rule = await this.options.rulesClient.create<AttackDiscoveryScheduleParams>({
@@ -97,18 +96,18 @@ export class AttackDiscoveryScheduleDataClient {
     ruleToUpdate: AttackDiscoveryScheduleUpdateProps & { id: string }
   ): Promise<AttackDiscoverySchedule> => {
     const { id, actions: _, ...updatePayload } = ruleToUpdate;
+
     const { actions, systemActions } = convertScheduleActionsToAlertingActions({
       actionsClient: this.options.actionsClient,
-      logger: this.options.logger,
       scheduleActions: ruleToUpdate.actions,
     });
     const rule = await this.options.rulesClient.update<AttackDiscoveryScheduleParams>({
       id,
       data: {
+        ...updatePayload,
         actions,
         ...(systemActions.length ? { systemActions } : {}),
         tags: [],
-        ...updatePayload,
       },
     });
     const schedule = convertAlertingRuleToSchedule(rule);

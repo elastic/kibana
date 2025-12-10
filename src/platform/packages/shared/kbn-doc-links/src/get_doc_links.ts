@@ -128,6 +128,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       connectorsDropbox: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-dropbox`,
       connectorsContentExtraction: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-content-extraction`,
       connectorsGithub: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-github`,
+      connectorsGitlab: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-gitlab`,
       connectorsGmail: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-gmail`,
       connectorsGoogleCloudStorage: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-google-cloud`,
       connectorsGoogleDrive: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-google-drive`,
@@ -201,6 +202,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
       customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
       elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
+    },
+    searchGettingStarted: {
+      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
+      notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
+      elasticTraining: `${ELASTIC_WEBSITE_URL}training`,
     },
     metricbeat: {
       base: `${ELASTIC_DOCS}reference/beats/metricbeat`,
@@ -344,10 +350,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ilmShrink: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-shrink`,
       ilmWaitForSnapshot: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-wait-for-snapshot`,
       indexModules: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules`,
-      indexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules`,
+      indexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings`,
       dynamicIndexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules#dynamic-index-settings`,
       indexTemplates: `${ELASTIC_DOCS}manage-data/data-store/templates`,
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping`,
+      mappingReference: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference`,
       mappingAnalyzer: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/analyzer`,
       mappingCoerce: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/coerce`,
       mappingCopyTo: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/copy-to`,
@@ -438,6 +445,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
       publicBaseUrl: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-publicBaseUrl`,
+      troubleshootServerNotReady: `${ELASTIC_DOCS}troubleshoot/kibana/error-server-not-ready`,
     },
     logging: {
       enableDeprecationHttpDebugLogs: `${ELASTIC_DOCS}reference/kibana/configuration-reference/logging-settings#enable-http-debug-logs`,
@@ -449,7 +457,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       avcResults: `https://www.elastic.co/blog/elastic-security-av-comparatives-business-test`,
       bidirectionalIntegrations: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/third-party-response-actions`,
       trustedApps: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-applications`,
-      trustedDevices: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-applications`, // TODO: Update this link when trusted devices is available
+      trustedDevices: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-devices`,
       elasticAiFeatures: `${ELASTIC_DOCS}solutions/security/ai`,
       eventFilters: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/event-filters`,
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
@@ -506,6 +514,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryDsl: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/querydsl`,
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLExamples: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
+      queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,
@@ -690,6 +699,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       kibanaPrivileges: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges`,
       mappingRoles: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/mapping-users-groups-to-roles`,
       mappingRolesFieldRules: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/role-mapping-resources#mapping-roles-rule-field`,
+      roles: `${ELASTIC_DOCS}reference/elasticsearch/roles`,
       runAsPrivilege: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#_run_as_privilege`,
       enableElasticSearchSecurityFeatures: `${ELASTIC_DOCS}deploy-manage/security/set-up-minimal-security#_enable_es_security_features`,
     },
@@ -1063,6 +1073,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     datasetQuality: {
       failureStore: `${ELASTIC_DOCS}solutions/observability/data-set-quality-monitoring#find-failed-documents-with-failure-store`,
+    },
+    indexManagement: {
+      componentTemplate: `${ELASTIC_DOCS}manage-data/data-store/templates#component-templates`,
+      indexAlias: `${ELASTIC_DOCS}manage-data/data-store/aliases`,
     },
   });
 };

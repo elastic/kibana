@@ -103,7 +103,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
-    mockExportTypesRegistry = new ExportTypesRegistry();
+    mockExportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
     mockExportTypesRegistry.register(mockPdfExportType);
 
     store = await reportingCore.getStore();

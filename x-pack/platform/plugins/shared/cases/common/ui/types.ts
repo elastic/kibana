@@ -75,11 +75,6 @@ export interface CasesUiConfigType {
   stack: {
     enabled: boolean;
   };
-  resilient: {
-    additionalFields: {
-      enabled: boolean;
-    };
-  };
   incrementalId: {
     enabled: boolean;
   };
@@ -191,6 +186,8 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;

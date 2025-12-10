@@ -5,7 +5,7 @@ exports[`Select Flow Direction rendering it renders the basic group button for u
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
 >
   <div
-    class="euiFilterButton__wrapper css-nbqv3o-wrapper-withNext-hasToggle"
+    class="euiFilterButton__wrapper css-1anz60t-wrapper-withNext-hasToggle"
   >
     <button
       aria-pressed="true"
@@ -27,7 +27,7 @@ exports[`Select Flow Direction rendering it renders the basic group button for u
     </button>
   </div>
   <div
-    class="euiFilterButton__wrapper css-10m1aro-wrapper-hasToggle"
+    class="euiFilterButton__wrapper css-1nn8k4u-wrapper-hasToggle"
   >
     <button
       aria-pressed="false"

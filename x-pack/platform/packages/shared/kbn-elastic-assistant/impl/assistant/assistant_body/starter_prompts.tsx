@@ -9,6 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { PromptItemArray } from '@kbn/elastic-assistant-common/impl/schemas/security_ai_prompts/common_attributes.gen';
+import { kebabCase } from 'lodash';
 import { useAssistantContext, useFindPrompts } from '../../..';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
   compressed?: boolean;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
+
 const starterPromptClassName = css`
   max-width: 50%;
   min-width: calc(50% - 8px);
@@ -24,12 +26,14 @@ const starterPromptClassName = css`
 const starterPromptInnerClassName = css`
   text-align: center !important;
 `;
+
 interface PromptGroup {
   description: string;
   title: string;
   icon: string;
   prompt: string;
 }
+
 // these are the promptIds (Security AI Prompts integration) for each of the starter prompts fields
 export const promptGroups = [
   {
@@ -116,7 +120,7 @@ export const StarterPrompts: React.FC<Props> = ({
             paddingSize={compressed ? 's' : 'm'}
             hasShadow={false}
             hasBorder
-            data-test-subj={prompt}
+            data-test-subj={`starter-prompt-${kebabCase(title)}`}
             onClick={() => onSelectPrompt(prompt, title)}
             className={starterPromptInnerClassName}
           >

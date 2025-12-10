@@ -16,8 +16,7 @@ import type { InitialBenchConfig } from './config/types';
 
 // Mock workspace operations to avoid real git checkouts
 jest.mock('@kbn/workspaces', () => ({
-  activateWorktree: jest.fn(),
-  getWorkspaceFromSourceRepo: jest.fn(),
+  activateWorktreeOrUseSourceRepo: jest.fn(),
 }));
 
 // Mock collectConfigPaths to avoid git ls-files in temp directory
@@ -25,7 +24,7 @@ jest.mock('./config/collect_config_paths', () => ({
   collectConfigPaths: jest.fn(),
 }));
 
-import { activateWorktree, getWorkspaceFromSourceRepo } from '@kbn/workspaces';
+import { activateWorktreeOrUseSourceRepo } from '@kbn/workspaces';
 import { collectConfigPaths } from './config/collect_config_paths';
 
 // Type the mocked functions
@@ -122,8 +121,7 @@ describe('bench E2E', () => {
       exec: jest.fn(),
     };
 
-    (activateWorktree as jest.Mock).mockResolvedValue(mockWorkspace);
-    (getWorkspaceFromSourceRepo as jest.Mock).mockResolvedValue(mockWorkspace);
+    (activateWorktreeOrUseSourceRepo as jest.Mock).mockResolvedValue(mockWorkspace);
 
     // Create a log that captures output
     log = new ToolingLog({

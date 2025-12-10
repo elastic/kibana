@@ -14,6 +14,7 @@ import type {
 import { useAssetInventoryAssistant } from './use_asset_inventory_assistant';
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import type { AssetCriticalityLevel } from '../../../../../common/api/entity_analytics/asset_criticality';
 
 jest.mock('../../../../assistant/use_assistant_availability');
 jest.mock('@kbn/elastic-assistant');
@@ -28,10 +29,20 @@ const mockEntityFields: Record<string, string[]> = {
 
 const entityId = 'test-entity-id';
 
-const renderUseAssetInventoryAssistant = () =>
-  renderHook((props: UseAssetInventoryAssistantParams) => useAssetInventoryAssistant(props), {
-    initialProps: { entityId, entityFields: mockEntityFields, isPreviewMode: false },
-  });
+const renderUseAssetInventoryAssistant = (assetCriticalityLevel?: AssetCriticalityLevel) => {
+  const initialProps: UseAssetInventoryAssistantParams = {
+    entityId,
+    entityFields: mockEntityFields,
+    isPreviewMode: false,
+    ...(assetCriticalityLevel && { assetCriticalityLevel }),
+  };
+  return renderHook(
+    (props: UseAssetInventoryAssistantParams) => useAssetInventoryAssistant(props),
+    {
+      initialProps,
+    }
+  );
+};
 
 const useAssistantOverlayMock = useAssistantOverlay as jest.Mock;
 
@@ -194,6 +205,28 @@ describe('useAssetInventoryAssistant', () => {
     const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
 
     expect(await getPromptContext()).toEqual({});
+  });
+
+  it('includes asset criticality in prompt context when provided', async () => {
+    renderUseAssetInventoryAssistant('high_impact');
+
+    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+    const context = await getPromptContext();
+
+    expect(context).toEqual({
+      ...mockEntityFields,
+      'asset.criticality': ['high_impact'],
+    });
+  });
+
+  it('does not include asset criticality when not provided', async () => {
+    renderUseAssetInventoryAssistant();
+
+    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+    const context = await getPromptContext();
+
+    expect(context).toEqual(mockEntityFields);
+    expect(context['asset.criticality']).toBeUndefined();
   });
 
   it('uses noop function when hasAssistantPrivilege is false', () => {

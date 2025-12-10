@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -23,5 +23,6 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/triggers-actions-ui-types",
     "@kbn/alerting-types",
+    "@kbn/react-query",
   ]
 }

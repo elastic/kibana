@@ -26,8 +26,11 @@ import type {
 import { mockDataGridProps } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { useTagsAction } from '../components/tags/use_tags_action';
+
+jest.mock('../components/tags/use_tags_action');
 
 const columns = [
   {
@@ -59,6 +62,21 @@ afterAll(() => {
 });
 
 describe('AlertsDataGrid bulk actions', () => {
+  const mockUseTagsAction = jest.mocked(useTagsAction);
+
+  beforeEach(() => {
+    // Reset and set up the mock for tags action
+    mockUseTagsAction.mockReset();
+    mockUseTagsAction.mockImplementation(() => ({
+      isFlyoutOpen: false,
+      selectedAlerts: [],
+      openFlyout: jest.fn(),
+      onClose: jest.fn(),
+      onSaveTags: jest.fn(),
+      getAction: jest.fn(),
+    }));
+  });
+
   const alerts: Alert[] = [
     {
       _id: 'alert0',
@@ -154,7 +172,7 @@ describe('AlertsDataGrid bulk actions', () => {
       bulkActionsReducer,
       initialBulkActionsState || createDefaultBulkActionsState()
     );
-    const renderContext = useMemo(
+    const renderContext: RenderContext<AdditionalContext> = useMemo(
       () => ({
         ...baseRenderContext,
         bulkActionsStore,

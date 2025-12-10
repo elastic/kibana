@@ -43,7 +43,7 @@ export const RiskScoreGeneralSection = (props: RiskScoreGeneralSectionProps) => 
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={i18n.RISK_SCORE_RETAINMENT_TOOLTIP} position="right" />
+          <EuiIconTip type="info" content={i18n.RISK_SCORE_RETAINMENT_TOOLTIP} position="right" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule />

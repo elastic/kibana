@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import { type ESQLCommand } from '../../../types';
-import type { GrokDataType, FieldType } from '../../../definitions/types';
+import type { GrokDataType } from '../../../definitions/types';
 import { walk } from '../../../walker';
 import type { ESQLColumnData } from '../../types';
 
@@ -74,9 +75,10 @@ export const columnsAfter = (
     },
   });
 
+  const uniqueColumns = uniqBy(columns, 'name');
   return [
     ...previousColumns,
-    ...columns.map(
+    ...uniqueColumns.map(
       (column) =>
         ({
           name: column.name,
@@ -91,7 +93,7 @@ export const columnsAfter = (
  * Maps Grok data types to ES|QL field types.
  * Reference: https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html
  */
-const GROK_TO_ESQL_TYPE_MAP: Record<GrokDataType, FieldType> = {
+const GROK_TO_ESQL_TYPE_MAP: Record<GrokDataType, EsqlFieldType> = {
   int: 'integer',
   long: 'long',
   float: 'double',
@@ -99,7 +101,7 @@ const GROK_TO_ESQL_TYPE_MAP: Record<GrokDataType, FieldType> = {
   boolean: 'boolean',
 } as const;
 
-function grokTypeToESQLFieldType(grokType: GrokDataType): FieldType {
+function grokTypeToESQLFieldType(grokType: GrokDataType): EsqlFieldType {
   const normalizedType = grokType.toLowerCase() as GrokDataType;
   return GROK_TO_ESQL_TYPE_MAP[normalizedType] ?? 'keyword';
 }

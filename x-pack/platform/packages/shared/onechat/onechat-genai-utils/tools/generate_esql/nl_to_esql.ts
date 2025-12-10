@@ -13,6 +13,7 @@ import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/
 import type { ToolEventEmitter } from '@kbn/onechat-server';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
+import { indexExplorer } from '../index_explorer';
 
 export interface GenerateEsqlResponse {
   /**
@@ -49,7 +50,7 @@ export interface GenerateEsqlOptions {
   /**
    * The resource (index/datastream/alias) to target
    */
-  index: string;
+  index?: string;
   /**
    * Additional context to provide to the model (user prompt)
    */
@@ -69,6 +70,10 @@ export interface GenerateEsqlOptions {
    * Defaults to `3`
    * */
   maxRetries?: number;
+  /**
+   * Maximum row limit to use in generated ES|QL queries.
+   */
+  rowLimit?: number;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -80,13 +85,21 @@ export const generateEsql = async ({
   additionalInstructions,
   additionalContext,
   maxRetries = 3,
+  rowLimit,
   model,
   esClient,
   logger,
   events,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const docBase = await EsqlDocumentBase.load();
-  const graph = createNlToEsqlGraph({ model, esClient, logger, docBase, events });
+
+  const graph = createNlToEsqlGraph({
+    model,
+    esClient,
+    logger,
+    docBase,
+    events,
+  });
 
   return withActiveInferenceSpan(
     'GenerateEsqlGraph',
@@ -97,14 +110,37 @@ export const generateEsql = async ({
     },
     async () => {
       try {
+        // Discover index if not provided
+        let selectedTarget = index;
+        if (!selectedTarget) {
+          logger?.debug('No index provided, discovering target index using indexExplorer');
+          const {
+            resources: [selectedResource],
+          } = await indexExplorer({
+            nlQuery,
+            esClient,
+            limit: 1,
+            model,
+            logger,
+          });
+          if (!selectedResource) {
+            throw new Error(
+              'Could not discover a suitable index for the query. Please specify an index explicitly.'
+            );
+          }
+          selectedTarget = selectedResource.name;
+          logger?.debug(`Discovered target index: ${selectedTarget}`);
+        }
+
         const outState = await graph.invoke(
           {
             nlQuery,
-            target: index,
+            target: selectedTarget,
             executeQuery,
             maxRetries,
             additionalInstructions,
             additionalContext,
+            rowLimit,
           },
           {
             recursionLimit: 25,

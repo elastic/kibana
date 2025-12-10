@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import {
   mockContext,
   lookupIndexFields,
@@ -18,18 +19,25 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getLiteralsByType,
+  getOperatorSuggestions,
 } from '../../../__tests__/autocomplete';
+import {
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../../../definitions/all_operators';
 import type { ICommandCallbacks } from '../../types';
-import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import type { FunctionReturnType } from '../../../definitions/types';
 import {
   ESQL_NUMBER_TYPES,
   FunctionDefinitionTypes,
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
-import { parse } from '../../../parser';
+import { Parser } from '../../../parser';
 import { setTestFunctions } from '../../../definitions/utils/test_functions';
-import { allStarConstant, getDateHistogramCompletionItem } from '../../../..';
+import { getDateHistogramCompletionItem } from '../../../..';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
@@ -67,7 +75,7 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<FieldType & FunctionReturnType> = [
+export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
   'double',
   'integer',
   'long',
@@ -119,9 +127,9 @@ describe('STATS Autocomplete', () => {
 
   const suggest = async (query: string) => {
     const correctedQuery = correctQuerySyntax(query);
-    const { ast } = parse(correctedQuery, { withFormatting: true });
+    const { root } = Parser.parse(correctedQuery, { withFormatting: true });
     const cursorPosition = query.length;
-    const { command } = findAstPosition(ast, cursorPosition);
+    const { command } = findAstPosition(root, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
@@ -483,8 +491,11 @@ describe('STATS Autocomplete', () => {
 
         it('suggests operators after a first operand', async () => {
           await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField ', [
-            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { operators: true }, [
-              'keyword',
+            ...getOperatorSuggestions([
+              ...comparisonFunctions,
+              ...patternMatchOperators,
+              ...inOperators,
+              ...nullCheckOperators,
             ]),
           ]);
         });
@@ -579,7 +590,7 @@ describe('STATS Autocomplete', () => {
 
         await statsExpectSuggestions('from a | stats a=max(b) BY integerField, keywor', [
           ...expected,
-          ...getFieldNamesByType('any'),
+          ...getFieldNamesByType('any').filter((name) => name !== 'integerField'),
         ]);
       });
 
@@ -665,7 +676,7 @@ describe('STATS Autocomplete', () => {
           ' = ',
           getDateHistogramCompletionItem().text,
           ...fields,
-          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { scalar: true }),
           ...allGroupingFunctions,
         ]);
       });
@@ -753,7 +764,9 @@ describe('STATS Autocomplete', () => {
       test('after NOT keyword', async () => {
         await statsExpectSuggestions(
           'FROM logs-apache_error | STATS count() by keywordField <= textField NOT ',
-          ['LIKE $0', 'RLIKE $0', 'IN $0']
+          getOperatorSuggestions(
+            [...patternMatchOperators, ...inOperators].filter((op) => !op.name.startsWith('not '))
+          )
         );
       });
 
@@ -804,32 +817,21 @@ describe('STATS Autocomplete', () => {
           'integer',
           'date_period',
           'time_duration',
-        ] as FieldType[]);
+        ] as EsqlFieldType[]);
         (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
           expectedFields1.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, 50, ?_tstart, ?_tend)',
           [
+            // BUCKET second parameter (buckets) has constantOnly: true
+            // Types: date_period, integer, time_duration (NOT date, so no ?_tstart/?_tend)
             ...getLiteralsByType('time_duration'),
-            ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
-              ['integer', 'date_period', 'time_duration'],
-              {
-                scalar: true,
-              }
-            ),
-            ...['integerField', 'integerPrompt'],
           ],
           mockCallbacks,
           mockContext,
-          43 // at the second argument of the bucket function
+          43 // at the second argument (buckets) of the bucket function
         );
-      });
-
-      test('count(/) to suggest * for all', async () => {
-        const suggestions = await suggest('from a | stats count(');
-        expect(suggestions).toContain(allStarConstant);
       });
 
       describe('date histogram snippet', () => {
@@ -840,6 +842,79 @@ describe('STATS Autocomplete', () => {
 
           expect(suggestions).toContainEqual(expectedCompletionItem);
         });
+
+        test('BUCKET constant arguments should not trigger function suggestions', async () => {
+          const suggestions = await suggest('FROM a | STATS BY BUCKET(dateField, 50, ');
+
+          const dateHistogramSuggestions = suggestions.filter((s) =>
+            s.label?.includes('date histogram')
+          );
+
+          expect(dateHistogramSuggestions).toHaveLength(0);
+        });
+      });
+
+      test('BUCKET should not have duplicate date literal suggestions', async () => {
+        const suggestions = await suggest('FROM a | STATS BY BUCKET(dateField, 50, ');
+
+        const labels = suggestions.map((s) => s.label);
+
+        // Check for duplicates
+        const labelCounts = new Map<string, number>();
+        labels.forEach((label) => {
+          labelCounts.set(label, (labelCounts.get(label) || 0) + 1);
+        });
+
+        const duplicates = Array.from(labelCounts.entries())
+          .filter(([, count]) => count > 1)
+          .map(([label]) => label);
+
+        expect(duplicates).toEqual([]);
+      });
+
+      test('BUCKET with numeric field should NOT show col0 or date histogram at second param', async () => {
+        const suggestions = await suggest('FROM a | STATS AVG(b) BY BUCKET(numberField, ');
+
+        const labels = suggestions.map((s) => s.label);
+
+        // Should NOT suggest custom STATS columns like col0
+        expect(labels).not.toContain('col0');
+
+        // Should NOT suggest "Add date histogram"
+        const dateHistogramSuggestions = labels.filter((l) => l.includes('date histogram'));
+        expect(dateHistogramSuggestions).toHaveLength(0);
+
+        // Should NOT suggest date literals (?_tstart, ?_tend) for numeric buckets
+        expect(labels).not.toContain('?_tstart');
+        expect(labels).not.toContain('?_tend');
+
+        // Should NOT suggest any fields (constantOnly: true)
+        expect(labels).not.toContain('numberField');
+        expect(labels).not.toContain('dateField');
+      });
+
+      test('BUCKET(@timestamp, 1 day should NOT suggest comma (2-param signature complete)', async () => {
+        const suggestions = await suggest('FROM a | STATS BY BUCKET(dateField, 1 day ');
+
+        const labels = suggestions.map((s) => s.label);
+
+        // Should NOT suggest comma because 2-param signature is complete
+        expect(labels).not.toContain(',');
+      });
+
+      test('after comma in BY with assignment should suggest fields and functions', async () => {
+        const fields = getFieldNamesByType('any');
+
+        await statsExpectSuggestions(
+          'FROM a | STATS BY col = BUCKET(@timestamp, 50, ?_tstart, ?_tend), ',
+          [
+            ' = ',
+            getDateHistogramCompletionItem().text,
+            ...fields,
+            ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { scalar: true }),
+            ...allGroupingFunctions,
+          ]
+        );
       });
     });
   });

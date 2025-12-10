@@ -1115,22 +1115,6 @@
             "path": "x-pack/platform/plugins/private/runtime_fields/public/test_utils.ts"
           },
           {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/app/app.helpers.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/app/app.helpers.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/init_test_bed.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/init_test_bed.ts"
-          },
-          {
             "plugin": "snapshotRestore",
             "path": "x-pack/platform/plugins/private/snapshot_restore/__jest__/client_integration/helpers/home.helpers.ts"
           },
@@ -1501,10 +1485,6 @@
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor_flyout_preview.helpers.ts"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/platform/plugins/shared/es_ui_shared/static/forms/hook_form_lib/shared_imports.ts"
           }
         ],
         "children": [

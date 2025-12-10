@@ -18,7 +18,7 @@ import {
   getKibanaMigratorTestKit,
   startElasticsearch,
   currentVersion,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getSampleAType } from '../fixtures/zdt_base.fixtures';
 

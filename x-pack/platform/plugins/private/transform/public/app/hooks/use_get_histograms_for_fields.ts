@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';

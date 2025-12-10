@@ -39,9 +39,9 @@ export const toggleMetricsGridFullScreen = (metricsGrid: HTMLElement) => {
   }
 };
 
-export const useMetricsGridFullScreen = () => {
+export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
   const { euiTheme } = useEuiTheme();
-  const metricsGridId = useGeneratedHtmlId({ prefix: 'metricsExperienceGrid' });
+  const metricsGridId = useGeneratedHtmlId({ prefix });
   const [metricsGridWrapper, setMetricsGridWrapper] = useState<HTMLElement | null>(null);
   const [metricsGrid, setMetricsGrid] = useState<HTMLElement | null>(null);
 
@@ -95,7 +95,7 @@ export const useMetricsGridFullScreen = () => {
         }
 
         .euiFlyout {
-          ${logicalCSS('top', '0')}
+          ${logicalCSS('top', '0 !important')}
           ${logicalCSS('height', '100%')}
         }
       `,

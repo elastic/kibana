@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormBasedPersistedState, PieVisualizationState } from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, LensPartitionVisualizationState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   BuildDependencies,
@@ -18,20 +18,14 @@ import type {
   LensLegendConfig,
 } from '../types';
 import { DEFAULT_LAYER_ID } from '../types';
-import {
-  addLayerColumn,
-  buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
-  mapToFormula,
-} from '../utils';
+import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
 function buildVisualizationState(
   config: LensTreeMapConfig | LensPieConfig | LensMosaicConfig
-): PieVisualizationState {
+): LensPartitionVisualizationState {
   const layer = config;
 
   const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];
@@ -122,18 +116,19 @@ export async function buildPartitionChart(
     getValueColumns,
     dataViewsAPI
   );
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
+
   return {
     title: config.title,
     visualizationType: 'lnsPie',
-    references: buildReferences(dataviews),
+    references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

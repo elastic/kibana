@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useContext } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { SetupContext } from '../../application/setup_context';
 import { isSubscriptionAllowed } from '../../../common/utils/subscription';
 import { useKibana } from './use_kibana';

@@ -46,3 +46,9 @@ export const resultField = (euiTheme: EuiThemeComputed<{}>) =>
 export const ResultHeader = styled.div<{ euiTheme: EuiThemeComputed<{}> }>`
   padding: ${({ euiTheme }) => `0 ${euiTheme.size.s} ${euiTheme.size.xs} 0`};
 `;
+
+export const definitionStyle = css({
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+  maxWidth: '16rem',
+});

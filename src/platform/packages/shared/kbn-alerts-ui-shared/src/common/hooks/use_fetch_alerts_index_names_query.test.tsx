@@ -9,7 +9,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_query';

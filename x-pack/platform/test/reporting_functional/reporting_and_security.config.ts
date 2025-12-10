@@ -25,6 +25,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=6000`,
+        `--notifications.connectors.default.email=email`,
+        `--xpack.actions.preconfigured={"email":{"name":"Default email connector","actionTypeId":".email","config":{"service":"other","from":"testsender@test.com","host":"0.0.0.0","port":1025,"secure":false,"hasAuth":false}}}`,
       ],
     },
     services: {

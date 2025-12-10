@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   discoverAriaText,
   openInDiscoverText,
@@ -23,6 +24,7 @@ import {
   editFailureStoreText,
 } from '../../../../../common/translations';
 import {
+  useDatasetDetailsTelemetry,
   useDatasetQualityDetailsState,
   useFailureStoreModal,
   useQualityIssuesDocsChart,
@@ -54,6 +56,8 @@ export default function DocumentTrends({
     ...qualityIssuesChartProps
   } = useQualityIssuesDocsChart();
 
+  const { trackDatasetDetailsBreakdownFieldChanged } = useDatasetDetailsTelemetry();
+
   const {
     services: { application, alerting },
   } = useKibanaContextForPlugin();
@@ -65,6 +69,14 @@ export default function DocumentTrends({
       updateTimeRange({ start, end });
     },
     [updateTimeRange]
+  );
+
+  const onBreakdownFieldChange = useCallback(
+    (breakdownField: DataViewField | undefined) => {
+      trackDatasetDetailsBreakdownFieldChanged();
+      breakdown.onChange(breakdownField);
+    },
+    [breakdown, trackDatasetDetailsBreakdownFieldChanged]
   );
 
   const {
@@ -86,7 +98,7 @@ export default function DocumentTrends({
                     ? breakdown.dataViewField
                     : undefined,
               }}
-              onBreakdownFieldChange={breakdown.onChange}
+              onBreakdownFieldChange={onBreakdownFieldChange}
             />
           </EuiSkeletonRectangle>
         </EuiFlexItem>

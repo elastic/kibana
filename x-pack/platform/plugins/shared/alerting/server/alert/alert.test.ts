@@ -385,6 +385,7 @@ describe('updateLastScheduledActions()', () => {
         },
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
       },
     });
   });
@@ -399,6 +400,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -416,6 +418,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -431,6 +434,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -438,6 +442,77 @@ describe('updateLastScheduledActions()', () => {
           actions: {
             '111-111': { date: new Date().toISOString() },
           },
+        },
+      },
+    });
+  });
+
+  test('removes the outdated actions', () => {
+    const actionsOnTheRule = ['222-222', '333-333'];
+
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+    alert.clearThrottlingLastScheduledActions(actionsOnTheRule);
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+  });
+  test('removes all the actions when there is no action on the rule', () => {
+    const actionsOnTheRule: string[] = [];
+
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+    alert.clearThrottlingLastScheduledActions(actionsOnTheRule);
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {},
         },
       },
     });
@@ -529,6 +604,7 @@ describe('toJSON', () => {
           },
           flappingHistory: [false, true],
           maintenanceWindowIds: [],
+          maintenanceWindowNames: [],
           flapping: false,
           pendingRecoveredCount: 2,
         },
@@ -596,6 +672,7 @@ describe('toRaw', () => {
         flappingHistory: [false, true, true],
         flapping: false,
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         activeCount: 1,
       },
@@ -620,6 +697,7 @@ describe('setFlappingHistory', () => {
             false,
           ],
           "maintenanceWindowIds": Array [],
+          "maintenanceWindowNames": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -653,6 +731,7 @@ describe('setFlapping', () => {
           "flapping": false,
           "flappingHistory": Array [],
           "maintenanceWindowIds": Array [],
+          "maintenanceWindowNames": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},

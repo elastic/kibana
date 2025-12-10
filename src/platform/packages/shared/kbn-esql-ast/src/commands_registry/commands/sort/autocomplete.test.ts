@@ -13,7 +13,15 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   suggest,
+  getOperatorSuggestions,
 } from '../../../__tests__/autocomplete';
+
+import {
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../../../definitions/all_operators';
+
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
 
@@ -21,14 +29,13 @@ const expectedFieldSuggestions = getFieldNamesByType('any');
 const expectedFunctionSuggestions = getFunctionSignaturesByReturnType(Location.SORT, 'any', {
   scalar: true,
 });
-const expressionOperatorSuggestions = getFunctionSignaturesByReturnType(
-  Location.SORT,
-  'any',
-  {
-    operators: true,
-  },
-  ['keyword']
-);
+
+// String operators for text/keyword fields (no comparison operators)
+const stringOperatorSuggestions = getOperatorSuggestions([
+  ...patternMatchOperators,
+  ...inOperators,
+  ...nullCheckOperators,
+]);
 
 const sortExpectSuggestions = (
   query: string,
@@ -105,7 +112,7 @@ describe('SORT Autocomplete', () => {
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
 
       await sortExpectSuggestions('from a | sort doubleField ASC, keywordField ', [
@@ -115,7 +122,7 @@ describe('SORT Autocomplete', () => {
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
     });
 
@@ -140,7 +147,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
     });
 
@@ -152,7 +159,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField ASC', [
         'ASC NULLS FIRST',
@@ -176,7 +183,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField DESC ', [
         'NULLS FIRST',
@@ -212,7 +219,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField null', [
         'ASC',
@@ -221,7 +228,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField nulls', [
         'ASC',
@@ -230,7 +237,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField nulls ', [
         'ASC',
@@ -239,7 +246,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
     });
 
@@ -251,7 +258,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField NULLS FI', [
         'ASC',
@@ -260,7 +267,7 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
     });
 
@@ -272,7 +279,7 @@ describe('SORT Autocomplete', () => {
         'NULLS FIRST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField NULLS LAS', [
         'ASC',
@@ -281,7 +288,7 @@ describe('SORT Autocomplete', () => {
         'NULLS FIRST',
         ', ',
         '| ',
-        ...expressionOperatorSuggestions,
+        ...stringOperatorSuggestions,
       ]);
     });
 

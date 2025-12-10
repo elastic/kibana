@@ -106,7 +106,11 @@ describe('UiamService', () => {
       });
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
-        connect: { ca: ['mocked file content for /some/ca/path'], rejectUnauthorized: true },
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
       });
 
       agentSpy.mockClear();
@@ -126,6 +130,7 @@ describe('UiamService', () => {
             'mocked file content for /some/ca/path-1',
             'mocked file content for /some/ca/path-2',
           ],
+          allowPartialTrustChain: true,
           rejectUnauthorized: true,
         },
       });
@@ -143,6 +148,7 @@ describe('UiamService', () => {
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
           ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
           rejectUnauthorized: true,
           checkServerIdentity: expect.any(Function),
         },
@@ -157,7 +163,11 @@ describe('UiamService', () => {
       });
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
-        connect: { rejectUnauthorized: true, checkServerIdentity: expect.any(Function) },
+        connect: {
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+          checkServerIdentity: expect.any(Function),
+        },
       });
     });
 
@@ -170,7 +180,9 @@ describe('UiamService', () => {
         ssl: { verificationMode: 'none' },
       });
       expect(agentSpy).toHaveBeenCalledTimes(1);
-      expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: { allowPartialTrustChain: true, rejectUnauthorized: false },
+      });
     });
   });
 
@@ -216,6 +228,30 @@ describe('UiamService', () => {
         dispatcher: AGENT_MOCK,
       });
     });
+
+    it('throws error if refresh fails with 400 status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Bad request' } }),
+      });
+
+      await expect(uiamService.refreshSessionTokens('old-refresh')).rejects.toThrowError(
+        'Bad request'
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({ refresh_token: 'old-refresh' }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
   });
 
   describe('#invalidateSessionTokens', () => {
@@ -230,40 +266,37 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_invalidate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer old-token' },
-        body: JSON.stringify({ token: 'old-token', refresh_token: 'old-refresh' }),
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer old-token',
+        },
+        body: JSON.stringify({ tokens: ['old-token', 'old-refresh'] }),
         dispatcher: AGENT_MOCK,
       });
     });
 
-    it('fail if invalidation fails', async () => {
+    it('throws error if invalidation fails with 400 status code', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
-        status: 401,
+        status: 400,
         headers: new Headers(),
-        json: async () => ({ error: { message: 'Oh no!' } }),
+        json: async () => ({ error: { message: 'Bad request' } }),
       });
 
       await expect(
         uiamService.invalidateSessionTokens('old-token', 'old-refresh')
-      ).rejects.toThrowError('Oh no!');
-    });
-
-    it('TEMPORARILY do not throw if invalidation fails with 500 status code', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: false,
-        status: 500,
-        headers: new Headers(),
-        json: async () => ({ error: { message: 'Oh no!' } }),
-      });
-
-      await uiamService.invalidateSessionTokens('old-token', 'old-refresh');
+      ).rejects.toThrowError('Bad request');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_invalidate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer old-token' },
-        body: JSON.stringify({ token: 'old-token', refresh_token: 'old-refresh' }),
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer old-token',
+        },
+        body: JSON.stringify({ tokens: ['old-token', 'old-refresh'] }),
         dispatcher: AGENT_MOCK,
       });
     });

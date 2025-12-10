@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage } from '@kbn/esql-ast';
+import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
 import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import type { EditorError } from '../types';
 
 export interface ReferenceMaps {
   sources: Set<string>;
@@ -27,5 +26,11 @@ export interface ValidationResult {
 }
 
 export interface ValidationOptions {
-  ignoreOnMissingCallbacks?: boolean;
+  /**
+   * Forces cache invalidation for column metadata.
+   * Only effective when 'getColumnsFor' callback is provided in ESQLCallbacks.
+   * Use when schema changes have occurred (e.g., new fields added to lookup indices).
+   * @default false
+   */
+  invalidateColumnsCache?: boolean;
 }

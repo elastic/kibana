@@ -128,14 +128,15 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
  */
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
-  'src/babel-*',
   'packages/*',
-  'x-pack/packages/ai-infra/*',
   'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
-  'x-pack/dev-tools',
+  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/*',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'src/babel-*',
   'typings/*',
   'typings/**/*',
+  'x-pack/dev-tools',
+  'x-pack/packages/ai-infra/*',
 ];
 
 /**

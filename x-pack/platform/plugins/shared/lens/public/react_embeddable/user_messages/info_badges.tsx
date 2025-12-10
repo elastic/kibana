@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { useState } from 'react';
-import type { UserMessage } from '../../types';
+import type { UserMessage } from '@kbn/lens-common';
 import { getLongMessage } from '../../user_messages_utils';
 
 export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {

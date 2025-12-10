@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 
-import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
+import type { DateHistogramParams, HistogramParams } from '@kbn/chart-expressions-common';
 
 import { initXAxis } from './_init_x_axis';
 import { makeFakeXAspect } from './_fake_x_aspect';

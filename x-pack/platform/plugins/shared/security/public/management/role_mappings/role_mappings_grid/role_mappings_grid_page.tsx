@@ -117,6 +117,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       return (
         <EuiPageSection alignment="center" color="danger">
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.roleMappings.loadingRoleMappingsErrorTitle"
@@ -296,7 +297,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               }
               pagination={pagination}
               loading={loadState === 'loadingTable'}
-              message={message}
+              noItemsMessage={message}
               rowProps={() => {
                 return {
                   'data-test-subj': 'roleMappingRow',

@@ -45,10 +45,16 @@ export const OBSERVABLE_TYPE_DOMAIN = {
   key: 'observable-type-domain',
 } as const;
 
+export const OBSERVABLE_TYPE_AGENT_ID = {
+  label: 'Agent id',
+  key: 'observable-type-agent-id',
+} as const;
+
 /**
  * Exporting an array of built-in observable types for use in the application
  */
 export const OBSERVABLE_TYPES_BUILTIN: { label: string; key: string }[] = [
+  OBSERVABLE_TYPE_AGENT_ID,
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_IPV6,
   OBSERVABLE_TYPE_URL,

@@ -18,9 +18,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  type InitMonitoringEngineResponse,
   PrivilegeMonitoringEngineStatusEnum,
   type PrivMonHealthResponse,
-  type InitMonitoringEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -43,7 +43,7 @@ import { UserLimitCallOut } from '../components/user_limit_callout';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
-import { DataViewManagerScopeName } from '../../data_view_manager/constants';
+import { PageScope } from '../../data_view_manager/constants';
 import { forceHiddenTimeline } from '../../common/utils/timeline/force_hidden_timeline';
 
 type PageState =
@@ -114,8 +114,8 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
+  const { dataView, status } = useDataView(PageScope.explore);
+  const { dataViewSpec } = useDataViewSpec(PageScope.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -207,8 +207,9 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       {state.type === 'dashboard' && (
         <FiltersGlobal>
           <SiemSearchBar
+            dataView={dataView}
             id={InputsModelId.global}
-            sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
+            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
           />
         </FiltersGlobal>
       )}

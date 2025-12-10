@@ -46,7 +46,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
 
   const createDrilldown = async () => {
-    await dashboard.gotoDashboardEditMode(dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME);
+    await dashboard.loadDashboardInEditMode(
+      dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
+    );
     await toasts.dismissAll(); // toasts get in the way of bottom "Create drilldown" button in flyout
 
     // create drilldown
@@ -77,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     dashboardName: string,
     controls: Array<{ field: string; type: string }>
   ) => {
-    await dashboard.gotoDashboardEditMode(dashboardName);
+    await dashboard.loadDashboardInEditMode(dashboardName);
     await toasts.dismissAll(); // toasts get in the way of bottom "Save and close" button in create control flyout
 
     for (const control of controls) {
@@ -150,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('test dashboard to dashboard drilldown', () => {
         beforeEach(async () => {
-          await dashboard.gotoDashboardEditMode(
+          await dashboard.loadDashboardInEditMode(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
           );
         });
@@ -289,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('test dashboard to dashboard drilldown with controls', () => {
         const cleanFiltersAndControls = async (dashboardName: string) => {
-          await dashboard.gotoDashboardEditMode(dashboardName);
+          await dashboard.loadDashboardInEditMode(dashboardName);
           await filterBar.removeAllFilters();
           await dashboardControls.deleteAllControls();
           await dashboard.clickQuickSave();
@@ -325,7 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('creates filter pills representing controls selections', async () => {
-          await dashboard.gotoDashboardEditMode(
+          await dashboard.loadDashboardInEditMode(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
           );
 
@@ -402,7 +404,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard(
           dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
         );
-        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         // brush area chart and drilldown back to pie chat dashboard

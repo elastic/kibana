@@ -59,6 +59,7 @@ export const EmbeddableLegacyUrlConflictInternal = (
       {expandError ? (
         <EuiTextAlign textAlign="left">
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.spaces.embeddableLegacyUrlConflict.calloutTitle"

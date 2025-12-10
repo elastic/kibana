@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { ScopedHistory } from '@kbn/core/public';

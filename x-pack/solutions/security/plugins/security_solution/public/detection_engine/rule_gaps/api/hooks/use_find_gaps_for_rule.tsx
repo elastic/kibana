@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import { findGapsForRule } from '../api';

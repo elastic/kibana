@@ -38,7 +38,7 @@ export interface MoreActionsRowControlColumnProps {
 
 /**
  * Renders a horizontal 3-dot button which displays a context menu when clicked.
- * This is used in the AI for SOC alert summary table.
+ * This is used in EASE alert summary table.
  * The following options are available:
  * - add to existing case
  * - add to new case

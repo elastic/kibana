@@ -28,19 +28,20 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
 
   const exitAttemptWithUnsavedFields = useObservable(
     indexUpdateService.exitAttemptWithUnsavedChanges$,
-    false
+    { isActive: false }
   );
 
   const closeWithoutSaving = () => {
     indexUpdateService.discardUnsavedChanges();
     onClose();
+    exitAttemptWithUnsavedFields.onExitCallback?.();
   };
 
   const continueEditing = () => {
     indexUpdateService.setExitAttemptWithUnsavedChanges(false);
   };
 
-  if (!exitAttemptWithUnsavedFields) {
+  if (!exitAttemptWithUnsavedFields.isActive) {
     return null;
   }
 

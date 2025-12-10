@@ -42,7 +42,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -79,7 +79,6 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
           isPreviewMode
           entityType={EntityType.host}
         />
@@ -99,7 +98,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -115,25 +114,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
-          entityType={EntityType.host}
-        />
-      </TestProviders>
-    );
-
-    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
-  });
-
-  it('risk summary header does not render link when link is not enabled', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <FlyoutRiskSummary
-          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-          recalculatingScore={false}
-          isLinkEnabled={false}
-          isPreviewMode
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -150,7 +131,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -167,7 +148,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -184,7 +165,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -213,7 +194,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -237,7 +218,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.user}
         />
       </TestProviders>
@@ -261,7 +242,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.user}
         />
       </TestProviders>

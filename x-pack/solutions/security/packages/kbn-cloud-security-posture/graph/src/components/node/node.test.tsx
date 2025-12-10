@@ -111,14 +111,6 @@ describe('Entity Nodes', () => {
       expect(screen.getByTestId(GRAPH_TAG_TEXT_ID).textContent).toBe('N/A');
     });
 
-    it('should use id as label when label is not provided', () => {
-      renderNodeInFlow({
-        id: 'id-used-as-label',
-      });
-
-      expect(screen.getByText('id-used-as-label')).toBeInTheDocument();
-    });
-
     it('should render node with all details (count > 1)', () => {
       const label = 'server-01';
       const tag = 'Host';
@@ -134,7 +126,8 @@ describe('Entity Nodes', () => {
       expect(screen.getByTestId(GRAPH_TAG_TEXT_ID).textContent).toBe(tag);
       expect(screen.getByTestId(GRAPH_TAG_COUNT_ID).textContent).toBe(count.toString());
       expect(screen.getByText('server-01').textContent).toBe(label);
-      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID).textContent).toBe('IP: 192.168.1.1');
+      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID).textContent).toBe('IP: ');
+      expect(screen.getByText('192.168.1.1')).toBeInTheDocument();
       expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID).textContent).toBe('+1');
       expect(screen.getAllByTestId(GRAPH_FLAGS_VISIBLE_FLAG_ID)).toHaveLength(2);
       expect(screen.getByTestId(GRAPH_FLAGS_PLUS_COUNT_ID).textContent).toBe('+1');
@@ -144,7 +137,8 @@ describe('Entity Nodes', () => {
       const manyIps = Array.from({ length: 10 }, (_, i) => `192.168.1.${i + 1}`);
       renderNodeInFlow({ ips: manyIps });
 
-      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID).textContent).toBe('IP: 192.168.1.1');
+      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID).textContent).toBe('IP: ');
+      expect(screen.getByText('192.168.1.1')).toBeInTheDocument();
       expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID).textContent).toBe(
         `+${manyIps.length - 1}`
       );

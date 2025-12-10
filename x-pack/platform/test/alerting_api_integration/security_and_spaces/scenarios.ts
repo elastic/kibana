@@ -219,6 +219,58 @@ export const StackAlertsOnly: User = {
   },
 };
 
+export const ManualRunOnlyUser: User = {
+  username: 'manual_run_only',
+  fullName: 'manual_run_only',
+  password: 'manual_run_only-password',
+  role: {
+    name: 'manual_run_only_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          alertsFixture: ['read', 'manual_run'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
+export const EnableDisableOnlyUser: User = {
+  username: 'enable_disable_only',
+  fullName: 'enable_disable_only',
+  password: 'enable_disable_only-password',
+  role: {
+    name: 'enable_disable_only_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          alertsFixture: ['enable_disable', 'read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -228,6 +280,8 @@ export const Users: User[] = [
   Space1AllAlertingNoneActions,
   CasesAll,
   StackAlertsOnly,
+  ManualRunOnlyUser,
+  EnableDisableOnlyUser,
 ];
 
 export const Space1: Space = {
@@ -341,6 +395,26 @@ interface Space1AllAtSpace1 extends Scenario {
 export const Space1AllAtSpace1: Space1AllAtSpace1 = {
   id: 'space_1_all at space1',
   user: Space1All,
+  space: Space1,
+};
+
+interface EnableDisableOnlyUserAtSpace1 extends Scenario {
+  id: 'enable_disable_only at space1';
+}
+
+export const EnableDisableOnlyUserAtSpace1: EnableDisableOnlyUserAtSpace1 = {
+  id: 'enable_disable_only at space1',
+  user: EnableDisableOnlyUser,
+  space: Space1,
+};
+
+interface ManualRunOnlyUserAtSpace1 extends Scenario {
+  id: 'manual_run_only at space1';
+}
+
+export const ManualRunOnlyUserAtSpace1: ManualRunOnlyUserAtSpace1 = {
+  id: 'manual_run_only at space1',
+  user: ManualRunOnlyUser,
   space: Space1,
 };
 

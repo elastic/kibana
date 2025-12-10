@@ -237,7 +237,7 @@ export const AddConnectorInline = ({
             />
           )
         ) : (
-          <EuiCallOut title={noConnectorsLabel}>
+          <EuiCallOut announceOnMount title={noConnectorsLabel}>
             <p>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.connectorAddInline.unauthorizedToCreateForEmptyConnectors"

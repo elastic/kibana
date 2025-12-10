@@ -76,9 +76,11 @@ export class ScopedProfilesManager {
   /**
    * Resolves the data source context profile
    * @param params The data source profile provider parameters
+   * @param onBeforeChange An optional callback to be invoked before changing the context
    */
   public async resolveDataSourceProfile(
-    params: Omit<DataSourceProfileProviderParams, 'rootContext'>
+    params: Omit<DataSourceProfileProviderParams, 'rootContext'>,
+    onBeforeChange?: () => void
   ) {
     const serializedParams = serializeDataSourceProfileParams(params);
 
@@ -105,6 +107,7 @@ export class ScopedProfilesManager {
       return;
     }
 
+    onBeforeChange?.();
     this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;

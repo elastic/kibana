@@ -197,6 +197,7 @@ export const FixSnapshotsFlyout = ({
         {snapshotState.error && !isResolved && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 snapshotState.action === 'delete'
                   ? i18nTexts.deleteSnapshotErrorTitle
@@ -215,6 +216,7 @@ export const FixSnapshotsFlyout = ({
         {mlUpgradeModeEnabled && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={i18nTexts.upgradeModeEnabledErrorTitle}
               color="warning"
               iconType="warning"

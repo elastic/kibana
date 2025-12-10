@@ -10,7 +10,6 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AuthType, WebhookMethods } from '../../../common/auth/constants';
 import { getAxiosConfig } from './get_axios_config';
 import type { GetAxiosConfigParams, GetAxiosConfigResponse } from './get_axios_config';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -19,6 +18,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { promiseResult } from '../lib/result_type';
 import sinon from 'sinon';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { AuthType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),

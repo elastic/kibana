@@ -21,24 +21,15 @@ import {
   SUM_ID,
 } from '@kbn/lens-formula-docs';
 import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
+  OverallAverageIndexPatternColumn,
+  OverallMaxIndexPatternColumn,
+  OverallMetricIndexPatternColumn,
+  OverallMinIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+} from '@kbn/lens-common';
 import { optionalHistogramBasedOperationToExpression } from './utils';
 import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
-
-type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: T;
-  };
-
-export type OverallSumIndexPatternColumn = OverallMetricIndexPatternColumn<typeof OVERALL_SUM_ID>;
-export type OverallMinIndexPatternColumn = OverallMetricIndexPatternColumn<typeof OVERALL_MIN_ID>;
-export type OverallMaxIndexPatternColumn = OverallMetricIndexPatternColumn<typeof OVERALL_MAX_ID>;
-export type OverallAverageIndexPatternColumn = OverallMetricIndexPatternColumn<
-  typeof OVERALL_AVERAGE_ID
->;
 
 function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<string>>({
   type,

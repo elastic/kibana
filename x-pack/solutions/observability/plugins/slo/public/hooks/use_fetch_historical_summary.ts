@@ -7,7 +7,7 @@
 
 import type { FetchHistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';

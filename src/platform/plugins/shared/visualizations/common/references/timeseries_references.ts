@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { VisParams } from '..';
+import type { VisParams } from '@kbn/visualizations-common';
 
 /** @internal **/
 const REF_NAME_POSTFIX = '_ref_name';

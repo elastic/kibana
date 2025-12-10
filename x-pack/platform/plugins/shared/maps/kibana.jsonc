@@ -22,6 +22,7 @@
       "features",
       "inspector",
       "data",
+      "dataViews",
       "fieldFormats",
       "fileUpload",
       "uiActions",

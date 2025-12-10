@@ -12,6 +12,7 @@ import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observab
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
@@ -20,7 +21,6 @@ import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
-  GroupDefinition,
   SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
@@ -90,6 +90,7 @@ const setup = ({
     chromeBreadcrumbs$,
     logger,
     featureFlags: coreFeatureFlagsMock.createStart(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
@@ -300,94 +301,6 @@ describe('initNavigation()', () => {
         ],
       });
     });
-
-    test('should leave "recentlyAccessed" as is', async () => {
-      const treeDefinition = await getNavigationTree();
-      const nodes = treeDefinition.body as ChromeProjectNavigationNode[];
-      expect(nodes[2]).toEqual({
-        type: 'recentlyAccessed',
-      });
-    });
-
-    test('should load preset', async () => {
-      const treeDefinition = await getNavigationTree();
-      const nodes = treeDefinition.body as ChromeProjectNavigationNode[];
-
-      expect(nodes[3]).toMatchInlineSnapshot(`
-        Object {
-          "children": Array [
-            Object {
-              "deepLink": Object {
-                "baseUrl": "/app",
-                "href": "/app/discover",
-                "id": "discover",
-                "title": "DISCOVER",
-                "url": "/app/discover",
-                "visibleIn": Array [
-                  "globalSearch",
-                ],
-              },
-              "href": "/app/discover",
-              "id": "discover",
-              "isExternalLink": false,
-              "onClick": undefined,
-              "path": "rootNav:analytics.discover",
-              "sideNavStatus": "visible",
-              "title": "DISCOVER",
-            },
-            Object {
-              "deepLink": Object {
-                "baseUrl": "/app",
-                "href": "/app/dashboards",
-                "id": "dashboards",
-                "title": "DASHBOARDS",
-                "url": "/app/dashboards",
-                "visibleIn": Array [
-                  "globalSearch",
-                ],
-              },
-              "href": "/app/dashboards",
-              "id": "dashboards",
-              "isExternalLink": false,
-              "onClick": undefined,
-              "path": "rootNav:analytics.dashboards",
-              "sideNavStatus": "visible",
-              "title": "DASHBOARDS",
-            },
-            Object {
-              "deepLink": Object {
-                "baseUrl": "/app",
-                "href": "/app/visualize",
-                "id": "visualize",
-                "title": "VISUALIZE",
-                "url": "/app/visualize",
-                "visibleIn": Array [
-                  "globalSearch",
-                ],
-              },
-              "href": "/app/visualize",
-              "id": "visualize",
-              "isExternalLink": false,
-              "onClick": undefined,
-              "path": "rootNav:analytics.visualize",
-              "sideNavStatus": "visible",
-              "title": "VISUALIZE",
-            },
-          ],
-          "deepLink": undefined,
-          "href": undefined,
-          "icon": "stats",
-          "id": "rootNav:analytics",
-          "isExternalLink": false,
-          "onClick": undefined,
-          "path": "rootNav:analytics",
-          "renderAs": "accordion",
-          "sideNavStatus": "visible",
-          "title": "Data exploration",
-          "type": "navGroup",
-        }
-      `);
-    });
   });
 
   test('should handle race condition when initNavigation() is called after getNavigationTreeUi$()', async () => {
@@ -459,7 +372,7 @@ describe('initNavigation()', () => {
       isExternalLink: true,
       path: 'group1.node-0',
       sideNavStatus: 'visible',
-      title: 'Users and roles',
+      title: 'Members',
     });
 
     // performance
@@ -495,6 +408,71 @@ describe('initNavigation()', () => {
       title: 'Project',
     });
   });
+
+  test('should update the navigation tree when cloud URLs are updated after initialization', async () => {
+    const { projectNavigation } = setup();
+
+    // First: Set cloud URLs WITHOUT billingUrl
+    projectNavigation.setCloudUrls({
+      usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/',
+      performanceUrl: 'https://cloud.elastic.co/performance/',
+      deploymentUrl: 'https://cloud.elastic.co/deployment/',
+    });
+
+    projectNavigation.initNavigation<any>(
+      'es',
+      of({
+        body: [
+          {
+            id: 'group1',
+            type: 'navGroup',
+            children: [
+              { cloudLink: 'userAndRoles' },
+              { cloudLink: 'billingAndSub' }, // No URL for this yet
+              { cloudLink: 'performance' },
+              { cloudLink: 'deployment' },
+            ],
+          },
+        ],
+      })
+    );
+
+    // Verify that billingAndSub link is NOT in the tree (no URL available)
+    let treeDefinition = await lastValueFrom(
+      projectNavigation.getNavigationTreeUi$().pipe(take(1))
+    );
+    let [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+    expect(node?.children?.length).toBe(3); // Only 3 links without billing
+
+    // Verify the links are userAndRoles, performance, deployment (no billing)
+    expect(node.children![0].title).toBe('Members');
+    expect(node.children![1].title).toBe('Performance');
+    expect(node.children![2].title).toBe('Project'); // deployment
+
+    // Second: Update cloud URLs WITH billingUrl
+    projectNavigation.setCloudUrls({
+      usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/',
+      performanceUrl: 'https://cloud.elastic.co/performance/',
+      billingUrl: 'https://cloud.elastic.co/billing/', // NOW we add billing
+      deploymentUrl: 'https://cloud.elastic.co/deployment/',
+    });
+
+    // Verify that billingAndSub link IS now in the tree
+    treeDefinition = await lastValueFrom(projectNavigation.getNavigationTreeUi$().pipe(take(1)));
+    [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+    expect(node?.children?.length).toBe(4); // Now 4 links including billing
+
+    // Verify the billing link is present with correct properties
+    expect(node.children![1]).toEqual({
+      deepLink: undefined,
+      href: 'https://cloud.elastic.co/billing',
+      id: 'node-1',
+      isExternalLink: true,
+      path: 'group1.node-1',
+      sideNavStatus: 'visible',
+      title: 'Billing and subscription',
+    });
+  });
 });
 
 describe('breadcrumbs', () => {
@@ -511,7 +489,6 @@ describe('breadcrumbs', () => {
           id: 'root',
           title: 'Root',
           breadcrumbStatus: 'hidden' as 'hidden',
-          type: 'navGroup',
           children: [
             {
               id: 'subNav',
@@ -755,7 +732,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toHaveLength(4);
 
     // navigation node contents changed, but not the path
-    const [node] = mockNavigation.body as [GroupDefinition];
+    const [node] = mockNavigation.body;
     updateDefinition({
       body: [{ ...node, title: 'Changed title' }, ...mockNavigation.body],
     });
@@ -996,71 +973,6 @@ describe('solution navigations', () => {
         projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
       );
       expect(activeSolution).toEqual(solution1);
-    }
-  });
-
-  it('should set and return the nav panel selected node', async () => {
-    const { projectNavigation } = setup({ navLinkIds: ['link1', 'link2', 'link3'] });
-
-    {
-      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
-      expect(selectedNode).toBeNull();
-    }
-
-    {
-      const node: ChromeProjectNavigationNode = {
-        id: 'node1',
-        title: 'Node 1',
-        path: 'node1',
-      };
-      projectNavigation.setPanelSelectedNode(node);
-
-      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
-
-      expect(selectedNode).toBe(node);
-    }
-
-    {
-      const fooSolution: SolutionNavigationDefinition<any> = {
-        id: 'es',
-        title: 'Foo solution',
-        icon: 'logoSolution',
-        homePage: 'discover',
-        navigationTree$: of({
-          body: [
-            {
-              type: 'navGroup',
-              id: 'group1',
-              children: [
-                { link: 'link1' },
-                {
-                  id: 'group2',
-                  children: [
-                    {
-                      link: 'link2', // We'll target this node using its id
-                    },
-                  ],
-                },
-                { link: 'link3' },
-              ],
-            },
-          ],
-        }),
-      };
-
-      projectNavigation.changeActiveSolutionNavigation('es');
-      projectNavigation.updateSolutionNavigations({ es: fooSolution });
-
-      projectNavigation.setPanelSelectedNode('link2'); // Set the selected node using its id
-
-      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
-
-      expect(selectedNode).toMatchObject({
-        id: 'link2',
-        href: '/app/link2',
-        path: 'group1.group2.link2',
-        title: 'LINK2',
-      });
     }
   });
 });

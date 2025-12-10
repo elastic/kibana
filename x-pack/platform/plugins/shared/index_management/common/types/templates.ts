@@ -44,6 +44,7 @@ export interface TemplateDeserialized {
     aliases?: Aliases;
     mappings?: Mappings;
     data_stream_options?: DataStreamOptions;
+    lifecycle?: DataStream['lifecycle'];
   };
   lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only

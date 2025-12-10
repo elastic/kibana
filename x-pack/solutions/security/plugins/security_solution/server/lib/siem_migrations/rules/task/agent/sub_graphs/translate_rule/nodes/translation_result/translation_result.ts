@@ -22,6 +22,7 @@ export const getTranslationResultNode = (): GraphNode => {
       severity: DEFAULT_TRANSLATION_SEVERITY,
       risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
       ...state.elastic_rule,
+      threat: state.original_rule.threat,
     };
 
     const query = elasticRule.query;

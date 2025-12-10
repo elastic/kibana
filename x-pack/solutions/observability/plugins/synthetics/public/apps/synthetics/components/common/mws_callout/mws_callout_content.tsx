@@ -15,6 +15,7 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[
     return (
       <>
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActive.monitors',
             {

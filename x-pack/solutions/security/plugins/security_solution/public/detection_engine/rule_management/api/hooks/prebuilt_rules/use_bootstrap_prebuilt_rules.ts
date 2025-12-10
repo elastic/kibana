@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';

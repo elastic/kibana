@@ -7,26 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
-import {
-  selectWorkflowDefinition,
-  selectYamlLineCounter,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import type { YamlValidationResult } from '../model/types';
-import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import { monaco } from '@kbn/monaco';
+import { collectAllConnectorIds } from './collect_all_connector_ids';
+import { collectAllVariables } from './collect_all_variables';
+import { validateConnectorIds } from './validate_connector_ids';
+import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
-import { collectAllVariables } from './collect_all_variables';
+import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
-  selectWorkflowGraph,
-  selectYamlDocument,
-} from '../../../widgets/workflow_yaml_editor/lib/store';
-import { collectAllConnectorIds } from './collect_all_connector_ids';
-import { validateConnectorIds } from './validate_connector_ids';
+  selectConnectors,
+  selectIsWorkflowTab,
+  selectWorkflowDefinition,
+  selectYamlLineCounter,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
+import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import type { YamlValidationResult } from '../model/types';
 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,
@@ -49,8 +48,11 @@ export function useYamlValidation(
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   const lineCounter = useSelector(selectYamlLineCounter);
+  const isWorkflowTab = useSelector(selectIsWorkflowTab);
+  const connectors = useSelector(selectConnectors);
   const { application } = useKibana().services;
 
+  // eslint-disable-next-line complexity
   useEffect(() => {
     if (!editor) {
       return;
@@ -58,6 +60,20 @@ export function useYamlValidation(
 
     const model = editor.getModel();
     if (!model) {
+      return;
+    }
+
+    if (!isWorkflowTab) {
+      // clear decorations and markers
+      if (decorationsCollection.current) {
+        decorationsCollection.current.clear();
+      }
+      monaco.editor.setModelMarkers(model, 'variable-validation', []);
+      monaco.editor.setModelMarkers(model, 'step-name-validation', []);
+      monaco.editor.setModelMarkers(model, 'liquid-template-validation', []);
+      monaco.editor.setModelMarkers(model, 'connector-id-validation', []);
+      setIsLoading(false);
+      setError(null);
       return;
     }
 
@@ -82,7 +98,7 @@ export function useYamlValidation(
 
     const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes();
+    const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
     // Generate the connectors management URL
     const connectorsManagementUrl = application?.getUrlForApp('management', {
@@ -93,6 +109,7 @@ export function useYamlValidation(
     const validationResults: YamlValidationResult[] = [
       validateStepNameUniqueness(yamlDocument),
       validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
+      validateLiquidTemplate(model.getValue()),
       validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
     ].flat();
 
@@ -123,6 +140,31 @@ export function useYamlValidation(
               ? createMarkdownContent(validationResult.hoverMessage)
               : null,
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          },
+        });
+      } else if (validationResult.owner === 'liquid-template-validation') {
+        markers.push({
+          severity: SEVERITY_MAP[validationResult.severity],
+          message: validationResult.message,
+          startLineNumber: validationResult.startLineNumber,
+          startColumn: validationResult.startColumn,
+          endLineNumber: validationResult.endLineNumber,
+          endColumn: validationResult.endColumn,
+          source: 'liquid-template-validation',
+        });
+        decorations.push({
+          range: new monaco.Range(
+            validationResult.startLineNumber,
+            validationResult.startColumn,
+            validationResult.endLineNumber,
+            validationResult.endColumn
+          ),
+          options: {
+            inlineClassName: `liquid-template-${validationResult.severity ?? 'valid'}`,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            hoverMessage: validationResult.hoverMessage
+              ? createMarkdownContent(validationResult.hoverMessage)
+              : null,
           },
         });
       } else if (validationResult.owner === 'step-name-validation') {
@@ -205,11 +247,25 @@ export function useYamlValidation(
     );
     monaco.editor.setModelMarkers(
       model,
+      'liquid-template-validation',
+      markers.filter((m) => m.source === 'liquid-template-validation')
+    );
+    monaco.editor.setModelMarkers(
+      model,
       'connector-id-validation',
       markers.filter((m) => m.source === 'connector-id-validation')
     );
     setError(null);
-  }, [editor, lineCounter, workflowDefinition, workflowGraph, yamlDocument, application]);
+  }, [
+    editor,
+    lineCounter,
+    workflowDefinition,
+    workflowGraph,
+    yamlDocument,
+    application,
+    isWorkflowTab,
+    connectors?.connectorTypes,
+  ]);
 
   return {
     error,

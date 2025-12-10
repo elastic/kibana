@@ -13,9 +13,12 @@ import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useRef, useCallback, useMemo, useState } from 'react';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
-import type { VisualizeEditorContext } from '../types';
-import type { LensDocument } from '../persistence';
+import type {
+  VisualizeEditorContext,
+  LensAppLocator,
+  LensAppLocatorParams,
+  LensDocument,
+} from '@kbn/lens-common';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';

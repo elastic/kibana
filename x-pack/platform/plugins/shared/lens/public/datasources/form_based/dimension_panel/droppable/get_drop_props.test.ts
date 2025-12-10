@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { DragDropOperation, OperationMetadata } from '../../../../types';
-import type { TermsIndexPatternColumn } from '../../operations';
+import type {
+  DragDropOperation,
+  OperationMetadata,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 import { getDropProps } from './get_drop_props';
 import {
   mockDataViews,

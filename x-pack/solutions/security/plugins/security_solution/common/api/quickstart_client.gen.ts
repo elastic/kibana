@@ -109,6 +109,10 @@ import type {
   SetAlertsStatusRequestBodyInput,
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import type {
+  SearchUnifiedAlertsRequestBodyInput,
+  SearchUnifiedAlertsResponse,
+} from './detection_engine/unified_alerts/search/search_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
@@ -219,6 +223,10 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
+  EntityDetailsHighlightsRequestBodyInput,
+  EntityDetailsHighlightsResponse,
+} from './entity_analytics/entity_details/highlights.gen';
+import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from './entity_analytics/entity_store/enable.gen';
@@ -227,6 +235,8 @@ import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
   DeleteEntityEngineResponse,
+  DeleteEntityEnginesRequestQueryInput,
+  DeleteEntityEnginesResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
 import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
 import type {
@@ -247,6 +257,11 @@ import type {
   StopEntityEngineRequestParamsInput,
   StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
+import type {
+  DeleteSingleEntityRequestParamsInput,
+  DeleteSingleEntityRequestBodyInput,
+  DeleteSingleEntityResponse,
+} from './entity_analytics/entity_store/entities/delete_entity.gen';
 import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
@@ -435,6 +450,8 @@ import type {
   UpsertDashboardMigrationResourcesResponse,
 } from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
+  CreateQRadarRuleMigrationRulesRequestParamsInput,
+  CreateQRadarRuleMigrationRulesRequestBodyInput,
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
@@ -463,6 +480,9 @@ import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
+  RuleMigrationEnhanceRuleRequestParamsInput,
+  RuleMigrationEnhanceRuleRequestBodyInput,
+  RuleMigrationEnhanceRuleResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -782,6 +802,25 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Parses QRadar XML export and adds rules to an existing migration
+   */
+  async createQRadarRuleMigrationRules(props: CreateQRadarRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateQRadarRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/qradar/rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * Create a new detection rule.
 > warn
 > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -973,6 +1012,20 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async deleteEntityEngines(props: DeleteEntityEnginesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngines`);
+    return this.kbnClient
+      .request<DeleteEntityEnginesResponse>({
+        path: '/api/entity_store/engines',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async deleteEntitySource(props: DeleteEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntitySource`);
     return this.kbnClient
@@ -1064,6 +1117,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Delete a single entity in Entity Store.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+
+    */
+  async deleteSingleEntity(props: DeleteSingleEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteSingleEntity`);
+    return this.kbnClient
+      .request<DeleteSingleEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1360,6 +1431,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async entityDetailsHighlights(props: EntityDetailsHighlightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EntityDetailsHighlights`);
+    return this.kbnClient
+      .request<EntityDetailsHighlightsResponse>({
+        path: '/internal/entity_details/highlights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2623,6 +2707,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
+   */
+  async ruleMigrationEnhanceRule(props: RuleMigrationEnhanceRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleMigrationEnhanceRule`);
+    return this.kbnClient
+      .request<RuleMigrationEnhanceRuleResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/rules/enhance',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async rulePreview(props: RulePreviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API RulePreview`);
     return this.kbnClient
@@ -2719,6 +2822,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Find and/or aggregate detection and attack alerts that match the given query.
+   */
+  async searchUnifiedAlerts(props: SearchUnifiedAlertsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchUnifiedAlerts`);
+    return this.kbnClient
+      .request<SearchUnifiedAlertsResponse>({
+        path: '/internal/detection_engine/unified_alerts/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3164,6 +3283,10 @@ export interface CreatePrivilegesImportIndexProps {
 export interface CreatePrivMonUserProps {
   body: CreatePrivMonUserRequestBodyInput;
 }
+export interface CreateQRadarRuleMigrationRulesProps {
+  params: CreateQRadarRuleMigrationRulesRequestParamsInput;
+  body: CreateQRadarRuleMigrationRulesRequestBodyInput;
+}
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
@@ -3191,6 +3314,9 @@ export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
 }
+export interface DeleteEntityEnginesProps {
+  query: DeleteEntityEnginesRequestQueryInput;
+}
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;
 }
@@ -3208,6 +3334,10 @@ export interface DeleteRuleProps {
 }
 export interface DeleteRuleMigrationProps {
   params: DeleteRuleMigrationRequestParamsInput;
+}
+export interface DeleteSingleEntityProps {
+  params: DeleteSingleEntityRequestParamsInput;
+  body: DeleteSingleEntityRequestBodyInput;
 }
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
@@ -3253,6 +3383,9 @@ export interface EndpointUnisolateActionProps {
 }
 export interface EndpointUploadActionProps {
   attachment: FormData;
+}
+export interface EntityDetailsHighlightsProps {
+  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
@@ -3433,6 +3566,10 @@ export interface ReadRuleProps {
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
+export interface RuleMigrationEnhanceRuleProps {
+  params: RuleMigrationEnhanceRuleRequestParamsInput;
+  body: RuleMigrationEnhanceRuleRequestBodyInput;
+}
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
@@ -3445,6 +3582,9 @@ export interface SearchAlertsProps {
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
+}
+export interface SearchUnifiedAlertsProps {
+  body: SearchUnifiedAlertsRequestBodyInput;
 }
 export interface SetAlertAssigneesProps {
   body: SetAlertAssigneesRequestBodyInput;

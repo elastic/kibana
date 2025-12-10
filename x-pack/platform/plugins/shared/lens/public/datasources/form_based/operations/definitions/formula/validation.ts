@@ -24,8 +24,13 @@ import {
   REASON_IDS,
   validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
+import type {
+  DateRange,
+  GenericIndexPatternColumn,
+  FormBasedLayer,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { nonNullable } from '../../../../../utils';
-import type { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
   findVariables,
@@ -35,13 +40,7 @@ import {
   isMathNode,
 } from './util';
 
-import type {
-  OperationDefinition,
-  GenericIndexPatternColumn,
-  GenericOperationDefinition,
-} from '..';
-import type { FormBasedLayer } from '../../../types';
-import type { IndexPattern } from '../../../../../types';
+import type { OperationDefinition, GenericOperationDefinition } from '..';
 import type { TinymathNodeTypes } from './types';
 import type { InvalidQueryError, ValidationErrors } from './validation_errors';
 

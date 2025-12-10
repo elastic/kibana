@@ -31,6 +31,7 @@ export const extraFunctions: FunctionDefinition[] = [
         ],
         minParams: 2,
         returnType: 'unknown',
+        isSignatureRepeating: true,
       },
     ],
     examples: [
@@ -105,7 +106,10 @@ export function enrichFunctionSignatures(
  * - `date_extract`: Adds datePart suggestions from dateExtractOptions
  * - `mv_sort`: Marks 'order' as constantOnly with ['asc', 'desc'] suggestions
  * - `percentile`: Marks 'percentile' parameter as constantOnly
+ * - `count_distinct`: Marks 'precision' parameter as constantOnly
  * - `count`: Marks 'percentile' parameter as constantOnly
+ * - `round`: Marks 'decimals' parameter as constantOnly
+ * - `round_to`: Marks 'points' parameter as constantOnly
  * - `qstr`: Adds custom parameter snippet for triple-quoted strings
  * - `kql`: Adds custom parameter snippet for triple-quoted strings
  */
@@ -161,8 +165,32 @@ export function enrichFunctionParameters(functionDefinition: FunctionDefinition)
     });
   }
 
+  if (functionDefinition.name === 'count_distinct') {
+    return enrichFunctionSignatures(functionDefinition, 'precision', {
+      constantOnly: true,
+    });
+  }
+
   if (functionDefinition.name === 'count') {
     return enrichFunctionSignatures(functionDefinition, 'percentile', {
+      constantOnly: true,
+    });
+  }
+
+  if (functionDefinition.name === 'mv_contains') {
+    return enrichFunctionSignatures(functionDefinition, 'superset', {
+      supportsMultiValues: true,
+    });
+  }
+
+  if (functionDefinition.name === 'round') {
+    return enrichFunctionSignatures(functionDefinition, 'decimals', {
+      constantOnly: true,
+    });
+  }
+
+  if (functionDefinition.name === 'round_to') {
+    return enrichFunctionSignatures(functionDefinition, 'points', {
       constantOnly: true,
     });
   }

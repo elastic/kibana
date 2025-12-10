@@ -121,7 +121,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
         }
         data-test-subj="reportingPageHeader"
         pageTitle={
-          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reports" />
+          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reporting" />
         }
         description={
           <FormattedMessage
@@ -140,6 +140,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
                 size="s"
                 iconType="flask"
                 label={TECH_PREVIEW_LABEL}
+                aria-label={TECH_PREVIEW_LABEL}
                 tooltipContent={TECH_PREVIEW_DESCRIPTION}
               />
             </>
@@ -176,11 +177,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
           path={REPORTING_SCHEDULES_PATH}
           render={() => (
             <Suspense fallback={<EuiLoadingSpinner size={'xl'} />}>
-              {enableLinks && showLinks ? (
-                <ReportSchedulesTable apiClient={apiClient} />
-              ) : (
-                <LicensePrompt />
-              )}
+              {enableLinks && showLinks ? <ReportSchedulesTable /> : <LicensePrompt />}
             </Suspense>
           )}
         />

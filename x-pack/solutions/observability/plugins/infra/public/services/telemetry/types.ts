@@ -32,6 +32,7 @@ export enum InfraTelemetryEventTypes {
   ANOMALY_DETECTION_PARTITION_FIELD_CHANGE = 'Infra Anomaly Detection Job Partition Field Change',
   ANOMALY_DETECTION_FILTER_FIELD_CHANGE = 'Infra Anomaly Detection Job Filter Field Change',
   SCHEMA_SELECTOR_INTERACTION = 'Schema Selector Interaction',
+  METRICS_EXPLORER_CALLOUT_VIEW_IN_DISCOVER_CLICKED = 'Metrics Explorer Callout View In Discover Clicked',
 }
 
 export interface HostsViewQuerySubmittedParams {
@@ -106,6 +107,10 @@ export interface SchemaSelectorParams {
   schemas_available?: DataSchemaFormat[];
 }
 
+export interface MetricsExplorerCalloutViewInDiscoverClickedParams {
+  view: string;
+}
+
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
   | HostEntryClickedParams
@@ -118,7 +123,8 @@ export type InfraTelemetryEventParams =
   | AnomalyDetectionDateFieldChangeParams
   | AnomalyDetectionPartitionFieldChangeParams
   | AnomalyDetectionFilterFieldChangeParams
-  | SchemaSelectorParams;
+  | SchemaSelectorParams
+  | MetricsExplorerCalloutViewInDiscoverClickedParams;
 
 export interface PerformanceMetricInnerEvents {
   key1?: string;
@@ -151,6 +157,9 @@ export interface ITelemetryClient {
   ): void;
   reportAnomalyDetectionFilterFieldChange(params: AnomalyDetectionFilterFieldChangeParams): void;
   reportSchemaSelectorInteraction(params: SchemaSelectorParams): void;
+  reportMetricsExplorerCalloutViewInDiscoverClicked(
+    params: MetricsExplorerCalloutViewInDiscoverClickedParams
+  ): void;
 }
 
 export type InfraTelemetryEvent =
@@ -221,4 +230,8 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.SCHEMA_SELECTOR_INTERACTION;
       schema: RootSchema<SchemaSelectorParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.METRICS_EXPLORER_CALLOUT_VIEW_IN_DISCOVER_CLICKED;
+      schema: RootSchema<MetricsExplorerCalloutViewInDiscoverClickedParams>;
     };

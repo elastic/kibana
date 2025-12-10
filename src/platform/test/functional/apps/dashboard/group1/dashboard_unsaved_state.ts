@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.loadSavedDashboard('few panels');
-      await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       originalPanelCount = await dashboard.getPanelCount();
     });

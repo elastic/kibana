@@ -11,12 +11,12 @@ import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/con
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
-import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   assetCriticalityRouteHelpersFactory,
   buildDocument,
@@ -34,7 +34,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const previewRiskScores = async ({
@@ -68,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  const doTests = () => {
+  describe('@ess @serverless Risk Scoring Preview API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -137,7 +136,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
@@ -592,7 +595,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               criticality_level: 'extreme_impact',
               criticality_modifier: 2.0,
@@ -628,28 +635,6 @@ export default ({ getService }: FtrProviderContext): void => {
         service: [],
         user: [],
       });
-    });
-  };
-
-  describe('@ess @serverless Risk Scoring Preview API', () => {
-    describe('ESQL based risk scoring', () => {
-      doTests();
-    });
-
-    describe('scripted metric based risk scoring', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-
-      doTests();
     });
   });
 };

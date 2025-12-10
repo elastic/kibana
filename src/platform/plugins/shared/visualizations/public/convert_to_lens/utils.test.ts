@@ -11,7 +11,6 @@ import type { IAggConfig } from '@kbn/data-plugin/common';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type {
-  AggBasedColumn,
   CounterRateColumn,
   GenericColumnWithMeta,
   SchemaConfig,
@@ -22,8 +21,9 @@ import type {
   CountColumn,
   MaxColumn,
   DateHistogramColumn,
-  Meta,
+  AggBasedColumn,
 } from '../../common/convert_to_lens/lib';
+import type { AnyMetricColumnWithSourceFieldWithMeta, Meta } from '../../common/convert_to_lens';
 import {
   getBucketCollapseFn,
   getBucketColumns,
@@ -705,7 +705,7 @@ describe('getColumnIds', () => {
             { columnId: 'col-3', meta: { aggId: '3' } },
             { columnId: 'col-4', meta: { aggId: '4' } },
             { columnId: 'col-5', meta: { aggId: '5' } },
-          ] as AggBasedColumn[],
+          ] as AnyMetricColumnWithSourceFieldWithMeta[],
           dataView,
           [metric1, metric2]
         )

@@ -23,7 +23,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
       <button
         aria-label="Close feedback panel"
         class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-        data-test-subj="feedbackSnippetPanelDismiss"
+        data-test-subj="feedbackSnippetTestIdPanelDismiss"
         id="feedbackSnippetTestIdPanelDismiss"
         type="button"
       >
@@ -45,6 +45,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     <button
       aria-label="Take quick survey"
       class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
+      data-test-subj="feedbackSnippetTestIdPanelSurveyLink"
       id="feedbackSnippetTestIdPanelSurveyLink"
       type="button"
     >
@@ -93,10 +94,10 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     >
       <span
         color="success"
-        data-euiicon-type="faceHappy"
+        data-euiicon-type="thumbUp"
         data-test-subj="feedbackSnippetPanelPositiveIcon"
       >
-        Happy face
+        Thumb up
       </span>
     </div>
   </div>
@@ -126,7 +127,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
       <button
         aria-label="Close feedback panel"
         class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-        data-test-subj="feedbackSnippetPanelDismiss"
+        data-test-subj="feedbackSnippetTestIdPanelDismiss"
         id="feedbackSnippetTestIdPanelDismiss"
         type="button"
       >
@@ -150,6 +151,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     >
       <button
         class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
+        data-test-subj="feedbackSnippetTestIdPanelThumbDown"
         id="feedbackSnippetTestIdPanelThumbDown"
         type="button"
       >
@@ -169,6 +171,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     >
       <button
         class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-success"
+        data-test-subj="feedbackSnippetTestIdPanelThumbUp"
         id="feedbackSnippetTestIdPanelThumbUp"
         type="button"
       >

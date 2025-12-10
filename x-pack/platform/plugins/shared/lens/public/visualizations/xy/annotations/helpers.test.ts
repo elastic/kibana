@@ -6,7 +6,7 @@
  */
 
 import { createMockFramePublicAPI } from '../../../mocks';
-import type { FramePublicAPI } from '../../../types';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { getStaticDate } from './helpers';
 
 describe('annotations helpers', () => {

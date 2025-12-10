@@ -8,8 +8,8 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQuery } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { useQuery } from '@tanstack/react-query';
 
 export function useStepExecution(workflowExecutionId: string, stepExecutionId: string) {
   const { http } = useKibana().services;
@@ -17,7 +17,7 @@ export function useStepExecution(workflowExecutionId: string, stepExecutionId: s
   return useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      const response = await http!.get<EsWorkflowStepExecution>(
+      const response = await http?.get<EsWorkflowStepExecution>(
         `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
       );
       return response;

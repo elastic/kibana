@@ -423,7 +423,7 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
@@ -802,7 +802,7 @@
             "\nOnboarding configuration"
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"chat\" | \"oblt\" | \"es\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -831,11 +831,29 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1018,6 +1036,24 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-public.CloudStart.isServerlessEnabled",
           "type": "boolean",
           "tags": [],
@@ -1039,7 +1075,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -1357,7 +1393,7 @@
             "\nOnboarding configuration."
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"chat\" | \"oblt\" | \"es\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
@@ -1388,11 +1424,29 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1455,6 +1509,24 @@
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudStart.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

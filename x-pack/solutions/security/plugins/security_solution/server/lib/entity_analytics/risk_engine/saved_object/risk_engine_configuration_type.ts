@@ -51,6 +51,17 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     excludeAlertStatuses: {
       type: 'keyword',
     },
+    filters: {
+      type: 'nested',
+      properties: {
+        entity_types: {
+          type: 'keyword',
+        },
+        filter: {
+          type: 'text',
+        },
+      },
+    },
   },
 };
 
@@ -109,6 +120,34 @@ const version3: SavedObjectsModelVersion = {
   ],
 };
 
+const version4: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        filters: {
+          type: 'nested',
+          properties: {
+            entity_types: { type: 'keyword' },
+            filter: { type: 'text' },
+          },
+        },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            filters: document.attributes.filters || [],
+          },
+        };
+      },
+    },
+  ],
+};
+
 export const riskEngineConfigurationType: SavedObjectsType = {
   name: riskEngineConfigurationTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -119,5 +158,6 @@ export const riskEngineConfigurationType: SavedObjectsType = {
     1: version1,
     2: version2,
     3: version3,
+    4: version4,
   },
 };

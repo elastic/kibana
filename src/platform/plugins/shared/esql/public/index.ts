@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { EsqlPlugin, type EsqlPluginStart } from './plugin';
 
 export { ESQLLangEditor } from './create_editor';
 export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
 export type { EsqlPluginStart };
 
-export function plugin() {
-  return new EsqlPlugin();
+export function plugin(initContext: PluginInitializerContext) {
+  return new EsqlPlugin(initContext);
 }

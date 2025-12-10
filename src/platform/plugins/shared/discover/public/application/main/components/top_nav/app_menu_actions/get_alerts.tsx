@@ -44,8 +44,6 @@ const CreateAlertFlyout: React.FC<{
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
 }> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
-  const query = stateContainer.appState.getState().query;
-
   const {
     dataView,
     isEsqlMode,
@@ -56,10 +54,12 @@ const CreateAlertFlyout: React.FC<{
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
   const timeField = getTimeField(dataView);
+  const { query, savedQuery: savedQueryId } = stateContainer.getCurrentTab().appState;
 
   /**
    * Provides the default parameters used to initialize the new rule
    */
+
   const getParams = useCallback(() => {
     if (isEsqlMode) {
       return {
@@ -68,7 +68,6 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
-    const savedQueryId = stateContainer.appState.getState().savedQuery;
     return {
       searchType: 'searchSource',
       searchConfiguration: stateContainer.savedSearchState
@@ -76,7 +75,7 @@ const CreateAlertFlyout: React.FC<{
         .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
+  }, [isEsqlMode, stateContainer.savedSearchState, savedQueryId, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({

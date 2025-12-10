@@ -113,7 +113,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
   allowCreate,
   openCreateModal,
   fullWidth = true,
-  ...otherProps
+  ...comboBoxProps
 }) => {
   const [currentSearch, setCurrentSearch] = useState('');
 
@@ -175,16 +175,26 @@ export const TagSelector: FC<TagSelectorProps> = ({
     [selected, onTagsSelected, openCreateModal, currentSearch]
   );
 
+  const { onSearchChange: onSearchChangeProp, ...restProps } = comboBoxProps;
+
+  const handleOnSearchChange = useCallback(
+    (searchValue: string) => {
+      setCurrentSearch(searchValue);
+      onSearchChangeProp?.(searchValue);
+    },
+    [onSearchChangeProp]
+  );
+
   return (
     <EuiComboBox<Tag | CreateOption>
       placeholder={''}
       options={options}
       selectedOptions={selectedOptions}
-      onSearchChange={setCurrentSearch}
+      onSearchChange={handleOnSearchChange}
       onChange={onChange}
       renderOption={renderOption}
       fullWidth={fullWidth}
-      {...otherProps}
+      {...restProps}
     />
   );
 };

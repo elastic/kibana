@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
-import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
+import { DEFAULT_URL, SUB_ACTION } from '@kbn/connector-schemas/bedrock/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -58,7 +58,7 @@ describe('Bedrock Params Fields renders', () => {
       actionTypeId: '.bedrock',
       name: 'My Bedrock Connector',
       config: {
-        apiUrl: DEFAULT_BEDROCK_URL,
+        apiUrl: DEFAULT_URL,
       },
     });
 

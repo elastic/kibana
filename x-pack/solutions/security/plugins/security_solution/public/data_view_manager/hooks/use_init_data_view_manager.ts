@@ -12,13 +12,14 @@ import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
+import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserInfo } from '../../detections/components/user_info';
 
@@ -42,6 +43,10 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const attacksAlertsAlignmentEnabled = services.featureFlags.getBooleanValue(
+    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+    false
+  );
 
   const {
     loading: loadingSignalIndex,
@@ -80,23 +85,27 @@ export const useInitDataViewManager = () => {
     }
 
     // NOTE: init listener contains logic that preloads default security solution data view
-    const dataViewsLoadingListener = createInitListener({
-      dataViews: services.dataViews,
-      http: services.http,
-      uiSettings: services.uiSettings,
-      application: services.application,
-      spaces: services.spaces,
-    });
+    const dataViewsLoadingListener = createInitListener(
+      {
+        dataViews: services.dataViews,
+        http: services.http,
+        uiSettings: services.uiSettings,
+        application: services.application,
+        spaces: services.spaces,
+      },
+      attacksAlertsAlignmentEnabled
+    );
 
     dispatch(addListener(dataViewsLoadingListener));
 
     // NOTE: Every scope has its own listener instance; this allows for cancellation
     const listeners = [
-      DataViewManagerScopeName.default,
-      DataViewManagerScopeName.timeline,
-      DataViewManagerScopeName.detections,
-      DataViewManagerScopeName.analyzer,
-      DataViewManagerScopeName.explore,
+      PageScope.default,
+      PageScope.timeline,
+      PageScope.alerts,
+      PageScope.attacks,
+      PageScope.analyzer,
+      PageScope.explore,
     ].map((scope) =>
       createDataViewSelectedListener({
         scope,
@@ -117,6 +126,7 @@ export const useInitDataViewManager = () => {
       });
     };
   }, [
+    attacksAlertsAlignmentEnabled,
     dispatch,
     newDataViewPickerEnabled,
     services.application,

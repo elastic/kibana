@@ -83,6 +83,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             label: fullScreenButtonLabel,
             ariaLabel: fullScreenButtonLabel,
             id: actionId,
+            dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
           },
         ]}
       >

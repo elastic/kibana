@@ -328,6 +328,7 @@ export class TaskManagerPlugin
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
+      basePath: http.basePath,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -410,6 +411,7 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
+      taskPollingLifecycle: this.taskPollingLifecycle,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});

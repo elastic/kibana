@@ -11,6 +11,7 @@ import { injectReferences } from '../migrations/references';
 import type { LayerDescriptor } from '../descriptor_types';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
+import { transformLayersOut } from './transform_layers_out';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
@@ -23,12 +24,17 @@ export function transformMapAttributesOut(
   return {
     title: injectedAttributes.title,
     ...(injectedAttributes.description ? { description: injectedAttributes.description } : {}),
-    ...(injectedAttributes.layerListJSON
-      ? { layers: parseJSON<Partial<LayerDescriptor[]>>([], injectedAttributes.layerListJSON) }
-      : {}),
+    ...parseLayerListJSON(injectedAttributes.layerListJSON),
     ...parseMapStateJSON(injectedAttributes.mapStateJSON),
     ...parseUiStateJSON(injectedAttributes.uiStateJSON),
   };
+}
+
+function parseLayerListJSON(layerListJSON?: string) {
+  if (!layerListJSON) return {};
+
+  const layers = parseJSON<Partial<LayerDescriptor[]>>([], layerListJSON);
+  return { layers: transformLayersOut(layers) };
 }
 
 function parseMapStateJSON(mapStateJSON?: string) {

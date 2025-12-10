@@ -28,5 +28,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./data_streams_failure_store'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./types_privileges'));
+    loadTestFile(require.resolve('./update_failure_store'));
   });
 }

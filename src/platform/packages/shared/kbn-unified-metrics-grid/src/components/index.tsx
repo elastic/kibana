@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
-import { store } from '../store';
-import { MetricsExperienceProvider } from '../context/metrics_experience_provider';
+import { MetricsExperienceClientProvider } from '../context/metrics_experience_client_provider';
+import { withRestorableState } from '../restorable_state';
+import { MetricsExperienceStateProvider } from '../context/metrics_experience_state_provider';
+import type { UnifiedMetricsGridProps } from '../types';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,23 +27,35 @@ const queryClient = new QueryClient({
   },
 });
 
-export const UnifiedMetricsExperienceGrid = (
-  props: ChartSectionProps & { client?: MetricsExperienceClient }
+const InternalUnifiedMetricsExperienceGrid = (
+  props: UnifiedMetricsGridProps & { client?: MetricsExperienceClient }
 ) => {
   if (!props.client) {
     return null;
   }
 
   return (
-    <MetricsExperienceProvider value={{ client: props.client }}>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <MetricsExperienceGrid {...props} />
-        </QueryClientProvider>
-      </Provider>
-    </MetricsExperienceProvider>
+    <MetricsExperienceClientProvider value={{ client: props.client }}>
+      <QueryClientProvider client={queryClient}>
+        <MetricsExperienceGrid {...props} />
+      </QueryClientProvider>
+    </MetricsExperienceClientProvider>
   );
 };
 
+const InternalUnifiedMetricsExperienceGridWithState = (
+  props: UnifiedMetricsGridProps & { client?: MetricsExperienceClient }
+) => {
+  return (
+    <MetricsExperienceStateProvider>
+      <InternalUnifiedMetricsExperienceGrid {...props} />
+    </MetricsExperienceStateProvider>
+  );
+};
+
+const UnifiedMetricsExperienceGridWithRestorableState = withRestorableState(
+  InternalUnifiedMetricsExperienceGridWithState
+);
+
 // eslint-disable-next-line import/no-default-export
-export default UnifiedMetricsExperienceGrid;
+export default UnifiedMetricsExperienceGridWithRestorableState;

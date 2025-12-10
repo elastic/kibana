@@ -129,7 +129,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
             {warning ? (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut size="s" color="warning" title={warning} />
+                <EuiCallOut announceOnMount size="s" color="warning" title={warning} />
               </>
             ) : null}
           </Suspense>

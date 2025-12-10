@@ -14,15 +14,17 @@ type CommonPropsWithChildren = CommonProps & PropsWithChildren;
 
 export interface PanelProps extends CommonPropsWithChildren {
   isAlert?: boolean;
+  grow?: boolean;
 }
 
-export const Panel = ({ isAlert, ...restProps }: PanelProps) => {
+export const Panel = ({ isAlert, grow, ...restProps }: PanelProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
       data-test-subj={GROUPED_ITEM_TEST_ID}
       paddingSize="m"
       hasShadow={false}
+      grow={grow}
       css={css`
         border-radius: ${euiTheme.size.s};
         border: ${euiTheme.border.thin};

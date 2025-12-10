@@ -14,8 +14,8 @@ import type {
   FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
   FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
-import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
+import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -23,9 +23,9 @@ import {
 } from './entity_details/generic_details_left';
 import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
 import { GenericEntityPanel } from './entity_details/generic_right';
-import type { AIForSOCDetailsProps } from './ai_for_soc/types';
-import { AIForSOCDetailsProvider } from './ai_for_soc/context';
-import { AIForSOCPanel } from './ai_for_soc';
+import type { EaseDetailsProps } from './ease/types';
+import { EaseDetailsProvider } from './ease/context';
+import { EasePanel } from './ease';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -79,12 +79,20 @@ import {
   MisconfigurationFindingsPreviewPanelKey,
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
-import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import { EasePanelKey } from './ease/constants/panel_keys';
 import {
   VulnerabilityFindingsPanelKey,
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
+import { AttackDetailsRightPanelKey } from './attack_details/constants/panel_keys';
+import type { AttackDetailsProps } from './attack_details/types';
+import { AttackDetailsProvider } from './attack_details/context';
+import { AttackDetailsPanel } from './attack_details';
+import type { IOCDetailsProps } from './ioc_details/types';
+import { IOCDetailsProvider } from './ioc_details/context';
+import { IOCPanel } from './ioc_details';
+import { IOCRightPanelKey } from './ioc_details/constants/panel_keys';
 
 const GraphGroupedNodePreviewPanel = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -243,11 +251,19 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: IOCPanelKey,
+    key: EasePanelKey,
     component: (props) => (
-      <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
-        <AIForSOCPanel />
-      </AIForSOCDetailsProvider>
+      <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
+        <EasePanel />
+      </EaseDetailsProvider>
+    ),
+  },
+  {
+    key: AttackDetailsRightPanelKey,
+    component: (props) => (
+      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
+        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
+      </AttackDetailsProvider>
     ),
   },
   {
@@ -272,6 +288,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <FindingsVulnerabilityPanel
         {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
       />
+    ),
+  },
+  {
+    key: IOCRightPanelKey,
+    component: (props) => (
+      <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
+        <IOCPanel path={props.path as IOCDetailsProps['path']} />
+      </IOCDetailsProvider>
     ),
   },
 ];

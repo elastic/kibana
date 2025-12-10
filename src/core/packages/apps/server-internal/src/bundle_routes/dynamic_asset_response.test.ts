@@ -82,7 +82,7 @@ describe('headers', () => {
     expect(result.options.headers).toEqual({
       'cache-control': 'must-revalidate',
       'content-type': 'application/javascript; charset=utf-8',
-      etag: expect.stringMatching(/^[a-f0-9]{40}-\/public/i),
+      etag: expect.stringMatching(/^[a-f0-9]{64}-\/public/i),
     });
   });
 });

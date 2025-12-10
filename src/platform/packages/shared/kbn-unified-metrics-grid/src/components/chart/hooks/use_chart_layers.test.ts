@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from '../../../common/utils';
 import { useChartLayers } from './use_chart_layers';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/utils', () => ({
   ...jest.requireActual('../../../common/utils'),
@@ -44,18 +45,37 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].seriesColor).toBe('#000');
   });
 
-  it('should return a line chart configuration with a breakdown when dimensions are provided', () => {
+  it('should return a line chart configuration with a breakdown when single dimension is provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         metric: mockMetric,
-        dimensions: ['service.name'],
+        dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
         color: '#FFF',
       })
     );
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN);
+    expect(layer.breakdown).toBe('service.name'); // Single dimension uses actual dimension name
+    expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
+    expect(layer.yAxis[0].seriesColor).toBe('#FFF');
+  });
+
+  it('should return a line chart configuration with DIMENSIONS_COLUMN when multiple dimensions are provided', () => {
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metric: mockMetric,
+        dimensions: [
+          { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+          { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        ],
+        color: '#FFF',
+      })
+    );
+
+    const [layer] = result.current;
+    expect(layer.seriesType).toBe('line');
+    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN); // Multiple dimensions use DIMENSIONS_COLUMN
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });

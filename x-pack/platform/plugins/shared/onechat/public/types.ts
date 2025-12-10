@@ -13,11 +13,27 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { ToolServiceStartContract } from '@kbn/onechat-browser';
+
+import type {
+  AgentsServiceStartContract,
+  AttachmentServiceStartContract,
+  ToolServiceStartContract,
+} from '@kbn/onechat-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EmbeddableConversationProps } from './embeddable/types';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
+
+export interface ConversationFlyoutRef {
+  close(): void;
+}
+
+export interface OpenConversationFlyoutReturn {
+  flyoutRef: ConversationFlyoutRef;
+}
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -40,6 +56,7 @@ export interface OnechatStartDependencies {
   cloud: CloudStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface OnechatPluginSetup {}
@@ -49,7 +66,35 @@ export interface OnechatPluginSetup {}
  */
 export interface OnechatPluginStart {
   /**
+   * Agent service contract, can be used to list agents.
+   */
+  agents: AgentsServiceStartContract;
+  /**
+   * Attachment service contract, can be used to register and retrieve attachment UI definitions.
+   */
+  attachments: AttachmentServiceStartContract;
+  /**
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+  /**
+   * Opens a conversation flyout.
+   *
+   * @param options - Configuration options for the flyout
+   * @returns An object containing the flyout reference
+   *
+   * @example
+   * ```tsx
+   * // Open a new conversation with close handler
+   * const { flyoutRef } = plugins.onechat.openConversationFlyout({
+   *   onClose: () => console.log('Flyout closed')
+   * });
+   *
+   * // Programmatically close the flyout
+   * flyoutRef.close();
+   * ```
+   */
+  openConversationFlyout: (options?: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
+  clearConversationFlyoutActiveConfig: () => void;
 }

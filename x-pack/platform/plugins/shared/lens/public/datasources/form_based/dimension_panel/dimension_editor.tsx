@@ -23,11 +23,16 @@ import {
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
+import type {
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  LensLayerType as LayerType,
+  IndexPattern,
+  IndexPatternField,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
-import type { GenericIndexPatternColumn } from '../form_based';
-import { deleteColumn } from '../form_based';
-import type { FieldBasedIndexPatternColumn } from '../operations';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -38,12 +43,12 @@ import {
   resetIncomplete,
   canTransition,
   adjustColumnReferencesForChangedColumn,
+  deleteColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { FormBasedLayer } from '../types';
 import type { FormatSelectorProps } from './format_selector';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
@@ -53,7 +58,6 @@ import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
-import type { LayerType } from '../../../../common/types';
 import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
 import {
   quickFunctionsName,
@@ -73,7 +77,6 @@ import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
 import { operationsButtonStyles } from './shared_styles';
-import type { IndexPattern, IndexPatternField } from '../../../types';
 import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends FormBasedDimensionEditorProps {

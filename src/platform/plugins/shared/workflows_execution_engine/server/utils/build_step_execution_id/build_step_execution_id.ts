@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StackFrame } from '@kbn/workflows';
 import crypto from 'crypto';
+import type { StackFrame } from '@kbn/workflows';
 
 /**
  * Generates a unique identifier for a step execution by combining execution ID, path, and step ID,

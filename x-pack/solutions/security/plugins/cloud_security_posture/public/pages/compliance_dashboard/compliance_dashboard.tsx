@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { EuiEmptyPrompt, EuiIcon, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';

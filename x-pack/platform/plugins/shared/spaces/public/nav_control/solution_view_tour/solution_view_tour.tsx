@@ -27,8 +27,8 @@ const solutionMap: Record<SolutionId, string> = {
   oblt: i18n.translate('xpack.spaces.navControl.tour.obltSolution', {
     defaultMessage: 'Elastic Observability',
   }),
-  chat: i18n.translate('xpack.spaces.navControl.tour.chatSolution', {
-    defaultMessage: 'Elastic Workchat',
+  workplaceai: i18n.translate('xpack.spaces.navControl.tour.workplaceAiSolution', {
+    defaultMessage: 'Elastic Workplace AI',
   }),
 };
 

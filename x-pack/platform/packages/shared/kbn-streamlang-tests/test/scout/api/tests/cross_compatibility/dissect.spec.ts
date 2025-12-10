@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -158,8 +158,8 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         docs[0].message
       );
 
-      const { order_id: ingestOrderId, ...ingestDoc } = ingestResult[0];
-      const { order_id: esqlOrderId, ...esqlDoc } = esqlResult.documentsWithoutKeywordsOrdered[1];
+      const { order_id: _ingestOrderId, ...ingestDoc } = ingestResult[0];
+      const { order_id: _esqlOrderId, ...esqlDoc } = esqlResult.documentsWithoutKeywordsOrdered[1];
       expect(ingestDoc).toStrictEqual(esqlDoc);
     }
   );

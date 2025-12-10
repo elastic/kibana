@@ -6,6 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { licenseService } from '../../../common/hooks/use_license';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
   CreateRuleMigrationRulesRequestBody,
@@ -20,14 +22,17 @@ import * as api from '../api';
 import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
 import * as i18n from './translations';
 import { SiemRulesMigrationsTelemetry } from './telemetry';
+import type { CapabilitiesLevel, MissingCapability } from '../../common/service';
 import {
   SiemMigrationsServiceBase,
+  getMissingCapabilitiesChecker,
   getMissingCapabilitiesToast,
   getNoConnectorToast,
 } from '../../common/service';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
-import { getSuccessToast } from './notification/success_notification';
+import { raiseSuccessToast } from './notification/success_notification';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
+import { requiredRuleMigrationCapabilities } from './capabilities';
 
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
@@ -41,6 +46,22 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   ) {
     super(core, plugins);
     this.telemetry = new SiemRulesMigrationsTelemetry(telemetryService);
+  }
+
+  /** Returns any missing capabilities for the user to use this feature */
+  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
+    const getMissingCapabilities = getMissingCapabilitiesChecker(requiredRuleMigrationCapabilities);
+    return getMissingCapabilities(this.core.application.capabilities, level);
+  }
+
+  /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */
+  public isAvailable() {
+    const { siemMigrationsDisabled } = ExperimentalFeaturesService.get();
+    return (
+      !siemMigrationsDisabled &&
+      licenseService.isEnterprise() &&
+      !this.hasMissingCapabilities('minimum')
+    );
   }
 
   /** Accessor for the rule migrations API client */
@@ -72,7 +93,9 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   ): Promise<string> {
     const rulesCount = data.length;
     if (rulesCount === 0) {
-      throw new Error(i18n.EMPTY_RULES_ERROR);
+      const emptyRulesError = new Error(i18n.EMPTY_RULES_ERROR);
+      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error: emptyRulesError });
+      throw emptyRulesError;
     }
 
     try {
@@ -83,10 +106,10 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
 
       await this.addRulesToMigration(migrationId, data);
 
-      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
+      this.telemetry.reportSetupMigrationCreated({ migrationId, count: rulesCount });
       return migrationId;
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
+      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error });
       throw error;
     }
   }
@@ -238,6 +261,6 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   }
 
   protected sendFinishedMigrationNotification(taskStats: RuleMigrationStats) {
-    this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
+    raiseSuccessToast(taskStats, this.core);
   }
 }

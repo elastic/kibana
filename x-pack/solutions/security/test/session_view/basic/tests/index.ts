@@ -57,7 +57,7 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siemV3: ['read'],
+          siemV4: ['read'],
         },
         spaces: ['*'],
       },

@@ -13,6 +13,7 @@ import { isActionBlock } from '@kbn/streamlang/types/streamlang';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
+  StreamlangDSL,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
@@ -46,24 +47,28 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
+      service, // Expose service for direct access when needed
+      resetSteps: (steps: StreamlangDSL['steps']) => {
+        service.send({ type: 'step.resetSteps', steps });
+      },
       addProcessor: (
         step?: StreamlangProcessorDefinition,
         options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
       ) => {
         service.send({ type: 'step.addProcessor', step, options });
       },
-
+      duplicateProcessor: (id: string) => {
+        service.send({ type: 'step.duplicateProcessor', processorStepId: id });
+      },
       addCondition: (
         step?: StreamlangWhereBlock,
         options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
       ) => {
         service.send({ type: 'step.addCondition', step, options });
       },
-
       reorderStep: (stepId: string, direction: 'up' | 'down') => {
         service.send({ type: 'step.reorder', stepId, direction });
       },
-
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
       },
@@ -97,6 +102,9 @@ export const useStreamEnrichmentEvents = () => {
       addDataSource: (dataSource: EnrichmentDataSource) => {
         service.send({ type: 'dataSources.add', dataSource });
       },
+      selectDataSource: (id: string) => {
+        service.send({ type: 'dataSources.select', id });
+      },
       setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
         service.send({
           type: 'previewColumns.updateExplicitlyEnabledColumns',
@@ -117,6 +125,19 @@ export const useStreamEnrichmentEvents = () => {
       },
       setPreviewColumnsSorting: (sorting: SimulationContext['previewColumnsSorting']) => {
         service.send({ type: 'previewColumns.setSorting', sorting });
+      },
+      // Pipeline suggestion actions
+      suggestPipeline: (params: { connectorId: string; streamName: string }) => {
+        service.send({ type: 'suggestion.generate', connectorId: params.connectorId });
+      },
+      clearSuggestedSteps: () => {
+        service.send({ type: 'suggestion.dismiss' });
+      },
+      cancelSuggestion: () => {
+        service.send({ type: 'suggestion.cancel' });
+      },
+      acceptSuggestion: () => {
+        service.send({ type: 'suggestion.accept' });
       },
     }),
     [service]

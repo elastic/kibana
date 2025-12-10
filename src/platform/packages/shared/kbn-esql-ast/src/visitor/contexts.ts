@@ -35,8 +35,8 @@ import type {
   ESQLMap,
   ESQLMapEntry,
   ESQLOrderExpression,
+  ESQLParens,
   ESQLSource,
-  ESQLStringLiteral,
 } from '../types';
 import type {
   CommandVisitorInput,
@@ -106,7 +106,7 @@ export class VisitorContext<
     const args: ESQLAstExpressionNode[] = [];
 
     for (const arg of children(node)) {
-      args.push(arg);
+      args.push(arg as ESQLAstExpression);
     }
 
     return args;
@@ -516,7 +516,7 @@ export class DissectCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// GROK <column> <string>
+// GROK <column> <string> [ , <string> ... ]
 export class GrokCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
@@ -701,7 +701,7 @@ export class MapEntryExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLMapEntry> {
-  public key(): ESQLStringLiteral {
+  public key(): ESQLAstExpression {
     return this.node.key;
   }
 
@@ -723,5 +723,22 @@ export class MapEntryExpressionVisitorContext<
     this.ctx.assertMethodExists('visitExpression');
 
     return this.visitExpression(this.value(), input as any);
+  }
+}
+
+export class ParensExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLParens> {
+  public child(): ESQLAstExpression {
+    return this.node.child;
+  }
+
+  public visitChild(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.child(), input as any);
   }
 }

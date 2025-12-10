@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '..';
+import type { SavedObject, SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -47,6 +47,8 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from './apis';
 
 /**
@@ -176,10 +178,30 @@ export interface SavedObjectsClientContract {
    *
    * @param options {@link SavedObjectsFindOptions} - options for the find operation
    * @returns the {@link SavedObjectsFindResponse}
+   *
+   * @remarks When using aggregations via the `aggs` option, be aware that certain Elasticsearch
+   * aggregation types can return data from documents outside the query scope, potentially bypassing
+   * security restrictions like Kibana Spaces. See the `aggs` documentation in {@link SavedObjectsFindOptions}
+   * for a list of aggregations to avoid.
    */
   find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
+
+  /**
+   * Performs a raw search against the saved objects indices, returning the raw Elasticsearch response
+   * @param options {@link SavedObjectsSearchOptions} - options for the search operation
+   * @returns the {@link SavedObjectsSearchResponse}
+   *
+   * @remarks While the `search` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Take care to ensure it is implemented correctly for your use case and appropriately stress tested. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+   * @remarks When using aggregations, certain Elasticsearch aggregation types can return data from documents
+   * outside the query scope, potentially bypassing security restrictions like Kibana Spaces. See
+   * {@link SavedObjectsSearchOptions} for a list of aggregations to avoid.
+   * @remarks See tutorial https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects-search
+   */
+  search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>>;
 
   /**
    * Returns an array of objects by id

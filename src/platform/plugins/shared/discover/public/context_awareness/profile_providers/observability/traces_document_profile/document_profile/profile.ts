@@ -23,8 +23,7 @@ import { createGetDocViewer } from './accessors';
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-document-profile';
 
 export const createObservabilityTracesDocumentProfileProvider = ({
-  tracesContextService,
-  apmErrorsContextService,
+  apmContextService,
   logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
@@ -32,8 +31,8 @@ export const createObservabilityTracesDocumentProfileProvider = ({
   profile: {
     getDocViewer: createGetDocViewer({
       apm: {
-        errors: apmErrorsContextService.getErrorsIndexPattern(),
-        traces: tracesContextService.getAllTracesIndexPattern(),
+        errors: apmContextService.errorsService.getErrorsIndexPattern(),
+        traces: apmContextService.tracesService.getAllTracesIndexPattern(),
       },
       logs: logsContextService.getAllLogsIndexPattern(),
     }),
@@ -43,7 +42,7 @@ export const createObservabilityTracesDocumentProfileProvider = ({
 
     if (
       isObservabilitySolutionView &&
-      isTraceDocument(record, tracesContextService.isTracesIndexPattern)
+      isTraceDocument(record, apmContextService.tracesService.isTracesIndexPattern)
     ) {
       return {
         isMatch: true,
@@ -59,7 +58,7 @@ export const createObservabilityTracesDocumentProfileProvider = ({
 
 function isTraceDocument(
   record: DataTableRecord,
-  isTracesIndexPattern: ProfileProviderServices['tracesContextService']['isTracesIndexPattern']
+  isTracesIndexPattern: ProfileProviderServices['apmContextService']['tracesService']['isTracesIndexPattern']
 ): boolean {
   const traceId = getFieldValue(record, TRACE_ID_FIELD);
   const index = getFieldValues(record, INDEX_FIELD);
@@ -76,5 +75,5 @@ const getFieldValues = <TRecord extends DataTableRecord, TField extends string>(
   field: TField & keyof TRecord['flattened']
 ): TRecord['flattened'][TField][] => {
   const value = record.flattened[field];
-  return Array.isArray(value) ? value : [value];
+  return (Array.isArray(value) ? value : [value]) as TRecord['flattened'][TField][];
 };

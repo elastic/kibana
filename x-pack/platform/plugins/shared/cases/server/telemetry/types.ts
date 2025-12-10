@@ -66,6 +66,29 @@ export interface AssigneesFilters {
   };
 }
 
+export interface ObservablesAggregationResult {
+  doc_count: number;
+  byDescription: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      byType: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+        }>;
+      };
+    }>;
+  };
+}
+
+export interface TotalWithMaxObservablesAggregationResult {
+  buckets: Array<{
+    key: number;
+    doc_count: number;
+  }>;
+}
+
 export interface FileAttachmentAggsResult {
   averageSize: {
     value: number;
@@ -111,16 +134,21 @@ export type CaseAggregationResult = Record<
     counts: Buckets;
     totalAssignees: ValueCount;
     assigneeFilters: AssigneesFilters;
+    observables: ObservablesAggregationResult;
+    totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
   }
 > & {
   assigneeFilters: AssigneesFilters;
   counts: Buckets;
   syncAlerts: Buckets;
+  extractObservables: Buckets;
+  observables: ObservablesAggregationResult;
   status: Buckets;
   users: Cardinality;
   tags: Cardinality;
   totalAssignees: ValueCount;
   totalsByOwner: Buckets;
+  totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
 };
 
 export interface Assignees {
@@ -159,6 +187,8 @@ export interface SolutionTelemetry extends Count, AttachmentFramework {
   assignees: Assignees;
   totalWithAlerts: number;
   status: Status;
+  observables: ObservablesTelemetry;
+  totalWithMaxObservables: number;
 }
 
 export interface Status {
@@ -171,6 +201,12 @@ export interface LatestDates {
   createdAt: string;
   updatedAt: string;
   closedAt: string;
+}
+
+export interface ObservablesTelemetry {
+  manual: { default: number; custom: number };
+  auto: { default: number; custom: number };
+  total: number;
 }
 
 export interface CustomFieldsTelemetry {
@@ -191,6 +227,10 @@ export interface CasesTelemetry {
         status: Status;
         syncAlertsOn: number;
         syncAlertsOff: number;
+        extractObservablesOn: number;
+        extractObservablesOff: number;
+        observables: ObservablesTelemetry;
+        totalWithMaxObservables: number;
         totalUsers: number;
         totalParticipants: number;
         totalTags: number;
@@ -244,6 +284,7 @@ export interface CasesTelemetry {
 
 export type CountSchema = MakeSchemaFrom<Count>;
 export type StatusSchema = MakeSchemaFrom<Status>;
+export type ObservablesSchema = MakeSchemaFrom<ObservablesTelemetry>;
 export type LatestDatesSchema = MakeSchemaFrom<LatestDates>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;
 export type AssigneesSchema = MakeSchemaFrom<Assignees>;

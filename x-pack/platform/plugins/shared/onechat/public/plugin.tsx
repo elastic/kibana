@@ -12,21 +12,30 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {
+  AGENT_BUILDER_ENABLED_SETTING_ID,
+  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import { OnechatNavControlInitiator } from './components/nav_control/lazy_onechat_nav_control';
 import {
   AgentBuilderAccessChecker,
   AgentService,
+  AttachmentsService,
   ChatService,
   ConversationsService,
   NavigationService,
   ToolsService,
   type OnechatInternalService,
 } from './services';
+import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
+import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -34,6 +43,10 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { openConversationFlyout } from './flyout/open_conversation_flyout';
+import type { EmbeddableConversationProps } from './embeddable/types';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { ConversationFlyoutRef } from './types';
 
 export class OnechatPlugin
   implements
@@ -45,10 +58,13 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
+  private conversationFlyoutActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: OnechatInternalService;
   private setupServices?: {
     navigationService: NavigationService;
   };
+  private activeFlyoutRef: ConversationFlyoutRef | null = null;
+  private updateFlyoutPropsCallback: ((props: EmbeddableConversationProps) => void) | null = null;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -57,7 +73,7 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isOnechatUiEnabled = core.settings.client.get<boolean>(
+    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
       AGENT_BUILDER_ENABLED_SETTING_ID,
       true
     );
@@ -69,7 +85,7 @@ export class OnechatPlugin
 
     this.setupServices = { navigationService };
 
-    if (isOnechatUiEnabled) {
+    if (isAgentBuilderEnabled) {
       registerApp({
         core,
         getServices: () => {
@@ -104,6 +120,7 @@ export class OnechatPlugin
     docLinks.setDocLinks(core.docLinks.links);
 
     const agentService = new AgentService({ http });
+    const attachmentsService = new AttachmentsService();
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
@@ -115,8 +132,9 @@ export class OnechatPlugin
 
     const { navigationService } = this.setupServices;
 
-    this.internalServices = {
+    const internalServices: OnechatInternalService = {
       agentService,
+      attachmentsService,
       chatService,
       conversationsService,
       navigationService,
@@ -125,8 +143,83 @@ export class OnechatPlugin
       accessChecker,
     };
 
-    return {
+    this.internalServices = internalServices;
+
+    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
+      AGENT_BUILDER_ENABLED_SETTING_ID,
+      true
+    );
+    const isAgentBuilderNavEnabled = core.settings.client.get<boolean>(
+      AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+      false
+    );
+
+    const onechatService: OnechatPluginStart = {
+      agents: createPublicAgentsContract({ agentService }),
+      attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
+      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+        // set config until flyout is next opened
+        this.conversationFlyoutActiveConfig = config;
+        // if there is already an active flyout, update its props
+        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+          this.updateFlyoutPropsCallback(config);
+          return { flyoutRef: this.activeFlyoutRef };
+        }
+      },
+      clearConversationFlyoutActiveConfig: () => {
+        this.conversationFlyoutActiveConfig = {};
+      },
+      openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
+        const config = options ?? this.conversationFlyoutActiveConfig;
+
+        // If a flyout is already open, update its props instead of creating a new one
+        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+          this.updateFlyoutPropsCallback(config);
+          return { flyoutRef: this.activeFlyoutRef };
+        }
+
+        // Create new flyout and set up prop updates
+        const { flyoutRef } = openConversationFlyout(config, {
+          coreStart: core,
+          services: internalServices,
+          onPropsUpdate: (callback) => {
+            this.updateFlyoutPropsCallback = callback;
+          },
+          onClose: () => {
+            this.activeFlyoutRef = null;
+            this.updateFlyoutPropsCallback = null;
+          },
+        });
+
+        this.activeFlyoutRef = flyoutRef;
+
+        return { flyoutRef };
+      },
     };
+
+    if (isAgentBuilderEnabled && isAgentBuilderNavEnabled) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <OnechatNavControlInitiator
+              coreStart={core}
+              pluginsStart={startDependencies}
+              onechatService={onechatService}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        // right before the user profile
+        order: 1001,
+      });
+    }
+
+    return onechatService;
   }
 }

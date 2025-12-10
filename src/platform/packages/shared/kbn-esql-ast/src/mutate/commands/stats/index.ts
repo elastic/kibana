@@ -215,7 +215,12 @@ export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsC
     .on('visitExpression', (ctx) => {
       const node = ctx.node;
       const summary = summarizeField(query, node);
-      newFields.add(summary.field);
+
+      if (isFunctionExpression(summary.arg)) {
+        // only mark as new field if the arg is a function expression
+        newFields.add(summary.field);
+      }
+
       for (const field of summary.usedFields) usedFields.add(field);
       grouping[summary.field] = summary;
     })

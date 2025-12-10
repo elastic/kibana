@@ -195,10 +195,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       disableEmptyRows?: boolean;
     }) {
       await retry.try(async () => {
-        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+        if (
+          !(await testSubjects.exists('lns-indexPattern-dimensionContainerClose', {
+            timeout: 1000,
+          }))
+        ) {
           await testSubjects.click(opts.dimension);
         }
-        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        });
       });
 
       if (opts.operation === 'formula') {
@@ -579,7 +585,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
       await retry.try(async () => {
         const dimensionEditor = (
-          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`)
+          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`, 1000)
         )[dimensionIndex];
         await dimensionEditor.click();
       });
@@ -590,6 +596,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async performLayerAction(testSubject: string, layerIndex = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        if (tabs[layerIndex]) {
+          await tabs[layerIndex].moveMouseTo();
+        }
         await testSubjects.click(`lnsLayerSplitButton--${layerIndex}`);
         await testSubjects.click(testSubject);
       });
@@ -779,7 +790,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
@@ -846,27 +857,48 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await common.sleep(1000); // give time for debounced components to rerender
     },
-    hasVisualOptionsButton() {
-      return testSubjects.exists('lnsVisualOptionsButton');
+    async hasStyleToolbarButton() {
+      return find.existsByCssSelector('button[data-test-subj="style"][title="Style"]');
     },
-    async openVisualOptions() {
-      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
-        return;
+    async hasLegendToolbarButton() {
+      return find.existsByCssSelector('button[data-test-subj="legend"][title="Legend"]');
+    },
+    async openStyleSettingsFlyout() {
+      // Close dimension editor flyout
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
       }
+
+      await find.clickByCssSelector('button[data-test-subj="style"][title="Style"]');
       await retry.try(async () => {
-        await testSubjects.click('lnsVisualOptionsButton');
-        await testSubjects.exists('lnsVisualOptionsPopover_title');
+        const styleTitle = await find.byCssSelector('#lnsDimensionContainerTitle');
+        const titleText = await styleTitle.getVisibleText();
+        if (titleText !== 'Style') {
+          throw new Error(`Expected flyout title to be "Style", but got "${titleText}"`);
+        }
       });
     },
-    async openTextOptions() {
-      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
-        return;
+
+    async openLegendSettingsFlyout() {
+      // Close dimension editor flyout
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
       }
+
+      if (await this.hasLegendToolbarButton()) {
+        const button = await find.byCssSelector('button[data-test-subj="legend"][title="Legend"]');
+        await button.click();
+      }
+    },
+    async closeFlyoutWithBackButton() {
       await retry.try(async () => {
-        await testSubjects.click('lnsTextOptionsButton');
-        await testSubjects.exists('lnsTextOptionsPopover_title');
+        if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
+          await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+          await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+        }
       });
     },
+
     async retrySetValue(
       input: string,
       value: string,
@@ -943,13 +975,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
+      await this.ensureLayerTabIsActive(layerIndex);
+
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
         return;
       }
       await retry.try(async () => {
         const allChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
-        await allChartSwitches[layerIndex].click();
-        await testSubjects.existOrFail('lnsChartSwitchList');
+        expect(allChartSwitches.length).to.be(1);
+        await allChartSwitches[0].click();
+        await testSubjects.existOrFail('lnsChartSwitchList', { timeout: 5000 });
       });
     },
 
@@ -971,30 +1006,33 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDonutHoleSize() {
-      await this.openVisualOptions();
+      await this.openStyleSettingsFlyout();
+
       const comboboxOptions = await comboBox.getComboBoxSelectedOptions('lnsEmptySizeRatioOption');
       return comboboxOptions[0];
     },
 
     async setDonutHoleSize(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
-        return await testSubjects.exists('lnsEmptySizeRatioOption');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsEmptySizeRatioOption', value);
+      await this.closeFlyoutWithBackButton();
     },
 
     async setGaugeShape(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
-        return await testSubjects.exists('lnsToolbarGaugeAngleType');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
+      await this.closeFlyoutWithBackButton();
+    },
+
+    async setGaugeOrientation(value: 'horizontal' | 'vertical') {
+      await this.openStyleSettingsFlyout();
+      await testSubjects.click(`lns_gaugeOrientation_${value}Bullet`);
+      await this.closeFlyoutWithBackButton();
     },
 
     async getSelectedBarOrientationSetting() {
       await retry.waitFor('visual options are displayed', async () => {
-        await this.openVisualOptions();
+        await this.openStyleSettingsFlyout();
         return await testSubjects.exists('lns_barOrientation');
       });
       const orientationButtons = await find.allByCssSelector(
@@ -1069,19 +1107,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Returns the number of layers visible in the chart configuration
-     */
-    async getLayerCount() {
-      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
-    },
-
-    /**
      * Returns the layer vis type from chart switch label
      */
-    async getLayerType(index = 0) {
-      return (await find.allByCssSelector(`[data-test-subj^="lnsChartSwitchPopover"]`))[
-        index
-      ].getVisibleText();
+    async getLayerType() {
+      const switchPopovers = await find.allByCssSelector(
+        `[data-test-subj^="lnsChartSwitchPopover"]`
+      );
+      expect(switchPopovers.length).to.be(1);
+      return await switchPopovers[0].getVisibleText();
     },
 
     /**
@@ -1093,11 +1126,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       seriesType = 'bar'
     ) {
       await testSubjects.click('lnsLayerAddButton');
-      const layerCount = await this.getLayerCount();
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+      const layerCount = tabs.length;
 
       await retry.waitFor('check for layer type support', async () => {
         const fasterChecks = await Promise.all([
-          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length > layerCount,
+          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, 1000)).length >
+            layerCount,
           testSubjects.exists(`lnsLayerAddButton-${layerType}`),
         ]);
         return fasterChecks.filter(Boolean).length > 0;
@@ -1123,6 +1158,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async duplicateLayer(index: number = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        if (tabs[index]) {
+          await tabs[index].moveMouseTo();
+        }
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
@@ -1385,6 +1425,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openLayerContextMenu(index: number = 0) {
+      // Hover over the tab to make the layer actions button visible
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+      if (tabs[index]) {
+        await tabs[index].moveMouseTo();
+      }
       await testSubjects.click(`lnsLayerSplitButton--${index}`);
     },
 
@@ -1636,6 +1681,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        if (tabs[index]) {
+          await tabs[index].moveMouseTo();
+        }
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
@@ -1645,6 +1695,68 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
+    },
+
+    async ensureLayerTabIsActive(index: number = 0) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+
+      if (tabs[index]) {
+        // Check if the tab is already active
+        const isActive = await tabs[index].getAttribute('aria-selected');
+        if (isActive === 'true') {
+          await testSubjects.exists(`lns-layerPanel-${index}`);
+          return;
+        }
+
+        // Click to make it active
+        await tabs[index].click();
+
+        // Wait for the layer panel to render
+        await retry.waitFor('layer panel to be visible', async () => {
+          return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
+        });
+      }
+    },
+
+    async ensureLayerTabWithNameIsActive(name: string) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+      for (let i = 0; i < tabs.length; i++) {
+        const tabText = await tabs[i].getVisibleText();
+        if (tabText === name) {
+          // Check if the tab is already active
+          const isActive = await tabs[i].getAttribute('aria-selected');
+          if (isActive === 'true') {
+            await testSubjects.exists(`lns-layerPanel-${i}`);
+            return;
+          }
+
+          // Click to make it active
+          await tabs[i].click();
+
+          // Wait for the layer panel to render
+          await retry.waitFor('layer panel to be visible', async () => {
+            return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
+          });
+          return;
+        }
+      }
+      throw new Error(`Layer tab with name "${name}" not found`);
+    },
+
+    async assertLayerCount(expectedCount: number) {
+      // Inside the tab content there should be one panel
+      const layerPanels = await find.allByCssSelector('[data-test-subj^="lns-layerPanel-"]', 1000);
+      expect(layerPanels.length).to.eql(1);
+
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+
+      // tabs will hidden if there's just one layer
+      if (expectedCount <= 1) {
+        expect(tabs.length).to.eql(0);
+        return;
+      }
+
+      expect(tabs.length).to.eql(expectedCount);
     },
 
     /**

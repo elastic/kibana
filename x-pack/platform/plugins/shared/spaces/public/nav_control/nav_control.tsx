@@ -7,11 +7,11 @@
 
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { TourManager } from './solution_view_tour';

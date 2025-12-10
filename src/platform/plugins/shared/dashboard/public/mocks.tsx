@@ -13,6 +13,7 @@ import type { DashboardStart } from './plugin';
 import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
+import type { DashboardReadResponseBody } from '../server';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -90,16 +91,15 @@ export function buildMockDashboardApi({
   const results = getDashboardApi({
     initialState,
     savedObjectId,
-    savedObjectResult: {
-      dashboardFound: true,
-      newDashboardCreated: savedObjectId === undefined,
-      dashboardId: savedObjectId,
-      managed: false,
-      dashboardInput: {
-        ...initialState,
-      },
-      references: [],
-    },
+    readResult: savedObjectId
+      ? ({
+          id: savedObjectId,
+          data: initialState,
+          meta: {
+            managed: false,
+          },
+        } as unknown as DashboardReadResponseBody)
+      : undefined,
   });
   results.internalApi.setControlGroupApi(mockControlGroupApi);
   return results;
@@ -108,11 +108,13 @@ export function buildMockDashboardApi({
 export function getSampleDashboardState(overrides?: Partial<DashboardState>): DashboardState {
   return {
     // options
-    useMargins: true,
-    syncColors: false,
-    syncCursor: true,
-    syncTooltips: false,
-    hidePanelTitles: false,
+    options: {
+      use_margins: true,
+      sync_colors: false,
+      sync_cursor: true,
+      sync_tooltips: false,
+      hide_panel_titles: false,
+    },
 
     tags: [],
     filters: [],
@@ -121,11 +123,10 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       language: 'kuery',
       query: 'hi',
     },
-    timeRange: {
+    time_range: {
       to: 'now',
       from: 'now-15m',
     },
-    timeRestore: false,
     panels: [],
     ...overrides,
   };
