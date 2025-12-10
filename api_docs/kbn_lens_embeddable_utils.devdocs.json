@@ -85,6 +85,17 @@
           },
           {
             "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-common.LensConfigBuilder.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/config_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
             "id": "def-common.LensConfigBuilder.setEnabled",
             "type": "Function",
             "tags": [],

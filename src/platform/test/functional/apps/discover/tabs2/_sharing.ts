@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('unsaved');
         expect(await unifiedTabs.getTabLabels()).to.eql(['saved', 'unsaved']);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([
+        expect(await unifiedTabs.getRecentlyClosedTabTitles()).to.eql([
           'Untitled',
           'saved',
           'unsaved',
@@ -229,7 +229,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.be('');
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('saved');
         expect(await unifiedTabs.getTabLabels()).to.eql(['saved']);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([
+        expect(await unifiedTabs.getRecentlyClosedTabTitles()).to.eql([
           'unsaved (modified)',
           'Untitled',
           'saved',

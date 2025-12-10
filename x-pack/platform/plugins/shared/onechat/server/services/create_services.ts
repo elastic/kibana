@@ -83,6 +83,8 @@ export class ServiceManager {
       spaces,
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       getRunner,
       toolsService: tools,
     });
