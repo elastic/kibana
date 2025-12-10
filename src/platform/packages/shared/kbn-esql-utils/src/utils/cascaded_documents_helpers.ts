@@ -443,12 +443,19 @@ function handleStatsByColumnLeafOperation(
   // include all the existing commands up to the operating stats command in the cascade operation query
   editorQuery.ast.commands.slice(0, operatingStatsCommandIndex + 1).forEach((cmd, idx, arr) => {
     if (idx === arr.length - 1 && cmd.name === 'stats') {
-      // We know the operating stats command is the last command in the array,
-      // so we modify it into an INLINE STATS command
-      mutate.generic.commands.append(
-        cascadeOperationQuery.ast,
-        synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false })
-      );
+      const hasAggregates = cmd.args.some(isFunctionExpression);
+
+      if (hasAggregates) {
+        // We know the operating stats command is the last command in the array,
+        // so we modify it into an INLINE STATS command
+        mutate.generic.commands.append(
+          cascadeOperationQuery.ast,
+          synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false })
+        );
+      } else {
+        // if the stats command does not have any aggregates, then we don't want to include it in the cascade operation query
+        return;
+      }
     } else {
       mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
     }
