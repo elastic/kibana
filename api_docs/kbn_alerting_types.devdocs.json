@@ -4183,6 +4183,14 @@
             "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
+          "[] | undefined; \"kibana.alert.maintenance_window_names\"?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
           "[] | undefined; \"kibana.alert.reason\"?: ",
           {
             "pluginId": "@kbn/utility-types",
