@@ -24962,7 +24962,7 @@ langchain@^1.1.5:
     uuid "^10.0.0"
     zod "^3.25.76 || ^4"
 
-langsmith@^0.3.64, langsmith@^0.3.82, langsmith@~0.3.74:
+langsmith@^0.3.64, langsmith@^0.3.67, langsmith@^0.3.82, langsmith@~0.3.74:
   version "0.3.82"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.82.tgz#62ed8c3ebaae4138d0aa0773024b38d6c00c055f"
   integrity sha512-RTcxtRm0zp2lV+pMesMW7EZSsIlqN7OmR2F6sZ/sOFQwmcLVl+VErMPV4VkX4Sycs4/EIAFT5hpr36EqiHoikQ==
@@ -35314,12 +35314,12 @@ zip-stream@^6.0.1:
     compress-commons "^6.0.2"
     readable-stream "^4.0.0"
 
-zod-to-json-schema@^3.24.1, zod-to-json-schema@^3.24.3, zod-to-json-schema@^3.24.6:
+zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.24.1, zod-to-json-schema@^3.24.3, zod-to-json-schema@^3.24.6:
   version "3.24.6"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.6.tgz#5920f020c4d2647edfbb954fa036082b92c9e12d"
   integrity sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg==
 
-zod@^3.23.8, zod@^3.24.1, zod@^3.24.2, zod@^3.25.76, "zod@^3.25.76 || ^4":
+zod@^3.23.8, zod@^3.24.1, zod@^3.24.2, zod@^3.25.32, zod@^3.25.76, "zod@^3.25.76 || ^4":
   version "3.25.76"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
   integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
