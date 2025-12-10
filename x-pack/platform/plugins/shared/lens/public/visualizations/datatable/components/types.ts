@@ -8,7 +8,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
-import type { Datatable, DatatableColumnMeta, RenderMode } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import type {
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
@@ -50,7 +50,6 @@ export type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   dispatchEvent: ILensInterpreterRenderHandlers['event'];
   getType: (meta?: DatatableColumnMeta) => IAggType | undefined;
-  renderMode: RenderMode;
   paletteService: PaletteRegistry;
   theme: CoreSetup['theme'];
   interactive: boolean;
