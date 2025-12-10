@@ -199,13 +199,12 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     </EuiFlyoutFooter>
   );
 
+  // ref={null} is needed to fix styled-components' ref prop type
   return (
     <FlyoutWithHigherZIndex
       onClose={() => onClose()}
       {...restOfProps}
       maxWidth={MAX_FLYOUT_WIDTH}
-      // FIXME: this bypasses an error with styled-components wrapping a component with forwardRef (EuiFlyout)
-      // The proper fix is to convert this module to Emotion for styling
       ref={null}
     >
       {header}
