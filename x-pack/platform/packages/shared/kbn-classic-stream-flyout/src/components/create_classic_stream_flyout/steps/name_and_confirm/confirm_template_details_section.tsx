@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useMemo, useEffect, useState } from 'react';
 import {
   EuiPanel,
@@ -33,17 +34,68 @@ import {
   type IlmPolicyFetcher,
 } from '../../../../utils';
 
+interface PhasesInfoProps {
+  ilmPhases: PhaseDescription[] | null;
+  isLoadingIlmPolicy?: boolean;
+  hasErrorLoadingIlmPolicy?: boolean;
+}
+
+const PhasesInfo = ({
+  ilmPhases,
+  isLoadingIlmPolicy = false,
+  hasErrorLoadingIlmPolicy = false,
+}: PhasesInfoProps) => {
+  if (isLoadingIlmPolicy) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="s" />
+      </EuiFlexItem>
+    );
+  }
+
+  if (hasErrorLoadingIlmPolicy) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiTextColor color="warning">
+          {i18n.translate(
+            'xpack.createClassicStreamFlyout.nameAndConfirmStep.ilmPolicyErrorDescription',
+            {
+              defaultMessage:
+                'There was an error while loading the ILM policy phases. Please try again later.',
+            }
+          )}
+        </EuiTextColor>
+      </EuiFlexItem>
+    );
+  }
+
+  if (ilmPhases && ilmPhases.length > 0) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" direction="row" responsive={false} wrap>
+          {ilmPhases.map((phase, idx) => (
+            <EuiFlexItem key={idx} grow={false}>
+              <EuiHealth textSize="xs" color={phase.color}>
+                <EuiTextColor color="subdued">{phase.description}</EuiTextColor>
+              </EuiHealth>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  }
+
+  return null;
+};
+
 interface RetentionDetailsProps {
   ilmPolicyName: string;
-  isLoadingIlmPolicy: boolean;
-  ilmPhases: PhaseDescription[] | null;
 }
 
 const RetentionDetails = ({
   ilmPolicyName,
-  isLoadingIlmPolicy,
-  ilmPhases,
-}: RetentionDetailsProps) => (
+  children,
+}: PropsWithChildren<RetentionDetailsProps>) => (
   <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -57,24 +109,7 @@ const RetentionDetails = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    {isLoadingIlmPolicy && (
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="s" />
-      </EuiFlexItem>
-    )}
-    {ilmPhases && ilmPhases.length > 0 && (
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" direction="row" responsive={false} wrap>
-          {ilmPhases.map((phase, idx) => (
-            <EuiFlexItem key={idx} grow={false}>
-              <EuiHealth textSize="xs" color={phase.color}>
-                <EuiTextColor color="subdued">{phase.description}</EuiTextColor>
-              </EuiHealth>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    )}
+    {children}
   </EuiFlexGroup>
 );
 
@@ -117,6 +152,7 @@ export const ConfirmTemplateDetailsSection = ({
 
   const [ilmPolicy, setIlmPolicy] = useState<PolicyFromES | null>(null);
   const [isLoadingIlmPolicy, setIsLoadingIlmPolicy] = useState(false);
+  const [hasErrorLoadingIlmPolicy, setHasErrorLoadingIlmPolicy] = useState(false);
 
   const ilmPolicyName = template.ilmPolicy?.name;
 
@@ -147,9 +183,9 @@ export const ConfirmTemplateDetailsSection = ({
         }
       })
       .catch((error) => {
-        // Silently fail - we'll just not show phases
         if (!abortController.signal.aborted) {
           setIlmPolicy(null);
+          setHasErrorLoadingIlmPolicy(true);
         }
       })
       .finally(() => {
@@ -202,11 +238,13 @@ export const ConfirmTemplateDetailsSection = ({
           defaultMessage: 'Retention',
         }),
         description: (
-          <RetentionDetails
-            ilmPolicyName={ilmPolicyName}
-            isLoadingIlmPolicy={isLoadingIlmPolicy}
-            ilmPhases={ilmPhases}
-          />
+          <RetentionDetails ilmPolicyName={ilmPolicyName}>
+            <PhasesInfo
+              ilmPhases={ilmPhases}
+              isLoadingIlmPolicy={isLoadingIlmPolicy}
+              hasErrorLoadingIlmPolicy={hasErrorLoadingIlmPolicy}
+            />
+          </RetentionDetails>
         ),
       });
     } else if (dataRetention) {
@@ -236,7 +274,7 @@ export const ConfirmTemplateDetailsSection = ({
     }
 
     return items;
-  }, [template, ilmPolicyName, ilmPhases, isLoadingIlmPolicy]);
+  }, [template, ilmPolicyName, ilmPhases, isLoadingIlmPolicy, hasErrorLoadingIlmPolicy]);
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" css={styles.panel}>
