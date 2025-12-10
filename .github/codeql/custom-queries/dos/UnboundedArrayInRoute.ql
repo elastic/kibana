@@ -16,17 +16,15 @@
 import javascript
 
 /**
- * Holds if the variable is the 'schema' imported from '@kbn/config-schema'
+ * Gets the local variable bound to 'schema' imported from '@kbn/config-schema'
  */
-class SchemaImport extends Import {
-  SchemaImport() {
-    this.getImportedModule() = "@kbn/config-schema" and
-    this.getASpecifier().getImportedName() = "schema"
-  }
-
-  VarDecl getSchemaVarDecl() {
-    result = this.getASpecifier().getTarget()
-  }
+LocalVariable schemaVariable() {
+  exists(ImportDeclaration decl, ImportSpecifier spec |
+    decl.getImportedPathExpr().getStringValue() = "@kbn/config-schema" and
+    spec = decl.getASpecifier() and
+    spec.getImportedName() = "schema" and
+    result = spec.getLocal().getVariable()
+  )
 }
 
 /**
@@ -34,12 +32,11 @@ class SchemaImport extends Import {
  */
 class SchemaArrayOfCall extends CallExpr {
   SchemaArrayOfCall() {
-    exists(PropAccess pa, SchemaImport si, VarAccess va |
+    exists(PropAccess pa, VarAccess va |
       this.getCallee() = pa and
       pa.getPropertyName() = "arrayOf" and
       pa.getBase() = va and
-      va.getName() = "schema" and
-      si.getSchemaVarDecl() = va.getTarget()
+      va.getVariable() = schemaVariable()
     )
   }
 
