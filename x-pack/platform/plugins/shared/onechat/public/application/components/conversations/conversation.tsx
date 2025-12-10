@@ -36,6 +36,7 @@ import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useAttachmentViewer } from '../../hooks/use_attachment_viewer';
+import { useSyncFlyoutAttachments } from '../../hooks/use_sync_flyout_attachments';
 import { queryKeys } from '../../query_keys';
 
 export const Conversation: React.FC<{}> = () => {
@@ -50,6 +51,9 @@ export const Conversation: React.FC<{}> = () => {
   const referencedAttachmentIds = useReferencedAttachmentIds();
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
+
+  // Sync flyout-provided attachments to conversation-level attachments
+  useSyncFlyoutAttachments();
 
   // Handler to update an attachment (creates new version)
   const handleUpdateAttachment = useCallback(

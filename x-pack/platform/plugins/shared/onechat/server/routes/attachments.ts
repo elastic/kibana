@@ -140,6 +140,11 @@ export function registerAttachmentRoutes({
               }),
             }),
             body: schema.object({
+              id: schema.maybe(
+                schema.string({
+                  meta: { description: 'Optional client-provided ID for the attachment.' },
+                })
+              ),
               type: schema.string({
                 meta: { description: 'Type of the attachment.' },
               }),
@@ -163,7 +168,7 @@ export function registerAttachmentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService } = getInternalServices();
         const { conversation_id: conversationId } = request.params;
-        const { type, data, description, hidden } = request.body;
+        const { id, type, data, description, hidden } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
@@ -171,7 +176,14 @@ export function registerAttachmentRoutes({
         const attachments = conversation.attachments ?? [];
         const stateManager = createAttachmentStateManager(attachments);
 
-        const newAttachment = stateManager.add({ type, data, description, hidden });
+        // Check if attachment with this ID already exists
+        if (id && stateManager.get(id)) {
+          return response.conflict({
+            body: { message: `Attachment with ID '${id}' already exists` },
+          });
+        }
+
+        const newAttachment = stateManager.add({ id, type, data, description, hidden });
 
         // Save updated conversation
         await client.update({
@@ -336,6 +348,15 @@ export function registerAttachmentRoutes({
         }
 
         if (permanent) {
+          // Attachments with client-provided IDs (from flyout configuration) cannot be permanently deleted
+          if (attachment.client_id) {
+            return response.badRequest({
+              body: {
+                message: `Cannot permanently delete attachment '${attachmentId}' because it was provided externally. Use soft delete instead.`,
+              },
+            });
+          }
+
           // For permanent delete, check if attachment is referenced in any round
           const isReferenced = isAttachmentReferencedInRounds(attachmentId, conversation.rounds);
 

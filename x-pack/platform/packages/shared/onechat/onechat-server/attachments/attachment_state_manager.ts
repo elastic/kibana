@@ -25,6 +25,8 @@ import {
  * Input for adding a new attachment to the state manager.
  */
 export interface AttachmentAddInput {
+  /** Optional ID for the attachment (if not provided, a UUID will be generated) */
+  id?: string;
   /** Type of the attachment */
   type: string;
   /** The attachment data */
@@ -268,7 +270,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   // Write operations
 
   add(input: AttachmentAddInput): VersionedAttachment {
-    const id = uuidv4();
+    const id = input.id || uuidv4();
     const now = new Date().toISOString();
     const contentHash = hashContent(input.data);
     const estimatedTokens = estimateTokens(input.data);
@@ -290,6 +292,8 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       current_version: 1,
       description: input.description,
       hidden: input.hidden,
+      // Store client_id if a client-provided ID was used
+      client_id: input.id,
     };
 
     this.attachments.set(id, attachment);
@@ -304,8 +308,27 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return undefined;
     }
 
-    const now = new Date().toISOString();
     const contentHash = hashContent(data);
+    const currentVersion = getLatestVersion(attachment);
+
+    // Check if content has actually changed by comparing hashes
+    const contentChanged = !currentVersion || currentVersion.content_hash !== contentHash;
+    const descriptionChanged = description !== undefined && description !== attachment.description;
+
+    // If nothing changed, return the current version without creating a new one
+    if (!contentChanged && !descriptionChanged) {
+      return currentVersion;
+    }
+
+    // If only description changed (no content change), update description without new version
+    if (!contentChanged && descriptionChanged) {
+      attachment.description = description;
+      this.dirty = true;
+      return currentVersion;
+    }
+
+    // Content changed - create a new version
+    const now = new Date().toISOString();
     const estimatedTokens = estimateTokens(data);
     const newVersionNumber = attachment.current_version + 1;
 

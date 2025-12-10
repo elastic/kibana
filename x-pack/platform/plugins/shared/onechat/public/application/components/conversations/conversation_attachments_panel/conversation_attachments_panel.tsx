@@ -166,6 +166,8 @@ export const ConversationAttachmentsPanel: React.FC<ConversationAttachmentsPanel
                 // Screen context attachments should never be deletable
                 const isScreenContext = attachment.type === AttachmentType.screenContext;
                 const canDelete = !isScreenContext;
+                // Attachments with client_id (from flyout configuration) cannot be permanently deleted
+                const canPermanentDelete = canDelete && !isReferenced && !attachment.client_id;
 
                 return (
                   <ConversationAttachmentItem
@@ -178,7 +180,7 @@ export const ConversationAttachmentsPanel: React.FC<ConversationAttachmentsPanel
                         : undefined
                     }
                     onPermanentDelete={
-                      canDelete && !isReferenced && onPermanentDeleteAttachment
+                      canPermanentDelete && onPermanentDeleteAttachment
                         ? () => onPermanentDeleteAttachment(attachment.id)
                         : undefined
                     }

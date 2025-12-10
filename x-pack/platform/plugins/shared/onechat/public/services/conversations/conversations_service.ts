@@ -117,15 +117,18 @@ export class ConversationsService {
 
   /**
    * Create a new conversation-level attachment.
+   * @param id - Optional client-provided ID for the attachment. If not provided, server generates one.
    */
   async createAttachment({
     conversationId,
+    id,
     type,
     data,
     description,
     hidden,
   }: {
     conversationId: string;
+    id?: string;
     type: string;
     data: unknown;
     description?: string;
@@ -134,7 +137,7 @@ export class ConversationsService {
     return await this.http.post<{ id: string; type: string; current_version: number }>(
       `${publicApiPath}/conversations/${conversationId}/attachments`,
       {
-        body: JSON.stringify({ type, data, description, hidden }),
+        body: JSON.stringify({ id, type, data, description, hidden }),
       }
     );
   }
