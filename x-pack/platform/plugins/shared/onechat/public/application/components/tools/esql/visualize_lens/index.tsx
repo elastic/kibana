@@ -17,17 +17,29 @@ export function VisualizeLens({
   dataViews,
   uiActions,
   lensConfig,
+  onPromoteToAttachment,
+  findExistingVisualizationAttachment,
+  onOpenAttachment,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
   uiActions: UiActionsStart;
   lensConfig: any;
+  /** Optional callback to promote visualization to attachment */
+  onPromoteToAttachment?: (lensConfig: any) => void;
+  /** Function to find if a visualization is already an attachment */
+  findExistingVisualizationAttachment?: (lensConfig: any) => { id: string } | undefined;
+  /** Callback to open an existing attachment in the viewer */
+  onOpenAttachment?: (attachmentId: string) => void;
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
     dataViews,
     lensConfig,
   });
+
+  // Check if this visualization is already an attachment
+  const existingAttachment = findExistingVisualizationAttachment?.(lensConfig);
 
   return (
     <BaseVisualization
@@ -36,6 +48,13 @@ export function VisualizeLens({
       lensInput={lensInput}
       setLensInput={setLensInput}
       isLoading={isLoading}
+      onPromoteToAttachment={
+        // Pass the original lensConfig (API format), not lensInput.attributes (Lens format)
+        // The attachment renderer will convert it back via LensConfigBuilder.fromAPIFormat()
+        onPromoteToAttachment ? () => onPromoteToAttachment(lensConfig) : undefined
+      }
+      existingAttachmentId={existingAttachment?.id}
+      onOpenAttachment={onOpenAttachment}
     />
   );
 }

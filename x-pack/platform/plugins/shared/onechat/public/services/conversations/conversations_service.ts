@@ -56,4 +56,106 @@ export class ConversationsService {
       }
     );
   }
+
+  /**
+   * Delete a conversation-level attachment.
+   * @param permanent - If true, permanently removes the attachment. Only allowed for attachments not referenced in any round.
+   */
+  async deleteAttachment({
+    conversationId,
+    attachmentId,
+    permanent = false,
+  }: {
+    conversationId: string;
+    attachmentId: string;
+    permanent?: boolean;
+  }) {
+    return await this.http.delete<{ success: boolean; permanent: boolean }>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
+      {
+        query: permanent ? { permanent: true } : undefined,
+      }
+    );
+  }
+
+  /**
+   * Restore a previously deleted conversation-level attachment.
+   */
+  async restoreAttachment({
+    conversationId,
+    attachmentId,
+  }: {
+    conversationId: string;
+    attachmentId: string;
+  }) {
+    return await this.http.post<{ success: boolean }>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/_restore`
+    );
+  }
+
+  /**
+   * Update a conversation-level attachment (creates a new version).
+   */
+  async updateAttachment({
+    conversationId,
+    attachmentId,
+    data,
+    description,
+  }: {
+    conversationId: string;
+    attachmentId: string;
+    data: unknown;
+    description?: string;
+  }) {
+    return await this.http.put<{ attachment: unknown; new_version: unknown }>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
+      {
+        body: JSON.stringify({ data, description }),
+      }
+    );
+  }
+
+  /**
+   * Create a new conversation-level attachment.
+   */
+  async createAttachment({
+    conversationId,
+    type,
+    data,
+    description,
+    hidden,
+  }: {
+    conversationId: string;
+    type: string;
+    data: unknown;
+    description?: string;
+    hidden?: boolean;
+  }) {
+    return await this.http.post<{ id: string; type: string; current_version: number }>(
+      `${publicApiPath}/conversations/${conversationId}/attachments`,
+      {
+        body: JSON.stringify({ type, data, description, hidden }),
+      }
+    );
+  }
+
+  /**
+   * Rename a conversation-level attachment (update description without creating a new version).
+   */
+  async renameAttachment({
+    conversationId,
+    attachmentId,
+    description,
+  }: {
+    conversationId: string;
+    attachmentId: string;
+    description: string;
+  }) {
+    return await this.http.patch<{ success: boolean; attachment: unknown }>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
+      {
+        body: JSON.stringify({ description }),
+      }
+    );
+  }
 }

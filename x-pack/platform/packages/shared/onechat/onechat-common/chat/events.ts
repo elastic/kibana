@@ -166,6 +166,8 @@ export const isThinkingCompleteEvent = (
 export interface RoundCompleteEventData {
   /** round that was completed */
   round: ConversationRound;
+  /** Updated conversation-level attachments after this round */
+  updatedAttachments?: unknown[];
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;

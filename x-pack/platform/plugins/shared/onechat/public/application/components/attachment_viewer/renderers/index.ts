@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export type {
-  AttachmentUIDefinition,
-  AttachmentServiceStartContract,
-  AttachmentContentProps,
-  AttachmentEditorProps,
-} from './contract';
+export { VisualizationContentRenderer } from './visualization_renderer';

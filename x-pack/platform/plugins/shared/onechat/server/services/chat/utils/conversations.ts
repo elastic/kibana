@@ -38,6 +38,8 @@ export const createConversation$ = ({
         title,
         agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
+        // Include attachments created during the first round
+        attachments: roundCompletedEvent.data.updatedAttachments,
       });
     }),
     switchMap((createdConversation) => {
@@ -69,6 +71,8 @@ export const updateConversation$ = ({
         id: conversation.id,
         title,
         rounds: [...conversation.rounds, roundCompletedEvent.data.round],
+        // Include updated attachments from the round (overwrites existing)
+        attachments: roundCompletedEvent.data.updatedAttachments,
       });
     }),
     switchMap((updatedConversation) => {

@@ -5,8 +5,32 @@
  * 2.0.
  */
 
-import type { UnknownAttachment } from '@kbn/onechat-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/onechat-browser';
+import type { UnknownAttachment, AttachmentType } from '@kbn/onechat-common/attachments';
+import type {
+  AttachmentUIDefinition,
+  AttachmentContentProps,
+  AttachmentEditorProps,
+} from '@kbn/onechat-browser';
+import type { ReactNode } from 'react';
+import {
+  TextContentRenderer,
+  TextEditorRenderer,
+  EsqlContentRenderer,
+  EsqlEditorRenderer,
+  ScreenContextContentRenderer,
+  VisualizationContentRenderer,
+  DefaultJsonRenderer,
+} from './default_renderers';
+
+/**
+ * Type for render content function.
+ */
+export type RenderContentFn = (props: AttachmentContentProps) => ReactNode;
+
+/**
+ * Type for render editor function.
+ */
+export type RenderEditorFn = (props: AttachmentEditorProps) => ReactNode;
 
 /**
  * Internal service for managing attachment UI definitions.
@@ -14,6 +38,34 @@ import type { AttachmentUIDefinition } from '@kbn/onechat-browser';
  */
 export class AttachmentsService {
   private readonly registry: Map<string, AttachmentUIDefinition> = new Map();
+
+  /**
+   * Default renderers for built-in attachment types.
+   */
+  private readonly defaultRenderers: Record<string, {
+    renderContent: RenderContentFn;
+    renderEditor?: RenderEditorFn;
+    isEditable: boolean;
+  }> = {
+    text: {
+      renderContent: TextContentRenderer,
+      renderEditor: TextEditorRenderer,
+      isEditable: true,
+    },
+    esql: {
+      renderContent: EsqlContentRenderer,
+      renderEditor: EsqlEditorRenderer,
+      isEditable: true,
+    },
+    screen_context: {
+      renderContent: ScreenContextContentRenderer,
+      isEditable: false,
+    },
+    visualization: {
+      renderContent: VisualizationContentRenderer,
+      isEditable: false,
+    },
+  };
 
   /**
    * Registers a UI definition for a specific attachment type.
@@ -52,5 +104,68 @@ export class AttachmentsService {
    */
   hasAttachmentType(attachmentType: string): boolean {
     return this.registry.has(attachmentType);
+  }
+
+  /**
+   * Gets the content render function for a specific attachment type.
+   * Returns the registered renderer if available, otherwise falls back to
+   * default renderers for built-in types, then to JSON fallback.
+   *
+   * @param attachmentType - The type identifier to look up
+   * @returns The render function for viewing attachment content
+   */
+  getRenderContent(attachmentType: string): RenderContentFn {
+    // First check registered UI definition
+    const definition = this.registry.get(attachmentType);
+    if (definition?.renderContent) {
+      return definition.renderContent as RenderContentFn;
+    }
+
+    // Fall back to default renderers for built-in types
+    const defaultRenderer = this.defaultRenderers[attachmentType];
+    if (defaultRenderer?.renderContent) {
+      return defaultRenderer.renderContent;
+    }
+
+    // Ultimate fallback: JSON renderer
+    return DefaultJsonRenderer;
+  }
+
+  /**
+   * Gets the editor render function for a specific attachment type.
+   * Returns undefined if the type doesn't support editing.
+   *
+   * @param attachmentType - The type identifier to look up
+   * @returns The render function for editing attachment content, or undefined
+   */
+  getRenderEditor(attachmentType: string): RenderEditorFn | undefined {
+    // First check registered UI definition
+    const definition = this.registry.get(attachmentType);
+    if (definition?.renderEditor) {
+      return definition.renderEditor as RenderEditorFn;
+    }
+
+    // Fall back to default renderers for built-in types
+    const defaultRenderer = this.defaultRenderers[attachmentType];
+    return defaultRenderer?.renderEditor;
+  }
+
+  /**
+   * Checks if a specific attachment type supports editing.
+   *
+   * @param attachmentType - The type identifier to check
+   * @returns true if the type supports editing, false otherwise
+   */
+  isEditable(attachmentType: string): boolean {
+    // First check registered UI definition
+    const definition = this.registry.get(attachmentType);
+    if (definition) {
+      // If isEditable is explicitly set, use it; otherwise check if editor exists
+      return definition.isEditable ?? Boolean(definition.renderEditor);
+    }
+
+    // Fall back to default renderers for built-in types
+    const defaultRenderer = this.defaultRenderers[attachmentType];
+    return defaultRenderer?.isEditable ?? false;
   }
 }

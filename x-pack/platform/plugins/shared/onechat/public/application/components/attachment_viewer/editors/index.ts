@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export type {
-  AttachmentUIDefinition,
-  AttachmentServiceStartContract,
-  AttachmentContentProps,
-  AttachmentEditorProps,
-} from './contract';
+export { TextAttachmentEditor } from './text_editor';
+export { EsqlAttachmentEditor } from './esql_editor';

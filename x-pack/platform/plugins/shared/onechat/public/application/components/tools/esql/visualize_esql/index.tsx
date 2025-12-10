@@ -21,6 +21,9 @@ export function VisualizeESQL({
   esqlColumns,
   esqlQuery,
   preferredChartType,
+  onPromoteToAttachment,
+  findExistingVisualizationAttachment,
+  onOpenAttachment,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
@@ -29,6 +32,12 @@ export function VisualizeESQL({
   esqlQuery: string;
   preferredChartType?: ChartType;
   errorMessages?: string[];
+  /** Optional callback to promote visualization to attachment */
+  onPromoteToAttachment?: (lensConfig: any) => void;
+  /** Function to find if a visualization is already an attachment */
+  findExistingVisualizationAttachment?: (lensConfig: any) => { id: string } | undefined;
+  /** Callback to open an existing attachment in the viewer */
+  onOpenAttachment?: (attachmentId: string) => void;
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
@@ -38,6 +47,11 @@ export function VisualizeESQL({
     preferredChartType,
   });
 
+  // Check if this visualization is already an attachment
+  const existingAttachment = lensInput?.attributes
+    ? findExistingVisualizationAttachment?.(lensInput.attributes)
+    : undefined;
+
   return (
     <BaseVisualization
       lens={lens}
@@ -45,6 +59,13 @@ export function VisualizeESQL({
       lensInput={lensInput}
       setLensInput={setLensInput}
       isLoading={isLoading}
+      onPromoteToAttachment={
+        onPromoteToAttachment && lensInput
+          ? () => onPromoteToAttachment(lensInput.attributes)
+          : undefined
+      }
+      existingAttachmentId={existingAttachment?.id}
+      onOpenAttachment={onOpenAttachment}
     />
   );
 }

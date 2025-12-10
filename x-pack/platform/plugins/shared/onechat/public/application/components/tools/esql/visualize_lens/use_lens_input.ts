@@ -25,13 +25,26 @@ interface ReturnValue {
   error?: Error;
 }
 
+/**
+ * Detect if config is already in Lens format (has visualizationType)
+ * vs API format (has chartType) which needs conversion
+ */
+const isLensFormat = (config: any): boolean => {
+  return config && typeof config === 'object' && 'visualizationType' in config;
+};
+
 export function useLensInput({ dataViews, lens, lensConfig }: Params): ReturnValue {
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
-  // convert lens config to lens attributes
+  // convert lens config to lens attributes, or use directly if already in Lens format
   const lensAttributes = useMemo(() => {
+    if (isLensFormat(lensConfig)) {
+      // Already in Lens format (e.g., from ES|QL suggestions or promoted from chat)
+      return lensConfig;
+    }
+    // API format - needs conversion via LensConfigBuilder
     return new LensConfigBuilder().fromAPIFormat(lensConfig);
   }, [lensConfig]);
 

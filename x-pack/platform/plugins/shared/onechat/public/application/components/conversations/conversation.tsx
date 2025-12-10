@@ -7,10 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, useEuiOverflowScroll, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
-import { useHasActiveConversation } from '../../hooks/use_conversation';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { useQueryClient } from '@kbn/react-query';
+import type { VersionedAttachment } from '@kbn/onechat-common/attachments';
+import {
+  useHasActiveConversation,
+  useConversationAttachments,
+  useReferencedAttachmentIds,
+} from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
+import { ConversationAttachmentsPanel } from './conversation_attachments_panel';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
@@ -27,6 +34,9 @@ import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { useConversationContext } from '../../context/conversation/conversation_context';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
+import { useAttachmentViewer } from '../../hooks/use_attachment_viewer';
+import { queryKeys } from '../../query_keys';
 
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
@@ -36,6 +46,68 @@ export const Conversation: React.FC<{}> = () => {
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
   const { isEmbeddedContext } = useConversationContext();
+  const conversationAttachments = useConversationAttachments();
+  const referencedAttachmentIds = useReferencedAttachmentIds();
+  const { conversationsService } = useOnechatServices();
+  const queryClient = useQueryClient();
+
+  // Handler to update an attachment (creates new version)
+  const handleUpdateAttachment = useCallback(
+    async (attachmentId: string, content: unknown, description?: string) => {
+      if (!conversationId) {
+        throw new Error('No conversation ID');
+      }
+      try {
+        const result = await conversationsService.updateAttachment({
+          conversationId,
+          attachmentId,
+          data: content,
+          description,
+        });
+        // Invalidate the conversation query to refresh attachments
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+        // Return the updated attachment
+        return result.attachment as VersionedAttachment;
+      } catch (error) {
+        // TODO: Show error toast
+        console.error('Failed to update attachment:', error);
+        throw error; // Re-throw so the viewer can show error
+      }
+    },
+    [conversationId, conversationsService, queryClient]
+  );
+
+  // Handler to rename an attachment (update description without creating new version)
+  const handleRenameAttachment = useCallback(
+    async (attachmentId: string, description: string) => {
+      if (!conversationId) {
+        throw new Error('No conversation ID');
+      }
+      try {
+        const result = await conversationsService.renameAttachment({
+          conversationId,
+          attachmentId,
+          description,
+        });
+        // Invalidate the conversation query to refresh attachments
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+        // Return the updated attachment
+        return result.attachment as VersionedAttachment;
+      } catch (error) {
+        // TODO: Show error toast
+        console.error('Failed to rename attachment:', error);
+        throw error; // Re-throw so the viewer can show error
+      }
+    },
+    [conversationId, conversationsService, queryClient]
+  );
+
+  // Hook to open attachment viewer flyout
+  const { openViewer: openAttachmentViewer } = useAttachmentViewer({
+    attachments: conversationAttachments,
+    onUpdate: handleUpdateAttachment,
+    onRename: handleRenameAttachment,
+  });
 
   useSendPredefinedInitialMessage();
 
@@ -43,6 +115,54 @@ export const Conversation: React.FC<{}> = () => {
     onAppLeave,
     isResponseLoading,
   });
+
+  // Handler to delete a conversation-level attachment (soft delete)
+  const handleDeleteAttachment = useCallback(
+    async (attachmentId: string) => {
+      if (!conversationId) return;
+      try {
+        await conversationsService.deleteAttachment({ conversationId, attachmentId, permanent: false });
+        // Invalidate the conversation query to refresh attachments
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+      } catch (error) {
+        // TODO: Show error toast
+        console.error('Failed to delete attachment:', error);
+      }
+    },
+    [conversationId, conversationsService, queryClient]
+  );
+
+  // Handler to permanently delete a conversation-level attachment
+  const handlePermanentDeleteAttachment = useCallback(
+    async (attachmentId: string) => {
+      if (!conversationId) return;
+      try {
+        await conversationsService.deleteAttachment({ conversationId, attachmentId, permanent: true });
+        // Invalidate the conversation query to refresh attachments
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+      } catch (error) {
+        // TODO: Show error toast
+        console.error('Failed to permanently delete attachment:', error);
+      }
+    },
+    [conversationId, conversationsService, queryClient]
+  );
+
+  // Handler to restore a previously deleted attachment
+  const handleRestoreAttachment = useCallback(
+    async (attachmentId: string) => {
+      if (!conversationId) return;
+      try {
+        await conversationsService.restoreAttachment({ conversationId, attachmentId });
+        // Invalidate the conversation query to refresh attachments
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+      } catch (error) {
+        // TODO: Show error toast
+        console.error('Failed to restore attachment:', error);
+      }
+    },
+    [conversationId, conversationsService, queryClient]
+  );
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -97,11 +217,31 @@ export const Conversation: React.FC<{}> = () => {
           css={scrollableStyles}
         >
           <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-            <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+            <ConversationRounds
+              scrollContainerHeight={scrollContainerHeight}
+              conversationAttachments={conversationAttachments}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
       </EuiFlexItem>
+      {/* Conversation-level attachments panel */}
+      {conversationAttachments && conversationAttachments.length > 0 && (
+        <EuiFlexItem
+          css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+          grow={false}
+        >
+          <ConversationAttachmentsPanel
+            attachments={conversationAttachments}
+            referencedAttachmentIds={referencedAttachmentIds}
+            onDeleteAttachment={handleDeleteAttachment}
+            onPermanentDeleteAttachment={handlePermanentDeleteAttachment}
+            onRestoreAttachment={handleRestoreAttachment}
+            onOpenAttachmentViewer={openAttachmentViewer}
+            autoCollapse
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
         grow={false}

@@ -10,3 +10,8 @@ import type { EmbeddableConversationProps } from '../embeddable/types';
 export interface OpenConversationFlyoutOptions extends EmbeddableConversationProps {
   onClose?: () => void;
 }
+
+export type {
+  OpenAttachmentViewerFlyoutOptions,
+  AttachmentViewerFlyoutRef,
+} from './open_attachment_viewer_flyout';

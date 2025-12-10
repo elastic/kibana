@@ -15,10 +15,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import React, { useMemo, useCallback } from 'react';
+import type { Attachment, VersionedAttachment } from '@kbn/onechat-common/attachments';
 import { ROUNDED_BORDER_RADIUS_LARGE } from '../conversation.styles';
 import { AttachmentPillsRow } from '../conversation_input/attachment_pills_row';
+import { useAttachmentViewer } from '../../../hooks/use_attachment_viewer';
 
 const labels = {
   userMessage: i18n.translate('xpack.onechat.round.userInput', {
@@ -29,10 +30,30 @@ const labels = {
 interface RoundInputProps {
   input: string;
   attachments?: Attachment[];
+  conversationAttachments?: VersionedAttachment[];
 }
 
-export const RoundInput = ({ input, attachments }: RoundInputProps) => {
+export const RoundInput = ({ input, attachments, conversationAttachments }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
+
+  // Use the attachment viewer hook with conversation-level versioned attachments
+  const { openViewer } = useAttachmentViewer({
+    attachments: conversationAttachments,
+  });
+
+  const handleAttachmentClick = useCallback(
+    (attachmentId: string) => {
+      // Debug logging to understand why click might not work
+      console.log('[AttachmentClick] Clicked attachment:', attachmentId);
+      console.log('[AttachmentClick] Available conversationAttachments:', conversationAttachments);
+      console.log(
+        '[AttachmentClick] Match found:',
+        conversationAttachments?.find((a) => a.id === attachmentId)
+      );
+      openViewer(attachmentId);
+    },
+    [openViewer, conversationAttachments]
+  );
 
   const backgroundColorStyle = {
     background: `linear-gradient(
@@ -74,7 +95,10 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
       </EuiPanel>
       {visibleAttachments.length > 0 && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} />
+          <AttachmentPillsRow
+            attachments={visibleAttachments}
+            onAttachmentClick={conversationAttachments ? handleAttachmentClick : undefined}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -120,10 +120,19 @@ export function createVisualizationRenderer({
   startDependencies,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
+  onPromoteToAttachment,
+  findExistingVisualizationAttachment,
+  onOpenAttachment,
 }: {
   startDependencies: OnechatStartDependencies;
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
+  /** Optional callback to promote visualization to attachment */
+  onPromoteToAttachment?: (lensConfig: any, esqlQuery?: string) => void;
+  /** Function to find if a visualization is already an attachment */
+  findExistingVisualizationAttachment?: (lensConfig: any) => { id: string } | undefined;
+  /** Callback to open an existing attachment in the viewer */
+  onOpenAttachment?: (attachmentId: string) => void;
 }) {
   return (props: VisualizationElementAttributes) => {
     const { toolResultId, chartType } = props;
@@ -173,6 +182,11 @@ export function createVisualizationRenderer({
           dataViews={startDependencies.dataViews}
           lens={startDependencies.lens}
           uiActions={startDependencies.uiActions}
+          onPromoteToAttachment={
+            onPromoteToAttachment ? (lensConfig) => onPromoteToAttachment(lensConfig) : undefined
+          }
+          findExistingVisualizationAttachment={findExistingVisualizationAttachment}
+          onOpenAttachment={onOpenAttachment}
         />
       );
     }
@@ -191,6 +205,13 @@ export function createVisualizationRenderer({
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}
+        onPromoteToAttachment={
+          onPromoteToAttachment
+            ? (lensConfig) => onPromoteToAttachment(lensConfig, query)
+            : undefined
+        }
+        findExistingVisualizationAttachment={findExistingVisualizationAttachment}
+        onOpenAttachment={onOpenAttachment}
       />
     );
   };

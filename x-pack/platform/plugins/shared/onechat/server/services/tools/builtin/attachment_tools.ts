@@ -74,29 +74,29 @@ export const createAttachmentTools = (
       description:
         'Read the full content of a conversation attachment by ID. Use this to access attachment data.',
       schema: attachmentReadSchema,
-      handler: async ({ attachmentId, version }): Promise<ToolHandlerReturn> => {
-        const attachment = attachmentManager.get(attachmentId);
+      handler: async ({ attachment_id, version }): Promise<ToolHandlerReturn> => {
+        const attachment = attachmentManager.get(attachment_id);
         if (!attachment) {
           return {
             results: [
               createErrorResult({
-                message: `Attachment with ID '${attachmentId}' not found`,
-                metadata: { attachmentId },
+                message: `Attachment with ID '${attachment_id}' not found`,
+                metadata: { attachment_id },
               }),
             ],
           };
         }
 
         const targetVersion = version
-          ? attachmentManager.getVersion(attachmentId, version)
+          ? attachmentManager.getVersion(attachment_id, version)
           : getLatestVersion(attachment);
 
         if (!targetVersion) {
           return {
             results: [
               createErrorResult({
-                message: `Version ${version} not found for attachment '${attachmentId}'`,
-                metadata: { attachmentId, version },
+                message: `Version ${version} not found for attachment '${attachment_id}'`,
+                metadata: { attachment_id, version },
               }),
             ],
           };
@@ -108,7 +108,7 @@ export const createAttachmentTools = (
               type: ToolResultType.resource,
               data: {
                 __attachment_operation__: 'read',
-                attachment_id: attachmentId,
+                attachment_id,
                 version: targetVersion.version,
                 type: attachment.type,
                 content: targetVersion.data,
@@ -129,15 +129,15 @@ export const createAttachmentTools = (
       description:
         'Update a conversation attachment. Creates a new version with the provided content.',
       schema: attachmentUpdateSchema,
-      handler: async ({ attachmentId, content, description }): Promise<ToolHandlerReturn> => {
-        const newVersion = attachmentManager.update(attachmentId, content, description);
+      handler: async ({ attachment_id, content, description }): Promise<ToolHandlerReturn> => {
+        const newVersion = attachmentManager.update(attachment_id, content, description);
 
         if (!newVersion) {
           return {
             results: [
               createErrorResult({
-                message: `Attachment with ID '${attachmentId}' not found`,
-                metadata: { attachmentId },
+                message: `Attachment with ID '${attachment_id}' not found`,
+                metadata: { attachment_id },
               }),
             ],
           };
@@ -149,7 +149,7 @@ export const createAttachmentTools = (
               type: ToolResultType.resource,
               data: {
                 __attachment_operation__: 'update',
-                attachment_id: attachmentId,
+                attachment_id,
                 new_version: newVersion.version,
                 message: `Successfully updated attachment to version ${newVersion.version}`,
               },
@@ -198,15 +198,15 @@ export const createAttachmentTools = (
       description:
         'Soft-delete an attachment from the conversation. The attachment can be restored later.',
       schema: attachmentDeleteSchema,
-      handler: async ({ attachmentId }): Promise<ToolHandlerReturn> => {
-        const success = attachmentManager.delete(attachmentId);
+      handler: async ({ attachment_id }): Promise<ToolHandlerReturn> => {
+        const success = attachmentManager.delete(attachment_id);
 
         if (!success) {
           return {
             results: [
               createErrorResult({
-                message: `Attachment with ID '${attachmentId}' not found or already deleted`,
-                metadata: { attachmentId },
+                message: `Attachment with ID '${attachment_id}' not found or already deleted`,
+                metadata: { attachment_id },
               }),
             ],
           };
@@ -218,7 +218,7 @@ export const createAttachmentTools = (
               type: ToolResultType.resource,
               data: {
                 __attachment_operation__: 'delete',
-                attachment_id: attachmentId,
+                attachment_id,
                 message: `Successfully deleted attachment`,
               },
             },
@@ -234,8 +234,8 @@ export const createAttachmentTools = (
       type: ToolType.builtin,
       description: 'List all attachments in the conversation with their summaries.',
       schema: attachmentListSchema,
-      handler: async ({ includeDeleted }): Promise<ToolHandlerReturn> => {
-        const attachments = includeDeleted
+      handler: async ({ include_deleted }): Promise<ToolHandlerReturn> => {
+        const attachments = include_deleted
           ? attachmentManager.getAll()
           : attachmentManager.getActive();
 
@@ -274,15 +274,15 @@ export const createAttachmentTools = (
       type: ToolType.builtin,
       description: 'Get the diff between two versions of an attachment to understand what changed.',
       schema: attachmentDiffSchema,
-      handler: async ({ attachmentId, fromVersion, toVersion }): Promise<ToolHandlerReturn> => {
-        const diff = attachmentManager.getDiff(attachmentId, fromVersion, toVersion);
+      handler: async ({ attachment_id, from_version, to_version }): Promise<ToolHandlerReturn> => {
+        const diff = attachmentManager.getDiff(attachment_id, from_version, to_version);
 
         if (!diff) {
           return {
             results: [
               createErrorResult({
-                message: `Could not generate diff for attachment '${attachmentId}'`,
-                metadata: { attachmentId, fromVersion, toVersion },
+                message: `Could not generate diff for attachment '${attachment_id}'`,
+                metadata: { attachment_id, from_version, to_version },
               }),
             ],
           };
@@ -294,9 +294,9 @@ export const createAttachmentTools = (
               type: ToolResultType.resource,
               data: {
                 __attachment_operation__: 'diff',
-                attachment_id: attachmentId,
-                from_version: fromVersion,
-                to_version: toVersion ?? 'current',
+                attachment_id,
+                from_version,
+                to_version: to_version ?? 'current',
                 ...diff,
               },
             },

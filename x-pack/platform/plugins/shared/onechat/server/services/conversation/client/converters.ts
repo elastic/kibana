@@ -158,6 +158,8 @@ export const updateConversation = ({
     ...update,
     space,
     updatedAt: updateDate.toISOString(),
+    // If attachments are provided in the update, use them; otherwise keep existing
+    attachments: update.attachments ?? conversation.attachments,
   };
 
   return updated;
@@ -183,5 +185,7 @@ export const createRequestToEs = ({
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
+    // Include attachments if provided
+    attachments: conversation.attachments ?? [],
   };
 };

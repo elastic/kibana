@@ -21,6 +21,12 @@ interface BaseVisualizationProps {
   lensInput: TypedLensByValueInput | undefined;
   setLensInput: (input: TypedLensByValueInput) => void;
   isLoading: boolean;
+  /** Optional callback to promote visualization to attachment */
+  onPromoteToAttachment?: () => void;
+  /** If the visualization is already an attachment, this is its ID */
+  existingAttachmentId?: string;
+  /** Callback to open an existing attachment in the viewer */
+  onOpenAttachment?: (attachmentId: string) => void;
 }
 
 export function BaseVisualization({
@@ -29,6 +35,9 @@ export function BaseVisualization({
   lensInput,
   setLensInput,
   isLoading,
+  onPromoteToAttachment,
+  existingAttachmentId,
+  onOpenAttachment,
 }: BaseVisualizationProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensLoadEvent, setLensLoadEvent] = useState<
@@ -66,6 +75,9 @@ export function BaseVisualization({
             lensInput={lensInput}
             lensLoadEvent={lensLoadEvent}
             setLensInput={setLensInput}
+            onPromoteToAttachment={onPromoteToAttachment}
+            existingAttachmentId={existingAttachmentId}
+            onOpenAttachment={onOpenAttachment}
           />
         )}
         {isLoading ? (

@@ -15,6 +15,7 @@ import { useConversationContext } from '../../../context/conversation/conversati
 export interface AttachmentPillsRowProps {
   attachments: AttachmentInput[] | Attachment[];
   removable?: boolean;
+  onAttachmentClick?: (attachmentId: string) => void;
 }
 
 const labels = {
@@ -26,6 +27,7 @@ const labels = {
 export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   attachments,
   removable = false,
+  onAttachmentClick,
 }) => {
   const { removeAttachment } = useConversationContext();
 
@@ -45,6 +47,9 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
           key={attachment.id ?? `${attachment.type}-${index}`}
           attachment={attachment as Attachment}
           onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
+          onClick={
+            onAttachmentClick && attachment.id ? () => onAttachmentClick(attachment.id!) : undefined
+          }
         />
       ))}
     </EuiBadgeGroup>

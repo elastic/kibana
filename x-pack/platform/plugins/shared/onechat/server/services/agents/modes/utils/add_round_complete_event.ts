@@ -44,11 +44,14 @@ export const addRoundCompleteEvent = ({
   startTime,
   endTime,
   modelProvider,
+  getUpdatedAttachments,
 }: {
   userInput: RoundInput;
   startTime: Date;
   modelProvider: ModelProvider;
   endTime?: Date;
+  /** Optional function to get updated attachments after round completes */
+  getUpdatedAttachments?: () => unknown[];
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -69,6 +72,8 @@ export const addRoundCompleteEvent = ({
             type: ChatEventType.roundComplete,
             data: {
               round,
+              // Include updated attachments if provided
+              updatedAttachments: getUpdatedAttachments?.(),
             },
           };
 

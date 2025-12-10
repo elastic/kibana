@@ -25,16 +25,21 @@ export const getCurrentSpaceId = ({
 };
 
 export const createSpaceDslFilter = (space: string): QueryDslQueryContainer => {
+  // Note: { term: { space } } is shorthand for { term: { space: space } }
+  // We need to use explicit field name to avoid empty field issues
   return isDefaultSpace(space)
     ? {
         bool: {
-          should: [{ term: { space } }, { bool: { must_not: { exists: { field: 'space' } } } }],
+          should: [
+            { term: { space: space || DEFAULT_SPACE_ID } },
+            { bool: { must_not: { exists: { field: 'space' } } } },
+          ],
           minimum_should_match: 1,
         },
       }
     : {
         bool: {
-          should: [{ term: { space } }],
+          should: [{ term: { space: space } }],
           minimum_should_match: 1,
         },
       };

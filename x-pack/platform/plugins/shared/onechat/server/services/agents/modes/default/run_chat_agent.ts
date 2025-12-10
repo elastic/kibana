@@ -8,9 +8,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
+import type { ChatAgentEvent, RoundInput, ToolType } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
-import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
+import type {
+  AgentHandlerContext,
+  AgentEventEmitterFn,
+  ExecutableTool,
+} from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server/tools';
+import { createAttachmentStateManager } from '@kbn/onechat-server/attachments';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -24,6 +30,22 @@ import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import { createAttachmentTools } from '../../../tools/builtin/attachment_tools';
+
+/**
+ * Converts BuiltinToolDefinition to ExecutableTool format.
+ * This is needed because attachment tools are dynamically created with the state manager.
+ */
+const convertBuiltinToExecutable = (tool: BuiltinToolDefinition): ExecutableTool => ({
+  id: tool.id,
+  type: tool.type as ToolType,
+  description: tool.description,
+  tags: tool.tags,
+  configuration: {},
+  readonly: true,
+  getSchema: () => tool.schema,
+  execute: async (params) => tool.handler(params.toolParams),
+});
 
 const chatAgentGraphName = 'default-onechat-agent';
 
@@ -66,10 +88,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     manualEvents$.next(event);
   };
 
+  // Create attachment state manager for conversation-level attachments
+  // This enables the LLM to read, update, add, and manage attachments
+  const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? []);
+
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     attachmentsService: attachments,
+    conversationAttachments: attachmentStateManager.toArray(),
   });
 
   const selectedTools = await selectTools({
@@ -80,8 +107,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
   });
 
+  // Create and add attachment management tools
+  // These tools allow the LLM to add, read, update, delete attachments
+  const attachmentToolDefinitions = createAttachmentTools(attachmentStateManager);
+  const attachmentTools = attachmentToolDefinitions.map(convertBuiltinToExecutable);
+  const allSelectedTools = [...selectedTools, ...attachmentTools];
+
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
-    tools: selectedTools,
+    tools: allSelectedTools,
     logger,
     request,
     sendEvent: eventEmitter,
@@ -153,7 +186,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput, startTime, modelProvider }),
+    addRoundCompleteEvent({
+      userInput: processedInput,
+      startTime,
+      modelProvider,
+      // Pass a function to get updated attachments after all events are processed
+      getUpdatedAttachments: () => attachmentStateManager.toArray(),
+    }),
     shareReplay()
   );
 

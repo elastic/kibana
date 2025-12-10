@@ -12,6 +12,7 @@ import {
   type TextAttachment,
   type ScreenContextAttachment,
   type EsqlAttachment,
+  type VisualizationAttachment,
 } from '@kbn/onechat-common/attachments';
 
 export const registerAttachmentUiDefinitions = ({
@@ -25,6 +26,7 @@ export const registerAttachmentUiDefinitions = ({
         defaultMessage: 'Text',
       }),
     getIcon: () => 'document',
+    isEditable: true,
   });
 
   attachments.addAttachmentType<ScreenContextAttachment>(AttachmentType.screenContext, {
@@ -33,6 +35,7 @@ export const registerAttachmentUiDefinitions = ({
         defaultMessage: 'Screen context',
       }),
     getIcon: () => 'inspect',
+    isEditable: false,
   });
 
   attachments.addAttachmentType<EsqlAttachment>(AttachmentType.esql, {
@@ -41,5 +44,16 @@ export const registerAttachmentUiDefinitions = ({
         defaultMessage: 'ES|QL query',
       }),
     getIcon: () => 'editorCodeBlock',
+    isEditable: true,
+  });
+
+  attachments.addAttachmentType<VisualizationAttachment>(AttachmentType.visualization, {
+    getLabel: (attachment) =>
+      attachment.data?.description ||
+      i18n.translate('xpack.agentBuilderPlatform.attachments.visualization.label', {
+        defaultMessage: 'Visualization',
+      }),
+    getIcon: () => 'visBarVerticalStacked',
+    isEditable: false,
   });
 };

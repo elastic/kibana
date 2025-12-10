@@ -8,6 +8,7 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { VersionedAttachment } from '@kbn/onechat-common/attachments';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { RoundLayout } from './round_layout';
 
@@ -15,10 +16,12 @@ const CONVERSATION_ROUNDS_ID = 'onechatConversationRoundsContainer';
 
 interface ConversationRoundsProps {
   scrollContainerHeight: number;
+  conversationAttachments?: VersionedAttachment[];
 }
 
 export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
   scrollContainerHeight,
+  conversationAttachments,
 }) => {
   const conversationRounds = useConversationRounds();
 
@@ -40,6 +43,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
             scrollContainerHeight={scrollContainerHeight}
             isCurrentRound={isCurrentRound}
             rawRound={round}
+            conversationAttachments={conversationAttachments}
           />
         );
       })}

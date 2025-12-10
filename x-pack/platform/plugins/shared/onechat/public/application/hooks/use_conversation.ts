@@ -126,3 +126,43 @@ export const useHasActiveConversation = () => {
   const conversationRounds = useConversationRounds();
   return Boolean(conversationId || conversationRounds.length > 0);
 };
+
+/**
+ * Hook to get conversation-level versioned attachments.
+ * These are attachments that persist across the entire conversation.
+ */
+export const useConversationAttachments = () => {
+  const { conversation } = useConversation();
+  return conversation?.attachments;
+};
+
+/**
+ * Hook to get the set of attachment IDs that have been referenced in conversation rounds.
+ * An attachment is referenced if any tool call result contains an __attachment_operation__
+ * marker with that attachment_id.
+ */
+export const useReferencedAttachmentIds = (): Set<string> => {
+  const conversationRounds = useConversationRounds();
+
+  return useMemo(() => {
+    const referencedIds = new Set<string>();
+
+    for (const round of conversationRounds) {
+      for (const step of round.steps) {
+        if (step.type !== 'tool_call') continue;
+
+        for (const result of step.results) {
+          const data = result.data as Record<string, unknown> | undefined;
+          if (!data || !data.__attachment_operation__) continue;
+
+          const attachmentId = data.attachment_id as string | undefined;
+          if (attachmentId) {
+            referencedIds.add(attachmentId);
+          }
+        }
+      }
+    }
+
+    return referencedIds;
+  }, [conversationRounds]);
+};

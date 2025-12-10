@@ -117,6 +117,22 @@ export interface AttachmentStateManager {
    */
   restore(attachmentId: string): boolean;
 
+  /**
+   * Permanently deletes an attachment (removes it completely).
+   * This should only be used for attachments that have never been referenced in conversation rounds.
+   * @param attachmentId - The ID of the attachment to permanently delete
+   * @returns true if successful, false if attachment not found
+   */
+  permanentDelete(attachmentId: string): boolean;
+
+  /**
+   * Updates the attachment metadata (description) without creating a new version.
+   * @param attachmentId - The ID of the attachment to rename
+   * @param description - The new description/title
+   * @returns true if successful, false if attachment not found
+   */
+  rename(attachmentId: string, description: string): boolean;
+
   // Utility functions
 
   /**
@@ -384,6 +400,30 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     attachment.versions.push(restoredVersion);
     attachment.current_version = newVersionNumber;
 
+    this.dirty = true;
+    return true;
+  }
+
+  permanentDelete(attachmentId: string): boolean {
+    const attachment = this.attachments.get(attachmentId);
+    if (!attachment) {
+      return false;
+    }
+
+    // Remove the attachment completely from the map
+    this.attachments.delete(attachmentId);
+    this.dirty = true;
+    return true;
+  }
+
+  rename(attachmentId: string, description: string): boolean {
+    const attachment = this.attachments.get(attachmentId);
+    if (!attachment) {
+      return false;
+    }
+
+    // Update the description without creating a new version
+    attachment.description = description;
     this.dirty = true;
     return true;
   }

@@ -6,4 +6,13 @@
  */
 
 export { AttachmentsService } from './attachements_service';
+export type { RenderContentFn, RenderEditorFn } from './attachements_service';
 export { createPublicAttachmentContract } from './create_public_attachment_contract';
+export {
+  TextContentRenderer,
+  TextEditorRenderer,
+  EsqlContentRenderer,
+  EsqlEditorRenderer,
+  ScreenContextContentRenderer,
+  DefaultJsonRenderer,
+} from './default_renderers';

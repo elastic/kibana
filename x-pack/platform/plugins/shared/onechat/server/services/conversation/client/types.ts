@@ -19,10 +19,15 @@ export type ConversationCreateRequest = Omit<
   'id' | 'created_at' | 'updated_at' | 'user'
 > & {
   id?: string;
+  /** Conversation-level versioned attachments */
+  attachments?: unknown[];
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds'>>;
+  Partial<Pick<Conversation, 'title' | 'rounds'>> & {
+    /** Conversation-level versioned attachments */
+    attachments?: unknown[];
+  };
 
 export interface ConversationListOptions {
   agentId?: string;
