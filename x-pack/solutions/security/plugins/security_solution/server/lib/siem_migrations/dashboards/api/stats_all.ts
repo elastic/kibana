@@ -9,7 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { GetAllDashboardMigrationsStatsResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/api/util/authz';
+import { authz } from './util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 
 export const registerSiemDashboardMigrationsStatsAllRoute = (

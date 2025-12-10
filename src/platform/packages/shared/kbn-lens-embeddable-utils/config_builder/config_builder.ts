@@ -119,6 +119,10 @@ export class LensConfigBuilder {
     this.enableAPITransforms = enableAPITransforms;
   }
 
+  public get isEnabled() {
+    return this.enableAPITransforms;
+  }
+
   public setEnabled(enabled: boolean) {
     this.enableAPITransforms = enabled;
   }
