@@ -103,10 +103,6 @@ export class StreamsClient {
 
   public async checkStreamStatus(): Promise<boolean | 'conflict'> {
     const rootLogsStreamExists = await this.checkRootLogsStreamExists();
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return rootLogsStreamExists;
-    }
     const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
     if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
       return 'conflict';
@@ -159,16 +155,13 @@ export class StreamsClient {
       );
     }
 
-    if (!this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+    const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
-      if (!elasticsearchStreamsEnabled) {
-        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
-          method: 'POST',
-          path: '_streams/logs/_enable',
-        });
-      }
+    if (!elasticsearchStreamsEnabled) {
+      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+        method: 'POST',
+        path: '_streams/logs/_enable',
+      });
     }
 
     return { acknowledged: true, result: 'created' };
