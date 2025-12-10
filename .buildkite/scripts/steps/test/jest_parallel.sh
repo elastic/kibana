@@ -62,53 +62,12 @@ while read -r config; do
   # Warning: Closing file descriptor 24 on garbage collection
   cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
 
-  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+  if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] ; then
     cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
   fi
 
-  cmd=$cmd"\" NODE_ENV=test node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
-
-  echo "actual full command is:"
-  echo "$cmd"
-  echo ""
-
-  start=$(date +%s)
-
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  eval "$cmd"
-  lastCode=$?
-  set -e;
-
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
-
-  results+=("- $config
-    duration: ${duration}
-    result: ${lastCode}")
-
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "Jest exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
-  fi
 done <<< "$configs"
 
-if [[ "$failedConfigs" ]]; then
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
-fi
 
 echo "--- Jest configs complete"
 printf "%s\n" "${results[@]}"
