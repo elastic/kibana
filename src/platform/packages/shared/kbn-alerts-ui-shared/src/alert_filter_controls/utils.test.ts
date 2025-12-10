@@ -20,13 +20,13 @@ import { isEqualWith } from 'lodash';
 const defaultControls: FilterControlConfig[] = [
   {
     fieldName: 'first',
-    hideActionBar: true,
+    displaySettings: { hideActionBar: true },
     selectedOptions: ['val1', 'val2'],
   },
 
   {
     fieldName: 'second',
-    hideActionBar: true,
+    displaySettings: { hideActionBar: true },
     selectedOptions: ['val1', 'val2'],
     persist: true,
   },
@@ -47,7 +47,7 @@ const secondControlsSet: FilterControlConfig[] = [
   },
   {
     fieldName: 'second',
-    hideActionBar: false,
+    displaySettings: { hideActionBar: false },
     exclude: true,
   },
 ];
@@ -125,7 +125,7 @@ describe('utils', () => {
         {
           fieldName: 'first',
           selectedOptions: ['firstVal'],
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
         },
       ];
 
@@ -142,13 +142,13 @@ describe('utils', () => {
         {
           fieldName: 'first',
           selectedOptions: ['secondVal1', 'secondVal2'],
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
           existsSelected: true,
         },
         {
           fieldName: 'second',
           selectedOptions: ['val1', 'val2'],
-          hideActionBar: false,
+          displaySettings: { hideActionBar: false },
           exclude: true,
           persist: true,
         },
@@ -192,7 +192,7 @@ describe('utils', () => {
       const expectedResult = [
         {
           fieldName: 'second',
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
           selectedOptions: ['val1', 'val2'],
           persist: true,
         },
@@ -211,7 +211,7 @@ describe('utils', () => {
         {
           fieldName: 'second',
           selectedOptions: ['val2'],
-          hideActionBar: false,
+          displaySettings: { hideActionBar: false },
         },
         {
           fieldName: 'first',
@@ -223,7 +223,7 @@ describe('utils', () => {
         {
           fieldName: 'second',
           selectedOptions: ['val2'],
-          hideActionBar: false,
+          displaySettings: { hideActionBar: false },
           persist: true,
         },
         {
@@ -232,7 +232,7 @@ describe('utils', () => {
         {
           fieldName: 'first',
           selectedOptions: [],
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
         },
       ];
 
