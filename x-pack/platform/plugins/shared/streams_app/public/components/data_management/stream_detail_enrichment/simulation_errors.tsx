@@ -62,7 +62,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
                   'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
                   {
                     defaultMessage:
-                      'This can happen due to type mismatches or fields exceeding configured limits.',
+                      'Potential causes include type mismatches or fields exceeding configured limits.',
                   }
                 )}
               </p>
