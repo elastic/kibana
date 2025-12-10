@@ -28,8 +28,7 @@ import type { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT, INGEST_PIPELINES_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { useIngestPipelinesLocator } from '../../../../../services/use_ingest_pipeline_locator';
-import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
-import { indexModeLabels } from '../../../../../lib/index_mode_labels';
+import { allowAutoCreateRadioIds, indexModeLabels } from '../../../../../../../common/constants';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../../..';
 
 interface Props {

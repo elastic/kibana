@@ -25,7 +25,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
-import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
+import { MAX_DATA_RETENTION, indexModeLabels } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import type { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
@@ -38,7 +38,6 @@ import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
-import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import type { Filters } from '../../components';
 import { FilterListButton } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';

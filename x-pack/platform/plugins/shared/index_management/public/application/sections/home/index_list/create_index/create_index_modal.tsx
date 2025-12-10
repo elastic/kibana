@@ -26,8 +26,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
-import { indexModeDescriptions, indexModeLabels } from '../../../../lib/index_mode_labels';
+import {
+  LOOKUP_INDEX_MODE,
+  STANDARD_INDEX_MODE,
+  indexModeDescriptions,
+  indexModeLabels,
+} from '../../../../../../common/constants';
 import { createIndex } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
 
