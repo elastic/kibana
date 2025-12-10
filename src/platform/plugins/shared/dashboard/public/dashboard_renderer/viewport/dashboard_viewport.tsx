@@ -62,19 +62,6 @@ export const DashboardViewport = () => {
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
-  // TODO: Re-add this for sticky controls only **or** remove it once we fix the double fetch bug
-  // useEffect(() => {
-  //   if (!controlGroupApi) {
-  //     return;
-  //   }
-  //   const subscription = controlGroupApi.children$.subscribe((children) => {
-  //     setHasControls(Object.keys(children).length > 0);
-  //   });
-  //   return () => {
-  //     subscription.unsubscribe();
-  //   };
-  // }, [controlGroupApi]);
-
   const styles = useMemoCss(dashboardViewportStyles);
 
   return (
