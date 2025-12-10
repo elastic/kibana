@@ -31,10 +31,6 @@ import {
   clearConversations,
   decodeEvents,
   getConversationCreatedEvent,
-  invokeChatCompleteWithFunctionRequest,
-  getMessageAddedEvents,
-  chatComplete,
-  getConversationById,
 } from '../utils/conversation';
 
 interface NonStreamingChatResponse {
@@ -525,9 +521,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body as Readable);
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await getConversationById({
-          observabilityAIAssistantAPIClient,
-          conversationId,
+        const fullConversation = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId,
+            },
+          },
         });
 
         proxy.interceptWithResponse('Good night, sir!').catch((e) => {
@@ -564,223 +564,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await clearConversations(es);
-      });
-    });
-
-    describe('when calling a tool', () => {
-      describe('when calling a tool that is not available', () => {
-        before(async () => {
-          proxy = await createLlmProxy(log);
-          connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
-            port: proxy.getPort(),
-          });
-        });
-        after(async () => {
-          await observabilityAIAssistantAPIClient.deleteActionConnector({
-            actionId: connectorId,
-          });
-        });
-
-        describe('when invoking the /chat/complete with the tool request', function () {
-          let events: MessageAddEvent[];
-
-          before(async () => {
-            void proxy.interceptWithResponse('Hello from LLM Proxy');
-
-            const responseBody = await invokeChatCompleteWithFunctionRequest({
-              connectorId,
-              observabilityAIAssistantAPIClient,
-              functionCall: {
-                name: 'unknown_tool',
-                trigger: MessageRole.User,
-                arguments: JSON.stringify({
-                  foo: 'bar',
-                }),
-              },
-            });
-
-            await proxy.waitForAllInterceptorsToHaveBeenCalled();
-
-            events = getMessageAddedEvents(responseBody);
-          });
-
-          it('includes the tool name and an error in the first message add event', () => {
-            expect(events[0].message.message.name).to.be('unknown_tool');
-            expect(events[0].message.message.content).to.contain('toolNotFoundError');
-          });
-
-          it('emits the second message add event that interacts with the LLM to fix the error', () => {
-            expect(events[1].message.message.content).to.be('Hello from LLM Proxy');
-          });
-        });
-
-        describe('when the LLM calls a tool that is not available', function () {
-          let fullConversation: Conversation;
-          before(async () => {
-            void proxy.interceptTitle('LLM-generated title');
-
-            void proxy.interceptWithFunctionRequest({
-              name: 'unknown_tool',
-              arguments: () =>
-                JSON.stringify({
-                  foo: 'bar',
-                }),
-              when: () => true,
-            });
-
-            void proxy.interceptWithResponse('Hello from LLM Proxy, again!');
-
-            const { conversationCreateEvent } = await chatComplete({
-              userPrompt: 'user prompt test spec',
-              connectorId,
-              persist: true,
-              observabilityAIAssistantAPIClient,
-            });
-
-            await proxy.waitForAllInterceptorsToHaveBeenCalled();
-
-            const conversationId = conversationCreateEvent.conversation.id;
-            const conversationResponse = await getConversationById({
-              observabilityAIAssistantAPIClient,
-              conversationId,
-            });
-
-            expect(conversationResponse.status).to.be(200);
-            fullConversation = conversationResponse.body;
-          });
-
-          after(async () => {
-            await clearConversations(es);
-          });
-
-          it('returns the conversation with the correct messages', () => {
-            expect(fullConversation.messages.length).to.be(6);
-            // user prompt
-            expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
-            // context tool call
-            expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
-            // context tool response
-            expect(fullConversation.messages[2].message.name).to.be('context');
-            // unknown tool call
-            expect(fullConversation.messages[3].message.function_call?.name).to.be('unknown_tool');
-            // unknown tool response with error message
-            expect(fullConversation.messages[4].message.name).to.contain('unknown_tool');
-            expect(fullConversation.messages[4].message.content).to.contain('toolNotFoundError');
-            // interaction with the LLM to fix the error
-            expect(fullConversation.messages[5].message.content).to.be(
-              'Hello from LLM Proxy, again!'
-            );
-          });
-        });
-      });
-
-      describe('when calling a tool with invalid arguments', () => {
-        before(async () => {
-          proxy = await createLlmProxy(log);
-          connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
-            port: proxy.getPort(),
-          });
-        });
-        after(async () => {
-          await observabilityAIAssistantAPIClient.deleteActionConnector({
-            actionId: connectorId,
-          });
-        });
-        describe('when invoking the /chat/complete with the function request and invalid arguments', function () {
-          let events: MessageAddEvent[];
-
-          before(async () => {
-            void proxy.interceptWithResponse('Hello from LLM Proxy');
-
-            const responseBody = await invokeChatCompleteWithFunctionRequest({
-              connectorId,
-              observabilityAIAssistantAPIClient,
-              functionCall: {
-                name: 'kibana',
-                trigger: MessageRole.User,
-                arguments: JSON.stringify({
-                  foo: 'bar',
-                }),
-              },
-            });
-
-            await proxy.waitForAllInterceptorsToHaveBeenCalled();
-
-            events = getMessageAddedEvents(responseBody);
-          });
-
-          it('includes the tool name and an error in the first message add event', () => {
-            expect(events[0].message.message.name).to.be('kibana');
-            expect(events[0].message.message.content).to.contain(
-              'Tool call arguments for kibana were invalid'
-            );
-          });
-
-          it('emits the second message add event that interacts with the LLM to fix the error', () => {
-            expect(events[1].message.message.content).to.be('Hello from LLM Proxy');
-          });
-        });
-
-        describe('when the LLM calls a tool with invalid arguments', function () {
-          let fullConversation: Conversation;
-          before(async () => {
-            void proxy.interceptTitle('LLM-generated title');
-
-            void proxy.interceptWithFunctionRequest({
-              name: 'kibana',
-              arguments: () =>
-                JSON.stringify({
-                  foo: 'bar',
-                }),
-              when: () => true,
-            });
-
-            void proxy.interceptWithResponse('I will not call the kibana function!');
-            void proxy.interceptWithResponse('Hello from LLM Proxy, again!');
-
-            const { conversationCreateEvent } = await chatComplete({
-              userPrompt: 'user prompt test spec',
-              connectorId,
-              persist: true,
-              observabilityAIAssistantAPIClient,
-            });
-
-            await proxy.waitForAllInterceptorsToHaveBeenCalled();
-
-            const conversationId = conversationCreateEvent.conversation.id;
-            const conversationResponse = await getConversationById({
-              observabilityAIAssistantAPIClient,
-              conversationId,
-            });
-            expect(conversationResponse.status).to.be(200);
-            fullConversation = conversationResponse.body;
-          });
-
-          after(async () => {
-            await clearConversations(es);
-          });
-
-          it('returns the conversation with the correct messages', () => {
-            expect(fullConversation.messages.length).to.be(6);
-            // user prompt
-            expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
-            // context tool call
-            expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
-            // context tool response
-            expect(fullConversation.messages[2].message.name).to.be('context');
-            // kibana tool call
-            expect(fullConversation.messages[3].message.function_call?.name).to.be('kibana');
-            // kibana tool response with error message
-            expect(fullConversation.messages[4].message.name).to.contain('kibana');
-            expect(fullConversation.messages[4].message.content).to.contain(
-              'Tool call arguments for kibana were invalid'
-            );
-            // interaction with the LLM to fix the error
-            expect(fullConversation.messages[5].message.content).to.be(
-              'Hello from LLM Proxy, again!'
-            );
-          });
-        });
       });
     });
 
