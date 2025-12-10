@@ -14,14 +14,3 @@ export enum Milestone {
   M6 = 6,
   M7 = 7,
 }
-
-export interface NBAAction {
-  app: string;
-  text: string;
-}
-
-export interface NBA {
-  message: string;
-  title: string;
-  apps: NBAAction[] | undefined; // TODO: for two apps - how-to pass text to the buttons?
-}

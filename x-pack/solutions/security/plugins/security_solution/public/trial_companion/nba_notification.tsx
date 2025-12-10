@@ -9,14 +9,14 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface Props {
+export interface NBANotificationProps {
   title: string;
   message: string;
   viewButtonText: string | undefined;
   onSeenBanner: () => void;
   onViewButton: (() => void) | undefined;
 }
-export const NBANotification: React.FC<Props> = ({
+export const NBANotification: React.FC<NBANotificationProps> = ({
   title,
   message,
   viewButtonText,

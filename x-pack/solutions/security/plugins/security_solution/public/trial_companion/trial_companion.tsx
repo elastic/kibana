@@ -13,8 +13,9 @@ import { NBANotification } from './nba_notification';
 import { useKibana } from '../common/lib/kibana';
 import { useGetNBA } from './hooks/use_get_nba';
 import { postNBAUserSeen } from './api';
-import { ALL_NBA } from '../../common/trial_companion/constants';
-import type { Milestone, NBA, NBAAction } from '../../common/trial_companion/types';
+import { ALL_NBA } from './nba_translations';
+import type { NBA, NBAAction } from './nba_translations';
+import type { Milestone } from '../../common/trial_companion/types';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
