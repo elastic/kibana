@@ -104,4 +104,160 @@ describe('insertTriggerSnippet', () => {
 
     expect(mockEditor.pushUndoStop).toHaveBeenCalledTimes(2);
   });
+
+  describe('when triggers section exists with empty item', () => {
+    it('should replace empty item and add the selected trigger type', () => {
+      const inputYaml = `triggers:\n  -\n`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+
+      insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: false,
+      });
+
+      const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+      });
+
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: new monaco.Range(2, 1, 3, 1),
+            text: `  ${expectedSnippet}`,
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+
+    it('should replace empty item when there are no existing triggers', () => {
+      const inputYaml = `triggers:\n  -`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+
+      insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: false,
+      });
+
+      const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+      });
+
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: new monaco.Range(2, 1, 2, 4),
+            text: `  ${expectedSnippet}`,
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+
+    it('should replace empty item even when there are existing triggers', () => {
+      const inputYaml = `triggers:\n  - type: manual\n  -\n`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+
+      insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'alert');
+
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('alert', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: false,
+      });
+
+      const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('alert', {
+        full: true,
+        monacoSuggestionFormat: false,
+      });
+
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: new monaco.Range(3, 1, 3, 1),
+            text: `  ${expectedSnippet}`,
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe('when no triggers section exists', () => {
+    it('should add triggers section completely with the selected trigger type', () => {
+      const inputYaml = `name: New workflow`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+
+      insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: true,
+      });
+
+      const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: true,
+      });
+
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: new monaco.Range(1, 1, 1, 1),
+            text: expectedSnippet,
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+
+    it('should add triggers section when YAML is completely empty', () => {
+      const inputYaml = ``;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+
+      insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: true,
+      });
+
+      const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: true,
+      });
+
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: new monaco.Range(1, 1, 1, 1),
+            text: expectedSnippet,
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+  });
 });
