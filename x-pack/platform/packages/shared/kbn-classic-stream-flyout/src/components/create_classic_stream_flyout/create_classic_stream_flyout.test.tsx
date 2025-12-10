@@ -431,7 +431,7 @@ describe('CreateClassicStreamFlyout', () => {
       selectTemplateAndGoToStep2(getByTestId, 'template-2');
 
       // template-2 has indexMode: 'logsdb'
-      expect(getByText('Logsdb')).toBeInTheDocument();
+      expect(getByText('LogsDB')).toBeInTheDocument();
     });
 
     it('displays version when available', () => {
@@ -889,54 +889,10 @@ describe('CreateClassicStreamFlyout', () => {
     });
   });
 
-  describe('ILM policy fetching', () => {
-    it('should fetch ILM policy details when template has ILM policy', async () => {
-      const mockGetIlmPolicy = jest.fn().mockResolvedValue({
-        name: '30d',
-        policy: {
-          phases: {
-            hot: { actions: {} },
-            warm: { min_age: '7d', actions: {} },
-            cold: { min_age: '30d', actions: {} },
-          },
-        },
-      });
-
-      const { getByTestId, findByText } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
-
-      // Select template with ILM policy and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-      // Wait for ILM policy to be fetched
-      await waitFor(() => {
-        expect(mockGetIlmPolicy).toHaveBeenCalledWith('30d', expect.any(AbortSignal));
-      });
-
-      // Check that phase information is displayed
-      await findByText(/Hot till 7d/i);
-      await findByText(/Warm till 30d/i);
-      await findByText(/Cold indefinitely/i);
-    });
-
-    it('should pass abort signal to getIlmPolicy', async () => {
-      let capturedSignal: AbortSignal | undefined;
-      const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
-        capturedSignal = signal;
-        return new Promise((resolve) => {
-          setTimeout(() => resolve(null), 10000);
-        });
-      });
-
-      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
-
-      // Select template with ILM policy and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-      await waitFor(() => {
-        expect(mockGetIlmPolicy).toHaveBeenCalled();
-        expect(capturedSignal).toBeDefined();
-      });
-    });
+  describe('ILM policy fetching integration', () => {
+    // Note: Basic ILM policy fetching, loading states, error handling, and abort signal tests
+    // are covered in confirm_template_details_section.test.tsx.
+    // These tests focus on navigation-specific integration behavior.
 
     it('should abort ILM policy fetch when going back to template selection', async () => {
       let capturedSignal: AbortSignal | undefined;
@@ -965,68 +921,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
     });
 
-    it('should show loading spinner while fetching ILM policy', async () => {
-      const mockGetIlmPolicy = jest.fn().mockImplementation(() => {
-        return new Promise((resolve) => {
-          setTimeout(
-            () =>
-              resolve({
-                name: '30d',
-                policy: {
-                  phases: {
-                    hot: { actions: {} },
-                  },
-                },
-              }),
-            100
-          );
-        });
-      });
-
-      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
-
-      // Select template with ILM policy and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-      // Wait for loading spinner to appear
-      await waitFor(() => {
-        expect(mockGetIlmPolicy).toHaveBeenCalled();
-      });
-
-      // Loading spinner should be visible while fetching
-      const templateDetails = getByTestId('templateDetails');
-      expect(templateDetails).toBeInTheDocument();
-    });
-
-    it('should handle ILM policy fetch errors gracefully', async () => {
-      const mockGetIlmPolicy = jest.fn().mockRejectedValue(new Error('Network error'));
-
-      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
-
-      // Select template with ILM policy and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-      await waitFor(() => {
-        expect(mockGetIlmPolicy).toHaveBeenCalled();
-      });
-
-      // Component should not crash and should display template details without phases
-      expect(getByTestId('templateDetails')).toBeInTheDocument();
-    });
-
-    it('should not fetch ILM policy when template has no ILM policy', () => {
-      const mockGetIlmPolicy = jest.fn();
-
-      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
-
-      // Select template without ILM policy and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-3');
-
-      // Should not call getIlmPolicy
-      expect(mockGetIlmPolicy).not.toHaveBeenCalled();
-    });
-
-    it('should abort previous ILM policy fetch when switching templates', async () => {
+    it('should abort previous ILM policy fetch when switching templates via navigation', async () => {
       let firstSignal: AbortSignal | undefined;
       let secondSignal: AbortSignal | undefined;
       let callCount = 0;
