@@ -146,14 +146,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('should show bulk actions menu after selecting alerts', async () => {
-        await testSubjects.click('checkboxSelectAll');
+        await testSubjects.click('bulk-actions-header');
         await retry.try(async () => {
-          expect(await testSubjects.exists('bulkActionsToggle')).to.be(true);
+          expect(await testSubjects.exists('selectedShowBulkActionsButton')).to.be(true);
         });
       });
 
       it('should bulk mute all selected alerts and show success toast', async () => {
-        await testSubjects.click('bulkActionsToggle');
+        await testSubjects.click('selectedShowBulkActionsButton');
         await retry.waitFor('bulk actions menu visible', () => testSubjects.exists('bulk-mute'));
         await testSubjects.click('bulk-mute');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -192,8 +192,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.alerts.common.submitQuery(`kibana.alert.rule.uuid: "${ruleId}"`);
         await observability.alerts.common.waitForAlertTableToLoad();
 
-        await testSubjects.click('checkboxSelectAll');
-        await testSubjects.click('bulkActionsToggle');
+        await testSubjects.click('bulk-actions-header');
+        await testSubjects.click('selectedShowBulkActionsButton');
         await retry.waitFor('bulk actions menu visible', () => testSubjects.exists('bulk-unmute'));
         await testSubjects.click('bulk-unmute');
         await PageObjects.header.waitUntilLoadingHasFinished();
