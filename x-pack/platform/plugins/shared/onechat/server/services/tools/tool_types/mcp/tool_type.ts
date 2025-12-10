@@ -166,22 +166,24 @@ export const getMcpToolType = (): ToolTypeDefinition<
             config.tool_name
           );
 
-          if (inputSchema) {
-            try {
-              // Convert JSON Schema to Zod schema
-              const zodSchema = jsonSchemaToZod(inputSchema);
-              return zodSchema as z.ZodObject<any>;
-            } catch (error) {
-              // If JSON Schema conversion fails, fall back to passthrough schema
-              // This can happen if the MCP server provides a malformed or unsupported schema
-            }
+          if (!inputSchema) {
+            throw new Error(
+              `Failed to retrieve input schema for MCP tool '${config.tool_name}' from connector '${config.connector_id}'. ` +
+                `The mcp-connector-tools saved object may be missing or the tool may not exist on the MCP server.`
+            );
           }
 
-          // Fall back to passthrough schema if saved object not found or schema conversion fails
-          return z
-            .object({})
-            .passthrough()
-            .describe('Parameters to pass to the MCP tool');
+          try {
+            // Convert JSON Schema to Zod schema
+            const zodSchema = jsonSchemaToZod(inputSchema);
+            return zodSchema as z.ZodObject<any>;
+          } catch (error) {
+            throw new Error(
+              `Failed to convert JSON Schema to Zod for MCP tool '${config.tool_name}': ` +
+                `${error instanceof Error ? error.message : String(error)}. ` +
+                `The MCP server may have provided an unsupported or malformed schema.`
+            );
+          }
         },
 
         getLlmDescription: ({ description }) => {
