@@ -15,8 +15,8 @@ import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import type { InfraFormatter } from '../../../../common/inventory/types';
 import { Timeline } from './timeline/timeline';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
-import { KubernetesButton } from '../../../../components/kubernetes_dashboard_promotion';
-import { OtelKubernetesButton } from '../../../../components/otel_kubernetes_dashboard_promotion';
+import { KubernetesButton } from '../../../../components/kubernetes_dashboard_promotion/ecs_kubernetes_dashboard_promotion';
+import { OtelKubernetesButton } from '../../../../components/kubernetes_dashboard_promotion/otel_kubernetes_dashboard_promotion';
 import { useInstalledIntegration } from '../../../../hooks/use_installed_integration';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {
@@ -43,12 +43,12 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   );
 
   const hasElasticSchema = schemas.includes('ecs');
-  const { isInstalled: hasK8sIntegration } = useInstalledIntegration('kubernetes');
+  const { isInstalled: hasEcsK8sIntegration } = useInstalledIntegration('kubernetes');
   const hasSemconvSchema = schemas.includes('semconv');
   const { isInstalled: hasOtelK8sIntegration } = useInstalledIntegration('kubernetes_otel');
 
-  const showKubernetesButton = hasElasticSchema && hasK8sIntegration;
-  const showOtelKubernetesButton = hasSemconvSchema && hasOtelK8sIntegration;
+  const showEcsK8sButton = hasElasticSchema && hasEcsK8sIntegration;
+  const showOtelK8sButton = hasSemconvSchema && hasOtelK8sIntegration;
 
   useEffect(() => {
     if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));
@@ -62,15 +62,15 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
   if (view === 'table') {
-    return nodeType === 'pod' && (showKubernetesButton || showOtelKubernetesButton) ? (
+    return nodeType === 'pod' && (showEcsK8sButton || showOtelK8sButton) ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
         <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
-          {showKubernetesButton && (
+          {showEcsK8sButton && (
             <EuiFlexItem grow={false}>
               <KubernetesButton />
             </EuiFlexItem>
           )}
-          {showOtelKubernetesButton && (
+          {showOtelK8sButton && (
             <EuiFlexItem grow={false}>
               <OtelKubernetesButton />
             </EuiFlexItem>
@@ -94,14 +94,14 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
               {isOpen ? hideHistory : showHistory}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {nodeType === 'pod' && (showKubernetesButton || showOtelKubernetesButton) && (
+          {nodeType === 'pod' && (showEcsK8sButton || showOtelK8sButton) && (
             <>
-              {showKubernetesButton && (
+              {showEcsK8sButton && (
                 <EuiFlexItem grow={false}>
                   <KubernetesButton />
                 </EuiFlexItem>
               )}
-              {showOtelKubernetesButton && (
+              {showOtelK8sButton && (
                 <EuiFlexItem grow={false}>
                   <OtelKubernetesButton />
                 </EuiFlexItem>

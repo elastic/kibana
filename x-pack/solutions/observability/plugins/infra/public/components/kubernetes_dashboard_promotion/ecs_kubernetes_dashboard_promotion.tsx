@@ -17,23 +17,19 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { TryItButton } from './try_it_button';
-import { useInstalledIntegration } from '../hooks/use_installed_integration';
+import { TryItButton } from '../try_it_button';
+import { useInstalledIntegration } from '../../hooks/use_installed_integration';
 
-export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }) => {
-  const { isInstalled } = useInstalledIntegration('kubernetes_otel');
-
-  const handleClose = () => {
-    onClose();
-  };
+export const KubernetesDashboardCard = ({ onClose }: { onClose: () => void }) => {
+  const { isInstalled } = useInstalledIntegration('kubernetes');
 
   return (
     <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiImage
-            src="https://images.unsplash.com/photo-1650253618249-fb0d32d3865c?w=900&h=900&fit=crop&q=60"
-            alt="Kubernetes OpenTelemetry Dashboards"
+            src="https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=900&h=900&fit=crop&q=60"
+            alt="Kubernetes Dashboards"
             size="s"
           />
         </EuiFlexItem>
@@ -44,15 +40,15 @@ export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }
                 <h4>
                   {isInstalled
                     ? i18n.translate(
-                        'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationInstalledTitle',
+                        'xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationInstalledTitle',
                         {
-                          defaultMessage: 'View Kubernetes OpenTelemetry Dashboards',
+                          defaultMessage: 'View Kubernetes Dashboards',
                         }
                       )
                     : i18n.translate(
-                        'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationNotInstalledTitle',
+                        'xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationNotInstalledTitle',
                         {
-                          defaultMessage: 'Install Kubernetes OpenTelemetry Dashboards',
+                          defaultMessage: 'Install Kubernetes Integration',
                         }
                       )}
                 </h4>
@@ -62,14 +58,14 @@ export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }
               <EuiText size="s" color="subdued">
                 {isInstalled
                   ? i18n.translate(
-                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationInstalledDescription',
-                      { defaultMessage: 'View your Kubernetes OpenTelemetry Dashboards' }
+                      'xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationInstalledDescription',
+                      { defaultMessage: 'View your Kubernetes Dashboards' }
                     )
                   : i18n.translate(
-                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationNotInstalledDescription',
+                      'xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationNotInstalledDescription',
                       {
                         defaultMessage:
-                          'Install the Kubernetes OpenTelemetry Dashboards integration to view your Kubernetes OpenTelemetry Dashboards.',
+                          'Install the Kubernetes integration to view your Kubernetes Dashboards.',
                       }
                     )}
               </EuiText>
@@ -81,26 +77,26 @@ export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }
                     size="s"
                     data-test-subj={
                       isInstalled
-                        ? 'infraOtelKubernetesDashboardCardLink'
-                        : 'infraOtelKubernetesDashboardCardInstallLink'
+                        ? 'infraKubernetesDashboardCardLink'
+                        : 'infraKubernetesDashboardCardInstallLink'
                     }
                     href={
                       isInstalled
-                        ? 'https://www.elastic.co/guide/en/observability/current/kubernetes-otel-dashboards.html'
-                        : 'https://www.elastic.co/guide/en/observability/current/kubernetes-otel-dashboards.html'
+                        ? 'https://www.elastic.co/guide/en/observability/current/kubernetes-dashboards.html'
+                        : 'https://www.elastic.co/guide/en/observability/current/kubernetes-dashboards.html'
                     }
                     target="_blank"
                     rel="noopener"
                   >
                     {isInstalled
                       ? i18n.translate(
-                          'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.viewDashboardLink',
+                          'xpack.infra.inventoryUI.kubernetesPodsDashboard.viewDashboardLink',
                           {
                             defaultMessage: 'View Dashboard',
                           }
                         )
                       : i18n.translate(
-                          'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.installDashboardLink',
+                          'xpack.infra.inventoryUI.kubernetesPodsDashboard.installDashboardLink',
                           {
                             defaultMessage: 'View Integration',
                           }
@@ -109,23 +105,20 @@ export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButtonEmpty
-                    data-test-subj="infraOtelKubernetesDashboardCardHideThisButton"
+                    data-test-subj="infraKubernetesDashboardCardHideThisButton"
                     color="text"
                     size="s"
-                    onClick={handleClose}
+                    onClick={onClose}
                     aria-label={i18n.translate(
-                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.dismissCard',
+                      'xpack.infra.inventoryUI.kubernetesPodsDashboard.dismissCard',
                       {
                         defaultMessage: 'Dismiss card',
                       }
                     )}
                   >
-                    {i18n.translate(
-                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.hideCard',
-                      {
-                        defaultMessage: 'Hide this',
-                      }
-                    )}
+                    {i18n.translate('xpack.infra.inventoryUI.kubernetesPodsDashboard.hideCard', {
+                      defaultMessage: 'Hide this',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -136,16 +129,16 @@ export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }
     </EuiPanel>
   );
 };
-const LOCAL_STORAGE_KEY = 'inventoryUI:otelK8sDashboardClicked';
 
-export const OtelKubernetesButton = () => {
+const LOCAL_STORAGE_KEY = 'inventoryUI:k8sDashboardClicked';
+export const KubernetesButton = () => {
   const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
   const clickedRef = useRef<boolean | undefined>(clicked);
   return (
     <TryItButton
       color={clickedRef.current ? 'primary' : 'accent'}
-      label={i18n.translate('xpack.infra.bottomDrawer.otelKubernetesDashboardsLink', {
-        defaultMessage: 'Otel Kubernetes dashboards',
+      label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
+        defaultMessage: 'Kubernetes dashboards',
       })}
       data-test-subj="inventory-kubernetesDashboard-link"
       link={{

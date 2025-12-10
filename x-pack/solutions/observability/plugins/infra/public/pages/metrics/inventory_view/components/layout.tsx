@@ -30,8 +30,9 @@ import { createLegend } from '../lib/create_legend';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
-import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion';
-import { OtelKubernetesDashboardCard } from '../../../../components/otel_kubernetes_dashboard_promotion';
+import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/ecs_kubernetes_dashboard_promotion';
+import { OtelKubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/otel_kubernetes_dashboard_promotion';
+
 interface Props {
   currentView?: InventoryView | null;
   interval: string;
@@ -76,11 +77,11 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const hasElasticSchema = schemas.includes('ecs');
   const hasOtelSchema = schemas.includes('semconv');
 
-  const [k8sCardDismissed, setK8sCardDismissed] = useState(false);
+  const [ecsK8sCardDismissed, setEcsK8sCardDismissed] = useState(false);
   const [otelK8sCardDismissed, setOtelK8sCardDismissed] = useState(false);
 
-  const showKubernetesDashboardCard = hasElasticSchema && !k8sCardDismissed;
-  const showOtelKubernetesDashboardCard = hasOtelSchema && !otelK8sCardDismissed;
+  const showEcsK8sDashboardCard = hasElasticSchema && !ecsK8sCardDismissed;
+  const showOtelK8sDashboardCard = hasOtelSchema && !otelK8sCardDismissed;
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -171,21 +172,20 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
               </EuiFlexGroup>
             </EuiFlexGroup>
           </TopActionContainer>
-          {nodeType === 'pod' &&
-            (showKubernetesDashboardCard || showOtelKubernetesDashboardCard) && (
-              <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
-                {showKubernetesDashboardCard && (
-                  <EuiFlexItem>
-                    <KubernetesDashboardCard onClose={() => setK8sCardDismissed(true)} />
-                  </EuiFlexItem>
-                )}
-                {showOtelKubernetesDashboardCard && (
-                  <EuiFlexItem>
-                    <OtelKubernetesDashboardCard onClose={() => setOtelK8sCardDismissed(true)} />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            )}
+          {nodeType === 'pod' && (showEcsK8sDashboardCard || showOtelK8sDashboardCard) && (
+            <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
+              {showEcsK8sDashboardCard && (
+                <EuiFlexItem>
+                  <KubernetesDashboardCard onClose={() => setEcsK8sCardDismissed(true)} />
+                </EuiFlexItem>
+              )}
+              {showOtelK8sDashboardCard && (
+                <EuiFlexItem>
+                  <OtelKubernetesDashboardCard onClose={() => setOtelK8sCardDismissed(true)} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          )}
           <EuiFlexItem
             grow={false}
             css={css`
