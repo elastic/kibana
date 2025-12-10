@@ -253,4 +253,21 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       },
     ],
   },
+  {
+    name: 'agent.internal',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
+      defaultMessage: 'Advanced Internal YAML Settings',
+    }),
+    description: () => (
+      <FormattedMessage
+        id="xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsDescription"
+        defaultMessage="Control advanced agent internal settings and feature flags - no stability guarantee is provided for these settings."
+      />
+    ),
+    api_field: {
+      name: 'agent_internal',
+    },
+    schema: z.string(),
+    type: 'yaml',
+  },
 ];
