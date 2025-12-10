@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { createContext, useContext } from 'react';
 import type { DataSource } from '../../components/trace_metrics_grid';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 type TraceMetricsContextProps = {
   dataSource: DataSource;
   indexes: string;
   filters: string[];
-  discoverFetch$: ChartSectionProps['fetch$'];
-} & Pick<ChartSectionProps, 'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter'>;
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
+} & Pick<UnifiedMetricsGridProps, 'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter'>;
 
 export const TraceMetricsContext = createContext<TraceMetricsContextProps | undefined>(undefined);
 
