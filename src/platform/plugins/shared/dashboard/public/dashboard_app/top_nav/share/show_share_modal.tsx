@@ -268,7 +268,7 @@ export function ShowShareModal({
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR
       ) as LocatorPublic<DashboardLocatorParams>,
-      params: locatorParams,
+      params: { ...locatorParams, timeRange: locatorParams.timeRange ?? undefined },
     },
   });
 }
