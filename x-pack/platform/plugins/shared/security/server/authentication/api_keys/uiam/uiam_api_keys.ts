@@ -27,7 +27,7 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   clusterClient: IClusterClient;
   license: SecurityLicense;
-  uiam: UiamServicePublic;
+  uiam?: UiamServicePublic;
 }
 
 /**
@@ -38,7 +38,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
-  private readonly uiam: UiamServicePublic;
+  private readonly uiam?: UiamServicePublic;
 
   constructor({ logger, clusterClient, license, uiam }: UiamAPIKeysOptions) {
     this.logger = logger;
@@ -59,9 +59,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     request: KibanaRequest,
     params: GrantUiamAPIKeyParams
   ): Promise<GrantAPIKeyResult | null> {
+    console.log('UiamAPIKeys grantApiKey called');
     if (!this.license.isEnabled()) {
       return null;
     }
+
+    this.isUiamEnabled();
 
     const authorization = UiamAPIKeys.getAuthorizationHeader(request);
 
@@ -79,7 +82,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       };
     } else {
       try {
-        const { id, key, description } = await this.uiam.grantApiKey(
+        const { id, key, description } = await this.uiam!.grantApiKey(
           authorization,
           params.name,
           params.expiration
@@ -117,6 +120,8 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       return null;
     }
 
+    this.isUiamEnabled();
+
     const authorization = UiamAPIKeys.getAuthorizationHeader(request);
     const { id } = params;
 
@@ -127,7 +132,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      await this.uiam.revokeApiKey(id, authorization.credentials);
+      await this.uiam!.revokeApiKey(id, authorization.credentials);
 
       this.logger.debug(`API key ${id} was invalidated successfully via UIAM`);
 
@@ -168,6 +173,8 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       return null;
     }
 
+    this.isUiamEnabled();
+
     // Create authorization header in the format: ApiKey base64(id:key)
     const authorizationHeader = `ApiKey ${apiKey}`;
 
@@ -175,7 +182,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     const isUiam = apiKey.startsWith(UIAM_CREDENTIALS_PREFIX);
 
     if (isUiam) {
-      const uiamHeaders = this.uiam.getEsClientAuthenticationHeader();
+      const uiamHeaders = this.uiam!.getEsClientAuthenticationHeader();
 
       return this.clusterClient.asScoped({
         headers: {
@@ -218,5 +225,11 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     return authorizationHeader;
+  }
+
+  private isUiamEnabled(): void {
+    if (!this.uiam) {
+      throw new Error('UIAM service is not available.');
+    }
   }
 }

@@ -10,9 +10,6 @@
 import type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  GrantAPIKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   ValidateAPIKeyParams,
@@ -66,14 +63,6 @@ export interface APIKeysServiceWithContext {
    * @param params The params to invalidate an API keys.
    */
   invalidate(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
-
-  /**
-   * Tries to grant an API key for the current user.
-   * @param createParams Create operation parameters.
-   */
-  grantAsInternalUser(
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
-  ): Promise<GrantAPIKeyResult | null>;
 
   /**
    * UIAM-specific API key operations.

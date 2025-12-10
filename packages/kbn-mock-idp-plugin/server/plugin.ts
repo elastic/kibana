@@ -16,6 +16,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Plugin, PluginInitializer } from '@kbn/core-plugins-server';
+import type { CoreAuthenticationService } from '@kbn/core-security-server';
 import {
   readRolesFromResource,
   SERVERLESS_ROLES_ROOT_PATH,
@@ -80,7 +81,7 @@ export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
   initializerContext
 ): Promise<Plugin> => {
-  let getAuthenticationService: (() => any) | undefined;
+  let getAuthenticationService: (() => CoreAuthenticationService) | undefined;
 
   return {
     setup(core, plugins: PluginSetupDependencies) {
@@ -230,6 +231,12 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               expiration,
             });
 
+            if (!result) {
+              return response.badRequest({
+                body: { message: 'Failed to grant API key' },
+              });
+            }
+
             return response.ok({
               body: result,
             });
@@ -249,6 +256,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           validate: {
             body: schema.object({
               apiKey: schema.string(),
+              authcScheme: schema.string(),
             }),
           },
           options: { authRequired: 'optional' },
@@ -331,7 +339,15 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             };
             const requestToUse = kibanaRequestFactory(fakeRawRequest);
 
-            const result = await authcService.apiKeys.uiam.invalidateApiKey(requestToUse, apiKeyId);
+            const result = await authcService.apiKeys.uiam.invalidateApiKey(requestToUse, {
+              id: apiKeyId,
+            });
+
+            if (!result) {
+              return response.badRequest({
+                body: { message: 'Failed to invalidate API key' },
+              });
+            }
 
             return response.ok({
               body: result,
@@ -347,7 +363,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
       );
     },
     start(core) {
-      getAuthenticationService = () => core.security.authc;
+      getAuthenticationService = (): CoreAuthenticationService => core.security.authc;
     },
     stop() {},
   };

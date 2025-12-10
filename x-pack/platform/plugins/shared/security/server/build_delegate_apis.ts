@@ -27,16 +27,19 @@ export const buildSecurityApi = ({
       apiKeys: {
         areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
-        grantAsInternalUser: (request, createParams, isForUiam) =>
-          getAuthc().apiKeys.grantAsInternalUser(request, createParams, isForUiam),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
         update: (request, updateParams) => getAuthc().apiKeys.update(request, updateParams),
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
         invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
         invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),
-        invalidateViaUiam: (request, apiKeyId) =>
-          getAuthc().apiKeys.invalidateViaUiam(request, apiKeyId),
-        getScopedClusterClient: (request) => getAuthc().apiKeys.getScopedClusterClient(request),
+        uiam: {
+          grantApiKey: (request, grantUiamApiKeyParams) =>
+            getAuthc().apiKeys.uiam.grantApiKey(request, grantUiamApiKeyParams),
+          invalidateApiKey: (request, invalidateUiamApiKeyParams) =>
+            getAuthc().apiKeys.uiam.invalidateApiKey(request, invalidateUiamApiKeyParams),
+          getScopedClusterClientWithApiKey: (apiKey) =>
+            getAuthc().apiKeys.uiam.getScopedClusterClientWithApiKey(apiKey),
+        },
       },
     },
     audit: {

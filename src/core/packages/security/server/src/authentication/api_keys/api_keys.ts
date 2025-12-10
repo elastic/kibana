@@ -60,16 +60,6 @@ export interface APIKeys {
   ): Promise<UpdateAPIKeyResult | null>;
 
   /**
-   * Tries to grant an API key for the current user.
-   * @param request Request instance.
-   * @param createParams Create operation parameters.
-   */
-  grantAsInternalUser(
-    request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
-  ): Promise<GrantAPIKeyResult | null>;
-
-  /**
    * Tries to validate an API key.
    * @param apiKeyPrams ValidateAPIKeyParams.
    */
@@ -95,7 +85,7 @@ export interface APIKeys {
    * UIAM-specific API key operations.
    * Provides methods for managing API keys through the UIAM service.
    */
-  uiam?: UiamAPIKeysService;
+  uiam: UiamAPIKeysService;
 }
 
 export type CreateAPIKeyParams =

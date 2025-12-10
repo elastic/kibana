@@ -9,7 +9,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
-import type { GrantUiamAPIKeyParams } from './uiam_api_keys';
+import type { GrantUiamAPIKeyParams, InvalidateUiamAPIKeyParams } from './uiam_api_keys';
 
 /**
  * Public UIAM API Keys service exposed through core context to manage
@@ -24,16 +24,16 @@ export interface UiamAPIKeysServiceWithContext {
    * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details.
    * @throws {Error} If the UIAM service is not available.
    */
-  grantApiKey(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult>;
+  grantApiKey(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
 
   /**
    * Invalidates an API key via the UIAM service.
    *
-   * @param apiKeyId The ID of the API key to invalidate.
    * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation.
    * @throws {Error} If the license is not enabled or if the request does not contain an authorization header.
+   * @param params
    */
-  invalidateApiKey(apiKeyId: string): Promise<InvalidateAPIKeyResult | null>;
+  invalidateApiKey(params: InvalidateUiamAPIKeyParams): Promise<InvalidateAPIKeyResult | null>;
 
   /**
    * Creates a scoped Elasticsearch client authenticated with an API key.

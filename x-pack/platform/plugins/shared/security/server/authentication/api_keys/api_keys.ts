@@ -65,7 +65,7 @@ type GrantAPIKeyParams =
 /**
  * Class responsible for managing Elasticsearch API keys.
  */
-export class APIKeys implements APIKeysType {
+export class APIKeys implements Omit<APIKeysType, 'uiam'> {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
