@@ -1053,7 +1053,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const linkedAttachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
           spaceId: TEST_SPACE_ID,
         });
         expect(linkedAttachments.attachments.length).to.eql(1);
