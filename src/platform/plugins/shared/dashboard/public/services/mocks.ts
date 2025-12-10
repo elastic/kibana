@@ -29,6 +29,8 @@ import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
@@ -68,6 +70,10 @@ export const setStubKibanaServices = () => {
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     urlForwarding: urlForwardingPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
+    visualizations: visualizationsPluginMock.createStartContract(),
+    eventAnnotation: {
+      getService: jest.fn().mockReturnValue(eventAnnotationServiceMock),
+    } as any,
   });
 };
 

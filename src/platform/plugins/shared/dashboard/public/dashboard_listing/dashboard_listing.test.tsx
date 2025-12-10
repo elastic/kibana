@@ -44,9 +44,17 @@ jest.mock('@kbn/content-management-table-list-view', () => {
 });
 
 const renderDashboardListing = (props: Partial<DashboardListingProps> = {}) =>
-  render(<DashboardListing goToDashboard={jest.fn()} getDashboardUrl={jest.fn()} {...props} />, {
-    wrapper: I18nProvider,
-  });
+  render(
+    <DashboardListing
+      goToDashboard={jest.fn()}
+      getDashboardUrl={jest.fn()}
+      listingViewRegistry={new Set()}
+      {...props}
+    />,
+    {
+      wrapper: I18nProvider,
+    }
+  );
 
 test('initial filter is passed through', async () => {
   (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;

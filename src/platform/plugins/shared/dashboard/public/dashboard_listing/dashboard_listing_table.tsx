@@ -23,7 +23,7 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import type { DashboardListingProps, DashboardListingUserContent } from './types';
 
 export const DashboardListingTable = ({
   disableCreateDashboardButton,
@@ -69,9 +69,11 @@ export const DashboardListingTable = ({
             unsavedDashboardIds={unsavedDashboardIds}
             refreshUnsavedDashboards={refreshUnsavedDashboards}
           />
-          <TableListViewTable<DashboardSavedObjectUserContent>
+          <TableListViewTable<DashboardListingUserContent>
             tableCaption={tableCaption}
             {...tableListViewTable}
+            onFetchSuccess={() => {}}
+            setPageDataTestSubject={() => {}}
           />
         </>
       </TableListViewKibanaProvider>

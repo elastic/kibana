@@ -19,22 +19,21 @@ export interface EntityNames {
 export const getEntityNames = (contentTypeFilter?: TabId): EntityNames => {
   switch (contentTypeFilter) {
     case TAB_IDS.VISUALIZATIONS:
-      // These match the i18n keys in visualizations plugin for consistency
       return {
-        entityName: i18n.translate('visualizations.listing.table.entityName', {
+        entityName: i18n.translate('dashboard.listing.table.visualizationEntityName', {
           defaultMessage: 'visualization',
         }),
-        entityNamePlural: i18n.translate('visualizations.listing.table.entityNamePlural', {
+        entityNamePlural: i18n.translate('dashboard.listing.table.visualizationEntityNamePlural', {
           defaultMessage: 'visualizations',
         }),
       };
 
     case TAB_IDS.ANNOTATIONS:
       return {
-        entityName: i18n.translate('eventAnnotationListing.table.entityName', {
+        entityName: i18n.translate('dashboard.listing.table.annotationEntityName', {
           defaultMessage: 'annotation group',
         }),
-        entityNamePlural: i18n.translate('eventAnnotationListing.table.entityNamePlural', {
+        entityNamePlural: i18n.translate('dashboard.listing.table.annotationEntityNamePlural', {
           defaultMessage: 'annotation groups',
         }),
       };

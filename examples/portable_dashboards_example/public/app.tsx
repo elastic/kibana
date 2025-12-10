@@ -131,6 +131,7 @@ const PortableDashboardListingDemo = ({ history }: { history: AppMountParameters
         alert(`Here's where I would redirect you to ${dashboardId ?? 'a new Dashboard'}`)
       }
       getDashboardUrl={() => 'https://www.elastic.co/'}
+      listingViewRegistry={new Set()}
     >
       <EuiButton onClick={() => history.push(DASHBOARD_DEMO_PATH)}>
         Go back to usage demos

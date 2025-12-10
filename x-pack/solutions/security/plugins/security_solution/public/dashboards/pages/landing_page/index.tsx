@@ -150,6 +150,7 @@ export const DashboardsLandingPage = () => {
             initialFilter={initialFilter}
             urlStateEnabled={false}
             showCreateDashboardButton={false}
+            listingViewRegistry={new Set()}
           />
         </>
       )}
