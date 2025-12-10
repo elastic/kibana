@@ -30,6 +30,7 @@ export const OptionsListPopover = ({
   disableMultiValueEmptySelection?: boolean;
 }) => {
   const { componentApi, displaySettings } = useOptionsListContext();
+
   const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
     componentApi.field$,
     componentApi.availableOptions$,

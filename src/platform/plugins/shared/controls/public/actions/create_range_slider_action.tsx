@@ -15,7 +15,7 @@ import { RangeSliderEditorOptions } from '../controls/data_controls/range_slider
 import { dataViewsService } from '../services/kibana_services';
 import { RANGE_SLIDER_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
-import { createDataControlOfType } from './create_control_action';
+import { createDataControlOfType } from './create_data_control_panel_action';
 
 const isFieldCompatible = (field: DataViewField) => {
   return field.aggregatable && field.type === 'number';

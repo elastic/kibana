@@ -25,7 +25,7 @@ import { dataViewsService } from '../services/kibana_services';
 
 let lastUsedDataViewId: string | undefined;
 
-export const createControlAction = (): ActionDefinition<
+export const createDataControlPanelAction = (): ActionDefinition<
   EmbeddableApiContext & { isPinned: boolean }
 > => ({
   id: ACTION_CREATE_CONTROL,

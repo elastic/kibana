@@ -16,6 +16,6 @@ export { getRangesliderControlFactory } from './controls/data_controls/range_sli
 export { getTimesliderControlFactory } from './controls/timeslider_control/get_timeslider_control_factory';
 export { getESQLControlFactory } from './controls/esql_control/get_esql_control_factory';
 
-export { createControlAction } from './actions/create_control_action';
+export { createDataControlPanelAction } from './actions/create_data_control_panel_action';
 export { createESQLControlAction } from './actions/create_esql_control_action';
 export { createTimeSliderAction } from './actions/create_time_slider_action';

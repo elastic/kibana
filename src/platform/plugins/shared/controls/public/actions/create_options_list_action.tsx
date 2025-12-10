@@ -15,7 +15,7 @@ import { OptionsListEditorOptions } from '../controls/data_controls/options_list
 import { dataViewsService } from '../services/kibana_services';
 import { OPTIONS_LIST_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
-import { createDataControlOfType } from './create_control_action';
+import { createDataControlOfType } from './create_data_control_panel_action';
 
 const isFieldCompatible = (field: DataViewField) => {
   return (

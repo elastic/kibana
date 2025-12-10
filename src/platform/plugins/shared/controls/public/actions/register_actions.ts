@@ -49,8 +49,8 @@ export function registerActions(uiActions: UiActionsStart) {
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_EDIT_PANEL);
 
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_CONTROL, async () => {
-    const { createControlAction } = await import('../controls_module');
-    return createControlAction();
+    const { createDataControlPanelAction } = await import('../controls_module');
+    return createDataControlPanelAction();
   });
 
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
