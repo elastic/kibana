@@ -11,6 +11,7 @@ import { StackConnectorsPlugin } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { experimentalFeaturesMock } from '../public/mocks';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 jest.mock('../common/experimental_features');
 
@@ -35,7 +36,13 @@ describe('Stack Connectors Plugin', () => {
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(16);
+
+      const specConnectorTypes = Object.values(connectorsSpecs);
+      const builtInConnectorTypesCount = 16;
+
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(
+        builtInConnectorTypesCount + specConnectorTypes.length
+      );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -141,6 +148,19 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
+
+      // Spec Connector Types registered
+      specConnectorTypes.forEach((spec, index) => {
+        expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+          builtInConnectorTypesCount + index + 1,
+          expect.objectContaining({
+            id: spec.metadata.id,
+            name: spec.metadata.displayName,
+          })
+        );
+      });
+
+      // SubAction Connectors
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(14);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
