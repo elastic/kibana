@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 
@@ -72,9 +73,6 @@ const TIME_WINDOWS = {
   errors: 15,
   changePoints: 6 * 60, // 6 hours
 } as const;
-
-const hasContent = (data: unknown): boolean =>
-  Boolean(data) && (Array.isArray(data) ? data.length > 0 : true);
 
 async function fetchAlertContext({
   alertDoc,
@@ -153,14 +151,16 @@ async function fetchAlertContext({
     }
 
     const { config, data, start } = result.value;
-    if (!hasContent(data)) {
+    if (isEmpty(data)) {
       return;
     }
 
     contextParts.push(
       `<${config.key}>
 Time window: ${start} to ${alertStart}
+\`\`\`json
 ${JSON.stringify(data, null, 2)}
+\`\`\`
 </${config.key}>`
     );
   });
@@ -208,7 +208,7 @@ async function generateAlertSummary({
     - If inconclusive or signals skew Indirect/Unrelated, state that the alert may be unrelated/noisy and suggest targeted traces/logging for the suspected path.
   `);
 
-  const alertDetails = JSON.stringify(alertDoc, null, 2);
+  const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;
 
   const userPrompt = dedent(`
     <AlertDetails>
