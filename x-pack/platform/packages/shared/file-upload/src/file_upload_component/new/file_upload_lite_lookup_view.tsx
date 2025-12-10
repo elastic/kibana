@@ -55,7 +55,11 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     }));
   }, []);
 
-  const isFinished = uploadStatus.overallImportStatus === STATUS.COMPLETED;
+  useEffect(() => {
+    if (uploadStatus.overallImportStatus === STATUS.COMPLETED) {
+      setStep('finish', STATUS.COMPLETED);
+    }
+  }, [uploadStatus.overallImportStatus, setStep]);
 
   useEffect(() => {
     setDropzoneDisabled?.(stepsStatus.analysis !== STATUS.STARTED);
@@ -175,25 +179,26 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.finish', {
         defaultMessage: 'Finalizing',
       }),
-      children: isFinished ? (
-        <>
-          <EuiText size="s">{finalStatement}</EuiText>
+      children:
+        stepsStatus.finish === STATUS.COMPLETED ? (
+          <>
+            <EuiText size="s">{finalStatement}</EuiText>
 
-          <EuiSpacer />
+            <EuiSpacer />
 
-          <EuiButton
-            data-test-subj="fileUploadLiteLookupFinishButton"
-            disabled={uploadStatus.allDocsSearchable === false}
-            onClick={() => {
-              onClose?.();
-            }}
-          >
-            <FormattedMessage id="xpack.fileUpload.continue" defaultMessage="Finish" />
-          </EuiButton>
-        </>
-      ) : null,
+            <EuiButton
+              data-test-subj="fileUploadLiteLookupFinishButton"
+              disabled={uploadStatus.allDocsSearchable === false}
+              onClick={() => {
+                onClose?.();
+              }}
+            >
+              <FormattedMessage id="xpack.fileUpload.continue" defaultMessage="Finish" />
+            </EuiButton>
+          </>
+        ) : null,
       status: generateStatus(
-        isFinished
+        stepsStatus.finish === STATUS.COMPLETED
           ? uploadStatus.allDocsSearchable === true
             ? STATUS.COMPLETED
             : STATUS.STARTED
