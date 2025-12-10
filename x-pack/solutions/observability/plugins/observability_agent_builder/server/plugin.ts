@@ -50,6 +50,14 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginSetup {
+    // Routes must be registered synchronously during setup
+    registerServerRoutes({
+      core,
+      plugins,
+      logger: this.logger,
+      dataRegistry: this.dataRegistry,
+    });
+
     getIsObservabilityAgentEnabled(core)
       .then((isObservabilityAgentEnabled) => {
         if (!isObservabilityAgentEnabled) {
@@ -74,13 +82,6 @@ export class ObservabilityAgentBuilderPlugin
           dataRegistry: this.dataRegistry,
         }).catch((error) => {
           this.logger.error(`Error registering observability attachments: ${error}`);
-        });
-
-        registerServerRoutes({
-          core,
-          plugins,
-          logger: this.logger,
-          dataRegistry: this.dataRegistry,
         });
       })
       .catch((error) => {

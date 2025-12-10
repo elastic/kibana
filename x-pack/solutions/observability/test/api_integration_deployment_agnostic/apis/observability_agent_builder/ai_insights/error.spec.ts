@@ -55,9 +55,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
+
         const response = await scoped
           .post('/internal/observability_agent_builder/ai_insights/error')
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'kibana')
           .send({
             serviceName: traceData.serviceName,
             errorId: traceData.errorId,
