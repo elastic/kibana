@@ -421,7 +421,7 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
   if (SKIP_WARNINGS) return;
 
   const maxNewItemsPerLevel = 2;
-  const allPrimaryItems = [...primaryItems, ...footerItems];
+  const allMenuItems = [...primaryItems, ...footerItems];
   const newPrimaryItems: MenuItem[] = [];
   const isNew = (item: MenuItem | SecondaryMenuItem) => item.badgeType === 'new';
 
@@ -431,7 +431,7 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
       .map((item) => item.label)
       .join(', ');
 
-  allPrimaryItems.forEach((item) => {
+  allMenuItems.forEach((item) => {
     const isNewPrimaryItem = isNew(item);
     const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
 
