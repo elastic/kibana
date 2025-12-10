@@ -163,8 +163,6 @@ describe('saved search embeddable', () => {
       });
       const discoverComponent = render(<Component />);
 
-      await waitOneTick();
-
       // Field statistics mode should not trigger document fetching
       expect(search).not.toHaveBeenCalled();
       expect(api.dataLoading$.getValue()).toBe(false);
