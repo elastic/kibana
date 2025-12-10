@@ -814,6 +814,6 @@ describe('is spec connector', () => {
     );
 
     expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('testConnectorTab')).toBeDisabled();
+    expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
   });
 });

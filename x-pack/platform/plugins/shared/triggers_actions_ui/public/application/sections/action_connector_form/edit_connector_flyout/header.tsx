@@ -37,7 +37,7 @@ const FlyoutHeaderComponent: React.FC<{
   selectedTab: EditConnectorTabs;
   setTab: (nextPage: EditConnectorTabs) => void;
   icon?: IconType | null;
-  isSpecConnector?: boolean;
+  isTestable?: boolean;
 }> = ({
   icon,
   isExperimental = false,
@@ -47,7 +47,7 @@ const FlyoutHeaderComponent: React.FC<{
   connectorTypeDesc,
   selectedTab,
   setTab,
-  isSpecConnector = false,
+  isTestable,
 }) => {
   const {
     application: { capabilities },
@@ -169,12 +169,11 @@ const FlyoutHeaderComponent: React.FC<{
             defaultMessage: 'Rules',
           })}
         </EuiTab>
-        {canExecute && (
+        {isTestable && canExecute && (
           <EuiTab
             onClick={setTestTab}
             data-test-subj="testConnectorTab"
             isSelected={EditConnectorTabs.Test === selectedTab}
-            disabled={isSpecConnector}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
               defaultMessage: 'Test',

@@ -109,8 +109,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
-  const isSpecConnector =
-    Boolean(actionTypeModel?.source) && actionTypeModel?.source !== ACTION_TYPE_SOURCES.stack;
+  const isTestable =
+    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
@@ -336,7 +336,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         isSaving={isSaving}
         onSubmit={onSubmit}
         testConnector={testConnector}
-        isSpecConnector={isSpecConnector}
+        isTestable={isTestable}
       />
     </EuiFlyout>
   );
