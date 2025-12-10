@@ -20,6 +20,7 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
+import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
@@ -243,6 +244,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerAttachments(onechat).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
+    });
+    registerAgents(onechat).catch((error) => {
+      this.logger.error(`Error registering security agent: ${error}`);
     });
   }
 
@@ -888,6 +892,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
+        telemetryConfigProvider: this.telemetryConfigProvider,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {
