@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { RuleSpecificFlappingProperties, RulesSettingsFlapping } from '@kbn/alerting-types';
 import { RuleSettingsFlappingMessage } from './rule_settings_flapping_message';
 import { RuleSettingsFlappingInputs } from './rule_settings_flapping_inputs';
+import { getOnEnabledChange } from './rule_settings_on_enabled_change';
 
 const flappingLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.flappingLabel', {
   defaultMessage: 'Flapping Detection',
@@ -151,28 +152,23 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
       if (!spaceFlappingSettings) {
         return;
       }
+      const { custom, flappingChange, disable } = getOnEnabledChange({
+        enabled: value,
+        spaceFlappingSettings,
+        flappingSettings,
+        cachedFlappingSettings: cachedFlappingSettings.current,
+      });
 
-      if (spaceFlappingSettings.enabled === value) {
-        setIsCustom(false);
-        return onFlappingChange(null);
+      if (flappingChange != null) {
+        internalOnFlappingChange(flappingChange);
+      } else {
+        onFlappingChange(flappingChange);
       }
 
-      if (spaceFlappingSettings.enabled !== value) {
-        if (flappingSettings) {
-          internalOnFlappingChange({
-            ...flappingSettings,
-            enabled: value,
-          });
-        } else {
-          const initialFlappingSettings = cachedFlappingSettings.current || spaceFlappingSettings;
-          onFlappingChange({
-            enabled: value,
-            lookBackWindow: initialFlappingSettings.lookBackWindow,
-            statusChangeThreshold: initialFlappingSettings.statusChangeThreshold,
-          });
-        }
-        setDisableOverride(value);
-        setIsCustom(true);
+      setIsCustom(custom);
+
+      if (disable) {
+        setDisableOverride(disable);
       }
     },
     [spaceFlappingSettings, flappingSettings, onFlappingChange, internalOnFlappingChange]
