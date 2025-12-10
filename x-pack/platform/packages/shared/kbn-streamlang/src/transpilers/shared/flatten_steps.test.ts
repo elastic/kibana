@@ -76,7 +76,7 @@ describe('flattenSteps', () => {
         customIdentifier: 'i31b51cb0-d1c9-11f0-a523-ed186b43cf76',
       },
       {
-        where: {
+        condition: {
           field: 'sdfds',
           eq: 'dsfsdf',
           steps: [
