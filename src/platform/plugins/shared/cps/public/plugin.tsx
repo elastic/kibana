@@ -17,6 +17,7 @@ import { CPSManager } from './services/cps_manager';
 
 export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
   private readonly initializerContext: PluginInitializerContext<CPSConfigType>;
+  private cpsManager: ICPSManager | undefined;
 
   constructor(initializerContext: PluginInitializerContext<CPSConfigType>) {
     this.initializerContext = initializerContext;
@@ -32,14 +33,14 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
 
   public start(core: CoreStart): CPSPluginStart {
     const { cpsEnabled } = this.initializerContext.config.get();
-    let cpsManager: ICPSManager | undefined;
 
     // Only initialize cpsManager in serverless environments when CPS is enabled
     if (cpsEnabled) {
-      const manager = new CPSManager({
+      this.cpsManager = new CPSManager({
         http: core.http,
         logger: this.initializerContext.logger.get('cps'),
         application: core.application,
+        uiSettings: core.uiSettings,
       });
 
       // Register project picker in the navigation
@@ -48,7 +49,7 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
           mount: (element) => {
             ReactDOM.render(
               <I18nProvider>
-                <ProjectPickerContainer cpsManager={manager} />
+                <ProjectPickerContainer cpsManager={this.cpsManager!} />
               </I18nProvider>,
               element,
               () => {}
@@ -61,13 +62,16 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
           order: 1000,
         });
       });
-      cpsManager = manager;
     }
 
     return {
-      cpsManager,
+      cpsManager: this.cpsManager,
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.cpsManager && typeof (this.cpsManager as any).destroy === 'function') {
+      (this.cpsManager as any).destroy();
+    }
+  }
 }

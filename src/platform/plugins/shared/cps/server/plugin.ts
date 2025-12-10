@@ -11,6 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { registerRoutes } from './routes';
 import type { CPSConfig } from './config';
 import type { CPSServerSetup } from './types';
+import { registerUISettings } from './ui_settings';
 
 export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   private readonly initContext: PluginInitializerContext;
@@ -34,6 +35,9 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
 
     // Set CPS feature flag in Elasticsearch service
     core.elasticsearch.setCpsFeatureFlag(cpsEnabled);
+
+    // Register advanced settings
+    registerUISettings({ uiSettings: core.uiSettings });
 
     return {
       getCpsEnabled: () => cpsEnabled,

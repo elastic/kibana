@@ -90,6 +90,15 @@ export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   maps: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
+  management: {
+    defaultAccess: ProjectRoutingAccess.DISABLED,
+     routeRules: [
+      {
+        pattern: /kibana\/settings/, // Restrict to only settings page
+        access: ProjectRoutingAccess.READONLY,
+      },
+    ],
+  },
 };
 
 /**
