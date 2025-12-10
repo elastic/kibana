@@ -39,32 +39,48 @@ describe('GettingStartedRedirectGate', () => {
       </GettingStartedRedirectGate>
     );
 
-  it('renders children', () => {
-    (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
-    const { getByTestId } = renderGate();
-    expect(getByTestId('child')).toBeInTheDocument();
+  describe('when feature flag is disabled', () => {
+    beforeEach(() => {
+      (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(false);
+    });
+
+    it('always renders children and never redirects', () => {
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('renders children even when not visited', () => {
+      // localStorage is empty (not visited)
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
   });
 
-  describe.each([
-    // [visited, shouldNavigate, description]
-    [undefined, true, 'navigates when not visited'],
-    ['false', true, 'navigates when visited=false'],
-    ['true', false, 'does not navigate when already visited'],
-  ])('navigation logic', (visited, shouldNavigate, description) => {
-    it(description, async () => {
+  describe('when feature flag is enabled', () => {
+    beforeEach(() => {
       (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
+    });
 
-      if (visited !== undefined) {
-        localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, visited);
-      }
+    it('renders children when already visited', () => {
+      localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
 
-      renderGate();
+    it('does NOT render children and redirects when not visited', async () => {
+      const { queryByTestId } = renderGate();
+      expect(queryByTestId('child')).not.toBeInTheDocument();
+      await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
+    });
 
-      if (shouldNavigate) {
-        await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
-      } else {
-        expect(navigateToApp).not.toHaveBeenCalled();
-      }
+    it('does NOT render children and redirects when visited=false', async () => {
+      localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'false');
+      const { queryByTestId } = renderGate();
+      expect(queryByTestId('child')).not.toBeInTheDocument();
+      await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
     });
   });
 });
