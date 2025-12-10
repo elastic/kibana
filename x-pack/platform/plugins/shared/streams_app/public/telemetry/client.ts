@@ -28,6 +28,7 @@ import type {
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
+  StreamsTabVisitedProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
@@ -52,6 +53,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -181,6 +183,10 @@ export class StreamsTelemetryClient {
         duration_ms: Date.now() - start,
       });
     };
+  }
+
+  public trackTabVisited(params: StreamsTabVisitedProps) {
+    this.analytics.reportEvent(STREAMS_TAB_VISITED_EVENT_TYPE, params);
   }
 
   private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {

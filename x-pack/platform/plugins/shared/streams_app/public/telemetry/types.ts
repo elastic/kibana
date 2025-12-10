@@ -120,7 +120,7 @@ interface StreamsSignificantEventsCreatedProps {
 
 interface StreamsFeatureIdentificationIdentifiedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: Record<FeatureType, number>;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
@@ -129,14 +129,14 @@ interface StreamsFeatureIdentificationIdentifiedProps {
 
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: Record<FeatureType, number>;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: Record<FeatureType, number>;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -153,6 +153,22 @@ interface StreamsProcessingSimulationSamplesFetchLatencyProps {
   stream_type: StreamType;
   data_source_type: EnrichmentDataSource['type'];
   duration_ms: number;
+}
+
+interface StreamsTabVisitedProps {
+  stream_name: string;
+  stream_type: StreamType;
+  tab_name: string;
+  privileges: {
+    manage: boolean;
+    monitor: boolean;
+    view_index_metadata: boolean;
+    lifecycle: boolean;
+    simulate: boolean;
+    text_structure: boolean;
+    read_failure_store: boolean;
+    manage_failure_store: boolean;
+  };
 }
 
 export {
@@ -178,4 +194,5 @@ export {
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsTabVisitedProps,
 };
