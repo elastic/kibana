@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/shared-ux-utility'
   - '@kbn/presentation-util'
+  - '@kbn/esql-utils'
 tags:
   - plugin
   - prod
