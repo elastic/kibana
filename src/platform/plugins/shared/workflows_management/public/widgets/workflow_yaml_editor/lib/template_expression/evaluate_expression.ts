@@ -8,15 +8,9 @@
  */
 
 import { Liquid } from 'liquidjs';
+import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
-
-type JsonPrimitive = string | number | boolean | null;
-type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-type JsonArray = JsonValue[];
 
 // Create a liquid engine instance with the same configuration as the server
 const liquidEngine = new Liquid({
@@ -67,6 +61,18 @@ export function evaluateExpression(options: EvaluateExpressionOptions): JsonValu
 }
 
 /**
+ * Enhanced execution context with optional foreach support
+ */
+interface EnhancedExecutionContext extends ExecutionContext {
+  foreach?: {
+    item: JsonValue;
+    index: number;
+    total: number;
+    items: JsonArray;
+  };
+}
+
+/**
  * Build enhanced context with foreach.item support
  * This looks for ANY foreach step and adds foreach context if found
  * Note: We use the first foreach step found for simplicity (as requested by user)
@@ -74,8 +80,8 @@ export function evaluateExpression(options: EvaluateExpressionOptions): JsonValu
 function buildEnhancedContext(
   context: ExecutionContext,
   _currentStepId?: string
-): JsonObject & ExecutionContext {
-  const enhancedContext: JsonObject & ExecutionContext = { ...context };
+): EnhancedExecutionContext {
+  const enhancedContext: EnhancedExecutionContext = { ...context };
 
   // Always try to find foreach context (not dependent on current step ID)
   const foreachContext = findForeachContext(context);
@@ -92,7 +98,7 @@ function buildEnhancedContext(
  */
 function findForeachContext(
   context: ExecutionContext
-): (JsonObject & { item: JsonValue; index: number; total: number; items: JsonArray }) | null {
+): { item: JsonValue; index: number; total: number; items: JsonArray } | null {
   // Look through all steps to find foreach steps
   for (const [, stepData] of Object.entries(context.steps)) {
     // Check if this step has foreach state (items array)

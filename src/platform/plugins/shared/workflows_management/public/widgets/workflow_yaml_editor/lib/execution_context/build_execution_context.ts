@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-
-type JsonPrimitive = string | number | boolean | null;
-type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-type JsonArray = JsonValue[];
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { SerializedError, WorkflowStepExecutionDto } from '@kbn/workflows';
 
 /**
  * Execution context structure that mirrors the server-side StepContext
@@ -31,7 +25,7 @@ export interface ExecutionContext {
 
 export interface StepExecutionData {
   output?: JsonValue;
-  error?: string | null;
+  error?: SerializedError;
   input?: JsonValue;
   status?: string;
   state?: JsonObject; // For foreach steps: { items, item, index, total }

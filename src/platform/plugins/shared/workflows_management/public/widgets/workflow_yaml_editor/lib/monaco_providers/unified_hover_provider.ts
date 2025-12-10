@@ -9,6 +9,7 @@
 
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
+import type { JsonValue } from '@kbn/utility-types';
 import type {
   HoverContext,
   ParameterContext,
@@ -24,13 +25,6 @@ import { getInterceptedHover } from '../hover/get_intercepted_hover';
 import { evaluateExpression } from '../template_expression/evaluate_expression';
 import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
 import { formatValueAsJson } from '../template_expression/resolve_path_value';
-
-type JsonPrimitive = string | number | boolean | null;
-type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-type JsonArray = JsonValue[];
 
 export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
@@ -162,16 +156,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         return null;
       }
 
-      // Calculate range for hover
-      const range = this.calculateHoverRange(model, position, context);
-      if (!range) {
-        // console.log('UnifiedHoverProvider: Could not calculate hover range');
-        return null;
-      }
-
       // console.log('UnifiedHoverProvider: Returning hover content');
+      // Don't return a range for connector hovers - this prevents Monaco from highlighting
+      // Only template expression hovers should have ranges to show the blue highlight
       return {
-        range,
         contents: [hoverContent],
       };
     } catch (error) {

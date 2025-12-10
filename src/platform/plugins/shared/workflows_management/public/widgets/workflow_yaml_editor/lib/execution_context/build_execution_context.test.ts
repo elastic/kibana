@@ -7,52 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildExecutionContext } from './build_execution_context';
 
 describe('buildExecutionContext', () => {
-  const mockExecution: WorkflowExecutionDto = {
-    id: 'exec-123',
-    spaceId: 'default',
-    status: ExecutionStatus.COMPLETED,
-    isTestRun: false,
-    startedAt: '2024-01-01T00:00:00Z',
-    finishedAt: '2024-01-01T00:01:00Z',
-    workflowId: 'workflow-456',
-    workflowName: 'Test Workflow',
-    workflowDefinition: {
-      name: 'Test Workflow',
-      version: '1',
-      enabled: true,
-      triggers: [],
-      steps: [],
-      consts: {
-        API_URL: 'https://api.example.com',
-        TIMEOUT: 5000,
-      },
+  const mockExecutionContext = {
+    inputs: {
+      userId: 'user-123',
+      count: 10,
     },
-    stepExecutions: [],
-    duration: 60000,
-    yaml: '',
-    context: {
-      inputs: {
-        userId: 'user-123',
-        count: 10,
-      },
-      event: {
-        type: 'manual',
-      },
+    event: {
+      type: 'manual',
     },
   };
 
   it('should return null when stepExecutions is undefined', () => {
-    const result = buildExecutionContext(undefined, mockExecution.context);
+    const result = buildExecutionContext(undefined, mockExecutionContext);
     expect(result).toBeNull();
   });
 
   it('should return null when stepExecutions is empty', () => {
-    const result = buildExecutionContext([], mockExecution.context);
+    const result = buildExecutionContext([], mockExecutionContext);
     expect(result).toBeNull();
   });
 
@@ -86,11 +62,10 @@ describe('buildExecutionContext', () => {
         workflowRunId: 'exec-123',
         workflowId: 'workflow-456',
         output: { processed: true },
-        error: null,
       },
     ];
 
-    const result = buildExecutionContext(stepExecutions, mockExecution.context);
+    const result = buildExecutionContext(stepExecutions, mockExecutionContext);
 
     expect(result?.steps).toEqual({
       fetchData: {
@@ -103,7 +78,7 @@ describe('buildExecutionContext', () => {
       processData: {
         input: undefined,
         output: { processed: true },
-        error: null,
+        error: undefined,
         status: ExecutionStatus.COMPLETED,
         state: undefined,
       },
@@ -125,7 +100,7 @@ describe('buildExecutionContext', () => {
         workflowRunId: 'exec-123',
         workflowId: 'workflow-456',
         output: null,
-        error: 'Network error',
+        error: { type: 'NetworkError', message: 'Network error' },
       },
       {
         id: 'step-exec-1-retry-1',
@@ -140,17 +115,16 @@ describe('buildExecutionContext', () => {
         workflowRunId: 'exec-123',
         workflowId: 'workflow-456',
         output: { data: ['item1'] },
-        error: null,
       },
     ];
 
-    const result = buildExecutionContext(stepExecutions, mockExecution.context);
+    const result = buildExecutionContext(stepExecutions, mockExecutionContext);
 
     // Should have the latest execution (retry 1) based on globalExecutionIndex
     expect(result?.steps.fetchData).toEqual({
       input: undefined,
       output: { data: ['item1'] },
-      error: null,
+      error: undefined,
       status: ExecutionStatus.COMPLETED,
       state: undefined,
     });
@@ -179,7 +153,7 @@ describe('buildExecutionContext', () => {
       },
     ];
 
-    const result = buildExecutionContext(stepExecutions, mockExecution.context);
+    const result = buildExecutionContext(stepExecutions, mockExecutionContext);
 
     expect(result?.steps.foreachStep).toEqual({
       output: { results: [] },
