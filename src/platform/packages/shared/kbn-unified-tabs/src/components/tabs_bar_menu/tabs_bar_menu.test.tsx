@@ -157,4 +157,25 @@ describe('TabsBarMenu', () => {
     const selectedTabOption = (await screen.findAllByTitle(mockTabs[0].label))[0];
     expect(selectedTabOption.closest('[aria-selected="true"]')).toBeInTheDocument();
   });
+
+  it('displays relative time for recently closed tabs with timestamps', async () => {
+    const user = userEvent.setup();
+    const now = Date.now();
+    const propsWithTimestamps = {
+      ...defaultProps,
+      recentlyClosedItems: [
+        { id: 'closed1', label: 'Tab 1', closedAt: now - 5 * 60 * 1000 }, // 5 minutes
+        { id: 'closed2', label: 'Tab 2', closedAt: now - 10 * 60 * 1000 }, // 10 minutes
+      ],
+    };
+
+    render(<TabsBarMenu {...propsWithTimestamps} />);
+
+    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
+
+    expect(await screen.findByText('Recently closed')).toBeVisible();
+    expect(await screen.findByText(/5 minutes ago/i)).toBeVisible();
+    expect(await screen.findByText(/10 minutes ago/i)).toBeVisible();
+  });
 });

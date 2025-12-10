@@ -26,12 +26,12 @@ export function registerDataProviders({
   plugins: APMPluginSetupDependencies;
   logger: Logger;
 }) {
-  const { observabilityAgent } = plugins;
-  if (!observabilityAgent) {
+  const { observabilityAgentBuilder } = plugins;
+  if (!observabilityAgentBuilder) {
     return;
   }
 
-  observabilityAgent.registerDataProvider(
+  observabilityAgentBuilder.registerDataProvider(
     'apmServiceSummary',
     async ({ request, serviceName, serviceEnvironment, start, end, transactionType }) => {
       const { apmEventClient, apmAlertsClient, mlClient, esClient } = await buildApmToolResources({
@@ -58,7 +58,7 @@ export function registerDataProviders({
     }
   );
 
-  observabilityAgent.registerDataProvider(
+  observabilityAgentBuilder.registerDataProvider(
     'apmDownstreamDependencies',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
@@ -78,7 +78,7 @@ export function registerDataProviders({
     }
   );
 
-  observabilityAgent.registerDataProvider(
+  observabilityAgentBuilder.registerDataProvider(
     'apmErrors',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
@@ -86,7 +86,7 @@ export function registerDataProviders({
     }
   );
 
-  observabilityAgent.registerDataProvider(
+  observabilityAgentBuilder.registerDataProvider(
     'apmExitSpanChangePoints',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
@@ -101,7 +101,7 @@ export function registerDataProviders({
     }
   );
 
-  observabilityAgent.registerDataProvider(
+  observabilityAgentBuilder.registerDataProvider(
     'apmServiceChangePoints',
     async ({
       request,
