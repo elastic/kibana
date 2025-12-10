@@ -34,4 +34,3 @@ export const ELASTIC_LLM_TOUR_PERFORMANCE = i18n.translate(
     defaultMessage: 'performance',
   }
 );
-
