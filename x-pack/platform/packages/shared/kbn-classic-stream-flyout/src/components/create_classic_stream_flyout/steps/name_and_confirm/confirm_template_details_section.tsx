@@ -28,6 +28,7 @@ import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/t
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import {
   formatDataRetention,
+  indexModeLabels,
   getPhaseDescriptions,
   type PhaseDescription,
   type IlmPolicyFetcher,
@@ -227,7 +228,7 @@ export const ConfirmTemplateDetailsSection = ({
       title: i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.indexModeLabel', {
         defaultMessage: 'Index mode',
       }),
-      description: indexMode.charAt(0).toUpperCase() + indexMode.slice(1),
+      description: indexModeLabels[indexMode],
     });
 
     // Retention - ILM policy or data retention
