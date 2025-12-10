@@ -6,13 +6,6 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/alerting',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/alerting/{common,public,server}/**/*.{ts,tsx}',
-  ],
+  preset: '@kbn/jest-blaze/node',
+  rootDir: __dirname,
 };
