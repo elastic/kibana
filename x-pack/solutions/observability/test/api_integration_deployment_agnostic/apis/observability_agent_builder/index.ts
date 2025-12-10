@@ -16,6 +16,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_anomaly_detection_jobs.spec.ts'));
     loadTestFile(require.resolve('./tools/run_log_rate_analysis.spec.ts'));
     loadTestFile(require.resolve('./tools/get_log_categories.spec.ts'));
-    loadTestFile(require.resolve('./ai_insights/error_ai_insight.spec.ts'));
+    loadTestFile(require.resolve('./ai_insights/error.spec.ts'));
   });
 }

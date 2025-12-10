@@ -149,7 +149,6 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
         onStartConversation={() => {
           onechat.openConversationFlyout({
             attachments,
-            sessionTag: 'observability',
             newConversation: true,
           });
         }}
