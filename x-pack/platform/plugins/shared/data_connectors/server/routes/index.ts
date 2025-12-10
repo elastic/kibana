@@ -17,12 +17,7 @@ import { connectorsSpecs } from '@kbn/connector-specs';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
-
-const createDataConnectorRequestSchema = schema.object({
-  type: schema.string({ minLength: 1 }),
-  name: schema.string({ minLength: 1 }),
-  token: schema.string({ minLength: 1 }), // in the future, this can be either token or username&password
-});
+import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
 
 /**
  * Builds the secrets object for a connector based on its spec
@@ -100,10 +95,7 @@ export function registerRoutes(
           });
 
         const connectors = findResult.saved_objects.map((savedObject) => {
-          return {
-            ...savedObject.attributes,
-            id: savedObject.id,
-          };
+          return convertSOtoAPIResponse(savedObject);
         });
 
         return response.ok({
@@ -147,7 +139,7 @@ export function registerRoutes(
         );
 
         return response.ok({
-          body: { ...savedObject.attributes, id: savedObject.id },
+          body: convertSOtoAPIResponse(savedObject),
         });
       } catch (error) {
         logger.error(`Error fetching data connector: ${(error as Error).message}`);
