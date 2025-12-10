@@ -102,15 +102,18 @@ export const RulesTableToolbar = React.memo(() => {
   }, [selectedRuleNames]);
 
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
-  const attachmentData = useMemo(
-    () => ({ text: getPromptContextFromDetectionRules(selectedRules) }),
+  const ruleAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text: getPromptContextFromDetectionRules(selectedRules),
+        attachmentLabel: selectedRules.length === 1 ? selectedRules[0].name : i18n.SELECTED_RULES,
+      },
+      attachmentPrompt: i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
+    }),
     [selectedRules]
   );
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.rule,
-    attachmentData,
-    attachmentPrompt: i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
   return (
     <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -121,11 +124,7 @@ export const RulesTableToolbar = React.memo(() => {
         {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
           <>
             {isAgentBuilderEnabled ? (
-              <NewAgentBuilderAttachment
-                onClick={openAgentBuilderFlyout}
-                iconType={'discuss'}
-                text={i18nAssistant.CHAT_IN_AGENT_BUILDER}
-              />
+              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
             ) : (
               <NewChat
                 category="detection-rules"
