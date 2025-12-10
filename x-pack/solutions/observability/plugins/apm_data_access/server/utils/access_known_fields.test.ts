@@ -72,12 +72,12 @@ describe('accessKnownApmEventFields', () => {
     });
   });
 
-  it('can be spread into a new flattened object with the correct value formats', () => {
+  it('can be built into a new flattened object with the correct value formats', () => {
     const event = accessKnownApmEventFields(smallInput);
 
-    const eventObj = { ...event };
+    const newEvent = event.build();
 
-    expect(eventObj).toEqual({
+    expect(newEvent).toEqual({
       '@timestamp': '2024-10-10T10:10:10.000Z',
       'service.name': 'node-svc',
       'links.span_id': ['link1', 'link2'],
