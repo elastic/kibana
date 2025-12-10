@@ -24,6 +24,7 @@ import {
   QUERY_TITLE,
   QUERY_SEVERITY_SCORE,
   QUERY_FEATURE_TYPE,
+  QUERY_EVIDENCE,
 } from './fields';
 import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
 import type { AssetStorageSettings } from './storage_settings';
@@ -102,6 +103,7 @@ function fromStorage(link: StoredAssetLink): AssetLink {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
     [QUERY_FEATURE_TYPE]: FeatureType;
+    [QUERY_EVIDENCE]?: string[];
   } = link as any;
   return {
     ...storedQueryLink,
@@ -119,6 +121,7 @@ function fromStorage(link: StoredAssetLink): AssetLink {
           }
         : undefined,
       severity_score: storedQueryLink[QUERY_SEVERITY_SCORE],
+      evidence: storedQueryLink[QUERY_EVIDENCE],
     },
   } satisfies QueryLink;
 }
@@ -135,6 +138,7 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
     [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
     [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
+    [QUERY_EVIDENCE]: query.evidence,
   } as unknown as StoredAssetLink;
 }
 
