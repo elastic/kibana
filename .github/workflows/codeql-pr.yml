@@ -4,11 +4,6 @@ on:
   pull_request:
     branches: [ "main" ]
     types: [ opened, ready_for_review ]
-    paths:
-      - '.github/codeql/**'
-      - '.github/workflows/codeql-pr.yml'
-      - 'src/**'
-      - 'x-pack/**'
 
 jobs:
 
