@@ -72,7 +72,6 @@ export class TestSubjects extends FtrService {
    * that `options.timeout` defaults to the `timeouts.try` config, or 2 minutes.
    */
   public async existOrFail(selector: string, existsOptions?: ExistsOptions): Promise<void | never> {
-    this.log.debug(`TestSubjects.existOrFail(${selector})`);
     if (!(await this.exists(selector, { timeout: this.TRY_TIME, ...existsOptions }))) {
       throw new Error(`expected testSubject(${selector}) to exist`);
     }
