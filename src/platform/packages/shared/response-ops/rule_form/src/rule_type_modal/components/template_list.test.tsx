@@ -13,6 +13,15 @@ import userEvent from '@testing-library/user-event';
 import { TemplateList } from './template_list';
 import type { RuleTypeModalProps } from './rule_type_modal';
 
+// Mock IntersectionObserver
+const mockIntersectionObserver = jest.fn();
+mockIntersectionObserver.mockReturnValue({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+});
+window.IntersectionObserver = mockIntersectionObserver;
+
 describe('TemplateList', () => {
   const mockTemplates: RuleTypeModalProps['templates'] = [
     {
@@ -150,42 +159,42 @@ describe('TemplateList', () => {
     expect(screen.queryByText(/RULE TYPE/)).not.toBeInTheDocument();
   });
 
-  it('should show load more button when hasMore is true', () => {
+  it('should show load more trigger when hasMore is true', () => {
     render(<TemplateList {...defaultProps} hasMore={true} />);
 
-    expect(screen.getByTestId('templateList-loadMore')).toBeInTheDocument();
-    expect(screen.getByText('Load more')).toBeInTheDocument();
+    expect(screen.getByTestId('templateList-loadMoreTrigger')).toBeInTheDocument();
   });
 
-  it('should not show load more button when hasMore is false', () => {
+  it('should not show load more trigger when hasMore is false', () => {
     render(<TemplateList {...defaultProps} hasMore={false} />);
 
-    expect(screen.queryByTestId('templateList-loadMore')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templateList-loadMoreTrigger')).not.toBeInTheDocument();
   });
 
-  it('should call onLoadMore when load more button is clicked', async () => {
+  it('should call onLoadMore when intersection observer triggers', () => {
     const onLoadMore = jest.fn();
     render(<TemplateList {...defaultProps} hasMore={true} onLoadMore={onLoadMore} />);
 
-    const loadMoreButton = screen.getByTestId('templateList-loadMore');
-    await userEvent.click(loadMoreButton);
+    // Get the callback passed to IntersectionObserver
+    const observerCallback = mockIntersectionObserver.mock.calls[0][0];
+
+    // Simulate intersection
+    observerCallback([{ isIntersecting: true }]);
 
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  it('should show loading indicator on load more button when loadingMore is true', () => {
+  it('should show loading spinner when loadingMore is true', () => {
     render(<TemplateList {...defaultProps} hasMore={true} loadingMore={true} />);
 
-    const loadMoreButton = screen.getByTestId('templateList-loadMore');
-    // EUI adds a loading spinner when isLoading is true
-    expect(loadMoreButton).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('should render empty list when no templates provided', () => {
     render(<TemplateList {...defaultProps} templates={[]} />);
 
     expect(screen.queryByTestId(/-SelectOption/)).not.toBeInTheDocument();
-    expect(screen.queryByTestId('templateList-loadMore')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templateList-loadMoreTrigger')).not.toBeInTheDocument();
   });
 
   it('should handle templates with all fields populated', () => {

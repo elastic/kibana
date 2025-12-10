@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiBadge,
   useEuiTheme,
-  EuiButtonEmpty,
+  EuiLoadingSpinner,
   EuiText,
   EuiEmptyPrompt,
 } from '@elastic/eui';
@@ -102,6 +102,41 @@ export const TemplateList: React.FC<TemplateListProps> = ({
   loadingMore,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const observerRef = useRef<IntersectionObserver>();
+
+  const fetchNext = useCallback(
+    ([entry]: IntersectionObserverEntry[]) => {
+      if (entry.isIntersecting && hasMore && !loadingMore) {
+        onLoadMore();
+      }
+    },
+    [hasMore, loadingMore, onLoadMore]
+  );
+
+  useEffect(() => {
+    return () => observerRef.current?.disconnect();
+  }, []);
+
+  // Attaches an intersection observer to the last element
+  // to trigger a callback to paginate when the user scrolls to it
+  const setPaginationObserver = useCallback(
+    (ref: HTMLDivElement | null) => {
+      observerRef.current?.disconnect();
+
+      if (!ref) {
+        return;
+      }
+
+      observerRef.current = new IntersectionObserver(fetchNext, {
+        root: null,
+        threshold: 0.1,
+      });
+      observerRef.current.observe(ref);
+    },
+    [fetchNext]
+  );
+
+  const lastTemplateId = templates[templates.length - 1]?.id;
 
   return (
     <EuiFlexGroup
@@ -145,29 +180,22 @@ export const TemplateList: React.FC<TemplateListProps> = ({
           <React.Fragment key={tpl.id}>
             <TemplateCard template={tpl} onSelectTemplate={onSelectTemplate} />
             <EuiSpacer size="s" />
+            {/* Observer element for infinite scrolling - attached to last item */}
+            {hasMore && tpl.id === lastTemplateId && (
+              <div
+                ref={setPaginationObserver}
+                style={{ height: '1px' }}
+                data-test-subj="templateList-loadMoreTrigger"
+              />
+            )}
           </React.Fragment>
         ))}
-        {hasMore && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={onLoadMore}
-                  isLoading={loadingMore}
-                  iconType="arrowDown"
-                  data-test-subj="templateList-loadMore"
-                >
-                  {i18n.translate(
-                    'responseOpsRuleForm.components.ruleTypeModal.loadMoreTemplatesButton',
-                    {
-                      defaultMessage: 'Load more',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+        {loadingMore && (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
