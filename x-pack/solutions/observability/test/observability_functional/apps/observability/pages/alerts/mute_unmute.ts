@@ -16,6 +16,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'header']);
   const es = getService('es');
   const log = getService('log');
+  const toasts = getService('toasts');
 
   describe('Mute and Unmute alerts', function () {
     this.tags('includeFirefox');
@@ -97,14 +98,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await retry.waitForWithTimeout('alerts to be created', 120000, async () => {
         const response = await es.search({
           index: '.alerts-stack.alerts-default',
-          body: {
-            query: {
-              bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': ruleId } },
-                  { term: { 'kibana.alert.status': 'active' } },
-                ],
-              },
+          query: {
+            bool: {
+              must: [
+                { term: { 'kibana.alert.rule.uuid': ruleId } },
+                { term: { 'kibana.alert.status': 'active' } },
+              ],
             },
           },
         });
@@ -128,34 +127,44 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await es.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
     });
 
-    describe('Mute alert and filter by KQL', () => {
+    describe('Bulk mute and unmute', () => {
+      let totalAlerts: number;
+
       before(async () => {
+        await observability.alerts.common.clearQueryBar();
         await observability.alerts.common.submitQuery(`kibana.alert.rule.uuid: "${ruleId}"`);
         await observability.alerts.common.waitForAlertTableToLoad();
       });
 
-      after(async () => {
-        await observability.alerts.common.clearQueryBar();
-      });
-
-      it('should have at least 2 alerts from the rule', async () => {
+      it('should have at least 2 alerts available for bulk operations', async () => {
         await retry.try(async () => {
           const rows = await observability.alerts.common.getTableCellsInRows();
-          log.info(`Found ${rows.length} alert rows`);
-          expect(rows.length).to.be.greaterThan(1);
+          totalAlerts = rows.length;
+          log.info(`Found ${totalAlerts} alerts for bulk operations`);
+          expect(totalAlerts).to.be.greaterThan(1);
         });
       });
 
-      it('should mute first alert via row action', async () => {
-        await testSubjects.click('alertsTableRowActionMore');
-        await retry.waitFor('actions menu visible', () =>
-          testSubjects.exists('alertsTableActionsMenu')
-        );
-        await testSubjects.click('toggle-alert');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+      it('should show bulk actions menu after selecting alerts', async () => {
+        await testSubjects.click('checkboxSelectAll');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('bulkActionsToggle')).to.be(true);
+        });
       });
 
-      it('should show only muted alert when filtering by kibana.alert.muted: true', async () => {
+      it('should bulk mute all selected alerts and show success toast', async () => {
+        await testSubjects.click('bulkActionsToggle');
+        await retry.waitFor('bulk actions menu visible', () => testSubjects.exists('bulk-mute'));
+        await testSubjects.click('bulk-mute');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const toastTitle = await toasts.getTitleAndDismiss();
+        log.info(`Toast after mute: "${toastTitle}"`);
+        expect(toastTitle).to.contain('Muted');
+        expect(toastTitle).to.contain(`${totalAlerts}`);
+      });
+
+      it('should show all alerts as muted after bulk mute', async () => {
         await observability.alerts.common.clearQueryBar();
         await observability.alerts.common.submitQuery(
           `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: true`
@@ -164,44 +173,38 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const rows = await observability.alerts.common.getTableCellsInRows();
-          expect(rows.length).to.be(1);
+          log.info(`Found ${rows.length} muted alerts (expected ${totalAlerts})`);
+          expect(rows.length).to.be(totalAlerts);
         });
       });
 
-      it('should show only unmuted alerts when filtering by kibana.alert.muted: false', async () => {
+      it('should show no unmuted alerts after bulk mute', async () => {
         await observability.alerts.common.clearQueryBar();
         await observability.alerts.common.submitQuery(
           `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: false`
         );
         await observability.alerts.common.waitForAlertTableToLoad();
-
-        await retry.try(async () => {
-          const rows = await observability.alerts.common.getTableCellsInRows();
-          expect(rows.length).to.be.greaterThan(0);
-        });
+        await observability.alerts.common.getNoDataStateOrFail();
       });
 
-      it('should unmute the alert via row action', async () => {
+      it('should bulk unmute all selected alerts and show success toast', async () => {
         await observability.alerts.common.clearQueryBar();
-        await observability.alerts.common.submitQuery(
-          `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: true`
-        );
+        await observability.alerts.common.submitQuery(`kibana.alert.rule.uuid: "${ruleId}"`);
         await observability.alerts.common.waitForAlertTableToLoad();
 
-        await retry.try(async () => {
-          const rows = await observability.alerts.common.getTableCellsInRows();
-          expect(rows.length).to.be(1);
-        });
-
-        await testSubjects.click('alertsTableRowActionMore');
-        await retry.waitFor('actions menu visible', () =>
-          testSubjects.exists('alertsTableActionsMenu')
-        );
-        await testSubjects.click('toggle-alert');
+        await testSubjects.click('checkboxSelectAll');
+        await testSubjects.click('bulkActionsToggle');
+        await retry.waitFor('bulk actions menu visible', () => testSubjects.exists('bulk-unmute'));
+        await testSubjects.click('bulk-unmute');
         await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const toastTitle = await toasts.getTitleAndDismiss();
+        log.info(`Toast after unmute: "${toastTitle}"`);
+        expect(toastTitle).to.contain('Unmuted');
+        expect(toastTitle).to.contain(`${totalAlerts}`);
       });
 
-      it('should show all alerts as unmuted after unmuting', async () => {
+      it('should show all alerts as unmuted after bulk unmute', async () => {
         await observability.alerts.common.clearQueryBar();
         await observability.alerts.common.submitQuery(
           `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: false`
@@ -210,11 +213,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const rows = await observability.alerts.common.getTableCellsInRows();
-          expect(rows.length).to.be.greaterThan(1);
+          log.info(`Found ${rows.length} unmuted alerts (expected ${totalAlerts})`);
+          expect(rows.length).to.be(totalAlerts);
         });
       });
 
-      it('should show no muted alerts after unmuting', async () => {
+      it('should show no muted alerts after bulk unmute', async () => {
         await observability.alerts.common.clearQueryBar();
         await observability.alerts.common.submitQuery(
           `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: true`
