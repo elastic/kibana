@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
-import { indexModeLabels } from '@kbn/index-management-plugin/common/constants/index_modes';
+import { indexModeLabels } from '@kbn/index-management-plugin/common/constants';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import {
   formatDataRetention,
