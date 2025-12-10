@@ -28,11 +28,9 @@ export function initializeDataViewsManager(
   )
     .pipe(
       switchMap(async (childDataViews) => {
-        const allDataViews = [...childDataViews];
-        return uniqBy(allDataViews, 'id');
+        return uniqBy(childDataViews, 'id');
       })
     )
-    .pipe()
     .subscribe((nextDataViews) => {
       dataViews$.next(nextDataViews);
     });
