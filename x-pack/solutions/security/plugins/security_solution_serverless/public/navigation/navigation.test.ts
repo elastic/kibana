@@ -127,10 +127,7 @@ describe('Security Side Nav', () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
 
     subscription.unsubscribe();
-    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(
-      services,
-      AIChatExperience.Agent
-    );
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Agent);
   });
 
   it('passes chat experience parameter to createAiNavigationTree when using AI SOC', async () => {
