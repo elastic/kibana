@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { LoginAsInteractiveUserResponse } from './helpers';
 import { loginAsInteractiveUser, setupInteractiveUser, cleanupInteractiveUser } from './helpers';
@@ -16,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       it('updated_by is empty', async () => {
         const createResponse = await supertest
-          .post('/api/dashboards/dashboard')
+          .post(DASHBOARD_API_PATH)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -30,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.meta).to.not.have.key('updated_by');
 
         const updateResponse = await supertest
-          .put(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -58,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         createResponse = await supertestWithoutAuth
-          .post('/api/dashboards/dashboard')
+          .post(DASHBOARD_API_PATH)
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
@@ -82,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('updated_by is empty after update with non interactive user', async () => {
         const updateResponse = await supertestWithAuth
-          .put(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -94,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.status).to.be(200);
 
         const getResponse = await supertestWithAuth
-          .get(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .get(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send();
@@ -118,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const updateResponse = await supertestWithoutAuth
-          .put(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set(interactiveUser2.headers)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
@@ -131,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.status).to.be(200);
 
         const getResponse = await supertestWithAuth
-          .get(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .get(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send();
