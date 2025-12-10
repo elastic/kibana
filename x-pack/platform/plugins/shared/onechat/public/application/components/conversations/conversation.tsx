@@ -38,6 +38,7 @@ import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useAttachmentViewer } from '../../hooks/use_attachment_viewer';
 import { useSyncFlyoutAttachments } from '../../hooks/use_sync_flyout_attachments';
 import { queryKeys } from '../../query_keys';
+import { ConversationTokenUsage } from './conversation_token_usage';
 
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
@@ -246,6 +247,13 @@ export const Conversation: React.FC<{}> = () => {
           />
         </EuiFlexItem>
       )}
+      {/* Token usage widget */}
+      <EuiFlexItem
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+        grow={false}
+      >
+        <ConversationTokenUsage />
+      </EuiFlexItem>
       <EuiFlexItem
         css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
         grow={false}

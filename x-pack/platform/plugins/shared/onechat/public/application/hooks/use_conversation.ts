@@ -166,3 +166,84 @@ export const useReferencedAttachmentIds = (): Set<string> => {
     return referencedIds;
   }, [conversationRounds]);
 };
+
+/**
+ * Simple token estimation based on string length.
+ * Uses ~4 characters per token heuristic.
+ */
+const estimateTokensFromString = (str: string): number => {
+  return Math.ceil(str.length / 4);
+};
+
+/**
+ * Estimated context size for the next LLM request.
+ */
+export interface ConversationContextEstimate {
+  /** Estimated tokens from conversation history (messages, tool calls, responses) */
+  historyTokens: number;
+  /** Estimated tokens from active attachments */
+  attachmentTokens: number;
+  /** Total estimated context tokens for next request */
+  totalContextTokens: number;
+  /** Number of rounds in the conversation */
+  roundCount: number;
+}
+
+/**
+ * Hook to estimate the context size for the next LLM request.
+ * This estimates how many tokens will be sent in the next request,
+ * NOT the cumulative tokens used across all rounds.
+ */
+export const useConversationContextEstimate = (): ConversationContextEstimate => {
+  const conversationRounds = useConversationRounds();
+  const attachments = useConversationAttachments();
+
+  return useMemo(() => {
+    // Estimate tokens from conversation history
+    let historyTokens = 0;
+
+    for (const round of conversationRounds) {
+      // User message
+      historyTokens += estimateTokensFromString(round.input.message);
+
+      // Tool calls and results
+      for (const step of round.steps) {
+        if (step.type === 'tool_call') {
+          // Tool call params
+          historyTokens += estimateTokensFromString(JSON.stringify(step.params));
+          // Tool results
+          for (const result of step.results) {
+            historyTokens += estimateTokensFromString(JSON.stringify(result.data));
+          }
+        } else if (step.type === 'reasoning') {
+          // Reasoning content (if included in context)
+          historyTokens += estimateTokensFromString(step.reasoning);
+        }
+      }
+
+      // Assistant response
+      historyTokens += estimateTokensFromString(round.response.message);
+    }
+
+    // Get tokens from active attachments
+    let attachmentTokens = 0;
+    if (attachments) {
+      for (const attachment of attachments) {
+        // Only count active attachments
+        const latestVersion = attachment.versions.find(
+          (v) => v.version === attachment.current_version
+        );
+        if (latestVersion?.status === 'active' && latestVersion.estimated_tokens) {
+          attachmentTokens += latestVersion.estimated_tokens;
+        }
+      }
+    }
+
+    return {
+      historyTokens,
+      attachmentTokens,
+      totalContextTokens: historyTokens + attachmentTokens,
+      roundCount: conversationRounds.length,
+    };
+  }, [conversationRounds, attachments]);
+};
