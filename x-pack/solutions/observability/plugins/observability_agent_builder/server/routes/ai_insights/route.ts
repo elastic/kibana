@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
+import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -35,11 +36,10 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     }): Promise<{ summary: string; context: string }> => {
       const { alertId } = params.body;
 
-      const [, startDeps] = await core.getStartServices();
+      const [coreStart, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const connectorId = (await inference.getDefaultConnector(request))?.connectorId;
-
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
       const inferenceClient = inference.getClient({ request });
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
