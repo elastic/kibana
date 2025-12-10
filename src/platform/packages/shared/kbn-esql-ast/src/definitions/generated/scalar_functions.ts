@@ -811,7 +811,6 @@ const chunkDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.chunk', {
     defaultMessage: 'Use `CHUNK` to split a text field into smaller chunks.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -923,7 +922,7 @@ const clampDefinition: FunctionDefinition = {
   name: 'clamp',
   description: i18n.translate('kbn-esql-ast.esql.definitions.clamp', {
     defaultMessage:
-      'Clamps the values of all samples to have a lower limit of min and an upper limit of max.',
+      'Limits (or clamps) the values of all samples to have a lower limit of min and an upper limit of max.',
   }),
   preview: false,
   alias: undefined,
@@ -1373,7 +1372,7 @@ const clampMaxDefinition: FunctionDefinition = {
   name: 'clamp_max',
   description: i18n.translate('kbn-esql-ast.esql.definitions.clamp_max', {
     defaultMessage:
-      'Returns clamps the values of all input samples clamped to have an upper limit of max.',
+      'Limits (or clamps) all input sample values to an upper bound of max. Any value above max is reduced to max.',
   }),
   preview: false,
   alias: undefined,
@@ -1718,7 +1717,7 @@ const clampMinDefinition: FunctionDefinition = {
   name: 'clamp_min',
   description: i18n.translate('kbn-esql-ast.esql.definitions.clamp_min', {
     defaultMessage:
-      'Returns clamps the values of all input samples clamped to have a lower limit of min.',
+      'Limits (or clamps) all input sample values to a lower bound of min. Any value below min is set to min.',
   }),
   preview: false,
   alias: undefined,
@@ -17670,6 +17669,7 @@ const caseDefinition: FunctionDefinition = {
       ],
       minParams: 2,
       returnType: 'unknown',
+      isSignatureRepeating: true,
     },
   ],
   locationsAvailable: [
