@@ -8,7 +8,8 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { MessageRole, type InferenceClient } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
@@ -64,7 +65,6 @@ export interface GenerateErrorAiInsightParams {
     ObservabilityAgentBuilderPluginStart
   >;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
-  connectorId: string;
   errorId: string;
   serviceName: string;
   environment?: string;
@@ -73,7 +73,7 @@ export interface GenerateErrorAiInsightParams {
   end: string;
   logger: Logger;
   request: KibanaRequest;
-  inferenceClient: InferenceClient;
+  inferenceClient: BoundInferenceClient;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
