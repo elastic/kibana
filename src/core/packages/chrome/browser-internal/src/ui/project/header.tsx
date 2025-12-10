@@ -226,19 +226,7 @@ export const ProjectHeader = ({
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
-  const topBarStylesOuter = () => css`
-    position: relative;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: calc(${euiTheme.size.s} * 1.25);
-      bottom: calc(${euiTheme.size.s} * 1.25);
-      width: ${euiTheme.border.width.thin};
-      background-color: ${euiTheme.colors.borderBaseSubdued};
-    }
-  `;
-  const topBarStylesInner = () => css`
+  const topBarStyles = () => css`
     box-shadow: none !important;
     background-color: ${euiTheme.colors.backgroundTransparent};
     border-bottom-color: ${euiTheme.colors.backgroundTransparent};
@@ -248,16 +236,11 @@ export const ProjectHeader = ({
     <>
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header data-test-subj="kibanaProjectHeader">
-        <div
-          id="globalHeaderBars"
-          data-test-subj="headerGlobalNav"
-          className="header__bars"
-          css={topBarStylesOuter}
-        >
+        <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader
             position={isFixed ? 'fixed' : 'static'}
             className="header__firstBar"
-            css={topBarStylesInner}
+            css={topBarStyles}
           >
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               {children}
