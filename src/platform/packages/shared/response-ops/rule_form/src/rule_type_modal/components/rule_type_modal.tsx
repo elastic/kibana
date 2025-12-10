@@ -186,6 +186,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                       value={searchString}
                       onChange={({ target: { value } }) => onChangeSearch(value)}
                       fullWidth
+                      compressed
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
