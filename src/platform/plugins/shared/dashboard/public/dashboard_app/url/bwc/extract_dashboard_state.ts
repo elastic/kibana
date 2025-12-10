@@ -28,7 +28,7 @@ export function extractDashboardState(
       dashboardState.options?.auto_apply_filters === undefined &&
       typeof autoApplyFilters === 'boolean'
     ) {
-      // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+      // >9.4 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
       dashboardState.options = { ...dashboardState.options, auto_apply_filters: autoApplyFilters };
     }
 

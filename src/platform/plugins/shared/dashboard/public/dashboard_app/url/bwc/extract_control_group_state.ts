@@ -42,11 +42,11 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
     // >8.18 controls are exported as an array without order
     standardizedControls = controls.map((control) => {
       if ('controlConfig' in control) {
-        // >8.18 to <9.3 controls had `config` stored under `controlConfig`
+        // >8.18 to <9.4 controls had `config` stored under `controlConfig`
         const { controlConfig, ...rest } = control;
         return { ...rest, config: controlConfig };
       }
-      return control; // otherwise, we are dealing with state >=9.3
+      return control; // otherwise, we are dealing with state >=9.4
     });
   } else if (controls !== null && typeof controls === 'object') {
     // <=8.18 controls were exported as an object with order
@@ -82,7 +82,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   if (controlState !== null && typeof controlState === 'object') {
     let useGlobalFilters = DEFAULT_USE_GLOBAL_FILTERS;
     let ignoreValidations = DEFAULT_IGNORE_VALIDATIONS;
-    // >9.3 control group `ignoreParentSettings` gets translated to individual control settings
+    // >9.4 control group `ignoreParentSettings` gets translated to individual control settings
     if (
       'ignoreParentSettings' in controlState &&
       typeof controlState.ignoreParentSettings === 'object'
@@ -98,7 +98,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
       );
     }
 
-    // >9.3 non-default control group `chainingSystem` gets translated to `useGlobalFilters`
+    // >9.4 non-default control group `chainingSystem` gets translated to `useGlobalFilters`
     if (
       'chainingSystem' in controlState &&
       typeof controlState.chainingSystem === 'string' &&
@@ -125,7 +125,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
       });
     }
 
-    // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+    // >9.4 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
     if (
       'autoApplySelections' in controlState &&
       typeof controlState.autoApplySelections === 'boolean'

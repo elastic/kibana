@@ -10,7 +10,7 @@
 import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {
-  describe('>=9.3 state', () => {
+  describe('>=9.4 state', () => {
     test('should extract controls', () => {
       const controlGroupInput93 = {
         controls: [
@@ -43,7 +43,7 @@ describe('extractDashboardState', () => {
     });
   });
 
-  describe('>= 8.19 to <9.3 state', () => {
+  describe('>= 8.19 to <9.4 state', () => {
     test('should extract controls', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {

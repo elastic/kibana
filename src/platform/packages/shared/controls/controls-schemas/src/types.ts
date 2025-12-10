@@ -58,7 +58,7 @@ export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
 }
 
-// This value only exists for control saved objects prior to version 9.3
+// This value only exists for control saved objects prior to version 9.4
 export interface LegacyIgnoreParentSettings {
   ignoreFilters?: boolean;
   ignoreQuery?: boolean;
