@@ -9,11 +9,12 @@
 
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { NotFoundRoute } from './not_found';
@@ -29,6 +30,36 @@ export interface DiscoverRouterProps {
 }
 
 export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps) => {
+  const { onechat } = services;
+
+  // Set up onechat conversation flyout config on mount
+  useEffect(() => {
+    if (!onechat?.setConversationFlyoutActiveConfig) {
+      return;
+    }
+
+    onechat.setConversationFlyoutActiveConfig({
+      sessionTag: 'discover',
+      newConversation: false,
+      attachments: [
+        {
+          id: 'discover-screen-context',
+          type: AttachmentType.screenContext,
+          data: {
+            app: 'discover',
+            url: window.location.href,
+            description: 'User is exploring data in Discover',
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      onechat.clearConversationFlyoutActiveConfig?.();
+    };
+  }, [onechat]);
+
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>

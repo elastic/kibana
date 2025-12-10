@@ -64,6 +64,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -150,6 +151,7 @@ export interface DiscoverServices {
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  onechat?: OnechatPluginStart;
 }
 
 export const buildServices = ({
@@ -247,5 +249,6 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
+    onechat: plugins.onechat,
   };
 };

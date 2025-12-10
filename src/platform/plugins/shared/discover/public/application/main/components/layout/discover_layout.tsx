@@ -39,6 +39,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useUpdateOnechatAttachments } from '../../../../hooks/use_onechat_attachments';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
@@ -85,6 +86,7 @@ export interface DiscoverLayoutProps {
 }
 
 export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+  const services = useDiscoverServices();
   const {
     trackUiMetric,
     capabilities,
@@ -98,7 +100,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
     discoverFeatureFlags,
-  } = useDiscoverServices();
+  } = services;
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -316,6 +318,28 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
+
+  // Update onechat attachments with current Discover context
+  const onechatContext = useMemo(() => {
+    // Extract query string from query object
+    let queryString: string | undefined;
+    if (query) {
+      if (isOfAggregateQueryType(query)) {
+        queryString = query.esql;
+      } else if (typeof query === 'object' && 'query' in query) {
+        queryString = String(query.query);
+      }
+    }
+
+    return {
+      dataView,
+      columns: currentColumns,
+      documents: documentState.result ?? [],
+      query: queryString,
+    };
+  }, [dataView, currentColumns, documentState.result, query]);
+
+  useUpdateOnechatAttachments(services, onechatContext);
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
