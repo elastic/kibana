@@ -421,6 +421,7 @@ describe('LoginForm', () => {
 
       const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
 
+      // @ts-expect-error upgrade typescript v5.9.3
       window.location = { ...window.location, href: currentURL, origin: 'https://some-host.com' };
       const wrapper = renderWithI18n(
         <EuiProvider>
@@ -490,6 +491,7 @@ describe('LoginForm', () => {
         '/some-base-path/app/kibana#/home?_g=()'
       )}`;
 
+      // @ts-expect-error upgrade typescript v5.9.3
       window.location = {
         ...window.location,
         href: currentURL,

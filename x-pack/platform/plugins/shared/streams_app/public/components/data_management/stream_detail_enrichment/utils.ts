@@ -7,10 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
@@ -26,35 +23,48 @@ import {
   ALWAYS_CONDITION,
   conditionSchema,
   convertStepToUIDefinition,
+  convertUIStepsToDSL,
   streamlangProcessorSchema,
 } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
-import type {
-  DissectFormState,
-  GrokFormState,
-  ProcessorFormState,
-  DateFormState,
-  ManualIngestPipelineFormState,
-  EnrichmentDataSourceWithUIAttributes,
-  ReplaceFormState,
-  SetFormState,
-  WhereBlockFormState,
-  ConvertFormState,
-  DropFormState,
-} from './types';
+import type { ProcessorResources } from './state_management/steps_state_machine';
+import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
   ConfigDrivenProcessorType,
   ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
-import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import type { ProcessorResources } from './state_management/steps_state_machine';
+import type {
+  ConvertFormState,
+  DateFormState,
+  DissectFormState,
+  DropFormState,
+  EnrichmentDataSourceWithUIAttributes,
+  GrokFormState,
+  ManualIngestPipelineFormState,
+  ProcessorFormState,
+  ReplaceFormState,
+  SetFormState,
+  WhereBlockFormState,
+} from './types';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'set', 'replace'];
+export const SPECIALISED_TYPES = [
+  'convert',
+  'date',
+  'dissect',
+  'grok',
+  'set',
+  'replace',
+  'drop_document',
+];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -66,7 +76,7 @@ interface RecalcColumnWidthsParams {
   visibleColumns: string[];
 }
 
-const PRIORITIZED_CONTENT_FIELDS = [
+export const PRIORITIZED_CONTENT_FIELDS = [
   'message',
   'body.text',
   'error.message',
@@ -85,7 +95,7 @@ const PRIORITIZED_DATE_FIELDS = [
   'attributes.custom.timestamp',
 ];
 
-const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
   // Count occurrences of well-known text fields in the sample documents
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
     Object.keys(doc).filter((key) => prioritizedFields.includes(key))
@@ -104,6 +114,27 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
 
   const mostCommonField = sortedFields[0];
   return mostCommonField ? mostCommonField[0] : '';
+};
+
+/**
+ * Checks if the sample documents have valid message fields with actual content
+ * that can be used for pipeline suggestion generation.
+ */
+export const hasValidMessageFieldsForSuggestion = (sampleDocs: FlattenRecord[]): boolean => {
+  if (!sampleDocs || sampleDocs.length === 0) {
+    return false;
+  }
+
+  // Check if any of the prioritized content fields exist with non-empty values
+  const docsWithValidFields = sampleDocs.filter((doc) => {
+    return PRIORITIZED_CONTENT_FIELDS.some((fieldName) => {
+      const value = doc[fieldName];
+      return value !== undefined && value !== null && String(value).trim().length > 0;
+    });
+  });
+
+  // Require at least 50% of documents to have valid message fields
+  return docsWithValidFields.length >= sampleDocs.length * 0.5;
 };
 
 const defaultConvertProcessorFormState = (): ConvertFormState => ({
@@ -138,6 +169,7 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
 const defaultDropProcessorFormState = (): DropFormState => ({
   action: 'drop_document',
   where: ALWAYS_CONDITION,
+  ignore_failure: true,
 });
 
 const defaultGrokProcessorFormState: (
@@ -282,6 +314,8 @@ export const convertFormStateToProcessor = (
   processorDefinition: StreamlangProcessorDefinition;
   processorResources?: ProcessorResources;
 } => {
+  const description = 'description' in formState ? formState.description : undefined;
+
   if ('action' in formState) {
     if (formState.action === 'grok') {
       const { patterns, from, ignore_failure, ignore_missing } = formState;
@@ -290,6 +324,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'grok',
           where: formState.where,
+          description,
           patterns: patterns
             .map((pattern) => pattern.getExpression().trim())
             .filter((pattern) => !isEmpty(pattern)),
@@ -310,6 +345,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'dissect',
           where: formState.where,
+          description,
           from,
           pattern,
           append_separator: isEmpty(append_separator) ? undefined : append_separator,
@@ -326,6 +362,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'manual_ingest_pipeline',
           where: formState.where,
+          description,
           processors,
           ignore_failure,
         },
@@ -339,6 +376,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'date',
           where: formState.where,
+          description,
           from,
           formats,
           ignore_failure,
@@ -351,10 +389,13 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'drop_document') {
+      const { where, ignore_failure } = formState;
       return {
         processorDefinition: {
           action: 'drop_document',
-          where: formState.where,
+          where,
+          ignore_failure,
+          description,
         },
       };
     }
@@ -376,6 +417,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'set',
           where: formState.where,
+          description,
           to,
           ...getValueOrCopyFrom(),
           override,
@@ -395,6 +437,7 @@ export const convertFormStateToProcessor = (
           to: isEmpty(to) ? undefined : to,
           ignore_failure,
           ignore_missing,
+          description,
           where: 'where' in formState ? formState.where : undefined,
         } as ConvertProcessor,
       };
@@ -412,6 +455,7 @@ export const convertFormStateToProcessor = (
           to: isEmpty(to) ? undefined : to,
           ignore_failure,
           ignore_missing,
+          description,
           where: 'where' in formState ? formState.where : undefined,
         } as ReplaceProcessor,
       };
@@ -419,9 +463,10 @@ export const convertFormStateToProcessor = (
 
     if (configDrivenProcessors[formState.action]) {
       return {
-        processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
-          formState as any
-        ),
+        processorDefinition: {
+          ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
+          description,
+        },
       };
     }
   }
@@ -560,4 +605,38 @@ export const getValidSteps = (
 export const getStepPanelColour = (stepIndex: number) => {
   const isEven = stepIndex % 2 === 0;
   return isEven ? 'subdued' : undefined;
+};
+
+export const buildUpsertStreamRequestPayload = (
+  definition: Streams.ingest.all.GetResponse,
+  steps: StreamlangStepWithUIAttributes[],
+  fields?: FieldDefinition
+): { ingest: IngestUpsertRequest } => {
+  const processing = convertUIStepsToDSL(steps);
+
+  return Streams.WiredStream.GetResponse.is(definition)
+    ? {
+        ingest: {
+          ...definition.stream.ingest,
+          processing,
+          ...(fields && {
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields,
+            },
+          }),
+        },
+      }
+    : {
+        ingest: {
+          ...definition.stream.ingest,
+          processing,
+          ...(fields && {
+            classic: {
+              ...definition.stream.ingest.classic,
+              field_overrides: fields,
+            },
+          }),
+        },
+      };
 };

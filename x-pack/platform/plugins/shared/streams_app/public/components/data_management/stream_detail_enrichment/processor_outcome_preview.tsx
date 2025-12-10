@@ -120,6 +120,9 @@ const PreviewDocumentsGroupBy = () => {
   const simulationParsedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
+  const simulationDroppedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.dropped_rate)
+  );
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
@@ -170,6 +173,13 @@ const PreviewDocumentsGroupBy = () => {
           numActiveFilters={simulationFailedRate}
         >
           {previewDocsFilterOptions.outcome_filter_failed.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
+          badgeColor="accent"
+          numActiveFilters={simulationDroppedRate}
+        >
+          {previewDocsFilterOptions.outcome_filter_dropped.label}
         </EuiFilterButton>
       </EuiFilterGroup>
     </EuiFlexGroup>

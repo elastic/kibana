@@ -12,8 +12,9 @@ describe('generateLayer', () => {
   const definition: Streams.WiredStream.Definition = {
     name: 'logs.abc',
     description: '',
+    updated_at: new Date().toISOString(),
     ingest: {
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       wired: {
         routing: [],
         fields: {
@@ -27,6 +28,7 @@ describe('generateLayer', () => {
         dsl: { data_retention: '30d' },
       },
       settings: {},
+      failure_store: { inherit: {} },
     },
   };
 

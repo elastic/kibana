@@ -73,6 +73,7 @@
         MATCH: execute a match query on a specified field - equivalent to match query for Elasticsearch Query DSL
         QSTR: perform a Lucene query string query
         KQL: perform a KQL query
+        LOOKUP JOIN: combines data from a query results table with matching records from a specified lookup index
     </search-functions>
 
     <date-time-functions>

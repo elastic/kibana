@@ -10,6 +10,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
+import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
 
@@ -26,6 +27,7 @@ const initialState: WorkflowDetailState = {
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
+  loading: initialLoadingState,
 };
 
 // Slice
@@ -87,6 +89,9 @@ const workflowDetailSlice = createSlice({
     _setComputedExecution: (state, action: { payload: ComputedData }) => {
       state.computedExecution = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    addLoadingStateReducers(builder);
   },
 });
 

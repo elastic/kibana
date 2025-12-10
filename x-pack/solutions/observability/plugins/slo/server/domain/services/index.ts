@@ -11,3 +11,4 @@ export * from './compute_sli';
 export * from './compute_summary_status';
 export * from './date_range';
 export * from './validate_slo';
+export * from './compute_health';

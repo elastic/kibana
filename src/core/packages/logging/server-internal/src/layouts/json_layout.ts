@@ -66,6 +66,9 @@ export class JsonLayout implements Layout {
     if (record.meta) {
       // @ts-expect-error toJSON not defined on `LogMeta`, but some structured meta can have it defined
       const serializedMeta = record.meta.toJSON ? record.meta.toJSON() : { ...record.meta };
+      if (serializedMeta.error instanceof Error) {
+        serializedMeta.error = JsonLayout.errorToSerializableObject(serializedMeta.error);
+      }
       output = merge(serializedMeta, log);
     }
 

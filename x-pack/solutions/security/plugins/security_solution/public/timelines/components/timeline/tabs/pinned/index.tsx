@@ -247,7 +247,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     timelineId,
     refetch,
     events,
-    pinnedEventIds,
     eventIdToNoteIds,
     onToggleShowNotes,
   });

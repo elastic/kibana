@@ -109,6 +109,7 @@ export const App: FC<AppProps> = ({
       mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
       spaces: deps.spaces,
       fieldsMetadata: deps.fieldsMetadata,
+      fileUpload: deps.fileUpload,
     };
   }, [deps, coreStart]);
 
