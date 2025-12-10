@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { esqlCommandRegistry } from '../../../..';
 import type { ESQLAstAllCommands, ESQLAstForkCommand } from '../../../types';
-import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
+import type { ESQLColumnData } from '../../types';
 import type { IAdditionalFields } from '../../registry';
 
 export const columnsAfter = async (
