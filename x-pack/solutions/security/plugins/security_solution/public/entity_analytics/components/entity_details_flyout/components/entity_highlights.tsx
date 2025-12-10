@@ -27,6 +27,7 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import type { EntityType } from '../../../../../common/search_strategy';
 import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
@@ -49,6 +50,7 @@ export const EntityHighlightsAccordion: React.FC<{
   const connectorId = selectedConnectorId ?? firstConnector?.id ?? '';
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
     useAssistantAvailability();
+  const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
   const { gradientPanelStyle, buttonGradientStyle, iconGradientStyle, gradientSVG } =
     useGradientStyles();
 
@@ -80,7 +82,11 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled = !hasAssistantPrivilege || !isAssistantVisible || !isAssistantEnabled;
+  const disabled =
+    !hasAssistantPrivilege ||
+    !isAssistantVisible ||
+    !isAssistantEnabled ||
+    !hasEntityHighlightsLicense;
   const isLoading = isChatLoading || isAnonymizationFieldsLoading;
 
   if (disabled) {
