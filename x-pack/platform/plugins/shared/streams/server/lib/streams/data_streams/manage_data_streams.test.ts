@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getTemplateLifecycle, updateDataStreamsFailureStore } from './manage_data_streams';
+import {
+  getTemplateLifecycle,
+  updateDataStreamsFailureStore,
+  putDataStreamsSettings,
+} from './manage_data_streams';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { Streams } from '@kbn/streams-schema';
@@ -352,5 +356,91 @@ describe('updateDataStreamsFailureStore', () => {
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Error updating data stream failure store: Template simulation error'
     );
+  });
+});
+
+describe('putDataStreamsSettings', () => {
+  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+
+  beforeEach(() => {
+    mockEsClient = {
+      indices: {
+        putDataStreamSettings: jest.fn(),
+      },
+    } as any;
+  });
+
+  it('should call dry_run first and then apply settings if validation passes', async () => {
+    mockEsClient.indices.putDataStreamSettings = jest
+      .fn()
+      .mockResolvedValueOnce({ data_streams: [{ name: 'logs', applied_to_data_stream: true }] }) // dry_run
+      .mockResolvedValueOnce({ data_streams: [{ name: 'logs', applied_to_data_stream: true }] }); // real call
+
+    await putDataStreamsSettings({
+      esClient: mockEsClient,
+      names: ['logs'],
+      settings: { 'index.refresh_interval': '5s' },
+    });
+
+    expect(mockEsClient.indices.putDataStreamSettings).toHaveBeenCalledTimes(2);
+    expect(mockEsClient.indices.putDataStreamSettings).toHaveBeenNthCalledWith(1, {
+      name: ['logs'],
+      settings: { 'index.refresh_interval': '5s' },
+      dry_run: true,
+    });
+    expect(mockEsClient.indices.putDataStreamSettings).toHaveBeenNthCalledWith(2, {
+      name: ['logs'],
+      settings: { 'index.refresh_interval': '5s' },
+    });
+  });
+
+  it('should throw and not apply settings if dry_run fails', async () => {
+    mockEsClient.indices.putDataStreamSettings = jest.fn().mockResolvedValueOnce({
+      data_streams: [
+        {
+          name: 'logs',
+          applied_to_data_stream: false,
+          error:
+            'index setting [index.refresh_interval=1s] should be either -1 or equal to or greater than 5s',
+        },
+      ],
+    });
+
+    await expect(
+      putDataStreamsSettings({
+        esClient: mockEsClient,
+        names: ['logs'],
+        settings: { 'index.refresh_interval': '1s' },
+      })
+    ).rejects.toThrow(
+      'index setting [index.refresh_interval=1s] should be either -1 or equal to or greater than 5s'
+    );
+
+    // Should only call once (dry_run), not proceed to real call
+    expect(mockEsClient.indices.putDataStreamSettings).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.putDataStreamSettings).toHaveBeenCalledWith({
+      name: ['logs'],
+      settings: { 'index.refresh_interval': '1s' },
+      dry_run: true,
+    });
+  });
+
+  it('should throw if real call fails after dry_run succeeds', async () => {
+    mockEsClient.indices.putDataStreamSettings = jest
+      .fn()
+      .mockResolvedValueOnce({ data_streams: [{ name: 'logs', applied_to_data_stream: true }] }) // dry_run succeeds
+      .mockResolvedValueOnce({
+        data_streams: [{ name: 'logs', error: 'Unexpected error during apply' }],
+      }); // real call fails
+
+    await expect(
+      putDataStreamsSettings({
+        esClient: mockEsClient,
+        names: ['logs'],
+        settings: { 'index.refresh_interval': '5s' },
+      })
+    ).rejects.toThrow('Unexpected error during apply');
+
+    expect(mockEsClient.indices.putDataStreamSettings).toHaveBeenCalledTimes(2);
   });
 });

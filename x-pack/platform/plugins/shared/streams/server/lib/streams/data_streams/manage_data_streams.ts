@@ -269,6 +269,21 @@ export async function putDataStreamsSettings({
     'index.refresh_interval'?: string | -1 | null;
   };
 }) {
+  // First, validate settings with dry_run to catch errors before applying
+  const dryRunResponse = await retryTransientEsErrors(() =>
+    esClient.indices.putDataStreamSettings({
+      name: names,
+      settings,
+      dry_run: true,
+    })
+  );
+  const dryRunErrors = dryRunResponse.data_streams
+    .filter(({ error }) => Boolean(error))
+    .map(({ error }) => error);
+  if (dryRunErrors.length) {
+    throw new Error(dryRunErrors.join('\n'));
+  }
+
   const response = await retryTransientEsErrors(() =>
     esClient.indices.putDataStreamSettings({
       name: names,
