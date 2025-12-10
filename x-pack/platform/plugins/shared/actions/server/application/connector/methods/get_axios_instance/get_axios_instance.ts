@@ -111,6 +111,7 @@ export async function getAxiosInstance(
   return await getAxiosInstanceWithAuth({
     connectorId,
     connectorTokenClient,
+    additionalHeaders: actionType.globalAuthHeaders,
     secrets: validatedSecrets,
   });
 }
