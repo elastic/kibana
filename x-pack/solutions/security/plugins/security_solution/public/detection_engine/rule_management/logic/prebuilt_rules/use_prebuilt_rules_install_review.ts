@@ -11,7 +11,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import type { ReviewPrebuiltRuleInstallationSort } from '../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_sort';
-import type { AddPrebuiltRulesTableFilterOptions } from '../../../rule_management_ui/components/rules_table/add_prebuilt_rules_table/use_filter_prebuilt_rules_to_install';
+import type { AddPrebuiltRulesTableFilterOptions } from '../../../rule_management_ui/components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
 
 interface UsePrebuiltRulesInstallReviewParams {
   page: number;

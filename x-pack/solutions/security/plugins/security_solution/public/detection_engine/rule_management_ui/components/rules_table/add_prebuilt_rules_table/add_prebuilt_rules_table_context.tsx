@@ -88,6 +88,11 @@ export interface AddPrebuiltRulesTableState {
   pagination: PaginationOptions;
 }
 
+export interface AddPrebuiltRulesTableFilterOptions {
+  name: string;
+  tags: string[];
+}
+
 export interface AddPrebuiltRulesTableActions {
   reFetchRules: () => void;
   installOneRule: (ruleId: RuleSignatureId, enable?: boolean) => void;
@@ -169,11 +174,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
       refetchInterval: 60000, // Refetch available rules for installation every minute
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
       // Fetch rules to install only after background installation of security_detection_rules package is complete
-      enabled: isUpgradeReviewRequestEnabled({
-        canUserCRUD,
-        isUpgradingSecurityPackages,
-        prebuiltRulesStatus: prebuiltRulesStatus?.stats,
-      }),
+      enabled: isUpgradeReviewEnabled,
     }
   );
 
