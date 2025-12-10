@@ -27,7 +27,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
   const [error, setError] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
-  const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
 
   // Using http.post to avoid circular dependency with observability_agent_builder plugin
   // TODO: use typed client once data access plugin dependencies on observability are removed
@@ -41,7 +40,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
         {
           body: JSON.stringify({
             alertId,
-            connectorId: lastUsedConnectorId,
           }),
         }
       );

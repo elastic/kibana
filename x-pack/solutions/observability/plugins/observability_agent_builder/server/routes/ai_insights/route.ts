@@ -24,7 +24,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     params: t.type({
       body: t.type({
         alertId: t.string,
-        connectorId: t.union([t.string, t.undefined]),
       }),
     }),
     handler: async ({
@@ -34,17 +33,12 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       request,
       params,
     }): Promise<{ summary: string; context: string }> => {
-      const { alertId, connectorId: bodyConnectorId } = params.body;
+      const { alertId } = params.body;
 
       const [, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const connectorId =
-        bodyConnectorId ?? (await inference.getDefaultConnector(request))?.connectorId;
-
-      if (!connectorId) {
-        throw new Error('No default connector found');
-      }
+      const connectorId = (await inference.getDefaultConnector(request))?.connectorId;
 
       const inferenceClient = inference.getClient({ request });
 
