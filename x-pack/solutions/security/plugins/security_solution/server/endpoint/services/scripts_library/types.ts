@@ -6,10 +6,10 @@
  */
 
 import type { Readable } from 'stream';
-import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import type {
   CreateScriptRequestBody,
   PatchUpdateRequestBody,
+  ListScriptsRequestQuery,
 } from '../../../../common/api/endpoint/scripts_library';
 import type {
   EndpointScript,
