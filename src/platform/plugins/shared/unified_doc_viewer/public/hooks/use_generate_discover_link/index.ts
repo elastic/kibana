@@ -8,7 +8,7 @@
  */
 import { from, where } from '@kbn/esql-composer';
 import { castArray } from 'lodash';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { getUnifiedDocViewerServices } from '../../plugin';
 
 type WhereClause = ReturnType<typeof where>;
 
