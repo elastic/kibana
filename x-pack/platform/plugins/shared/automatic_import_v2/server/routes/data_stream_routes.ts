@@ -105,7 +105,8 @@ const deleteDataStreamRoute = (
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          await automaticImportService.deleteDataStream(integrationId, dataStreamId);
+          const esClient = automaticImportv2.esClient;
+          await automaticImportService.deleteDataStream(integrationId, dataStreamId, esClient);
           return response.ok();
         } catch (err) {
           logger.error(`deleteDataStreamRoute: Caught error:`, err);

@@ -16,6 +16,7 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsServiceSetup,
   SavedObjectsClient,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -235,9 +236,19 @@ export class AutomaticImportService {
   public async deleteDataStream(
     integrationId: string,
     dataStreamId: string,
+    esClient: ElasticsearchClient,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    // Remove the data stream creation task
+    await this.taskManagerService.removeDataStreamCreationTask({ integrationId, dataStreamId });
+    // Delete the samples from the samples index
+    await this.samplesIndexService.deleteSamplesForDataStream(
+      integrationId,
+      dataStreamId,
+      esClient
+    );
+    // Delete the data stream from the saved objects
     await this.savedObjectService.deleteDataStream(integrationId, dataStreamId, options);
   }
 
