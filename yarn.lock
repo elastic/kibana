@@ -4909,6 +4909,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-connect-plugin@link:x-pack/platform/plugins/shared/cloud_connect":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-data-migration-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration":
   version "0.0.0"
   uid ""
