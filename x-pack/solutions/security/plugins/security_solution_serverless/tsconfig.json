@@ -47,5 +47,6 @@
     "@kbn/core-application-browser",
     "@kbn/deeplinks-management",
     "@kbn/connector-schemas",
+    "@kbn/management-settings-ids",
   ]
 }
