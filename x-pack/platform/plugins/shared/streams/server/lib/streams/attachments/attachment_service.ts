@@ -6,12 +6,14 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { AttachmentClient } from './attachment_client';
 import type { AttachmentStorageSettings } from './storage_settings';
 import type { AttachmentDocument } from './types';
 import { attachmentStorageSettings } from './storage_settings';
+import { attachmentTypeToSavedObjectTypeMap } from './utils';
 
 export class AttachmentService {
   constructor(
@@ -28,9 +30,21 @@ export class AttachmentService {
       attachmentStorageSettings
     );
 
+    // Create an internal saved objects repository that can query across all spaces
+    // This is needed to distinguish between "attachment deleted" vs "attachment in different space"
+    // Filter to only include saved object types that are registered (some may be disabled, e.g., 'slo' in Logs Essentials tier)
+    const typeRegistry = coreStart.savedObjects.getTypeRegistry();
+    const availableSoTypes = Object.values(attachmentTypeToSavedObjectTypeMap).filter(
+      (soType) => typeRegistry.getType(soType) !== undefined
+    );
+    const internalSavedObjectsRepository =
+      coreStart.savedObjects.createInternalRepository(availableSoTypes);
+    const internalSoClient = new SavedObjectsClient(internalSavedObjectsRepository);
+
     return new AttachmentClient({
       storageClient: adapter.getClient(),
       soClient: coreStart.savedObjects.getScopedClient(request),
+      internalSoClient,
       rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
     });
   }

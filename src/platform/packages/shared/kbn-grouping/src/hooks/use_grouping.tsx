@@ -50,7 +50,7 @@ export type DynamicGroupingProps<T> = Pick<
   | 'activePage'
   | 'data'
   | 'groupingLevel'
-  | 'inspectButton'
+  | 'additionalToolbarControls'
   | 'isLoading'
   | 'itemsPerPage'
   | 'onChangeGroupsItemsPerPage'

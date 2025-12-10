@@ -2790,6 +2790,23 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.fipsIsEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "fipsIsEnabled",
+        "description": [],
+        "signature": [
+          "() => RegExpMatchArray | null | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/fips.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.getArgValue",
         "type": "Function",
         "tags": [],
