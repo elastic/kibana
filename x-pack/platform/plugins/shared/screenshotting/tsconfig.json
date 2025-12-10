@@ -27,7 +27,6 @@
     "@kbn/screenshotting-server",
     "@kbn/handlebars",
     "@kbn/setup-node-env",
-    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",
