@@ -17,6 +17,23 @@ interface FocusedStepInfo {
   lineEnd: number;
 }
 
+/**
+ * Monaco's SuggestController internal API (partial typing for what we use).
+ * State 0 = hidden, other states = visible/active.
+ */
+interface SuggestController extends monaco.editor.IEditorContribution {
+  model?: {
+    state: number;
+  };
+}
+
+/**
+ * Monaco's SnippetController2 internal API (partial typing for what we use).
+ */
+interface SnippetController extends monaco.editor.IEditorContribution {
+  isInSnippet?: () => boolean;
+}
+
 export const useFocusedStepOutline = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   yamlLineMap: YamlLineMap | undefined
@@ -46,6 +63,21 @@ export const useFocusedStepOutline = (
     }
 
     const updateFocusedStep = () => {
+      // Skip updating focus when suggestion widget or snippet controller is active
+      const suggestController = editor.getContribution(
+        'editor.contrib.suggestController'
+      ) as SuggestController | null;
+      const snippetController = editor.getContribution(
+        'snippetController2'
+      ) as SnippetController | null;
+
+      const isSuggestWidgetVisible = suggestController?.model?.state !== 0;
+      const isSnippetSessionActive = snippetController?.isInSnippet?.();
+
+      if (isSuggestWidgetVisible || isSnippetSessionActive) {
+        return;
+      }
+
       const position = editor.getPosition();
       if (!position) {
         setFocusedStepInfo(null);
