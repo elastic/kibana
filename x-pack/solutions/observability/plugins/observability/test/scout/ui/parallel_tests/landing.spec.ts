@@ -94,13 +94,13 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     apmSynthtraceEsClient,
   }) => {
     // Generate both logs and APM data
-    generateLogsData({
+    await generateLogsData({
       from: new Date(TEST_START_DATE).getTime(),
       to: new Date(TEST_END_DATE).getTime(),
       client: logsSynthtraceEsClient,
     });
 
-    generateApmData({
+    await generateApmData({
       from: new Date(TEST_START_DATE).getTime(),
       to: new Date(TEST_END_DATE).getTime(),
       client: apmSynthtraceEsClient,
