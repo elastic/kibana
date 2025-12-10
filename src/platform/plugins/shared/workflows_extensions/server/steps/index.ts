@@ -12,7 +12,7 @@ import { aiPromptStepDefinition } from './ai/ai_prompt_step';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
-export const registerStepDefinitions = (
+export const registerInternalStepDefinitions = (
   core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
   serverStepRegistry: ServerStepRegistry
 ) => {

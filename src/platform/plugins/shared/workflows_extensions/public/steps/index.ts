@@ -10,6 +10,6 @@
 import { AiPromptStepDefinition } from './ai/ai_prompt_step';
 import type { PublicStepRegistry } from '../step_registry';
 
-export const registerStepDefinitions = (stepRegistry: PublicStepRegistry) => {
+export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
   stepRegistry.register(AiPromptStepDefinition);
 };
