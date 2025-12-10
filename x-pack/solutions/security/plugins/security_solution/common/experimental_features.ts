@@ -198,6 +198,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Entity Analytics Watchlist feature.
    */
   entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Gap Auto Fill Scheduler feature.
+   */
+  gapAutoFillSchedulerEnabled: false,
   /**
    * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
    */
