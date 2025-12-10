@@ -11,24 +11,61 @@ import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import { filterModulesByScoutCiConfig } from '../servers/configs/discovery';
+import { filterModulesByScoutCiConfig } from '../tests_discovery/search_configs';
 import type { ModuleDiscoveryInfo } from './config_discovery';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
 
-jest.mock('fs');
+// Module-level object to store mock modules that the jest.mock can access
+export const mockTestableModulesStore: { modules: ScoutTestableModuleWithConfigs[] } = {
+  modules: [],
+};
+
+// Mock fs before any imports that might use it
+jest.mock('fs', () => {
+  const actualFs = jest.requireActual('fs');
+  return {
+    ...actualFs,
+    readFileSync: jest.fn((path: string, encoding?: string) => {
+      // Return valid JSON for package.json files (used by @kbn/repo-info during initialization)
+      if (typeof path === 'string' && path.endsWith('package.json')) {
+        return JSON.stringify({ name: 'kibana', version: '1.0.0' });
+      }
+      // For other files, return empty string by default
+      return '';
+    }),
+    existsSync: jest.fn(() => false),
+    mkdirSync: jest.fn(),
+    writeFileSync: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/repo-info', () => ({
+  REPO_ROOT: '/mock/repo/root',
+}));
 
 jest.mock('@kbn/scout-info', () => ({
   SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout_playwright_configs.json',
 }));
 
-let mockTestableModules: ScoutTestableModuleWithConfigs[] = [];
+jest.mock('../tests_discovery/search_configs', () => ({
+  filterModulesByScoutCiConfig: jest.fn(),
+}));
+
+jest.mock('@kbn/scout-reporting/src/registry', () => {
+  // Access the module-level store
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const testModule = require('./config_discovery.test');
+  return {
+    testableModules: {
+      get allIncludingConfigs() {
+        return testModule.mockTestableModulesStore.modules;
+      },
+    },
+  };
+});
 
 jest.mock('../servers/configs', () => ({
   getScoutPlaywrightConfigs: jest.fn(),
-}));
-
-jest.mock('../servers/configs/discovery', () => ({
-  validateWithScoutCiConfig: jest.fn(),
 }));
 
 describe('runDiscoverPlaywrightConfigs', () => {
@@ -69,6 +106,17 @@ describe('runDiscoverPlaywrightConfigs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Re-setup fs mocks after clearing
+    (fs.readFileSync as jest.Mock).mockImplementation((path: string) => {
+      if (typeof path === 'string' && path.endsWith('package.json')) {
+        return JSON.stringify({ name: 'kibana', version: '1.0.0' });
+      }
+      // For yaml files (used by search_configs)
+      if (typeof path === 'string' && path.endsWith('.yml')) {
+        return 'mock yaml content';
+      }
+      return '';
+    });
     (fs.existsSync as jest.Mock).mockReturnValue(false);
     (fs.mkdirSync as jest.Mock).mockImplementation(jest.fn());
     (fs.writeFileSync as jest.Mock).mockImplementation(jest.fn());
@@ -80,7 +128,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
 
     // Default mock modules
-    mockTestableModules = [
+    mockTestableModulesStore.modules = [
       {
         name: 'pluginA',
         group: 'groupA',
@@ -314,7 +362,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up modules with no matching tags
-    mockTestableModules = [
+    mockTestableModulesStore.modules = [
       {
         name: 'pluginNoMatch',
         group: 'groupX',
@@ -397,7 +445,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up a module with a config that has no passed tests
-    mockTestableModules = [
+    mockTestableModulesStore.modules = [
       {
         name: 'pluginNoTests',
         group: 'groupY',
@@ -450,7 +498,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up a module with mixed test statuses and file types
-    mockTestableModules = [
+    mockTestableModulesStore.modules = [
       {
         name: 'pluginMixedTests',
         group: 'groupZ',
@@ -552,7 +600,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up a module with various tags to test runModes computation
-    mockTestableModules = [
+    mockTestableModulesStore.modules = [
       {
         name: 'pluginTestModes',
         group: 'groupTest',
@@ -622,7 +670,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
   describe('--flatten flag', () => {
     beforeEach(() => {
       // Set up modules with different groups and runModes for flatten testing
-      mockTestableModules = [
+      mockTestableModulesStore.modules = [
         {
           name: 'pluginSearch',
           group: 'search',
@@ -782,7 +830,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       };
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
-        mockTestableModules.map((m) => ({
+        mockTestableModulesStore.modules.map((m) => ({
           name: m.name,
           group: m.group,
           type: m.type,
@@ -858,7 +906,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       };
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
-        mockTestableModules.map((m) => ({
+        mockTestableModulesStore.modules.map((m) => ({
           name: m.name,
           group: m.group,
           type: m.type,
@@ -917,7 +965,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       });
 
       // Set up a module with a config that has multiple runModes
-      mockTestableModules = [
+      mockTestableModulesStore.modules = [
         {
           name: 'pluginMultiMode',
           group: 'test',

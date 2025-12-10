@@ -10,7 +10,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import yaml from 'js-yaml';
-import type { ModuleDiscoveryInfo } from '../../cli/config_discovery';
+import type { ModuleDiscoveryInfo } from './types';
 
 jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',

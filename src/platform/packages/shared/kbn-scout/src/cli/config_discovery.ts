@@ -7,203 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
-import path from 'path';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { tags } from '../playwright/tags';
-import { filterModulesByScoutCiConfig } from '../servers/configs/discovery';
+import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
+import { filterModulesByScoutCiConfig } from '../tests_discovery/search_configs';
+import {
+  collectUniqueTags,
+  getRunModesFromTags,
+  getTestTagsForTarget,
+} from '../tests_discovery/tag_utils';
+import { countModulesByType, flattenModulesByRunMode } from '../tests_discovery/transform_utils';
+import type {
+  FlattenedConfigGroup,
+  ModuleDiscoveryInfo,
+  TargetType,
+} from '../tests_discovery/types';
+import { TARGET_TYPES } from '../tests_discovery/types';
 
-type TargetType = 'all' | 'mki' | 'ech';
+// Re-export types for backward compatibility
+export type { FlattenedConfigGroup, ModuleDiscoveryInfo } from '../tests_discovery/types';
 
-const TARGET_TYPES: TargetType[] = ['all', 'mki', 'ech'];
+// Builds module discovery info from testable modules
 
-const getTestTagsForTarget = (target: string): string[] => {
-  switch (target) {
-    case 'mki':
-      return tags.SERVERLESS_ONLY;
-    case 'ech':
-      return tags.ESS_ONLY;
-    case 'all':
-    default:
-      return tags.DEPLOYMENT_AGNOSTIC;
-  }
+const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
+  return testableModules.allIncludingConfigs.map((module) => ({
+    name: module.name,
+    group: module.group,
+    type: module.type,
+    configs: module.configs.map((config) => {
+      const runnableTest = config.manifest.tests.find(
+        (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
+      );
+
+      const usesParallelWorkers = config.path.includes('parallel.playwright.config.ts');
+      const allTags = collectUniqueTags(config.manifest.tests);
+
+      return {
+        path: config.path,
+        hasTests: !!runnableTest,
+        tags: allTags,
+        runModes: [], // Will be computed from tags after cross-tag filtering
+        usesParallelWorkers,
+      };
+    }),
+  }));
 };
 
-const collectUniqueTags = (
-  tests: Array<{ tags?: string[]; expectedStatus?: string; location?: { file?: string } }>
-): string[] => {
-  const tagSet = new Set<string>();
-  for (const test of tests) {
-    // Only collect tags from tests that have passed status and are spec files
-    if (
-      test.expectedStatus === 'passed' &&
-      test.location?.file?.endsWith('.spec.ts') &&
-      test.tags
-    ) {
-      for (const tag of test.tags) {
-        tagSet.add(tag);
-      }
-    }
-  }
-  return Array.from(tagSet);
-};
-
-const countModulesByType = (
-  modules: ModuleDiscoveryInfo[]
-): { plugins: number; packages: number } => {
-  let plugins = 0;
-  let packages = 0;
-  for (const module of modules) {
-    if (module.type === 'plugin') {
-      plugins++;
-    } else {
-      packages++;
-    }
-  }
-  return { plugins, packages };
-};
-
-/**
- * Converts tags to run modes (e.g., --stateful, --serverless=es)
- */
-const getRunModesFromTags = (testTags: string[]): string[] => {
-  const modes: string[] = [];
-  const tagSet = new Set(testTags);
-
-  // Map tags to run modes
-  if (tagSet.has('@ess')) {
-    modes.push('--stateful');
-  }
-  if (tagSet.has('@svlSearch')) {
-    modes.push('--serverless=es');
-  }
-  if (tagSet.has('@svlSecurity')) {
-    modes.push('--serverless=security');
-  }
-  if (tagSet.has('@svlOblt')) {
-    modes.push('--serverless=oblt');
-  }
-  // TODO: Uncomment to run tests for these targets in CI
-  //
-  // if (tagSet.has('@svlLogsEssentials')) {
-  //   modes.push('--serverless=oblt-logs-essentials');
-  // }
-  // if (tagSet.has('@svlSecurityEssentials')) {
-  //   modes.push('--serverless=security-essentials');
-  // }
-  // if (tagSet.has('@svlSecurityEase')) {
-  //   modes.push('--serverless=security-ease');
-  // }
-
-  return modes;
-};
-
-// It is used in regular CI pipelines with locally run servers
-export interface ModuleDiscoveryInfo {
-  name: string;
-  group: string;
-  type: 'plugin' | 'package';
-  configs: {
-    path: string;
-    hasTests: boolean;
-    tags: string[];
-    runModes: string[];
-    usesParallelWorkers: boolean;
-  }[];
-}
-
-// It is used in CI pipelines targeting test runs in Cloud
-export interface FlattenedConfigGroup {
-  mode: 'serverless' | 'stateful';
-  group: string;
-  runMode: string;
-  configs: string[];
-}
-
-/**
- * Flattens ModuleDiscoveryInfo[] into an array grouped by mode, group, and runMode to qaf-tests run
- */
-const flattenModulesByRunMode = (modules: ModuleDiscoveryInfo[]): FlattenedConfigGroup[] => {
-  // Using a map with composite key: `${mode}:${group}:${runMode}`
-  const groupsMap = new Map<string, FlattenedConfigGroup>();
-
-  for (const module of modules) {
-    for (const config of module.configs) {
-      for (const runMode of config.runModes) {
-        const mode: 'serverless' | 'stateful' = runMode.startsWith('--serverless')
-          ? 'serverless'
-          : 'stateful';
-
-        const key = `${mode}:${module.group}:${runMode}`;
-
-        // Get or create group
-        let group = groupsMap.get(key);
-        if (!group) {
-          group = {
-            mode,
-            group: module.group,
-            runMode,
-            configs: [],
-          };
-          groupsMap.set(key, group);
-        }
-
-        // Add config path to group
-        group.configs.push(config.path);
-      }
-    }
-  }
-
-  // Convert map to array and sort for consistent output
-  return Array.from(groupsMap.values()).sort((a, b) => {
-    // Sort by mode first (stateful before serverless), then by group, then by runMode (alphabetical)
-    if (a.mode !== b.mode) {
-      return a.mode === 'stateful' ? -1 : 1;
-    }
-    if (a.group !== b.group) {
-      return a.group.localeCompare(b.group);
-    }
-    return a.runMode.localeCompare(b.runMode);
-  });
-};
-
-export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: ToolingLog) => {
-  const target = (flagsReader.enum('target', TARGET_TYPES) || 'all') as TargetType;
-  const targetTags = getTestTagsForTarget(target);
+// Filters modules by target tags and computes run modes
+const filterModulesByTargetTags = (
+  modules: ModuleDiscoveryInfo[],
+  targetTags: string[]
+): ModuleDiscoveryInfo[] => {
   const targetTagsSet = new Set(targetTags);
-  const flatten = flagsReader.boolean('flatten');
 
-  const modulesWithTests: ModuleDiscoveryInfo[] = testableModules.allIncludingConfigs.map(
-    (module) => ({
-      name: module.name,
-      group: module.group,
-      type: module.type,
-      configs: module.configs.map((config) => {
-        const runnableTest = config.manifest.tests.find(
-          (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
-        );
-
-        const usesParallelWorkers = config.path.includes('parallel.playwright.config.ts');
-        const allTags = collectUniqueTags(config.manifest.tests);
-
-        return {
-          path: config.path,
-          hasTests: !!runnableTest,
-          tags: allTags,
-          runModes: [], // It will be computed from tags after cross-tag filtering
-          usesParallelWorkers,
-        };
-      }),
-    })
-  );
-
-  // Filter configs based on matching tags with targetTags
-  // Keep only configs with matching tags, and filter each config's tags to only include cross tags
-  // Compute runModes from the filtered tags
-  const filteredModulesWithTests = modulesWithTests
+  return modules
     .map((module) => ({
       ...module,
       configs: module.configs
@@ -218,79 +77,66 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
         }),
     }))
     .filter((module) => module.configs.length > 0);
+};
 
-  // If flatten flag is set, transform to flattened format
-  if (flatten) {
-    // Apply CI filtering if save flag is set (for consistency with non-flattened behavior)
-    const modulesToFlatten = flagsReader.boolean('save')
-      ? filterModulesByScoutCiConfig(log, filteredModulesWithTests)
-      : filteredModulesWithTests;
-
-    const flattenedConfigs = flattenModulesByRunMode(modulesToFlatten);
-
-    if (flagsReader.boolean('save')) {
-      const dirPath = path.dirname(SCOUT_PLAYWRIGHT_CONFIGS_PATH);
-
-      if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
-      }
-
-      fs.writeFileSync(SCOUT_PLAYWRIGHT_CONFIGS_PATH, JSON.stringify(flattenedConfigs, null, 2));
-
-      const statefulCount = flattenedConfigs.filter((g) => g.mode === 'stateful').length;
-      const serverlessCount = flattenedConfigs.filter((g) => g.mode === 'serverless').length;
-      const totalConfigs = flattenedConfigs.reduce((sum, g) => sum + g.configs.length, 0);
-
-      log.info(
-        `Scout configs flattened and saved: ${statefulCount} stateful group(s), ${serverlessCount} serverless group(s), ${totalConfigs} total config(s) to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
-      );
-
-      return;
-    }
-
-    // If not saving, just log the flattened structure
-    log.info(`Found ${flattenedConfigs.length} flattened config group(s):`);
-    flattenedConfigs.forEach((group) => {
-      log.info(
-        `- ${group.mode} / ${group.group} / ${group.runMode}: ${group.configs.length} config(s)`
-      );
-    });
-
-    return;
-  }
-
-  // Original non-flattened logic for regular CI runs (only until we introduce Scout balancer)
-  const { plugins: pluginCount, packages: packageCount } =
-    countModulesByType(filteredModulesWithTests);
+// Logs discovered modules in non-flattened format
+const logDiscoveredModules = (modules: ModuleDiscoveryInfo[], log: ToolingLog): void => {
+  const { plugins: pluginCount, packages: packageCount } = countModulesByType(modules);
 
   const finalMessage =
-    filteredModulesWithTests.length === 0
+    modules.length === 0
       ? 'No Playwright config files found'
       : `Found Playwright config files in ${pluginCount} plugin(s) and ${packageCount} package(s)`;
 
-  if (!flagsReader.boolean('save')) {
-    log.info(finalMessage);
+  log.info(finalMessage);
 
-    filteredModulesWithTests.forEach((module) => {
-      log.info(`${module.group} / [${module.name}] ${module.type}:`);
-      module.configs.forEach((config) => {
-        log.info(
-          `- ${config.path} (hasTests: ${config.hasTests}, tags: [${config.tags.join(', ')}])`
-        );
-      });
+  modules.forEach((module) => {
+    log.info(`${module.group} / [${module.name}] ${module.type}:`);
+    module.configs.forEach((config) => {
+      log.info(
+        `- ${config.path} (hasTests: ${config.hasTests}, tags: [${config.tags.join(', ')}])`
+      );
     });
-  }
+  });
+};
+
+const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: ToolingLog): void => {
+  log.info(`Found ${flattenedConfigs.length} flattened config group(s):`);
+  flattenedConfigs.forEach((group) => {
+    log.info(
+      `- ${group.mode} / ${group.group} / ${group.runMode}: ${group.configs.length} config(s)`
+    );
+  });
+};
+
+const handleFlattenedOutput = (
+  filteredModules: ModuleDiscoveryInfo[],
+  flagsReader: FlagsReader,
+  log: ToolingLog
+): void => {
+  // Apply CI filtering if save flag is set (for consistency with non-flattened behavior)
+  const modulesToFlatten = flagsReader.boolean('save')
+    ? filterModulesByScoutCiConfig(log, filteredModules)
+    : filteredModules;
+
+  const flattenedConfigs = flattenModulesByRunMode(modulesToFlatten);
 
   if (flagsReader.boolean('save')) {
-    const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModulesWithTests);
+    saveFlattenedConfigGroups(flattenedConfigs, log);
+    return;
+  }
 
-    const dirPath = path.dirname(SCOUT_PLAYWRIGHT_CONFIGS_PATH);
+  logFlattenedConfigs(flattenedConfigs, log);
+};
 
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
-    }
-
-    fs.writeFileSync(SCOUT_PLAYWRIGHT_CONFIGS_PATH, JSON.stringify(filteredForCiModules, null, 2));
+const handleNonFlattenedOutput = (
+  filteredModules: ModuleDiscoveryInfo[],
+  flagsReader: FlagsReader,
+  log: ToolingLog
+): void => {
+  if (flagsReader.boolean('save')) {
+    const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
+    saveModuleDiscoveryInfo(filteredForCiModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
       countModulesByType(filteredForCiModules);
@@ -298,37 +144,84 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
     log.info(
       `Scout configs were filtered for CI. Saved ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
     );
-
     return;
   }
 
   if (flagsReader.boolean('validate')) {
-    filterModulesByScoutCiConfig(log, filteredModulesWithTests);
+    filterModulesByScoutCiConfig(log, filteredModules);
+    return;
+  }
+
+  logDiscoveredModules(filteredModules, log);
+};
+
+// Discovers and processes Playwright configuration files with Scout tests
+export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: ToolingLog): void => {
+  const target = (flagsReader.enum('target', TARGET_TYPES) || 'all') as TargetType;
+  const targetTags = getTestTagsForTarget(target);
+  const flatten = flagsReader.boolean('flatten');
+
+  // Build initial module discovery info
+  const modulesWithTests = buildModuleDiscoveryInfo();
+  // Filter modules by target tags and compute run modes
+  const filteredModules = filterModulesByTargetTags(modulesWithTests, targetTags);
+  // Handle output based on flatten flag
+  if (flatten) {
+    handleFlattenedOutput(filteredModules, flagsReader, log);
+  } else {
+    handleNonFlattenedOutput(filteredModules, flagsReader, log);
   }
 };
 
 /**
- * Discover Playwright configuration files with Scout tests
+ * CLI command to discover Playwright configuration files with Scout tests.
+ *
+ * This command scans the codebase for Playwright configuration files that contain
+ * Scout tests, filters them based on deployment target tags, and optionally saves
+ * or validates the results.
+ *
+ * The command supports three deployment targets:
+ * - 'all': Finds configs with deployment-agnostic tags (works for both ESS and serverless)
+ * - 'mki': Finds configs with serverless-only tags (for Managed Kibana Infrastructure)
+ * - 'ech': Finds configs with ESS-only tags (for Elastic Cloud Hosted)
+ *
+ * Output formats:
+ * - Standard: Lists modules grouped by plugin/package with their configs and tags
+ * - Flattened: Groups configs by deployment mode (stateful/serverless), group, and run mode
  */
 export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
   description: `
   Discover Playwright configuration files with Scout tests.
 
+  This command scans for Playwright config files containing Scout tests and filters them
+  based on deployment target tags. It can output results in standard or flattened format,
+  validate against CI configuration, or save filtered results to a file.
+
   Options:
     --target <target>  Filter configs by deployment target:
                        - 'all': deployment-agnostic tags (default)
-                       - 'mki': serverless-only tags (MKI)
-                       - 'ech': ESS-only tags (ECH)
+                       - 'mki': serverless-only tags
+                       - 'ech': stateful-only tags
     --validate         Validate that all discovered modules are registered in Scout CI config
     --save             Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     --flatten          Output configs in flattened format grouped by mode, group, and runMode
+                       (useful for Cloud test execution)
 
-  Common usage:
+  Examples:
+    # Discover all deployment-agnostic configs
     node scripts/scout discover-playwright-configs
+
+    # Discover serverless-only configs
     node scripts/scout discover-playwright-configs --target mki
+
+    # Validate discovered configs against CI configuration
     node scripts/scout discover-playwright-configs --validate
+
+    # Save filtered configs for CI use
     node scripts/scout discover-playwright-configs --save
+
+    # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
   `,
   flags: {
