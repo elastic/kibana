@@ -61,6 +61,7 @@ export {
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
+export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 
 // Callback functions
 export * from './utils/callbacks';
