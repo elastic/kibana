@@ -7,17 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import createContainer from 'constate';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
-
-type UseDataSourcesParams = DataSources;
-
-export interface DataSources {
-  indexes: TraceIndexes;
-}
-
-const useDataSources = ({ indexes }: UseDataSourcesParams) => {
-  return { indexes };
-};
-
-export const [DataSourcesProvider, useDataSourcesContext] = createContainer(useDataSources);
+export * from './chart_with_custom_buttons';

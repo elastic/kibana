@@ -22,7 +22,6 @@ export const ChatExperience: React.FC = () => {
   } = kibana;
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [hasHandledAgentSelection, setHasHandledAgentSelection] = useState(false);
   const isAiAgentsEnabled = getIsAiAgentsEnabled(kibana.services.featureFlags);
 
   // Show confirmation modal for AI Agents selection
