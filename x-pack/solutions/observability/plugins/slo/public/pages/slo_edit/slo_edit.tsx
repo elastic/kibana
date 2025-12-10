@@ -26,7 +26,7 @@ export function SloEditPage() {
     serverless,
   } = useKibana().services;
   const { sloId } = useParams<{ sloId: string | undefined }>();
-  const { data: slo, isLoading: isLoadingSlo } = useFetchSloDetails({ sloId });
+  const { data: slo, isLoading: isLoading } = useFetchSloDetails({ sloId });
   const isEditMode = Boolean(sloId);
 
   const { data: permissions } = usePermissions();
@@ -89,7 +89,7 @@ export function SloEditPage() {
       data-test-subj="sloEditPage"
     >
       <HeaderMenu />
-      {isEditMode && isLoadingSlo ? (
+      {isEditMode && isLoading ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
       ) : (
         <SloEditForm slo={slo} />
