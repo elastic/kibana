@@ -6,6 +6,7 @@
  */
 import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   assign,
   enqueueActions,
@@ -17,14 +18,17 @@ import {
   raise,
   stateIn,
   cancel,
+  assertEvent,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes, StreamlangDSL } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
+  convertUIStepsToDSL,
+  validateStreamlang,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
@@ -72,6 +76,7 @@ import {
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
+import { createSuggestPipelineActor } from './suggest_pipeline_actor';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -91,11 +96,46 @@ export const streamEnrichmentMachine = setup({
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     stepMachine: getPlaceholderFor(() => stepMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
+    suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
+    notifySuggestionFailure: () => {}, // Placeholder for suggestion failure notification
     refreshDefinition: () => {},
+    /* Validation actions */
+    computeValidation: assign(({ context }) => {
+      const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
+
+      // Only run validation for wired streams
+      if (!isWiredStream) {
+        return {
+          validationErrors: new Map(),
+          fieldTypesByProcessor: new Map(),
+        };
+      }
+
+      const allStepsWithUI = context.stepRefs.map(
+        (stepActorRef) => stepActorRef.getSnapshot().context.step
+      );
+      const streamlangDSL = convertUIStepsToDSL(allStepsWithUI, false);
+      const validationResult = validateStreamlang(streamlangDSL, {
+        reservedFields: [],
+      });
+
+      const errorsByStep = new Map<string, typeof validationResult.errors>();
+      validationResult.errors.forEach((error) => {
+        if (error.processorId) {
+          const existing = errorsByStep.get(error.processorId) || [];
+          errorsByStep.set(error.processorId, [...existing, error]);
+        }
+      });
+
+      return {
+        validationErrors: errorsByStep,
+        fieldTypesByProcessor: validationResult.fieldTypesByProcessor,
+      };
+    }),
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
       urlState: params.urlState,
@@ -224,6 +264,22 @@ export const streamEnrichmentMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
+    overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
+      // Clean-up existing step refs
+      assignArgs.context.stepRefs.forEach(stopChild);
+
+      // Convert new steps to UI format and spawn new step refs
+      // Mark as isNew: true so they're tracked as new additions
+      // Mark as isUpdated: true so they skip draft and go to configured state (can be simulated)
+      const uiSteps = convertStepsForUI({ steps: params.steps });
+      const stepRefs = uiSteps.map((step) => {
+        return spawnStep(step, assignArgs, { isNew: true, isUpdated: true });
+      });
+
+      return {
+        stepRefs,
+      };
+    }),
     reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
@@ -249,9 +305,20 @@ export const streamEnrichmentMachine = setup({
         dataSourceRef.send({ type: 'dataSource.refresh' })
       );
     },
+    /* Pipeline suggestion actions */
+    storeSuggestedPipeline: assign((_, params: { pipeline: StreamlangDSL }) => ({
+      suggestedPipeline: params.pipeline,
+    })),
+    clearSuggestion: assign({ suggestedPipeline: undefined }),
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
       ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
+        // Don't run simulation if there are validation errors
+        if (context.validationErrors.size > 0) {
+          enqueue('sendResetEventToSimulator');
+          return;
+        }
+
         const simulationMode = getActiveSimulationMode(context);
         const isPartialSimulation = simulationMode === 'partial';
         /**
@@ -292,6 +359,7 @@ export const streamEnrichmentMachine = setup({
     },
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
+    hasNoValidationErrors: ({ context }) => context.validationErrors.size === 0,
     canUpdateStream: and(['hasStagedChanges', stateIn('#managingProcessors.idle')]),
     isStagedStep: ({ context }, params: { id: string }) => {
       const stepRef = context.stepRefs.find((p) => p.id === params.id);
@@ -310,6 +378,9 @@ export const streamEnrichmentMachine = setup({
     initialStepRefs: [],
     stepRefs: [],
     urlState: defaultEnrichmentUrlState,
+    validationErrors: new Map(),
+    fieldTypesByProcessor: new Map(),
+    suggestedPipeline: undefined,
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {
@@ -352,6 +423,7 @@ export const streamEnrichmentMachine = setup({
       type: 'parallel',
       entry: [
         { type: 'setupSteps' },
+        { type: 'computeValidation' },
         { type: 'setupDataSources' },
         { type: 'sendStepsEventToSimulator' },
       ],
@@ -517,7 +589,10 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.reorder': {
                       guard: 'hasSimulatePrivileges',
-                      actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
+                      actions: [
+                        { type: 'reorderSteps', params: ({ event }) => event },
+                        { type: 'computeValidation' },
+                      ],
                       target: 'idle',
                       reenter: true,
                     },
@@ -527,6 +602,7 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -538,18 +614,32 @@ export const streamEnrichmentMachine = setup({
                           type: 'duplicateProcessor',
                           params: ({ event }) => event,
                         },
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'step.addProcessor': {
                       guard: 'hasSimulatePrivileges',
                       target: 'creating',
-                      actions: [{ type: 'addProcessor', params: ({ event }) => event }],
+                      actions: [
+                        { type: 'addProcessor', params: ({ event }) => event },
+                        { type: 'computeValidation' },
+                      ],
                     },
                     'step.addCondition': {
                       guard: 'hasSimulatePrivileges',
                       target: 'creating',
-                      actions: [{ type: 'addCondition', params: ({ event }) => event }],
+                      actions: [
+                        { type: 'addCondition', params: ({ event }) => event },
+                        { type: 'computeValidation' },
+                      ],
+                    },
+                    'step.resetSteps': {
+                      guard: 'hasManagePrivileges',
+                      actions: [
+                        { type: 'overwriteSteps', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
                     },
                   },
                 },
@@ -560,6 +650,7 @@ export const streamEnrichmentMachine = setup({
                     'step.change': {
                       actions: [
                         { type: 'reassignSteps' },
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -569,11 +660,12 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'computeValidation' },
                       ],
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                      actions: [{ type: 'reassignSteps' }, { type: 'computeValidation' }],
                     },
                   },
                 },
@@ -583,6 +675,7 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'step.change': {
                       actions: [
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -593,11 +686,99 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'computeValidation' },
                       ],
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                      actions: [{ type: 'reassignSteps' }, { type: 'computeValidation' }],
+                    },
+                  },
+                },
+              },
+            },
+            pipelineSuggestion: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    'suggestion.generate': {
+                      guard: ({ context }) => context.stepRefs.length === 0,
+                      target: 'generatingSuggestion',
+                    },
+                  },
+                },
+                generatingSuggestion: {
+                  invoke: {
+                    id: 'suggestPipelineActor',
+                    src: 'suggestPipeline',
+                    input: ({ context, event }) => {
+                      assertEvent(event, ['suggestion.generate', 'suggestion.regenerate']);
+                      // Get preview documents from simulator
+                      const documents = getActiveDataSourceSamples(context);
+
+                      return {
+                        streamName: context.definition.stream.name,
+                        connectorId: event.connectorId,
+                        documents,
+                      };
+                    },
+                    onDone: {
+                      target: 'viewingSuggestion',
+                      actions: [
+                        {
+                          type: 'storeSuggestedPipeline',
+                          params: ({ event }) => ({ pipeline: event.output }),
+                        },
+                        {
+                          type: 'overwriteSteps',
+                          params: ({ event }) => ({ steps: event.output.steps }),
+                        },
+                      ],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: [
+                        {
+                          type: 'notifySuggestionFailure',
+                          params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                        },
+                      ],
+                    },
+                  },
+                  on: {
+                    'suggestion.cancel': {
+                      target: 'idle',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                  },
+                },
+                viewingSuggestion: {
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                  on: {
+                    'suggestion.accept': {
+                      target: 'idle',
+                      actions: [{ type: 'clearSuggestion' }],
+                    },
+                    'suggestion.dismiss': {
+                      target: 'idle',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                    'suggestion.regenerate': {
+                      target: 'generatingSuggestion',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
                     },
                   },
                 },
@@ -626,7 +807,11 @@ export const createStreamEnrichmentMachineImplementations = ({
     setupGrokCollection: setupGrokCollectionActor(),
     stepMachine,
     dataSourceMachine: dataSourceMachine.provide(
-      createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
+      createDataSourceMachineImplementations({
+        data,
+        toasts: core.notifications.toasts,
+        telemetryClient,
+      })
     ),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
@@ -635,6 +820,11 @@ export const createStreamEnrichmentMachineImplementations = ({
         toasts: core.notifications.toasts,
       })
     ),
+    suggestPipeline: createSuggestPipelineActor({
+      streamsRepositoryClient,
+      telemetryClient,
+      notifications: core.notifications,
+    }),
   },
   actions: {
     refreshDefinition,
@@ -645,5 +835,15 @@ export const createStreamEnrichmentMachineImplementations = ({
     notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({
       toasts: core.notifications.toasts,
     }),
+    notifySuggestionFailure: (params: { event: unknown }) => {
+      const event = params.event as { error: Error };
+      core.notifications.toasts.addError(event.error, {
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.suggestionError',
+          { defaultMessage: 'Failed to generate pipeline suggestion' }
+        ),
+        toastMessage: event.error.message,
+      });
+    },
   },
 });

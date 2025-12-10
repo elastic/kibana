@@ -22,6 +22,16 @@ export const TENANT_ID_VAR_NAME = 'tenant_id';
 export const CLIENT_ID_VAR_NAME = 'client_id';
 export const AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID = 'azure_credentials_cloud_connector_id';
 
+// Account type variable names for different cloud providers
+export const AWS_ACCOUNT_TYPE_VAR_NAME = 'aws.account_type';
+export const AZURE_ACCOUNT_TYPE_VAR_NAME = 'azure.account_type';
+export const GCP_ACCOUNT_TYPE_VAR_NAME = 'gcp.account_type';
+
+// Account type values used across all cloud providers
+// These values are used both in package policy vars and in the Cloud Connector API
+export const SINGLE_ACCOUNT = 'single-account';
+export const ORGANIZATION_ACCOUNT = 'organization-account';
+
 export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   AWS_ROLE_ARN_VAR_NAME,
   AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
