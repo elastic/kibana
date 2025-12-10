@@ -11,15 +11,24 @@ import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 import { getSchemaForAuthType } from '.';
 
-export const generateSecretsSchemaFromSpec = (authSpec: ConnectorSpec['auth']) => {
+export const generateSecretsSchemaFromSpec = (
+  authSpec: ConnectorSpec['auth'],
+  collapseSingleAuthType: boolean = false
+) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
   for (const authType of authSpec?.types || []) {
     secretSchemas.push(getSchemaForAuthType(authType));
   }
-  return secretSchemas.length > 0
-    ? // to make zod types happy
-      z
-        .discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
-        .meta({ label: 'Authentication' })
-    : z.object({});
+
+  if (secretSchemas.length === 0) {
+    return z.object({});
+  }
+
+  if (collapseSingleAuthType && secretSchemas.length === 1) {
+    return secretSchemas[0];
+  }
+
+  return z
+    .discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
+    .meta({ label: 'Authentication' });
 };

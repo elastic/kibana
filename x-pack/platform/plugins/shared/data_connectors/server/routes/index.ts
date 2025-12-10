@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type {
   IRouter,
   Logger,
@@ -14,11 +15,15 @@ import type {
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { connectorsSpecs } from '@kbn/connector-specs';
+import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
 
+interface JSONSchema {
+  [k: string]: unknown;
+}
 /**
  * Builds the secrets object for a connector based on its spec
  * @param connectorType - The connector type ID (e.g., '.notion')
@@ -38,29 +43,29 @@ export function buildSecretsFromConnectorSpec(
     throw new Error(`Stack connector spec not found for type "${connectorType}"`);
   }
 
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
-  });
+  const secretSchema = generateSecretsSchemaFromSpec(connectorSpec.auth, true);
+  const jsonSecretSchema = z.toJSONSchema(secretSchema);
+  if (jsonSecretSchema.type !== 'object' || !jsonSecretSchema.properties) {
+    throw new Error('Stack connector spec has multiple auth types');
+  }
+
+  const authType = (jsonSecretSchema.properties?.authType as JSONSchema)?.const;
 
   const secrets: Record<string, string> = {};
-  if (hasBearerAuth) {
-    secrets.authType = 'bearer';
-    secrets.token = token;
-  } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
-
-    const headerField =
-      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
-        ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'ApiKey'; // default fallback
-
-    secrets.authType = 'api_key_header';
-    secrets.apiKey = token;
-    secrets.headerField = headerField;
+  switch (authType) {
+    case 'bearer':
+      secrets.authType = authType;
+      secrets.token = token;
+      break;
+    case 'api_key_header':
+      secrets.authType = authType;
+      const keyValue = Object.keys(jsonSecretSchema.properties).filter(
+        (key) => key !== 'authType'
+      )?.[0];
+      secrets[keyValue] = token;
+      break;
+    default:
+      throw new Error(`Unsupported auth type "${authType}" in stack connector spec`);
   }
 
   return secrets;

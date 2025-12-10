@@ -53,6 +53,10 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
       return z.object({
         [headerField]: schemaToUse.shape.apiKey,
       });
+    } else {
+      return z.object({
+        [HEADER_FIELD_DEFAULT]: schemaToUse.shape.apiKey,
+      });
     }
 
     return schemaToUse.meta(existingMeta);

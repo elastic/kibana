@@ -10,30 +10,79 @@
 import { z } from '@kbn/zod/v4';
 import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
 
+const authTypes = [
+  'none',
+  'basic',
+  'bearer',
+  'oauth_client_credentials',
+  {
+    type: 'api_key_header',
+    defaults: {
+      headerField: 'custom-api-key-field',
+    },
+  },
+];
 describe('generateSecretsSchemaFromSpec', () => {
-  test('correctly generates schemas for array of auth types', () => {
-    const schema = generateSecretsSchemaFromSpec({
-      types: [
-        'none',
-        'basic',
-        'bearer',
-        'oauth_client_credentials',
+  describe('with collapseSingleAuthType = false', () => {
+    test('correctly generates schemas for array of auth types', () => {
+      const schema = generateSecretsSchemaFromSpec({
+        types: authTypes,
+        headers: {
+          'X-Custom-Header': 'CustomValue',
+        },
+      });
+      expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    });
+
+    test('correctly generates schemas for single auth types', () => {
+      authTypes.forEach((authType) => {
+        const schema = generateSecretsSchemaFromSpec({
+          types: [authType],
+          headers: {
+            'X-Custom-Header': 'CustomValue',
+          },
+        });
+        expect(z.toJSONSchema(schema)).toMatchSnapshot();
+      });
+    });
+
+    test('returns empty object schema when no auth types are provided', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: [] });
+      expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    });
+  });
+  describe('with collapseSingleAuthType = true', () => {
+    test('correctly generates schemas for array of auth types', () => {
+      const schema = generateSecretsSchemaFromSpec(
         {
-          type: 'api_key_header',
-          defaults: {
-            headerField: 'custom-api-key-field',
+          types: authTypes,
+          headers: {
+            'X-Custom-Header': 'CustomValue',
           },
         },
-      ],
-      headers: {
-        'X-Custom-Header': 'CustomValue',
-      },
+        true
+      );
+      expect(z.toJSONSchema(schema)).toMatchSnapshot();
     });
-    expect(z.toJSONSchema(schema)).toMatchSnapshot();
-  });
 
-  test('returns empty object schema when no auth types are provided', () => {
-    const schema = generateSecretsSchemaFromSpec({ types: [] });
-    expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    test('correctly generates schemas for single auth types', () => {
+      authTypes.forEach((authType) => {
+        const schema = generateSecretsSchemaFromSpec(
+          {
+            types: [authType],
+            headers: {
+              'X-Custom-Header': 'CustomValue',
+            },
+          },
+          true
+        );
+        expect(z.toJSONSchema(schema)).toMatchSnapshot();
+      });
+    });
+
+    test('returns empty object schema when no auth types are provided', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: [] }, true);
+      expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    });
   });
 });
