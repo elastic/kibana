@@ -42,21 +42,25 @@ const getConfigFormSchema = (): ConfigFieldSchema<string>[] => [
     type: 'COMBO_BOX',
     validations: [
       {
-        isBlocking: false,
+        isBlocking: true,
         validator: (args) => {
-          // console.log('args.value', args.value, typeof args.value);
-          // // const areAllValid = args.value.every((value) => value.startsWith('#'));
-          // // if (areAllValid) {
-          // //   return;
-          // // }
-          // if (args.value.startsWith('#')) {
-          //   return;
-          // }
-          // return {
-          //   code: 'ERR_FIELD_FORMAT',
-          //   formatType: 'COMBO_BOX',
-          //   message: i18n.CHANNEL_NAME_ERROR,
-          // };
+          const valueAsArray = Array.isArray(args.value) ? args.value : [args.value];
+
+          if (valueAsArray.length === 0) {
+            return;
+          }
+
+          const areAllValid = valueAsArray.every((value) => value.startsWith('#'));
+
+          if (areAllValid) {
+            return;
+          }
+
+          return {
+            code: 'ERR_FIELD_FORMAT',
+            formatType: 'COMBO_BOX',
+            message: i18n.CHANNEL_NAME_ERROR,
+          };
         },
       },
     ],

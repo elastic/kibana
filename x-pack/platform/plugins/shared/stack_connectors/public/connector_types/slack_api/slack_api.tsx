@@ -29,6 +29,8 @@ import {
 } from './translations';
 import type { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
+import { serializer } from './form_serializer';
+import { deserializer } from './form_deserializer';
 
 const isChannelValid = (channels?: string[], channelIds?: string[], channelNames?: string[]) => {
   if (channelNames && channelNames.length > 0) {
@@ -115,32 +117,7 @@ export const getConnectorType = (): ConnectorTypeModel<
     return {};
   },
   connectorForm: {
-    serializer: (data) => {
-      const formAllowedChannels =
-        (data.config?.allowedChannels as SlackApiConfig['allowedChannels']) ?? [];
-
-      const allowedChannels = formAllowedChannels.map((option) => ({ name: option })) ?? [];
-
-      return {
-        ...data,
-        config: { ...data.config, allowedChannels },
-      };
-    },
-    deserializer: (data) => {
-      const allowedChannels = data.config?.allowedChannels as Array<{ name: string }>;
-      const formattedChannels =
-        allowedChannels.map((channel) => {
-          if (channel.name.startsWith('#')) {
-            return channel.name;
-          }
-
-          return `#${channel.name}`;
-        }) ?? [];
-
-      return {
-        ...data,
-        config: { ...data.config, allowedChannels: formattedChannels },
-      };
-    },
+    serializer,
+    deserializer,
   },
 });
