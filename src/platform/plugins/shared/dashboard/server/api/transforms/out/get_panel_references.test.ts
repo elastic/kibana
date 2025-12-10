@@ -86,8 +86,8 @@ describe('getPanelReferences', () => {
         },
       };
       // containerReferences[0] is a reference for this panel
-      // but it is not returned because there is know way for dashboard
-      // to know that containerReferences[0] is a reference for this panel
+      // but it is not returned because is not possible for dashboard
+      // to determine that containerReferences[0] is a reference for this panel
       expect(getPanelReferences(containerReferences, byValueState)).toEqual([
         containerReferences[2],
       ]);
