@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { NUMERIC_TYPES } from '../../constants';
 
-export const isMetricField = (fieldType: string, typeCaps: FieldCapsFieldCapability): boolean =>
-  Boolean(typeCaps.time_series_metric) || NUMERIC_TYPES.includes(fieldType as ES_FIELD_TYPES);
+export const isMetricField = (fieldSpec: FieldSpec): boolean =>
+  Boolean(fieldSpec.timeSeriesMetric) ||
+  NUMERIC_TYPES.includes(fieldSpec.esTypes?.[0] as ES_FIELD_TYPES);
 
 export const hasValue = (value: unknown): boolean => {
   if (value == null) {
@@ -24,7 +25,7 @@ export const hasValue = (value: unknown): boolean => {
   return true;
 };
 
-export type FieldSpecId = `${string}>${string}`;
+export type FieldSpecId = string;
 export const buildFieldSpecId = (index: string, fieldName: string): FieldSpecId => {
   return `${index}>${fieldName}`;
 };

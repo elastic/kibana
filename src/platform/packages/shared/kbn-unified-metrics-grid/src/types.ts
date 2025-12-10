@@ -10,12 +10,9 @@
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type {
-  FieldCapsFieldCapability,
-  MappingTimeSeriesMetricType,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { FieldSpec as DataViewFieldSpec } from '@kbn/data-views-plugin/common';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { FieldSpecId } from './common/utils/fields';
 
 export interface MetricsExperienceService {
   client: MetricsExperienceClient;
@@ -54,11 +51,11 @@ export interface MetricField {
 export type DimensionValueFilters = Record<string, string[]>;
 
 export interface FieldSpec {
-  key: FieldSpecId;
+  key: string;
   index: string;
   fieldName: string;
   fieldType: string;
-  typeInfo: FieldCapsFieldCapability;
+  typeInfo: DataViewFieldSpec;
   dimensions: Dimension[];
 }
 

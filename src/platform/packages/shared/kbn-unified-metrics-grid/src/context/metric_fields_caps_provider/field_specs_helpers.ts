@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { FieldSpec as MetricFieldSpecs, Dimension } from '../../types';
 import {
   isMetricField,
@@ -17,7 +17,6 @@ import {
   buildFieldSpecId,
   type FieldSpecId,
 } from '../../common/utils/fields';
-import type { FieldCapsResponseMap } from './metric_fields_caps_provider';
 
 const INVALID_FIELD_NAME = '_metric_names_hash';
 
@@ -40,26 +39,17 @@ const shouldSkipField = (fieldName: string) =>
 /**
  * Builds sorted dimensions for an index.
  */
-const buildDimensions = (
-  indexFieldCaps: Record<string, Record<string, FieldCapsFieldCapability>>
-): Dimension[] => {
+const buildDimensions = (dataViewFieldMap: DataViewFieldMap): Dimension[] => {
   const dimensions: Dimension[] = [];
 
-  for (const fieldName in indexFieldCaps) {
+  for (const fieldName in dataViewFieldMap) {
     if (shouldSkipField(fieldName)) {
       continue;
     }
 
-    const capabilities = indexFieldCaps[fieldName];
-    for (const type in capabilities) {
-      if (!Object.hasOwn(capabilities, type)) {
-        continue;
-      }
-
-      if (capabilities[type].time_series_dimension) {
-        dimensions.push({ name: fieldName, type: type as ES_FIELD_TYPES });
-        break;
-      }
+    const spec = dataViewFieldMap[fieldName];
+    if (spec.timeSeriesDimension) {
+      dimensions.push({ name: fieldName, type: spec.esTypes?.[0] as ES_FIELD_TYPES });
     }
   }
 
@@ -70,49 +60,36 @@ const buildDimensions = (
  * Creates metric field specs from field caps.
  */
 export const createFieldSpecs = (
-  fieldCaps: FieldCapsResponseMap | undefined
+  index: string,
+  dataViewFieldMap: DataViewFieldMap
 ): MetricFieldSpecs[] => {
-  if (!fieldCaps) {
+  if (Object.keys(dataViewFieldMap).length === 0) {
     return [];
   }
 
   const fieldSpecs: MetricFieldSpecs[] = [];
 
-  for (const indexName in fieldCaps) {
-    if (!Object.hasOwn(fieldCaps, indexName)) {
+  for (const fieldName in dataViewFieldMap) {
+    if (!Object.hasOwn(dataViewFieldMap, fieldName)) {
       continue;
     }
 
-    const indexFieldCaps = fieldCaps[indexName];
-    if (!indexFieldCaps) {
+    if (shouldSkipField(fieldName)) {
       continue;
     }
 
-    const dimensions = buildDimensions(indexFieldCaps);
+    const fieldSpec = dataViewFieldMap[fieldName];
+    const dimensions = buildDimensions(dataViewFieldMap);
 
-    for (const fieldName in indexFieldCaps) {
-      if (shouldSkipField(fieldName)) {
-        continue;
-      }
-
-      const capabilities = indexFieldCaps[fieldName];
-      for (const type in capabilities) {
-        if (!Object.hasOwn(capabilities, type)) {
-          continue;
-        }
-
-        const typeInfo = capabilities[type];
-        if (isMetricField(type, typeInfo)) {
-          fieldSpecs.push({
-            key: buildFieldSpecId(indexName, fieldName),
-            index: indexName,
-            fieldName,
-            fieldType: type,
-            typeInfo,
-            dimensions,
-          });
-        }
-      }
+    if (isMetricField(fieldSpec)) {
+      fieldSpecs.push({
+        key: fieldName,
+        index,
+        fieldName,
+        fieldType: fieldSpec.esTypes?.[0] || 'unknown',
+        typeInfo: fieldSpec,
+        dimensions,
+      });
     }
   }
 
@@ -153,7 +130,6 @@ export const createSampleRowByMetric = (
           sampleRowByMetric.set(spec.key, row);
           pendingSamples.delete(spec.key);
         }
-        break;
       }
     }
   }

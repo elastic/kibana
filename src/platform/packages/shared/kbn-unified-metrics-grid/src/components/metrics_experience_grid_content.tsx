@@ -14,7 +14,6 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiText,
   euiScrollBarStyles,
   useEuiTheme,
@@ -37,7 +36,6 @@ export interface MetricsExperienceGridContentProps
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
   filters?: DimensionValueFilters;
-  isFieldsLoading?: boolean;
   isDiscoverLoading?: boolean;
 }
 
@@ -51,7 +49,6 @@ export const MetricsExperienceGridContent = ({
   onFilter,
   actions,
   histogramCss,
-  isFieldsLoading = false,
   isDiscoverLoading = false,
 }: MetricsExperienceGridContentProps) => {
   const euiThemeContext = useEuiTheme();
@@ -114,11 +111,6 @@ export const MetricsExperienceGridContent = ({
                   </strong>
                 </EuiText>
               </EuiFlexItem>
-              {isFieldsLoading && (
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="s" />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -141,7 +133,7 @@ export const MetricsExperienceGridContent = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>
-        {(isDiscoverLoading || isFieldsLoading) && <MetricsGridLoadingProgress />}
+        {isDiscoverLoading && <MetricsGridLoadingProgress />}
         <MetricsGrid
           columns={columns}
           dimensions={selectedDimensions}

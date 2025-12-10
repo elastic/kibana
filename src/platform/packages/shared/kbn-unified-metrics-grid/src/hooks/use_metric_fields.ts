@@ -9,7 +9,6 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, MetricField, MetricUnit } from '../types';
@@ -33,7 +32,7 @@ export const useMetricFields = ({
 }) => {
   const { searchTerm, selectedDimensions, selectedValueMetricFieldIds, onDimensionsChange } =
     useMetricsExperienceState();
-  const { fieldSpecs, sampleRowByMetric, isFetching } = useMetricFieldsCapsContext();
+  const { fieldSpecs, sampleRowByMetric } = useMetricFieldsCapsContext();
 
   const { onPageReady } = usePerformanceContext();
 
@@ -76,14 +75,12 @@ export const useMetricFields = ({
     dimensions,
   });
 
-  if (!isFetching) {
-    lastValueRef.current = { metricFields, visibleFields, dimensions };
-  }
+  lastValueRef.current = { metricFields, visibleFields, dimensions };
 
   // Sync selected dimensions when available dimensions change
   useEffect(() => {
     const currentDimensions = lastValueRef.current.dimensions;
-    if (isFetching || currentDimensions.length === 0) {
+    if (currentDimensions.length === 0) {
       return;
     }
 
@@ -93,30 +90,22 @@ export const useMetricFields = ({
     if (validSelection.length !== selectedDimensions.length) {
       onDimensionsChange(validSelection);
     }
-  }, [selectedDimensions, onDimensionsChange, isFetching, dimensions]);
+  }, [selectedDimensions, onDimensionsChange, dimensions]);
 
   useEffect(() => {
-    if (!isFetching) {
-      onPageReady({
-        meta: {
-          rangeFrom: fetchParams.timeRange?.from,
-          rangeTo: fetchParams.timeRange?.to,
-        },
-        customMetrics: {
-          key1: 'metric_experience_fields_loaded',
-          value1: fieldSpecs.length,
-          key2: 'metrics_experience_poc_version',
-          value2: 1,
-        },
-      });
-    }
-  }, [
-    isFetching,
-    fieldSpecs.length,
-    onPageReady,
-    fetchParams.timeRange?.from,
-    fetchParams.timeRange?.to,
-  ]);
+    onPageReady({
+      meta: {
+        rangeFrom: fetchParams.timeRange?.from,
+        rangeTo: fetchParams.timeRange?.to,
+      },
+      customMetrics: {
+        key1: 'metric_experience_fields_loaded',
+        value1: fieldSpecs.length,
+        key2: 'metrics_experience_poc_version',
+        value2: 1,
+      },
+    });
+  }, [fieldSpecs.length, onPageReady, fetchParams.timeRange?.from, fetchParams.timeRange?.to]);
 
   return {
     metricFields: lastValueRef.current.metricFields,
@@ -139,17 +128,7 @@ const getDimensionsFromRow = (row: DatatableRow, dimensions: Dimension[]): Dimen
   return result;
 };
 
-const getUnit = (
-  meta: FieldCapsFieldCapability['meta'],
-  row: DatatableRow,
-  fieldName: string
-): MetricUnit | undefined => {
-  const metaUnit = Array.isArray(meta?.unit) ? meta.unit[0] : meta?.unit;
-
-  if (metaUnit) {
-    return normalizeUnit({ fieldName, unit: metaUnit });
-  }
-
+const getUnit = (row: DatatableRow, fieldName: string): MetricUnit | undefined => {
   if (row.unit && typeof row.unit === 'string') {
     return normalizeUnit({ fieldName, unit: row.unit });
   }
@@ -160,17 +139,14 @@ const getUnit = (
 // utility functions
 
 const buildMetricField = (spec: FieldSpec, row: DatatableRow): MetricField => {
-  const meta = spec.typeInfo.meta ?? {};
-  const display = Array.isArray(meta.display) ? meta.display[0] : meta.display;
-
   return {
     name: spec.fieldName,
     index: spec.index,
     dimensions: getDimensionsFromRow(row, spec.dimensions),
     type: spec.fieldType,
-    instrument: spec.typeInfo.time_series_metric,
-    unit: getUnit(meta, row, spec.fieldName),
-    display,
+    instrument: spec.typeInfo.timeSeriesMetric,
+    unit: getUnit(row, spec.fieldName),
+    display: undefined,
     noData: false,
   };
 };

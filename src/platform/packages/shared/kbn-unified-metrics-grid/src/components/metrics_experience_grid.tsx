@@ -21,7 +21,6 @@ import { SearchButton } from './toolbar/right_side_actions/search_button';
 import { useMetricFields } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { UnifiedMetricsGridProps } from '../types';
-import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -45,8 +44,6 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
   } = useMetricsExperienceState();
 
-  const { isFetching: isFetchingFieldsCaps } = useMetricFieldsCapsContext();
-
   const { metricFields, visibleFields, dimensions } = useMetricFields({ fetchParams });
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
@@ -54,7 +51,6 @@ export const MetricsExperienceGrid = ({
     visibleFields,
     dimensions,
     renderToggleActions,
-    isLoading: isFetchingFieldsCaps,
   });
 
   const onKeyDown = useCallback(
@@ -68,7 +64,7 @@ export const MetricsExperienceGrid = ({
   );
 
   if (metricFields.length === 0 && selectedDimensionValues.length === 0) {
-    return <EmptyState isLoading={isFetchingFieldsCaps} />;
+    return <EmptyState />;
   }
 
   return (
@@ -106,7 +102,6 @@ export const MetricsExperienceGrid = ({
         onFilter={onFilter}
         actions={actions}
         histogramCss={histogramCss}
-        isFieldsLoading={isFetchingFieldsCaps}
         isDiscoverLoading={isDiscoverLoading}
       />
     </MetricsGridWrapper>

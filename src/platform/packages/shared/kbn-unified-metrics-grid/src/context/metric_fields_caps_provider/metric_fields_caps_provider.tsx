@@ -8,11 +8,9 @@
  */
 
 import React, { createContext, useCallback, useMemo, type PropsWithChildren } from 'react';
-import { useQuery } from '@kbn/react-query';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { useMetricsExperienceClient } from '../metrics_experience_client_provider';
 import type { FieldSpec as MetricFieldSpecs } from '../../types';
 import type { FieldSpecId } from '../../common/utils/fields';
 import {
@@ -34,16 +32,12 @@ export interface MetricFieldsCapsContextValue {
   getValuesByDimension: (
     requiredFieldIds: FieldSpecId[]
   ) => Map<string, Map<string, Set<FieldSpecId>>>;
-  isFetching: boolean;
-  isError: boolean;
 }
 
 const EMPTY_CONTEXT: MetricFieldsCapsContextValue = {
   fieldSpecs: [],
   sampleRowByMetric: new Map(),
   getValuesByDimension: (_: FieldSpecId[]) => new Map(),
-  isFetching: false,
-  isError: false,
 };
 
 export const MetricFieldsCapsContext = createContext<MetricFieldsCapsContextValue>(EMPTY_CONTEXT);
@@ -56,34 +50,15 @@ export const MetricFieldsCapsProvider = ({
   fetchParams,
   children,
 }: PropsWithChildren<MetricFieldsCapsProviderProps>) => {
-  const { table, timeRange, dataView } = fetchParams;
-  const { client } = useMetricsExperienceClient();
+  const { table, dataView } = fetchParams;
 
-  const index = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-
-  const canFetch = !!table?.rows?.length;
-
-  const {
-    data: fieldCaps,
-    isFetching,
-    isError,
-  } = useQuery({
-    queryKey: ['metricFieldsCaps', index, timeRange?.from, timeRange?.to],
-    queryFn: async ({ signal }) => {
-      return client.getFieldCaps(
-        {
-          index,
-          from: timeRange?.from,
-          to: timeRange?.to,
-        },
-        signal
-      );
-    },
-    enabled: canFetch,
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const fieldSpecs = useMemo(() => createFieldSpecs(fieldCaps), [fieldCaps]);
+  const fieldSpecs = useMemo(
+    () =>
+      dataView != null
+        ? createFieldSpecs(dataView.getIndexPattern(), dataView.fields.toSpec())
+        : [],
+    [dataView]
+  );
 
   const { sampleRowByMetric, fieldSpecsByRow } = useMemo(
     () => createSampleRowByMetric(table?.rows, fieldSpecs),
@@ -100,10 +75,8 @@ export const MetricFieldsCapsProvider = ({
       fieldSpecs,
       sampleRowByMetric,
       getValuesByDimension,
-      isFetching,
-      isError,
     }),
-    [fieldSpecs, sampleRowByMetric, getValuesByDimension, isFetching, isError]
+    [fieldSpecs, sampleRowByMetric, getValuesByDimension]
   );
 
   return (
