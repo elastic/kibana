@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/data-sources-registry-plugin'
   - '@kbn/connector-specs'
   - '@kbn/actions-plugin'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
