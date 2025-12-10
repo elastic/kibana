@@ -166,7 +166,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        <EuiContextMenuItem>
+        <EuiContextMenuItem key="try-ai-agent">
           <EuiButton
             aria-label={i18n.TRY_AI_AGENT}
             onClick={handleOpenAIAgentModal}

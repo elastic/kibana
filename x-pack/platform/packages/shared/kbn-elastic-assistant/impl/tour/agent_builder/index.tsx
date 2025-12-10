@@ -95,10 +95,10 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
         </EuiTitle>
       }
       footerAction={[
-        <EuiButtonEmpty size="s" color="text" flush="right" onClick={finishTour}>
+        <EuiButtonEmpty key="skip" size="s" color="text" flush="right" onClick={finishTour}>
           {AGENT_BUILDER_TOUR_SKIP}
         </EuiButtonEmpty>,
-        <EuiButton size="s" color="success" onClick={handleContinue}>
+        <EuiButton key="continue" size="s" color="success" onClick={handleContinue}>
           {AGENT_BUILDER_TOUR_CONTINUE}
         </EuiButton>,
       ]}
