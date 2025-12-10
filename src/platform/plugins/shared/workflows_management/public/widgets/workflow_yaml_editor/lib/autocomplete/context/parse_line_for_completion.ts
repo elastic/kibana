@@ -52,6 +52,12 @@ export interface ConnectorIdLineParseResult extends BaseLineParseResult {
   valueStartIndex: number;
 }
 
+export interface WorkflowLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-id';
+  match: RegExpMatchArray;
+  valueStartIndex: number;
+}
+
 export interface TypeLineParseResult extends BaseLineParseResult {
   matchType: 'type';
   match: RegExpMatchArray;
@@ -70,6 +76,7 @@ export type LineParseResult =
   | LiquidLineParseResult
   | LiquidSyntaxLineParseResult
   | ConnectorIdLineParseResult
+  | WorkflowLineParseResult
   | TypeLineParseResult
   | TimezoneLineParseResult;
 
@@ -109,6 +116,17 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       match: connectorIdMatch,
       // +1 for the space char
       valueStartIndex: connectorIdMatch.groups.prefix.length + 1,
+    };
+  }
+
+  const workflowIdMatch = lineUpToCursor.match(/^(?<prefix>\s*workflow-id:)\s*(?<value>.*)$/);
+  if (workflowIdMatch && workflowIdMatch.groups) {
+    const workflowValue = workflowIdMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'workflow-id',
+      fullKey: workflowValue,
+      match: workflowIdMatch,
+      valueStartIndex: workflowIdMatch.groups.prefix.length + 1,
     };
   }
   // Try @ trigger first (e.g., "@const" or "@steps.step1")

@@ -132,6 +132,7 @@ jest.mock('./decorations', () => ({
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
+  useWorkflowIdDecorations: jest.fn(),
 }));
 
 jest.mock('../styles/use_workflow_editor_styles', () => ({

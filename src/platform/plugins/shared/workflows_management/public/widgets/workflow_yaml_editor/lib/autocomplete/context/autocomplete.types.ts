@@ -12,6 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { LineParseResult } from './parse_line_for_completion';
+import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
 import type {
   StepInfo,
   StepPropInfo,
@@ -49,6 +50,7 @@ export interface AutocompleteContext {
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
+  workflows: WorkflowsResponse;
 }
 
 // we don't want to pass model and position, but currently it's used in getWithBlockSuggestions

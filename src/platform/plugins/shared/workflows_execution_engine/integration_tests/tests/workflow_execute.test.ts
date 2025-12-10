@@ -155,8 +155,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       inputs:
         param1: "value1"
         param2: "value2"
@@ -339,8 +338,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       inputs:
         param1: "value1"
       await: true
@@ -369,8 +367,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       await: true
 `,
       });
@@ -428,8 +425,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       await: true
 `,
       });
@@ -453,8 +449,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       await: true
 `,
       });
@@ -516,34 +511,13 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       await: false
 `,
       });
 
       expect(workflowRepositoryMock.getWorkflow).toHaveBeenCalledWith(
         'child-workflow-id',
-        'fake_space_id'
-      );
-      expect(workflowsExecutionEngineMock.executeWorkflow).toHaveBeenCalled();
-    });
-
-    it('should resolve workflow by name', async () => {
-      await workflowRunFixture.runWorkflow({
-        workflowYaml: `
-steps:
-  - name: executeChild
-    type: workflow.execute
-    with:
-      workflow:
-        name: "child-workflow-name"
-      await: false
-`,
-      });
-
-      expect(workflowRepositoryMock.findWorkflowByName).toHaveBeenCalledWith(
-        'child-workflow-name',
         'fake_space_id'
       );
       expect(workflowsExecutionEngineMock.executeWorkflow).toHaveBeenCalled();
@@ -556,29 +530,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "non-existent-id"
-      await: false
-`,
-      });
-
-      const executeStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).filter((se) => se.stepId === 'executeChild');
-
-      expect(executeStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
-      expect(executeStepExecutions[0].error?.message).toContain('Workflow not found');
-    });
-
-    it('should fail if workflow not found by name', async () => {
-      await workflowRunFixture.runWorkflow({
-        workflowYaml: `
-steps:
-  - name: executeChild
-    type: workflow.execute
-    with:
-      workflow:
-        name: "non-existent-name"
+      workflow-id: "non-existent-id"
       await: false
 `,
       });
@@ -623,8 +575,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "disabled-workflow-id"
+      workflow-id: "disabled-workflow-id"
       await: false
 `,
       });
@@ -667,8 +618,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "invalid-workflow-id"
+      workflow-id: "invalid-workflow-id"
       await: false
 `,
       });
@@ -721,8 +671,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       inputs:
         param1: "{{steps.setupStep.output.result}}"
         param2: "static-value"
@@ -775,8 +724,7 @@ steps:
   - name: executeChild
     type: workflow.execute
     with:
-      workflow:
-        id: "child-workflow-id"
+      workflow-id: "child-workflow-id"
       await: false
 `,
       });

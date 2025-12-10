@@ -76,7 +76,7 @@ export function generateBuiltInStepSnippet(
     case 'workflow.execute':
       parameters = {
         with: {
-          workflow: { id: 'workflow-id' },
+          'workflow-id': 'workflow-id',
           inputs: {},
           await: true,
         },

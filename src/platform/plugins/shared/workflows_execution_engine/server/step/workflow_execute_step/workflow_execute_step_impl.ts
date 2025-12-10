@@ -60,13 +60,12 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowExecuteStep;
-    const { workflow, inputs = {}, await: shouldAwait = true } = step.with;
+    const { 'workflow-id': workflowId, inputs = {}, await: shouldAwait = true } = step.with;
 
     try {
-      // Resolve workflow by ID or name
-      const targetWorkflow = await this.resolveWorkflow(workflow);
+      const targetWorkflow = await this.getWorkflow(workflowId);
       if (!targetWorkflow) {
-        const error = new Error(`Workflow not found: ${JSON.stringify(workflow)}`);
+        const error = new Error(`Workflow not found: ${workflowId}`);
         this.stepExecutionRuntime.failStep(error);
         this.workflowExecutionRuntime.navigateToNextNode();
         await this.stepExecutionRuntime.flushEventLogs();
@@ -83,17 +82,14 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
         return;
       }
 
-      // Map inputs using template engine
       const mappedInputs = this.mapInputs(inputs);
 
-      // Route to appropriate execution strategy
       if (shouldAwait) {
         await this.syncExecutor.execute(targetWorkflow, mappedInputs, this.spaceId, this.request);
       } else {
         await this.asyncExecutor.execute(targetWorkflow, mappedInputs, this.spaceId, this.request);
       }
     } catch (error) {
-      // Catch any unexpected errors during execution
       this.stepExecutionRuntime.failStep(error as Error);
       this.workflowExecutionRuntime.navigateToNextNode();
     } finally {
@@ -101,22 +97,13 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     }
   }
 
-  private async resolveWorkflow(workflowRef: {
-    id?: string;
-    name?: string;
-  }): Promise<EsWorkflow | null> {
-    if (workflowRef.id) {
-      return this.workflowRepository.getWorkflow(workflowRef.id, this.spaceId);
-    }
-    if (workflowRef.name) {
-      return this.workflowRepository.findWorkflowByName(workflowRef.name, this.spaceId);
-    }
-    return null;
+  private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
+    return this.workflowRepository.getWorkflow(workflowId, this.spaceId);
   }
 
   private async validateWorkflowAccess(workflow: EsWorkflow): Promise<void> {
     // Note: spaceId validation is already done by the repository when fetching the workflow
-    // since getWorkflow and findWorkflowByName filter by spaceId
+    // since getWorkflow filter by spaceId
     if (!workflow.enabled) {
       throw new Error(`Workflow ${workflow.id} is disabled`);
     }

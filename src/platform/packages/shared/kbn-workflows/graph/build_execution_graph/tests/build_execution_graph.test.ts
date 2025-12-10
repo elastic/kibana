@@ -240,9 +240,7 @@ describe('convertToWorkflowGraph', () => {
           name: 'testWorkflowExecuteStep',
           type: 'workflow.execute',
           with: {
-            workflow: {
-              id: 'child-workflow-id',
-            },
+            'workflow-id': 'child-workflow-id',
             inputs: {
               param1: 'value1',
             },
@@ -288,9 +286,7 @@ describe('convertToWorkflowGraph', () => {
           name: 'testWorkflowExecuteStep',
           type: 'workflow.execute',
           with: {
-            workflow: {
-              id: 'child-workflow-id',
-            },
+            'workflow-id': 'child-workflow-id',
             inputs: {
               param1: 'value1',
             },
