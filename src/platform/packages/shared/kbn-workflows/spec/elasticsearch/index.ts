@@ -11,6 +11,7 @@ import {
   ENHANCED_ELASTICSEARCH_CONNECTORS,
   mergeEnhancedConnectors,
 } from './enhanced_es_connectors';
+import { GENERATED_ELASTICSEARCH_CONNECTORS } from './generated';
 import type { InternalConnectorContract } from '../../types/latest';
 
 /**
@@ -36,10 +37,10 @@ import type { InternalConnectorContract } from '../../types/latest';
  */
 export function getElasticsearchConnectors(): InternalConnectorContract[] {
   // Lazy load the large generated files to keep them out of the main bundle
-  const {
-    GENERATED_ELASTICSEARCH_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('./generated');
+  // const {
+  //   GENERATED_ELASTICSEARCH_CONNECTORS,
+  //   // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // } = require('./generated');
 
   return mergeEnhancedConnectors(
     GENERATED_ELASTICSEARCH_CONNECTORS,
