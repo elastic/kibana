@@ -77,7 +77,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   );
 
   const {
-    templates: rawTemplates,
+    templates,
     hasNextPage: hasMoreTemplates,
     fetchNextPage: loadMoreTemplates,
     isLoading: templatesLoading,
@@ -91,17 +91,6 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     sortOrder: 'asc',
     search: debouncedSearchString || undefined,
   });
-
-  // Enrich templates with rule type metadata
-  const templates = useMemo(() => {
-    return rawTemplates.map((t) => {
-      const rt = ruleTypeIndex.get(t.ruleTypeId);
-      return {
-        ...t,
-        ruleTypeName: rt?.name,
-      };
-    });
-  }, [rawTemplates, ruleTypeIndex]);
 
   return (
     <RuleTypeModal

@@ -134,31 +134,6 @@ describe('TemplateList', () => {
     expect(screen.queryByRole('mark')).not.toBeInTheDocument(); // EuiBadge uses mark element
   });
 
-  it('should render rule type name when provided', () => {
-    render(<TemplateList {...defaultProps} />);
-
-    // Rule type name is rendered with CSS text-transform: uppercase
-    expect(screen.getByText('Rule Type 1')).toBeInTheDocument();
-    expect(screen.getByText('Rule Type 2')).toBeInTheDocument();
-  });
-
-  it('should not render rule type name section when not provided', () => {
-    const templatesWithoutRuleTypeName: RuleTypeModalProps['templates'] = [
-      {
-        id: 'template-no-rule-type-name',
-        name: 'Template No Rule Type Name',
-        tags: [],
-        ruleTypeId: 'rule-type-1',
-        ruleTypeName: undefined,
-      },
-    ];
-
-    render(<TemplateList {...defaultProps} templates={templatesWithoutRuleTypeName} />);
-
-    // Rule type name should not be rendered
-    expect(screen.queryByText(/RULE TYPE/)).not.toBeInTheDocument();
-  });
-
   it('should show load more trigger when hasMore is true', () => {
     render(<TemplateList {...defaultProps} hasMore={true} />);
 
@@ -212,8 +187,6 @@ describe('TemplateList', () => {
     render(<TemplateList {...defaultProps} templates={fullTemplate} />);
 
     expect(screen.getByText('Full Template')).toBeInTheDocument();
-    // Rule type name is rendered with CSS text-transform: uppercase
-    expect(screen.getByText('Full Rule Type')).toBeInTheDocument();
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(screen.getByText('tag2')).toBeInTheDocument();
     expect(screen.getByText('tag3')).toBeInTheDocument();

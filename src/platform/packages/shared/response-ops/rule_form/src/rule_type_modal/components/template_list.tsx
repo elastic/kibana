@@ -16,7 +16,6 @@ import {
   EuiBadge,
   useEuiTheme,
   EuiLoadingSpinner,
-  EuiText,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -65,17 +64,6 @@ const TemplateCard: React.FC<TemplateCardProps> = React.memo(({ template, onSele
       data-test-subj={`${template.id}-SelectOption`}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
-        {template.ruleTypeName && (
-          <EuiFlexItem grow={false}>
-            <EuiText
-              color="subdued"
-              size="xs"
-              style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
-            >
-              {template.ruleTypeName}
-            </EuiText>
-          </EuiFlexItem>
-        )}
         {!!template.tags?.length && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
