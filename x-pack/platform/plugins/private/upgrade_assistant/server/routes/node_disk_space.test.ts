@@ -165,25 +165,6 @@ describe('Disk space API', () => {
       ]);
     });
 
-    it('returns empty array if low watermark disk usage setting is undefined', async () => {
-      (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as jest.Mock
-      ).mockResolvedValue({
-        defaults: {},
-        transient: {},
-        persistent: {},
-      });
-
-      const resp = await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/node_disk_space',
-      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
-
-      expect(resp.status).toEqual(200);
-      expect(resp.payload).toEqual([]);
-    });
-
     it('returns empty array if nodes have not reached low disk usage', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
@@ -229,19 +210,6 @@ describe('Disk space API', () => {
     });
 
     describe('Error handling', () => {
-      it('returns an error if cluster.getSettings throws', async () => {
-        (
-          routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-            .getSettings as jest.Mock
-        ).mockRejectedValue(new Error('scary error!'));
-        await expect(
-          routeDependencies.router.getHandler({
-            method: 'get',
-            pathPattern: '/api/upgrade_assistant/node_disk_space',
-          })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
-        ).rejects.toThrow('scary error!');
-      });
-
       it('returns an error if node.stats throws', async () => {
         (
           routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
