@@ -23,11 +23,7 @@ export function EmbeddedConsoleProvider(ctx: FtrProviderContext) {
       await testSubjects.missingOrFail('consoleEmbeddedBody');
     },
     async clickEmbeddedConsoleControlBar() {
-      // There are always 2 buttons with this test-subj in the FTR environment.
-      // Both are visible, but we need to click the last one (the active instance).
-      const buttons = await testSubjects.findAll('consoleEmbeddedControlBar');
-      const activeButton = buttons[buttons.length - 1];
-      await activeButton.click();
+      await testSubjects.click('consoleEmbeddedControlBar');
     },
     async expectEmbeddedConsoleHaveFullscreenToggle() {
       await testSubjects.existOrFail('consoleToggleFullscreenButton');
