@@ -29,6 +29,7 @@ export class StreamsApp {
   public readonly schemaDataGrid;
   public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
+  public readonly saveRoutingRuleButton;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -61,6 +62,7 @@ export class StreamsApp {
       locator: '.euiCodeBlock',
     });
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
+    this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
   }
 
   async goto() {
@@ -237,6 +239,8 @@ export class StreamsApp {
 
   async fillRoutingRuleName(name: string) {
     await this.page.getByTestId('streamsAppRoutingStreamEntryNameField').fill(name);
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(300); // accommodates the input debounce delay
   }
 
   async clickEditRoutingRule(streamName: string) {
