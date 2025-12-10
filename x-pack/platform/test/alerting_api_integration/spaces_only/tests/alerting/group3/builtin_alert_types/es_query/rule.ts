@@ -185,6 +185,72 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           return await createDSLRule(supertest, objectRemover, connectorId, {
             name: 'always fire',
             thresholdComparator: '>',
+            threshold: [-1],
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataViewId = await createIndexPattern('date');
+          return await createSearchSourceRule(
+            supertest,
+            objectRemover,
+            connectorId,
+            {
+              name: 'always fire',
+              thresholdComparator: '>',
+              threshold: [-1],
+            },
+            esTestDataViewId
+          );
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: alerts as expected for 0 documents for ${searchType} search type`, async () => {
+        // this test runs the rule once, without injecting any source documents
+        // the rule should fire with no source documents because we're matching on count > -1
+
+        // Run 1:
+        // 1 - create the rule - it run one time on creation
+        // 2 - wait for output doc to be written, indicating rule is done running
+        const ruleId = await initData();
+        const docs = await waitForDocs(1);
+
+        const messagePattern =
+          /Document count is 0 in the last 1h in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+
+        const doc = docs[0];
+        const { hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query`);
+        expect(message).to.match(messagePattern);
+        expect(hits).to.be.empty();
+
+        const aadDocs = await getAADDocsForRule(ruleId, 1);
+
+        const alertDoc = aadDocs.body.hits.hits[0]._source;
+        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+        expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+        expect(alertDoc['kibana.alert.evaluation.conditions']).to.be(
+          'Number of matching documents is greater than -1'
+        );
+        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(-1);
+        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+        expect(value === 0).to.be(true);
+        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      })
+    );
+
+    [
+      [
+        'esQuery',
+        async () => {
+          return await createDSLRule(supertest, objectRemover, connectorId, {
+            name: 'always fire',
+            thresholdComparator: '>',
             threshold: [0],
           });
         },
