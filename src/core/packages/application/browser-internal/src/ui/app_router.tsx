@@ -21,6 +21,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -33,6 +34,7 @@ interface Props {
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
+  setAppActionMenuBeta: (appId: string, config: TopNavMenuConfigBeta) => void;
   setIsMounting: (isMounting: boolean) => void;
   hasCustomBranding$?: Observable<boolean>;
 }
@@ -48,6 +50,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   theme$,
   setAppLeaveHandler,
   setAppActionMenu,
+  setAppActionMenuBeta,
   appStatuses$,
   setIsMounting,
   hasCustomBranding$,
@@ -80,6 +83,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                       mounter,
                       setAppLeaveHandler,
                       setAppActionMenu,
+                      setAppActionMenuBeta,
                       setIsMounting,
                       theme$,
                       showPlainSpinner,
@@ -109,6 +113,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                       mounter,
                       setAppLeaveHandler,
                       setAppActionMenu,
+                      setAppActionMenuBeta,
                       setIsMounting,
                       theme$,
                       showPlainSpinner,

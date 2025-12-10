@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
 import type { AppLeaveHandler } from './app_leave';
 import type { ScopedHistory } from './scoped_history';
 
@@ -204,6 +205,8 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+
+  setHeaderActionMenuBeta: (config: TopNavMenuConfigBeta) => void;
 
   /**
    * An observable emitting {@link CoreTheme | Core's theme}.

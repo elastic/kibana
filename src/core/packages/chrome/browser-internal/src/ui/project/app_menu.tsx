@@ -12,11 +12,13 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo } from 'react';
+import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
   // TODO: get rid of observable
   appMenuActions$: Observable<MountPoint | undefined>;
+  appMenuActionsBeta$?: Observable<TopNavMenuConfigBeta | undefined> | null;
 
   /**
    * Whether the menu bar should be fixed (sticky) or static.
@@ -55,7 +57,11 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
     return { root, fixed, static: staticStyle };
   }, [euiTheme]);
 
-export const AppMenuBar = ({ appMenuActions$, isFixed = true }: AppMenuBarProps) => {
+export const AppMenuBar = ({
+  appMenuActions$,
+  appMenuActionsBeta$,
+  isFixed = true,
+}: AppMenuBarProps) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$);
   const { euiTheme } = useEuiTheme();
 
@@ -69,7 +75,7 @@ export const AppMenuBar = ({ appMenuActions$, isFixed = true }: AppMenuBarProps)
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={[styles.root, isFixed ? styles.fixed : styles.static]}
     >
-      <HeaderActionMenu mounter={headerActionMenuMounter} />
+      <HeaderActionMenu mounter={headerActionMenuMounter} config={appMenuActionsBeta$} />
     </div>
   );
 };

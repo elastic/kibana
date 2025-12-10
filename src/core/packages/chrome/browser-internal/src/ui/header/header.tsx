@@ -208,7 +208,10 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderActionMenu mounter={headerActionMenuMounter} />
+                <HeaderActionMenu
+                  mounter={headerActionMenuMounter}
+                  config={application.currentActionMenuBeta$}
+                />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

@@ -12,7 +12,7 @@ import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscri
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
-
+import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
@@ -97,6 +97,9 @@ interface AppUpdaterWrapper {
 interface AppInternalState {
   leaveHandler?: AppLeaveHandler;
   actionMenu?: MountPoint;
+  actionMenuBeta?: {
+    config: TopNavMenuConfigBeta;
+  };
 }
 
 /**
@@ -110,6 +113,7 @@ export class ApplicationService {
   private readonly appInternalStates = new Map<string, AppInternalState>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
+  private currentActionMenuBeta$ = new BehaviorSubject<TopNavMenuConfigBeta | undefined>({});
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject<void>();
@@ -330,6 +334,10 @@ export class ApplicationService {
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
+      currentActionMenuBeta$: this.currentActionMenuBeta$.pipe(
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
       history: this.history!,
       isAppRegistered: (appId: string): boolean => {
         return applications$.value.get(appId) !== undefined;
@@ -382,6 +390,7 @@ export class ApplicationService {
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
+            setAppActionMenuBeta={this.setAppActionMenuBeta}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
             hasCustomBranding$={this.hasCustomBranding$}
           />
@@ -405,10 +414,22 @@ export class ApplicationService {
     this.refreshCurrentActionMenu();
   };
 
+  private setAppActionMenuBeta = (appId: string, config: TopNavMenuConfigBeta) => {
+    this.appInternalStates.set(appId, {
+      ...(this.appInternalStates.get(appId) ?? {}),
+      actionMenuBeta: { config },
+    });
+    this.refreshCurrentActionMenu();
+  };
+
   private refreshCurrentActionMenu = () => {
     const appId = this.currentAppId$.getValue();
     const currentActionMenu = appId ? this.appInternalStates.get(appId)?.actionMenu : undefined;
+    const currentActionMenuBeta = appId
+      ? this.appInternalStates.get(appId)?.actionMenuBeta?.config
+      : undefined;
     this.currentActionMenu$.next(currentActionMenu);
+    this.currentActionMenuBeta$.next(currentActionMenuBeta);
   };
 
   private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
@@ -454,6 +475,7 @@ export class ApplicationService {
     this.stop$.next();
     this.currentAppId$.complete();
     this.currentActionMenu$.complete();
+    this.currentActionMenuBeta$.complete();
     this.statusUpdaters$.complete();
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);

@@ -38,6 +38,7 @@ import type { Observable } from 'rxjs';
 import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
+import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
@@ -112,6 +113,7 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   actionMenu$?: Observable<MountPoint | undefined> | null;
+  actionMenuBeta$?: Observable<TopNavMenuConfigBeta | undefined> | null;
   docLinks: DocLinksStart;
   children: React.ReactNode;
   customBranding$: Observable<CustomBranding>;
@@ -312,7 +314,11 @@ export const ProjectHeader = ({
       </header>
 
       {observables.actionMenu$ && (
-        <AppMenuBar appMenuActions$={observables.actionMenu$} isFixed={true} />
+        <AppMenuBar
+          appMenuActions$={observables.actionMenu$}
+          appMenuActionsBeta$={observables.actionMenuBeta$}
+          isFixed={true}
+        />
       )}
     </>
   );
