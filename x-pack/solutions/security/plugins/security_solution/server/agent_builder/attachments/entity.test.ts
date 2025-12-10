@@ -6,12 +6,14 @@
  */
 
 import type { Attachment } from '@kbn/onechat-common/attachments';
+import { onechatMocks } from '@kbn/onechat-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
 import { createEntityAttachmentType } from './entity';
 
 describe('createEntityAttachmentType', () => {
   const attachmentType = createEntityAttachmentType();
+  const formatContext = onechatMocks.attachments.createFormatContextMock();
 
   describe('validate', () => {
     it('returns valid when entity data is valid with host identifierType', async () => {
@@ -111,7 +113,7 @@ describe('createEntityAttachmentType', () => {
         data: 'identifier: hostname-1, identifierType: host',
       };
 
-      const formatted = await attachmentType.format(attachment);
+      const formatted = await attachmentType.format(attachment, formatContext);
       const representation = await formatted.getRepresentation();
 
       expect(representation.type).toBe('text');
@@ -125,7 +127,7 @@ describe('createEntityAttachmentType', () => {
         data: 'invalid data',
       };
 
-      expect(() => attachmentType.format(attachment)).toThrow(
+      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
         'Invalid risk entity attachment data for attachment test-id'
       );
     });
