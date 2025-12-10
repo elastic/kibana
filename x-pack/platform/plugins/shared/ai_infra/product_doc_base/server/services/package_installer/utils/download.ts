@@ -8,6 +8,7 @@
 import { type ReadStream, createReadStream } from 'fs';
 import fetch from 'node-fetch';
 import { createWriteStream, getSafePath } from '@kbn/fs';
+import { pipeline } from 'stream/promises';
 import { resolveLocalArtifactsPath } from './local_artifacts';
 
 export const downloadToDisk = async (
@@ -29,11 +30,7 @@ export const downloadToDisk = async (
     readStream = res.body as ReadStream;
   }
 
-  await new Promise<void>((resolve, reject) => {
-    readStream.pipe(writeStream);
-    readStream.on('error', reject);
-    writeStream.on('finish', resolve);
-  });
+  await pipeline(readStream, writeStream);
 
   return artifactFullPath;
 };
