@@ -10,6 +10,7 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
+import type { GrantUiamAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
@@ -91,14 +92,12 @@ export interface UiamServicePublic {
   /**
    * Grants an API key using the UIAM service.
    * @param authorization The HTTP authorization header containing scheme and credentials.
-   * @param name A descriptive name for the API key.
-   * @param expiration Optional expiration time for the API key (e.g., '1d', '7d').
+   * @param params The parameters for creating the API key (name and optional expiration).
    * @returns A promise that resolves to an object containing the API key details.
    */
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
-    name: string,
-    expiration?: string
+    params: GrantUiamAPIKeyParams
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -229,16 +228,16 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(authorization: HTTPAuthorizationHeader, name: string, expiration?: string) {
+  async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
     try {
       this.#logger.debug(
         `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
       );
 
       const body: GrantUiamApiKeyRequestBody = {
-        description: name,
+        description: params.name,
         internal: true,
-        ...(expiration ? { expiration } : {}),
+        ...(params.expiration ? { expiration: params.expiration } : {}),
         role_assignments: {
           limit: {
             access: ['application'],

@@ -81,11 +81,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       };
     } else {
       try {
-        const { id, key, description } = await this.uiam!.grantApiKey(
-          authorization,
-          params.name,
-          params.expiration
-        );
+        const { id, key, description } = await this.uiam!.grantApiKey(authorization, params);
 
         result = {
           id,

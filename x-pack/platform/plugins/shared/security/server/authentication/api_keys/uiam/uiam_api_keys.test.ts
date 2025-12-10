@@ -139,8 +139,10 @@ describe('UiamAPIKeys', () => {
           scheme: 'ApiKey',
           credentials: 'essu_uiam_credential_123',
         }),
-        'test-key',
-        '7d'
+        {
+          name: 'test-key',
+          expiration: '7d',
+        }
       );
 
       expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key via UIAM');
@@ -170,8 +172,9 @@ describe('UiamAPIKeys', () => {
           scheme: 'ApiKey',
           credentials: 'essu_uiam_credential_123',
         }),
-        'test-key',
-        undefined
+        {
+          name: 'test-key',
+        }
       );
     });
 
@@ -228,8 +231,10 @@ describe('UiamAPIKeys', () => {
           scheme: 'Bearer',
           credentials: 'essu_uiam_bearer_token_123',
         }),
-        'test-bearer-key',
-        '30d'
+        {
+          name: 'test-bearer-key',
+          expiration: '30d',
+        }
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });

@@ -329,7 +329,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'my-api-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'my-api-key',
+        })
       ).resolves.toEqual(mockResponse);
 
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
@@ -369,10 +371,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(
-          new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'),
-          'api-key-from-grant'
-        )
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'), {
+          name: 'api-key-from-grant',
+        })
       ).resolves.toEqual(mockResponse);
 
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
@@ -412,11 +413,10 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(
-          new HTTPAuthorizationHeader('Bearer', 'access-token'),
-          'test-key-with-exp',
-          '7d'
-        )
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'test-key-with-exp',
+          expiration: '7d',
+        })
       ).resolves.toEqual(mockResponse);
 
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
@@ -453,7 +453,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'test-key',
+        })
       ).rejects.toThrowError('Invalid request');
 
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
@@ -489,7 +491,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'test-key',
+        })
       ).rejects.toThrowError('Unknown error');
     });
 
@@ -502,7 +506,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'invalid-token'), 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'invalid-token'), {
+          name: 'test-key',
+        })
       ).rejects.toThrowError('Unauthorized');
     });
 
@@ -515,7 +521,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'test-key',
+        })
       ).rejects.toThrowError('Forbidden');
     });
 
@@ -528,7 +536,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'test-key',
+        })
       ).rejects.toThrowError('Internal Server Error');
     });
   });
