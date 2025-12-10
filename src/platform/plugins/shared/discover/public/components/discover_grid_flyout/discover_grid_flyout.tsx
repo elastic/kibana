@@ -74,6 +74,7 @@ export function DiscoverGridFlyout({
 
   const { flyoutActions } = useFlyoutActions({
     actions: flyoutCustomization?.actions,
+    hit: actualHit,
     dataView,
     rowIndex: actualHit.raw._index,
     rowId: actualHit.raw._id,
