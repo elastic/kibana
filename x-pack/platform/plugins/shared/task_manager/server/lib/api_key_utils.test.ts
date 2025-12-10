@@ -13,8 +13,9 @@ import {
 } from './api_key_utils';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser, FakeRawRequest } from '@kbn/core/server';
 import type { IBasePath } from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 const mockTask = {
   id: 'task',
@@ -116,6 +117,32 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
 
+    test('should return the API key if the request is a fake request', async () => {
+      const mockApiKey = Buffer.from('apiKeyId:my-fake-apiKey').toString('base64');
+      const fakeRawRequest: FakeRawRequest = {
+        headers: {
+          authorization: `ApiKey ${mockApiKey}`,
+        },
+        path: '/',
+      };
+
+      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+      const coreStart = coreMock.createStart();
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
+
+      const result = await createApiKey([mockTask], fakeRequest, coreStart.security);
+      const apiKeyResult = result.get('task');
+      const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
+      expect(decodedApiKey).toEqual('apiKeyId:my-fake-apiKey');
+
+      expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
+      expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(fakeRequest);
+      expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
     test('should throw if API keys are not enabled', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
@@ -127,14 +154,56 @@ describe('api_key_utils', () => {
       });
     });
 
-    test('should throw if user is not authenticated', async () => {
-      const request = httpServerMock.createKibanaRequest();
+    test('should throw if API key cannot be retrieved from user request', async () => {
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          bad_authorization: `ApiKey: ${mockApiKey}`,
+        },
+      });
+
       const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'api_key',
+        username: 'testUser',
+      };
+
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
       await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
-        message: 'Cannot authenticate current user.',
+        message: 'Could not extract API key from user request header.',
       });
+
+      expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
+      expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+      expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('should throw if API key cannot be retrieved from fake request', async () => {
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+      const fakeRawRequest: FakeRawRequest = {
+        headers: {
+          bad_authorization: `ApiKey ${mockApiKey}`,
+        },
+        path: '/',
+      };
+
+      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+      const coreStart = coreMock.createStart();
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
+
+      await expect(createApiKey([mockTask], fakeRequest, coreStart.security)).rejects.toMatchObject(
+        {
+          message: 'Could not extract API key from fake request header.',
+        }
+      );
+
+      expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
+      expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(fakeRequest);
+      expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
 
     test('should throw if API key was not created', async () => {
@@ -274,7 +343,7 @@ describe('api_key_utils', () => {
       });
     });
 
-    test('should set apiKeyCreatedByUser to true if the API key existed prior', async () => {
+    test('should set apiKeyCreatedByUser to true if the API key existed prior on user request', async () => {
       const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -305,6 +374,42 @@ describe('api_key_utils', () => {
 
       expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          spaceId: 'default',
+          apiKeyCreatedByUser: true,
+        },
+      });
+    });
+
+    test('should set apiKeyCreatedByUser to true if the API key existed prior on fake request', async () => {
+      const mockApiKey = Buffer.from('apiKeyId:my-fake-apiKey').toString('base64');
+      const fakeRawRequest: FakeRawRequest = {
+        headers: {
+          authorization: `ApiKey ${mockApiKey}`,
+        },
+        path: '/',
+      };
+      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+      const coreStart = coreMock.createStart();
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
+
+      const basePathMock = {
+        get: jest.fn(() => '/'),
+        serverBasePath: '/',
+      } as unknown as IBasePath;
+
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        fakeRequest,
+        coreStart.security,
+        basePathMock
+      );
+
+      expect(result.get('task')).toEqual({
+        apiKey: 'YXBpS2V5SWQ6bXktZmFrZS1hcGlLZXk=',
         userScope: {
           apiKeyId: 'apiKeyId',
           spaceId: 'default',

@@ -84,7 +84,7 @@ export const tagcloudStateSchemaNoESQL = schema.object({
   tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
 });
 
-const tagcloudStateSchemaESQL = schema.object({
+export const tagcloudStateSchemaESQL = schema.object({
   type: schema.literal('tagcloud'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,

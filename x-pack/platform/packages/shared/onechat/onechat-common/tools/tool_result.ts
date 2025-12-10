@@ -11,6 +11,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 export enum ToolResultType {
   resource = 'resource',
   tabularData = 'tabular_data',
+  dashboard = 'dashboard',
   query = 'query',
   visualization = 'visualization',
   other = 'other',
@@ -19,7 +20,9 @@ export enum ToolResultType {
 
 export enum SupportedChartType {
   Metric = 'metric',
-  Map = 'map',
+  Gauge = 'gauge',
+  Tagcloud = 'tagcloud',
+  XY = 'xy',
 }
 
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
@@ -27,6 +30,15 @@ interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
   type: TType;
   data: TData;
 }
+
+export type DashboardResult = ToolResultMixin<
+  ToolResultType.dashboard,
+  {
+    id: string;
+    title?: string;
+    content: Record<string, unknown>;
+  }
+>;
 
 export type ResourceResult = ToolResultMixin<
   ToolResultType.resource,
@@ -79,6 +91,7 @@ export type ToolResult =
   | TabularDataResult
   | QueryResult
   | VisualizationResult
+  | DashboardResult
   | OtherResult
   | ErrorResult;
 
@@ -102,6 +115,10 @@ export const isErrorResult = (result: ToolResult): result is ErrorResult => {
   return result.type === ToolResultType.error;
 };
 
+export const isDashboardResult = (result: ToolResult): result is DashboardResult => {
+  return result.type === ToolResultType.dashboard;
+};
+
 export interface VisualizationElementAttributes {
   toolResultId?: string;
   chartType?: ChartType;
@@ -112,5 +129,16 @@ export const visualizationElement = {
   attributes: {
     toolResultId: 'tool-result-id',
     chartType: 'chart-type',
+  },
+};
+
+export interface DashboardElementAttributes {
+  toolResultId?: string;
+}
+
+export const dashboardElement = {
+  tagName: 'dashboard',
+  attributes: {
+    toolResultId: 'tool-result-id',
   },
 };

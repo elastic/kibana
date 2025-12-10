@@ -14,7 +14,7 @@ import type { ScheduledReport } from '../../types';
 export const getEmailsValidator =
   (
     validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses']
-  ): ValidationFunc<ScheduledReport, string, string> =>
+  ): ValidationFunc<Partial<ScheduledReport>, string, string> =>
   ({ value, path }) => {
     const validatedEmails = validateEmailAddresses(Array.isArray(value) ? value : [value]);
     for (const validatedEmail of validatedEmails) {

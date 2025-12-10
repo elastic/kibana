@@ -12,7 +12,11 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
-import { DASHBOARD_API_VERSION, DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  DASHBOARD_API_PATH,
+  DASHBOARD_API_VERSION,
+  DASHBOARD_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
 import type {
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
@@ -31,8 +35,11 @@ const cache = new LRUCache<string, DashboardReadResponseBody>({
 
 export const dashboardClient = {
   create: async (dashboardState: DashboardState, references: Reference[]) => {
-    return coreServices.http.post<DashboardCreateResponseBody>(`/api/dashboards/dashboard`, {
+    return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
+      query: {
+        allowUnmappedKeys: true,
+      },
       body: JSON.stringify({
         data: {
           ...dashboardState,
@@ -43,7 +50,7 @@ export const dashboardClient = {
   },
   delete: async (id: string): Promise<DeleteResult> => {
     cache.delete(id);
-    return coreServices.http.delete(`/api/dashboards/dashboard/${id}`, {
+    return coreServices.http.delete(`${DASHBOARD_API_PATH}/${id}`, {
       version: DASHBOARD_API_VERSION,
     });
   },
@@ -53,8 +60,11 @@ export const dashboardClient = {
     }
 
     const result = await coreServices.http
-      .get<DashboardReadResponseBody>(`/api/dashboards/dashboard/${id}`, {
+      .get<DashboardReadResponseBody>(`${DASHBOARD_API_PATH}/${id}`, {
         version: DASHBOARD_API_VERSION,
+        query: {
+          allowUnmappedKeys: true,
+        },
       })
       .catch((e) => {
         if (e.response?.status === 404) {
@@ -74,19 +84,25 @@ export const dashboardClient = {
     return result;
   },
   search: async (searchBody: DashboardSearchRequestBody) => {
-    return await coreServices.http.post<DashboardSearchResponseBody>(`/api/dashboards/search`, {
-      version: DASHBOARD_API_VERSION,
-      body: JSON.stringify({
-        ...searchBody,
-        search: searchBody.search ? `${searchBody.search}*` : undefined,
-      }),
-    });
+    return await coreServices.http.post<DashboardSearchResponseBody>(
+      `${DASHBOARD_API_PATH}/search`,
+      {
+        version: DASHBOARD_API_VERSION,
+        body: JSON.stringify({
+          ...searchBody,
+          search: searchBody.search ? `${searchBody.search}*` : undefined,
+        }),
+      }
+    );
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
-      `/api/dashboards/dashboard/${id}`,
+      `${DASHBOARD_API_PATH}/${id}`,
       {
         version: DASHBOARD_API_VERSION,
+        query: {
+          allowUnmappedKeys: true,
+        },
         body: JSON.stringify({
           data: {
             ...dashboardState,

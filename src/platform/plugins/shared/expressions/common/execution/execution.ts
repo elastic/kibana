@@ -526,6 +526,7 @@ export class Execution<
           if (completionFlag && hash) {
             const sideEffectResult = this.#getSideEffectFn(fn, args);
             while (this.functionCache.size >= maxCacheSize) {
+              // @ts-expect-error upgrade typescript v5.9.3
               this.functionCache.delete(this.functionCache.keys().next().value);
             }
             this.functionCache.set(hash, {

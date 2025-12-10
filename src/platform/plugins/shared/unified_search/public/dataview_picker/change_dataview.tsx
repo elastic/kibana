@@ -333,6 +333,7 @@ export function ChangeDataView({
             prepend={i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
               defaultMessage: 'Data view',
             })}
+            {...(trigger.fullWidth && { fullWidth: true })}
           >
             <EuiPopover
               id={popoverId}

@@ -63,8 +63,19 @@ export const GenerateSignificantEventsPrompt = createPrompt({
                       SIGNIFICANT_EVENT_TYPE_SECURITY,
                     ],
                   },
+                  severity_score: {
+                    type: 'number',
+                    minimum: 0,
+                    maximum: 100,
+                  },
+                  evidence: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                    },
+                  },
                 },
-                required: ['kql', 'title', 'category'],
+                required: ['kql', 'title', 'category', 'severity_score'],
               },
             },
           },

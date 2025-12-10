@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLink,
-  EuiSelect,
+  EuiComboBox,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -64,10 +64,25 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
 
   const authz = useAuthz();
 
-  const onChangeCallback = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = event.target;
-    setSelectedPolicyId(value);
-  };
+  // Memoize options to avoid recreating them on every render.
+  // Important for performance when users have many policies.
+  const policyOptions = useMemo(
+    () =>
+      agentPolicies
+        .filter((policy) => !policy?.supports_agentless)
+        .map((agentPolicy) => ({
+          value: agentPolicy.id,
+          label: agentPolicy.name,
+        })),
+    [agentPolicies]
+  );
+
+  // Memoize selected options to avoid unnecessary EuiComboBox re-renders
+  const selectedOptions = useMemo(() => {
+    if (!selectedPolicyId) return [];
+    const option = policyOptions.find((opt) => opt.value === selectedPolicyId);
+    return option ? [option] : [];
+  }, [selectedPolicyId, policyOptions]);
 
   return (
     <>
@@ -112,26 +127,28 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           )
         }
       >
-        <EuiSelect
+        <EuiComboBox
           fullWidth
           isLoading={!agentPolicies}
-          options={agentPolicies
-            .filter((policy) => !policy?.supports_agentless)
-            .map((agentPolicy) => ({
-              value: agentPolicy.id,
-              text: agentPolicy.name,
-            }))}
-          value={selectedPolicyId}
-          onChange={onChangeCallback}
+          options={policyOptions}
+          selectedOptions={selectedOptions}
+          onChange={(newOptions) => {
+            if (newOptions.length) {
+              setSelectedPolicyId(newOptions[0].value);
+            } else {
+              setSelectedPolicyId(undefined);
+            }
+          }}
+          singleSelection={{ asPlainText: true }}
           aria-label={i18n.translate(
             'xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel',
             {
               defaultMessage: 'Agent policy',
             }
           )}
-          hasNoInitialSelection={!selectedPolicyId}
           data-test-subj="agentPolicyDropdown"
           isInvalid={!selectedPolicyId}
+          isClearable={true}
         />
       </AgentPolicyFormRow>
       {authz.fleet.readAgentPolicies && selectedPolicyId && !isFleetServerPolicy && (

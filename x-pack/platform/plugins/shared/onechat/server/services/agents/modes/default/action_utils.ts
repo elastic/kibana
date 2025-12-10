@@ -16,6 +16,7 @@ import type {
   AgentErrorAction,
   ExecuteToolAction,
   AnswerAction,
+  StructuredAnswerAction,
 } from './actions';
 import {
   toolCallAction,
@@ -23,6 +24,7 @@ import {
   executeToolAction,
   answerAction,
   errorAction,
+  structuredAnswerAction,
 } from './actions';
 
 export const processResearchResponse = (
@@ -70,6 +72,37 @@ export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | A
     return errorAction(
       createAgentExecutionError(
         'agent returned an empty response',
+        AgentExecutionErrorCode.emptyResponse,
+        {}
+      )
+    );
+  }
+};
+
+export const processStructuredAnswerResponse = (
+  response: unknown
+): StructuredAnswerAction | AnswerAction | AgentErrorAction => {
+  try {
+    if (response && typeof response === 'object') {
+      const action = structuredAnswerAction(response);
+      return action;
+    } else if (typeof response === 'string') {
+      return answerAction(response);
+    } else {
+      return errorAction(
+        createAgentExecutionError(
+          'agent returned an invalid structured response',
+          AgentExecutionErrorCode.emptyResponse,
+          {}
+        )
+      );
+    }
+  } catch (error) {
+    return errorAction(
+      createAgentExecutionError(
+        `Error processing structured response: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
         AgentExecutionErrorCode.emptyResponse,
         {}
       )

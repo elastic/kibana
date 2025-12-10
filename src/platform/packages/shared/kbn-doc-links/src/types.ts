@@ -91,6 +91,7 @@ export interface DocLinks {
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
+    readonly elasticTraining: string;
   };
   readonly metricbeat: {
     readonly base: string;
@@ -119,6 +120,7 @@ export interface DocLinks {
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
     readonly connectorsGithub: string;
+    readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsGoogleDrive: string;
     readonly connectorsGmail: string;
@@ -501,6 +503,7 @@ export interface DocLinks {
     kibanaPrivileges: string;
     mappingRoles: string;
     mappingRolesFieldRules: string;
+    roles: string;
     runAsPrivilege: string;
     enableElasticSearchSecurityFeatures: string;
   }>;

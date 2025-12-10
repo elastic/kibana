@@ -505,7 +505,7 @@
             "label": "fileUpload",
             "description": [],
             "signature": [
-              "FileUploadStartApi"
+              "FileUploadPluginStartApi"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
             "deprecated": false,

@@ -1896,7 +1896,7 @@
           "\nThis is a shared type between XY Expression and Annotation plugins.\nWe've put it here to avoid a circular dependency between the two plugins."
         ],
         "signature": [
-          "\"min\" | \"max\" | \"median\" | \"count\" | \"total\" | \"range\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"stdDeviation\" | \"difference\" | \"differencePercent\""
+          "\"count\" | \"min\" | \"max\" | \"median\" | \"total\" | \"range\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"stdDeviation\" | \"difference\" | \"differencePercent\""
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
         "deprecated": false,

@@ -28,6 +28,12 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { ScriptsLibraryClient } from './services/scripts_library';
+import { EndpointError } from '../../common/endpoint/errors';
+import {
+  installScriptsLibraryIndexTemplates,
+  SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+} from './lib/scripts_library';
 import type { ReferenceDataClientInterface } from './lib/reference_data';
 import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
@@ -116,13 +122,21 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
 
+    this.startDependencies = dependencies;
+    this.security = dependencies.security;
+
+    const isScriptsLibraryEnabled =
+      this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement;
+
+    if (isScriptsLibraryEnabled) {
+      SavedObjectsClientFactory.addSavedObjectHiddenType(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE);
+    }
+
     const savedObjectsFactory = new SavedObjectsClientFactory(
       dependencies.savedObjectsServiceStart,
       this.setupDependencies.httpServiceSetup
     );
 
-    this.startDependencies = dependencies;
-    this.security = dependencies.security;
     this.savedObjectsFactoryService = savedObjectsFactory;
     this.fleetServicesFactory = new EndpointFleetServicesFactory(
       dependencies.fleetStartServices,
@@ -132,6 +146,17 @@ export class EndpointAppContextService {
 
     this.registerFleetExtensions();
     this.registerListsExtensions();
+
+    // Setup scripts library
+    if (this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement) {
+      const scriptsLogger = this.createLogger('scriptsLibrarySetup');
+      installScriptsLibraryIndexTemplates({
+        esClient: this.getInternalEsClient(),
+        logger: scriptsLogger,
+      }).catch((e) => {
+        scriptsLogger.error(e);
+      });
+    }
   }
 
   public stop() {
@@ -445,5 +470,32 @@ export class EndpointAppContextService {
       this.savedObjects.createInternalScopedSoClient({ readonly: false }),
       this.createLogger('ReferenceDataClient')
     );
+  }
+
+  public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(
+    key: TKey
+  ): ConfigType[TKey] {
+    if (!this.startDependencies?.config) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!this.startDependencies.config[key]) {
+      throw new EndpointError(`Missing config value for key: ${key}`);
+    }
+
+    return this.startDependencies.config[key];
+  }
+
+  getScriptsLibraryClient(
+    spaceId: string,
+    username: string,
+    esClient: ElasticsearchClient
+  ): ScriptsLibraryClient {
+    return new ScriptsLibraryClient({
+      spaceId,
+      username,
+      endpointService: this,
+      esClient,
+    });
   }
 }

@@ -135,7 +135,7 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
         optional: true, // Error case does not have the migration ID
       },
     },
-    rulesCount: {
+    count: {
       type: 'integer',
       _meta: {
         description: 'Number of rules uploaded',
@@ -355,10 +355,10 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
         optional: true, // Error case does not have the migration ID
       },
     },
-    rulesCount: {
+    count: {
       type: 'integer',
       _meta: {
-        description: 'Number of rules uploaded',
+        description: 'Number of dashboards uploaded',
         optional: false,
       },
     },
