@@ -777,7 +777,18 @@ export const QueryBarTopRow = React.memo(
     function renderDataViewsPicker() {
       if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
         return (
-          <EuiFlexItem css={{ maxWidth: '100%' }} grow={isMobile}>
+          <EuiFlexItem
+            css={{
+              minWidth: 120,
+              maxWidth: isMobile ? '100%' : '350px',
+              ...(!isMobile && {
+                flexBasis: '120px',
+                flexGrow: 1,
+                flexShrink: 1,
+              }),
+            }}
+            grow={isMobile}
+          >
             <DataViewPicker
               {...props.dataViewPickerComponentProps}
               trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
