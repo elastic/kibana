@@ -23,7 +23,9 @@ import {
 const PROXIED_METHODS: WeakMap<
   Record<string, any>,
   {
+    build?: () => Record<string, any>;
     requireFields?: (required: string[]) => Record<string, any>;
+    containsFields?: (field: string) => boolean;
     unflatten?: () => Record<string, any>;
   }
 > = new WeakMap();
@@ -38,7 +40,7 @@ type RequiredApmFields<
  * Accessing fields from the document will correctly return single or multi values
  * according to known field types.
  */
-type ProxiedApmEvent<
+export type ProxiedApmEvent<
   T extends Partial<FlattenedApmEvent>,
   R extends keyof FlattenedApmEvent = never
 > = Readonly<MapToSingleOrMultiValue<RequiredApmFields<T, R>>>;
@@ -50,6 +52,11 @@ interface ApmDocumentMethods<
   T extends Partial<FlattenedApmEvent>,
   R extends keyof FlattenedApmEvent = never
 > {
+  /**
+   * Creates a new unproxied object with all the fields values extracted into their single or
+   * multi-value form. The new object no longer grants access to proxied methods.
+   */
+  build(): MapToSingleOrMultiValue<RequiredApmFields<T, R>>;
   /**
    * Unflattens the APM Event, so fields can be accessed via `event.service?.name`.
    *
@@ -66,6 +73,11 @@ interface ApmDocumentMethods<
    * include the provided required fields.
    */
   requireFields<K extends keyof FlattenedApmEvent = never>(fields: K[]): ApmDocument<T, R | K>;
+  /**
+   * Evaluates whether any field matches the input string partially or fully and if those that
+   * do match have a value present.
+   */
+  containsFields(fields: string): boolean;
 }
 
 /**
@@ -115,6 +127,9 @@ export function accessKnownApmEventFields(fields: Record<string, any>) {
 const accessHandler = {
   get(fields: Record<string, any>, key: string, proxy: any) {
     switch (key) {
+      case 'build':
+        return (PROXIED_METHODS.get(proxy)!.build ??= () => ({ ...proxy }));
+
       case 'unflatten':
         // Lazily initialise method on first access
         return (PROXIED_METHODS.get(proxy)!.unflatten ??= () =>
@@ -126,6 +141,14 @@ const accessHandler = {
           ensureRequiredApmFields(fields, requiredFields);
 
           return proxy;
+        });
+
+      case 'containsFields':
+        return (PROXIED_METHODS.get(proxy)!.containsFields ??= (field: string) => {
+          return Object.keys(fields).some(
+            (originalField) =>
+              originalField.includes(field) && Boolean(fields[originalField]?.length)
+          );
         });
 
       default: {
@@ -141,5 +164,9 @@ const accessHandler = {
   // Trap any setters to make the proxied object immutable.
   set() {
     return false;
+  },
+
+  ownKeys(target: any) {
+    return Object.keys(target);
   },
 };

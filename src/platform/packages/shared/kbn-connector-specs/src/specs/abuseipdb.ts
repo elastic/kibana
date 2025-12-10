@@ -31,14 +31,9 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  authTypes: [
-    {
-      type: 'api_key_header',
-      defaults: {
-        headerField: 'Key',
-      },
-    },
-  ],
+  auth: {
+    types: [{ type: 'api_key_header', defaults: { headerField: 'Key' } }],
+  },
 
   actions: {
     checkIp: {

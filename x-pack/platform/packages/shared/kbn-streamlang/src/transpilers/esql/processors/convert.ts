@@ -92,12 +92,12 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
    *    ```
    */
 
-  if ('where' in processor && !isAlwaysCondition(processor.where)) {
+  if ('where' in processor && processor.where && !isAlwaysCondition(processor.where)) {
     const evalCommandWithCondition = Builder.command({
       name: 'eval',
       args: [
         Builder.expression.func.binary('=', [
-          Builder.expression.column(processor.to),
+          Builder.expression.column(processor.to!), // Safe because refinement ensures 'to' exists when 'where' is present
           Builder.expression.func.call('CASE', [
             buildWhereCondition(from, ignore_missing, processor.where, conditionToESQLAst),
             convertAssignment,
@@ -109,7 +109,6 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
     commands.push(evalCommandWithCondition);
     return commands;
   }
-
   /**
    * 2. Default case: No where condition, just convert the field.
    *
@@ -131,9 +130,7 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
    *      // | WHERE NOT(http.status_code IS NULL)  // Only if ignore_missing = false
    *      | EVAL http.status_code_str = TO_STRING(http.status_code)
    *    ```
-   */
-
-  const evalCommand = Builder.command({
+   */ const evalCommand = Builder.command({
     name: 'eval',
     args: [
       Builder.expression.func.binary('=', [
