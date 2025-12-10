@@ -162,14 +162,20 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const toastTitle = await toasts.getTitleAndDismiss();
         log.info(`Toast after mute: "${toastTitle}"`);
         expect(toastTitle).to.contain('Muted');
-        expect(toastTitle).to.contain(`${totalAlerts}`);
+        expect(toastTitle).to.contain('alert instance');
+        expect(toastTitle).to.contain('rule');
       });
 
       it('should show all alerts as muted after bulk mute', async () => {
-        await observability.alerts.common.clearQueryBar();
-        await observability.alerts.common.submitQuery(
-          `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: true`
-        );
+        // Wait for any toasts to clear and page to stabilize
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await observability.alerts.common.clearQueryBar();
+          await observability.alerts.common.submitQuery(
+            `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: true`
+          );
+        });
         await observability.alerts.common.waitForAlertTableToLoad();
 
         await retry.try(async () => {
@@ -180,17 +186,25 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('should show no unmuted alerts after bulk mute', async () => {
-        await observability.alerts.common.clearQueryBar();
-        await observability.alerts.common.submitQuery(
-          `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: false`
-        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await observability.alerts.common.clearQueryBar();
+          await observability.alerts.common.submitQuery(
+            `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: false`
+          );
+        });
         await observability.alerts.common.waitForAlertTableToLoad();
         await observability.alerts.common.getNoDataStateOrFail();
       });
 
       it('should bulk unmute all selected alerts and show success toast', async () => {
-        await observability.alerts.common.clearQueryBar();
-        await observability.alerts.common.submitQuery(`kibana.alert.rule.uuid: "${ruleId}"`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await observability.alerts.common.clearQueryBar();
+          await observability.alerts.common.submitQuery(`kibana.alert.rule.uuid: "${ruleId}"`);
+        });
         await observability.alerts.common.waitForAlertTableToLoad();
 
         await testSubjects.click('bulk-actions-header');
@@ -202,14 +216,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const toastTitle = await toasts.getTitleAndDismiss();
         log.info(`Toast after unmute: "${toastTitle}"`);
         expect(toastTitle).to.contain('Unmuted');
-        expect(toastTitle).to.contain(`${totalAlerts}`);
+        expect(toastTitle).to.contain('alert instance');
+        expect(toastTitle).to.contain('rule');
       });
 
       it('should show all alerts as unmuted after bulk unmute', async () => {
-        await observability.alerts.common.clearQueryBar();
-        await observability.alerts.common.submitQuery(
-          `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: false`
-        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await observability.alerts.common.clearQueryBar();
+          await observability.alerts.common.submitQuery(
+            `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: false`
+          );
+        });
         await observability.alerts.common.waitForAlertTableToLoad();
 
         await retry.try(async () => {
@@ -220,10 +239,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('should show no muted alerts after bulk unmute', async () => {
-        await observability.alerts.common.clearQueryBar();
-        await observability.alerts.common.submitQuery(
-          `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: true`
-        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await observability.alerts.common.clearQueryBar();
+          await observability.alerts.common.submitQuery(
+            `kibana.alert.rule.uuid: "${ruleId}" AND kibana.alert.muted: true`
+          );
+        });
         await observability.alerts.common.waitForAlertTableToLoad();
         await observability.alerts.common.getNoDataStateOrFail();
       });

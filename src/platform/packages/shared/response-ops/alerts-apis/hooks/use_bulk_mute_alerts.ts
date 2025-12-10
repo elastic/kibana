@@ -36,14 +36,16 @@ export const useBulkMuteAlerts = ({ http, notifications: { toasts } }: UseBulkMu
     mutationKey: getKey(),
     context: AlertsQueryContext,
     onSuccess(_data, variables) {
-      const totalAlerts = variables.rules.reduce(
+      const alertCount = variables.rules.reduce(
         (sum, rule) => sum + rule.alert_instance_ids.length,
         0
       );
+      const ruleCount = variables.rules.length;
       toasts.addSuccess(
         i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertsMuted', {
-          defaultMessage: 'Muted {count} {count, plural, one {alert} other {alerts}}',
-          values: { count: totalAlerts },
+          defaultMessage:
+            'Muted {alertCount} {alertCount, plural, one {alert instance} other {alert instances}} for {ruleCount} {ruleCount, plural, one {rule} other {rules}}',
+          values: { alertCount, ruleCount },
         })
       );
     },

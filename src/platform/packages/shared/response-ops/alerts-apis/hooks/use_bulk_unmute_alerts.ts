@@ -39,14 +39,16 @@ export const useBulkUnmuteAlerts = ({
     mutationKey: getKey(),
     context: AlertsQueryContext,
     onSuccess(_data, variables) {
-      const totalAlerts = variables.rules.reduce(
+      const alertCount = variables.rules.reduce(
         (sum, rule) => sum + rule.alert_instance_ids.length,
         0
       );
+      const ruleCount = variables.rules.length;
       toasts.addSuccess(
         i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertsUnmuted', {
-          defaultMessage: 'Unmuted {count} {count, plural, one {alert} other {alerts}}',
-          values: { count: totalAlerts },
+          defaultMessage:
+            'Unmuted {alertCount} {alertCount, plural, one {alert instance} other {alert instances}} for {ruleCount} {ruleCount, plural, one {rule} other {rules}}',
+          values: { alertCount, ruleCount },
         })
       );
     },
