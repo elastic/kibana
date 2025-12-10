@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { InterceptDisplayManager, type Intercept } from './intercept_display_manager';
+import { InterceptDisplayManagerMemoized, type Intercept } from './intercept_display_manager';
 
 const staticAssetsHelperMock = httpServiceMock.createSetupContract().staticAssets;
 
@@ -52,7 +52,7 @@ describe('InterceptDisplayManager', () => {
     const ackProductIntercept = jest.fn();
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={Rx.EMPTY}
         staticAssetsHelper={staticAssetsHelperMock}
@@ -83,7 +83,7 @@ describe('InterceptDisplayManager', () => {
     });
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
         staticAssetsHelper={staticAssetsHelperMock}
@@ -118,7 +118,7 @@ describe('InterceptDisplayManager', () => {
     });
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
         staticAssetsHelper={staticAssetsHelperMock}
@@ -198,7 +198,7 @@ describe('InterceptDisplayManager', () => {
     const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
         staticAssetsHelper={staticAssetsHelperMock}
