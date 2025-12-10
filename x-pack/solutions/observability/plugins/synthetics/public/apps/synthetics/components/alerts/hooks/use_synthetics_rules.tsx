@@ -6,19 +6,27 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { selectDynamicSettings } from '../../../state/settings';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
+  selectSyntheticsAlertsLoaded,
 } from '../../../state/alert_rules/selectors';
+import {
+  enableDefaultAlertingSilentlyAction,
+  getDefaultAlertingAction,
+} from '../../../state/alert_rules';
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
 import {
   selectAlertFlyoutVisibility,
   selectIsNewRule,
+  selectMonitorListState,
   setAlertFlyoutVisible,
 } from '../../../state';
 import type { ClientPluginsStart } from '../../../../../plugin';
@@ -28,8 +36,42 @@ export const useSyntheticsRules = (isOpen: boolean) => {
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
   const loading = useSelector(selectSyntheticsAlertsLoading);
+  const rulesLoaded = useSelector(selectSyntheticsAlertsLoaded);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewRule);
+  const { settings } = useSelector(selectDynamicSettings);
+  const { canSave } = useSyntheticsSettingsContext();
+  const { loaded, data: monitors } = useSelector(selectMonitorListState);
+
+  const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
+  const defaultRulesEnabled =
+    settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
+
+  const getOrCreateAlerts = useCallback(() => {
+    if (canSave) {
+      dispatch(enableDefaultAlertingSilentlyAction.get());
+    } else {
+      dispatch(getDefaultAlertingAction.get());
+    }
+  }, [canSave, dispatch]);
+
+  // // Fetch or create default rules when popover opens
+  useEffect(() => {
+    if (isOpen && hasMonitors && defaultRulesEnabled && !loading) {
+      // If rules haven't been loaded yet, fetch/create them
+      if (rulesLoaded === null || !defaultRules) {
+        getOrCreateAlerts();
+      }
+    }
+  }, [
+    isOpen,
+    hasMonitors,
+    defaultRulesEnabled,
+    loading,
+    rulesLoaded,
+    defaultRules,
+    getOrCreateAlerts,
+  ]);
 
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
@@ -39,11 +81,19 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   const onClose = useMemo(() => () => dispatch(setAlertFlyoutVisible(null)), [dispatch]);
 
   const EditAlertFlyout = useMemo(() => {
-    const initialRule =
-      alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules?.tlsRule : defaultRules?.statusRule;
-    if (!initialRule || isNewRule) {
+    // Don't render if this is a new rule flyout
+    if (isNewRule || !alertFlyoutVisible) {
       return null;
     }
+
+    const initialRule =
+      alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules?.tlsRule : defaultRules?.statusRule;
+
+    // If the rule doesn't exist yet, return null (the useEffect will try to fetch/create it)
+    if (!initialRule) {
+      return null;
+    }
+
     return (
       <RuleFormFlyout
         plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
@@ -88,7 +138,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   }, [isNewRule, alertFlyoutVisible, plugins, ruleTypeRegistry, actionTypeRegistry, onClose]);
 
   return useMemo(
-    () => ({ loading, EditAlertFlyout, NewRuleFlyout }),
-    [EditAlertFlyout, loading, NewRuleFlyout]
+    () => ({ loading, EditAlertFlyout, NewRuleFlyout, defaultRules }),
+    [EditAlertFlyout, loading, NewRuleFlyout, defaultRules]
   );
 };
