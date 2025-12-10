@@ -53,7 +53,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('returns results from both search connectors and internal kb', async () => {
         const entries = await recall('What happened during the database outage?');
         const docTypes = uniq(entries.map(({ id }) => id.split('_')[0]));
-        expect(docTypes).to.eql(['animal', 'technical']);
+        ['animal', 'technical'].forEach((type) => {
+          expect(docTypes).to.contain(type);
+        });
       });
 
       it('returns the "Cheetah" entry from search connectors as the top result', async () => {

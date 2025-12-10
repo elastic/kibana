@@ -341,6 +341,7 @@ export default function (providerContext: FtrProviderContext) {
         ...res.attributes,
         installed_kibana: sortBy(res.attributes.installed_kibana, ['id']),
         package_assets: sortBy(res.attributes.package_assets, ['id']),
+        installed_es: sortBy(res.attributes.installed_es, ['id']),
       }).eql({
         installed_kibana_space_id: 'default',
         installed_kibana: sortBy(
