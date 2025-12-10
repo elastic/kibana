@@ -30,15 +30,20 @@ import {
 import type { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
 
-const isChannelValid = (channels?: string[], channelIds?: string[]) => {
-  if (
-    (channels === undefined && !channelIds?.length) ||
-    (channelIds === undefined && !channels?.length) ||
-    (!channelIds?.length && !channels?.length)
-  ) {
-    return false;
+const isChannelValid = (channels?: string[], channelIds?: string[], channelNames?: string[]) => {
+  if (channelNames && channelNames.length > 0) {
+    return true;
   }
-  return true;
+
+  if (channelIds && channelIds.length > 0) {
+    return true;
+  }
+
+  if (channels && channels.length > 0) {
+    return true;
+  }
+
+  return false;
 };
 
 export const getConnectorType = (): ConnectorTypeModel<
@@ -71,7 +76,8 @@ export const getConnectorType = (): ConnectorTypeModel<
       if (
         !isChannelValid(
           actionParams.subActionParams.channels,
-          actionParams.subActionParams.channelIds
+          actionParams.subActionParams.channelIds,
+          actionParams.subActionParams.channelNames
         )
       ) {
         errors.channels.push(CHANNEL_REQUIRED);
@@ -107,5 +113,34 @@ export const getConnectorType = (): ConnectorTypeModel<
       return params;
     }
     return {};
+  },
+  connectorForm: {
+    serializer: (data) => {
+      const formAllowedChannels =
+        (data.config?.allowedChannels as SlackApiConfig['allowedChannels']) ?? [];
+
+      const allowedChannels = formAllowedChannels.map((option) => ({ name: option })) ?? [];
+
+      return {
+        ...data,
+        config: { ...data.config, allowedChannels },
+      };
+    },
+    deserializer: (data) => {
+      const allowedChannels = data.config?.allowedChannels as Array<{ name: string }>;
+      const formattedChannels =
+        allowedChannels.map((channel) => {
+          if (channel.name.startsWith('#')) {
+            return channel.name;
+          }
+
+          return `#${channel.name}`;
+        }) ?? [];
+
+      return {
+        ...data,
+        config: { ...data.config, allowedChannels: formattedChannels },
+      };
+    },
   },
 });
