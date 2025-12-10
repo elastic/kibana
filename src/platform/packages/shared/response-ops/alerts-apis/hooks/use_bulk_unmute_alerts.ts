@@ -23,6 +23,7 @@ const ERROR_TITLE = i18n.translate('alertsApis.bulkUnmuteAlerts.error', {
 export interface UseBulkUnmuteAlertsParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  onSuccess?: () => void;
 }
 
 export interface BulkUnmuteAlertsParams {
@@ -34,6 +35,7 @@ export const getKey = mutationKeys.bulkUnmuteAlerts;
 export const useBulkUnmuteAlerts = ({
   http,
   notifications: { toasts },
+  onSuccess,
 }: UseBulkUnmuteAlertsParams) => {
   return useMutation(({ rules }: BulkUnmuteAlertsParams) => bulkUnmuteAlerts({ http, rules }), {
     mutationKey: getKey(),
@@ -51,6 +53,7 @@ export const useBulkUnmuteAlerts = ({
           values: { alertCount, ruleCount },
         })
       );
+      onSuccess?.();
     },
     onError: (error: ServerError) => {
       if (error.name !== 'AbortError') {

@@ -352,8 +352,8 @@ export const useBulkMuteActions = ({
     clearSelection();
   }, [clearSelection, refresh]);
 
-  const { mutateAsync: bulkMute } = useBulkMuteAlerts({ http, notifications });
-  const { mutateAsync: bulkUnmute } = useBulkUnmuteAlerts({ http, notifications });
+  const { mutateAsync: bulkMute } = useBulkMuteAlerts({ http, notifications, onSuccess });
+  const { mutateAsync: bulkUnmute } = useBulkUnmuteAlerts({ http, notifications, onSuccess });
 
   const onMuteClick = useCallback(
     async (selectedAlerts?: TimelineItem[]) => {
@@ -364,12 +364,11 @@ export const useBulkMuteActions = ({
       try {
         setIsBulkActionsLoading(true);
         await bulkMute({ rules });
-        onSuccess();
       } finally {
         setIsBulkActionsLoading(false);
       }
     },
-    [bulkMute, onSuccess, setIsBulkActionsLoading]
+    [bulkMute, setIsBulkActionsLoading]
   );
 
   const onUnmuteClick = useCallback(
@@ -381,12 +380,11 @@ export const useBulkMuteActions = ({
       try {
         setIsBulkActionsLoading(true);
         await bulkUnmute({ rules });
-        onSuccess();
       } finally {
         setIsBulkActionsLoading(false);
       }
     },
-    [bulkUnmute, onSuccess, setIsBulkActionsLoading]
+    [bulkUnmute, setIsBulkActionsLoading]
   );
 
   return useMemo(
