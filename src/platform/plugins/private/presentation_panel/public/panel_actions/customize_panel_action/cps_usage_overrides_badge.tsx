@@ -13,6 +13,7 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React, { useState } from 'react';
+import { map } from 'rxjs';
 import {
   EuiPopover,
   EuiText,
@@ -105,6 +106,16 @@ export class CpsUsageOverridesBadge
 
   public async execute(_context: ActionExecutionMeta & EmbeddableApiContext) {
     return;
+  }
+
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return apiPublishesUnifiedSearch(embeddable) && isOfAggregateQueryType(embeddable.query$.getValue());
+  }
+
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+      return apiPublishesUnifiedSearch(embeddable)
+        ? embeddable.query$.pipe(map(() => undefined))
+        : undefined;
   }
 
   public getIconType() {
