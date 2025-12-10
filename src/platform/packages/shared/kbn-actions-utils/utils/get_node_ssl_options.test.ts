@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
-import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
+import type { Logger } from '@kbn/logging';
+
+const logger = {
+  warn: jest.fn(),
+} as unknown as Logger;
 
 describe('getNodeSSLOptions', () => {
   test('get node.js SSL options: rejectUnauthorized eql true for the verification mode "full"', () => {
@@ -33,13 +37,7 @@ describe('getNodeSSLOptions', () => {
 
   test('get node.js SSL options: rejectUnauthorized eql true for the verification mode value which does not exist, the logger called with the proper warning message', () => {
     const nodeOption = getNodeSSLOptions(logger, 'notexist');
-    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
-          Array [
-            Array [
-              "Unknown ssl verificationMode: notexist",
-            ],
-          ]
-      `);
+    expect(logger.warn).toHaveBeenCalledWith(`Unknown ssl verificationMode: notexist`);
     expect(nodeOption).toMatchObject({
       rejectUnauthorized: true,
     });
