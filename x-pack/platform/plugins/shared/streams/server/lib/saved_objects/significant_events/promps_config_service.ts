@@ -13,6 +13,9 @@ import type {
 import { significantEventsSystemPromptTemplate } from '@kbn/streams-ai/src/significant_events/prompt';
 import { featuresSystemPromptTemplate } from '@kbn/streams-ai/src/features/prompt';
 import { streamsPromptsSOType } from './prompts_config';
+import type { PromptsConfigAttributes } from './prompts_config';
+
+export type { PromptsConfigAttributes };
 
 const defaultsPrompts = {
   featurePromptOverride: featuresSystemPromptTemplate,
@@ -20,11 +23,6 @@ const defaultsPrompts = {
 };
 
 const SINGLETON_PROMPTS_ID = 'streams-prompts-config-id';
-
-export interface PromptsConfigAttributes {
-  featurePromptOverride?: string;
-  significantEventsPromptOverride?: string;
-}
 
 export class PromptsConfigService {
   private readonly soClient: SavedObjectsClientContract;

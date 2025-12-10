@@ -5,8 +5,16 @@
  * 2.0.
  */
 import type { SavedObjectsType } from '@kbn/core/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const streamsPromptsSOType = 'stream-prompts';
+
+export const streamsPromptsSOAttributesV1 = schema.object({
+  featurePromptOverride: schema.maybe(schema.string()),
+  significantEventsPromptOverride: schema.maybe(schema.string()),
+});
+
+export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV1>;
 
 export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
   return {
@@ -23,6 +31,10 @@ export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
     modelVersions: {
       '1': {
         changes: [],
+        schemas: {
+          forwardCompatibility: streamsPromptsSOAttributesV1.extends({}, { unknowns: 'ignore' }),
+          create: streamsPromptsSOAttributesV1,
+        },
       },
     },
   };
