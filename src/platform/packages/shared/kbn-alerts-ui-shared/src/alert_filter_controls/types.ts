@@ -30,7 +30,6 @@ export type FilterControlConfig = Omit<OptionsListDSLControlState, 'dataViewId'>
    * Determines the presence and order of a control
    * */
   persist?: boolean;
-  hideActionBar?: boolean;
 };
 
 export type FilterGroupHandler = ControlGroupRendererApi;
