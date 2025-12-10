@@ -269,5 +269,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     },
     schema: z.string(),
     type: 'yaml',
+    example_value: `'agent:\n internal:\n runtime:\n default: otel'`,
   },
 ];
