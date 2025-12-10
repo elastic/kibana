@@ -109,13 +109,15 @@ export class CpsUsageOverridesBadge
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesUnifiedSearch(embeddable) && isOfAggregateQueryType(embeddable.query$.getValue());
+    return (
+      apiPublishesUnifiedSearch(embeddable) && isOfAggregateQueryType(embeddable.query$.getValue())
+    );
   }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
-      return apiPublishesUnifiedSearch(embeddable)
-        ? embeddable.query$.pipe(map(() => undefined))
-        : undefined;
+    return apiPublishesUnifiedSearch(embeddable)
+      ? embeddable.query$.pipe(map(() => undefined))
+      : undefined;
   }
 
   public getIconType() {
