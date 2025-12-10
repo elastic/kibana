@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/esql-ux-example-plugin",
+  "owner": "@elastic/kibana-esql",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "esqlUxExample",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "esql_ux_example"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "developerExamples",
+      "kibanaReact",
+      "kibanaUtils",
+      "uiActions"
+    ]
+  }
+}
