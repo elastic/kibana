@@ -52,7 +52,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'pluginA',
         group: 'group1',
         type: 'plugin',
-        visibility: 'private',
         configs: [
           {
             path: 'pluginPathA',
@@ -67,7 +66,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'pluginB',
         group: 'group1',
         type: 'plugin',
-        visibility: 'shared',
         configs: [
           {
             path: 'pluginPathB',
@@ -89,7 +87,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'pluginC',
         group: 'group2',
         type: 'plugin',
-        visibility: 'private',
         configs: [
           {
             path: 'pluginPathC',
@@ -104,7 +101,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'packageA',
         group: 'group1',
         type: 'package',
-        visibility: 'shared',
         configs: [
           {
             path: 'packagePathA',
@@ -119,7 +115,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'packageB',
         group: 'group2',
         type: 'package',
-        visibility: 'private',
         configs: [
           {
             path: 'packagePathB',
@@ -147,7 +142,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'pluginX',
         group: 'groupX',
         type: 'plugin',
-        visibility: 'private',
         configs: [
           {
             path: 'pluginPathX',
@@ -162,7 +156,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'packageX',
         group: 'groupX',
         type: 'package',
-        visibility: 'shared',
         configs: [
           {
             path: 'packagePathX',
@@ -188,7 +181,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'pluginC',
         group: 'group2',
         type: 'plugin',
-        visibility: 'private',
         configs: [
           {
             path: 'pluginPathC',
@@ -203,7 +195,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'packageB',
         group: 'group2',
         type: 'package',
-        visibility: 'private',
         configs: [
           {
             path: 'packagePathB',
@@ -233,7 +224,6 @@ describe('filterModulesByScoutCiConfig', () => {
         name: 'pluginA',
         group: 'group1',
         type: 'plugin',
-        visibility: 'private',
         configs: [
           {
             path: 'pluginPathA',
