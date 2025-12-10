@@ -109,9 +109,9 @@ export const ControlsContent = ({
       );
 
       subscriptions.current.add(
-        controlGroup.getInput$().subscribe(({ initialChildControlState }) => {
-          setControlPanels(initialChildControlState);
-        })
+        controlGroup
+          .getInput$()
+          .subscribe(({ initialChildControlState }) => setControlPanels(initialChildControlState))
       );
     },
     [onFiltersChange, setControlPanels]

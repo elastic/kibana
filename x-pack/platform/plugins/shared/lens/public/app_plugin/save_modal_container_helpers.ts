@@ -42,13 +42,13 @@ export const redirectToDashboard = ({
     },
   ];
 
-  // Only add controls group if they exist
+  // Add each control to the embeddable package (if any)
   Object.values(controlsState ?? {}).forEach((control) => {
     embeddablePackages.push({
       type: control.type,
       serializedState: {
         rawState: {
-          ...omit(control, ['type', 'order', 'width', 'grow']),
+          ...omit(control, ['type', 'order', 'width', 'grow']), // add as panel rather than pinned, so strip out unnecessary info
         },
       },
     });
