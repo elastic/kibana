@@ -163,10 +163,10 @@ describe('saved search embeddable', () => {
       });
       const discoverComponent = render(<Component />);
 
-      // wait for data fetching
-      expect(api.dataLoading$.getValue()).toBe(true);
-      resolveSearch();
       await waitOneTick();
+
+      // Field statistics mode should not trigger document fetching
+      expect(search).not.toHaveBeenCalled();
       expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
@@ -178,7 +178,7 @@ describe('saved search embeddable', () => {
       const { search, resolveSearch } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
       });
       const { api } = await factory.buildEmbeddable({
         initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
@@ -198,6 +198,25 @@ describe('saved search embeddable', () => {
       api.setTitle('custom title');
       await waitOneTick();
       expect(search).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not fetch documents when in field statistics view mode', async () => {
+      const { search, resolveSearch } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
+      });
+      const { api } = await factory.buildEmbeddable({
+        initialState: { rawState: { savedObjectId: 'id' } },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      // Field statistics mode should not trigger document fetching
+      expect(search).not.toHaveBeenCalled();
+      expect(api.dataLoading$.getValue()).toBe(false);
     });
   });
 
