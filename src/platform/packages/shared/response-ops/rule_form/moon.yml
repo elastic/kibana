@@ -47,8 +47,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/ui-actions-plugin'
   - '@kbn/actions-plugin'
-  - '@kbn/alerting-plugin'
   - '@kbn/react-hooks'
+  - '@kbn/response-ops-rules-apis'
 tags:
   - shared-browser
   - package
