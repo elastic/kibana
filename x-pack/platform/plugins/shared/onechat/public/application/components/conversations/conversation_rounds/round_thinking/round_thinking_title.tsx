@@ -47,7 +47,12 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
     // While this round is loading, show the agent reasoning as the button label if available
     // Otherwise fallback to default thinking label.
     // Agent reasoning can be reasoning directly from the agent or individual tool call progression
-    thinkingButtonLabel = agentReasoning ? `${agentReasoning}...` : defaultThinkingLabel;
+    thinkingButtonLabel = agentReasoning
+      ? i18n.translate('...', {
+          defaultMessage: '{reasoning}…',
+          values: { reasoning: agentReasoning },
+        })
+      : defaultThinkingLabel;
   }
 
   return (
