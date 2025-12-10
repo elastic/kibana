@@ -207,9 +207,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     if (!controlGroup) {
       return;
     }
-    const filterSubscription = controlGroup.filters$.subscribe({
-      next: debouncedFilterUpdates,
-    });
+    const filterSubscription = controlGroup.filters$.subscribe({ next: debouncedFilterUpdates });
     return () => {
       filterSubscription.unsubscribe();
     };
@@ -282,31 +280,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       defaultControls,
     });
   }, [getStoredControlState, controlsFromUrl, defaultControlsObj, defaultControls]);
-
-  const newControlStateTransform: ControlStateTransform = useCallback(
-    (newInput, controlType) => {
-      // for any new controls, we want to avoid
-      // default placeholder
-      let result = newInput;
-      if (controlType === OPTIONS_LIST_CONTROL) {
-        result = {
-          ...newInput,
-          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-        };
-
-        if ((newInput as DataControlState).fieldName in defaultControlsObj) {
-          result = {
-            ...result,
-            ...defaultControlsObj[(newInput as DataControlState).fieldName],
-            //  title should not be overridden by the initial controls, hence the hardcoding
-            title: newInput.title ?? result.title,
-          };
-        }
-      }
-      return result;
-    },
-    [defaultControlsObj]
-  );
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (defaultState, { addOptionsListControl }: ControlGroupStateBuilder) => {
@@ -403,8 +376,35 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [switchToViewMode, upsertPersistableControls]);
 
+  const newControlStateTransform: ControlStateTransform = useCallback(
+    (newInput, controlType) => {
+      // for any new controls, we want to avoid
+      // default placeholder
+      let result = newInput;
+      if (controlType === OPTIONS_LIST_CONTROL) {
+        result = {
+          ...newInput,
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+        };
+
+        if ((newInput as DataControlState).fieldName in defaultControlsObj) {
+          result = {
+            ...result,
+            ...defaultControlsObj[(newInput as DataControlState).fieldName],
+            //  title should not be overridden by the initial controls, hence the hardcoding
+            title: newInput.title ?? result.title,
+          };
+        }
+      }
+      return result;
+    },
+    [defaultControlsObj]
+  );
+
   const addControlsHandler = useCallback(() => {
-    controlGroup?.openAddDataControlFlyout({ controlStateTransform: newControlStateTransform });
+    controlGroup?.openAddDataControlFlyout({
+      controlStateTransform: newControlStateTransform,
+    });
   }, [controlGroup, newControlStateTransform]);
 
   if (!spaceId) {
