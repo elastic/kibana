@@ -27,5 +27,3 @@ export const plugin: PluginInitializer<
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) => {
   return new OnechatPlugin(pluginInitializerContext);
 };
-
-export { useConnectorSelection } from './application/hooks/chat/use_connector_selection';

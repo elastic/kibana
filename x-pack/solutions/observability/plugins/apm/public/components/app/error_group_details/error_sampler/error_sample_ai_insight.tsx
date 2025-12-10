@@ -13,7 +13,6 @@ import {
   createRepositoryClient,
   type DefaultClientOptions,
 } from '@kbn/server-route-repository-client';
-import { useConnectorSelection } from '@kbn/onechat-plugin/public';
 import type { ObservabilityAgentBuilderServerRouteRepository } from '@kbn/observability-agent-builder-plugin/server';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
@@ -43,20 +42,18 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
-  const { rangeFrom, rangeTo, environment, kuery } = query;
+  const { rangeFrom, rangeTo, environment } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
 
-  const { selectedConnector, defaultConnectorId } = useConnectorSelection();
   const license = useLicenseContext();
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
 
   const errorId = error.error.id;
   const serviceName = error.service.name;
-  const traceId = error.trace?.id;
 
   const fetchAiInsights = async () => {
     setIsLoading(true);
@@ -69,12 +66,9 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
             body: {
               errorId,
               serviceName,
-              traceId,
               start,
               end,
               environment,
-              kuery,
-              connectorId: selectedConnector ?? defaultConnectorId ?? '',
             },
           },
         }

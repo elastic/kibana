@@ -63,14 +63,6 @@
       "share",
       "onechat"
     ],
-    "requiredBundles": [
-      "fleet",
-      "kibanaReact",
-      "kibanaUtils",
-      "ml",
-      "observability",
-      "maps",
-      "onechat"
-    ]
+    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }
 }

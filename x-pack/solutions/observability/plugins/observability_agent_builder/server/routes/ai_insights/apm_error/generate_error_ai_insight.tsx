@@ -8,8 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { MessageRole } from '@kbn/inference-common';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { MessageRole, type InferenceClient } from '@kbn/inference-common';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
@@ -74,23 +73,21 @@ export interface GenerateErrorAiInsightParams {
   end: string;
   logger: Logger;
   request: KibanaRequest;
-  inferenceStart: InferenceServerStart;
+  inferenceClient: InferenceClient;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
 export async function generateErrorAiInsight({
   core,
   plugins,
-  connectorId,
   errorId,
   serviceName,
   environment,
-  traceId,
   start,
   end,
   logger,
   request,
-  inferenceStart,
+  inferenceClient,
   dataRegistry,
 }: GenerateErrorAiInsightParams): Promise<{ summary: string; context: string }> {
   const errorContext = await fetchApmErrorContext({
@@ -100,19 +97,15 @@ export async function generateErrorAiInsight({
     request,
     serviceName,
     environment: environment ?? '',
-    traceId,
     start,
     end,
     errorId,
     logger,
   });
 
-  const inferenceClient = inferenceStart.getClient({ request });
-
   const userPrompt = buildUserPrompt(errorContext);
 
   const response = await inferenceClient.chatComplete({
-    connectorId,
     system: ERROR_AI_INSIGHT_SYSTEM_PROMPT,
     messages: [
       {

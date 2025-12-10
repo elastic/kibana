@@ -30,12 +30,11 @@ export interface FetchApmErrorContextParams {
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
-  serviceName: string;
-  environment?: string;
-  traceId?: string;
+  errorId: string;
   start: string;
   end: string;
-  errorId: string;
+  serviceName: string;
+  environment?: string;
   logger: Logger;
 }
 
@@ -51,12 +50,11 @@ export async function fetchApmErrorContext({
   plugins,
   dataRegistry,
   request,
+  errorId,
   serviceName,
-  environment = '',
-  traceId,
   start,
   end,
-  errorId,
+  environment = '',
   logger,
 }: FetchApmErrorContextParams): Promise<string> {
   const parsedStart = parseDatemath(start);
@@ -65,7 +63,7 @@ export async function fetchApmErrorContext({
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-  const errorDetailsPromise = dataRegistry.getData('apmErrorDetails', {
+  const errorDetails = await dataRegistry.getData('apmErrorDetails', {
     request,
     errorId,
     serviceName,
@@ -74,18 +72,20 @@ export async function fetchApmErrorContext({
     serviceEnvironment: environment ?? '',
   });
 
+  const traceId = errorDetails?.transaction?.trace?.id ?? errorDetails?.error?.trace?.id;
+
   const contextParts: ContextPart[] = [
     {
       name: 'ErrorDetails',
       start,
       end,
-      handler: async () => (await errorDetailsPromise)?.error,
+      handler: async () => errorDetails?.error,
     },
     {
       name: 'TransactionDetails',
       start,
       end,
-      handler: async () => (await errorDetailsPromise)?.transaction,
+      handler: async () => errorDetails?.transaction,
     },
     {
       name: 'DownstreamDependencies',

@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
@@ -23,52 +24,49 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     params: t.type({
       body: t.type({
-        serviceName: t.string,
         errorId: t.string,
         start: t.string,
         end: t.string,
+        serviceName: t.string,
         environment: t.union([t.string, t.undefined]),
-        kuery: t.union([t.string, t.undefined]),
-        connectorId: t.union([t.string, t.undefined]),
-        traceId: t.union([t.string, t.undefined]),
       }),
     }),
     handler: async ({ request, core, plugins, dataRegistry, params, logger }) => {
-      const {
-        errorId,
-        serviceName,
-        start,
-        end,
-        environment = '',
-        connectorId: lastUsedConnectorId,
-        traceId,
-      } = params.body;
+      const { errorId, serviceName, start, end, environment = '' } = params.body;
 
-      const [_, pluginsStart] = await core.getStartServices();
+      const [coreStart, startDeps] = await core.getStartServices();
+      const { inference } = startDeps;
 
-      let connectorId = lastUsedConnectorId;
-      if (!connectorId) {
-        const defaultConnector = await pluginsStart.inference.getDefaultConnector(request);
-        connectorId = defaultConnector?.connectorId;
-      }
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+
+      const defaultConnectorSetting = await uiSettingsClient.get<string | undefined>(
+        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR
+      );
+      const hasValidDefaultConnector =
+        defaultConnectorSetting && defaultConnectorSetting !== 'NO_DEFAULT_CONNECTOR';
+
+      const connectorId = hasValidDefaultConnector
+        ? defaultConnectorSetting
+        : (await inference.getDefaultConnector(request))?.connectorId;
 
       if (!connectorId) {
         throw new Error('No default connector found');
       }
 
+      const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+
       const { summary, context } = await generateErrorAiInsight({
         core,
         plugins,
-        connectorId,
         errorId,
         serviceName,
         start,
         end,
         environment,
-        traceId,
         dataRegistry,
         request,
-        inferenceStart: pluginsStart.inference,
+        inferenceClient,
         logger,
       });
 
