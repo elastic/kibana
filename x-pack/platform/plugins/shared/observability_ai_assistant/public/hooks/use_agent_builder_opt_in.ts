@@ -15,7 +15,6 @@ import {
 } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from './use_kibana';
 import { useIsAgentBuilderEnabled } from './use_is_agent_builder_enabled';
-import { getSolutionSpecificAgentBuilderFlyoutOptions } from '../utils/get_solution_specific_agent_builder_flyout_options';
 
 export interface UseAgentBuilderOptInParams {
   /**
@@ -69,9 +68,8 @@ export const useAgentBuilderOptIn = ({
     application,
     notifications,
     settings,
-    serverless,
     plugins: {
-      start: { onechat, cloud, spaces },
+      start: { onechat },
     },
   } = useKibana().services;
 
@@ -104,6 +102,10 @@ export const useAgentBuilderOptIn = ({
   const confirmAgentBuilderOptIn = useCallback(async () => {
     setIsAgentBuilderConfirmationModalOpen(false);
 
+    if (!onechat) {
+      return;
+    }
+
     try {
       await Promise.all([
         settings.client.set(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, AIChatExperience.Agent),
@@ -114,20 +116,7 @@ export const useAgentBuilderOptIn = ({
         await application.navigateToApp('observability', { path: '/' });
       }
 
-      if (!onechat?.openConversationFlyout) {
-        return;
-      }
-
-      const solutionSpecificOptions = await getSolutionSpecificAgentBuilderFlyoutOptions({
-        isServerless: !!serverless,
-        cloud,
-        spaces,
-      });
-
-      onechat.openConversationFlyout({
-        newConversation: true,
-        ...solutionSpecificOptions,
-      });
+      onechat.openConversationFlyout({ newConversation: true });
     } catch (error) {
       const toastError = error?.body?.message ? new Error(error.body.message) : error;
 
@@ -138,16 +127,7 @@ export const useAgentBuilderOptIn = ({
         toastMessage: error?.message,
       });
     }
-  }, [
-    application,
-    cloud,
-    navigateFromConversationApp,
-    notifications?.toasts,
-    onechat,
-    serverless,
-    settings.client,
-    spaces,
-  ]);
+  }, [application, navigateFromConversationApp, notifications?.toasts, onechat, settings.client]);
 
   return {
     showAgentBuilderOptInCta,

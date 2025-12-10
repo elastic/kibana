@@ -11,8 +11,6 @@ import type { Observable } from 'rxjs';
 import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -146,8 +144,6 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   onechat?: OnechatPluginStart;
-  cloud?: CloudStart;
-  spaces?: SpacesPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}
