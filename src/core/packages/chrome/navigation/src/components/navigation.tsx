@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, useEffect, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +22,7 @@ import {
   NAVIGATION_SELECTOR_PREFIX,
 } from '../constants';
 import { SideNav } from './side_nav';
+import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
@@ -58,13 +59,17 @@ export interface NavigationProps {
    */
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /**
+   * (optional) Callback fired when the side panel (secondary nav) state changes.
+   */
+  onSidePanelStateChange?: (isOpen: boolean) => void;
+  /**
+   * (optional) Callback fired when the collapse button is toggled.
+   */
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
+  /**
    * (optional) Content to display inside the side panel footer.
    */
   sidePanelFooter?: ReactNode;
-  /**
-   * (optional) Collapse button configuration for controlling navigation expand/collapse state.
-   */
-  collapseButton?: ReactNode;
   /**
    * (optional) data-test-subj attribute for testing purposes.
    */
@@ -77,9 +82,10 @@ export const Navigation = ({
   items,
   logo,
   onItemClick,
+  onSidePanelStateChange,
+  onToggleCollapsed,
   setWidth,
   sidePanelFooter,
-  collapseButton,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -107,6 +113,16 @@ export const Navigation = ({
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
+
+  // Notify the layout when the side panel state changes
+  useEffect(() => {
+    onSidePanelStateChange?.(isSidePanelOpen);
+  }, [isSidePanelOpen, onSidePanelStateChange]);
+
+  // Create the collapse button if a toggle callback is provided
+  const collapseButton = onToggleCollapsed ? (
+    <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
+  ) : null;
 
   return (
     <div

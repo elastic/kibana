@@ -12,14 +12,11 @@ import { EuiButtonIcon, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import type { Observable } from 'rxjs';
-import { isObservable, of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { PRIMARY_NAVIGATION_ID } from '@kbn/core-chrome-navigation/src/constants';
+import { PRIMARY_NAVIGATION_ID } from '../constants';
 
 interface Props {
-  isCollapsed: boolean | Observable<boolean>;
+  isCollapsed: boolean;
   toggle: (isCollapsed: boolean) => void;
 }
 
@@ -40,22 +37,12 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
 };
 
 /**
- * Reimplementation of EuiCollapsibleNavBeta Collapse Button to survey new sidenav and new layout use-cases
+ * Collapse button for the side navigation
  */
-export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest }) => {
-  const collapsedObservable = useMemo(
-    () => (isObservable(isCollapsed) ? isCollapsed : of(isCollapsed)),
-    [isCollapsed]
-  );
-
-  const collapsed = useObservable(
-    collapsedObservable,
-    typeof isCollapsed === 'boolean' ? isCollapsed : false
-  );
-
-  const iconType = collapsed ? 'transitionLeftIn' : 'transitionLeftOut';
+export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
+  const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
   const { euiTheme } = useEuiTheme();
-  const styles = sideNavCollapseButtonStyles(euiTheme);
+  const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
 
   const isSmall = useIsWithinBreakpoints(['xs', 's']);
   if (isSmall) return null;
@@ -69,7 +56,7 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest 
         color="text"
         iconType={iconType}
         aria-label={
-          collapsed
+          isCollapsed
             ? i18n.translate('core.ui.chrome.sideNavigation.expandButtonLabel', {
                 defaultMessage: 'Expand navigation menu',
               })
@@ -77,11 +64,12 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest 
                 defaultMessage: 'Collapse navigation menu',
               })
         }
-        aria-pressed={!collapsed}
-        aria-expanded={!collapsed}
+        aria-pressed={!isCollapsed}
+        aria-expanded={!isCollapsed}
         aria-controls={PRIMARY_NAVIGATION_ID}
-        onClick={() => toggle(!collapsed)}
+        onClick={() => toggle(!isCollapsed)}
       />
     </div>
   );
 };
+
