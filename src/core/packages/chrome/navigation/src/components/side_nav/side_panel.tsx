@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
@@ -33,7 +33,7 @@ const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   position: relative;
   display: flex;
   flex-direction: column;
-  width: ${SIDE_PANEL_WIDTH - 8}px; // we need a gap between the side panel and the app content
+  width: ${SIDE_PANEL_WIDTH - SIDE_PANEL_CONTENT_GAP}px;
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
   border-radius: ${euiThemeContext.euiTheme.border.radius.medium};

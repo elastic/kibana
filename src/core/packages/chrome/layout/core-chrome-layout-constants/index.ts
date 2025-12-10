@@ -42,6 +42,11 @@ export const MAIN_CONTENT_SELECTORS = [
 ];
 
 /**
+ * The gap (in pixels) between the secondary side navigation panel and the main app content.
+ */
+export const SIDE_PANEL_CONTENT_GAP = 8;
+
+/**
  * The selector for elements that should be included in the focus trap of a flyout.
  * This will allow the flyout focus trap to include header and sidenav by default.
  */
