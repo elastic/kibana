@@ -10195,7 +10195,7 @@
     "@opentelemetry/resources" "2.2.0"
     "@opentelemetry/sdk-metrics" "2.2.0"
 
-"@opentelemetry/exporter-trace-otlp-grpc@0.208.0", "@opentelemetry/exporter-trace-otlp-grpc@^0.208.0":
+"@opentelemetry/exporter-trace-otlp-grpc@0.208.0":
   version "0.208.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-trace-otlp-grpc/-/exporter-trace-otlp-grpc-0.208.0.tgz#c687b50ec8dd6f066128fec6caf0c58e3c87716c"
   integrity sha512-E/eNdcqVUTAT7BC+e8VOw/krqb+5rjzYkztMZ/o+eyJl+iEY6PfczPXpwWuICwvsm0SIhBoh9hmYED5Vh5RwIw==
