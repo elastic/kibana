@@ -12,6 +12,7 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
@@ -28,12 +29,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const unzipPromisify = promisify(unzip);
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
+  const log = getService('log');
   const MINUTE = 60 * 1000;
 
   describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(10 * MINUTE);
 
+    let indexedData: IndexedHostsAndAlertsResponse;
     let clearPrefilledEntries: () => Promise<void>;
 
     const openNewEndpointExceptionFlyout = async () => {
@@ -91,31 +94,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const checkArtifact = (expectedArtifact: object) => {
-      return retry.tryForTime(2 * MINUTE, async () => {
-        const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
+      const artifactNamePrefix = `endpoint-exceptionlist-${
+        indexedData.hosts.at(0)?.host.os.type
+      }-v1`;
 
-        const foundArtifactId = artifacts
-          .flatMap((artifact) => artifact.artifactIds)
-          .find((artifactId) => artifactId.startsWith('endpoint-exceptionlist-macos-v1'));
+      log.info(`Checking generated artifact content for: ${artifactNamePrefix}`);
 
-        expect(foundArtifactId).to.not.be(undefined);
+      return retry
+        .tryForTime(2 * MINUTE, async () => {
+          const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
 
-        // Get fleet artifact
-        const artifactResult = await esClient.get({
-          index: '.fleet-artifacts-7',
-          id: `endpoint:${foundArtifactId!}`,
+          const foundArtifactId = artifacts
+            .flatMap((artifact) => artifact.artifactIds)
+            .find((artifactId) => artifactId.startsWith(artifactNamePrefix));
+
+          expect(foundArtifactId).to.not.be(undefined);
+
+          // Get fleet artifact
+          const artifactResult = await esClient.get({
+            index: FLEET_SERVER_ARTIFACTS_INDEX,
+            id: `endpoint:${foundArtifactId!}`,
+          });
+
+          const artifact = artifactResult._source as ArtifactElasticsearchProperties;
+
+          const zippedBody = Buffer.from(artifact.body, 'base64');
+          const artifactBody = await unzipPromisify(zippedBody);
+
+          expect(JSON.parse(artifactBody.toString())).to.eql(expectedArtifact);
+        })
+        .catch((error) => {
+          log.error(`Check of artifact content for [${artifactNamePrefix}] failed`);
+          throw error;
         });
-
-        const artifact = artifactResult._source as ArtifactElasticsearchProperties;
-
-        const zippedBody = Buffer.from(artifact.body, 'base64');
-        const artifactBody = await unzipPromisify(zippedBody);
-
-        expect(JSON.parse(artifactBody.toString())).to.eql(expectedArtifact);
-      });
     };
 
-    let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security');
 

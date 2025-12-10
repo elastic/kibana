@@ -15,8 +15,12 @@ export const formSerializer = (data: ConnectorFormSchema) => {
   const providerConfig = data.config?.providerConfig as
     | InferenceConnectorProviderConfig
     | undefined;
-  if (data && providerConfig?.max_number_of_allocations != null) {
-    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } = providerConfig;
+  if (data && providerConfig) {
+    const {
+      max_number_of_allocations: maxAllocations,
+      headers,
+      ...restProviderConfig
+    } = providerConfig || {};
 
     return {
       ...data,
@@ -24,14 +28,19 @@ export const formSerializer = (data: ConnectorFormSchema) => {
         ...data.config,
         providerConfig: {
           ...restProviderConfig,
-          adaptive_allocations: {
-            enabled: true,
-            min_number_of_allocations: MIN_ALLOCATIONS,
-            max_number_of_allocations: maxAllocations,
-          },
-          // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
-          num_threads: DEFAULT_NUM_THREADS,
+          ...(maxAllocations
+            ? {
+                adaptive_allocations: {
+                  enabled: true,
+                  min_number_of_allocations: MIN_ALLOCATIONS,
+                  ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+                },
+                // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+                num_threads: DEFAULT_NUM_THREADS,
+              }
+            : {}),
         },
+        ...(headers ? { headers } : {}),
       },
     };
   }
@@ -39,22 +48,31 @@ export const formSerializer = (data: ConnectorFormSchema) => {
 };
 
 export const formDeserializer = (data: ConnectorFormSchema) => {
-  const providerConfig = data.config?.providerConfig as
-    | InferenceConnectorProviderConfig
-    | undefined;
-  if (data && providerConfig?.adaptive_allocations?.max_number_of_allocations != null) {
+  if (
+    (data.config?.providerConfig as InferenceConnectorProviderConfig | undefined)
+      ?.adaptive_allocations?.max_number_of_allocations ||
+    data.config?.headers
+  ) {
+    const { headers, ...restConfig } = data.config;
+    const maxAllocations = (
+      data.config.providerConfig as InferenceConnectorProviderConfig | undefined
+    )?.adaptive_allocations?.max_number_of_allocations;
+
     return {
       ...data,
       config: {
-        ...data.config,
+        ...restConfig,
         providerConfig: {
-          ...providerConfig,
-          max_number_of_allocations: providerConfig.adaptive_allocations.max_number_of_allocations,
-          // remove the adaptive_allocations from the data config as form does not expect it
-          adaptive_allocations: undefined,
+          ...(data.config.providerConfig as InferenceConnectorProviderConfig),
+          ...(headers ? { headers } : {}),
+          ...(maxAllocations
+            ? // remove the adaptive_allocations from the data config as form does not expect it
+              { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
+            : {}),
         },
       },
     };
   }
+
   return data;
 };

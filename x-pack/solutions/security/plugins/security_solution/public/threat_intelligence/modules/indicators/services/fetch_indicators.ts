@@ -42,13 +42,6 @@ export interface FetchParams {
   filterQuery: Query;
 }
 
-type ReactQueryKey = [string, FetchParams];
-
-export interface IndicatorsQueryParams {
-  signal?: AbortSignal;
-  queryKey: ReactQueryKey;
-}
-
 export interface IndicatorsResponse {
   indicators: Indicator[];
   total: number;

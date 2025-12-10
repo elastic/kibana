@@ -30,12 +30,17 @@ interface SampleDataActionButtonProps {
 }
 
 export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
-  isLoading,
   onIngestSampleData,
   hasRequiredLicense,
 }) => {
   const { application, http, share, uiSettings } = useKibana().services;
-  const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
+  const {
+    isInstalled,
+    indexName,
+    dashboardId,
+    isLoading: isStatusLoading,
+    isInstalling,
+  } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
   const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
@@ -167,7 +172,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
       iconType="download"
       size="s"
       data-test-subj="installSampleBtn"
-      isLoading={isLoading}
+      isLoading={isInstalling}
       disabled={!hasRequiredLicense}
       onClick={onIngestSampleData}
     >

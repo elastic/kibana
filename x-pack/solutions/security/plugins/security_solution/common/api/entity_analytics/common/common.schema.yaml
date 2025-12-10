@@ -224,6 +224,17 @@ components:
           format: double
         criticality_level:
           $ref: '../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+        category_3_score:
+          type: number
+          format: double
+        category_3_count:
+          type: integer
+        is_privileged_user:
+          type: boolean
+        privileged_user_modifier:
+          type: number
+          format: double
+        
 
     RiskScoreEntityIdentifierWeights:
       type: number

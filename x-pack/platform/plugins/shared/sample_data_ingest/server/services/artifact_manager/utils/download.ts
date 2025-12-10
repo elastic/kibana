@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import { createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
+import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
-import Path from 'path';
-import fetch from 'node-fetch';
-import { validatePath, validateMimeType, validateFileSignature, type MimeType } from './validators';
+import fetch, { type Response } from 'node-fetch';
+import { validateMimeType, validateFileSignature, type MimeType } from './validators';
 
-export const download = async (fileUrl: string, filePath: string, expectedMimeType: MimeType) => {
-  validatePath(filePath);
+export const download = async (
+  fileUrl: string,
+  filePathAtVolume: string,
+  expectedMimeType: MimeType,
+  abortController?: AbortController
+): Promise<string> => {
+  const writeStream = createWriteStream(filePathAtVolume);
 
-  const dirPath = Path.dirname(filePath);
+  let res: Response;
 
-  await mkdir(dirPath, { recursive: true });
-  const writeStream = createWriteStream(filePath);
-
-  const res = await fetch(fileUrl);
+  try {
+    res = await fetch(fileUrl, {
+      signal: abortController?.signal,
+    });
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      writeStream.destroy();
+      throw new Error('Download aborted');
+    }
+    throw err;
+  }
 
   if (!res.ok) {
     throw new Error(`Failed to download file: ${res.status} ${res.statusText}`);
@@ -32,7 +42,19 @@ export const download = async (fileUrl: string, filePath: string, expectedMimeTy
     throw new Error('Response body is null');
   }
 
-  await pipeline(res.body, writeStream);
+  try {
+    await pipeline(res.body, writeStream);
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      writeStream.destroy();
+      throw new Error('Download aborted during streaming');
+    }
+    throw err;
+  }
 
-  await validateFileSignature(filePath, expectedMimeType);
+  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
+
+  await validateFileSignature(artifactFullPath, expectedMimeType);
+
+  return artifactFullPath;
 };

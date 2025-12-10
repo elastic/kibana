@@ -7,7 +7,7 @@
 
 import { validateCasesWebhookConfig } from './validators';
 import { AuthType } from '@kbn/connector-schemas/common/auth';
-import type { CasesWebhookPublicConfigurationType } from './types';
+import type { CasesWebhookPublicConfigurationType } from '@kbn/connector-schemas/cases_webhook';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 
 describe('validateCasesWebhookConfig', () => {

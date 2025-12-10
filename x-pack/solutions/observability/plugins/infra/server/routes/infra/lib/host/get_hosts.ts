@@ -131,6 +131,7 @@ const getHostNames = async ({
           from,
           to,
           limit,
+          schema,
         })
       : undefined,
   ]);

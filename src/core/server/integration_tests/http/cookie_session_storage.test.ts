@@ -19,6 +19,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HttpService, createCookieSessionStorageFactory } from '@kbn/core-http-server-internal';
 import { httpServerMock, createConfigService } from '@kbn/core-http-server-mocks';
@@ -56,6 +57,8 @@ const configService = createConfigService({
 const contextSetup = contextServiceMock.createSetupContract();
 const contextPreboot = contextServiceMock.createPrebootContract();
 
+const docLinksPreboot = docLinksServiceMock.createSetupContract();
+
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
@@ -63,6 +66,7 @@ const setupDeps = {
 
 const prebootDeps = {
   context: contextPreboot,
+  docLinks: docLinksPreboot,
 };
 
 interface User {

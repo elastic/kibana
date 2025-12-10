@@ -179,6 +179,9 @@ describe('When using scan action from response actions console', () => {
   });
 
   it('should work with a single `--comment` argument', async () => {
+    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
+      () => new Promise((r) => setTimeout(r, 100))
+    );
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two" --comment "Scan folder"');
 
@@ -194,11 +197,21 @@ describe('When using scan action from response actions console', () => {
     await enterConsoleCommand(renderResult, user, 'scan --help');
 
     expect(renderResult.getByTestId('test-helpOutput').textContent).toEqual(
-      'AboutScan the host for malwareUsagescan --path [--comment]Examplescan --path "/full/path/to/folder" --comment "Scan folder for malware"Required parameters--path - The absolute path to a file or directory to be scannedOptional parameters--comment - A comment to go along with the action'
+      'About' +
+        'Scan the host for malware' +
+        'Usage' +
+        'scan --path [--comment]' +
+        'Required parameters--path - The absolute path to a file or directory to be scanned' +
+        'Optional parameters--comment - A comment to go along with the action' +
+        'Examples' +
+        'can --path "/full/path/to/folder" --comment "Scan folder for malware"'
     );
   });
 
   it('should display pending message', async () => {
+    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
+      () => new Promise((r) => setTimeout(r, 100))
+    );
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 

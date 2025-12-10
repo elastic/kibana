@@ -10,7 +10,7 @@ import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/pu
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { map } from 'rxjs';
-import type { LensApi } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';

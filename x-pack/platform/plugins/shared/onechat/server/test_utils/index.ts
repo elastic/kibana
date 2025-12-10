@@ -11,7 +11,12 @@ export {
   type ModelProviderMock,
   type ModelProviderFactoryMock,
 } from './model_provider';
-export { createScopedRunnerDepsMock, type CreateScopedRunnerDepsMock } from './runner';
+export {
+  createScopedRunnerDepsMock,
+  type CreateScopedRunnerDepsMock,
+  createRunnerDepsMock,
+  type CreateRunnerDepsMock,
+} from './runner';
 export {
   createToolsServiceStartMock,
   createToolProviderMock,
@@ -28,9 +33,11 @@ export {
   createAgentsServiceStartMock,
   createMockedAgentRegistry,
   createMockedAgent,
+  createMockedInternalAgent,
   type AgentsServiceStartMock,
   type AgentRegistryMock,
   type MockedAgent,
+  type MockedInternalAgent,
 } from './agents';
 export {
   createConversationClientMock,
@@ -39,3 +46,4 @@ export {
   type ConversationServiceMock,
   type ConversationClientMock,
 } from './conversations';
+export { createFormatContextMock } from './attachments';

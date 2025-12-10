@@ -18,17 +18,26 @@ import type {
 } from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
-import { createNewConversation, newConversationId } from '../../utils/new_conversation';
-
-const pendingRoundId = '__pending__';
+import {
+  createNewConversation,
+  createNewRound,
+  newConversationId,
+} from '../../utils/new_conversation';
 
 export interface ConversationActions {
   removeNewConversationQuery: () => void;
   invalidateConversation: () => void;
-  addOptimisticRound: ({ userMessage }: { userMessage: string }) => void;
+  addOptimisticRound: ({
+    userMessage,
+    attachments,
+  }: {
+    userMessage: string;
+    attachments?: AttachmentInput[];
+  }) => void;
   removeOptimisticRound: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
@@ -49,6 +58,7 @@ export interface ConversationActions {
   }) => void;
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
   onConversationCreated: ({
     conversationId,
     title,
@@ -57,6 +67,7 @@ export interface ConversationActions {
     title: string;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
+  renameConversation: (id: string, title: string) => Promise<void>;
 }
 
 interface UseConversationActionsParams {
@@ -102,15 +113,22 @@ const createConversationActions = ({
       queryClient.invalidateQueries({ queryKey });
     },
 
-    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
+    addOptimisticRound: ({
+      userMessage,
+      attachments,
+    }: {
+      userMessage: string;
+      attachments?: AttachmentInput[];
+    }) => {
       setConversation(
         produce((draft) => {
-          const nextRound: ConversationRound = {
-            id: pendingRoundId,
-            input: { message: userMessage },
-            response: { message: '' },
-            steps: [],
-          };
+          const optimisticAttachments: Attachment[] =
+            attachments?.map((attachment, idx) => ({
+              id: `pending-attachment-${idx}`,
+              ...attachment,
+            })) ?? [];
+
+          const nextRound = createNewRound({ userMessage, attachments: optimisticAttachments });
 
           if (!draft) {
             const newConversation = createNewConversation();
@@ -129,7 +147,6 @@ const createConversationActions = ({
         })
       );
     },
-
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
       if (conversationId) {
@@ -148,7 +165,6 @@ const createConversationActions = ({
       );
       setAgentIdStorage(agentId);
     },
-
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
@@ -194,7 +210,11 @@ const createConversationActions = ({
         round.response.message += messageChunk;
       });
     },
-
+    setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {
+      setCurrentRound((round) => {
+        round.time_to_first_token = timeToFirstToken;
+      });
+    },
     onConversationCreated: ({
       conversationId: id,
       title,
@@ -224,7 +244,6 @@ const createConversationActions = ({
         onConversationCreated({ conversationId: id, title });
       }
     },
-
     deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });
 
@@ -238,6 +257,24 @@ const createConversationActions = ({
       if (onDeleteConversation) {
         onDeleteConversation({ id, isCurrentConversation });
       }
+    },
+    renameConversation: async (id: string, title: string) => {
+      await conversationsService.rename({ conversationId: id, title });
+
+      // Update the conversation in cache if it exists
+      const conversationQueryKey = queryKeys.conversations.byId(id);
+      const currentConversation = queryClient.getQueryData<Conversation>(conversationQueryKey);
+      if (currentConversation) {
+        queryClient.setQueryData<Conversation>(
+          conversationQueryKey,
+          produce(currentConversation, (draft) => {
+            draft.title = title;
+          })
+        );
+      }
+
+      // Invalidate conversation list to get updated data from server
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };

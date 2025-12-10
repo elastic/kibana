@@ -13,14 +13,15 @@ import {
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
 
-import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeRetriever } from '../shared/columns';
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { correctQuerySyntax, getVariablesHoverContent } from './helpers';
 import { getPolicyHover } from './get_policy_hover';
 import { getFunctionSignatureHover } from './get_function_signature_hover';
-import { getQueryForFields } from '../autocomplete/get_query_for_fields';
+import { getQueryForFields } from '../shared/get_query_for_fields';
 import { getFunctionArgumentHover } from './get_function_argument_hover';
 import { getColumnHover } from './get_column_hover';
+import { findSubquery } from '../shared/subqueries_helpers';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -70,9 +71,11 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     return hoverContent;
   }
 
-  // getColumnMap has its own cache, shared with the autocomplete system
+  const { subQuery } = findSubquery(root, offset);
+  const astForContext = subQuery ?? root;
+
   const { getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(fullText, root),
+    getQueryForFields(fullText, astForContext),
     fullText,
     callbacks
   );

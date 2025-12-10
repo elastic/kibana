@@ -100,15 +100,9 @@ describe('secrets validation', () => {
   test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type secrets: [
-        {
-          \\"code\\": \\"custom\\",
-          \\"message\\": \\"must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)\\",
-          \\"path\\": []
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+    );
   });
 
   test('succeeds when authentication credentials are omitted', () => {
@@ -180,26 +174,14 @@ describe('secrets validation', () => {
   test('fails when secret crt is provided but key omitted, or vice versa', () => {
     expect(() => {
       validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type secrets: [
-        {
-          \\"code\\": \\"custom\\",
-          \\"message\\": \\"must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)\\",
-          \\"path\\": []
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+    );
     expect(() => {
       validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type secrets: [
-        {
-          \\"code\\": \\"custom\\",
-          \\"message\\": \\"must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)\\",
-          \\"path\\": []
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+    );
   });
 });
 
@@ -243,25 +225,9 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"received\\": \\"https\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
-            \\"post\\",
-            \\"put\\",
-            \\"patch\\",
-            \\"get\\",
-            \\"delete\\"
-          ],
-          \\"path\\": [
-            \\"method\\"
-          ],
-          \\"message\\": \\"Invalid enum value. Expected 'post' | 'put' | 'patch' | 'get' | 'delete', received 'https'\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"method\\": Invalid enum value. Expected 'post' | 'put' | 'patch' | 'get' | 'delete', received 'https'"`
+    );
   });
 
   test('config validation passes when a url is specified', () => {
@@ -283,7 +249,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
+      `"error validating connector type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
     );
   });
 
@@ -311,19 +277,9 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"object\\",
-          \\"received\\": \\"string\\",
-          \\"path\\": [
-            \\"headers\\"
-          ],
-          \\"message\\": \\"Expected object, received string\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"headers\\": Expected object, received string"`
+    );
   });
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
@@ -364,7 +320,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: target url is not present in allowedHosts"`
+      `"error validating connector type config: error validation webhook action config: target url is not present in allowedHosts"`
     );
   });
 
@@ -382,7 +338,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
+      `"error validating connector type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
     );
   });
 
@@ -399,7 +355,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
+        `"error validating connector type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
       );
     });
 
@@ -417,7 +373,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
 
@@ -435,7 +391,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
 
@@ -453,7 +409,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
 
@@ -471,7 +427,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
   });

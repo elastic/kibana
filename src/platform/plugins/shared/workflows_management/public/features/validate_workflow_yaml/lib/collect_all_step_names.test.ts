@@ -18,7 +18,7 @@ describe('collectAllStepNames', () => {
   });
 
   it('should return empty array for document without contents', () => {
-    const yamlDocument = { contents: null };
+    const yamlDocument = parseDocument('');
     const result = collectAllStepNames(yamlDocument);
     expect(result).toEqual([]);
   });

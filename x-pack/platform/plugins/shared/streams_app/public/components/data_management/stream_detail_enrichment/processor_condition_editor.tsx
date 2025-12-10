@@ -24,7 +24,7 @@ export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorP
   const valueSuggestions = useEnrichmentValueSuggestions(getFilterConditionField(props.condition));
   const streamName = useSimulatorSelector((state) => state.context.streamName);
 
-  // Fetch DataView field types with automatic caching via React Query
+  // Fetch DataView field types for displaying field type icons
   const { fieldTypeMap } = useStreamDataViewFieldTypes(streamName);
 
   // Enrich field suggestions with types from DataView

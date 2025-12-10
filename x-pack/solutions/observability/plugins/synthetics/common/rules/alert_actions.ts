@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ServiceNowActionParams,
-  OpsgenieActionParams,
-} from '@kbn/stack-connectors-plugin/server/connector_types';
+import type { ServiceNowActionParams } from '@kbn/connector-schemas/servicenow';
 import type { ActionParamsType as EmailActionParams } from '@kbn/connector-schemas/email';
 import type { ActionParamsType as IndexActionParams } from '@kbn/connector-schemas/es_index';
 import type { ActionParamsType as JiraActionParams } from '@kbn/connector-schemas/jira';
+import type { Params as OpsgenieActionParams } from '@kbn/connector-schemas/opsgenie';
 import type { ActionParamsType as PagerDutyActionParams } from '@kbn/connector-schemas/pagerduty';
 import type { ActionParamsType as ServerLogActionParams } from '@kbn/connector-schemas/server_log';
 import type { SlackApiActionParams } from '@kbn/connector-schemas/slack_api';
@@ -20,7 +18,7 @@ import type { ActionParamsType as WebhookActionParams } from '@kbn/connector-sch
 import type { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
-import { OpsgenieSubActions } from '@kbn/stack-connectors-plugin/common';
+import { SUB_ACTION as OpsgenieSubActions } from '@kbn/connector-schemas/opsgenie/constants';
 import type { ActionConnector, ActionTypeId } from './types';
 import type { DefaultEmail } from '../runtime_types';
 
@@ -209,17 +207,31 @@ function getWebhookActionParams(
 
 function getSlackAPIActionParams(
   { defaultActionMessage, defaultRecoveryMessage }: Translations,
-  allowedChannels: Array<{ id: string; name: string }>,
+  allowedChannels: Array<{ id?: string; name: string }>,
   recovery = false
 ): SlackApiActionParams {
   return {
     subAction: 'postMessage',
     subActionParams: {
       text: recovery ? defaultRecoveryMessage : defaultActionMessage,
-      channelIds: allowedChannels.map((channel) => channel.id),
+      channels: getValidChannels(allowedChannels),
     },
   };
 }
+
+const getValidChannels = (allowedChannels: Array<{ id?: string; name: string }>) => {
+  return allowedChannels.reduce((channels, channel) => {
+    if (channel.name) {
+      channels.push(channel.name);
+    }
+
+    if (channel.id) {
+      channels.push(channel.id);
+    }
+
+    return channels;
+  }, [] as string[]);
+};
 
 function getPagerDutyActionParams(
   { defaultActionMessage, defaultRecoveryMessage }: Translations,

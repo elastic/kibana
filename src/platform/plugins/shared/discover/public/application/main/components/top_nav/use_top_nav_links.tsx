@@ -47,7 +47,7 @@ import {
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
-import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 
 /**
@@ -143,6 +143,7 @@ export const useTopNavLinks = ({
           onClick: () => {
             services.data.search.showSearchSessionsFlyout({
               appId,
+              trackingProps: { openedFrom: 'background search button' },
               onBackgroundSearchOpened: services.discoverFeatureFlags.getTabsEnabled()
                 ? ({ session, event }) => {
                     event?.preventDefault();

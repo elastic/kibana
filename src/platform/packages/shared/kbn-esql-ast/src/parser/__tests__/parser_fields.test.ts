@@ -31,6 +31,8 @@ const assertNodeParserFields = (query: EsqlQuery, node: ESQLProperNode): void =>
   } catch (error) {
     // eslint-disable-next-line no-console
     console.log(node);
+    // eslint-disable-next-line no-console
+    console.error(error);
     throw error;
   }
 };

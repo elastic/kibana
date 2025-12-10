@@ -32,18 +32,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "stackConnectors",
-        "id": "def-common.OpsgenieSubActions",
-        "type": "Enum",
-        "tags": [],
-        "label": "OpsgenieSubActions",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/stack_connectors/common/opsgenie/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -58,21 +46,6 @@
           "\"/internal/stack_connectors\""
         ],
         "path": "x-pack/platform/plugins/shared/stack_connectors/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "stackConnectors",
-        "id": "def-common.OpsgenieConnectorTypeId",
-        "type": "string",
-        "tags": [],
-        "label": "OpsgenieConnectorTypeId",
-        "description": [],
-        "signature": [
-          "\".opsgenie\""
-        ],
-        "path": "x-pack/platform/plugins/shared/stack_connectors/common/opsgenie/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

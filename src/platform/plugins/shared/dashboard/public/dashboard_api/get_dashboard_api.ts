@@ -12,7 +12,7 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
 import {
@@ -32,27 +32,28 @@ import { initializeTrackPanel } from './track_panel';
 import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
+import { initializeProjectRoutingManager } from './project_routing_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
-import type { DashboardAPIGetOut } from '../../server/content_management';
+import type { DashboardReadResponseBody } from '../../server';
 import { saveDashboard } from './save_modal/save_dashboard';
 
 export function getDashboardApi({
   creationOptions,
   incomingEmbeddables,
   initialState,
-  savedObjectResult,
+  readResult,
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
-  savedObjectResult?: DashboardAPIGetOut;
+  readResult?: DashboardReadResponseBody;
   savedObjectId?: string;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
-  const isManaged = savedObjectResult?.meta.managed ?? false;
+  const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
@@ -91,7 +92,11 @@ export function getDashboardApi({
     incomingControlGroup
   );
 
-  const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
+  const controlGroupManager = initializeControlGroupManager(
+    mergedControlGroupState,
+    getReferences,
+    viewModeManager.api.viewMode$.value
+  );
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
@@ -107,24 +112,32 @@ export function getDashboardApi({
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
+  const projectRoutingManager = initializeProjectRoutingManager(
+    initialState,
+    settingsManager.api.projectRoutingRestore$
+  );
+
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
-    lastSavedState: savedObjectResult?.data ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: readResult?.data ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
+    projectRoutingManager,
     getReferences,
   });
 
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
+    const projectRoutingState = projectRoutingManager?.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
+      ...projectRoutingState,
       panels,
     };
 
@@ -149,6 +162,7 @@ export function getDashboardApi({
     ...trackPanel,
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,
+    ...projectRoutingManager?.api,
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
     ...controlGroupManager.api,
@@ -176,16 +190,25 @@ export function getDashboardApi({
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 
-      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
+      const {
+        description,
+        tags,
+        time_restore: timeRestore,
+        project_routing_restore: projectRoutingRestore,
+        title,
+      } = settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
         serializeState: getState,
         setTimeRestore: (newTimeRestore: boolean) =>
-          settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+          settingsManager.api.setSettings({ time_restore: newTimeRestore }),
+        setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
+          settingsManager.api.setSettings({ project_routing_restore: newProjectRoutingRestore }),
         tags,
         timeRestore,
+        projectRoutingRestore,
         title,
         viewMode: viewModeManager.api.viewMode$.value,
       });
@@ -200,7 +223,7 @@ export function getDashboardApi({
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
-          hidePanelTitles: settings.hidePanelTitles ?? false,
+          hide_panel_titles: settings.hide_panel_titles ?? false,
           description: saveResult.savedState.description,
           tags: saveResult.savedState.tags,
           title: saveResult.savedState.title,
@@ -268,6 +291,7 @@ export function getDashboardApi({
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
       layoutManager.cleanup();
+      projectRoutingManager?.cleanup();
     },
   };
 }

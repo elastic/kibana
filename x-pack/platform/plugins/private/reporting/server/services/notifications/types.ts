@@ -19,6 +19,7 @@ export interface NotifyArgs {
     bcc?: string[];
     cc?: string[];
     subject: string;
+    message: string;
     spaceId?: string;
   };
 }

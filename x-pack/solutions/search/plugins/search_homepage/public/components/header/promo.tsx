@@ -5,17 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiPanel, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiTitle, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import { FeatureUpdateGroup } from './feature_update_group';
 
 export interface HeaderPromoProps {
   title: React.ReactNode;
   description: React.ReactNode;
   updates?: React.ReactNode[];
-  cta: React.ReactNode;
+  actions: React.ReactNode[];
 }
 
-export const HeaderPromo = ({ title, description, updates, cta }: HeaderPromoProps) => {
+export const HeaderPromo = ({ title, description, updates, actions }: HeaderPromoProps) => {
   return (
     <EuiPanel color="transparent" paddingSize="xl">
       <EuiTitle size="l">
@@ -27,7 +27,9 @@ export const HeaderPromo = ({ title, description, updates, cta }: HeaderPromoPro
       </EuiText>
       <EuiSpacer size="xl" />
       {updates && updates.length > 0 ? <FeatureUpdateGroup updates={updates} /> : null}
-      {cta}
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        {actions}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

@@ -17,9 +17,11 @@ export interface LogEventsDependencies {
 }
 
 export interface LogEventsProps {
-  query: Query;
+  query?: Query;
   timeRange: TimeRange;
   index: string;
+  // Query for context filters that shouldn't trigger highlighting (e.g., trace IDs, span IDs)
+  nonHighlightingQuery?: Query;
   displayOptions?: {
     solutionNavIdOverride?: 'oblt' | 'security' | 'search';
     enableDocumentViewer?: boolean;

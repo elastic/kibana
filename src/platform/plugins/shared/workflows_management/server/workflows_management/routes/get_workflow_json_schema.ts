@@ -35,9 +35,18 @@ export function registerGetWorkflowJsonSchemaRoute({
         const { loose } = request.query;
         const spaceId = spaces.getSpaceId(request);
         const jsonSchema = await api.getWorkflowJsonSchema({ loose }, spaceId, request);
-        return response.ok({
-          body: jsonSchema,
-        });
+        if (!jsonSchema) {
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: 'Error generating JSON schema',
+            },
+          });
+        } else {
+          return response.ok({
+            body: jsonSchema,
+          });
+        }
       } catch (error) {
         return handleRouteError(response, error);
       }

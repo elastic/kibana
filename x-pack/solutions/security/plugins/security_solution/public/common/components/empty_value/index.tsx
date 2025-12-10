@@ -6,6 +6,7 @@
  */
 
 import { get, isString } from 'lodash/fp';
+import type { ReactNode } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -23,7 +24,7 @@ export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 export const getEmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
 export const getEmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
 
-export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
+export const defaultToEmptyTag = <T extends ReactNode>(item: T): JSX.Element => {
   if (item == null) {
     return getEmptyTagValue();
   } else if (isString(item) && item === '') {

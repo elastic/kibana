@@ -31,8 +31,10 @@
       "security",
       "monitoringCollection",
       "spaces",
-      "serverless"
+      "serverless",
+      "maintenanceWindows"
     ],
+    "requiredBundles": ["maintenanceWindows"],
     "extraPublicDirs": ["common", "common/parse_duration"]
   }
 }

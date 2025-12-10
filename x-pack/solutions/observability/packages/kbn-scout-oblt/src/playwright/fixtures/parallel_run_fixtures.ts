@@ -6,7 +6,7 @@
  */
 
 import { spaceTest as spaceBase, mergeTests } from '@kbn/scout';
-import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
+import type { ApiServicesFixture } from '@kbn/scout';
 import { extendPageObjects } from '../page_objects';
 import { profilingSetupFixture } from './worker';
 
@@ -32,7 +32,7 @@ const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorke
   },
   apiServices: [
     async (
-      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      { apiServices }: { apiServices: ApiServicesFixture },
       use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as ObltApiServicesFixture;

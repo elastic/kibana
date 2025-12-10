@@ -18,14 +18,17 @@ import {
   EuiListGroup,
   EuiTitle,
   EuiFieldSearch,
-  EuiHighlight,
   EuiSpacer,
   EuiLink,
   useEuiTheme,
   euiScrollBarStyles,
+  EuiHighlight,
 } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import type { LanguageDocumentationSections } from '../../types';
+import { SEARCH_DEBOUNCE_TIME } from '../shared';
 
 interface DocumentationProps {
   language: string;
@@ -54,10 +57,19 @@ function DocumentationContent({
   }, [selectedSection]);
 
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
+
+  useDebounce(
+    () => {
+      setDebouncedSearchText(searchText);
+    },
+    SEARCH_DEBOUNCE_TIME,
+    [searchText]
+  );
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, sections);
-  }, [sections, searchText, searchInDescription]);
+    return getFilteredGroups(debouncedSearchText, searchInDescription, sections, 0, false);
+  }, [sections, debouncedSearchText, searchInDescription]);
 
   return (
     <>
@@ -173,22 +185,26 @@ function DocumentationContent({
                             setSelectedSection(helpGroup.label);
                           }}
                         >
-                          <EuiHighlight search={searchText}>{helpGroup.label}</EuiHighlight>
+                          <EuiHighlight search={debouncedSearchText}>
+                            {helpGroup.label}
+                          </EuiHighlight>
                         </EuiLink>
                       </h6>
                     </EuiTitle>
 
-                    {helpGroup.options.length ? (
+                    {helpGroup.items.length ? (
                       <>
                         <EuiSpacer size="s" />
 
                         <EuiListGroup gutterSize="none">
-                          {helpGroup.options.map((helpItem) => {
+                          {helpGroup.items.map((helpItem) => {
                             return (
                               <EuiListGroupItem
                                 key={helpItem.label}
                                 label={
-                                  <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
+                                  <EuiHighlight search={debouncedSearchText}>
+                                    {helpItem.label}
+                                  </EuiHighlight>
                                 }
                                 size="s"
                                 onClick={() => {
@@ -256,7 +272,14 @@ function DocumentationContent({
                           }
                         }}
                       >
-                        {helpItem.description}
+                        {helpItem.description && (
+                          <Markdown
+                            markdownContent={helpItem.description.markdownContent}
+                            openLinksInNewTab={helpItem.description.openLinksInNewTab}
+                            readOnly
+                            enableSoftLineBreaks
+                          />
+                        )}
                       </article>
                     );
                   })}

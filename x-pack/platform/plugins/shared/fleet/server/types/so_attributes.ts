@@ -263,11 +263,17 @@ export interface SettingsSOAttributes {
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
   action_secret_storage_requirements_met?: boolean;
+  ssl_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
     enabled: boolean;
     is_preconfigured: boolean;
+  };
+  ilm_migration_status?: {
+    logs?: 'success' | null;
+    metrics?: 'success' | null;
+    synthetics?: 'success' | null;
   };
 }
 

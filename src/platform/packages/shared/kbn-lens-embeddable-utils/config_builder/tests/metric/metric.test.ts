@@ -18,11 +18,11 @@ describe('Metric', () => {
     validateConverter(simpleMetricAttributes, metricStateSchema);
   });
 
-  it.skip('should convert a complex metric', () => {
+  it('should convert a complex metric', () => {
     validateConverter(complexMetricAttributes, metricStateSchema);
   });
 
-  it.skip('should convert a breakdown-by metric', () => {
+  it('should convert a breakdown-by metric', () => {
     validateConverter(breakdownMetricAttributes, metricStateSchema);
   });
 });

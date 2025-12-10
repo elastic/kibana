@@ -41,6 +41,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       searchInferenceEndpoints: {
         pathname: '/app/elasticsearch/relevance/inference_endpoints',
       },
+      searchOverview: {
+        pathname: '/app/elasticsearch/overview',
+      },
+      searchHomepage: {
+        pathname: '/app/elasticsearch/home',
+      },
+      searchGettingStarted: {
+        pathname: '/app/elasticsearch/getting_started',
+      },
     },
   };
 }

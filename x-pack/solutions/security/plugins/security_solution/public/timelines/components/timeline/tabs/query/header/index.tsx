@@ -11,6 +11,8 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { css } from '@emotion/react';
+import { MigrationMessageCallout } from './migration_message_callout';
+import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';
 import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
 import {
   type TimelineStatus,
@@ -28,6 +30,14 @@ import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../
 
 interface Props {
   activeTab: TimelineTabs;
+  /**
+   * The currently selected timeline indices
+   */
+  currentIndices: string[];
+  /**
+   * The id of the dataview
+   */
+  dataViewId: string | null;
   filterManager: FilterManager;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
@@ -61,6 +71,8 @@ const useStyles = (shouldShowQueryBuilder: boolean) => {
 
 const QueryTabHeaderComponent: React.FC<Props> = ({
   activeTab,
+  currentIndices,
+  dataViewId,
   filterManager,
   show,
   showCallOutUnauthorizedMsg,
@@ -89,6 +101,11 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   );
   const dataProviderStyles = useStyles(shouldShowQueryBuilder);
 
+  const showAlertsOnlyMigrationMessage = useShouldShowAlertsOnlyMigrationMessage({
+    currentTimelineIndices: currentIndices,
+    dataViewId,
+  });
+
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
       <InPortal node={timelineEventsCountPortalNode}>
@@ -103,6 +120,11 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
               <EuiFlexItem>
                 <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
               </EuiFlexItem>
+              {showAlertsOnlyMigrationMessage && (
+                <EuiFlexItem>
+                  <MigrationMessageCallout timelineId={timelineId} />
+                </EuiFlexItem>
+              )}
               {showCallOutUnauthorizedMsg && (
                 <EuiFlexItem>
                   <EuiCallOut

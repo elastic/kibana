@@ -17,6 +17,7 @@ import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
 import { dashboardClient } from '../../dashboard_client';
 import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -25,13 +26,11 @@ export async function loadDashboardApi({
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   savedObjectId?: string;
 }) {
-  const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  const savedObjectResult = savedObjectId ? await dashboardClient.get(savedObjectId) : undefined;
+  const readResult = savedObjectId ? await dashboardClient.get(savedObjectId) : undefined;
 
-  const validationResult =
-    savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
+  const validationResult = readResult && creationOptions?.validateLoadedSavedObject?.(readResult);
   if (validationResult === 'invalid') {
     // throw error to stop the rest of Dashboard loading and make the factory throw an Error
     throw new Error('Dashboard failed saved object result validation');
@@ -58,17 +57,18 @@ export async function loadDashboardApi({
     incomingEmbeddables,
     initialState: {
       ...DEFAULT_DASHBOARD_STATE,
-      ...savedObjectResult?.data,
+      ...readResult?.data,
       ...unsavedChanges,
       ...overrideState,
     },
-    savedObjectResult,
+    readResult,
     savedObjectId,
   });
 
   const performanceSubscription = startQueryPerformanceTracking(api, {
     firstLoad: true,
-    creationStartTime,
+    creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
+      ?.startTime,
   });
 
   if (savedObjectId && !incomingEmbeddables?.length) {

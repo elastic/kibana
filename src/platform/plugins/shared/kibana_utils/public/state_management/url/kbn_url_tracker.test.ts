@@ -123,7 +123,8 @@ describe('kbnUrlTracker', () => {
     expect(getActiveNavLinkUrl()).toEqual('#/start/deep/path/3?unhashed');
   });
 
-  test('show warning and use hashed url if unhashing does not work', () => {
+  test('warn in console and use hashed url if unhashing does not work', () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn');
     (unhashUrl as jest.Mock).mockImplementation(() => {
       throw new Error('unhash broke');
     });
@@ -132,7 +133,8 @@ describe('kbnUrlTracker', () => {
     history.push('#/start/deep/path/2');
     urlTracker.appUnMounted();
     expect(getActiveNavLinkUrl()).toEqual('#/start/deep/path/2');
-    expect(toastService.addDanger).toHaveBeenCalledWith('unhash broke');
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith('unhash broke');
   });
 
   test('change nav link back to default if app gets mounted again', () => {

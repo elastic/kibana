@@ -119,6 +119,11 @@ export interface ISearchOptions {
    * When set es results are streamed back to the caller without any parsing of the content.
    */
   stream?: boolean;
+
+  /**
+   * A hash of the request params. This is attached automatically by the search interceptor. It is used to link this request with a search session.
+   */
+  requestHash?: string;
 }
 
 /**

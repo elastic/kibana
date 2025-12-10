@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Incident } from '@kbn/connector-schemas/swimlane';
 import type {
   ExternalServiceIncidentResponse,
   ExternalServiceApi,
-  Incident,
   PushToServiceApiHandlerArgs,
   PushToServiceResponse,
 } from './types';

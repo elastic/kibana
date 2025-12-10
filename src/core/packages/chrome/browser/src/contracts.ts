@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
@@ -79,6 +80,11 @@ export interface ChromeStart {
    * Override the current badge
    */
   setBadge(badge?: ChromeBadge): void;
+
+  /**
+   * Set global footer; Meant to be used by developer toolbar
+   */
+  setGlobalFooter(node: ReactNode): void;
 
   /**
    * Get an observable of the current list of breadcrumbs

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -36,6 +36,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
     "@kbn/visualizations-common",
+    "@kbn/vis-type-timeseries-plugin",
   ],
   "exclude": [
     "target/**/*",

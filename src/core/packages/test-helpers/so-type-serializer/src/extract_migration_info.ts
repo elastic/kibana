@@ -10,9 +10,16 @@
 import { compare as semverCompare } from 'semver';
 import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsFullModelVersion,
+  SavedObjectsFullModelVersionSchemaDefinitions,
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionSchemaDefinitions,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
+import { createHash } from 'crypto';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -29,11 +36,13 @@ export interface SavedObjectTypeMigrationInfo {
 
 export interface ModelVersionSummary {
   version: string;
+  modelVersionHash: string;
   changeTypes: string[];
   hasTransformation: boolean;
   newMappings: string[];
   schemas: {
-    forwardCompatibility: boolean;
+    create: false | string;
+    forwardCompatibility: false | string;
   };
 }
 
@@ -57,21 +66,27 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
       ? soType.modelVersions()
       : soType.modelVersions ?? {};
 
+  const getModelVersionHash = (
+    modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
+  ) => {
+    const hash = createHash('sha256');
+    const modelVersionData = JSON.stringify(modelVersion);
+    return `${hash.update(modelVersionData).digest('hex')}`;
+  };
+
   const modelVersions: ModelVersionSummary[] = Object.entries(modelVersionMap).map(
     ([version, modelVersion]) => {
       const { changes, schemas } = modelVersion ?? { changes: [] };
       return {
         version,
+        modelVersionHash: getModelVersionHash(modelVersion),
         changeTypes: [...new Set(changes.map((change) => change.type))].sort(),
         hasTransformation: hasTransformation(changes),
         newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(changes))),
-        schemas: {
-          forwardCompatibility: !!schemas?.forwardCompatibility,
-        },
+        schemas: { ...getSchemaPropertiesHashes(schemas) },
       };
     }
   );
-
   return {
     name: soType.name,
     namespaceType: soType.namespaceType,
@@ -88,4 +103,34 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
 const changesWithTransform = ['data_backfill', 'data_removal', 'unsafe_transform'];
 const hasTransformation = (changes: SavedObjectsModelChange[]): boolean => {
   return changes.some((change) => changesWithTransform.includes(change.type));
+};
+
+const getSchemaPropertiesHashes = (
+  schemas?:
+    | SavedObjectsModelVersionSchemaDefinitions
+    | SavedObjectsFullModelVersionSchemaDefinitions
+) => {
+  if (!schemas) {
+    return {
+      forwardCompatibility: false as const,
+      create: false as const,
+    };
+  }
+  const { forwardCompatibility, create } = schemas;
+  return {
+    forwardCompatibility: forwardCompatibility ? getHash(forwardCompatibility) : (false as const),
+    create: create ? getHash(create) : (false as const),
+  };
+};
+
+const getHash = (schemaProp: unknown) => {
+  const hash = createHash('sha256');
+  if (typeof schemaProp === 'function') {
+    const funcString = schemaProp.toString();
+    return `${hash.update(funcString).digest('hex')}`;
+  } else if (typeof schemaProp === 'object' && schemaProp !== null) {
+    const schemaPropData = JSON.stringify(schemaProp);
+    return `${hash.update(schemaPropData).digest('hex')}`;
+  }
+  return false;
 };

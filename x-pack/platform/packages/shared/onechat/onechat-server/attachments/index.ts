@@ -7,8 +7,16 @@
 
 export type {
   AttachmentTypeDefinition,
-  InlineAttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
-  AttachmentParseResult,
+  AttachmentValidationResult,
+  AgentFormattedAttachment,
+  AttachmentFormatContext,
 } from './type_definition';
+export type {
+  AttachmentBoundedTool,
+  BuiltinAttachmentBoundedTool,
+  IndexSearchAttachmentBoundedTool,
+  WorkflowAttachmentBoundedTool,
+  StaticEsqlAttachmentBoundedTool,
+} from './tools';

@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/observability-agent-builder",
+  "owner": ["@elastic/obs-ai-team"],
+  "group": "observability",
+  "visibility": "private"
+}

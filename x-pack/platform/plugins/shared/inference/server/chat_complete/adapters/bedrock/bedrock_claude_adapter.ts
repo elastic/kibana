@@ -24,6 +24,7 @@ import type { ConverseCompletionChunk } from './process_completion_chunks';
 import { processConverseCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -47,13 +48,14 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
     const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+    const connector = executor.getConnector();
 
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools?.length ? bedRockTools : undefined,
       toolChoice: toolChoiceToConverse(toolChoice),
-      temperature,
+      ...getTemperatureIfValid(temperature, { connector, modelName }),
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,

@@ -12,9 +12,11 @@ import type {
   RawRoundInput,
   ChatAgentEvent,
   AgentCapabilities,
+  AgentConfigurationOverrides,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type {
   ModelProvider,
   ScopedRunner,
@@ -48,6 +50,10 @@ export interface AgentHandlerContext {
    * Can be used to create scoped services not directly exposed by this context.
    */
   request: KibanaRequest;
+  /**
+   * Id of the space associated with the request
+   */
+  spaceId: string;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
@@ -108,6 +114,21 @@ export interface AgentParams {
    * Agent capabilities to enable.
    */
   capabilities?: AgentCapabilities;
+  browserApiTools?: BrowserApiToolMetadata[];
+  /**
+   * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
+   */
+  structuredOutput?: boolean;
+  /**
+   * Optional JSON schema for structured output. Only used when structuredOutput is true.
+   * If not provided, uses a default schema.
+   */
+  outputSchema?: Record<string, unknown>;
+  /**
+   * Optional runtime configuration overrides.
+   * These override the stored agent configuration for this execution only.
+   */
+  configurationOverrides?: AgentConfigurationOverrides;
 }
 
 export interface AgentResponse {

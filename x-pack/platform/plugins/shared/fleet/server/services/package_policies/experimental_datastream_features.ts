@@ -10,8 +10,6 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { merge } from 'lodash';
 
-import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
-
 import type { ExperimentalIndexingFeature } from '../../../common/types';
 import { PackageNotFoundError } from '../../errors';
 import type {
@@ -21,7 +19,7 @@ import type {
   IndexTemplateEntry,
 } from '../../types';
 import { appContextService } from '../app_context';
-import { prepareTemplate } from '../epm/elasticsearch/template/install';
+import { prepareDataStreamTemplates } from '../epm/elasticsearch/template/install';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
 import { getInstalledPackageWithAssets } from '../epm/packages/get';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
@@ -66,26 +64,19 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     installation = installedPackageWithAssets.installation;
     const { packageInfo, paths, assetsMap } = installedPackageWithAssets;
 
-    // prepare template from package spec to find original index:false values
-    const templates = packageInfo.data_streams?.map((dataStream: any) => {
-      const experimentalDataStreamFeature =
-        packagePolicy.package?.experimental_data_stream_features?.find(
-          (datastreamFeature) =>
-            datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
-        );
-      return prepareTemplate({
-        packageInstallContext: {
-          archiveIterator: createArchiveIteratorFromMap(assetsMap),
-          packageInfo,
-          paths,
-        },
-        fieldAssetsMap: assetsMap,
-        dataStream,
-        experimentalDataStreamFeature,
-      });
-    });
+    const packageInstallContext = {
+      archiveIterator: createArchiveIteratorFromMap(assetsMap),
+      packageInfo,
+      paths,
+    };
+    const templates = await prepareDataStreamTemplates(
+      packageInfo.data_streams ?? [],
+      packageInstallContext,
+      assetsMap,
+      packagePolicy.package?.experimental_data_stream_features
+    );
 
-    templates?.forEach((template) => {
+    templates.forEach((template) => {
       Object.keys(template.componentTemplates).forEach((templateName) => {
         templateMappings[templateName] =
           (template.componentTemplates[templateName].template as any).mappings ?? {};

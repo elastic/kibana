@@ -14,6 +14,7 @@ export interface SecurityLinkGroupDefinition {
 
 export const SecurityLinkGroup: Record<SecurityGroupName, SecurityLinkGroupDefinition> =
   Object.freeze({
+    [SecurityGroupName.alertDetections]: { title: i18nStrings.alertDetections.title },
     [SecurityGroupName.rules]: { title: i18nStrings.rules.title },
     [SecurityGroupName.explore]: { title: i18nStrings.explore.title },
     [SecurityGroupName.investigations]: { title: i18nStrings.investigations.title },

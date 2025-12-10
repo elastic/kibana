@@ -11,7 +11,6 @@ import React, { useEffect } from 'react';
 import { EuiFocusTrap } from '@elastic/eui';
 import { cx } from '@emotion/css';
 import { css } from '@emotion/react';
-import type { SerializedStyles } from '@emotion/serialize';
 import { ChartSectionTemplate, type ChartSectionTemplateProps } from '@kbn/unified-histogram';
 import { useMetricsGridFullScreen } from '../hooks';
 import {
@@ -21,10 +20,8 @@ import {
   METRICS_GRID_RESTRICT_BODY_CLASS,
 } from '../common/constants';
 
-export interface MetricsGridWrapperProps {
-  id: string;
-  toolbarCss?: SerializedStyles;
-  toolbar?: ChartSectionTemplateProps['toolbar'];
+export interface MetricsGridWrapperProps
+  extends Pick<ChartSectionTemplateProps, 'toolbar' | 'toolbarCss' | 'toolbarWrapAt' | 'id'> {
   isFullscreen?: boolean;
   isComponentVisible?: boolean;
   onToggleFullscreen?: () => void;
@@ -35,6 +32,7 @@ export const MetricsGridWrapper = ({
   id,
   toolbarCss,
   toolbar,
+  toolbarWrapAt,
   isFullscreen,
   children,
   isComponentVisible,
@@ -86,7 +84,12 @@ export const MetricsGridWrapper = ({
           })}
           css={fullHeightCss}
         >
-          <ChartSectionTemplate id={id} toolbarCss={toolbarCss} toolbar={toolbar}>
+          <ChartSectionTemplate
+            id={id}
+            toolbarCss={toolbarCss}
+            toolbarWrapAt={toolbarWrapAt}
+            toolbar={toolbar}
+          >
             {children}
           </ChartSectionTemplate>
         </div>

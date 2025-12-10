@@ -145,6 +145,29 @@ export abstract class SiemMigrationsDataItemClient<
     };
   }
 
+  async getByQuery(
+    migrationId: string,
+    { queryDSL, from, size }: { queryDSL: object; from?: number; size?: number }
+  ): Promise<{ total: number; data: Stored<I>[] }> {
+    const index = await this.getIndexName();
+    const baseQuery = this.getFilterQuery(migrationId, {});
+    const combinedQuery = {
+      bool: {
+        must: [baseQuery, queryDSL],
+      },
+    };
+    const result = await this.esClient
+      .search<I>({ index, query: combinedQuery, from, size })
+      .catch((error) => {
+        this.logger.error(`Error searching migration ${this.type} by query: ${error.message}`);
+        throw error;
+      });
+    return {
+      total: this.getTotalHits(result),
+      data: this.processResponseHits(result),
+    };
+  }
+
   /** Prepares bulk ES delete operations for the migration items based on migrationId. */
   public async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
     const index = await this.getIndexName();

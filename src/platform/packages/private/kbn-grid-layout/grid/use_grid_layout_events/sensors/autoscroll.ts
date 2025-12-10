@@ -8,11 +8,11 @@
  */
 
 import {
-  getClientHeight,
+  getViewportHeight,
   getScrollDimensions,
-  scrollByContainer,
+  scrollBy,
   type ScrollContainer,
-} from '../../utils/scroll_container';
+} from '@kbn/core-chrome-layout-utils';
 import type { UserMouseEvent } from './mouse';
 
 const DEADZONE = 0.35; // percent of the distance from the center of the screen on either side of the middle is considered deadzone and will not scroll.
@@ -40,7 +40,7 @@ export const startAutoScroll = (container: ScrollContainer) => {
 
     if (latestMouseEvent) {
       // Scroll faster depending on how far the user's drag is from the center of the screen.
-      const clientHeight = getClientHeight(container);
+      const clientHeight = getViewportHeight(container);
       const distanceFromCenterOfScreen = clientHeight / 2 - latestMouseEvent.clientY;
       const scrollDirection = distanceFromCenterOfScreen > 0 ? 'up' : 'down';
       const distanceFromCenterOfScreenPercentage = distanceFromCenterOfScreen / clientHeight;
@@ -69,7 +69,7 @@ export const startAutoScroll = (container: ScrollContainer) => {
         PIXELS_PER_SECOND * (dragDistanceSpeedMultiplier * edgeSlowdownMultiplier) * deltaTime;
 
       if (pixelsToScroll > 0) {
-        scrollByContainer(container, scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll);
+        scrollBy({ top: scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll }, container);
       }
     }
 

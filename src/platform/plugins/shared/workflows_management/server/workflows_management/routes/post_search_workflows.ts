@@ -31,14 +31,14 @@ export function registerPostSearchWorkflowsRoute({
     },
     async (context, request, response) => {
       try {
-        const { limit, page, enabled, createdBy, query } =
+        const { size, page, enabled, createdBy, query } =
           request.body as unknown as GetWorkflowsParams;
 
         const spaceId = spaces.getSpaceId(request);
         return response.ok({
           body: await api.getWorkflows(
             {
-              limit,
+              size,
               page,
               enabled,
               createdBy,

@@ -60,33 +60,43 @@ export function fromTermsLensApiToLensState(
   const orderByConfig = getOrderByValue(rank_by, getMetricColumnIdByIndex);
   const orderDirection = getOrderDirection(rank_by, getMetricColumnIdByIndex);
 
+  const format = fromFormatAPIToLensState(options.format);
+
   return {
     operationType: 'terms',
     dataType: 'string',
     ...getLensStateBucketSharedProps({ ...options, field }),
     params: {
-      secondaryFields,
+      ...(secondaryFields.length ? { secondaryFields } : {}),
       size, // it cannot be 0 (zero)
-      accuracyMode: Boolean(increase_accuracy),
-      include: includes?.values ?? [],
-      includeIsRegex: includes?.as_regex ?? false,
-      exclude: excludes?.values ?? [],
-      excludeIsRegex: excludes?.as_regex ?? false,
-      otherBucket: Boolean(other_bucket),
-      missingBucket: other_bucket?.include_documents_without_field,
+      ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
+      ...(includes?.values
+        ? { include: includes?.values, includeIsRegex: includes?.as_regex ?? false }
+        : {}),
+      ...(excludes?.values
+        ? {
+            exclude: excludes.values,
+            excludeIsRegex: excludes?.as_regex ?? false,
+          }
+        : {}),
+      ...(other_bucket != null ? { otherBucket: true } : {}),
+      ...(other_bucket?.include_documents_without_field != null
+        ? { missingBucket: other_bucket?.include_documents_without_field }
+        : {}),
       orderBy: orderByConfig,
       orderDirection,
-      orderAgg:
-        rank_by?.type === 'custom'
-          ? {
+      ...(rank_by?.type === 'custom'
+        ? {
+            orderAgg: {
               operationType: rank_by.operation,
               sourceField: rank_by.field ?? '',
               dataType: 'number',
               isBucketed: false,
               label: '',
-            }
-          : undefined,
-      format: fromFormatAPIToLensState(options.format),
+            },
+          }
+        : {}),
+      ...(format ? { format } : {}),
       parentFormat: { id: 'terms' },
     },
   };
@@ -119,9 +129,11 @@ function getRankByConfig(
     };
   }
   if (params.orderBy.type === 'column') {
-    const index = columns.findIndex(
-      (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
-    );
+    const index = columns
+      .filter(({ column }) => !column.isBucketed)
+      .findIndex(
+        (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
+      );
     if (index > -1) {
       return {
         type: 'column',
@@ -146,7 +158,7 @@ export function fromTermsLensStateToAPI(
     ...(column.params.accuracyMode != null
       ? { increase_accuracy: column.params.accuracyMode }
       : {}),
-    ...(column.params.include
+    ...(column.params.include?.length
       ? {
           includes: {
             as_regex: column.params.includeIsRegex,
@@ -154,7 +166,7 @@ export function fromTermsLensStateToAPI(
           },
         }
       : {}),
-    ...(column.params.exclude
+    ...(column.params.exclude?.length
       ? {
           excludes: {
             as_regex: column.params.excludeIsRegex,

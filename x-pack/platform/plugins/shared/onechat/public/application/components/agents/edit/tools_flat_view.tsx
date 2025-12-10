@@ -26,6 +26,8 @@ interface ToolsFlatViewProps {
   disabled: boolean;
   pageIndex: number;
   onPageChange: (pageIndex: number) => void;
+  pageSize: number;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
 interface ToolDetailsColumnProps {
@@ -92,9 +94,9 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
   disabled,
   pageIndex,
   onPageChange,
+  pageSize,
+  onPageSizeChange,
 }) => {
-  const pageSize = 10;
-
   const columns = React.useMemo(
     () => [
       createCheckboxColumn(selectedTools, onToggleTool, disabled),
@@ -105,10 +107,15 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
   );
 
   const handleTableChange = React.useCallback(
-    ({ page: { index } }: CriteriaWithPagination<ToolDefinition>) => {
-      onPageChange(index);
+    ({ page }: CriteriaWithPagination<ToolDefinition>) => {
+      if (page) {
+        onPageChange(page.index);
+        if (page.size !== pageSize) {
+          onPageSizeChange(page.size);
+        }
+      }
     },
-    [onPageChange]
+    [onPageChange, onPageSizeChange, pageSize]
   );
 
   const noItemsMessage = (
@@ -143,7 +150,8 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
         pagination={{
           pageIndex,
           pageSize,
-          showPerPageOptions: false,
+          pageSizeOptions: [10, 25, 50, 100],
+          showPerPageOptions: true,
         }}
         onTableChange={handleTableChange}
         sorting={{

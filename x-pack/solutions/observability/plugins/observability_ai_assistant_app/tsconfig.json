@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -45,9 +45,9 @@
     "@kbn/tooling-log",
     "@kbn/babel-register",
     "@kbn/expect",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/alerting-plugin",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace",
     "@kbn/esql-datagrid",
     "@kbn/alerting-comparators",
     "@kbn/core-lifecycle-browser",

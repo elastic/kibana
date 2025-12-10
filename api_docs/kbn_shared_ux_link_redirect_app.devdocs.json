@@ -300,42 +300,6 @@
             "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
@@ -586,6 +550,18 @@
           {
             "plugin": "searchAssistant",
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
@@ -961,42 +937,6 @@
             "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
@@ -1247,6 +1187,18 @@
           {
             "plugin": "searchAssistant",
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
@@ -1622,42 +1574,6 @@
             "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
@@ -1908,6 +1824,18 @@
           {
             "plugin": "searchAssistant",
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
