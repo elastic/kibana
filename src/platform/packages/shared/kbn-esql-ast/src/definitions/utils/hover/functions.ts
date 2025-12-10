@@ -40,8 +40,8 @@ function formatTypesList(
     return `${displayedTypes.join(separator)}${i18n.translate(
       'kbn-esql-ast.esql.hover.functions.moreTypes',
       {
-        defaultMessage: '|…+{remainingCount} more',
-        values: { remainingCount },
+        defaultMessage: `{separator}…+{remainingCount} more`,
+        values: { remainingCount, separator },
       }
     )}`;
   }
