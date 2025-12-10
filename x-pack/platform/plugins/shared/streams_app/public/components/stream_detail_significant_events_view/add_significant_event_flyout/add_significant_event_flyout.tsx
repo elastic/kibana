@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
@@ -33,7 +34,7 @@ import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
-import { defaultQuery } from './utils/default_query';
+import { defaultQuery, NO_FEATURE } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { FeaturesSelector } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
@@ -156,6 +157,7 @@ export function AddSignificantEventFlyout({
                     title: nextQuery.title,
                     feature: nextQuery.feature,
                     severity_score: nextQuery.severity_score,
+                    evidence: nextQuery.evidence,
                   })),
               ]);
 
@@ -411,14 +413,29 @@ export function AddSignificantEventFlyout({
                         case 'manual':
                           onSave({
                             type: 'single',
-                            query: queries[0],
+                            query: {
+                              ...queries[0],
+                              feature: queries[0].feature
+                                ? queries[0].feature.name === NO_FEATURE.name
+                                  ? undefined
+                                  : omit(queries[0].feature, 'description')
+                                : undefined,
+                            },
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
                           break;
                         case 'ai':
-                          onSave({ type: 'multiple', queries }).finally(() =>
-                            setIsSubmitting(false)
-                          );
+                          onSave({
+                            type: 'multiple',
+                            queries: queries.map((nextQuery) => ({
+                              ...nextQuery,
+                              feature: nextQuery.feature
+                                ? nextQuery.feature.name === NO_FEATURE.name
+                                  ? undefined
+                                  : omit(nextQuery.feature, 'description')
+                                : undefined,
+                            })),
+                          }).finally(() => setIsSubmitting(false));
                           break;
                       }
                     }}
