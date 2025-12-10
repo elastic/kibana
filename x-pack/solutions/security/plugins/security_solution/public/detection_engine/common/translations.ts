@@ -1657,9 +1657,9 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   }
 );
 
-export const CHAT_IN_AGENT_BUILDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
+export const RULE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
   {
-    defaultMessage: 'Chat in Agent Builder',
+    defaultMessage: 'Settings',
   }
 );

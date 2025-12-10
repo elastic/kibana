@@ -30,7 +30,8 @@
     "@kbn/core-test-helpers-test-utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }
