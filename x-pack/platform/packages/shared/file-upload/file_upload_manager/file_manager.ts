@@ -910,10 +910,10 @@ export class FileUploadManager {
       };
 
       pipelines.forEach((pipeline) => {
-        if (pipeline === undefined) {
+        if (pipeline === undefined || pipeline.processors === undefined) {
           return;
         }
-        pipeline.processors!.push({
+        pipeline.processors.push({
           set: {
             field: 'content',
             copy_from: 'attachment.content',

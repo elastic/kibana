@@ -17,9 +17,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldSelect } from '@kbn/field-utils/src/components/field_select/field_select';
 import useObservable from 'react-use/lib/useObservable';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useFileUploadContext } from '../../../use_file_upload';
 import { MappingEditorService } from './mapping_editor_service';
 
@@ -69,16 +69,18 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem>
               <strong>
-                {i18n.translate('xpack.fileUpload.mappingEditor.fieldNameLabel', {
-                  defaultMessage: 'Field name',
-                })}
+                <FormattedMessage
+                  id="xpack.fileUpload.mappingEditor.fieldNameLabel"
+                  defaultMessage="Field name"
+                />
               </strong>
             </EuiFlexItem>
             <EuiFlexItem>
               <strong>
-                {i18n.translate('xpack.fileUpload.mappingEditor.fieldTypeLabel', {
-                  defaultMessage: 'Field type',
-                })}
+                <FormattedMessage
+                  id="xpack.fileUpload.mappingEditor.fieldTypeLabel"
+                  defaultMessage="Field type"
+                />
               </strong>
             </EuiFlexItem>
           </EuiFlexGroup>

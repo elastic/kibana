@@ -55,27 +55,17 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     }));
   }, []);
 
-  useEffect(() => {
-    if (uploadStatus.overallImportStatus === STATUS.COMPLETED) {
-      setStep('finish', STATUS.COMPLETED);
-    }
-  }, [uploadStatus.overallImportStatus, setStep]);
+  const isFinished = uploadStatus.overallImportStatus === STATUS.COMPLETED;
 
   useEffect(() => {
     setDropzoneDisabled?.(stepsStatus.analysis !== STATUS.STARTED);
   }, [stepsStatus.analysis, setDropzoneDisabled]);
 
   useEffect(() => {
-    setFileUploadActive(true);
+    setFileUploadActive(filesStatus.length > 0);
     return () => {
       setFileUploadActive(false);
     };
-  }, [setFileUploadActive]);
-
-  useEffect(() => {
-    if (filesStatus.length === 0) {
-      setFileUploadActive(false);
-    }
   }, [filesStatus, setFileUploadActive]);
 
   const importClick = useCallback(() => {
@@ -185,26 +175,25 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.finish', {
         defaultMessage: 'Finalizing',
       }),
-      children:
-        stepsStatus.finish === STATUS.COMPLETED ? (
-          <>
-            <EuiText size="s">{finalStatement}</EuiText>
+      children: isFinished ? (
+        <>
+          <EuiText size="s">{finalStatement}</EuiText>
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            <EuiButton
-              data-test-subj="fileUploadLiteLookupFinishButton"
-              disabled={uploadStatus.allDocsSearchable === false}
-              onClick={() => {
-                onClose?.();
-              }}
-            >
-              <FormattedMessage id="xpack.fileUpload.continue" defaultMessage="Finish" />
-            </EuiButton>
-          </>
-        ) : null,
+          <EuiButton
+            data-test-subj="fileUploadLiteLookupFinishButton"
+            disabled={uploadStatus.allDocsSearchable === false}
+            onClick={() => {
+              onClose?.();
+            }}
+          >
+            <FormattedMessage id="xpack.fileUpload.continue" defaultMessage="Finish" />
+          </EuiButton>
+        </>
+      ) : null,
       status: generateStatus(
-        stepsStatus.finish === STATUS.COMPLETED
+        isFinished
           ? uploadStatus.allDocsSearchable === true
             ? STATUS.COMPLETED
             : STATUS.STARTED
