@@ -148,14 +148,14 @@ export function SloManagementTable() {
       type: 'icon',
       icon: 'logstashOutput',
       name: i18n.translate('xpack.slo.item.actions.purge', {
-        defaultMessage: 'Purge',
+        defaultMessage: 'Purge rollup data',
       }),
       description: i18n.translate('xpack.slo.item.actions.purge', {
-        defaultMessage: 'Purge',
+        defaultMessage: 'Purge rollup data',
       }),
       'data-test-subj': 'sloActionsPurge',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge' }),
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge_rollup' }),
     },
     {
       type: 'icon',

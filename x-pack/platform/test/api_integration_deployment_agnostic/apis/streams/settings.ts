@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
 import type {
   IngestStreamSettings,
@@ -40,6 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           ...definition.stream.ingest,
+          processing: omit(definition.stream.ingest.processing, 'updated_at'),
           settings,
         },
       },
