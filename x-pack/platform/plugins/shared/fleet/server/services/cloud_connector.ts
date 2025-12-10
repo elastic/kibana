@@ -142,6 +142,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         name,
         namespace,
         cloudProvider,
+        accountType: cloudConnector.accountType,
         vars,
         packagePolicyCount: 1,
         created_at: new Date().toISOString(),
@@ -281,6 +282,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           cloudConnectorUpdate.name,
           cloudConnectorId
         );
+      }
+
+      if (cloudConnectorUpdate.accountType !== undefined) {
+        updateAttributes.accountType = cloudConnectorUpdate.accountType;
       }
 
       if (cloudConnectorUpdate.vars) {

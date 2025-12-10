@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
 import { ConversationsHistoryPopover } from '../conversations_history/conversations_history_popover';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useConversationList } from '../../../hooks/use_conversation_list';
 
 const labels = {
   open: i18n.translate('xpack.onechat.conversationsHistory.open', {
@@ -29,6 +30,9 @@ export const ConversationsHistoryButton: React.FC = () => {
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
   const { isEmbeddedContext } = useConversationContext();
+  const { conversations, isLoading } = useConversationList();
+
+  const hasNoConversations = !isLoading && conversations?.length === 0;
 
   const togglePopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -38,7 +42,8 @@ export const ConversationsHistoryButton: React.FC = () => {
     padding-left: ${euiTheme.size.s};
   `;
 
-  const showButtonIcon = isEmbeddedContext || hasActiveConversation;
+  const showButtonIcon = hasActiveConversation;
+
   const button = showButtonIcon ? (
     <EuiButtonIcon
       iconType="clockCounter"
@@ -55,6 +60,7 @@ export const ConversationsHistoryButton: React.FC = () => {
       aria-label={isPopoverOpen ? labels.close : labels.open}
       onClick={togglePopover}
       data-test-subj="onechatConversationsHistoryToggleBtn"
+      disabled={hasNoConversations}
     >
       {labels.conversations}
     </EuiButtonEmpty>
