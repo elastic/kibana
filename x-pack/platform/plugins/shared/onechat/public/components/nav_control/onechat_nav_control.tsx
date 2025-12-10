@@ -9,10 +9,12 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import type { CoreStart } from '@kbn/core/public';
 import type { OnechatPluginStart } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
+import { ONECHAT_FEATURE_ID, uiPrivileges } from '../../../common/features';
 
-interface OnechatNavControlServices {
+interface OnechatNavControlServices extends CoreStart {
   onechat: OnechatPluginStart;
 }
 
@@ -22,8 +24,16 @@ const buttonCss = css`
 
 export function OnechatNavControl() {
   const {
-    services: { onechat },
+    services: { onechat, application },
   } = useKibana<OnechatNavControlServices>();
+
+  const hasShowPrivilege = Boolean(
+    application?.capabilities?.[ONECHAT_FEATURE_ID]?.[uiPrivileges.show]
+  );
+
+  if (!hasShowPrivilege) {
+    return null;
+  }
 
   return (
     <EuiToolTip content={buttonLabel}>
