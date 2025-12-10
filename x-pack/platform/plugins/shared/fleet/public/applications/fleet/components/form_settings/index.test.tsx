@@ -221,4 +221,25 @@ describe('ConfiguredSettings', () => {
 
     expect(result.queryByText('GO_MAX_PROCS')).toBeNull();
   });
+
+  it('should render learn more link with target="_blank"', () => {
+    const learnMoreUrl = 'https://www.elastic.co/guide/en/fleet';
+    const result = render([
+      {
+        name: 'agent.limits.go_max_procs',
+        title: 'GO_MAX_PROCS',
+        description: () => 'Description',
+        learnMoreLink: learnMoreUrl,
+        api_field: {
+          name: 'agent_limits_go_max_procs',
+        },
+        schema: z.number().int().min(0).default(0),
+      },
+    ]);
+
+    const learnMoreLink = result.getByText('Learn more.');
+    expect(learnMoreLink).not.toBeNull();
+    expect(learnMoreLink.closest('a')).toHaveAttribute('href', learnMoreUrl);
+    expect(learnMoreLink.closest('a')).toHaveAttribute('target', '_blank');
+  });
 });
