@@ -40,7 +40,7 @@ export function getPanelReferences(
   if (panelRefs.length) return panelRefs;
 
   //
-  // Panel references where not prefixed with panel id until 7.13
+  // Panel references were not prefixed with panel id until 7.13
   //
 
   // It is possible to find drilldown reference since the reference structure is known
