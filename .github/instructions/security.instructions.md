@@ -50,7 +50,7 @@ router.get({
   path: '/api/path',
   security: {
     authz: {
-      requiredPrivileges: ['<privilege_3>', { anyRequired: ['<privilege_1>', '<privilege_2>'] }],
+      requiredPrivileges: ['privilege_3', { anyRequired: ['privilege_1', 'privilege_2'] }],
     },
   },
   ...
@@ -64,10 +64,10 @@ router.get({
   // }
 
   // Branch logic based on specific privileges
-  if (authzResult?.['<privilege_1>']) {
+  if (authzResult.privilege_1) {
     // User has privilege_1, return enhanced data
     return response.ok({ body: ...  });
-  } else if (authzResult?.['<privilege_2>']) {
+  } else if (authzResult.privilege_2) {
     // User has privilege_2, return basic data
     return response.ok({ body: ...  });
   }
@@ -106,7 +106,7 @@ router.get({
       },
     },
   }, (context, request, response) => {
-    if (request.authzResult?.['read_params_decrypted']) {
+    if (request.authzResult.read_params_decrypted) {
       return getDecryptedParams(routeContext, paramId);
     } else {
       return getBasicParams(routeContext, paramId);
