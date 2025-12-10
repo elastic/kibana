@@ -8,39 +8,25 @@
  */
 
 import { useMemo } from 'react';
-import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
-import type { FieldSpecId } from '../common/utils';
-import { buildFieldSpecId } from '../common/utils';
+import { useMetricsExperienceFieldsCapsContext } from '../context/metrics_experience_fields_caps_provider';
 
 /**
  * Extracts dimension values for specific indices and selected dimensions.
  * Calls getRowsByDimension() on demand.
  */
-export const useExtractDimensionsValues = ({
-  indices,
-  dimensionNames,
-}: {
-  indices: string[];
-  dimensionNames: string[];
-}) => {
-  const { getValuesByDimension } = useMetricFieldsCapsContext();
-
-  const requiredDimensionFields = useMemo(() => {
-    return dimensionNames.flatMap((dimName) =>
-      indices.map((index) => buildFieldSpecId(index, dimName))
-    );
-  }, [indices, dimensionNames]);
+export const useExtractDimensionsValues = ({ dimensionNames }: { dimensionNames: string[] }) => {
+  const { getValuesByDimension } = useMetricsExperienceFieldsCapsContext();
 
   const valuesByDimension = useMemo(() => {
-    return getValuesByDimension(requiredDimensionFields);
-  }, [requiredDimensionFields, getValuesByDimension]);
+    return getValuesByDimension(dimensionNames);
+  }, [dimensionNames, getValuesByDimension]);
 
   return useMemo(() => {
     if (valuesByDimension.size === 0) {
-      return new Map<string, Map<string, Set<FieldSpecId>>>();
+      return new Map<string, Map<string, Set<string>>>();
     }
 
-    const result = new Map<string, Map<string, Set<FieldSpecId>>>();
+    const result = new Map<string, Map<string, Set<string>>>();
 
     for (const [key, values] of valuesByDimension.entries()) {
       result.set(key, values);

@@ -7,13 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { NUMERIC_TYPES } from '../../constants';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
 
-export const isMetricField = (fieldSpec: FieldSpec): boolean =>
-  Boolean(fieldSpec.timeSeriesMetric) ||
-  NUMERIC_TYPES.includes(fieldSpec.esTypes?.[0] as ES_FIELD_TYPES);
+export const isMetricField = (
+  fieldSpec: FieldSpec,
+  columnByName: Map<string, DatatableColumn>
+): boolean => Boolean(getTimeSeriesMetric(fieldSpec, columnByName));
+
+export const getTimeSeriesMetric = (
+  fieldSpec: FieldSpec,
+  columnByName: Map<string, DatatableColumn>
+): estypes.MappingTimeSeriesMetricType | undefined => {
+  if (
+    !fieldSpec.timeSeriesMetric &&
+    columnByName.get(fieldSpec.name)?.meta?.esType?.startsWith('counter_')
+  ) {
+    return 'counter';
+  }
+
+  return fieldSpec.timeSeriesMetric;
+};
 
 export const hasValue = (value: unknown): boolean => {
   if (value == null) {
@@ -23,9 +38,4 @@ export const hasValue = (value: unknown): boolean => {
     return value.some((v) => v != null);
   }
   return true;
-};
-
-export type FieldSpecId = string;
-export const buildFieldSpecId = (index: string, fieldName: string): FieldSpecId => {
-  return `${index}>${fieldName}`;
 };

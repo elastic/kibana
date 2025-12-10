@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -19,8 +19,8 @@ import { ValuesSelector } from '../values_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
-  metricFields: MetricField[];
-  visibleFields: MetricField[];
+  allMetricFields: MetricField[];
+  visibleMetricFields: MetricField[];
   dimensions: Dimension[];
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
@@ -28,8 +28,8 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
 }
 
 export const useToolbarActions = ({
-  metricFields,
-  visibleFields,
+  allMetricFields,
+  visibleMetricFields,
   dimensions,
   renderToggleActions,
   hideDimensionsSelector = false,
@@ -37,7 +37,7 @@ export const useToolbarActions = ({
   isLoading = false,
 }: UseToolbarActionsProps) => {
   const [indices, setIndices] = useState<string[]>([
-    ...new Set(metricFields.map((field) => field.index)),
+    ...new Set(allMetricFields.map((field) => field.index)),
   ]);
 
   const {
@@ -62,17 +62,11 @@ export const useToolbarActions = ({
     [isFullscreen, renderToggleActions]
   );
 
-  useEffect(() => {
-    if (!isLoading) {
-      setIndices([...new Set(visibleFields.map((field) => field.index))]);
-    }
-  }, [isLoading, visibleFields]);
-
   const leftSideActions = useMemo(
     () => [
       hideDimensionsSelector ? null : (
         <DimensionsSelector
-          fields={metricFields}
+          fields={allMetricFields}
           dimensions={dimensions}
           onChange={onDimensionsChange}
           selectedDimensions={selectedDimensions}
@@ -85,7 +79,6 @@ export const useToolbarActions = ({
         <ValuesSelector
           selectedDimensions={selectedDimensions}
           selectedValues={selectedDimensionValues}
-          indices={indices}
           onChange={onDimensionValuesChange}
           disabled={selectedDimensions.length === 0}
           onClear={onClearValues}
@@ -95,10 +88,9 @@ export const useToolbarActions = ({
       ) : null,
     ],
     [
-      indices,
       isSmallScreen,
       selectedDimensions,
-      metricFields,
+      allMetricFields,
       dimensions,
       onClearValues,
       onDimensionsChange,

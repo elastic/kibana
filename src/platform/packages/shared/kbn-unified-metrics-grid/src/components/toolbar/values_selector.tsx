@@ -22,16 +22,14 @@ import {
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
 import { useExtractDimensionsValues } from '../../hooks/use_extract_dimensions_values';
-import type { FieldSpecId } from '../../common/utils';
 
 export interface ValuesFilterProps {
   selectedDimensions: Dimension[];
   selectedValues: string[];
-  indices?: string[];
   disabled?: boolean;
   fullWidth?: boolean;
   isLoading?: boolean;
-  onChange: (items: { value: string; metricFields: Set<FieldSpecId> }[]) => void;
+  onChange: (items: { value: string; metricFields: Set<string> }[]) => void;
   onClear: () => void;
 }
 export const ValuesSelector = ({
@@ -41,7 +39,6 @@ export const ValuesSelector = ({
   fullWidth = false,
   disabled = false,
   isLoading: isFieldsLoading = false,
-  indices = [],
   onClear,
 }: ValuesFilterProps) => {
   const selectedDimensionNames = useMemo(
@@ -50,12 +47,11 @@ export const ValuesSelector = ({
   );
 
   const valuesByDimensionName = useExtractDimensionsValues({
-    indices,
     dimensionNames: selectedDimensionNames,
   });
 
   const metricsByFieldValue = useMemo(() => {
-    const result = new Map<string, Set<FieldSpecId>>();
+    const result = new Map<string, Set<string>>();
     for (const [field, values] of valuesByDimensionName.entries()) {
       for (const [value, metricFieldKey] of values.entries()) {
         result.set(`${field}${FIELD_VALUE_SEPARATOR}${value}`, metricFieldKey);

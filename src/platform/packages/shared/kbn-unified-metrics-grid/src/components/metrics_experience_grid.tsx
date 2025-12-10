@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
@@ -44,13 +45,28 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
   } = useMetricsExperienceState();
 
-  const { metricFields, visibleFields, dimensions } = useMetricFields({ fetchParams });
+  const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
+
+  const { onPageReady } = usePerformanceContext();
+  useEffect(() => {
+    onPageReady({
+      meta: {
+        rangeFrom: fetchParams.timeRange?.from,
+        rangeTo: fetchParams.timeRange?.to,
+      },
+      customMetrics: {
+        key1: 'metric_experience_fields_count',
+        value1: allMetricFields.length,
+      },
+    });
+  }, [allMetricFields.length, onPageReady, fetchParams.timeRange?.from, fetchParams.timeRange?.to]);
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    metricFields,
-    visibleFields,
+    allMetricFields,
+    visibleMetricFields,
     dimensions,
     renderToggleActions,
+    isLoading: isDiscoverLoading,
   });
 
   const onKeyDown = useCallback(
@@ -63,7 +79,7 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (metricFields.length === 0 && selectedDimensionValues.length === 0) {
+  if (allMetricFields.length === 0 && selectedDimensionValues.length === 0) {
     return <EmptyState />;
   }
 
@@ -93,7 +109,7 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        fields={visibleFields}
+        fields={visibleMetricFields}
         services={services}
         filters={dimensionFilters}
         discoverFetch$={discoverFetch$}

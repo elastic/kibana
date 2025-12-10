@@ -9,12 +9,9 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
-import { usePerformanceContext } from '@kbn/ebt-tools';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, MetricField, MetricUnit } from '../types';
-import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
+import { useMetricsExperienceFieldsCapsContext } from '../context/metrics_experience_fields_caps_provider';
 import { normalizeUnit } from '../common/utils/metric_unit/normalize_unit';
-import type { FieldSpec } from '../types';
 import { hasValue } from '../common/utils/fields';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { useMetricFieldsFilter } from './use_metric_fields_filter';
@@ -25,57 +22,53 @@ import { useMetricFieldsFilter } from './use_metric_fields_filter';
  * - metricFields: Complete set of metric fields (for dimension selector, filtering source)
  * - visibleFields: Currently visible fields based on filters (for grid, value selector)
  */
-export const useMetricFields = ({
-  fetchParams,
-}: {
-  fetchParams: ChartSectionProps['fetchParams'];
-}) => {
-  const { searchTerm, selectedDimensions, selectedValueMetricFieldIds, onDimensionsChange } =
+export const useMetricFields = () => {
+  const { searchTerm, selectedDimensions, selectedValuesMetricFields, onDimensionsChange } =
     useMetricsExperienceState();
-  const { fieldSpecs, sampleRowByMetric } = useMetricFieldsCapsContext();
+  const { metricFields, dimensions, sampleRowByMetric } = useMetricsExperienceFieldsCapsContext();
 
-  const { onPageReady } = usePerformanceContext();
-
-  const metricFields = useMemo(() => {
-    if (fieldSpecs.length === 0 || sampleRowByMetric.size === 0) {
+  const sampledMetricFields = useMemo(() => {
+    if (metricFields.length === 0 || sampleRowByMetric.size === 0) {
       return [];
     }
 
-    const sorted = [...fieldSpecs].sort(
-      (a, b) => a.fieldName.localeCompare(b.fieldName) || a.index.localeCompare(b.index)
-    );
-
     const result: MetricField[] = [];
-    for (const spec of sorted) {
-      const row = sampleRowByMetric.get(spec.key);
+    for (const metricField of metricFields) {
+      const row = sampleRowByMetric.get(metricField.name);
       if (row) {
-        result.push(buildMetricField(spec, row));
+        result.push(enrichMetricField(metricField, dimensions, row));
       }
     }
+    return result.sort((a, b) => a.name.localeCompare(b.name));
+  }, [metricFields, dimensions, sampleRowByMetric]);
 
-    return result;
-  }, [fieldSpecs, sampleRowByMetric]);
+  const sampledDimensions = useMemo(
+    () => getUniqueDimensions(sampledMetricFields),
+    [sampledMetricFields]
+  );
 
-  const { filteredFields: visibleFields } = useMetricFieldsFilter({
-    fields: metricFields,
+  const { filteredFields: visibleMetricFields } = useMetricFieldsFilter({
+    fields: sampledMetricFields,
     searchTerm,
     dimensions: selectedDimensions,
-    dimensionMetricFields: selectedValueMetricFieldIds,
+    dimensionValuesMetricFields: selectedValuesMetricFields,
   });
-
-  const dimensions = useMemo(() => getUniqueDimensions(metricFields), [metricFields]);
 
   const lastValueRef = useRef<{
-    metricFields: MetricField[];
-    visibleFields: MetricField[];
+    allMetricFields: MetricField[];
+    visibleMetricFields: MetricField[];
     dimensions: Dimension[];
   }>({
-    metricFields,
-    visibleFields,
-    dimensions,
+    allMetricFields: sampledMetricFields,
+    visibleMetricFields,
+    dimensions: sampledDimensions,
   });
 
-  lastValueRef.current = { metricFields, visibleFields, dimensions };
+  lastValueRef.current = {
+    allMetricFields: sampledMetricFields,
+    visibleMetricFields,
+    dimensions: sampledDimensions,
+  };
 
   // Sync selected dimensions when available dimensions change
   useEffect(() => {
@@ -92,28 +85,10 @@ export const useMetricFields = ({
     }
   }, [selectedDimensions, onDimensionsChange, dimensions]);
 
-  useEffect(() => {
-    onPageReady({
-      meta: {
-        rangeFrom: fetchParams.timeRange?.from,
-        rangeTo: fetchParams.timeRange?.to,
-      },
-      customMetrics: {
-        key1: 'metric_experience_fields_loaded',
-        value1: fieldSpecs.length,
-        key2: 'metrics_experience_poc_version',
-        value2: 1,
-      },
-    });
-  }, [fieldSpecs.length, onPageReady, fetchParams.timeRange?.from, fetchParams.timeRange?.to]);
-
-  return {
-    metricFields: lastValueRef.current.metricFields,
-    visibleFields: lastValueRef.current.visibleFields,
-    dimensions: lastValueRef.current.dimensions,
-  };
+  return lastValueRef.current;
 };
 
+// utility functions
 const getDimensionsFromRow = (row: DatatableRow, dimensions: Dimension[]): Dimension[] => {
   if (dimensions.length === 0) {
     return dimensions;
@@ -121,7 +96,7 @@ const getDimensionsFromRow = (row: DatatableRow, dimensions: Dimension[]): Dimen
 
   const result: Dimension[] = [];
   for (const dim of dimensions) {
-    if (hasValue(row[dim.name])) {
+    if (dim.name !== 'unit' && hasValue(row[dim.name])) {
       result.push(dim);
     }
   }
@@ -136,18 +111,15 @@ const getUnit = (row: DatatableRow, fieldName: string): MetricUnit | undefined =
   return undefined;
 };
 
-// utility functions
-
-const buildMetricField = (spec: FieldSpec, row: DatatableRow): MetricField => {
+const enrichMetricField = (
+  metricField: MetricField,
+  dimensions: Dimension[],
+  row: DatatableRow
+): MetricField => {
   return {
-    name: spec.fieldName,
-    index: spec.index,
-    dimensions: getDimensionsFromRow(row, spec.dimensions),
-    type: spec.fieldType,
-    instrument: spec.typeInfo.timeSeriesMetric,
-    unit: getUnit(row, spec.fieldName),
-    display: undefined,
-    noData: false,
+    ...metricField,
+    dimensions: getDimensionsFromRow(row, dimensions),
+    unit: getUnit(row, metricField.name),
   };
 };
 

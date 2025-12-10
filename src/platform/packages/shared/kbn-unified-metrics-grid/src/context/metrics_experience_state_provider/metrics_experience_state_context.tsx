@@ -12,14 +12,13 @@ import { createContext } from 'react';
 import type { Dimension, DimensionValueFilters } from '../../types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
-import type { FieldSpecId } from '../../common/utils';
 import { parseDimensionFilters } from '../../common/utils/parse_dimension_filters';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   dimensionFilters: DimensionValueFilters | undefined;
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
-  onDimensionValuesChange: (items: { value: string; metricFields: Set<FieldSpecId> }[]) => void;
+  onDimensionValuesChange: (items: { value: string; metricFields: Set<string> }[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
 }
@@ -34,8 +33,8 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     'selectedDimensionValues',
     []
   );
-  const [selectedValueMetricFieldIds, setSelectedValueMetricFieldIds] = useRestorableState(
-    'selectedValueMetricFieldIds',
+  const [selectedValuesMetricFields, setSelectedValuesMetricFields] = useRestorableState(
+    'selectedValuesMetricFields',
     []
   );
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
@@ -44,7 +43,7 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
       setCurrentPage(0);
-      setSelectedValueMetricFieldIds([]);
+      setSelectedValuesMetricFields([]);
       setSelectedDimensions(nextDimensions);
       setSelectedDimensionValues((prevValueFilters) => {
         if (nextDimensions.length === 0) {
@@ -60,16 +59,16 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
       setCurrentPage,
       setSelectedDimensionValues,
       setSelectedDimensions,
-      setSelectedValueMetricFieldIds,
+      setSelectedValuesMetricFields,
     ]
   );
 
   const onDimensionValuesChange = useCallback(
-    (items: { value: string; metricFields: Set<FieldSpecId> }[]) => {
+    (items: { value: string; metricFields: Set<string> }[]) => {
       setSelectedDimensionValues(items.map((item) => item.value));
-      setSelectedValueMetricFieldIds(items.flatMap((item) => Array.from(item.metricFields)));
+      setSelectedValuesMetricFields(items.flatMap((item) => Array.from(item.metricFields)));
     },
-    [setSelectedDimensionValues, setSelectedValueMetricFieldIds]
+    [setSelectedDimensionValues, setSelectedValuesMetricFields]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
@@ -100,7 +99,7 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         searchTerm,
         selectedDimensions,
         selectedDimensionValues,
-        selectedValueMetricFieldIds,
+        selectedValuesMetricFields,
         onPageChange,
         onDimensionsChange,
         onDimensionValuesChange,

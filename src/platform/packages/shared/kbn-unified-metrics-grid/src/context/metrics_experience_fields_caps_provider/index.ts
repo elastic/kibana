@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useContext } from 'react';
-import { MetricFieldsCapsContext } from './metric_fields_caps_provider';
-
-export const useMetricFieldsCapsContext = () => {
-  return useContext(MetricFieldsCapsContext);
-};
+export {
+  MetricsExperienceFieldsCapsProvider,
+  type MetricsExperienceFieldsCapsProviderProps,
+} from './metrics_experience_fields_caps_provider';
+export { useMetricsExperienceFieldsCapsContext } from './use_metrics_experience_fields_caps_context';

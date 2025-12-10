@@ -9,7 +9,6 @@
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import type { Dimension } from './types';
-import type { FieldSpecId } from './common/utils';
 
 export interface MetricsExperienceRestorableState {
   // Pagination page index
@@ -21,13 +20,14 @@ export interface MetricsExperienceRestorableState {
   // Fullscreen mode state
   isFullscreen: boolean;
 
-  // Metric grouping dimensions
+  // Selected dimensions
   selectedDimensions: Dimension[];
 
-  // Metric value filters
+  // Selected dimension values
   selectedDimensionValues: string[];
-  // Metric field keys
-  selectedValueMetricFieldIds: FieldSpecId[];
+
+  // selected metric field keys matching the selected dimension values
+  selectedValuesMetricFields: string[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

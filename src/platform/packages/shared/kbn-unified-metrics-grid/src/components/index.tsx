@@ -16,7 +16,7 @@ import { MetricsExperienceClientProvider } from '../context/metrics_experience_c
 import { withRestorableState } from '../restorable_state';
 import { MetricsExperienceStateProvider } from '../context/metrics_experience_state_provider';
 import type { UnifiedMetricsGridProps } from '../types';
-import { MetricFieldsCapsProvider } from '../context/metric_fields_caps_provider';
+import { MetricsExperienceFieldsCapsProvider } from '../context/metrics_experience_fields_caps_provider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,9 +40,9 @@ const InternalUnifiedMetricsExperienceGrid = (
     <MetricsExperienceClientProvider value={{ client: props.client }}>
       <QueryClientProvider client={queryClient}>
         <PerformanceContextProvider>
-          <MetricFieldsCapsProvider fetchParams={props.fetchParams}>
+          <MetricsExperienceFieldsCapsProvider fetchParams={props.fetchParams}>
             <MetricsExperienceGrid {...props} />
-          </MetricFieldsCapsProvider>
+          </MetricsExperienceFieldsCapsProvider>
         </PerformanceContextProvider>
       </QueryClientProvider>
     </MetricsExperienceClientProvider>
