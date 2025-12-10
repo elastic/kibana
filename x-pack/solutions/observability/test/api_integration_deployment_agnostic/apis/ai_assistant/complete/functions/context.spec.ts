@@ -303,7 +303,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             .map((doc: Instruction & { title: string }) => doc.text)
             .sort();
 
-          suggestionTexts.forEach((text) => {
+          suggestionTexts.forEach((text: any) => {
             expect(sampleDocTexts).to.contain(text);
           });
         });
