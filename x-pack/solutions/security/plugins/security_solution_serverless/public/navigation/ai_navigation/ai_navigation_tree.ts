@@ -7,6 +7,7 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
@@ -19,7 +20,9 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'ease_home',
@@ -161,10 +164,13 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
         {
           title: i18nStrings.stackManagement.ai.title,
           breadcrumbStatus: 'hidden',
-          children: [
-            { link: 'management:genAiSettings' },
-            { link: 'management:securityAiAssistantManagement' },
-          ],
+          children:
+            chatExperience !== AIChatExperience.Agent
+              ? [
+                  { link: 'management:genAiSettings' },
+                  { link: 'management:securityAiAssistantManagement' },
+                ]
+              : [{ link: 'management:genAiSettings' }],
         },
         {
           title: i18nStrings.stackManagementV2.data.title,
