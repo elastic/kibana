@@ -38,7 +38,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   private readonly getYamlDocument: () => YAML.Document | null;
   private readonly getExecutionContext?: () => ExecutionContext | null;
 
-  constructor(config: ProviderConfig & { getExecutionContext?: () => ExecutionContext | null }) {
+  constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
     this.getExecutionContext = config.getExecutionContext;
   }
