@@ -21,7 +21,7 @@ import {
   throwError,
   timer,
 } from 'rxjs';
-import { AbortError, AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '..';
 import { isAbortResponse, isRunningResponse } from '..';
@@ -65,11 +65,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     }
 
     const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
-      switchMap((e) =>
-        (e.target as AbortSignal)?.reason === AbortReason.CANCELED
-          ? EMPTY
-          : throwError(new AbortError())
-      )
+      switchMap((e) => throwError(() => new AbortError((e.target as AbortSignal)?.reason)))
     );
 
     return from(search()).pipe(

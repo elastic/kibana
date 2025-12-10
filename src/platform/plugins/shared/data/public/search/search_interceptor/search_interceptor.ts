@@ -412,7 +412,7 @@ export class SearchInterceptor {
       }),
       catchError((e: Error) => {
         // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
-        if (id && (searchAbortController.isTimeout() || searchAbortController.isCanceled())) {
+        if (searchAbortController.isTimeout() || searchAbortController.isCanceled()) {
           if (searchAbortController.isTimeout()) {
             this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
               [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
@@ -430,7 +430,8 @@ export class SearchInterceptor {
                 ? toPartialResponseAfterTimeout(response)
                 : response
             ),
-            tap(async () => {
+            tap(async (response) => {
+              id = id ?? response.id;
               await sendCancelRequest();
               if (searchAbortController.isTimeout()) {
                 this.handleSearchError(e, request?.params?.body ?? {}, options, true);
