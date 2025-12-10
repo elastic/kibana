@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/config-schema'
   - '@kbn/data-sources-registry-plugin'
+  - '@kbn/connector-specs'
+  - '@kbn/actions-plugin'
 tags:
   - plugin
   - prod

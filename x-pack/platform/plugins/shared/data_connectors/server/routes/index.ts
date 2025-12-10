@@ -61,7 +61,7 @@ export function buildSecretsFromConnectorSpec(
     const headerField =
       typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
         ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'Api-Key'; // default fallback
+        : 'ApiKey'; // default fallback
 
     secrets.authType = 'api_key_header';
     secrets.apiKey = token;
