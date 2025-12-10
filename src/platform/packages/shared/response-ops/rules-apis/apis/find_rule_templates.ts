@@ -26,7 +26,7 @@ export interface FindRuleTemplatesParams {
 // i really want to import this from @kbn/alerts-ui-shared but can't because of circular dependencies.
 // i can't move this type to @kbn/alerting-types because the `Rule` type there uses a legacy format that is not compatible with the templates API.
 // defining the type here isn't a huge deal, but it means we have to manually add any new/additional fields here to use them in the UI.
-interface RuleTemplate {
+export interface RuleTemplate {
   id: string;
   name: string;
   ruleTypeId: string;
