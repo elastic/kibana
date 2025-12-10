@@ -32,8 +32,8 @@
     "@kbn/std",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/licensing-types",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }
