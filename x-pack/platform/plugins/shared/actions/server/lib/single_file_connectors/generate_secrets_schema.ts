@@ -16,8 +16,8 @@ export const generateSecretsSchema = (
   configUtils: ActionsConfigurationUtilities
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
-  const pfxEnabled = settings.ssl.pfx.enabled;
+  const isPfxEnabled = settings.ssl.pfx.enabled;
   return {
-    schema: generateSecretsSchemaFromSpec(authSpec, { pfxEnabled }),
+    schema: generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled }),
   };
 };

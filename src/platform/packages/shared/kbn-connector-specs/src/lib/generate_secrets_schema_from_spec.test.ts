@@ -35,11 +35,11 @@ describe('generateSecretsSchemaFromSpec', () => {
   // Uncomment when PFX support is added back
   // test('correctly generates schemas when pfx is disabled', () => {
   //   const schema1 = generateSecretsSchemaFromSpec(['basic', 'bearer', 'pfx_certificate'], {
-  //     pfxEnabled: false,
+  //     isPfxEnabled: false,
   //   });
   //   expect(z.toJSONSchema(schema1)).toMatchSnapshot();
   //   const schema2 = generateSecretsSchemaFromSpec(['pfx_certificate'], {
-  //     pfxEnabled: false,
+  //     isPfxEnabled: false,
   //   });
   //   expect(z.toJSONSchema(schema2)).toMatchSnapshot();
   // });

@@ -10,13 +10,14 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import { isString } from 'lodash';
-import { getCustomAgents, type SSLSettings } from '@kbn/actions-utils';
+import type { SSLSettings } from '@kbn/actions-utils';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
+import { configureAxiosInstanceWithSsl } from '../lib';
 
 const authSchema = z
   .object({
-    pfx: z.base64().meta({ label: i18n.PFX_AUTH_CERT_LABEL, sensitive: true }),
+    pfx: z.string().meta({ label: i18n.PFX_AUTH_CERT_LABEL, sensitive: true }),
     passphrase: z
       .string()
       .meta({ label: i18n.PFX_AUTH_PASSPHRASE_LABEL, sensitive: true })
@@ -49,30 +50,6 @@ export const PFX: AuthTypeSpec<AuthSchemaType> = {
       ...(isString(secret.ca) ? { ca: Buffer.from(secret.ca, 'base64') } : {}),
     };
 
-    // clear existing interceptor and add a custom one
-    axiosInstance.interceptors.request.clear();
-    axiosInstance.interceptors.request.use((config) => {
-      if (config.url) {
-        const customHostSettings = ctx.getCustomHostSettings(config.url);
-
-        // retrieve custom agents, this time with sslOverrides
-        const { httpAgent, httpsAgent } = getCustomAgents({
-          customHostSettings,
-          logger: ctx.logger,
-          proxySettings: ctx.proxySettings,
-          sslOverrides,
-          sslSettings: ctx.sslSettings,
-          url: config.url,
-        });
-
-        // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
-        config.httpAgent = httpAgent;
-        config.httpsAgent = httpsAgent;
-        config.proxy = false;
-      }
-      return config;
-    });
-
-    return axiosInstance;
+    return configureAxiosInstanceWithSsl(ctx, axiosInstance, sslOverrides);
   },
 };

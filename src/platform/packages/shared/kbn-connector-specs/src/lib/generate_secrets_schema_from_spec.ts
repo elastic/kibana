@@ -12,17 +12,17 @@ import type { ConnectorSpec } from '../connector_spec';
 import { getSchemaForAuthType } from '.';
 
 interface GenerateOptions {
-  pfxEnabled: boolean;
+  isPfxEnabled: boolean;
 }
 
 export const generateSecretsSchemaFromSpec = (
   authSpec: ConnectorSpec['auth'],
-  { pfxEnabled }: GenerateOptions = { pfxEnabled: true }
+  { isPfxEnabled }: GenerateOptions = { isPfxEnabled: true }
 ) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
   for (const authType of authSpec?.types || []) {
     const schema = getSchemaForAuthType(authType);
-    if (schema.id === 'pfx_certificate' && !pfxEnabled) {
+    if (schema.id === 'pfx_certificate' && !isPfxEnabled) {
       continue;
     }
     secretSchemas.push(schema.schema);
