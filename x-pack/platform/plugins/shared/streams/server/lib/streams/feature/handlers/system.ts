@@ -58,7 +58,7 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
         result.features.map(async (system) => {
           const { description, tokensUsed } = await generateStreamDescription({
             stream: options.stream,
-            filter: system.filter,
+            feature: system,
             start: options.start,
             end: options.end,
             esClient: options.esClient,
