@@ -10,9 +10,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiToolTip,
   EuiText,
   EuiFormRow,
+  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,7 +32,7 @@ export const MathExpressionEditor: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const editorRef = useRef<{ updateOptions: (opts: Record<string, unknown>) => void } | null>(null);
 
-  const { field, fieldState } = useController<ProcessorFormState, 'expression'>({
+  const { field } = useController<ProcessorFormState, 'expression'>({
     name: 'expression',
     rules: {
       required: i18n.translate('xpack.streams.math.editorExpressionRequired', {
@@ -88,13 +90,15 @@ export const MathExpressionEditor: React.FC = () => {
     border-top: ${euiTheme.border.thin};
   `;
 
+  // Collect errors for display
+  const errors = hasInlineError ? validationResult.errors : [];
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.streams.math.editorLabel', {
         defaultMessage: 'Expression',
       })}
-      isInvalid={fieldState.invalid}
-      error={fieldState.error?.message}
+      isInvalid={errors.length > 0}
       fullWidth
     >
       <div css={containerStyles} data-test-subj="streamsMathExpressionEditor">
@@ -181,16 +185,58 @@ export const MathExpressionEditor: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow />
-            {hasInlineError && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="danger">
-                  {validationResult.errors[0]}
-                </EuiText>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <ErrorPopover errors={errors} />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>
     </EuiFormRow>
+  );
+};
+
+interface ErrorPopoverProps {
+  errors: string[];
+}
+
+const ErrorPopover: React.FC<ErrorPopoverProps> = ({ errors }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (errors.length === 0) return null;
+
+  return (
+    <EuiPopover
+      ownFocus={false}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      button={
+        <EuiButtonEmpty
+          color="danger"
+          iconType="warning"
+          size="xs"
+          flush="right"
+          onClick={() => setIsOpen(!isOpen)}
+          data-test-subj="streamsMathExpressionEditor-errorButton"
+        >
+          {i18n.translate('xpack.streams.math.errorCount', {
+            defaultMessage: '{count} {count, plural, one {error} other {errors}}',
+            values: { count: errors.length },
+          })}
+        </EuiButtonEmpty>
+      }
+    >
+      <div
+        css={css`
+          max-width: ${euiTheme.base * 20}px;
+        `}
+      >
+        {errors.map((error, index) => (
+          <EuiText key={index} size="s" color="danger">
+            {error}
+          </EuiText>
+        ))}
+      </div>
+    </EuiPopover>
   );
 };
