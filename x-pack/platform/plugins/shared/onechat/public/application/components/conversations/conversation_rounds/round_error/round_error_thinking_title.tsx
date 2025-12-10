@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
-import { roundedBorderRadiusStyles } from '../../conversation.styles';
+import { borderRadiusXlStyles } from '../../conversation.styles';
 
 const labels = {
   reasoningError: i18n.translate('xpack.onechat.round.error.reasoningError', {
@@ -35,7 +35,7 @@ export const RoundErrorThinkingTitle = ({ onClick }: RoundErrorThinkingTitleProp
 
   const containerStyles = css`
     background-color: ${euiTheme.colors.backgroundBaseDanger};
-    ${roundedBorderRadiusStyles}
+    ${borderRadiusXlStyles}
     border: 1px solid ${euiTheme.colors.borderBaseDanger};
     padding: ${euiTheme.size.m};
     width: 100%;

@@ -7,13 +7,13 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   useEuiTheme,
   useEuiShadow,
   EuiHorizontalRule,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
@@ -22,7 +22,8 @@ import { css } from '@emotion/react';
 import { RoundFlyout } from './round_flyout';
 import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
-import { roundedBorderRadiusStyles } from '../../conversation.styles';
+import { borderRadiusXlStyles } from '../../conversation.styles';
+import { RoundIcon } from './round_icon';
 
 const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
   defaultMessage: 'View JSON',
@@ -34,9 +35,6 @@ const closePanelLabel = i18n.translate('xpack.onechat.conversation.closePanel', 
 
 const reasoningLabel = i18n.translate('xpack.onechat.conversation.reasoning', {
   defaultMessage: 'Reasoning',
-});
-const completedReasoningLabel = i18n.translate('xpack.onechat.conversation.completedReasoning', {
-  defaultMessage: 'Completed reasoning',
 });
 
 interface RoundThinkingPanelProps {
@@ -57,8 +55,8 @@ export const RoundThinkingPanel = ({
 
   const containerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
-    ${roundedBorderRadiusStyles}
-    border: 1px solid ${euiTheme.colors.borderStrongPrimary};
+    ${borderRadiusXlStyles}
+    border: ${isLoading ? `1px solid ${euiTheme.colors.borderStrongPrimary}` : 'none'};
     padding: ${euiTheme.size.base};
     ${useEuiShadow('l')};
   `;
@@ -66,8 +64,6 @@ export const RoundThinkingPanel = ({
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
   };
-
-  const displayTitle = isLoading ? reasoningLabel : completedReasoningLabel;
 
   return (
     <>
@@ -78,21 +74,24 @@ export const RoundThinkingPanel = ({
         data-test-subj="agentBuilderThinkingPanel"
       >
         {/* Thinking Panel Title */}
-        <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          direction="row"
+          justifyContent="spaceBetween"
+          responsive={false}
+          onClick={onClose}
+          aria-label={closePanelLabel}
+          data-test-subj="agentBuilderThinkingToggle"
+          css={css`
+            cursor: pointer;
+          `}
+        >
+          <EuiFlexGroup responsive={false} gutterSize="m" direction="row" alignItems="center">
+            <RoundIcon isLoading={isLoading} />
             <EuiTitle size="xs">
-              <p>{displayTitle}</p>
+              <p>{reasoningLabel}</p>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="agentBuilderThinkingToggle"
-              aria-label={closePanelLabel}
-              iconType="cross"
-              color="text"
-              onClick={onClose}
-            />
-          </EuiFlexItem>
+            <EuiIcon type="arrowDown" color="subdued" size="m" />
+          </EuiFlexGroup>
         </EuiFlexGroup>
 
         {/* Thinking Steps */}
