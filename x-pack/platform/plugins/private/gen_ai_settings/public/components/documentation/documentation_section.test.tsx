@@ -79,7 +79,7 @@ describe('DocumentationSection', () => {
       renderComponent(mockProductDocBase);
 
       await waitFor(() => {
-        expect(screen.getByText('Tech Preview')).toBeInTheDocument();
+        expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();
       });
     });
   });

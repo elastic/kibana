@@ -72,7 +72,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       if (itemId === ELASTIC_DOCS_ID) {
         installDoc(defaultInferenceEndpoints.ELSER);
       }
-      // Security labs, Lens docs, ES|QL docs are stubbed - no action
+      // Security labs is stubbed - no action
     },
     [installDoc]
   );
@@ -82,7 +82,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       if (itemId === ELASTIC_DOCS_ID) {
         uninstallDoc(defaultInferenceEndpoints.ELSER);
       }
-      // Security labs, Lens docs, ES|QL docs are stubbed - no action
+      // Security labs is stubbed - no action
     },
     [uninstallDoc]
   );
