@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiPanel, EuiSpacer, EuiTitle, EuiSelect, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiSelect,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -23,18 +31,38 @@ const getValidationErrorMessage = (
       'xpack.createClassicStreamFlyout.nameAndConfirmStep.emptyValidationError',
       {
         defaultMessage:
-          'Please supply a valid text string for all wildcards within the selected index pattern.',
+          'You must specify a valid text string for all wildcards within the selected index pattern.',
       }
     );
   }
 
   if (validationError === 'invalidFormat') {
-    return i18n.translate(
-      'xpack.createClassicStreamFlyout.nameAndConfirmStep.invalidFormatValidationError',
-      {
-        defaultMessage:
-          'Stream name cannot include \\, /, *, ?, ", <, >, |, comma, #, colon, or spaces. It cannot start with -, _, +, or .ds-. It also cannot be . or ..',
-      }
+    return (
+      <span style={{ lineHeight: 2 }}>
+        <FormattedMessage
+          id="xpack.createClassicStreamFlyout.nameAndConfirmStep.invalidFormatValidationError"
+          defaultMessage="Stream name cannot include {backslash}, {slash}, {asterisk}, {question}, {quote}, {lt}, {gt}, {pipe}, {comma}, {hash}, {colon}, or spaces. It cannot start with {dash}, {underscore}, {plus}, or {dsPrefix}. It also cannot be {dot} or {dotdot}."
+          values={{
+            backslash: <EuiCode>{'\\'}</EuiCode>,
+            slash: <EuiCode>{'/'}</EuiCode>,
+            asterisk: <EuiCode>{'*'}</EuiCode>,
+            question: <EuiCode>{'?'}</EuiCode>,
+            quote: <EuiCode>{'"'}</EuiCode>,
+            lt: <EuiCode>{'<'}</EuiCode>,
+            gt: <EuiCode>{'>'}</EuiCode>,
+            pipe: <EuiCode>{'|'}</EuiCode>,
+            comma: <EuiCode>{','}</EuiCode>,
+            hash: <EuiCode>{'#'}</EuiCode>,
+            colon: <EuiCode>{':'}</EuiCode>,
+            dash: <EuiCode>{'-'}</EuiCode>,
+            underscore: <EuiCode>{'_'}</EuiCode>,
+            plus: <EuiCode>{'+'}</EuiCode>,
+            dsPrefix: <EuiCode>{'.ds-'}</EuiCode>,
+            dot: <EuiCode>{'.'}</EuiCode>,
+            dotdot: <EuiCode>{'..'}</EuiCode>,
+          }}
+        />
+      </span>
     );
   }
 
@@ -42,7 +70,7 @@ const getValidationErrorMessage = (
     return i18n.translate(
       'xpack.createClassicStreamFlyout.nameAndConfirmStep.duplicateValidationError',
       {
-        defaultMessage: 'This stream name already exists. Please try a different name.',
+        defaultMessage: 'This stream name already exists. Try a different name.',
       }
     );
   }
@@ -52,7 +80,7 @@ const getValidationErrorMessage = (
       <FormattedMessage
         key="higherPriorityError"
         id="xpack.createClassicStreamFlyout.nameAndConfirmStep.higherPriorityValidationError"
-        defaultMessage="This stream name matches a higher priority index template with index pattern {pattern}. Please alter your stream name so that it no longer conflicts, or consider changing your selected index template."
+        defaultMessage="This stream name matches a higher priority index template with the index pattern: {pattern}. Change the name so that it no longer conflicts, or change the selected index template."
         values={{
           pattern: <strong>{conflictingIndexPattern}</strong>,
         }}

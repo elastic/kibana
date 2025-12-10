@@ -60,7 +60,7 @@ export const getPhaseDescriptions = (
     descriptions.push({
       description: i18n.translate('xpack.createClassicStreamFlyout.phases.frozen', {
         defaultMessage:
-          'Frozen {previousStartAge, select, undefined {indefinitely} other {till {previousStartAge}}}',
+          'Frozen {previousStartAge, select, undefined {indefinitely} other {until {previousStartAge}}}',
         values: { previousStartAge },
       }),
       color: phaseColors.frozen,
@@ -72,7 +72,7 @@ export const getPhaseDescriptions = (
     descriptions.push({
       description: i18n.translate('xpack.createClassicStreamFlyout.phases.cold', {
         defaultMessage:
-          'Cold {previousStartAge, select, undefined {indefinitely} other {till {previousStartAge}}}',
+          'Cold {previousStartAge, select, undefined {indefinitely} other {until {previousStartAge}}}',
         values: { previousStartAge },
       }),
       color: phaseColors.cold,
@@ -84,7 +84,7 @@ export const getPhaseDescriptions = (
     descriptions.push({
       description: i18n.translate('xpack.createClassicStreamFlyout.phases.warm', {
         defaultMessage:
-          'Warm {previousStartAge, select, undefined {indefinitely} other {till {previousStartAge}}}',
+          'Warm {previousStartAge, select, undefined {indefinitely} other {until {previousStartAge}}}',
         values: { previousStartAge },
       }),
       color: phaseColors.warm,
@@ -96,7 +96,7 @@ export const getPhaseDescriptions = (
     descriptions.push({
       description: i18n.translate('xpack.createClassicStreamFlyout.phases.hot', {
         defaultMessage:
-          'Hot {previousStartAge, select, undefined {indefinitely} other {till {previousStartAge}}}',
+          'Hot {previousStartAge, select, undefined {indefinitely} other {until {previousStartAge}}}',
         values: { previousStartAge },
       }),
       color: phaseColors.hot,

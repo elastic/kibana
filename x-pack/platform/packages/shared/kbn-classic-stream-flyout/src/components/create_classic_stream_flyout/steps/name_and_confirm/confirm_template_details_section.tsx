@@ -61,7 +61,7 @@ const PhasesInfo = ({
             'xpack.createClassicStreamFlyout.nameAndConfirmStep.ilmPolicyErrorDescription',
             {
               defaultMessage:
-                'There was an error while loading the ILM policy phases. Please try again later.',
+                'There was an error while loading the ILM policy phases. Try again later.',
             }
           )}
         </EuiTextColor>

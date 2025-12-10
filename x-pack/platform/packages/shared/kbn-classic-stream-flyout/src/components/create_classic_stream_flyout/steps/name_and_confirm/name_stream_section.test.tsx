@@ -141,19 +141,20 @@ describe('NameStreamSection', () => {
 
       expect(
         getByText(
-          'Please supply a valid text string for all wildcards within the selected index pattern.'
+          'You must specify a valid text string for all wildcards within the selected index pattern.'
         )
       ).toBeInTheDocument();
     });
 
-    it('displays invalidFormat validation error message', () => {
+    it('displays invalidFormat validation error message with formatted characters', () => {
       const { getByText } = renderComponent({
         validationError: 'invalidFormat',
       });
 
-      expect(
-        getByText(/Stream name cannot include \\, \/, \*, \?, ", <, >, \|, comma, #, colon/i)
-      ).toBeInTheDocument();
+      // Check for the main text (the special characters are in EuiCode elements)
+      expect(getByText(/Stream name cannot include/i)).toBeInTheDocument();
+      expect(getByText(/or spaces/i)).toBeInTheDocument();
+      expect(getByText(/It cannot start with/i)).toBeInTheDocument();
     });
 
     it('displays duplicate validation error message', () => {
@@ -162,7 +163,7 @@ describe('NameStreamSection', () => {
       });
 
       expect(
-        getByText('This stream name already exists. Please try a different name.')
+        getByText('This stream name already exists. Try a different name.')
       ).toBeInTheDocument();
     });
 
