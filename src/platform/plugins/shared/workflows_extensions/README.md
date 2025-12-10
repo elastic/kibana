@@ -133,6 +133,24 @@ export const myStepDefinition: ServerStepDefinition = {
 };
 ```
 
+If you need to inject dependencies (like core services or plugin APIs) into your step handler, convert the step definition into a factory function:
+
+```typescript
+export const getMyStepWithDepsDefinition = (coreSetup: CoreSetup) =>
+  createServerStepDefinition({
+    ...myStepWithDepsDefinition,
+    handler: async (context) => {
+      const [coreStart, depsStart] = await coreSetup.getStartServices();
+      const { http } = coreStart;
+      const { inference, uiSettings } = depsStart;
+
+      return {
+        output: 'step with deps output'
+      }
+    }
+  })
+```
+
 ### Step 3: Implement Public-Side Definition
 
 Create the public-side definition (e.g., `public/step_types/my_step.ts`):
@@ -183,15 +201,20 @@ Register the step definitions in both server and public plugin setup:
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { myStepDefinition } from './workflows/step_types/my_step';
+import { myStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
+
 
 export interface MyPluginServerSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export class MyPlugin implements Plugin {
-  public setup(_core: CoreSetup, plugins: MyPluginServerSetupDeps) {
+  public setup(core: CoreSetup, plugins: MyPluginServerSetupDeps) {
     // Register server-side step definitions
     plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
+
+    // Register server-side step definition using its factory function
+    plugins.workflowsExtensions.registerStepDefinition(myStepWithDepsDefinition(core));
   }
 }
 ```
