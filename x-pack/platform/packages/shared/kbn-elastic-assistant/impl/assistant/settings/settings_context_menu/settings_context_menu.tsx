@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
@@ -22,6 +23,11 @@ import { AnonymizationSettingsManagement } from '../../../data_anonymization/set
 import { useAssistantContext } from '../../../..';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
+import { AgentBuilderTourStep } from '../../../tour/agent_builder';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../tour/const';
+import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import * as i18n from './translations';
 
 interface Params {
@@ -30,8 +36,9 @@ interface Params {
 
 export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false }: Params) => {
-    const { assistantAvailability, navigateToApp, knowledgeBase, showAssistantOverlay } =
+    const { assistantAvailability, navigateToApp, knowledgeBase, showAssistantOverlay, settings, toasts } =
       useAssistantContext();
+    const { euiTheme } = useEuiTheme();
 
     const [isPopoverOpen, setPopover] = useState(false);
 
@@ -43,6 +50,8 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
     const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
 
+    const [isAIAgentModalVisible, setIsAIAgentModalVisible] = useState(false);
+
     const onButtonClick = useCallback(() => {
       setPopover(!isPopoverOpen);
     }, [isPopoverOpen]);
@@ -50,6 +59,31 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const closePopover = useCallback(() => {
       setPopover(false);
     }, []);
+
+    const handleOpenAIAgentModal = useCallback(() => {
+      setIsAIAgentModalVisible(true);
+      closePopover();
+    }, [closePopover]);
+    const handleCancelAIAgent = useCallback(() => {
+      setIsAIAgentModalVisible(false);
+    }, []);
+    const handleConfirmAIAgent = useCallback(async () => {
+      try {
+        await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
+        setIsAIAgentModalVisible(false);
+      } catch (error) {
+        if (toasts) {
+          toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+            title: i18n.translate(
+              'xpack.elasticAssistant.assistant.settings.settingsContextMenu.aiAgentSwitchError',
+              {
+                defaultMessage: 'Failed to switch to AI Agent',
+              }
+            ),
+          });
+        }
+      }
+    }, [settings.client, toasts]);
 
     const handleNavigateToSettings = useCallback(() => {
       if (assistantAvailability.hasSearchAILakeConfigurations) {
@@ -133,45 +167,69 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          aria-label={'try-ai-agent'}
+          key={'try-ai-agent'}
+          onClick={handleOpenAIAgentModal}
+          icon={'sparkles'}
+          data-test-subj={'try-ai-agent'}
+          css={css`
+            color: ${euiTheme.colors.accent};
+            font-weight: 500;
+          `}
+        >
+          {i18n.TRY_AI_AGENT}
+        </EuiContextMenuItem>,
       ],
       [
         handleNavigateToAnonymization,
         handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
         handleShowAlertsModal,
+        handleOpenAIAgentModal,
         knowledgeBase.latestAlerts,
+        euiTheme.colors.accent,
       ]
     );
 
     return (
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                aria-label={i18n.AI_ASSISTANT_MENU}
-                isDisabled={isDisabled}
-                iconType="controls"
-                onClick={onButtonClick}
-                data-test-subj="chat-context-menu"
-              />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="leftUp"
+          <AgentBuilderTourStep
+            isDisabled={isDisabled}
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
+            onContinue={handleOpenAIAgentModal}
           >
-            <EuiContextMenuPanel
-              items={items}
-              css={css`
-                width: 280px;
-              `}
-            />
-          </EuiPopover>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  aria-label={i18n.AI_ASSISTANT_MENU}
+                  isDisabled={isDisabled}
+                  iconType="controls"
+                  onClick={onButtonClick}
+                  data-test-subj="chat-context-menu"
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="leftUp"
+            >
+              <EuiContextMenuPanel
+                items={items}
+                css={css`
+                  width: 280px;
+                `}
+              />
+            </EuiPopover>
+          </AgentBuilderTourStep>
         </EuiToolTip>
         {isAlertsSettingsModalVisible && <AlertsSettingsModal onClose={closeAlertSettingsModal} />}
         {isAnonymizationModalVisible && (
           <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />
+        )}
+        {isAIAgentModalVisible && (
+          <AIAgentConfirmationModal onConfirm={handleConfirmAIAgent} onCancel={handleCancelAIAgent} />
         )}
       </>
     );

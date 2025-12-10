@@ -98,3 +98,10 @@ export const CLEAR_CHAT_CONFIRMATION = i18n.translate(
       'Are you sure you want to clear the current chat? All conversation data will be lost.',
   }
 );
+
+export const TRY_AI_AGENT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsContextMenu.tryAiAgent',
+  {
+    defaultMessage: 'Try AI Agent',
+  }
+);
