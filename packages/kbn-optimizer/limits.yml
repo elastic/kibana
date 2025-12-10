@@ -24,7 +24,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 566392
+  core: 565105
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -74,7 +74,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 187942
-  genAiSettings: 5003
+  genAiSettings: 5663
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -129,7 +129,7 @@ pageLoadAssetSize:
   painlessLab: 6299
   presentationPanel: 11418
   presentationUtil: 9000
-  productDocBase: 3083
+  productDocBase: 5025
   productIntercept: 9860
   profiling: 20716
   reindexService: 3469
