@@ -39,7 +39,6 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import { getMcpConnectorType } from './mcp';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import { getMcpConnectorType } from './mcp';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 

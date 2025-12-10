@@ -68,7 +68,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     const clientDetails: ClientDetails = {
       name: `kibana-mcp-connector-${this.connector.id}`,
       version: MCP_CLIENT_VERSION,
-      url: this.config.url,
+      url: this.config.serverUrl,
     };
 
     // Initialize the single MCP Client instance for this connector

@@ -28,7 +28,7 @@ export const MCPConnectorConfigSchema = z.object({
   /**
    * The URL of the MCP server endpoint.
    */
-  url: z.string(),
+  serverUrl: z.string(),
   /**
    * Whether authentication is required. Defaults to true.
    */

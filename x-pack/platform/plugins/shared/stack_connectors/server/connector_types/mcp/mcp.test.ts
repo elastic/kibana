@@ -79,7 +79,7 @@ describe('McpConnector', () => {
   let connectorUsageCollector: ConnectorUsageCollector;
 
   const defaultConfig = {
-    url: 'https://example.com/mcp',
+    serverUrl: 'https://example.com/mcp',
     hasAuth: false,
   };
 

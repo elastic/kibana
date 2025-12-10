@@ -21,4 +21,10 @@ export {
 } from './schemas/latest';
 
 // Types
-export type { MCPConnectorConfig, MCPConnectorSecrets } from './types/latest';
+export type {
+  MCPConnectorConfig,
+  MCPConnectorSecrets,
+  Config,
+  Secrets,
+  CallToolParams,
+} from './types/latest';

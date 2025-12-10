@@ -63,7 +63,7 @@ export const getMcpConnectorType = (): SubActionConnectorType<
 
 const configValidator = (config: MCPConnectorConfig, validatorServices: ValidatorServices) => {
   // Validate that the URL is allowed
-  urlAllowListValidator('url')(config, validatorServices);
+  urlAllowListValidator('serverUrl')(config, validatorServices);
 };
 
 const secretsValidator = (_secrets: MCPConnectorSecrets) => {

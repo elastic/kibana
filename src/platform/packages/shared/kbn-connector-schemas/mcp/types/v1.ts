@@ -8,7 +8,19 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { MCPConnectorConfigSchema, MCPConnectorSecretsSchema } from '../schemas/v1';
+import type {
+  MCPConnectorConfigSchema,
+  MCPConnectorSecretsSchema,
+  CallToolRequestSchema,
+} from '../schemas/v1';
 
+// Connector config and secrets types
 export type MCPConnectorConfig = z.input<typeof MCPConnectorConfigSchema>;
 export type MCPConnectorSecrets = z.infer<typeof MCPConnectorSecretsSchema>;
+
+// Type aliases for consistency with other connectors
+export type Config = MCPConnectorConfig;
+export type Secrets = MCPConnectorSecrets;
+
+// Sub-action parameter types
+export type CallToolParams = z.infer<typeof CallToolRequestSchema>;

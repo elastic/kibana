@@ -11,7 +11,7 @@ import { buildHeadersFromSecrets } from './auth_helpers';
 
 describe('buildHeadersFromSecrets', () => {
   const baseConfig: MCPConnectorConfig = {
-    url: 'https://example.com',
+    serverUrl: 'https://example.com',
     hasAuth: true,
   };
 
