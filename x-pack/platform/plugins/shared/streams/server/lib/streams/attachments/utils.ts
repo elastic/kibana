@@ -89,6 +89,16 @@ export const processRuleResults = (rules: SanitizedRule[]): AttachmentData[] => 
 };
 
 /**
+ * Map of saved object types for each attachment type when querying across all spaces.
+ * TypeScript will enforce that all attachment types have corresponding saved object types.
+ */
+export const attachmentTypeToSavedObjectTypeMap: Record<AttachmentType, string> = {
+  dashboard: 'dashboard',
+  slo: 'slo',
+  rule: 'alert',
+};
+
+/**
  * Fetches saved objects by IDs for dashboards and SLOs only.
  * Rules use the rule client instead.
  */
@@ -103,12 +113,12 @@ export const getSoByIds = async ({
 }): Promise<AttachmentData[]> => {
   if (attachmentType === 'dashboard') {
     const result = await soClient.bulkGet<DashboardSOAttributes>(
-      ids.map((id) => ({ id, type: attachmentType }))
+      ids.map((id) => ({ id, type: attachmentTypeToSavedObjectTypeMap[attachmentType] }))
     );
     return processDashboardResults(result.saved_objects);
   } else if (attachmentType === 'slo') {
     const result = await soClient.bulkGet<SloSOAttributes>(
-      ids.map((id) => ({ id, type: attachmentType }))
+      ids.map((id) => ({ id, type: attachmentTypeToSavedObjectTypeMap[attachmentType] }))
     );
     return processSloResults(result.saved_objects);
   } else {

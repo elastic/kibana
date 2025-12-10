@@ -149,9 +149,11 @@ function getClusterStyleDescriptor(
                 ),
               }
             : undefined;
+
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.DYNAMIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error — style types are complex unions/intersections, TS expects fields not present
+          // at runtime when cloning options
           options: {
             ...options,
             field,
@@ -161,7 +163,8 @@ function getClusterStyleDescriptor(
         // copy static styles to cluster style
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.STATIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error — style types are complex unions/intersections, TS expects fields not present
+          // at runtime when cloning options
           options: { ...styleProperty.getOptions() },
         };
       }
