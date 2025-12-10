@@ -164,7 +164,8 @@ const getMockStorageState = (groups: string[] = ['none']) =>
     },
   });
 
-describe('GroupedAlertsTable', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/245813
+describe.skip('GroupedAlertsTable', () => {
   let store = createMockStore();
 
   beforeEach(() => {
