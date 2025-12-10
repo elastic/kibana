@@ -16,9 +16,12 @@ import { getDashboardBackupService } from '../../../services/dashboard_backup_se
 import { dashboardClient } from '../../../dashboard_client';
 import { dashboardListingErrorStrings } from '../../_dashboard_listing_strings';
 
-export async function deleteDashboardListingItems(
-  itemsToDelete: Array<{ id: string; type?: string }>
-): Promise<void> {
+interface DeleteDashboardListingItemsParams {
+  itemsToDelete: Array<{ id: string; type?: string }>;
+}
+export async function deleteDashboardListingItems({
+  itemsToDelete,
+}: DeleteDashboardListingItemsParams): Promise<void> {
   const dashboardBackupService = getDashboardBackupService();
 
   try {

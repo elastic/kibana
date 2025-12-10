@@ -11,6 +11,7 @@ import React, { useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { logicalSizeCSS, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -35,7 +36,7 @@ export const DashboardListing = ({
     page: 'list',
   });
 
-  const { activeTab } = useParams<{ activeTab?: string }>();
+  const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
   const { euiTheme } = useEuiTheme();
 
   const tabs = useMemo(
@@ -55,6 +56,13 @@ export const DashboardListing = ({
       listingViewRegistry,
     ]
   );
+
+  const activeTabId = useMemo(() => {
+    const validTabIds = tabs.map((tab) => tab.id);
+    return activeTabParam && validTabIds.includes(activeTabParam)
+      ? activeTabParam
+      : TAB_IDS.DASHBOARDS;
+  }, [activeTabParam, tabs]);
 
   const changeActiveTab = useCallback((tabId: string) => {
     coreServices.application.navigateToUrl(`#/list/${tabId}`);
@@ -80,9 +88,11 @@ export const DashboardListing = ({
         >
           <TabbedTableListView
             headingId="dashboardListingHeading"
-            title="Dashboards"
+            title={i18n.translate('dashboardListing.title', {
+              defaultMessage: 'Dashboards',
+            })}
             tabs={tabs}
-            activeTabId={activeTab || TAB_IDS.DASHBOARDS}
+            activeTabId={activeTabId}
             changeActiveTab={changeActiveTab}
           />
         </div>

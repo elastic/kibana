@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type {
   TableListTab,
   TableListTabParentProps,
@@ -139,7 +140,9 @@ export const getDashboardListingTabs = ({
   };
 
   const dashboardsTab: TableListTab<DashboardListingUserContent> = {
-    title: 'Dashboards',
+    title: i18n.translate('dashboardListing.tabs.dashboards.title', {
+      defaultMessage: 'Dashboards',
+    }),
     id: TAB_IDS.DASHBOARDS,
     getTableList: (parentProps) => (
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
@@ -147,7 +150,9 @@ export const getDashboardListingTabs = ({
   };
 
   const visualizationsTab: TableListTab<DashboardListingUserContent> = {
-    title: 'Visualizations',
+    title: i18n.translate('dashboardListing.tabs.visualizations.title', {
+      defaultMessage: 'Visualizations',
+    }),
     id: TAB_IDS.VISUALIZATIONS,
     getTableList: (parentProps) => (
       <VisualizationsTabContent {...commonProps} parentProps={parentProps} />
@@ -155,7 +160,9 @@ export const getDashboardListingTabs = ({
   };
 
   // Additional tabs from registry (e.g., annotation groups from Event Annotation Listing plugin)
-  const registryTabs = Array.from(listingViewRegistry as Set<TableListTab>);
+  const registryTabs = listingViewRegistry
+    ? Array.from(listingViewRegistry as Set<TableListTab>)
+    : [];
 
   return [dashboardsTab, visualizationsTab, ...registryTabs];
 };

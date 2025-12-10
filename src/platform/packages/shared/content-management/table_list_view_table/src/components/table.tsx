@@ -17,11 +17,11 @@ import type {
   Direction,
   Query,
   Search,
+  EuiTableSelectionType,
 } from '@elastic/eui';
 import {
   EuiButton,
   EuiInMemoryTable,
-  type EuiTableSelectionType,
   useEuiTheme,
   EuiCode,
   EuiText,
@@ -295,26 +295,22 @@ export function Table<T extends UserContentCommonSchema>({
   const hasQueryOrFilters = Boolean(
     searchQuery.text || tableFilter.favorites || tableFilter.createdBy.length > 0
   );
-  const emptyPromptTitle = useMemo(
-    () => (
-      <FormattedMessage
-        id="contentManagement.tableList.listing.noItemsTitle"
-        defaultMessage="No {entityNamePlural} to display"
-        values={{ entityNamePlural }}
-      />
-    ),
-    [entityNamePlural]
+
+  const emptyPromptTitle = (
+    <FormattedMessage
+      id="contentManagement.tableList.listing.noItemsTitle"
+      defaultMessage="No {entityNamePlural} to display"
+      values={{ entityNamePlural }}
+    />
   );
 
-  const emptyPromptBody = useMemo(() => {
-    return (
-      <FormattedMessage
-        id="contentManagement.tableList.listing.noMatchedItemsMessage"
-        defaultMessage="No {entityNamePlural} matched your search."
-        values={{ entityNamePlural }}
-      />
-    );
-  }, [entityNamePlural]);
+  const emptyPromptBody = (
+    <FormattedMessage
+      id="contentManagement.tableList.listing.noMatchedItemsMessage"
+      defaultMessage="No {entityNamePlural} matched your search."
+      values={{ entityNamePlural }}
+    />
+  );
 
   const emptyPromptActions = useMemo(() => {
     return renderCreateButton({ fill: !hasQueryOrFilters });
@@ -395,7 +391,7 @@ export function Table<T extends UserContentCommonSchema>({
           noItemsMessage={
             isFetchingItems ? (
               <></>
-            ) : emptyPrompt && items.length === 0 && !hasQueryOrFilters ? (
+            ) : emptyPrompt && (items?.length ?? 0) === 0 && !hasQueryOrFilters ? (
               emptyPrompt
             ) : tableFilter.favorites ? (
               <FavoritesEmptyState

@@ -9,7 +9,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import useUnmount from 'react-use/lib/useUnmount';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
@@ -143,8 +142,6 @@ export const useDashboardListingTable = ({
       closeNewVisModal.current();
     };
   }, [pathname]);
-
-  useUnmount(() => closeNewVisModal.current());
 
   const updateItemMeta = useCallback(
     async ({ id, ...updatedState }: Parameters<Required<OpenContentEditorParams>['onSave']>[0]) => {
