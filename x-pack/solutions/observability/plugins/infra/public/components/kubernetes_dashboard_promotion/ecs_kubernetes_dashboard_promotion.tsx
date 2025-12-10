@@ -7,38 +7,71 @@
 
 import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiTitle,
   EuiText,
   EuiButtonEmpty,
-  EuiImage,
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { TryItButton } from '../try_it_button';
-import { useInstalledIntegration } from '../../hooks/use_installed_integration';
+import { KubernetesAssetImage } from './kubernetes_asset_image';
 
-export const KubernetesDashboardCard = ({ onClose }: { onClose: () => void }) => {
-  const { isInstalled } = useInstalledIntegration('kubernetes');
+const ECS_DOCS_URL = 'https://www.elastic.co/docs/reference/integrations/kubernetes';
+
+const EcsKubernetesIntegrationLink = () => (
+  <EuiLink
+    data-test-subj="infraEcsKubernetesDashboardCardIntegrationDocsLink"
+    href={ECS_DOCS_URL}
+    target="_blank"
+  >
+    {i18n.translate('xpack.infra.inventoryUI.ecsKubernetesDashboardCard.integrationDocsLinkText', {
+      defaultMessage: 'Kubernetes Integration',
+    })}
+  </EuiLink>
+);
+export const KubernetesDashboardCard = ({
+  onClose,
+  hasIntegrationInstalled,
+}: {
+  onClose: () => void;
+  hasIntegrationInstalled: boolean;
+}) => {
+  const { services } = useKibanaContextForPlugin();
+  const { getUrlForApp } = services.application;
+
+  const ecsKubernetesIntegrationUrl = getUrlForApp('integrations', {
+    path: '/detail/kubernetes',
+  });
+
+  const ecsKubernetesDashboardUrl = getUrlForApp('dashboards', {
+    path: '#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+  });
 
   return (
-    <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      color="subdued"
+      grow
+      borderRadius="m"
+      css={{ display: 'flex' }}
+    >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiImage
-            src="https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=900&h=900&fit=crop&q=60"
-            alt="Kubernetes Dashboards"
-            size="s"
-          />
+          <KubernetesAssetImage type="ecs" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h4>
-                  {isInstalled
+                  {hasIntegrationInstalled
                     ? i18n.translate(
                         'xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationInstalledTitle',
                         {
@@ -54,41 +87,40 @@ export const KubernetesDashboardCard = ({ onClose }: { onClose: () => void }) =>
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {isInstalled
-                  ? i18n.translate(
-                      'xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationInstalledDescription',
-                      { defaultMessage: 'View your Kubernetes Dashboards' }
-                    )
-                  : i18n.translate(
-                      'xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationNotInstalledDescription',
-                      {
-                        defaultMessage:
-                          'Install the Kubernetes integration to view your Kubernetes Dashboards.',
-                      }
-                    )}
+                {hasIntegrationInstalled ? (
+                  <FormattedMessage
+                    id="xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationInstalledDescription"
+                    defaultMessage="View dashboards available for the Kubernetes clusters observed using the {kubernetesIntegration} which match your query."
+                    values={{ kubernetesIntegration: <EcsKubernetesIntegrationLink /> }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.infra.inventoryUI.kubernetesPodsDashboard.integrationNotInstalledDescription"
+                    defaultMessage="We have dashboards for Kubernetes clusters observed using the {kubernetesIntegration} which match your query."
+                    values={{ kubernetesIntegration: <EcsKubernetesIntegrationLink /> }}
+                  />
+                )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
+              <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="s"
                     data-test-subj={
-                      isInstalled
+                      hasIntegrationInstalled
                         ? 'infraKubernetesDashboardCardLink'
                         : 'infraKubernetesDashboardCardInstallLink'
                     }
                     href={
-                      isInstalled
-                        ? 'https://www.elastic.co/guide/en/observability/current/kubernetes-dashboards.html'
-                        : 'https://www.elastic.co/guide/en/observability/current/kubernetes-dashboards.html'
+                      hasIntegrationInstalled
+                        ? ecsKubernetesDashboardUrl
+                        : ecsKubernetesIntegrationUrl
                     }
-                    target="_blank"
-                    rel="noopener"
                   >
-                    {isInstalled
+                    {hasIntegrationInstalled
                       ? i18n.translate(
                           'xpack.infra.inventoryUI.kubernetesPodsDashboard.viewDashboardLink',
                           {
@@ -138,7 +170,7 @@ export const KubernetesButton = () => {
     <TryItButton
       color={clickedRef.current ? 'primary' : 'accent'}
       label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
-        defaultMessage: 'Kubernetes dashboards',
+        defaultMessage: 'Kubernetes Integration Dashboards',
       })}
       data-test-subj="inventory-kubernetesDashboard-link"
       link={{

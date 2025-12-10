@@ -7,7 +7,14 @@
 
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiIconTip,
+  EuiButtonEmpty,
+  EuiPanel,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -65,6 +72,11 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
     return nodeType === 'pod' && (showEcsK8sButton || showOtelK8sButton) ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
         <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
+          <EuiText size="s">
+            {i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTextLabel', {
+              defaultMessage: 'Related Dashboards',
+            })}
+          </EuiText>
           {showEcsK8sButton && (
             <EuiFlexItem grow={false}>
               <KubernetesButton />
@@ -75,6 +87,18 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
               <OtelKubernetesButton />
             </EuiFlexItem>
           )}
+          <EuiIconTip
+            content={i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTooltip', {
+              defaultMessage: 'We found these dashboards related to your query',
+            })}
+            type="question"
+            aria-label={i18n.translate(
+              'xpack.infra.bottomDrawer.relatedDashboardsTooltipAriaLabel',
+              {
+                defaultMessage: 'Related Dashboards',
+              }
+            )}
+          />
         </EuiFlexGroup>
       </BottomPanel>
     ) : null;
@@ -96,6 +120,23 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
           </EuiFlexItem>
           {nodeType === 'pod' && (showEcsK8sButton || showOtelK8sButton) && (
             <>
+              <EuiText size="s">
+                {i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTextLabel', {
+                  defaultMessage: 'Related Dashboards',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTooltip', {
+                    defaultMessage: 'We found these dashboards related to your query',
+                  })}
+                  type="question"
+                  aria-label={i18n.translate(
+                    'xpack.infra.bottomDrawer.relatedDashboardsTooltipAriaLabel',
+                    {
+                      defaultMessage: 'Related Dashboards',
+                    }
+                  )}
+                />
+              </EuiText>
               {showEcsK8sButton && (
                 <EuiFlexItem grow={false}>
                   <KubernetesButton />

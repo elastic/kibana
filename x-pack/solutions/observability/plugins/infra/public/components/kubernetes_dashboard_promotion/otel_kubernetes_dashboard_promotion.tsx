@@ -7,6 +7,7 @@
 
 import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -14,35 +15,68 @@ import {
   EuiTitle,
   EuiText,
   EuiButtonEmpty,
-  EuiImage,
+  EuiLink,
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { TryItButton } from '../try_it_button';
-import { useInstalledIntegration } from '../../hooks/use_installed_integration';
+import { KubernetesAssetImage } from './kubernetes_asset_image';
 
-export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }) => {
-  const { isInstalled } = useInstalledIntegration('kubernetes_otel');
+const OTEL_DOCS_URL = 'https://www.elastic.co/docs/reference/integrations/kubernetes_otel';
+
+const OpenTelemetryLink = () => (
+  <EuiLink
+    data-test-subj="infraOtelKubernetesDashboardCardOpenTelemetryLink"
+    href={OTEL_DOCS_URL}
+    target="_blank"
+  >
+    {i18n.translate('xpack.infra.inventoryUI.otelKubernetesPodsDashboard.openTelemetryLinkText', {
+      defaultMessage: 'OpenTelemetry',
+    })}
+  </EuiLink>
+);
+
+export const OtelKubernetesDashboardCard = ({
+  onClose,
+  hasIntegrationInstalled,
+}: {
+  onClose: () => void;
+  hasIntegrationInstalled: boolean;
+}) => {
+  const { services } = useKibanaContextForPlugin();
+  const { getUrlForApp } = services.application;
+
+  const otelKubernetesIntegrationUrl = getUrlForApp('integrations', {
+    path: '/detail/kubernetes_otel',
+  });
+
+  const otelKubernetesDashboardUrl = getUrlForApp('dashboards', {
+    path: '#/view/kubernetes_otel-cluster-overview',
+  });
 
   const handleClose = () => {
     onClose();
   };
 
   return (
-    <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      color="subdued"
+      grow
+      borderRadius="m"
+      css={{ display: 'flex' }}
+    >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiImage
-            src="https://images.unsplash.com/photo-1650253618249-fb0d32d3865c?w=900&h=900&fit=crop&q=60"
-            alt="Kubernetes OpenTelemetry Dashboards"
-            size="s"
-          />
+          <KubernetesAssetImage type="otel" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h4>
-                  {isInstalled
+                  {hasIntegrationInstalled
                     ? i18n.translate(
                         'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationInstalledTitle',
                         {
@@ -58,41 +92,44 @@ export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {isInstalled
-                  ? i18n.translate(
-                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationInstalledDescription',
-                      { defaultMessage: 'View your Kubernetes OpenTelemetry Dashboards' }
-                    )
-                  : i18n.translate(
-                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationNotInstalledDescription',
-                      {
-                        defaultMessage:
-                          'Install the Kubernetes OpenTelemetry Dashboards integration to view your Kubernetes OpenTelemetry Dashboards.',
-                      }
-                    )}
+                {hasIntegrationInstalled ? (
+                  <FormattedMessage
+                    id="xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationInstalledDescription"
+                    defaultMessage="View dashboards available for the Kubernetes clusters which are observed using {openTelemetryLink} which match your query."
+                    values={{
+                      openTelemetryLink: <OpenTelemetryLink />,
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationNotInstalledDescription"
+                    defaultMessage="We have dashboards for Kubernetes clusters which are observed using {openTelemetryLink} which match your query."
+                    values={{
+                      openTelemetryLink: <OpenTelemetryLink />,
+                    }}
+                  />
+                )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
+              <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="s"
                     data-test-subj={
-                      isInstalled
+                      hasIntegrationInstalled
                         ? 'infraOtelKubernetesDashboardCardLink'
                         : 'infraOtelKubernetesDashboardCardInstallLink'
                     }
                     href={
-                      isInstalled
-                        ? 'https://www.elastic.co/guide/en/observability/current/kubernetes-otel-dashboards.html'
-                        : 'https://www.elastic.co/guide/en/observability/current/kubernetes-otel-dashboards.html'
+                      hasIntegrationInstalled
+                        ? otelKubernetesDashboardUrl
+                        : otelKubernetesIntegrationUrl
                     }
-                    target="_blank"
-                    rel="noopener"
                   >
-                    {isInstalled
+                    {hasIntegrationInstalled
                       ? i18n.translate(
                           'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.viewDashboardLink',
                           {
@@ -145,15 +182,15 @@ export const OtelKubernetesButton = () => {
     <TryItButton
       color={clickedRef.current ? 'primary' : 'accent'}
       label={i18n.translate('xpack.infra.bottomDrawer.otelKubernetesDashboardsLink', {
-        defaultMessage: 'Otel Kubernetes dashboards',
+        defaultMessage: 'Kubernetes OpenTelemetry Dashboards',
       })}
-      data-test-subj="inventory-kubernetesDashboard-link"
+      data-test-subj="inventory-otelKubernetesDashboard-link"
       link={{
         app: 'dashboards',
         hash: '/list',
         search: {
           _g: '()',
-          s: 'kubernetes tag:(Managed)',
+          s: 'tag:("Kubernetes OpenTelemetry Assets")',
         },
       }}
       onClick={() => {

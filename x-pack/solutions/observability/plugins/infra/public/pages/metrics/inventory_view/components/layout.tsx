@@ -32,6 +32,7 @@ import { LegendControls } from './waffle/legend_controls';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/ecs_kubernetes_dashboard_promotion';
 import { OtelKubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/otel_kubernetes_dashboard_promotion';
+import { useInstalledIntegration } from '../../../../hooks/use_installed_integration';
 
 interface Props {
   currentView?: InventoryView | null;
@@ -76,6 +77,8 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
 
   const hasElasticSchema = schemas.includes('ecs');
   const hasOtelSchema = schemas.includes('semconv');
+  const { isInstalled: hasEcsK8sIntegration } = useInstalledIntegration('kubernetes');
+  const { isInstalled: hasOtelK8sIntegration } = useInstalledIntegration('kubernetes_otel');
 
   const [ecsK8sCardDismissed, setEcsK8sCardDismissed] = useState(false);
   const [otelK8sCardDismissed, setOtelK8sCardDismissed] = useState(false);
@@ -172,20 +175,28 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
               </EuiFlexGroup>
             </EuiFlexGroup>
           </TopActionContainer>
-          {nodeType === 'pod' && (showEcsK8sDashboardCard || showOtelK8sDashboardCard) && (
-            <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
-              {showEcsK8sDashboardCard && (
-                <EuiFlexItem>
-                  <KubernetesDashboardCard onClose={() => setEcsK8sCardDismissed(true)} />
-                </EuiFlexItem>
-              )}
-              {showOtelK8sDashboardCard && (
-                <EuiFlexItem>
-                  <OtelKubernetesDashboardCard onClose={() => setOtelK8sCardDismissed(true)} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          )}
+          {nodeType === 'pod' &&
+            (showEcsK8sDashboardCard || showOtelK8sDashboardCard) &&
+            !loading && (
+              <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
+                {showEcsK8sDashboardCard && (
+                  <EuiFlexItem>
+                    <KubernetesDashboardCard
+                      onClose={() => setEcsK8sCardDismissed(true)}
+                      hasIntegrationInstalled={hasEcsK8sIntegration}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showOtelK8sDashboardCard && (
+                  <EuiFlexItem>
+                    <OtelKubernetesDashboardCard
+                      onClose={() => setOtelK8sCardDismissed(true)}
+                      hasIntegrationInstalled={hasOtelK8sIntegration}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            )}
           <EuiFlexItem
             grow={false}
             css={css`
