@@ -30,8 +30,9 @@ const createDataConnectorRequestSchema = schema.object({
  * @param token - The authentication token
  * @returns The secrets object to pass to the actions client
  * @throws Error if the connector spec is not found
+ * @internal exported for testing
  */
-function buildSecretsFromConnectorSpec(
+export function buildSecretsFromConnectorSpec(
   connectorType: string,
   token: string
 ): Record<string, string> {
