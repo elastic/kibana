@@ -9,6 +9,7 @@
 
 import { findDependencyReferencesTool } from './find_dependency_references';
 import fs from 'fs';
+import { parseToolResultJsonContent } from './test_utils';
 
 jest.mock('fs');
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
@@ -91,7 +92,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.dependencyName).toBe('enzyme');
       expect(parsedResult.totalMatchingFiles).toBe(2);
@@ -111,7 +112,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).toContain('src/file1.ts');
@@ -127,7 +128,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).toContain('src/file1.ts');
@@ -143,7 +144,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(2);
       expect(parsedResult.uniqueApis).toContain('shallow');
@@ -168,7 +169,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.matchingFilesByTeam).toHaveLength(2);
       expect(parsedResult.matchingFilesByTeam[0].team).toBe('@elastic/kibana-core');
@@ -187,7 +188,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.matchingFilesByTeam[0].files).toHaveLength(2);
       expect(parsedResult.matchingFilesByTeam[0].files[0].filePath).toBe('src/file1.ts');
@@ -205,7 +206,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(0);
       expect(parsedResult.matchingFiles).toHaveLength(0);
@@ -225,7 +226,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.uniqueApis).toContain('shallow');
@@ -254,7 +255,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).not.toContain('.hidden/file2.ts');
@@ -269,7 +270,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.analysisTimeMs).toBeGreaterThanOrEqual(0);
       expect(typeof parsedResult.analysisTimeMs).toBe('number');
@@ -285,7 +286,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: '@kbn/resizable-layout',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).toContain('src/file1.ts');
@@ -301,7 +302,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.uniqueApis).toEqual(['alpha', 'beta', 'zebra']);
     });
@@ -355,7 +356,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       // Should only find file2.tsx, file1.ts should be skipped
       expect(parsedResult.totalMatchingFiles).toBe(1);

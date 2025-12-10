@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conditionToESQL } from '@kbn/streamlang';
+import { conditionToESQLAst } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
 import type { StreamQuery } from '../queries';
 
@@ -41,12 +41,7 @@ export const buildEsqlQuery = (
   ]);
 
   const whereCondition = query.feature?.filter
-    ? Builder.expression.func.binary('and', [
-        kqlQuery,
-        Builder.expression.literal.string(conditionToESQL(query.feature.filter), {
-          unquoted: true,
-        }),
-      ])
+    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(query.feature.filter)])
     : kqlQuery;
 
   const whereCommand = Builder.command({

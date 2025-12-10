@@ -6,6 +6,8 @@
  */
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
+export type AccountType = 'single-account' | 'organization-account';
+
 export interface CloudConnectorSecretReference {
   isSecretRef: boolean;
   id: string;
@@ -41,6 +43,7 @@ export interface CloudConnector {
   id: string;
   name: string;
   cloudProvider: CloudProvider;
+  accountType?: AccountType;
   vars: CloudConnectorVars;
   packagePolicyCount: number;
   created_at: string;

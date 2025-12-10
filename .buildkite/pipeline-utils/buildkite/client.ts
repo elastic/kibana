@@ -51,6 +51,7 @@ export interface BuildkiteAgentTargetingRule {
   machineType?: string;
   minCpuPlatform?: string;
   preemptible?: boolean;
+  diskSizeGb?: number;
 }
 
 export interface BuildkiteCommandStep {

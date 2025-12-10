@@ -50,7 +50,7 @@ If both parameters are specified, only the query parameter is used.
     headerParams: [],
     pathParams: ['repository'],
     urlParams: ['master_timeout', 'timeout', 'verify'],
-    bodyParams: [],
+    bodyParams: ['uuid', 'type', 'settings'],
   },
   paramsSchema: z.union([
     z.object({

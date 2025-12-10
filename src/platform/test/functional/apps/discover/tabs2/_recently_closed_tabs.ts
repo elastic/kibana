@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should start with no recently closed tabs', async () => {
-      const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+      const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
       expect(recentlyClosedTabs.length).to.be(0);
     });
 
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
         // appeared in the recently closed tabs list
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
       });
 
@@ -64,8 +64,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
         expect(await queryBar.getQueryString()).to.be(query);
         // still on the recently closed tabs list
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
+      });
+    });
+
+    it('should show relative time when a tab was closed', async () => {
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, secondTabLabel);
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.closeTab(1);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        // appeared in the recently closed tabs list with relative time
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs.length).to.be(1);
+        expect(recentlyClosedTabs[0]).to.match(
+          new RegExp(`^${secondTabLabel}\\n\\d+ (second|minute)s? ago$`)
+        );
       });
     });
 
@@ -86,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
         // appeared in the recently closed tabs list
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
       });
 
@@ -104,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
         expect(await queryBar.getQueryString()).to.be(query);
         // still on the recently closed tabs list
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
         expect(await discover.getHitCount()).to.be('1,813');
       });
@@ -126,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
         expect(await queryBar.getQueryString()).to.be(query);
         // still on the recently closed tabs list
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
         expect(await discover.getHitCount()).to.be('1,813');
       });
@@ -161,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dataViews.getSelectedName()).to.be('logstash-*');
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
         expect(await discover.getHitCount()).to.be('14,004');
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([firstTabLabel, secondTabLabel]);
       });
 
@@ -203,7 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([testTabLabel]);
       });
 
@@ -220,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel, secondTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([testTabLabel]);
       });
 
@@ -244,7 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           secondTabLabel,
           untitledTabLabel,
         ]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([
           firstTabLabel,
           secondTabLabel,
@@ -277,7 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel, secondTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([testTabLabel]);
       });
 
@@ -293,7 +312,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await unifiedTabs.getTabLabels()).to.eql([tabWithFilterLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([firstTabLabel, secondTabLabel, testTabLabel]);
       });
 
@@ -303,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([
           tabWithFilterLabel,
           firstTabLabel,
@@ -318,7 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([
           untitledTabLabel,
           tabWithFilterLabel,
@@ -334,7 +353,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, tabWithFilterLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([
           untitledTabLabel,
           tabWithFilterLabel,
@@ -351,7 +370,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([]);
         expect(await discover.getHitCount()).to.be('14,004');
       });
@@ -361,7 +380,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([]);
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await discover.getSavedSearchTitle()).to.be(firstSession);
@@ -375,7 +394,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([]);
         expect(await discover.getHitCount()).to.be('2,784');
         await testSubjects.existOrFail('unsavedChangesBadge');
@@ -386,7 +405,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([untitledTabLabel]);
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await queryBar.getQueryString()).to.be(query);
@@ -399,7 +418,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([untitledTabLabel, untitledTabLabel]);
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await queryBar.getQueryString()).to.be('');
@@ -412,7 +431,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([untitledTabLabel, untitledTabLabel]);
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await queryBar.getQueryString()).to.be(query);

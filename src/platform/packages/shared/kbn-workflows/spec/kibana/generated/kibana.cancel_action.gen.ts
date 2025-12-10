@@ -43,7 +43,7 @@ Cancel a running or pending response action (Applies only to some agent types).`
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.object({
     ...getShapeAt(cancel_action_request, 'body'),

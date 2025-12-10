@@ -20,8 +20,8 @@ export interface MonacoCommandDependencies {
   telemetryService: ESQLEditorTelemetryService;
   editorRef: React.RefObject<monaco.editor.IStandaloneCodeEditor>;
   getCurrentQuery: () => string;
-  esqlVariables?: ESQLControlVariable[];
-  controlsContext?: ControlsContext;
+  esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
+  controlsContext: React.RefObject<ControlsContext | undefined>;
   openTimePickerPopover: () => void;
 }
 
@@ -128,9 +128,9 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
           position,
           uiActions,
           triggerSource,
-          esqlVariables,
-          controlsContext?.onSaveControl,
-          controlsContext?.onCancelControl
+          esqlVariables.current ?? undefined,
+          controlsContext.current?.onSaveControl,
+          controlsContext.current?.onCancelControl
         );
       })
     );
@@ -142,8 +142,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
 export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
   onQuerySubmit: (source: any) => void,
-  setIsVisorOpen: (isOpen: boolean) => void,
-  isVisorOpen: boolean
+  toggleVisor: () => void
 ) => {
   // Add editor key bindings
   editor.addCommand(
@@ -155,7 +154,7 @@ export const addEditorKeyBindings = (
   editor.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-    () => setIsVisorOpen(!isVisorOpen)
+    () => toggleVisor()
   );
 };
 

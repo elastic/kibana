@@ -23,6 +23,7 @@ import {
 const PROXIED_METHODS: WeakMap<
   Record<string, any>,
   {
+    build?: () => Record<string, any>;
     requireFields?: (required: string[]) => Record<string, any>;
     containsFields?: (field: string) => boolean;
     unflatten?: () => Record<string, any>;
@@ -51,6 +52,11 @@ interface ApmDocumentMethods<
   T extends Partial<FlattenedApmEvent>,
   R extends keyof FlattenedApmEvent = never
 > {
+  /**
+   * Creates a new unproxied object with all the fields values extracted into their single or
+   * multi-value form. The new object no longer grants access to proxied methods.
+   */
+  build(): MapToSingleOrMultiValue<RequiredApmFields<T, R>>;
   /**
    * Unflattens the APM Event, so fields can be accessed via `event.service?.name`.
    *
@@ -121,6 +127,9 @@ export function accessKnownApmEventFields(fields: Record<string, any>) {
 const accessHandler = {
   get(fields: Record<string, any>, key: string, proxy: any) {
     switch (key) {
+      case 'build':
+        return (PROXIED_METHODS.get(proxy)!.build ??= () => ({ ...proxy }));
+
       case 'unflatten':
         // Lazily initialise method on first access
         return (PROXIED_METHODS.get(proxy)!.unflatten ??= () =>

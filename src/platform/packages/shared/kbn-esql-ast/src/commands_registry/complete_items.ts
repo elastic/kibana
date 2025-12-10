@@ -69,6 +69,26 @@ export const allStarConstant: ISuggestionItem = {
   sortText: '1',
 };
 
+function buildValuePlaceholder(placeholderType: 'value' | 'default' = 'value'): ISuggestionItem {
+  return withAutoSuggest({
+    label: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderLabel', {
+      defaultMessage: 'Insert {placeholderType} placeholder',
+      values: { placeholderType },
+    }),
+    text: `"\${0:${placeholderType}}"`,
+    asSnippet: true,
+    kind: 'Constant',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderDetail', {
+      defaultMessage: 'Insert a {placeholderType} to describe the condition',
+      values: { placeholderType },
+    }),
+    category: SuggestionCategory.CONSTANT_VALUE,
+  });
+}
+
+export const valuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('value');
+export const defaultValuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('default');
+
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
   i18n.translate('kbn-esql-ast.esql.autocomplete.commaDoc', {

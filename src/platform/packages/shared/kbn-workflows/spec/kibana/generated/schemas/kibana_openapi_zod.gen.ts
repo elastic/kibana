@@ -3599,21 +3599,13 @@ export const security_ai_assistant_api_document_entry_update_fields = z.object({
 }).and(security_ai_assistant_api_document_entry_create_fields);
 
 export const security_ai_assistant_api_knowledge_base_entry_create_props = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_DocumentEntryCreateFields'))
-    }).and(security_ai_assistant_api_document_entry_create_fields),
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_IndexEntryCreateFields'))
-    }).and(security_ai_assistant_api_index_entry_create_fields)
+    security_ai_assistant_api_document_entry_create_fields,
+    security_ai_assistant_api_index_entry_create_fields
 ]);
 
 export const security_ai_assistant_api_knowledge_base_entry_response = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_DocumentEntry'))
-    }).and(security_ai_assistant_api_document_entry),
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_IndexEntry'))
-    }).and(security_ai_assistant_api_index_entry)
+    security_ai_assistant_api_document_entry,
+    security_ai_assistant_api_index_entry
 ]);
 
 export const security_ai_assistant_api_knowledge_base_entry_bulk_crud_action_results = z.object({
@@ -3654,21 +3646,13 @@ export const security_ai_assistant_api_knowledge_base_entry_bulk_crud_action_res
 });
 
 export const security_ai_assistant_api_knowledge_base_entry_update_props = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_DocumentEntryUpdateFields'))
-    }).and(security_ai_assistant_api_document_entry_update_fields),
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_IndexEntryUpdateFields'))
-    }).and(security_ai_assistant_api_index_entry_update_fields)
+    security_ai_assistant_api_document_entry_update_fields,
+    security_ai_assistant_api_index_entry_update_fields
 ]);
 
 export const security_ai_assistant_api_knowledge_base_entry_update_route_props = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_DocumentEntryCreateFields'))
-    }).and(security_ai_assistant_api_document_entry_create_fields),
-    z.object({
-        type: z.optional(z.literal('Security_AI_Assistant_API_IndexEntryCreateFields'))
-    }).and(security_ai_assistant_api_index_entry_create_fields)
+    security_ai_assistant_api_document_entry_create_fields,
+    security_ai_assistant_api_index_entry_create_fields
 ]);
 
 export const security_attack_discovery_api_attack_discovery_api_schedule_action_alerts_filter = z.record(z.string(), z.unknown());
@@ -5508,12 +5492,8 @@ export const security_detections_api_error_schema = z.object({
  * Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
  */
 export const security_detections_api_rule_source = z.union([
-    z.object({
-        type: z.literal('Security_Detections_API_ExternalRuleSource')
-    }).and(security_detections_api_external_rule_source),
-    z.object({
-        type: z.literal('Security_Detections_API_InternalRuleSource')
-    }).and(security_detections_api_internal_rule_source)
+    security_detections_api_external_rule_source,
+    security_detections_api_internal_rule_source
 ]);
 
 /**
@@ -5633,12 +5613,8 @@ export const security_detections_api_set_alerts_status_by_ids_base = z.object({
 });
 
 export const security_detections_api_set_alerts_status_by_ids = z.union([
-    z.object({
-        status: z.literal('closed')
-    }).and(security_detections_api_close_alerts_by_ids),
-    z.object({
-        status: z.literal('Security_Detections_API_SetAlertsStatusByIdsBase')
-    }).and(security_detections_api_set_alerts_status_by_ids_base)
+    security_detections_api_close_alerts_by_ids,
+    security_detections_api_set_alerts_status_by_ids_base
 ]);
 
 export const security_detections_api_set_alerts_status_by_query_base = z.object({
@@ -5648,12 +5624,8 @@ export const security_detections_api_set_alerts_status_by_query_base = z.object(
 });
 
 export const security_detections_api_set_alerts_status_by_query = z.union([
-    z.object({
-        status: z.literal('closed')
-    }).and(security_detections_api_close_alerts_by_query),
-    z.object({
-        status: z.literal('Security_Detections_API_SetAlertsStatusByQueryBase')
-    }).and(security_detections_api_set_alerts_status_by_query_base)
+    security_detections_api_close_alerts_by_query,
+    security_detections_api_set_alerts_status_by_query_base
 ]);
 
 /**
@@ -6478,30 +6450,14 @@ export const security_detections_api_threshold_rule_create_props = z.object({
 }).and(security_detections_api_threshold_rule_create_fields);
 
 export const security_detections_api_rule_create_props = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_EqlRuleCreateProps'))
-    }).and(security_detections_api_eql_rule_create_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_QueryRuleCreateProps'))
-    }).and(security_detections_api_query_rule_create_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_SavedQueryRuleCreateProps'))
-    }).and(security_detections_api_saved_query_rule_create_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_ThresholdRuleCreateProps'))
-    }).and(security_detections_api_threshold_rule_create_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_ThreatMatchRuleCreateProps'))
-    }).and(security_detections_api_threat_match_rule_create_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_MachineLearningRuleCreateProps'))
-    }).and(security_detections_api_machine_learning_rule_create_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_NewTermsRuleCreateProps'))
-    }).and(security_detections_api_new_terms_rule_create_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_EsqlRuleCreateProps'))
-    }).and(security_detections_api_esql_rule_create_props)
+    security_detections_api_eql_rule_create_props,
+    security_detections_api_query_rule_create_props,
+    security_detections_api_saved_query_rule_create_props,
+    security_detections_api_threshold_rule_create_props,
+    security_detections_api_threat_match_rule_create_props,
+    security_detections_api_machine_learning_rule_create_props,
+    security_detections_api_new_terms_rule_create_props,
+    security_detections_api_esql_rule_create_props
 ]);
 
 /**
@@ -7573,30 +7529,14 @@ export const security_detections_api_threshold_rule = z.object({
 }).and(security_detections_api_response_fields).and(security_detections_api_threshold_rule_response_fields);
 
 export const security_detections_api_rule_response = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_EqlRule'))
-    }).and(security_detections_api_eql_rule),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_QueryRule'))
-    }).and(security_detections_api_query_rule),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_SavedQueryRule'))
-    }).and(security_detections_api_saved_query_rule),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_ThresholdRule'))
-    }).and(security_detections_api_threshold_rule),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_ThreatMatchRule'))
-    }).and(security_detections_api_threat_match_rule),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_MachineLearningRule'))
-    }).and(security_detections_api_machine_learning_rule),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_NewTermsRule'))
-    }).and(security_detections_api_new_terms_rule),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_EsqlRule'))
-    }).and(security_detections_api_esql_rule)
+    security_detections_api_eql_rule,
+    security_detections_api_query_rule,
+    security_detections_api_saved_query_rule,
+    security_detections_api_threshold_rule,
+    security_detections_api_threat_match_rule,
+    security_detections_api_machine_learning_rule,
+    security_detections_api_new_terms_rule,
+    security_detections_api_esql_rule
 ]);
 
 export const security_detections_api_bulk_edit_action_results = z.object({
@@ -7726,30 +7666,14 @@ export const security_detections_api_threshold_rule_update_props = z.object({
 }).and(security_detections_api_threshold_rule_create_fields);
 
 export const security_detections_api_rule_update_props = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_EqlRuleUpdateProps'))
-    }).and(security_detections_api_eql_rule_update_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_QueryRuleUpdateProps'))
-    }).and(security_detections_api_query_rule_update_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_SavedQueryRuleUpdateProps'))
-    }).and(security_detections_api_saved_query_rule_update_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_ThresholdRuleUpdateProps'))
-    }).and(security_detections_api_threshold_rule_update_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_ThreatMatchRuleUpdateProps'))
-    }).and(security_detections_api_threat_match_rule_update_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_MachineLearningRuleUpdateProps'))
-    }).and(security_detections_api_machine_learning_rule_update_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_NewTermsRuleUpdateProps'))
-    }).and(security_detections_api_new_terms_rule_update_props),
-    z.object({
-        type: z.optional(z.literal('Security_Detections_API_EsqlRuleUpdateProps'))
-    }).and(security_detections_api_esql_rule_update_props)
+    security_detections_api_eql_rule_update_props,
+    security_detections_api_query_rule_update_props,
+    security_detections_api_saved_query_rule_update_props,
+    security_detections_api_threshold_rule_update_props,
+    security_detections_api_threat_match_rule_update_props,
+    security_detections_api_machine_learning_rule_update_props,
+    security_detections_api_new_terms_rule_update_props,
+    security_detections_api_esql_rule_update_props
 ]);
 
 export const security_detections_api_warning_schema = z.object({
@@ -8061,24 +7985,12 @@ export const security_endpoint_exceptions_api_exception_list_item_entry_nested =
 });
 
 export const security_endpoint_exceptions_api_exception_list_item_entry = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch'))
-    }).and(security_endpoint_exceptions_api_exception_list_item_entry_match),
-    z.object({
-        type: z.optional(z.literal('Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny'))
-    }).and(security_endpoint_exceptions_api_exception_list_item_entry_match_any),
-    z.object({
-        type: z.optional(z.literal('Security_Endpoint_Exceptions_API_ExceptionListItemEntryList'))
-    }).and(security_endpoint_exceptions_api_exception_list_item_entry_list),
-    z.object({
-        type: z.optional(z.literal('Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists'))
-    }).and(security_endpoint_exceptions_api_exception_list_item_entry_exists),
-    z.object({
-        type: z.optional(z.literal('Security_Endpoint_Exceptions_API_ExceptionListItemEntryNested'))
-    }).and(security_endpoint_exceptions_api_exception_list_item_entry_nested),
-    z.object({
-        type: z.optional(z.literal('Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchWildcard'))
-    }).and(security_endpoint_exceptions_api_exception_list_item_entry_match_wildcard)
+    security_endpoint_exceptions_api_exception_list_item_entry_match,
+    security_endpoint_exceptions_api_exception_list_item_entry_match_any,
+    security_endpoint_exceptions_api_exception_list_item_entry_list,
+    security_endpoint_exceptions_api_exception_list_item_entry_exists,
+    security_endpoint_exceptions_api_exception_list_item_entry_nested,
+    security_endpoint_exceptions_api_exception_list_item_entry_match_wildcard
 ]);
 
 export const security_endpoint_exceptions_api_exception_list_item_entry_array = z.array(security_endpoint_exceptions_api_exception_list_item_entry);
@@ -8167,6 +8079,19 @@ export const security_endpoint_management_api_agent_types = z.enum([
     description: 'List of agent types to retrieve. Defaults to `endpoint`.'
 });
 
+/**
+ * Determines which field is used to sort the results.
+ */
+export const security_endpoint_management_api_api_sort_field = z.enum([
+    'name',
+    'createdAt',
+    'createdBy',
+    'updatedAt',
+    'updatedBy'
+]).register(z.globalRegistry, {
+    description: 'Determines which field is used to sort the results.'
+});
+
 export const security_endpoint_management_api_cloud_file_script_parameters = z.object({
     cloudFile: z.string().min(1).register(z.globalRegistry, {
         description: 'Script name in cloud storage.'
@@ -8233,6 +8158,37 @@ export const security_endpoint_management_api_endpoint_ids = z.array(z.string().
 });
 
 export const security_endpoint_management_api_endpoint_metadata_response = z.record(z.string(), z.unknown());
+
+export const security_endpoint_management_api_endpoint_script_platform = z.enum([
+    'linux',
+    'macos',
+    'windows'
+]);
+
+export const security_endpoint_management_api_endpoint_script = z.object({
+    createdAt: z.optional(z.iso.datetime()),
+    createdBy: z.optional(z.string()),
+    description: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Description of the script and its purpose/functionality'
+    })),
+    downloadUri: z.optional(z.string().register(z.globalRegistry, {
+        description: 'URI to download the script file. Note that this is the relative path and does not include the space (if applicable)'
+    })),
+    example: z.optional(z.string()),
+    id: z.optional(z.uuid()),
+    instructions: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Instructions for using the script, including details around its supported input arguments'
+    })),
+    name: z.optional(z.string()),
+    pathToExecutable: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The relative path to the file included in the archive that should be executed once its contents are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).\n'
+    })),
+    platform: z.optional(z.array(security_endpoint_management_api_endpoint_script_platform)),
+    requiresInput: z.optional(z.boolean()),
+    updatedAt: z.optional(z.iso.datetime()),
+    updatedBy: z.optional(z.string()),
+    version: z.optional(z.string())
+});
 
 export const security_endpoint_management_api_execute_route_response = z.record(z.string(), z.unknown());
 
@@ -8309,6 +8265,8 @@ export const security_endpoint_management_api_page = z.int().gte(1).register(z.g
 export const security_endpoint_management_api_page_size = z.int().gte(1).lte(100).register(z.globalRegistry, {
     description: 'Number of items per page'
 }).default(10);
+
+export const security_endpoint_management_api_api_page_size = security_endpoint_management_api_page_size.and(z.unknown());
 
 /**
  * Optional parameters object
@@ -9868,24 +9826,12 @@ export const security_exceptions_api_exception_list_item_entry_nested = z.object
 });
 
 export const security_exceptions_api_exception_list_item_entry = z.union([
-    z.object({
-        type: z.optional(z.literal('Security_Exceptions_API_ExceptionListItemEntryMatch'))
-    }).and(security_exceptions_api_exception_list_item_entry_match),
-    z.object({
-        type: z.optional(z.literal('Security_Exceptions_API_ExceptionListItemEntryMatchAny'))
-    }).and(security_exceptions_api_exception_list_item_entry_match_any),
-    z.object({
-        type: z.optional(z.literal('Security_Exceptions_API_ExceptionListItemEntryList'))
-    }).and(security_exceptions_api_exception_list_item_entry_list),
-    z.object({
-        type: z.optional(z.literal('Security_Exceptions_API_ExceptionListItemEntryExists'))
-    }).and(security_exceptions_api_exception_list_item_entry_exists),
-    z.object({
-        type: z.optional(z.literal('Security_Exceptions_API_ExceptionListItemEntryNested'))
-    }).and(security_exceptions_api_exception_list_item_entry_nested),
-    z.object({
-        type: z.optional(z.literal('Security_Exceptions_API_ExceptionListItemEntryMatchWildcard'))
-    }).and(security_exceptions_api_exception_list_item_entry_match_wildcard)
+    security_exceptions_api_exception_list_item_entry_match,
+    security_exceptions_api_exception_list_item_entry_match_any,
+    security_exceptions_api_exception_list_item_entry_list,
+    security_exceptions_api_exception_list_item_entry_exists,
+    security_exceptions_api_exception_list_item_entry_nested,
+    security_exceptions_api_exception_list_item_entry_match_wildcard
 ]);
 
 export const security_exceptions_api_exception_list_item_entry_array = z.array(security_exceptions_api_exception_list_item_entry);
@@ -12359,7 +12305,7 @@ export const synthetics_browser_monitor_fields = synthetics_common_monitor_field
     ]).register(z.globalRegistry, {
         description: 'The screenshot option.'
     })),
-    synthetics_args: z.optional(z.array(z.unknown()).register(z.globalRegistry, {
+    synthetics_args: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'Synthetics agent CLI arguments.'
     })),
     type: z.enum(['browser']).register(z.globalRegistry, {
@@ -15390,6 +15336,15 @@ export const cases_ids = z.array(z.string()).register(z.globalRegistry, {
 });
 
 /**
+ * Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
+ *
+ * @deprecated
+ */
+export const cases_include_comments = z.boolean().register(z.globalRegistry, {
+    description: 'Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.'
+}).default(true);
+
+/**
  * Cross-site request forgery protection
  */
 export const cases_kbn_xsrf = z.string().register(z.globalRegistry, {
@@ -15613,6 +15568,54 @@ export const get_actions_connector_types_request = z.object({
     }))
 });
 
+/**
+ * Indicates a successful call.
+ */
+export const get_actions_connector_types_response = z.array(z.object({
+    allow_multiple_system_actions: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether multiple instances of the same system action connector can be used in a single rule.'
+    })),
+    enabled: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector is enabled.'
+    }),
+    enabled_in_config: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector is enabled in the Kibana configuration.'
+    }),
+    enabled_in_license: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector is enabled through the license.'
+    }),
+    id: z.string().register(z.globalRegistry, {
+        description: 'The identifier for the connector.'
+    }),
+    is_deprecated: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector type is deprecated.'
+    }),
+    is_system_action_type: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the action is a system action.'
+    }),
+    minimum_license_required: z.enum([
+        'basic',
+        'standard',
+        'gold',
+        'platinum',
+        'enterprise',
+        'trial'
+    ]).register(z.globalRegistry, {
+        description: 'The minimum license required to enable the connector.'
+    }),
+    name: z.string().register(z.globalRegistry, {
+        description: 'The name of the connector type.'
+    }),
+    sub_feature: z.optional(z.enum(['endpointSecurity']).register(z.globalRegistry, {
+        description: 'Indicates the sub-feature type the connector is grouped under.'
+    })),
+    supported_feature_ids: z.array(z.string()).register(z.globalRegistry, {
+        description: 'The list of supported features'
+    })
+})).register(z.globalRegistry, {
+    description: 'Indicates a successful call.'
+});
+
 export const delete_actions_connector_id_request = z.object({
     body: z.optional(z.never()),
     path: z.object({
@@ -15656,6 +15659,9 @@ export const get_actions_connector_id_response = z.object({
     id: z.string().register(z.globalRegistry, {
         description: 'The identifier for the connector.'
     }),
+    is_connector_type_deprecated: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector type is deprecated.'
+    }),
     is_deprecated: z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether the connector is deprecated.'
     }),
@@ -15669,7 +15675,7 @@ export const get_actions_connector_id_response = z.object({
         description: 'Indicates whether the connector is used for system actions.'
     }),
     name: z.string().register(z.globalRegistry, {
-        description: ' The name of the rule.'
+        description: ' The name of the connector.'
     })
 }).register(z.globalRegistry, {
     description: 'Indicates a successful call.'
@@ -15758,6 +15764,9 @@ export const post_actions_connector_id_response = z.object({
     id: z.string().register(z.globalRegistry, {
         description: 'The identifier for the connector.'
     }),
+    is_connector_type_deprecated: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector type is deprecated.'
+    }),
     is_deprecated: z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether the connector is deprecated.'
     }),
@@ -15771,7 +15780,7 @@ export const post_actions_connector_id_response = z.object({
         description: 'Indicates whether the connector is used for system actions.'
     }),
     name: z.string().register(z.globalRegistry, {
-        description: ' The name of the rule.'
+        description: ' The name of the connector.'
     })
 }).register(z.globalRegistry, {
     description: 'Indicates a successful call.'
@@ -15856,6 +15865,9 @@ export const put_actions_connector_id_response = z.object({
     id: z.string().register(z.globalRegistry, {
         description: 'The identifier for the connector.'
     }),
+    is_connector_type_deprecated: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector type is deprecated.'
+    }),
     is_deprecated: z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether the connector is deprecated.'
     }),
@@ -15869,7 +15881,7 @@ export const put_actions_connector_id_response = z.object({
         description: 'Indicates whether the connector is used for system actions.'
     }),
     name: z.string().register(z.globalRegistry, {
-        description: ' The name of the rule.'
+        description: ' The name of the connector.'
     })
 }).register(z.globalRegistry, {
     description: 'Indicates a successful call.'
@@ -15926,6 +15938,9 @@ export const post_actions_connector_id_execute_response = z.object({
     id: z.string().register(z.globalRegistry, {
         description: 'The identifier for the connector.'
     }),
+    is_connector_type_deprecated: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector type is deprecated.'
+    }),
     is_deprecated: z.boolean().register(z.globalRegistry, {
         description: 'Indicates whether the connector is deprecated.'
     }),
@@ -15939,7 +15954,7 @@ export const post_actions_connector_id_execute_response = z.object({
         description: 'Indicates whether the connector is used for system actions.'
     }),
     name: z.string().register(z.globalRegistry, {
-        description: ' The name of the rule.'
+        description: ' The name of the connector.'
     })
 }).register(z.globalRegistry, {
     description: 'Indicates a successful call.'
@@ -15949,6 +15964,42 @@ export const get_actions_connectors_request = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
     query: z.optional(z.never())
+});
+
+/**
+ * Indicates a successful call.
+ */
+export const get_actions_connectors_response = z.array(z.object({
+    config: z.optional(z.record(z.string(), z.unknown())),
+    connector_type_id: z.string().register(z.globalRegistry, {
+        description: 'The connector type identifier.'
+    }),
+    id: z.string().register(z.globalRegistry, {
+        description: 'The identifier for the connector.'
+    }),
+    is_connector_type_deprecated: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector type is deprecated.'
+    }),
+    is_deprecated: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector is deprecated.'
+    }),
+    is_missing_secrets: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector is missing secrets.'
+    })),
+    is_preconfigured: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. '
+    }),
+    is_system_action: z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether the connector is used for system actions.'
+    }),
+    name: z.string().register(z.globalRegistry, {
+        description: ' The name of the connector.'
+    }),
+    referenced_by_count: z.number().register(z.globalRegistry, {
+        description: 'The number of saved objects that reference the connector. If is_preconfigured is true, this value is not calculated.'
+    })
+})).register(z.globalRegistry, {
+    description: 'Indicates a successful call.'
 });
 
 export const post_agent_builder_a2a_agentid_request = z.object({
@@ -16804,6 +16855,9 @@ export const get_alerting_rule_id_response = z.object({
     }),
     flapping: z.optional(z.union([
         z.object({
+            enabled: z.optional(z.boolean().register(z.globalRegistry, {
+                description: 'Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.'
+            })),
             look_back_window: z.number().gte(2).lte(20).register(z.globalRegistry, {
                 description: 'The minimum number of runs in which the threshold must be met.'
             }),
@@ -17231,6 +17285,9 @@ export const post_alerting_rule_id_request = z.object({
         })).default(true),
         flapping: z.optional(z.union([
             z.object({
+                enabled: z.optional(z.boolean().register(z.globalRegistry, {
+                    description: 'Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.'
+                })),
                 look_back_window: z.number().gte(2).lte(20).register(z.globalRegistry, {
                     description: 'The minimum number of runs in which the threshold must be met.'
                 }),
@@ -17475,6 +17532,9 @@ export const post_alerting_rule_id_response = z.object({
     }),
     flapping: z.optional(z.union([
         z.object({
+            enabled: z.optional(z.boolean().register(z.globalRegistry, {
+                description: 'Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.'
+            })),
             look_back_window: z.number().gte(2).lte(20).register(z.globalRegistry, {
                 description: 'The minimum number of runs in which the threshold must be met.'
             }),
@@ -17894,6 +17954,9 @@ export const put_alerting_rule_id_request = z.object({
         })),
         flapping: z.optional(z.union([
             z.object({
+                enabled: z.optional(z.boolean().register(z.globalRegistry, {
+                    description: 'Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.'
+                })),
                 look_back_window: z.number().gte(2).lte(20).register(z.globalRegistry, {
                     description: 'The minimum number of runs in which the threshold must be met.'
                 }),
@@ -18120,6 +18183,9 @@ export const put_alerting_rule_id_response = z.object({
     }),
     flapping: z.optional(z.union([
         z.object({
+            enabled: z.optional(z.boolean().register(z.globalRegistry, {
+                description: 'Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.'
+            })),
             look_back_window: z.number().gte(2).lte(20).register(z.globalRegistry, {
                 description: 'The minimum number of runs in which the threshold must be met.'
             }),
@@ -18951,6 +19017,9 @@ export const get_alerting_rules_find_response = z.object({
     }),
     flapping: z.optional(z.union([
         z.object({
+            enabled: z.optional(z.boolean().register(z.globalRegistry, {
+                description: 'Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.'
+            })),
             look_back_window: z.number().gte(2).lte(20).register(z.globalRegistry, {
                 description: 'The minimum number of runs in which the threshold must be met.'
             }),
@@ -20222,7 +20291,11 @@ export const get_case_default_space_request = z.object({
             description: 'The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.'
         })
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.object({
+        includeComments: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.'
+        })).default(true)
+    }))
 });
 
 /**
@@ -22245,6 +22318,34 @@ export const create_update_protection_updates_note_request = z.object({
  */
 export const create_update_protection_updates_note_response = security_endpoint_management_api_protection_updates_note_response;
 
+export const endpoint_script_library_list_scripts_request = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        page: z.optional(security_endpoint_management_api_page),
+        pageSize: z.optional(security_endpoint_management_api_api_page_size),
+        sortField: z.optional(security_endpoint_management_api_api_sort_field),
+        sortDirection: z.optional(security_endpoint_management_api_sort_direction),
+        kuery: z.optional(security_endpoint_management_api_kuery.and(z.unknown()))
+    }))
+});
+
+/**
+ * List of scripts response
+ */
+export const endpoint_script_library_list_scripts_response = z.object({
+    data: z.optional(z.array(security_endpoint_management_api_endpoint_script)),
+    page: z.optional(security_endpoint_management_api_page),
+    pageSize: z.optional(security_endpoint_management_api_api_page_size),
+    sortDirection: z.optional(security_endpoint_management_api_sort_direction),
+    sortField: z.optional(security_endpoint_management_api_api_sort_field),
+    total: z.optional(z.int().register(z.globalRegistry, {
+        description: 'The total number of scripts matching the query'
+    }))
+}).register(z.globalRegistry, {
+    description: 'List of scripts response'
+});
+
 export const delete_monitoring_engine_request = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
@@ -23535,6 +23636,10 @@ export const get_fleet_agent_policies_response = z.object({
                     z.string(),
                     z.null()
                 ])),
+                cloud_connector_name: z.optional(z.union([
+                    z.string().min(1).max(255),
+                    z.null()
+                ])),
                 created_at: z.string(),
                 created_by: z.string(),
                 description: z.optional(z.string().register(z.globalRegistry, {
@@ -24028,6 +24133,10 @@ export const post_fleet_agent_policies_response = z.object({
                     z.string(),
                     z.null()
                 ])),
+                cloud_connector_name: z.optional(z.union([
+                    z.string().min(1).max(255),
+                    z.null()
+                ])),
                 created_at: z.string(),
                 created_by: z.string(),
                 description: z.optional(z.string().register(z.globalRegistry, {
@@ -24407,6 +24516,10 @@ export const post_fleet_agent_policies_bulk_get_response = z.object({
                     z.string(),
                     z.null()
                 ])),
+                cloud_connector_name: z.optional(z.union([
+                    z.string().min(1).max(255),
+                    z.null()
+                ])),
                 created_at: z.string(),
                 created_by: z.string(),
                 description: z.optional(z.string().register(z.globalRegistry, {
@@ -24773,6 +24886,10 @@ export const get_fleet_agent_policies_agentpolicyid_response = z.object({
                 agents: z.optional(z.number()),
                 cloud_connector_id: z.optional(z.union([
                     z.string(),
+                    z.null()
+                ])),
+                cloud_connector_name: z.optional(z.union([
+                    z.string().min(1).max(255),
                     z.null()
                 ])),
                 created_at: z.string(),
@@ -25268,6 +25385,10 @@ export const put_fleet_agent_policies_agentpolicyid_response = z.object({
                     z.string(),
                     z.null()
                 ])),
+                cloud_connector_name: z.optional(z.union([
+                    z.string().min(1).max(255),
+                    z.null()
+                ])),
                 created_at: z.string(),
                 created_by: z.string(),
                 description: z.optional(z.string().register(z.globalRegistry, {
@@ -25679,6 +25800,10 @@ export const post_fleet_agent_policies_agentpolicyid_copy_response = z.object({
                 agents: z.optional(z.number()),
                 cloud_connector_id: z.optional(z.union([
                     z.string(),
+                    z.null()
+                ])),
+                cloud_connector_name: z.optional(z.union([
+                    z.string().min(1).max(255),
                     z.null()
                 ])),
                 created_at: z.string(),
@@ -26333,7 +26458,7 @@ export const post_fleet_agentless_policies_request = z.object({
             enabled: z.optional(z.boolean().register(z.globalRegistry, {
                 description: 'Whether cloud connectors are enabled for this policy.'
             })).default(false),
-            name: z.optional(z.string().register(z.globalRegistry, {
+            name: z.optional(z.string().min(1).max(255).register(z.globalRegistry, {
                 description: 'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.'
             }))
         })),
@@ -26454,6 +26579,10 @@ export const post_fleet_agentless_policies_response = z.object({
         agents: z.optional(z.number()),
         cloud_connector_id: z.optional(z.union([
             z.string(),
+            z.null()
+        ])),
+        cloud_connector_name: z.optional(z.union([
+            z.string().min(1).max(255),
             z.null()
         ])),
         created_at: z.string(),
@@ -28224,6 +28353,46 @@ export const put_fleet_cloud_connectors_cloudconnectorid_response = z.object({
         updated_at: z.string(),
         vars: z.record(z.string(), z.unknown())
     })
+}).register(z.globalRegistry, {
+    description: 'OK: A successful request.'
+});
+
+export const get_fleet_cloud_connectors_cloudconnectorid_usage_request = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        cloudConnectorId: z.string().register(z.globalRegistry, {
+            description: 'The unique identifier of the cloud connector.'
+        })
+    }),
+    query: z.optional(z.object({
+        page: z.optional(z.number().gte(1).register(z.globalRegistry, {
+            description: 'The page number for pagination.'
+        })),
+        perPage: z.optional(z.number().gte(1).register(z.globalRegistry, {
+            description: 'The number of items per page.'
+        }))
+    }))
+});
+
+/**
+ * OK: A successful request.
+ */
+export const get_fleet_cloud_connectors_cloudconnectorid_usage_response = z.object({
+    items: z.array(z.object({
+        created_at: z.string(),
+        id: z.string(),
+        name: z.string(),
+        package: z.optional(z.object({
+            name: z.string(),
+            title: z.string(),
+            version: z.string()
+        })),
+        policy_ids: z.array(z.string()),
+        updated_at: z.string()
+    })),
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number()
 }).register(z.globalRegistry, {
     description: 'OK: A successful request.'
 });
@@ -33849,6 +34018,10 @@ export const get_fleet_package_policies_response = z.object({
             z.string(),
             z.null()
         ])),
+        cloud_connector_name: z.optional(z.union([
+            z.string().min(1).max(255),
+            z.null()
+        ])),
         created_at: z.string(),
         created_by: z.string(),
         description: z.optional(z.string().register(z.globalRegistry, {
@@ -34069,6 +34242,10 @@ export const post_fleet_package_policies_request = z.object({
             ])),
             cloud_connector_id: z.optional(z.union([
                 z.string(),
+                z.null()
+            ])),
+            cloud_connector_name: z.optional(z.union([
+                z.string().min(1).max(255),
                 z.null()
             ])),
             description: z.optional(z.string().register(z.globalRegistry, {
@@ -34337,6 +34514,10 @@ export const post_fleet_package_policies_response = z.object({
             z.string(),
             z.null()
         ])),
+        cloud_connector_name: z.optional(z.union([
+            z.string().min(1).max(255),
+            z.null()
+        ])),
         created_at: z.string(),
         created_by: z.string(),
         description: z.optional(z.string().register(z.globalRegistry, {
@@ -34575,6 +34756,10 @@ export const post_fleet_package_policies_bulk_get_response = z.object({
         agents: z.optional(z.number()),
         cloud_connector_id: z.optional(z.union([
             z.string(),
+            z.null()
+        ])),
+        cloud_connector_name: z.optional(z.union([
+            z.string().min(1).max(255),
             z.null()
         ])),
         created_at: z.string(),
@@ -34833,6 +35018,10 @@ export const get_fleet_package_policies_packagepolicyid_response = z.object({
             z.string(),
             z.null()
         ])),
+        cloud_connector_name: z.optional(z.union([
+            z.string().min(1).max(255),
+            z.null()
+        ])),
         created_at: z.string(),
         created_by: z.string(),
         description: z.optional(z.string().register(z.globalRegistry, {
@@ -35050,6 +35239,10 @@ export const put_fleet_package_policies_packagepolicyid_request = z.object({
             ])),
             cloud_connector_id: z.optional(z.union([
                 z.string(),
+                z.null()
+            ])),
+            cloud_connector_name: z.optional(z.union([
+                z.string().min(1).max(255),
                 z.null()
             ])),
             description: z.optional(z.string().register(z.globalRegistry, {
@@ -35312,6 +35505,10 @@ export const put_fleet_package_policies_packagepolicyid_response = z.object({
         agents: z.optional(z.number()),
         cloud_connector_id: z.optional(z.union([
             z.string(),
+            z.null()
+        ])),
+        cloud_connector_name: z.optional(z.union([
+            z.string().min(1).max(255),
             z.null()
         ])),
         created_at: z.string(),
@@ -35672,6 +35869,10 @@ export const post_fleet_package_policies_upgrade_dryrun_response = z.array(z.obj
                 z.string(),
                 z.null()
             ])),
+            cloud_connector_name: z.optional(z.union([
+                z.string().min(1).max(255),
+                z.null()
+            ])),
             created_at: z.string(),
             created_by: z.string(),
             description: z.optional(z.string().register(z.globalRegistry, {
@@ -35880,6 +36081,10 @@ export const post_fleet_package_policies_upgrade_dryrun_response = z.array(z.obj
             ])),
             cloud_connector_id: z.optional(z.union([
                 z.string(),
+                z.null()
+            ])),
+            cloud_connector_name: z.optional(z.union([
+                z.string().min(1).max(255),
                 z.null()
             ])),
             created_at: z.optional(z.string()),
@@ -39920,16 +40125,27 @@ export const put_streams_name_request = z.object({
         z.union([
             z.record(z.string(), z.unknown()).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
                 }).and(z.object({
                     description: z.string(),
-                    name: z.string()
+                    name: z.string(),
+                    updated_at: z.iso.datetime()
                 }))
             })).and(z.object({
                 dashboards: z.array(z.string()),
                 queries: z.array(z.object({
-                    id: z.string().min(1),
-                    title: z.string().min(1)
+                    id: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    }),
+                    title: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    })
                 }).and(z.object({
                     feature: z.optional(z.object({
                         filter: z.union([
@@ -39950,7 +40166,9 @@ export const put_streams_name_request = z.object({
                                         z.number(),
                                         z.boolean()
                                     ])),
-                                    field: z.string().min(1),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to filter on.'
+                                    }),
                                     gt: z.optional(z.union([
                                         z.string(),
                                         z.number(),
@@ -39997,35 +40215,67 @@ export const put_streams_name_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Range comparison values.'
                                     })),
                                     startsWith: z.optional(z.union([
                                         z.string(),
                                         z.number(),
                                         z.boolean()
                                     ]))
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                 }),
                                 z.object({
-                                    exists: z.optional(z.boolean()),
-                                    field: z.string().min(1)
+                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                        description: 'Indicates whether the field exists or not.'
+                                    })),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to check.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                 })
                             ]),
                             z.object({
-                                and: z.array(z.unknown())
+                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical AND that groups multiple conditions.'
                             }),
                             z.object({
-                                or: z.array(z.unknown())
+                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical OR that groups multiple conditions.'
                             }),
                             z.object({
-                                not: z.unknown()
+                                not: z.unknown().register(z.globalRegistry, {
+                                    description: 'A condition that negates another condition.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical NOT that negates a condition.'
                             }),
                             z.object({
-                                never: z.object({})
+                                never: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition never matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to false.'
                             }),
                             z.object({
-                                always: z.object({})
+                                always: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition always matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                             })
                         ]),
-                        name: z.string().min(1)
+                        name: z.string().min(1).register(z.globalRegistry, {
+                            description: 'A non-empty string.'
+                        })
                     })),
                     kql: z.object({
                         query: z.string()
@@ -40035,11 +40285,14 @@ export const put_streams_name_request = z.object({
                 rules: z.array(z.string())
             })).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
-                }).and(z.record(z.string(), z.unknown()).and(z.object({
-                    description: z.string(),
-                    name: z.string()
-                })).and(z.object({
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
+                }).and(z.object({
                     ingest: z.object({
                         failure_store: z.union([
                             z.object({
@@ -40052,7 +40305,9 @@ export const put_streams_name_request = z.object({
                                 z.object({
                                     lifecycle: z.object({
                                         enabled: z.object({
-                                            data_retention: z.optional(z.string().min(1))
+                                            data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                                description: 'A non-empty string.'
+                                            }))
                                         })
                                     })
                                 }),
@@ -40066,12 +40321,16 @@ export const put_streams_name_request = z.object({
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
-                                    data_retention: z.optional(z.string().min(1))
+                                    data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    }))
                                 })
                             }),
                             z.object({
                                 ilm: z.object({
-                                    policy: z.string().min(1)
+                                    policy: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    })
                                 })
                             }),
                             z.object({
@@ -40082,13 +40341,27 @@ export const put_streams_name_request = z.object({
                             steps: z.array(z.union([z.union([
                                     z.object({
                                         action: z.enum(['grok']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with grok patterns'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         pattern_definitions: z.optional(z.record(z.string(), z.string())),
-                                        patterns: z.array(z.string().min(1)).min(1),
+                                        patterns: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).min(1).register(z.globalRegistry, {
+                                            description: 'Grok patterns applied in order to extract fields'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40107,7 +40380,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40154,44 +40429,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Grok processor - Extract fields from text using grok patterns'
                                     }),
                                     z.object({
                                         action: z.enum(['dissect']),
-                                        append_separator: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        append_separator: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Separator inserted when target fields are concatenated'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with dissect pattern'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Dissect pattern describing field boundaries'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40210,7 +40531,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40257,46 +40580,98 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Dissect processor - Extract fields from text using a lightweight, delimiter-based parser'
                                     }),
                                     z.object({
                                         action: z.enum(['date']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        formats: z.array(z.string().min(1)),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        locale: z.optional(z.string().min(1)),
-                                        output_format: z.optional(z.string().min(1)),
-                                        timezone: z.optional(z.string().min(1)),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        formats: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).register(z.globalRegistry, {
+                                            description: 'Accepted input date formats, tried in order'
+                                        }),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field containing the date/time text'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        locale: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional locale for date parsing'
+                                        })),
+                                        output_format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional output format for storing the parsed date as text'
+                                        })),
+                                        timezone: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional timezone for date parsing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the parsed date (defaults to source)'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40315,7 +40690,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40362,40 +40739,78 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Date processor - Parse dates from strings using one or more expected formats'
                                     }),
                                     z.object({
                                         action: z.enum(['drop_document']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40414,7 +40829,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40461,44 +40878,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['rename']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Existing source field to rename or move'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip when source field is missing'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting the target field if it already exists'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'New field name or destination path'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40517,7 +40980,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40564,44 +41029,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Rename processor - Change a field name and optionally its location'
                                     }),
                                     z.object({
                                         action: z.enum(['set']),
-                                        copy_from: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.optional(z.unknown()),
+                                        copy_from: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Copy value from another field instead of providing a literal'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting an existing target field'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field to set or create'
+                                        }),
+                                        value: z.optional(z.unknown().register(z.globalRegistry, {
+                                            description: 'Literal value to assign to the target field'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40620,7 +41131,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40667,43 +41180,87 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
                                     }),
                                     z.object({
                                         action: z.enum(['append']),
-                                        allow_duplicates: z.optional(z.boolean()),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.array(z.unknown()).min(1),
+                                        allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'If true, do not deduplicate appended values'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Array field to append values to'
+                                        }),
+                                        value: z.array(z.unknown()).min(1).register(z.globalRegistry, {
+                                            description: 'Values to append (must be literal, no templates)'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40722,7 +41279,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40769,49 +41328,101 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Append processor - Append one or more values to an existing or new array field'
                                     }),
                                     z.object({
                                         action: z.enum(['remove_by_prefix']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean())
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove along with all its nested fields'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        }))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove by prefix processor - Remove a field and all nested fields matching the prefix'
                                     }),
                                     z.object({
                                         action: z.enum(['remove']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove from the document'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40830,7 +41441,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40877,45 +41490,89 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove processor - Delete one or more fields from the document'
                                     }),
                                     z.object({
                                         action: z.enum(['replace']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string or string with whitespace.'
+                                        }),
                                         replacement: z.string(),
-                                        to: z.optional(z.string().min(1)),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -40934,7 +41591,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -40981,50 +41640,96 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['convert']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to convert to a different data type'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the converted value (defaults to source)'
+                                        })),
                                         type: z.enum([
                                             'integer',
                                             'long',
                                             'double',
                                             'boolean',
                                             'string'
-                                        ]),
+                                        ]).register(z.globalRegistry, {
+                                            description: 'Target data type: integer, long, double, boolean, or string'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -41043,7 +41748,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -41090,41 +41797,83 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
                                     }),
                                     z.object({
-                                        action: z.enum(['manual_ingest_pipeline']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown()))),
+                                        action: z.enum(['manual_ingest_pipeline']).register(z.globalRegistry, {
+                                            description: 'Manual ingest pipeline - executes raw Elasticsearch ingest processors'
+                                        }),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+                                            description: 'Fallback processors to run when a processor fails'
+                                        })),
                                         processors: z.array(z.object({
                                             append: z.unknown(),
                                             attachment: z.unknown(),
@@ -41171,8 +41920,12 @@ export const put_streams_name_request = z.object({
                                             uri_parts: z.unknown(),
                                             urldecode: z.unknown(),
                                             user_agent: z.unknown()
+                                        })).register(z.globalRegistry, {
+                                            description: 'List of raw Elasticsearch ingest processors to run'
+                                        }),
+                                        tag: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Optional ingest processor tag for Elasticsearch'
                                         })),
-                                        tag: z.optional(z.string()),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -41191,7 +41944,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -41238,34 +41993,66 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Manual ingest pipeline wrapper around native Elasticsearch processors'
                                     })
                                 ]), z.object({
                                     customIdentifier: z.optional(z.string()),
@@ -41287,7 +42074,9 @@ export const put_streams_name_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ])),
-                                                field: z.string().min(1),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to filter on.'
+                                                }),
                                                 gt: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
@@ -41334,37 +42123,68 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'Range comparison values.'
                                                 })),
                                                 startsWith: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that compares a field to a value or range using an operator as the key.'
                                             }),
                                             z.object({
-                                                exists: z.optional(z.boolean()),
-                                                field: z.string().min(1)
+                                                exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                    description: 'Indicates whether the field exists or not.'
+                                                })),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to check.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that checks for the existence or non-existence of a field.'
                                             })
                                         ]),
                                         z.object({
-                                            and: z.array(z.unknown())
+                                            and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical AND that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            or: z.array(z.unknown())
+                                            or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical OR that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            not: z.unknown()
+                                            not: z.unknown().register(z.globalRegistry, {
+                                                description: 'A condition that negates another condition.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical NOT that negates a condition.'
                                         }),
                                         z.object({
-                                            never: z.object({})
+                                            never: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition never matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to false.'
                                         }),
                                         z.object({
-                                            always: z.object({})
+                                            always: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition always matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                         })
                                     ]), z.object({
                                         steps: z.array(z.unknown())
                                     }))
-                                })]))
+                                })])),
+                            updated_at: z.iso.datetime()
                         }),
                         settings: z.object({
                             'index.number_of_replicas': z.optional(z.object({
@@ -41380,9 +42200,7 @@ export const put_streams_name_request = z.object({
                                 ])
                             }))
                         })
-                    })
-                })).and(z.object({
-                    ingest: z.object({
+                    }).and(z.object({
                         wired: z.object({
                             fields: z.record(z.string(), z.record(z.string(), z.union([
                                 z.union([
@@ -41403,7 +42221,9 @@ export const put_streams_name_request = z.object({
                                 z.unknown()
                             ])).and(z.union([
                                 z.object({
-                                    format: z.optional(z.string().min(1)),
+                                    format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    })),
                                     type: z.enum([
                                         'keyword',
                                         'match_only_text',
@@ -41411,7 +42231,8 @@ export const put_streams_name_request = z.object({
                                         'double',
                                         'date',
                                         'boolean',
-                                        'ip'
+                                        'ip',
+                                        'geo_point'
                                     ])
                                 }),
                                 z.object({
@@ -41419,7 +42240,9 @@ export const put_streams_name_request = z.object({
                                 })
                             ]))),
                             routing: z.array(z.object({
-                                destination: z.string().min(1),
+                                destination: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                }),
                                 status: z.optional(z.enum(['enabled', 'disabled'])),
                                 where: z.union([
                                     z.union([
@@ -41439,7 +42262,9 @@ export const put_streams_name_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -41486,50 +42311,91 @@ export const put_streams_name_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ])
                             }))
                         })
-                    })
-                })))
+                    }))
+                }))
             })).and(z.record(z.string(), z.unknown())).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
                 }).and(z.object({
                     description: z.string(),
-                    name: z.string()
+                    name: z.string(),
+                    updated_at: z.iso.datetime()
                 }))
             })).and(z.object({
                 dashboards: z.array(z.string()),
                 queries: z.array(z.object({
-                    id: z.string().min(1),
-                    title: z.string().min(1)
+                    id: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    }),
+                    title: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    })
                 }).and(z.object({
                     feature: z.optional(z.object({
                         filter: z.union([
@@ -41550,7 +42416,9 @@ export const put_streams_name_request = z.object({
                                         z.number(),
                                         z.boolean()
                                     ])),
-                                    field: z.string().min(1),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to filter on.'
+                                    }),
                                     gt: z.optional(z.union([
                                         z.string(),
                                         z.number(),
@@ -41597,35 +42465,67 @@ export const put_streams_name_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Range comparison values.'
                                     })),
                                     startsWith: z.optional(z.union([
                                         z.string(),
                                         z.number(),
                                         z.boolean()
                                     ]))
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                 }),
                                 z.object({
-                                    exists: z.optional(z.boolean()),
-                                    field: z.string().min(1)
+                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                        description: 'Indicates whether the field exists or not.'
+                                    })),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to check.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                 })
                             ]),
                             z.object({
-                                and: z.array(z.unknown())
+                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical AND that groups multiple conditions.'
                             }),
                             z.object({
-                                or: z.array(z.unknown())
+                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical OR that groups multiple conditions.'
                             }),
                             z.object({
-                                not: z.unknown()
+                                not: z.unknown().register(z.globalRegistry, {
+                                    description: 'A condition that negates another condition.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical NOT that negates a condition.'
                             }),
                             z.object({
-                                never: z.object({})
+                                never: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition never matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to false.'
                             }),
                             z.object({
-                                always: z.object({})
+                                always: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition always matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                             })
                         ]),
-                        name: z.string().min(1)
+                        name: z.string().min(1).register(z.globalRegistry, {
+                            description: 'A non-empty string.'
+                        })
                     })),
                     kql: z.object({
                         query: z.string()
@@ -41635,7 +42535,13 @@ export const put_streams_name_request = z.object({
                 rules: z.array(z.string())
             })).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
                 }).and(z.object({
                     ingest: z.object({
                         failure_store: z.union([
@@ -41649,7 +42555,9 @@ export const put_streams_name_request = z.object({
                                 z.object({
                                     lifecycle: z.object({
                                         enabled: z.object({
-                                            data_retention: z.optional(z.string().min(1))
+                                            data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                                description: 'A non-empty string.'
+                                            }))
                                         })
                                     })
                                 }),
@@ -41663,12 +42571,16 @@ export const put_streams_name_request = z.object({
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
-                                    data_retention: z.optional(z.string().min(1))
+                                    data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    }))
                                 })
                             }),
                             z.object({
                                 ilm: z.object({
-                                    policy: z.string().min(1)
+                                    policy: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    })
                                 })
                             }),
                             z.object({
@@ -41679,13 +42591,27 @@ export const put_streams_name_request = z.object({
                             steps: z.array(z.union([z.union([
                                     z.object({
                                         action: z.enum(['grok']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with grok patterns'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         pattern_definitions: z.optional(z.record(z.string(), z.string())),
-                                        patterns: z.array(z.string().min(1)).min(1),
+                                        patterns: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).min(1).register(z.globalRegistry, {
+                                            description: 'Grok patterns applied in order to extract fields'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -41704,7 +42630,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -41751,44 +42679,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Grok processor - Extract fields from text using grok patterns'
                                     }),
                                     z.object({
                                         action: z.enum(['dissect']),
-                                        append_separator: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        append_separator: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Separator inserted when target fields are concatenated'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with dissect pattern'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Dissect pattern describing field boundaries'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -41807,7 +42781,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -41854,46 +42830,98 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Dissect processor - Extract fields from text using a lightweight, delimiter-based parser'
                                     }),
                                     z.object({
                                         action: z.enum(['date']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        formats: z.array(z.string().min(1)),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        locale: z.optional(z.string().min(1)),
-                                        output_format: z.optional(z.string().min(1)),
-                                        timezone: z.optional(z.string().min(1)),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        formats: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).register(z.globalRegistry, {
+                                            description: 'Accepted input date formats, tried in order'
+                                        }),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field containing the date/time text'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        locale: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional locale for date parsing'
+                                        })),
+                                        output_format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional output format for storing the parsed date as text'
+                                        })),
+                                        timezone: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional timezone for date parsing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the parsed date (defaults to source)'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -41912,7 +42940,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -41959,40 +42989,78 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Date processor - Parse dates from strings using one or more expected formats'
                                     }),
                                     z.object({
                                         action: z.enum(['drop_document']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42011,7 +43079,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42058,44 +43128,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['rename']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Existing source field to rename or move'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip when source field is missing'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting the target field if it already exists'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'New field name or destination path'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42114,7 +43230,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42161,44 +43279,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Rename processor - Change a field name and optionally its location'
                                     }),
                                     z.object({
                                         action: z.enum(['set']),
-                                        copy_from: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.optional(z.unknown()),
+                                        copy_from: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Copy value from another field instead of providing a literal'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting an existing target field'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field to set or create'
+                                        }),
+                                        value: z.optional(z.unknown().register(z.globalRegistry, {
+                                            description: 'Literal value to assign to the target field'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42217,7 +43381,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42264,43 +43430,87 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
                                     }),
                                     z.object({
                                         action: z.enum(['append']),
-                                        allow_duplicates: z.optional(z.boolean()),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.array(z.unknown()).min(1),
+                                        allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'If true, do not deduplicate appended values'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Array field to append values to'
+                                        }),
+                                        value: z.array(z.unknown()).min(1).register(z.globalRegistry, {
+                                            description: 'Values to append (must be literal, no templates)'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42319,7 +43529,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42366,49 +43578,101 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Append processor - Append one or more values to an existing or new array field'
                                     }),
                                     z.object({
                                         action: z.enum(['remove_by_prefix']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean())
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove along with all its nested fields'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        }))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove by prefix processor - Remove a field and all nested fields matching the prefix'
                                     }),
                                     z.object({
                                         action: z.enum(['remove']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove from the document'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42427,7 +43691,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42474,45 +43740,89 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove processor - Delete one or more fields from the document'
                                     }),
                                     z.object({
                                         action: z.enum(['replace']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string or string with whitespace.'
+                                        }),
                                         replacement: z.string(),
-                                        to: z.optional(z.string().min(1)),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42531,7 +43841,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42578,50 +43890,96 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['convert']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to convert to a different data type'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the converted value (defaults to source)'
+                                        })),
                                         type: z.enum([
                                             'integer',
                                             'long',
                                             'double',
                                             'boolean',
                                             'string'
-                                        ]),
+                                        ]).register(z.globalRegistry, {
+                                            description: 'Target data type: integer, long, double, boolean, or string'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42640,7 +43998,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42687,41 +44047,83 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
                                     }),
                                     z.object({
-                                        action: z.enum(['manual_ingest_pipeline']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown()))),
+                                        action: z.enum(['manual_ingest_pipeline']).register(z.globalRegistry, {
+                                            description: 'Manual ingest pipeline - executes raw Elasticsearch ingest processors'
+                                        }),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+                                            description: 'Fallback processors to run when a processor fails'
+                                        })),
                                         processors: z.array(z.object({
                                             append: z.unknown(),
                                             attachment: z.unknown(),
@@ -42768,8 +44170,12 @@ export const put_streams_name_request = z.object({
                                             uri_parts: z.unknown(),
                                             urldecode: z.unknown(),
                                             user_agent: z.unknown()
+                                        })).register(z.globalRegistry, {
+                                            description: 'List of raw Elasticsearch ingest processors to run'
+                                        }),
+                                        tag: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Optional ingest processor tag for Elasticsearch'
                                         })),
-                                        tag: z.optional(z.string()),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -42788,7 +44194,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -42835,34 +44243,66 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Manual ingest pipeline wrapper around native Elasticsearch processors'
                                     })
                                 ]), z.object({
                                     customIdentifier: z.optional(z.string()),
@@ -42884,7 +44324,9 @@ export const put_streams_name_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ])),
-                                                field: z.string().min(1),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to filter on.'
+                                                }),
                                                 gt: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
@@ -42931,37 +44373,68 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'Range comparison values.'
                                                 })),
                                                 startsWith: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that compares a field to a value or range using an operator as the key.'
                                             }),
                                             z.object({
-                                                exists: z.optional(z.boolean()),
-                                                field: z.string().min(1)
+                                                exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                    description: 'Indicates whether the field exists or not.'
+                                                })),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to check.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that checks for the existence or non-existence of a field.'
                                             })
                                         ]),
                                         z.object({
-                                            and: z.array(z.unknown())
+                                            and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical AND that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            or: z.array(z.unknown())
+                                            or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical OR that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            not: z.unknown()
+                                            not: z.unknown().register(z.globalRegistry, {
+                                                description: 'A condition that negates another condition.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical NOT that negates a condition.'
                                         }),
                                         z.object({
-                                            never: z.object({})
+                                            never: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition never matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to false.'
                                         }),
                                         z.object({
-                                            always: z.object({})
+                                            always: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition always matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                         })
                                     ]), z.object({
                                         steps: z.array(z.unknown())
                                     }))
-                                })]))
+                                })])),
+                            updated_at: z.iso.datetime()
                         }),
                         settings: z.object({
                             'index.number_of_replicas': z.optional(z.object({
@@ -42982,16 +44455,27 @@ export const put_streams_name_request = z.object({
             })).and(z.record(z.string(), z.unknown())).and(z.record(z.string(), z.unknown())),
             z.record(z.string(), z.unknown()).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
                 }).and(z.object({
                     description: z.string(),
-                    name: z.string()
+                    name: z.string(),
+                    updated_at: z.iso.datetime()
                 }))
             })).and(z.object({
                 dashboards: z.array(z.string()),
                 queries: z.array(z.object({
-                    id: z.string().min(1),
-                    title: z.string().min(1)
+                    id: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    }),
+                    title: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    })
                 }).and(z.object({
                     feature: z.optional(z.object({
                         filter: z.union([
@@ -43012,7 +44496,9 @@ export const put_streams_name_request = z.object({
                                         z.number(),
                                         z.boolean()
                                     ])),
-                                    field: z.string().min(1),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to filter on.'
+                                    }),
                                     gt: z.optional(z.union([
                                         z.string(),
                                         z.number(),
@@ -43059,35 +44545,67 @@ export const put_streams_name_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Range comparison values.'
                                     })),
                                     startsWith: z.optional(z.union([
                                         z.string(),
                                         z.number(),
                                         z.boolean()
                                     ]))
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                 }),
                                 z.object({
-                                    exists: z.optional(z.boolean()),
-                                    field: z.string().min(1)
+                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                        description: 'Indicates whether the field exists or not.'
+                                    })),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to check.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                 })
                             ]),
                             z.object({
-                                and: z.array(z.unknown())
+                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical AND that groups multiple conditions.'
                             }),
                             z.object({
-                                or: z.array(z.unknown())
+                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical OR that groups multiple conditions.'
                             }),
                             z.object({
-                                not: z.unknown()
+                                not: z.unknown().register(z.globalRegistry, {
+                                    description: 'A condition that negates another condition.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical NOT that negates a condition.'
                             }),
                             z.object({
-                                never: z.object({})
+                                never: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition never matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to false.'
                             }),
                             z.object({
-                                always: z.object({})
+                                always: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition always matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                             })
                         ]),
-                        name: z.string().min(1)
+                        name: z.string().min(1).register(z.globalRegistry, {
+                            description: 'A non-empty string.'
+                        })
                     })),
                     kql: z.object({
                         query: z.string()
@@ -43097,11 +44615,14 @@ export const put_streams_name_request = z.object({
                 rules: z.array(z.string())
             })).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
-                }).and(z.record(z.string(), z.unknown()).and(z.object({
-                    description: z.string(),
-                    name: z.string()
-                })).and(z.object({
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
+                }).and(z.object({
                     ingest: z.object({
                         failure_store: z.union([
                             z.object({
@@ -43114,7 +44635,9 @@ export const put_streams_name_request = z.object({
                                 z.object({
                                     lifecycle: z.object({
                                         enabled: z.object({
-                                            data_retention: z.optional(z.string().min(1))
+                                            data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                                description: 'A non-empty string.'
+                                            }))
                                         })
                                     })
                                 }),
@@ -43128,12 +44651,16 @@ export const put_streams_name_request = z.object({
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
-                                    data_retention: z.optional(z.string().min(1))
+                                    data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    }))
                                 })
                             }),
                             z.object({
                                 ilm: z.object({
-                                    policy: z.string().min(1)
+                                    policy: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    })
                                 })
                             }),
                             z.object({
@@ -43144,13 +44671,27 @@ export const put_streams_name_request = z.object({
                             steps: z.array(z.union([z.union([
                                     z.object({
                                         action: z.enum(['grok']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with grok patterns'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         pattern_definitions: z.optional(z.record(z.string(), z.string())),
-                                        patterns: z.array(z.string().min(1)).min(1),
+                                        patterns: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).min(1).register(z.globalRegistry, {
+                                            description: 'Grok patterns applied in order to extract fields'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43169,7 +44710,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43216,44 +44759,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Grok processor - Extract fields from text using grok patterns'
                                     }),
                                     z.object({
                                         action: z.enum(['dissect']),
-                                        append_separator: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        append_separator: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Separator inserted when target fields are concatenated'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with dissect pattern'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Dissect pattern describing field boundaries'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43272,7 +44861,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43319,46 +44910,98 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Dissect processor - Extract fields from text using a lightweight, delimiter-based parser'
                                     }),
                                     z.object({
                                         action: z.enum(['date']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        formats: z.array(z.string().min(1)),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        locale: z.optional(z.string().min(1)),
-                                        output_format: z.optional(z.string().min(1)),
-                                        timezone: z.optional(z.string().min(1)),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        formats: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).register(z.globalRegistry, {
+                                            description: 'Accepted input date formats, tried in order'
+                                        }),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field containing the date/time text'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        locale: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional locale for date parsing'
+                                        })),
+                                        output_format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional output format for storing the parsed date as text'
+                                        })),
+                                        timezone: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional timezone for date parsing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the parsed date (defaults to source)'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43377,7 +45020,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43424,40 +45069,78 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Date processor - Parse dates from strings using one or more expected formats'
                                     }),
                                     z.object({
                                         action: z.enum(['drop_document']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43476,7 +45159,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43523,44 +45208,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['rename']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Existing source field to rename or move'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip when source field is missing'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting the target field if it already exists'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'New field name or destination path'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43579,7 +45310,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43626,44 +45359,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Rename processor - Change a field name and optionally its location'
                                     }),
                                     z.object({
                                         action: z.enum(['set']),
-                                        copy_from: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.optional(z.unknown()),
+                                        copy_from: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Copy value from another field instead of providing a literal'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting an existing target field'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field to set or create'
+                                        }),
+                                        value: z.optional(z.unknown().register(z.globalRegistry, {
+                                            description: 'Literal value to assign to the target field'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43682,7 +45461,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43729,43 +45510,87 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
                                     }),
                                     z.object({
                                         action: z.enum(['append']),
-                                        allow_duplicates: z.optional(z.boolean()),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.array(z.unknown()).min(1),
+                                        allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'If true, do not deduplicate appended values'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Array field to append values to'
+                                        }),
+                                        value: z.array(z.unknown()).min(1).register(z.globalRegistry, {
+                                            description: 'Values to append (must be literal, no templates)'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43784,7 +45609,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43831,49 +45658,101 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Append processor - Append one or more values to an existing or new array field'
                                     }),
                                     z.object({
                                         action: z.enum(['remove_by_prefix']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean())
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove along with all its nested fields'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        }))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove by prefix processor - Remove a field and all nested fields matching the prefix'
                                     }),
                                     z.object({
                                         action: z.enum(['remove']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove from the document'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43892,7 +45771,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -43939,45 +45820,89 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove processor - Delete one or more fields from the document'
                                     }),
                                     z.object({
                                         action: z.enum(['replace']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string or string with whitespace.'
+                                        }),
                                         replacement: z.string(),
-                                        to: z.optional(z.string().min(1)),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -43996,7 +45921,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -44043,50 +45970,96 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['convert']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to convert to a different data type'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the converted value (defaults to source)'
+                                        })),
                                         type: z.enum([
                                             'integer',
                                             'long',
                                             'double',
                                             'boolean',
                                             'string'
-                                        ]),
+                                        ]).register(z.globalRegistry, {
+                                            description: 'Target data type: integer, long, double, boolean, or string'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -44105,7 +46078,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -44152,41 +46127,83 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
                                     }),
                                     z.object({
-                                        action: z.enum(['manual_ingest_pipeline']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown()))),
+                                        action: z.enum(['manual_ingest_pipeline']).register(z.globalRegistry, {
+                                            description: 'Manual ingest pipeline - executes raw Elasticsearch ingest processors'
+                                        }),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+                                            description: 'Fallback processors to run when a processor fails'
+                                        })),
                                         processors: z.array(z.object({
                                             append: z.unknown(),
                                             attachment: z.unknown(),
@@ -44233,8 +46250,12 @@ export const put_streams_name_request = z.object({
                                             uri_parts: z.unknown(),
                                             urldecode: z.unknown(),
                                             user_agent: z.unknown()
+                                        })).register(z.globalRegistry, {
+                                            description: 'List of raw Elasticsearch ingest processors to run'
+                                        }),
+                                        tag: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Optional ingest processor tag for Elasticsearch'
                                         })),
-                                        tag: z.optional(z.string()),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -44253,7 +46274,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -44300,34 +46323,66 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Manual ingest pipeline wrapper around native Elasticsearch processors'
                                     })
                                 ]), z.object({
                                     customIdentifier: z.optional(z.string()),
@@ -44349,7 +46404,9 @@ export const put_streams_name_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ])),
-                                                field: z.string().min(1),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to filter on.'
+                                                }),
                                                 gt: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
@@ -44396,37 +46453,68 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'Range comparison values.'
                                                 })),
                                                 startsWith: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that compares a field to a value or range using an operator as the key.'
                                             }),
                                             z.object({
-                                                exists: z.optional(z.boolean()),
-                                                field: z.string().min(1)
+                                                exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                    description: 'Indicates whether the field exists or not.'
+                                                })),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to check.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that checks for the existence or non-existence of a field.'
                                             })
                                         ]),
                                         z.object({
-                                            and: z.array(z.unknown())
+                                            and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical AND that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            or: z.array(z.unknown())
+                                            or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical OR that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            not: z.unknown()
+                                            not: z.unknown().register(z.globalRegistry, {
+                                                description: 'A condition that negates another condition.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical NOT that negates a condition.'
                                         }),
                                         z.object({
-                                            never: z.object({})
+                                            never: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition never matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to false.'
                                         }),
                                         z.object({
-                                            always: z.object({})
+                                            always: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition always matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                         })
                                     ]), z.object({
                                         steps: z.array(z.unknown())
                                     }))
-                                })]))
+                                })])),
+                            updated_at: z.iso.datetime()
                         }),
                         settings: z.object({
                             'index.number_of_replicas': z.optional(z.object({
@@ -44442,9 +46530,7 @@ export const put_streams_name_request = z.object({
                                 ])
                             }))
                         })
-                    })
-                })).and(z.object({
-                    ingest: z.object({
+                    }).and(z.object({
                         classic: z.object({
                             field_overrides: z.optional(z.record(z.string(), z.record(z.string(), z.union([
                                 z.union([
@@ -44465,7 +46551,9 @@ export const put_streams_name_request = z.object({
                                 z.unknown()
                             ])).and(z.union([
                                 z.object({
-                                    format: z.optional(z.string().min(1)),
+                                    format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    })),
                                     type: z.enum([
                                         'keyword',
                                         'match_only_text',
@@ -44473,7 +46561,8 @@ export const put_streams_name_request = z.object({
                                         'double',
                                         'date',
                                         'boolean',
-                                        'ip'
+                                        'ip',
+                                        'geo_point'
                                     ])
                                 }),
                                 z.object({
@@ -44481,20 +46570,31 @@ export const put_streams_name_request = z.object({
                                 })
                             ]))))
                         })
-                    })
-                })))
+                    }))
+                }))
             })).and(z.record(z.string(), z.unknown())).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
                 }).and(z.object({
                     description: z.string(),
-                    name: z.string()
+                    name: z.string(),
+                    updated_at: z.iso.datetime()
                 }))
             })).and(z.object({
                 dashboards: z.array(z.string()),
                 queries: z.array(z.object({
-                    id: z.string().min(1),
-                    title: z.string().min(1)
+                    id: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    }),
+                    title: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    })
                 }).and(z.object({
                     feature: z.optional(z.object({
                         filter: z.union([
@@ -44515,7 +46615,9 @@ export const put_streams_name_request = z.object({
                                         z.number(),
                                         z.boolean()
                                     ])),
-                                    field: z.string().min(1),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to filter on.'
+                                    }),
                                     gt: z.optional(z.union([
                                         z.string(),
                                         z.number(),
@@ -44562,35 +46664,67 @@ export const put_streams_name_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Range comparison values.'
                                     })),
                                     startsWith: z.optional(z.union([
                                         z.string(),
                                         z.number(),
                                         z.boolean()
                                     ]))
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                 }),
                                 z.object({
-                                    exists: z.optional(z.boolean()),
-                                    field: z.string().min(1)
+                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                        description: 'Indicates whether the field exists or not.'
+                                    })),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to check.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                 })
                             ]),
                             z.object({
-                                and: z.array(z.unknown())
+                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical AND that groups multiple conditions.'
                             }),
                             z.object({
-                                or: z.array(z.unknown())
+                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical OR that groups multiple conditions.'
                             }),
                             z.object({
-                                not: z.unknown()
+                                not: z.unknown().register(z.globalRegistry, {
+                                    description: 'A condition that negates another condition.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical NOT that negates a condition.'
                             }),
                             z.object({
-                                never: z.object({})
+                                never: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition never matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to false.'
                             }),
                             z.object({
-                                always: z.object({})
+                                always: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition always matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                             })
                         ]),
-                        name: z.string().min(1)
+                        name: z.string().min(1).register(z.globalRegistry, {
+                            description: 'A non-empty string.'
+                        })
                     })),
                     kql: z.object({
                         query: z.string()
@@ -44600,7 +46734,13 @@ export const put_streams_name_request = z.object({
                 rules: z.array(z.string())
             })).and(z.object({
                 stream: z.object({
-                    name: z.optional(z.unknown())
+                    ingest: z.optional(z.object({
+                        processing: z.object({
+                            updated_at: z.optional(z.unknown())
+                        })
+                    })),
+                    name: z.optional(z.unknown()),
+                    updated_at: z.optional(z.unknown())
                 }).and(z.object({
                     ingest: z.object({
                         failure_store: z.union([
@@ -44614,7 +46754,9 @@ export const put_streams_name_request = z.object({
                                 z.object({
                                     lifecycle: z.object({
                                         enabled: z.object({
-                                            data_retention: z.optional(z.string().min(1))
+                                            data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                                description: 'A non-empty string.'
+                                            }))
                                         })
                                     })
                                 }),
@@ -44628,12 +46770,16 @@ export const put_streams_name_request = z.object({
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
-                                    data_retention: z.optional(z.string().min(1))
+                                    data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    }))
                                 })
                             }),
                             z.object({
                                 ilm: z.object({
-                                    policy: z.string().min(1)
+                                    policy: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    })
                                 })
                             }),
                             z.object({
@@ -44644,13 +46790,27 @@ export const put_streams_name_request = z.object({
                             steps: z.array(z.union([z.union([
                                     z.object({
                                         action: z.enum(['grok']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with grok patterns'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         pattern_definitions: z.optional(z.record(z.string(), z.string())),
-                                        patterns: z.array(z.string().min(1)).min(1),
+                                        patterns: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).min(1).register(z.globalRegistry, {
+                                            description: 'Grok patterns applied in order to extract fields'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -44669,7 +46829,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -44716,44 +46878,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Grok processor - Extract fields from text using grok patterns'
                                     }),
                                     z.object({
                                         action: z.enum(['dissect']),
-                                        append_separator: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        append_separator: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Separator inserted when target fields are concatenated'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to parse with dissect pattern'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Dissect pattern describing field boundaries'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -44772,7 +46980,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -44819,46 +47029,98 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Dissect processor - Extract fields from text using a lightweight, delimiter-based parser'
                                     }),
                                     z.object({
                                         action: z.enum(['date']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        formats: z.array(z.string().min(1)),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        locale: z.optional(z.string().min(1)),
-                                        output_format: z.optional(z.string().min(1)),
-                                        timezone: z.optional(z.string().min(1)),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        formats: z.array(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })).register(z.globalRegistry, {
+                                            description: 'Accepted input date formats, tried in order'
+                                        }),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field containing the date/time text'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        locale: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional locale for date parsing'
+                                        })),
+                                        output_format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional output format for storing the parsed date as text'
+                                        })),
+                                        timezone: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Optional timezone for date parsing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the parsed date (defaults to source)'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -44877,7 +47139,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -44924,40 +47188,78 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Date processor - Parse dates from strings using one or more expected formats'
                                     }),
                                     z.object({
                                         action: z.enum(['drop_document']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -44976,7 +47278,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45023,44 +47327,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['rename']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Existing source field to rename or move'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip when source field is missing'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting the target field if it already exists'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'New field name or destination path'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -45079,7 +47429,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45126,44 +47478,90 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Rename processor - Change a field name and optionally its location'
                                     }),
                                     z.object({
                                         action: z.enum(['set']),
-                                        copy_from: z.optional(z.string().min(1)),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        override: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.optional(z.unknown()),
+                                        copy_from: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Copy value from another field instead of providing a literal'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        override: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Allow overwriting an existing target field'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field to set or create'
+                                        }),
+                                        value: z.optional(z.unknown().register(z.globalRegistry, {
+                                            description: 'Literal value to assign to the target field'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -45182,7 +47580,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45229,43 +47629,87 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
                                     }),
                                     z.object({
                                         action: z.enum(['append']),
-                                        allow_duplicates: z.optional(z.boolean()),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        to: z.string().min(1),
-                                        value: z.array(z.unknown()).min(1),
+                                        allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'If true, do not deduplicate appended values'
+                                        })),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        to: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Array field to append values to'
+                                        }),
+                                        value: z.array(z.unknown()).min(1).register(z.globalRegistry, {
+                                            description: 'Values to append (must be literal, no templates)'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -45284,7 +47728,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45331,49 +47777,101 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Append processor - Append one or more values to an existing or new array field'
                                     }),
                                     z.object({
                                         action: z.enum(['remove_by_prefix']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean())
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove along with all its nested fields'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        }))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove by prefix processor - Remove a field and all nested fields matching the prefix'
                                     }),
                                     z.object({
                                         action: z.enum(['remove']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Field to remove from the document'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -45392,7 +47890,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45439,45 +47939,89 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Remove processor - Delete one or more fields from the document'
                                     }),
                                     z.object({
                                         action: z.enum(['replace']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
                                         ignore_missing: z.optional(z.boolean()),
-                                        pattern: z.string().min(1),
+                                        pattern: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string or string with whitespace.'
+                                        }),
                                         replacement: z.string(),
-                                        to: z.optional(z.string().min(1)),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'A non-empty string.'
+                                        })),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -45496,7 +48040,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45543,50 +48089,96 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Base processor options plus conditional execution'
                                     }),
                                     z.object({
                                         action: z.enum(['convert']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        from: z.string().min(1),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        ignore_missing: z.optional(z.boolean()),
-                                        to: z.optional(z.string().min(1)),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        from: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Source field to convert to a different data type'
+                                        }),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Skip processing when source field is missing'
+                                        })),
+                                        to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Target field for the converted value (defaults to source)'
+                                        })),
                                         type: z.enum([
                                             'integer',
                                             'long',
                                             'double',
                                             'boolean',
                                             'string'
-                                        ]),
+                                        ]).register(z.globalRegistry, {
+                                            description: 'Target data type: integer, long, double, boolean, or string'
+                                        }),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -45605,7 +48197,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45652,41 +48246,83 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
                                     }),
                                     z.object({
-                                        action: z.enum(['manual_ingest_pipeline']),
-                                        customIdentifier: z.optional(z.string().min(1)),
-                                        description: z.optional(z.string()),
-                                        ignore_failure: z.optional(z.boolean()),
-                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown()))),
+                                        action: z.enum(['manual_ingest_pipeline']).register(z.globalRegistry, {
+                                            description: 'Manual ingest pipeline - executes raw Elasticsearch ingest processors'
+                                        }),
+                                        customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                            description: 'Custom identifier to correlate this processor across outputs'
+                                        })),
+                                        description: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Human-readable notes about this processor step'
+                                        })),
+                                        ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Continue pipeline execution if this processor fails'
+                                        })),
+                                        on_failure: z.optional(z.array(z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+                                            description: 'Fallback processors to run when a processor fails'
+                                        })),
                                         processors: z.array(z.object({
                                             append: z.unknown(),
                                             attachment: z.unknown(),
@@ -45733,8 +48369,12 @@ export const put_streams_name_request = z.object({
                                             uri_parts: z.unknown(),
                                             urldecode: z.unknown(),
                                             user_agent: z.unknown()
+                                        })).register(z.globalRegistry, {
+                                            description: 'List of raw Elasticsearch ingest processors to run'
+                                        }),
+                                        tag: z.optional(z.string().register(z.globalRegistry, {
+                                            description: 'Optional ingest processor tag for Elasticsearch'
                                         })),
-                                        tag: z.optional(z.string()),
                                         where: z.optional(z.union([
                                             z.union([
                                                 z.object({
@@ -45753,7 +48393,9 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ])),
-                                                    field: z.string().min(1),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to filter on.'
+                                                    }),
                                                     gt: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
@@ -45800,34 +48442,66 @@ export const put_streams_name_request = z.object({
                                                             z.number(),
                                                             z.boolean()
                                                         ]))
+                                                    }).register(z.globalRegistry, {
+                                                        description: 'Range comparison values.'
                                                     })),
                                                     startsWith: z.optional(z.union([
                                                         z.string(),
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                                 }),
                                                 z.object({
-                                                    exists: z.optional(z.boolean()),
-                                                    field: z.string().min(1)
+                                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                        description: 'Indicates whether the field exists or not.'
+                                                    })),
+                                                    field: z.string().min(1).register(z.globalRegistry, {
+                                                        description: 'The document field to check.'
+                                                    })
+                                                }).register(z.globalRegistry, {
+                                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                                 })
                                             ]),
                                             z.object({
-                                                and: z.array(z.unknown())
+                                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical AND that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                or: z.array(z.unknown())
+                                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical OR that groups multiple conditions.'
                                             }),
                                             z.object({
-                                                not: z.unknown()
+                                                not: z.unknown().register(z.globalRegistry, {
+                                                    description: 'A condition that negates another condition.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A logical NOT that negates a condition.'
                                             }),
                                             z.object({
-                                                never: z.object({})
+                                                never: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition never matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to false.'
                                             }),
                                             z.object({
-                                                always: z.object({})
+                                                always: z.object({}).register(z.globalRegistry, {
+                                                    description: 'An empty object. This condition always matches.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                             })
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Manual ingest pipeline wrapper around native Elasticsearch processors'
                                     })
                                 ]), z.object({
                                     customIdentifier: z.optional(z.string()),
@@ -45849,7 +48523,9 @@ export const put_streams_name_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ])),
-                                                field: z.string().min(1),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to filter on.'
+                                                }),
                                                 gt: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
@@ -45896,37 +48572,68 @@ export const put_streams_name_request = z.object({
                                                         z.number(),
                                                         z.boolean()
                                                     ]))
+                                                }).register(z.globalRegistry, {
+                                                    description: 'Range comparison values.'
                                                 })),
                                                 startsWith: z.optional(z.union([
                                                     z.string(),
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that compares a field to a value or range using an operator as the key.'
                                             }),
                                             z.object({
-                                                exists: z.optional(z.boolean()),
-                                                field: z.string().min(1)
+                                                exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                    description: 'Indicates whether the field exists or not.'
+                                                })),
+                                                field: z.string().min(1).register(z.globalRegistry, {
+                                                    description: 'The document field to check.'
+                                                })
+                                            }).register(z.globalRegistry, {
+                                                description: 'A condition that checks for the existence or non-existence of a field.'
                                             })
                                         ]),
                                         z.object({
-                                            and: z.array(z.unknown())
+                                            and: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical AND that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            or: z.array(z.unknown())
+                                            or: z.array(z.unknown()).register(z.globalRegistry, {
+                                                description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical OR that groups multiple conditions.'
                                         }),
                                         z.object({
-                                            not: z.unknown()
+                                            not: z.unknown().register(z.globalRegistry, {
+                                                description: 'A condition that negates another condition.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A logical NOT that negates a condition.'
                                         }),
                                         z.object({
-                                            never: z.object({})
+                                            never: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition never matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to false.'
                                         }),
                                         z.object({
-                                            always: z.object({})
+                                            always: z.object({}).register(z.globalRegistry, {
+                                                description: 'An empty object. This condition always matches.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                         })
                                     ]), z.object({
                                         steps: z.array(z.unknown())
                                     }))
-                                })]))
+                                })])),
+                            updated_at: z.iso.datetime()
                         }),
                         settings: z.object({
                             'index.number_of_replicas': z.optional(z.object({
@@ -45948,16 +48655,27 @@ export const put_streams_name_request = z.object({
         ]),
         z.record(z.string(), z.unknown()).and(z.object({
             stream: z.object({
-                name: z.optional(z.unknown())
+                ingest: z.optional(z.object({
+                    processing: z.object({
+                        updated_at: z.optional(z.unknown())
+                    })
+                })),
+                name: z.optional(z.unknown()),
+                updated_at: z.optional(z.unknown())
             }).and(z.object({
                 description: z.string(),
-                name: z.string()
+                name: z.string(),
+                updated_at: z.iso.datetime()
             }))
         })).and(z.object({
             dashboards: z.array(z.string()),
             queries: z.array(z.object({
-                id: z.string().min(1),
-                title: z.string().min(1)
+                id: z.string().min(1).register(z.globalRegistry, {
+                    description: 'A non-empty string.'
+                }),
+                title: z.string().min(1).register(z.globalRegistry, {
+                    description: 'A non-empty string.'
+                })
             }).and(z.object({
                 feature: z.optional(z.object({
                     filter: z.union([
@@ -45978,7 +48696,9 @@ export const put_streams_name_request = z.object({
                                     z.number(),
                                     z.boolean()
                                 ])),
-                                field: z.string().min(1),
+                                field: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'The document field to filter on.'
+                                }),
                                 gt: z.optional(z.union([
                                     z.string(),
                                     z.number(),
@@ -46025,35 +48745,67 @@ export const put_streams_name_request = z.object({
                                         z.number(),
                                         z.boolean()
                                     ]))
+                                }).register(z.globalRegistry, {
+                                    description: 'Range comparison values.'
                                 })),
                                 startsWith: z.optional(z.union([
                                     z.string(),
                                     z.number(),
                                     z.boolean()
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that compares a field to a value or range using an operator as the key.'
                             }),
                             z.object({
-                                exists: z.optional(z.boolean()),
-                                field: z.string().min(1)
+                                exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Indicates whether the field exists or not.'
+                                })),
+                                field: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'The document field to check.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that checks for the existence or non-existence of a field.'
                             })
                         ]),
                         z.object({
-                            and: z.array(z.unknown())
+                            and: z.array(z.unknown()).register(z.globalRegistry, {
+                                description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                            })
+                        }).register(z.globalRegistry, {
+                            description: 'A logical AND that groups multiple conditions.'
                         }),
                         z.object({
-                            or: z.array(z.unknown())
+                            or: z.array(z.unknown()).register(z.globalRegistry, {
+                                description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                            })
+                        }).register(z.globalRegistry, {
+                            description: 'A logical OR that groups multiple conditions.'
                         }),
                         z.object({
-                            not: z.unknown()
+                            not: z.unknown().register(z.globalRegistry, {
+                                description: 'A condition that negates another condition.'
+                            })
+                        }).register(z.globalRegistry, {
+                            description: 'A logical NOT that negates a condition.'
                         }),
                         z.object({
-                            never: z.object({})
+                            never: z.object({}).register(z.globalRegistry, {
+                                description: 'An empty object. This condition never matches.'
+                            })
+                        }).register(z.globalRegistry, {
+                            description: 'A condition that always evaluates to false.'
                         }),
                         z.object({
-                            always: z.object({})
+                            always: z.object({}).register(z.globalRegistry, {
+                                description: 'An empty object. This condition always matches.'
+                            })
+                        }).register(z.globalRegistry, {
+                            description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                         })
                     ]),
-                    name: z.string().min(1)
+                    name: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    })
                 })),
                 kql: z.object({
                     query: z.string()
@@ -46063,7 +48815,13 @@ export const put_streams_name_request = z.object({
             rules: z.array(z.string())
         })).and(z.object({
             stream: z.object({
-                name: z.optional(z.unknown())
+                ingest: z.optional(z.object({
+                    processing: z.object({
+                        updated_at: z.optional(z.unknown())
+                    })
+                })),
+                name: z.optional(z.unknown()),
+                updated_at: z.optional(z.unknown())
             }).and(z.object({
                 group: z.object({
                     members: z.array(z.string()),
@@ -46108,7 +48866,9 @@ export const post_streams_name_fork_request = z.object({
                         z.number(),
                         z.boolean()
                     ])),
-                    field: z.string().min(1),
+                    field: z.string().min(1).register(z.globalRegistry, {
+                        description: 'The document field to filter on.'
+                    }),
                     gt: z.optional(z.union([
                         z.string(),
                         z.number(),
@@ -46155,32 +48915,62 @@ export const post_streams_name_fork_request = z.object({
                             z.number(),
                             z.boolean()
                         ]))
+                    }).register(z.globalRegistry, {
+                        description: 'Range comparison values.'
                     })),
                     startsWith: z.optional(z.union([
                         z.string(),
                         z.number(),
                         z.boolean()
                     ]))
+                }).register(z.globalRegistry, {
+                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                 }),
                 z.object({
-                    exists: z.optional(z.boolean()),
-                    field: z.string().min(1)
+                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                        description: 'Indicates whether the field exists or not.'
+                    })),
+                    field: z.string().min(1).register(z.globalRegistry, {
+                        description: 'The document field to check.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A condition that checks for the existence or non-existence of a field.'
                 })
             ]),
             z.object({
-                and: z.array(z.unknown())
+                and: z.array(z.unknown()).register(z.globalRegistry, {
+                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                })
+            }).register(z.globalRegistry, {
+                description: 'A logical AND that groups multiple conditions.'
             }),
             z.object({
-                or: z.array(z.unknown())
+                or: z.array(z.unknown()).register(z.globalRegistry, {
+                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                })
+            }).register(z.globalRegistry, {
+                description: 'A logical OR that groups multiple conditions.'
             }),
             z.object({
-                not: z.unknown()
+                not: z.unknown().register(z.globalRegistry, {
+                    description: 'A condition that negates another condition.'
+                })
+            }).register(z.globalRegistry, {
+                description: 'A logical NOT that negates a condition.'
             }),
             z.object({
-                never: z.record(z.string(), z.never())
+                never: z.record(z.string(), z.never()).register(z.globalRegistry, {
+                    description: 'An empty object. This condition never matches.'
+                })
+            }).register(z.globalRegistry, {
+                description: 'A condition that always evaluates to false.'
             }),
             z.object({
-                always: z.record(z.string(), z.never())
+                always: z.record(z.string(), z.never()).register(z.globalRegistry, {
+                    description: 'An empty object. This condition always matches.'
+                })
+            }).register(z.globalRegistry, {
+                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
             })
         ])
     })),
@@ -46253,7 +49043,9 @@ export const put_streams_name_ingest_request = z.object({
                         z.object({
                             lifecycle: z.object({
                                 enabled: z.object({
-                                    data_retention: z.optional(z.string().min(1))
+                                    data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    }))
                                 })
                             })
                         }),
@@ -46267,12 +49059,16 @@ export const put_streams_name_ingest_request = z.object({
                 lifecycle: z.union([
                     z.object({
                         dsl: z.object({
-                            data_retention: z.optional(z.string().min(1))
+                            data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                description: 'A non-empty string.'
+                            }))
                         })
                     }),
                     z.object({
                         ilm: z.object({
-                            policy: z.string().min(1)
+                            policy: z.string().min(1).register(z.globalRegistry, {
+                                description: 'A non-empty string.'
+                            })
                         })
                     }),
                     z.object({
@@ -46283,13 +49079,27 @@ export const put_streams_name_ingest_request = z.object({
                     steps: z.array(z.union([z.union([
                             z.object({
                                 action: z.enum(['grok']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field to parse with grok patterns'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
                                 pattern_definitions: z.optional(z.record(z.string(), z.string())),
-                                patterns: z.array(z.string().min(1)).min(1),
+                                patterns: z.array(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                })).min(1).register(z.globalRegistry, {
+                                    description: 'Grok patterns applied in order to extract fields'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -46308,7 +49118,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -46355,44 +49167,90 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Grok processor - Extract fields from text using grok patterns'
                             }),
                             z.object({
                                 action: z.enum(['dissect']),
-                                append_separator: z.optional(z.string().min(1)),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
-                                pattern: z.string().min(1),
+                                append_separator: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Separator inserted when target fields are concatenated'
+                                })),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field to parse with dissect pattern'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
+                                pattern: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Dissect pattern describing field boundaries'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -46411,7 +49269,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -46458,46 +49318,98 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Dissect processor - Extract fields from text using a lightweight, delimiter-based parser'
                             }),
                             z.object({
                                 action: z.enum(['date']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                formats: z.array(z.string().min(1)),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                locale: z.optional(z.string().min(1)),
-                                output_format: z.optional(z.string().min(1)),
-                                timezone: z.optional(z.string().min(1)),
-                                to: z.optional(z.string().min(1)),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                formats: z.array(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                })).register(z.globalRegistry, {
+                                    description: 'Accepted input date formats, tried in order'
+                                }),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field containing the date/time text'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                locale: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Optional locale for date parsing'
+                                })),
+                                output_format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Optional output format for storing the parsed date as text'
+                                })),
+                                timezone: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Optional timezone for date parsing'
+                                })),
+                                to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Target field for the parsed date (defaults to source)'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -46516,7 +49428,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -46563,40 +49477,78 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Date processor - Parse dates from strings using one or more expected formats'
                             }),
                             z.object({
                                 action: z.enum(['drop_document']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -46615,7 +49567,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -46662,44 +49616,90 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Base processor options plus conditional execution'
                             }),
                             z.object({
                                 action: z.enum(['rename']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
-                                override: z.optional(z.boolean()),
-                                to: z.string().min(1),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Existing source field to rename or move'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip when source field is missing'
+                                })),
+                                override: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Allow overwriting the target field if it already exists'
+                                })),
+                                to: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'New field name or destination path'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -46718,7 +49718,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -46765,44 +49767,90 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Rename processor - Change a field name and optionally its location'
                             }),
                             z.object({
                                 action: z.enum(['set']),
-                                copy_from: z.optional(z.string().min(1)),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
-                                override: z.optional(z.boolean()),
-                                to: z.string().min(1),
-                                value: z.optional(z.unknown()),
+                                copy_from: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Copy value from another field instead of providing a literal'
+                                })),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                override: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Allow overwriting an existing target field'
+                                })),
+                                to: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Target field to set or create'
+                                }),
+                                value: z.optional(z.unknown().register(z.globalRegistry, {
+                                    description: 'Literal value to assign to the target field'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -46821,7 +49869,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -46868,43 +49918,87 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
                             }),
                             z.object({
                                 action: z.enum(['append']),
-                                allow_duplicates: z.optional(z.boolean()),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
-                                to: z.string().min(1),
-                                value: z.array(z.unknown()).min(1),
+                                allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'If true, do not deduplicate appended values'
+                                })),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                to: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Array field to append values to'
+                                }),
+                                value: z.array(z.unknown()).min(1).register(z.globalRegistry, {
+                                    description: 'Values to append (must be literal, no templates)'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -46923,7 +50017,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -46970,49 +50066,101 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Append processor - Append one or more values to an existing or new array field'
                             }),
                             z.object({
                                 action: z.enum(['remove_by_prefix']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean())
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Field to remove along with all its nested fields'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                }))
+                            }).register(z.globalRegistry, {
+                                description: 'Remove by prefix processor - Remove a field and all nested fields matching the prefix'
                             }),
                             z.object({
                                 action: z.enum(['remove']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Field to remove from the document'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -47031,7 +50179,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -47078,45 +50228,89 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Remove processor - Delete one or more fields from the document'
                             }),
                             z.object({
                                 action: z.enum(['replace']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
                                 ignore_missing: z.optional(z.boolean()),
-                                pattern: z.string().min(1),
+                                pattern: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string or string with whitespace.'
+                                }),
                                 replacement: z.string(),
-                                to: z.optional(z.string().min(1)),
+                                to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -47135,7 +50329,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -47182,50 +50378,96 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Base processor options plus conditional execution'
                             }),
                             z.object({
                                 action: z.enum(['convert']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
-                                to: z.optional(z.string().min(1)),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field to convert to a different data type'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
+                                to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Target field for the converted value (defaults to source)'
+                                })),
                                 type: z.enum([
                                     'integer',
                                     'long',
                                     'double',
                                     'boolean',
                                     'string'
-                                ]),
+                                ]).register(z.globalRegistry, {
+                                    description: 'Target data type: integer, long, double, boolean, or string'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -47244,7 +50486,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -47291,41 +50535,83 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
                             }),
                             z.object({
-                                action: z.enum(['manual_ingest_pipeline']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
-                                on_failure: z.optional(z.array(z.record(z.string(), z.unknown()))),
+                                action: z.enum(['manual_ingest_pipeline']).register(z.globalRegistry, {
+                                    description: 'Manual ingest pipeline - executes raw Elasticsearch ingest processors'
+                                }),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                on_failure: z.optional(z.array(z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+                                    description: 'Fallback processors to run when a processor fails'
+                                })),
                                 processors: z.array(z.object({
                                     append: z.unknown(),
                                     attachment: z.unknown(),
@@ -47372,8 +50658,12 @@ export const put_streams_name_ingest_request = z.object({
                                     uri_parts: z.unknown(),
                                     urldecode: z.unknown(),
                                     user_agent: z.unknown()
+                                })).register(z.globalRegistry, {
+                                    description: 'List of raw Elasticsearch ingest processors to run'
+                                }),
+                                tag: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Optional ingest processor tag for Elasticsearch'
                                 })),
-                                tag: z.optional(z.string()),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -47392,7 +50682,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -47439,34 +50731,66 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Manual ingest pipeline wrapper around native Elasticsearch processors'
                             })
                         ]), z.object({
                             customIdentifier: z.optional(z.string()),
@@ -47488,7 +50812,9 @@ export const put_streams_name_ingest_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ])),
-                                        field: z.string().min(1),
+                                        field: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'The document field to filter on.'
+                                        }),
                                         gt: z.optional(z.union([
                                             z.string(),
                                             z.number(),
@@ -47535,37 +50861,68 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'Range comparison values.'
                                         })),
                                         startsWith: z.optional(z.union([
                                             z.string(),
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that compares a field to a value or range using an operator as the key.'
                                     }),
                                     z.object({
-                                        exists: z.optional(z.boolean()),
-                                        field: z.string().min(1)
+                                        exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Indicates whether the field exists or not.'
+                                        })),
+                                        field: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'The document field to check.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that checks for the existence or non-existence of a field.'
                                     })
                                 ]),
                                 z.object({
-                                    and: z.array(z.unknown())
+                                    and: z.array(z.unknown()).register(z.globalRegistry, {
+                                        description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A logical AND that groups multiple conditions.'
                                 }),
                                 z.object({
-                                    or: z.array(z.unknown())
+                                    or: z.array(z.unknown()).register(z.globalRegistry, {
+                                        description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A logical OR that groups multiple conditions.'
                                 }),
                                 z.object({
-                                    not: z.unknown()
+                                    not: z.unknown().register(z.globalRegistry, {
+                                        description: 'A condition that negates another condition.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A logical NOT that negates a condition.'
                                 }),
                                 z.object({
-                                    never: z.object({})
+                                    never: z.object({}).register(z.globalRegistry, {
+                                        description: 'An empty object. This condition never matches.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that always evaluates to false.'
                                 }),
                                 z.object({
-                                    always: z.object({})
+                                    always: z.object({}).register(z.globalRegistry, {
+                                        description: 'An empty object. This condition always matches.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                 })
                             ]), z.object({
                                 steps: z.array(z.unknown())
                             }))
-                        })]))
+                        })])),
+                    updated_at: z.optional(z.unknown())
                 }),
                 settings: z.object({
                     'index.number_of_replicas': z.optional(z.object({
@@ -47602,7 +50959,9 @@ export const put_streams_name_ingest_request = z.object({
                         z.unknown()
                     ])).and(z.union([
                         z.object({
-                            format: z.optional(z.string().min(1)),
+                            format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                description: 'A non-empty string.'
+                            })),
                             type: z.enum([
                                 'keyword',
                                 'match_only_text',
@@ -47610,7 +50969,8 @@ export const put_streams_name_ingest_request = z.object({
                                 'double',
                                 'date',
                                 'boolean',
-                                'ip'
+                                'ip',
+                                'geo_point'
                             ])
                         }),
                         z.object({
@@ -47618,7 +50978,9 @@ export const put_streams_name_ingest_request = z.object({
                         })
                     ]))),
                     routing: z.array(z.object({
-                        destination: z.string().min(1),
+                        destination: z.string().min(1).register(z.globalRegistry, {
+                            description: 'A non-empty string.'
+                        }),
                         status: z.optional(z.enum(['enabled', 'disabled'])),
                         where: z.union([
                             z.union([
@@ -47638,7 +51000,9 @@ export const put_streams_name_ingest_request = z.object({
                                         z.number(),
                                         z.boolean()
                                     ])),
-                                    field: z.string().min(1),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to filter on.'
+                                    }),
                                     gt: z.optional(z.union([
                                         z.string(),
                                         z.number(),
@@ -47685,32 +51049,62 @@ export const put_streams_name_ingest_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Range comparison values.'
                                     })),
                                     startsWith: z.optional(z.union([
                                         z.string(),
                                         z.number(),
                                         z.boolean()
                                     ]))
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                 }),
                                 z.object({
-                                    exists: z.optional(z.boolean()),
-                                    field: z.string().min(1)
+                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                        description: 'Indicates whether the field exists or not.'
+                                    })),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to check.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                 })
                             ]),
                             z.object({
-                                and: z.array(z.unknown())
+                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical AND that groups multiple conditions.'
                             }),
                             z.object({
-                                or: z.array(z.unknown())
+                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical OR that groups multiple conditions.'
                             }),
                             z.object({
-                                not: z.unknown()
+                                not: z.unknown().register(z.globalRegistry, {
+                                    description: 'A condition that negates another condition.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical NOT that negates a condition.'
                             }),
                             z.object({
-                                never: z.object({})
+                                never: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition never matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to false.'
                             }),
                             z.object({
-                                always: z.object({})
+                                always: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition always matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                             })
                         ])
                     }))
@@ -47728,7 +51122,9 @@ export const put_streams_name_ingest_request = z.object({
                         z.object({
                             lifecycle: z.object({
                                 enabled: z.object({
-                                    data_retention: z.optional(z.string().min(1))
+                                    data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                        description: 'A non-empty string.'
+                                    }))
                                 })
                             })
                         }),
@@ -47742,12 +51138,16 @@ export const put_streams_name_ingest_request = z.object({
                 lifecycle: z.union([
                     z.object({
                         dsl: z.object({
-                            data_retention: z.optional(z.string().min(1))
+                            data_retention: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                description: 'A non-empty string.'
+                            }))
                         })
                     }),
                     z.object({
                         ilm: z.object({
-                            policy: z.string().min(1)
+                            policy: z.string().min(1).register(z.globalRegistry, {
+                                description: 'A non-empty string.'
+                            })
                         })
                     }),
                     z.object({
@@ -47758,13 +51158,27 @@ export const put_streams_name_ingest_request = z.object({
                     steps: z.array(z.union([z.union([
                             z.object({
                                 action: z.enum(['grok']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field to parse with grok patterns'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
                                 pattern_definitions: z.optional(z.record(z.string(), z.string())),
-                                patterns: z.array(z.string().min(1)).min(1),
+                                patterns: z.array(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                })).min(1).register(z.globalRegistry, {
+                                    description: 'Grok patterns applied in order to extract fields'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -47783,7 +51197,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -47830,44 +51246,90 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Grok processor - Extract fields from text using grok patterns'
                             }),
                             z.object({
                                 action: z.enum(['dissect']),
-                                append_separator: z.optional(z.string().min(1)),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
-                                pattern: z.string().min(1),
+                                append_separator: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Separator inserted when target fields are concatenated'
+                                })),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field to parse with dissect pattern'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
+                                pattern: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Dissect pattern describing field boundaries'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -47886,7 +51348,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -47933,46 +51397,98 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Dissect processor - Extract fields from text using a lightweight, delimiter-based parser'
                             }),
                             z.object({
                                 action: z.enum(['date']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                formats: z.array(z.string().min(1)),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                locale: z.optional(z.string().min(1)),
-                                output_format: z.optional(z.string().min(1)),
-                                timezone: z.optional(z.string().min(1)),
-                                to: z.optional(z.string().min(1)),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                formats: z.array(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                })).register(z.globalRegistry, {
+                                    description: 'Accepted input date formats, tried in order'
+                                }),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field containing the date/time text'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                locale: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Optional locale for date parsing'
+                                })),
+                                output_format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Optional output format for storing the parsed date as text'
+                                })),
+                                timezone: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Optional timezone for date parsing'
+                                })),
+                                to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Target field for the parsed date (defaults to source)'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -47991,7 +51507,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48038,40 +51556,78 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Date processor - Parse dates from strings using one or more expected formats'
                             }),
                             z.object({
                                 action: z.enum(['drop_document']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48090,7 +51646,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48137,44 +51695,90 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Base processor options plus conditional execution'
                             }),
                             z.object({
                                 action: z.enum(['rename']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
-                                override: z.optional(z.boolean()),
-                                to: z.string().min(1),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Existing source field to rename or move'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip when source field is missing'
+                                })),
+                                override: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Allow overwriting the target field if it already exists'
+                                })),
+                                to: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'New field name or destination path'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48193,7 +51797,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48240,44 +51846,90 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Rename processor - Change a field name and optionally its location'
                             }),
                             z.object({
                                 action: z.enum(['set']),
-                                copy_from: z.optional(z.string().min(1)),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
-                                override: z.optional(z.boolean()),
-                                to: z.string().min(1),
-                                value: z.optional(z.unknown()),
+                                copy_from: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Copy value from another field instead of providing a literal'
+                                })),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                override: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Allow overwriting an existing target field'
+                                })),
+                                to: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Target field to set or create'
+                                }),
+                                value: z.optional(z.unknown().register(z.globalRegistry, {
+                                    description: 'Literal value to assign to the target field'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48296,7 +51948,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48343,43 +51997,87 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
                             }),
                             z.object({
                                 action: z.enum(['append']),
-                                allow_duplicates: z.optional(z.boolean()),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
-                                to: z.string().min(1),
-                                value: z.array(z.unknown()).min(1),
+                                allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'If true, do not deduplicate appended values'
+                                })),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                to: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Array field to append values to'
+                                }),
+                                value: z.array(z.unknown()).min(1).register(z.globalRegistry, {
+                                    description: 'Values to append (must be literal, no templates)'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48398,7 +52096,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48445,49 +52145,101 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Append processor - Append one or more values to an existing or new array field'
                             }),
                             z.object({
                                 action: z.enum(['remove_by_prefix']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean())
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Field to remove along with all its nested fields'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                }))
+                            }).register(z.globalRegistry, {
+                                description: 'Remove by prefix processor - Remove a field and all nested fields matching the prefix'
                             }),
                             z.object({
                                 action: z.enum(['remove']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Field to remove from the document'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48506,7 +52258,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48553,45 +52307,89 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Remove processor - Delete one or more fields from the document'
                             }),
                             z.object({
                                 action: z.enum(['replace']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
                                 ignore_missing: z.optional(z.boolean()),
-                                pattern: z.string().min(1),
+                                pattern: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string or string with whitespace.'
+                                }),
                                 replacement: z.string(),
-                                to: z.optional(z.string().min(1)),
+                                to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'A non-empty string.'
+                                })),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48610,7 +52408,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48657,50 +52457,96 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Base processor options plus conditional execution'
                             }),
                             z.object({
                                 action: z.enum(['convert']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                from: z.string().min(1),
-                                ignore_failure: z.optional(z.boolean()),
-                                ignore_missing: z.optional(z.boolean()),
-                                to: z.optional(z.string().min(1)),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                from: z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Source field to convert to a different data type'
+                                }),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Skip processing when source field is missing'
+                                })),
+                                to: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Target field for the converted value (defaults to source)'
+                                })),
                                 type: z.enum([
                                     'integer',
                                     'long',
                                     'double',
                                     'boolean',
                                     'string'
-                                ]),
+                                ]).register(z.globalRegistry, {
+                                    description: 'Target data type: integer, long, double, boolean, or string'
+                                }),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48719,7 +52565,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48766,41 +52614,83 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
                             }),
                             z.object({
-                                action: z.enum(['manual_ingest_pipeline']),
-                                customIdentifier: z.optional(z.string().min(1)),
-                                description: z.optional(z.string()),
-                                ignore_failure: z.optional(z.boolean()),
-                                on_failure: z.optional(z.array(z.record(z.string(), z.unknown()))),
+                                action: z.enum(['manual_ingest_pipeline']).register(z.globalRegistry, {
+                                    description: 'Manual ingest pipeline - executes raw Elasticsearch ingest processors'
+                                }),
+                                customIdentifier: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                    description: 'Custom identifier to correlate this processor across outputs'
+                                })),
+                                description: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Human-readable notes about this processor step'
+                                })),
+                                ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+                                    description: 'Continue pipeline execution if this processor fails'
+                                })),
+                                on_failure: z.optional(z.array(z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+                                    description: 'Fallback processors to run when a processor fails'
+                                })),
                                 processors: z.array(z.object({
                                     append: z.unknown(),
                                     attachment: z.unknown(),
@@ -48847,8 +52737,12 @@ export const put_streams_name_ingest_request = z.object({
                                     uri_parts: z.unknown(),
                                     urldecode: z.unknown(),
                                     user_agent: z.unknown()
+                                })).register(z.globalRegistry, {
+                                    description: 'List of raw Elasticsearch ingest processors to run'
+                                }),
+                                tag: z.optional(z.string().register(z.globalRegistry, {
+                                    description: 'Optional ingest processor tag for Elasticsearch'
                                 })),
-                                tag: z.optional(z.string()),
                                 where: z.optional(z.union([
                                     z.union([
                                         z.object({
@@ -48867,7 +52761,9 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ])),
-                                            field: z.string().min(1),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to filter on.'
+                                            }),
                                             gt: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
@@ -48914,34 +52810,66 @@ export const put_streams_name_ingest_request = z.object({
                                                     z.number(),
                                                     z.boolean()
                                                 ]))
+                                            }).register(z.globalRegistry, {
+                                                description: 'Range comparison values.'
                                             })),
                                             startsWith: z.optional(z.union([
                                                 z.string(),
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                                         }),
                                         z.object({
-                                            exists: z.optional(z.boolean()),
-                                            field: z.string().min(1)
+                                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                                description: 'Indicates whether the field exists or not.'
+                                            })),
+                                            field: z.string().min(1).register(z.globalRegistry, {
+                                                description: 'The document field to check.'
+                                            })
+                                        }).register(z.globalRegistry, {
+                                            description: 'A condition that checks for the existence or non-existence of a field.'
                                         })
                                     ]),
                                     z.object({
-                                        and: z.array(z.unknown())
+                                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical AND that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        or: z.array(z.unknown())
+                                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical OR that groups multiple conditions.'
                                     }),
                                     z.object({
-                                        not: z.unknown()
+                                        not: z.unknown().register(z.globalRegistry, {
+                                            description: 'A condition that negates another condition.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A logical NOT that negates a condition.'
                                     }),
                                     z.object({
-                                        never: z.object({})
+                                        never: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition never matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to false.'
                                     }),
                                     z.object({
-                                        always: z.object({})
+                                        always: z.object({}).register(z.globalRegistry, {
+                                            description: 'An empty object. This condition always matches.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                     })
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Manual ingest pipeline wrapper around native Elasticsearch processors'
                             })
                         ]), z.object({
                             customIdentifier: z.optional(z.string()),
@@ -48963,7 +52891,9 @@ export const put_streams_name_ingest_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ])),
-                                        field: z.string().min(1),
+                                        field: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'The document field to filter on.'
+                                        }),
                                         gt: z.optional(z.union([
                                             z.string(),
                                             z.number(),
@@ -49010,37 +52940,68 @@ export const put_streams_name_ingest_request = z.object({
                                                 z.number(),
                                                 z.boolean()
                                             ]))
+                                        }).register(z.globalRegistry, {
+                                            description: 'Range comparison values.'
                                         })),
                                         startsWith: z.optional(z.union([
                                             z.string(),
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that compares a field to a value or range using an operator as the key.'
                                     }),
                                     z.object({
-                                        exists: z.optional(z.boolean()),
-                                        field: z.string().min(1)
+                                        exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                            description: 'Indicates whether the field exists or not.'
+                                        })),
+                                        field: z.string().min(1).register(z.globalRegistry, {
+                                            description: 'The document field to check.'
+                                        })
+                                    }).register(z.globalRegistry, {
+                                        description: 'A condition that checks for the existence or non-existence of a field.'
                                     })
                                 ]),
                                 z.object({
-                                    and: z.array(z.unknown())
+                                    and: z.array(z.unknown()).register(z.globalRegistry, {
+                                        description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A logical AND that groups multiple conditions.'
                                 }),
                                 z.object({
-                                    or: z.array(z.unknown())
+                                    or: z.array(z.unknown()).register(z.globalRegistry, {
+                                        description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A logical OR that groups multiple conditions.'
                                 }),
                                 z.object({
-                                    not: z.unknown()
+                                    not: z.unknown().register(z.globalRegistry, {
+                                        description: 'A condition that negates another condition.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A logical NOT that negates a condition.'
                                 }),
                                 z.object({
-                                    never: z.object({})
+                                    never: z.object({}).register(z.globalRegistry, {
+                                        description: 'An empty object. This condition never matches.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that always evaluates to false.'
                                 }),
                                 z.object({
-                                    always: z.object({})
+                                    always: z.object({}).register(z.globalRegistry, {
+                                        description: 'An empty object. This condition always matches.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                                 })
                             ]), z.object({
                                 steps: z.array(z.unknown())
                             }))
-                        })]))
+                        })])),
+                    updated_at: z.optional(z.unknown())
                 }),
                 settings: z.object({
                     'index.number_of_replicas': z.optional(z.object({
@@ -49077,7 +53038,9 @@ export const put_streams_name_ingest_request = z.object({
                         z.unknown()
                     ])).and(z.union([
                         z.object({
-                            format: z.optional(z.string().min(1)),
+                            format: z.optional(z.string().min(1).register(z.globalRegistry, {
+                                description: 'A non-empty string.'
+                            })),
                             type: z.enum([
                                 'keyword',
                                 'match_only_text',
@@ -49085,7 +53048,8 @@ export const put_streams_name_ingest_request = z.object({
                                 'double',
                                 'date',
                                 'boolean',
-                                'ip'
+                                'ip',
+                                'geo_point'
                             ])
                         }),
                         z.object({
@@ -49174,8 +53138,12 @@ export const post_streams_name_queries_bulk_request = z.object({
     body: z.optional(z.object({
         operations: z.array(z.union([z.object({
                 index: z.object({
-                    id: z.string().min(1),
-                    title: z.string().min(1)
+                    id: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    }),
+                    title: z.string().min(1).register(z.globalRegistry, {
+                        description: 'A non-empty string.'
+                    })
                 }).and(z.object({
                     feature: z.optional(z.object({
                         filter: z.union([
@@ -49196,7 +53164,9 @@ export const post_streams_name_queries_bulk_request = z.object({
                                         z.number(),
                                         z.boolean()
                                     ])),
-                                    field: z.string().min(1),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to filter on.'
+                                    }),
                                     gt: z.optional(z.union([
                                         z.string(),
                                         z.number(),
@@ -49243,35 +53213,67 @@ export const post_streams_name_queries_bulk_request = z.object({
                                             z.number(),
                                             z.boolean()
                                         ]))
+                                    }).register(z.globalRegistry, {
+                                        description: 'Range comparison values.'
                                     })),
                                     startsWith: z.optional(z.union([
                                         z.string(),
                                         z.number(),
                                         z.boolean()
                                     ]))
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that compares a field to a value or range using an operator as the key.'
                                 }),
                                 z.object({
-                                    exists: z.optional(z.boolean()),
-                                    field: z.string().min(1)
+                                    exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                        description: 'Indicates whether the field exists or not.'
+                                    })),
+                                    field: z.string().min(1).register(z.globalRegistry, {
+                                        description: 'The document field to check.'
+                                    })
+                                }).register(z.globalRegistry, {
+                                    description: 'A condition that checks for the existence or non-existence of a field.'
                                 })
                             ]),
                             z.object({
-                                and: z.array(z.unknown())
+                                and: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical AND that groups multiple conditions.'
                             }),
                             z.object({
-                                or: z.array(z.unknown())
+                                or: z.array(z.unknown()).register(z.globalRegistry, {
+                                    description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical OR that groups multiple conditions.'
                             }),
                             z.object({
-                                not: z.unknown()
+                                not: z.unknown().register(z.globalRegistry, {
+                                    description: 'A condition that negates another condition.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A logical NOT that negates a condition.'
                             }),
                             z.object({
-                                never: z.object({})
+                                never: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition never matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to false.'
                             }),
                             z.object({
-                                always: z.object({})
+                                always: z.object({}).register(z.globalRegistry, {
+                                    description: 'An empty object. This condition always matches.'
+                                })
+                            }).register(z.globalRegistry, {
+                                description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                             })
                         ]),
-                        name: z.string().min(1)
+                        name: z.string().min(1).register(z.globalRegistry, {
+                            description: 'A non-empty string.'
+                        })
                     })),
                     kql: z.object({
                         query: z.string()
@@ -49334,7 +53336,9 @@ export const put_streams_name_queries_queryid_request = z.object({
                             z.number(),
                             z.boolean()
                         ])),
-                        field: z.string().min(1),
+                        field: z.string().min(1).register(z.globalRegistry, {
+                            description: 'The document field to filter on.'
+                        }),
                         gt: z.optional(z.union([
                             z.string(),
                             z.number(),
@@ -49381,41 +53385,75 @@ export const put_streams_name_queries_queryid_request = z.object({
                                 z.number(),
                                 z.boolean()
                             ]))
+                        }).register(z.globalRegistry, {
+                            description: 'Range comparison values.'
                         })),
                         startsWith: z.optional(z.union([
                             z.string(),
                             z.number(),
                             z.boolean()
                         ]))
+                    }).register(z.globalRegistry, {
+                        description: 'A condition that compares a field to a value or range using an operator as the key.'
                     }),
                     z.object({
-                        exists: z.optional(z.boolean()),
-                        field: z.string().min(1)
+                        exists: z.optional(z.boolean().register(z.globalRegistry, {
+                            description: 'Indicates whether the field exists or not.'
+                        })),
+                        field: z.string().min(1).register(z.globalRegistry, {
+                            description: 'The document field to check.'
+                        })
+                    }).register(z.globalRegistry, {
+                        description: 'A condition that checks for the existence or non-existence of a field.'
                     })
                 ]),
                 z.object({
-                    and: z.array(z.unknown())
+                    and: z.array(z.unknown()).register(z.globalRegistry, {
+                        description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A logical AND that groups multiple conditions.'
                 }),
                 z.object({
-                    or: z.array(z.unknown())
+                    or: z.array(z.unknown()).register(z.globalRegistry, {
+                        description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A logical OR that groups multiple conditions.'
                 }),
                 z.object({
-                    not: z.unknown()
+                    not: z.unknown().register(z.globalRegistry, {
+                        description: 'A condition that negates another condition.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A logical NOT that negates a condition.'
                 }),
                 z.object({
-                    never: z.record(z.string(), z.never())
+                    never: z.record(z.string(), z.never()).register(z.globalRegistry, {
+                        description: 'An empty object. This condition never matches.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A condition that always evaluates to false.'
                 }),
                 z.object({
-                    always: z.record(z.string(), z.never())
+                    always: z.record(z.string(), z.never()).register(z.globalRegistry, {
+                        description: 'An empty object. This condition always matches.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                 })
             ]),
-            name: z.string().min(1)
+            name: z.string().min(1).register(z.globalRegistry, {
+                description: 'A non-empty string.'
+            })
         })),
         kql: z.object({
             query: z.string()
         }),
         severity_score: z.optional(z.number()),
-        title: z.string().min(1)
+        title: z.string().min(1).register(z.globalRegistry, {
+            description: 'A non-empty string.'
+        })
     })),
     path: z.object({
         name: z.string(),
@@ -49470,7 +53508,9 @@ export const post_streams_name_significant_events_generate_request = z.object({
                             z.number(),
                             z.boolean()
                         ])),
-                        field: z.string().min(1),
+                        field: z.string().min(1).register(z.globalRegistry, {
+                            description: 'The document field to filter on.'
+                        }),
                         gt: z.optional(z.union([
                             z.string(),
                             z.number(),
@@ -49517,32 +53557,62 @@ export const post_streams_name_significant_events_generate_request = z.object({
                                 z.number(),
                                 z.boolean()
                             ]))
+                        }).register(z.globalRegistry, {
+                            description: 'Range comparison values.'
                         })),
                         startsWith: z.optional(z.union([
                             z.string(),
                             z.number(),
                             z.boolean()
                         ]))
+                    }).register(z.globalRegistry, {
+                        description: 'A condition that compares a field to a value or range using an operator as the key.'
                     }),
                     z.object({
-                        exists: z.optional(z.boolean()),
-                        field: z.string().min(1)
+                        exists: z.optional(z.boolean().register(z.globalRegistry, {
+                            description: 'Indicates whether the field exists or not.'
+                        })),
+                        field: z.string().min(1).register(z.globalRegistry, {
+                            description: 'The document field to check.'
+                        })
+                    }).register(z.globalRegistry, {
+                        description: 'A condition that checks for the existence or non-existence of a field.'
                     })
                 ]),
                 z.object({
-                    and: z.array(z.unknown())
+                    and: z.array(z.unknown()).register(z.globalRegistry, {
+                        description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A logical AND that groups multiple conditions.'
                 }),
                 z.object({
-                    or: z.array(z.unknown())
+                    or: z.array(z.unknown()).register(z.globalRegistry, {
+                        description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A logical OR that groups multiple conditions.'
                 }),
                 z.object({
-                    not: z.unknown()
+                    not: z.unknown().register(z.globalRegistry, {
+                        description: 'A condition that negates another condition.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A logical NOT that negates a condition.'
                 }),
                 z.object({
-                    never: z.object({})
+                    never: z.object({}).register(z.globalRegistry, {
+                        description: 'An empty object. This condition never matches.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A condition that always evaluates to false.'
                 }),
                 z.object({
-                    always: z.object({})
+                    always: z.object({}).register(z.globalRegistry, {
+                        description: 'An empty object. This condition always matches.'
+                    })
+                }).register(z.globalRegistry, {
+                    description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                 })
             ])
         })).and(z.object({
@@ -49587,7 +53657,9 @@ export const post_streams_name_significant_events_preview_request = z.object({
                                 z.number(),
                                 z.boolean()
                             ])),
-                            field: z.string().min(1),
+                            field: z.string().min(1).register(z.globalRegistry, {
+                                description: 'The document field to filter on.'
+                            }),
                             gt: z.optional(z.union([
                                 z.string(),
                                 z.number(),
@@ -49634,32 +53706,62 @@ export const post_streams_name_significant_events_preview_request = z.object({
                                     z.number(),
                                     z.boolean()
                                 ]))
+                            }).register(z.globalRegistry, {
+                                description: 'Range comparison values.'
                             })),
                             startsWith: z.optional(z.union([
                                 z.string(),
                                 z.number(),
                                 z.boolean()
                             ]))
+                        }).register(z.globalRegistry, {
+                            description: 'A condition that compares a field to a value or range using an operator as the key.'
                         }),
                         z.object({
-                            exists: z.optional(z.boolean()),
-                            field: z.string().min(1)
+                            exists: z.optional(z.boolean().register(z.globalRegistry, {
+                                description: 'Indicates whether the field exists or not.'
+                            })),
+                            field: z.string().min(1).register(z.globalRegistry, {
+                                description: 'The document field to check.'
+                            })
+                        }).register(z.globalRegistry, {
+                            description: 'A condition that checks for the existence or non-existence of a field.'
                         })
                     ]),
                     z.object({
-                        and: z.array(z.unknown())
+                        and: z.array(z.unknown()).register(z.globalRegistry, {
+                            description: 'An array of conditions. All sub-conditions must be true for this condition to be true.'
+                        })
+                    }).register(z.globalRegistry, {
+                        description: 'A logical AND that groups multiple conditions.'
                     }),
                     z.object({
-                        or: z.array(z.unknown())
+                        or: z.array(z.unknown()).register(z.globalRegistry, {
+                            description: 'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+                        })
+                    }).register(z.globalRegistry, {
+                        description: 'A logical OR that groups multiple conditions.'
                     }),
                     z.object({
-                        not: z.unknown()
+                        not: z.unknown().register(z.globalRegistry, {
+                            description: 'A condition that negates another condition.'
+                        })
+                    }).register(z.globalRegistry, {
+                        description: 'A logical NOT that negates a condition.'
                     }),
                     z.object({
-                        never: z.record(z.string(), z.never())
+                        never: z.record(z.string(), z.never()).register(z.globalRegistry, {
+                            description: 'An empty object. This condition never matches.'
+                        })
+                    }).register(z.globalRegistry, {
+                        description: 'A condition that always evaluates to false.'
                     }),
                     z.object({
-                        always: z.record(z.string(), z.never())
+                        always: z.record(z.string(), z.never()).register(z.globalRegistry, {
+                            description: 'An empty object. This condition always matches.'
+                        })
+                    }).register(z.globalRegistry, {
+                        description: 'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
                     })
                 ]),
                 name: z.string()

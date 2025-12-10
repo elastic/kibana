@@ -31,7 +31,14 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   const panels = useMemo(() => {
-    const { onFieldUpdate, onAddField, stream, withFieldSimulation, fields } = schemaEditorContext;
+    const {
+      onFieldUpdate,
+      onAddField,
+      stream,
+      withFieldSimulation,
+      fields,
+      enableGeoPointSuggestions,
+    } = schemaEditorContext;
 
     let actions = [];
 
@@ -57,6 +64,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
               stream={stream}
               withFieldSimulation={withFieldSimulation}
               fields={fields}
+              enableGeoPointSuggestions={enableGeoPointSuggestions}
               {...props}
             />
           </StreamsAppContextProvider>,
@@ -108,19 +116,22 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
           },
         ];
 
-        const geoSuggestion = getGeoPointSuggestion({
-          fieldName: field.name,
-          fields,
-          streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
-        });
-
-        if (geoSuggestion) {
-          actions.push({
-            name: i18n.translate('xpack.streams.actions.mapAsGeoFieldLabel', {
-              defaultMessage: 'Map as geo field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true, applyGeoPointSuggestion: true }),
+        if (enableGeoPointSuggestions !== false) {
+          const geoSuggestion = getGeoPointSuggestion({
+            fieldName: field.name,
+            fields,
+            streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
           });
+
+          if (geoSuggestion) {
+            actions.push({
+              name: i18n.translate('xpack.streams.actions.mapAsGeoFieldLabel', {
+                defaultMessage: 'Map as geo field',
+              }),
+              onClick: () =>
+                openFlyout({ isEditingByDefault: true, applyGeoPointSuggestion: true }),
+            });
+          }
         }
         break;
       case 'inherited':

@@ -989,6 +989,42 @@ describe('TaskScheduling', () => {
         moment.duration(1, 'days').asMilliseconds()
       );
     });
+
+    test('should call store bulk update with request when provided', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: rruleScheduleExample24h,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '12h' },
+        {
+          request: mockRequest,
+        }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            runAt: expect.any(Date),
+            schedule: { interval: '12h' },
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        },
+      ]);
+    });
   });
 
   describe('runSoon', () => {

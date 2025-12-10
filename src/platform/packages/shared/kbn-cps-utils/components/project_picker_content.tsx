@@ -34,7 +34,6 @@ export interface ProjectPickerContentProps {
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
-  readonlyCustomTitle?: string;
 }
 
 const projectPickerOptions = [
@@ -55,7 +54,6 @@ export const ProjectPickerContent = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
-  readonlyCustomTitle,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
@@ -104,7 +102,7 @@ export const ProjectPickerContent = ({
           <EuiCallOut
             size="s"
             css={styles.callout}
-            title={readonlyCustomTitle ?? strings.getProjectPickerReadonlyCallout()}
+            title={strings.getProjectPickerReadonlyCallout()}
             iconType="info"
           />
         )}

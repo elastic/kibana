@@ -46,7 +46,7 @@ Run a script on a host. Currently supported only for some agent types.`,
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.object({
     ...getShapeAt(run_script_action_request, 'body'),

@@ -11,7 +11,6 @@ import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculateAndPersistScoresParams } from '../types';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
@@ -38,10 +37,7 @@ export const calculateAndPersistRiskScores = async (
     namespace: spaceId,
   });
 
-  const calculate = params.experimentalFeatures.disableESQLRiskScoring
-    ? calculateRiskScores
-    : calculateScoresWithESQL;
-  const { after_keys: afterKeys, scores } = await calculate(rest);
+  const { after_keys: afterKeys, scores } = await calculateScoresWithESQL(rest);
 
   // Extract entity IDs from scores for reset-to-zero functionality
   const entities: Record<EntityType, string[]> = {

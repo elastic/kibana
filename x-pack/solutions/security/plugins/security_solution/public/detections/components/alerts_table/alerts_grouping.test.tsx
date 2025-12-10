@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, within } from '@testing-library/react';
+import { fireEvent, render, within, waitFor, act } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -21,6 +21,7 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 import { AlertsEventTypes } from '../../../common/lib/telemetry';
+import type { GroupingAggregation } from '@kbn/grouping';
 import {
   defaultGroupingOptions,
   defaultGroupStatsAggregations,
@@ -30,6 +31,8 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
+import { parseGroupingQuery } from '@kbn/grouping/src';
+import type { AlertsGroupingAggregation } from './grouping_settings/types';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -194,16 +197,18 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('calls the proper initial dispatch actions for groups', () => {
+  it('calls the proper initial dispatch actions for groups', async () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders store={createMockStore()}>
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
 
-    expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
-    expect(queryByTestId('group-selector-dropdown')).not.toBeInTheDocument();
-    expect(getByTestId('alerts-table')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+      expect(queryByTestId('group-selector-dropdown')).not.toBeInTheDocument();
+      expect(getByTestId('alerts-table')).toBeInTheDocument();
+    });
 
     expect(mockDispatch).toHaveBeenCalledTimes(2);
     expect(mockDispatch.mock.calls[0][0].payload).toEqual({
@@ -216,7 +221,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('renders empty grouping table when group is selected without data', () => {
+  it('renders empty grouping table when group is selected without data', async () => {
     mockUseQueryAlerts.mockReturnValue(mockQueryResponse);
     jest
       .spyOn(window.localStorage, 'getItem')
@@ -227,11 +232,13 @@ describe('GroupedAlertsTable', () => {
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
-    expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
-    expect(getByTestId('empty-results-panel')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
+      expect(getByTestId('empty-results-panel')).toBeInTheDocument();
+    });
   });
 
-  it('renders grouping table in first accordion level when single group is selected', () => {
+  it('renders grouping table in first accordion level when single group is selected', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
@@ -242,11 +249,13 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
 
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    });
     expect(within(getByTestId('level-0-group-0')).getByTestId('alerts-table')).toBeInTheDocument();
   });
 
-  it('Query gets passed correctly', () => {
+  it('Query gets passed correctly', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
@@ -256,16 +265,18 @@ describe('GroupedAlertsTable', () => {
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
-    expect(mockUseQueryAlerts).toHaveBeenLastCalledWith({
-      fetchMethod: expect.any(Function),
-      indexName: 'test',
-      query: getQuery('kibana.alert.rule.name', 'SuperUniqueValue-test-uuid', mockDate),
-      queryName: 'securitySolutionUI fetchAlerts grouping',
-      skip: false,
+    await waitFor(() => {
+      expect(mockUseQueryAlerts).toHaveBeenLastCalledWith({
+        fetchMethod: expect.any(Function),
+        indexName: 'test',
+        query: getQuery('kibana.alert.rule.name', 'SuperUniqueValue-test-uuid', mockDate),
+        queryName: 'securitySolutionUI fetchAlerts grouping',
+        skip: false,
+      });
     });
   });
 
-  it('renders grouping table in second accordion level when 2 groups are selected', () => {
+  it('renders grouping table in second accordion level when 2 groups are selected', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
@@ -284,15 +295,19 @@ describe('GroupedAlertsTable', () => {
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    });
     expect(
       within(getByTestId('level-0-group-0')).queryByTestId('alerts-table')
     ).not.toBeInTheDocument();
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    });
     expect(within(getByTestId('level-1-group-0')).getByTestId('alerts-table')).toBeInTheDocument();
   });
 
-  it('resets all levels pagination when selected group changes', () => {
+  it('resets all levels pagination when selected group changes', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
@@ -312,13 +327,23 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    });
 
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    });
 
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    });
 
     [
       getByTestId('grouping-level-0-pagination'),
@@ -333,8 +358,12 @@ describe('GroupedAlertsTable', () => {
       ).toEqual('page');
     });
 
-    fireEvent.click(getAllByTestId('group-selector-dropdown')[0]);
-    fireEvent.click(getAllByTestId('panel-user.name')[0]);
+    await act(async () => {
+      fireEvent.click(getAllByTestId('group-selector-dropdown')[0]);
+    });
+    await act(async () => {
+      fireEvent.click(getAllByTestId('panel-user.name')[0]);
+    });
 
     [
       getByTestId('grouping-level-0-pagination'),
@@ -350,7 +379,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('resets all levels pagination when global query updates', () => {
+  it('resets all levels pagination when global query updates', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
@@ -370,11 +399,21 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    await act(async () => {
+      fireEvent.click(getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    });
 
     rerender(
       <TestProviders store={store}>
@@ -398,7 +437,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('resets only most inner group pagination when its parent groups open/close', () => {
+  it('resets only most inner group pagination when its parent groups open/close', async () => {
     store = createMockStore({
       ...mockGlobalState,
       groups: {
@@ -416,21 +455,35 @@ describe('GroupedAlertsTable', () => {
     );
 
     // set level 0 page to 2
-    fireEvent.click(getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    });
 
     // set level 1 page to 2
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    });
 
     // set level 2 page to 2
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-2-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-2-group-0')).getByTestId('group-panel-toggle'));
+    });
 
     // open different level 1 group
 
     // level 0, 1 pagination is the same
-    fireEvent.click(within(getByTestId('level-1-group-1')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-1')).getByTestId('group-panel-toggle'));
+    });
     [
       getByTestId('grouping-level-0-pagination'),
       getByTestId('grouping-level-1-pagination'),
@@ -456,7 +509,7 @@ describe('GroupedAlertsTable', () => {
     ).toEqual(null);
   });
 
-  it(`resets innermost level's current page when that level's page size updates`, () => {
+  it(`resets innermost level's current page when that level's page size updates`, async () => {
     store = createMockStore({
       ...mockGlobalState,
       groups: {
@@ -473,16 +526,30 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    });
 
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
-    fireEvent.click(
-      within(getByTestId('grouping-level-2')).getByTestId('tablePaginationPopoverButton')
-    );
-    fireEvent.click(getByTestId('tablePagination-100-rows'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(
+        within(getByTestId('grouping-level-2')).getByTestId('tablePaginationPopoverButton')
+      );
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('tablePagination-100-rows'));
+    });
     [
       getByTestId('grouping-level-0-pagination'),
       getByTestId('grouping-level-1-pagination'),
@@ -504,7 +571,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it(`resets outermost level's current page when that level's page size updates`, () => {
+  it(`resets outermost level's current page when that level's page size updates`, async () => {
     store = createMockStore({
       ...mockGlobalState,
       groups: {
@@ -521,16 +588,30 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
+    });
 
-    fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
+    });
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
+    });
 
-    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    await act(async () => {
+      fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
+    });
     const tablePaginations = getAllByTestId('tablePaginationPopoverButton');
-    fireEvent.click(tablePaginations[tablePaginations.length - 1]);
-    fireEvent.click(getByTestId('tablePagination-100-rows'));
+    await act(async () => {
+      fireEvent.click(tablePaginations[tablePaginations.length - 1]);
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('tablePagination-100-rows'));
+    });
 
     [
       getByTestId('grouping-level-0-pagination'),
@@ -553,7 +634,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('sends telemetry data when selected group changes', () => {
+  it('sends telemetry data when selected group changes', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
@@ -573,8 +654,12 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('group-selector-dropdown'));
-    fireEvent.click(getByTestId('panel-user.name'));
+    await act(async () => {
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('panel-user.name'));
+    });
 
     expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
       AlertsEventTypes.AlertsGroupingChanged,
@@ -584,8 +669,12 @@ describe('GroupedAlertsTable', () => {
       }
     );
 
-    fireEvent.click(getByTestId('group-selector-dropdown'));
-    fireEvent.click(getByTestId('panel-host.name'));
+    await act(async () => {
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('panel-host.name'));
+    });
 
     expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
       AlertsEventTypes.AlertsGroupingChanged,
@@ -594,5 +683,29 @@ describe('GroupedAlertsTable', () => {
         tableId: testProps.tableId,
       }
     );
+  });
+
+  it('calls onAggregationsChange when aggregations are updated', async () => {
+    const onAggregationsChange = jest.fn();
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+
+    render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} onAggregationsChange={onAggregationsChange} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(onAggregationsChange).toHaveBeenCalledWith(
+        parseGroupingQuery(
+          'kibana.alert.rule.name',
+          'SuperUniqueValue-test-uuid',
+          groupingSearchResponse.aggregations as GroupingAggregation<AlertsGroupingAggregation>
+        ),
+        0
+      );
+    });
   });
 });

@@ -9,6 +9,7 @@ export const storageKeys = {
   agentId: 'agentBuilder.agentId',
   lastUsedConnector: 'agentBuilder.lastUsedConnector',
   welcomeMessageDismissed: 'agentBuilder.welcomeMessageDismissed',
+  hasSeenAgentBuilderTour: 'agentBuilder.hasSeenTour',
 
   getLastConversationKey: (sessionTag?: string, agentId?: string): string => {
     const tag = sessionTag || 'default';

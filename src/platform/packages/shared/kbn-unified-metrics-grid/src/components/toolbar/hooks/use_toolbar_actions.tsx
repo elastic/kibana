@@ -9,7 +9,6 @@
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -19,8 +18,10 @@ import { useMetricsExperienceState } from '../../../context/metrics_experience_s
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
+import type { UnifiedMetricsGridProps } from '../../../types';
+
 interface UseToolbarActionsProps
-  extends Pick<ChartSectionProps, 'fetchParams' | 'renderToggleActions'> {
+  extends Pick<UnifiedMetricsGridProps, 'fetchParams' | 'renderToggleActions'> {
   fields: MetricField[];
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;

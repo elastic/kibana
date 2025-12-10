@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
   ExportRulesRequestBody,
@@ -32,7 +33,7 @@ export const exportRulesRoute = (
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
       options: {

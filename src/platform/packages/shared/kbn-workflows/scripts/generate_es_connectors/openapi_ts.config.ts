@@ -15,7 +15,9 @@ import { allowShortQuerySyntax } from '../shared/oas_allow_short_query_syntax';
 import { removeDiscriminatorsWithoutMapping } from '../shared/oas_remove_discriminators_without_mapping';
 import { createRemoveServerDefaults } from '../shared/oas_remove_server_defaults';
 
+console.log('Reading OpenAPI spec from ', ES_SPEC_OPENAPI_PATH);
 const openApiSpec = JSON.parse(fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')) as OpenAPIV3.Document;
+console.log('Preprocessing OpenAPI spec...');
 const preprocessedOpenApiSpec = [
   removeDiscriminatorsWithoutMapping,
   allowShortQuerySyntax,

@@ -58,4 +58,4 @@ export type {
 export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 export type { ScanDashboardsResult } from './scan_dashboards';
 
-export { PUBLIC_API_PATH } from './api/constants';
+export { DASHBOARD_API_PATH } from '../common/constants';

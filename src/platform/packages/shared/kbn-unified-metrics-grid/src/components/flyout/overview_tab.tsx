@@ -28,10 +28,12 @@ interface OverviewTabProps {
   description?: string;
 }
 
+const DEFAULT_PAGINATION_SIZE = 20;
+
 export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const { euiTheme } = useEuiTheme();
   const [activePage, setActivePage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
 
   const unitLabel = useMemo(() => getUnitLabel({ unit: metric.unit }), [metric.unit]);
 
@@ -176,7 +178,6 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               })}
             </strong>
           </EuiText>
-          <EuiSpacer size="xs" />
           <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
             {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
               defaultMessage: 'Showing {count} dimensions on page {page} of {total}. {dimensions}',
@@ -197,26 +198,32 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
             css={css`
               .euiListGroupItem__text {
                 padding-inline: 0;
+                min-block-size: ${euiTheme.size.base};
               }
               gap: 0px;
             `}
           />
           <EuiSpacer size="s" />
-          <EuiTablePagination
-            data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
-            aria-label={i18n.translate('metricsExperience.overviewTab.dimensionsPaginationLabel', {
-              defaultMessage: 'Dimensions pagination',
-            })}
-            pageCount={pageCount}
-            activePage={activePage}
-            onChangePage={setActivePage}
-            itemsPerPage={itemsPerPage}
-            onChangeItemsPerPage={(newItemsPerPage) => {
-              setItemsPerPage(newItemsPerPage);
-              setActivePage(0);
-            }}
-            itemsPerPageOptions={[0, 10, 20, 50]}
-          />
+          {dimensionListItems.length >= DEFAULT_PAGINATION_SIZE && (
+            <EuiTablePagination
+              data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
+              aria-label={i18n.translate(
+                'metricsExperience.overviewTab.dimensionsPaginationLabel',
+                {
+                  defaultMessage: 'Dimensions pagination',
+                }
+              )}
+              pageCount={pageCount}
+              activePage={activePage}
+              onChangePage={setActivePage}
+              itemsPerPage={itemsPerPage}
+              onChangeItemsPerPage={(newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage);
+                setActivePage(0);
+              }}
+              itemsPerPageOptions={[0, 10, 20, 50]}
+            />
+          )}
         </>
       )}
     </>

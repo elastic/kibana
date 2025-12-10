@@ -55,6 +55,7 @@ export async function generateSignificantEventDefinitions(
         ? { name: feature.name, filter: feature?.filter, type: feature.type }
         : undefined,
       severity_score: query.severity_score,
+      evidence: query.evidence,
     })),
     tokensUsed,
   };

@@ -95,7 +95,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       instructions,
       example,
       id: '',
-      hash: '',
+      file_id: '',
+      file_size: 0,
+      file_name: '',
+      file_hash_sha256: '',
       requires_input: requiresInput,
       path_to_executable: pathToExecutable,
       created_by: '',
@@ -116,6 +119,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       instructions,
       requires_input: requiresInput = false,
       path_to_executable: pathToExecutable = undefined,
+      file_name: fileName,
+      file_size: fileSize,
+      file_hash_sha256: fileHash,
       created_by: createdBy,
       updated_by: updatedBy,
       created_at: createdAt,
@@ -128,6 +134,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       id,
       name,
       platform: platform as EndpointScript['platform'],
+      fileName,
+      fileSize,
+      fileHash,
       downloadUri,
       requiresInput,
       description,
@@ -202,10 +211,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
     const fileStorage = await this.filesClient
       .create({
-        id: scriptId,
         metadata: {
           name: fileStream.hapi.filename ?? scriptDefinition.name.replace(/\D\W/g, '_'),
           mime: fileStream.hapi.headers['content-type'] ?? 'application/octet-stream',
+          meta: { scriptId },
         },
       })
       .catch((error) => {
@@ -246,7 +255,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
     Object.assign(soAttributes, {
       id: scriptId,
-      hash: fileStorage.data.hash.sha256,
+      file_id: fileStorage.id,
+      file_name: fileStorage.data.name,
+      file_size: fileStorage.data.size ?? 0,
+      file_hash_sha256: fileStorage.data.hash.sha256,
       created_by: this.username,
       updated_by: this.username,
     });

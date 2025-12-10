@@ -89,7 +89,12 @@ export class MetadataReceiver {
     const request: IndicesGetDataStreamRequest = {
       name: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['data_streams.name', 'data_streams.indices'],
+      filter_path: [
+        'data_streams.name',
+        'data_streams.indices',
+        'data_streams.lifecycle.enabled',
+        'data_streams.lifecycle.data_retention',
+      ],
     };
 
     return this.esClient.indices
@@ -97,8 +102,13 @@ export class MetadataReceiver {
       .then((response) => {
         const streams = response.data_streams ?? [];
         return streams.map((ds) => {
+          const dsl = ds.lifecycle;
           return {
             datastream_name: ds.name,
+            dsl: {
+              enabled: dsl?.enabled ?? false,
+              data_retention: dsl?.data_retention,
+            },
             indices:
               ds.indices?.map((index) => {
                 return {

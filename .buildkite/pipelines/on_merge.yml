@@ -10,7 +10,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 115
     retry:
       automatic:
         - exit_status: '*'
@@ -54,7 +53,7 @@ steps:
       provider: gcp
       machineType: n2-highcpu-8
       preemptible: true
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -69,7 +68,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -84,7 +83,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -99,7 +98,7 @@ steps:
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -116,7 +115,7 @@ steps:
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -148,7 +147,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 80
     retry:
       automatic:
@@ -164,7 +163,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -181,7 +180,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 115
+      diskSizeGb: 105
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -199,7 +198,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 115
+      diskSizeGb: 105
     key: build_scout_tests
     timeout_in_minutes: 15
     depends_on:

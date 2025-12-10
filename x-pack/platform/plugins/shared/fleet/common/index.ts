@@ -68,6 +68,12 @@ export {
   API_VERSIONS,
   APP_API_ROUTES,
   FLEET_LOG_INDICES,
+  // Cloud Connector constants
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+  AWS_ACCOUNT_TYPE_VAR_NAME,
+  AZURE_ACCOUNT_TYPE_VAR_NAME,
+  GCP_ACCOUNT_TYPE_VAR_NAME,
 } from './constants';
 export {
   // Route services

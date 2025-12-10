@@ -101,3 +101,6 @@ export const GRAPH_TAG_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagText` as cons
 
 export const GRAPH_POPOVER_PREVIEW_PANEL =
   `${GRAPH_INVESTIGATION_TEST_ID}PopoverPreviewPanel` as const;
+
+export const GRAPH_CALLOUT_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}Callout` as const;
+export const GRAPH_CALLOUT_LINK_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}CalloutLink` as const;

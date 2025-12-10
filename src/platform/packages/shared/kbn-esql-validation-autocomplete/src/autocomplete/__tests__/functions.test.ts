@@ -1976,4 +1976,38 @@ describe('functions arg suggestions', () => {
       expect(labels).not.toContain('CASE');
     });
   });
+
+  describe('conditional function autocomplete', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          name: 'conditional_mock',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: 'Mock function with isSignatureRepeating',
+          locationsAvailable: [Location.EVAL, Location.STATS],
+          signatures: [
+            {
+              params: [
+                { name: 'condition', type: 'boolean' },
+                { name: 'value', type: 'any' },
+              ],
+              returnType: 'unknown',
+              minParams: 2,
+              isSignatureRepeating: true,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('does not suggest comma after string literal at default position', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, "value", "default" /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain(',');
+    });
+  });
 });

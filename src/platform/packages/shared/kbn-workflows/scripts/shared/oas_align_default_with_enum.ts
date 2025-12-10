@@ -47,7 +47,6 @@ export function alignDefaultWithEnum(document: OpenAPIV3.Document) {
           ),
         ],
       };
-      console.log(key, JSON.stringify(extendedValue, null, 2));
       return [key, extendedValue];
     })
   );

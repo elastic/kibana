@@ -115,6 +115,10 @@ export const isErrorResult = (result: ToolResult): result is ErrorResult => {
   return result.type === ToolResultType.error;
 };
 
+export const isDashboardResult = (result: ToolResult): result is DashboardResult => {
+  return result.type === ToolResultType.dashboard;
+};
+
 export interface VisualizationElementAttributes {
   toolResultId?: string;
   chartType?: ChartType;
@@ -125,5 +129,16 @@ export const visualizationElement = {
   attributes: {
     toolResultId: 'tool-result-id',
     chartType: 'chart-type',
+  },
+};
+
+export interface DashboardElementAttributes {
+  toolResultId?: string;
+}
+
+export const dashboardElement = {
+  tagName: 'dashboard',
+  attributes: {
+    toolResultId: 'tool-result-id',
   },
 };

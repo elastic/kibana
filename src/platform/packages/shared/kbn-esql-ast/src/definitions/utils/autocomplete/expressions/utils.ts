@@ -98,6 +98,7 @@ export function buildExpressionFunctionParameterContext(
     hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
     functionDefinition: fnDefinition,
     firstArgumentType: analyzer.getFirstArgumentType(),
+    firstValueType: analyzer.getFirstValueType(),
     currentParameterIndex: analyzer.getCurrentParameterIndex(),
     validSignatures: analyzer.getValidSignatures(),
   };

@@ -128,6 +128,7 @@ export interface RuleExecutorServices<
   actionsClient?: PublicMethodsOf<ActionsClient>;
   getDataViews: () => Promise<DataViewsContract>;
   getMaintenanceWindowIds: () => Promise<string[]>;
+  getMaintenanceWindowNames: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
   ruleMonitoringService?: PublicRuleMonitoringService;
   ruleResultService?: PublicRuleResultService;
