@@ -76,7 +76,18 @@ export const inferenceKeys = {
   getConnectors: () => ['get-inference-connectors'] as const,
 };
 
-const DEFAULT_SEARCH_FIELDS = ['title', 'description', 'incremental_id.text'];
+const DEFAULT_SEARCH_FIELDS = [
+  'cases.title',
+  'cases.description',
+  'cases.incremental_id.text',
+  'cases.observables.value',
+  'cases.customFields.value',
+  'cases-comments.comment',
+  'cases-comments.alertId',
+  'cases-comments.eventId',
+  'cases-comments.rule.name',
+  'cases-comments.filename',
+];
 
 export const DEFAULT_FROM_DATE = 'now-30d';
 export const DEFAULT_TO_DATE = 'now';

@@ -8,16 +8,17 @@
 import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 
-import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
-import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import type {
+  CasesFindRequestWithCustomFields,
+  CasesFindResponse,
+} from '../../../common/types/api';
+import { CasesFindRequestWithCustomFieldsRt, CasesFindResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
-import { constructQueryOptions } from '../utils';
+import { constructQueryOptions, constructSearch } from '../utils';
 import { Operations } from '../../authorization';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -25,12 +26,12 @@ import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
 
 /**
- * Retrieves a case and optionally its comments.
+ * Retrieves a case and optionally its comments via saved objects find.
  *
  * @ignore
  */
-export const search = async (
-  params: CasesSearchRequest,
+export const find = async (
+  params: CasesFindRequestWithCustomFields,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
@@ -38,11 +39,12 @@ export const search = async (
     services: { caseService, licensingService },
     authorization,
     logger,
+    savedObjectsSerializer,
     spaceId,
   } = clientArgs;
 
   try {
-    const paramArgs = decodeWithExcessOrThrow(CasesSearchRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrow(CasesFindRequestWithCustomFieldsRt)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
@@ -115,19 +117,18 @@ export const search = async (
       ...options,
       customFieldsConfiguration,
       authorizationFilter,
-      searchType: 'search',
     });
 
-    const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
+    const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
 
     const [cases, statusStats] = await Promise.all([
-      caseService.searchCasesGroupedByID({
+      caseService.findCasesGroupedByID({
         caseOptions: {
           ...paramArgs,
           ...caseQueryOptions,
+          ...caseSearch,
           searchFields: asArray(paramArgs.searchFields),
         },
-        namespaces,
       }),
       caseService.getCaseStatusStats({
         searchOptions: statusStatsOptions,

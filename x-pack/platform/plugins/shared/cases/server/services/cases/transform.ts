@@ -14,8 +14,9 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import type { CaseCustomFields, ExternalService } from '../../../common/types/domain';
+import type { Case, CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
@@ -158,6 +159,75 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       total_observables: restAttributes.observables?.length ?? 0,
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
+  };
+}
+
+/**
+ * Encodes the version from Elasticsearch hit's _seq_no and _primary_term.
+ * This matches the format used by Kibana's saved objects version encoding.
+ */
+function encodeHitVersion(hit: estypes.SearchHit): string | undefined {
+  const seqNo = (hit as { _seq_no?: number })._seq_no;
+  const primaryTerm = (hit as { _primary_term?: number })._primary_term;
+
+  if (seqNo == null || primaryTerm == null) {
+    return undefined;
+  }
+
+  return Buffer.from(JSON.stringify([seqNo, primaryTerm]), 'utf8').toString('base64');
+}
+
+export function transformESModelToCase(
+  caseId: string,
+  caseData: CasePersistedAttributes,
+  hit: estypes.SearchHit
+): Case {
+  const sourceWithRefs = hit._source as { references?: SavedObjectReference[] } | undefined;
+  const references = sourceWithRefs?.references;
+
+  const connector = transformESConnectorOrUseDefault({
+    connector: caseData.connector,
+    references,
+    referenceName: CONNECTOR_ID_REFERENCE_NAME,
+  });
+
+  const externalService = transformESExternalService(caseData.external_service, references);
+
+  const { total_alerts, total_comments, total_events, ...caseAttributes } = caseData;
+
+  const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
+  const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;
+  const category = !caseAttributes.category ? null : caseAttributes.category;
+  const customFields = !caseAttributes.customFields
+    ? []
+    : (caseAttributes.customFields as CaseCustomFields);
+  const observables = caseAttributes.observables ?? [];
+  const total_observables = observables.length;
+  const incremental_id = caseAttributes.incremental_id ?? undefined;
+  const settings = {
+    syncAlerts: caseAttributes.settings?.syncAlerts ?? false,
+    extractObservables: caseAttributes.settings?.extractObservables ?? false,
+  };
+
+  const version = encodeHitVersion(hit);
+
+  return {
+    id: caseId,
+    version: version ?? '0',
+    totalComment: total_comments ?? 0,
+    totalAlerts: total_alerts ?? 0,
+    totalEvents: total_events,
+    ...caseAttributes,
+    severity,
+    status,
+    connector,
+    external_service: externalService,
+    category,
+    customFields,
+    observables,
+    total_observables,
+    incremental_id,
+    settings,
   };
 }
 
