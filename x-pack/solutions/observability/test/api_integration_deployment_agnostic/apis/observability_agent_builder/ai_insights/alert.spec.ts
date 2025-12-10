@@ -38,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const alertingApi = getService('alertingApi');
   const kibanaServer = getService('kibanaServer');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const observabilityAgentBuilderApi = getService('observabilityAgentBuilderApi');
 
   describe('AI Insights: Alert', function () {
     // LLM Proxy is not yet supported in cloud environments
@@ -121,19 +121,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           response: MOCKED_AI_SUMMARY,
         });
 
-        const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        const response = await scoped
-          .post('/internal/observability_agent_builder/ai_insights/alert')
-          .set('kbn-xsrf', 'true')
-          .set(internalReqHeader)
-          .send({ alertId })
-          .expect(200);
+        const { status, body } = await observabilityAgentBuilderApi.editor({
+          endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
+          params: { body: { alertId } },
+        });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(response.body).to.have.property('summary');
-        expect(response.body).to.have.property('context');
-        expect(response.body.summary).to.be(MOCKED_AI_SUMMARY);
+        expect(status).to.be(200);
+        expect(body).to.have.property('summary');
+        expect(body).to.have.property('context');
+        expect(body.summary).to.be(MOCKED_AI_SUMMARY);
       });
 
       it('returns context with APM data when service.name is present', async () => {
@@ -143,22 +141,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           response: MOCKED_AI_SUMMARY,
         });
 
-        const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        const response = await scoped
-          .post('/internal/observability_agent_builder/ai_insights/alert')
-          .set('kbn-xsrf', 'true')
-          .set(internalReqHeader)
-          .send({ alertId })
-          .expect(200);
+        const { status, body } = await observabilityAgentBuilderApi.editor({
+          endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
+          params: { body: { alertId } },
+        });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        const { context } = response.body;
-        expect(context).to.be.a('string');
+        expect(status).to.be(200);
+        expect(body.context).to.be.a('string');
 
         // Context should contain APM service summary and errors from the synthetic data
-        expect(context).to.contain('<apmServiceSummary>');
-        expect(context).to.contain('<apmErrors>');
+        expect(body.context).to.contain('<apmServiceSummary>');
+        expect(body.context).to.contain('<apmErrors>');
       });
 
       it('returns no related signals when alert has no service.name', async () => {
@@ -178,30 +173,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           response: MOCKED_AI_SUMMARY,
         });
 
-        const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        const response = await scoped
-          .post('/internal/observability_agent_builder/ai_insights/alert')
-          .set('kbn-xsrf', 'true')
-          .set(internalReqHeader)
-          .send({ alertId })
-          .expect(200);
+        const { status, body } = await observabilityAgentBuilderApi.editor({
+          endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
+          params: { body: { alertId } },
+        });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        const { context } = response.body;
-        expect(context).to.be('No related signals available.');
+        expect(status).to.be(200);
+        expect(body.context).to.be('No related signals available.');
       });
 
       it('returns 404 when alert does not exist', async () => {
         llmProxy.clear();
 
-        const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        await scoped
-          .post('/internal/observability_agent_builder/ai_insights/alert')
-          .set('kbn-xsrf', 'true')
-          .set(internalReqHeader)
-          .send({ alertId: 'non-existent-alert-id' })
-          .expect(404);
+        const { status } = await observabilityAgentBuilderApi.editor({
+          endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
+          params: { body: { alertId: 'non-existent-alert-id' } },
+        });
+        expect(status).to.be(404);
       });
     });
   });
