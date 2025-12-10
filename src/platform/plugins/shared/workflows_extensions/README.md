@@ -138,14 +138,16 @@ export const myStepDefinition: ServerStepDefinition = {
 Create the public-side definition (e.g., `public/step_types/my_step.ts`):
 
 ```typescript
+import React from 'react';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { icon as starIcon } from '@elastic/eui/es/components/icon/assets/star';
 import { i18n } from '@kbn/i18n';
 import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
 
 export const myStepDefinition: PublicStepDefinition = {
   ...myStepCommonDefinition,
-  icon: starIcon, // Must import icon from EUI, not use string
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
+  ),
   label: i18n.translate('myPlugin.myStep.label', {
     defaultMessage: 'My Custom Step',
   }),
@@ -313,7 +315,7 @@ The public definition must include:
 - `inputSchema`: Zod schema for input validation
 - `outputSchema`: Zod schema for output validation
 - `label`: User-facing label (i18n recommended)
-- `icon`: React component (can be imported from EUI, not a string)
+- `icon`: React component (can be imported from EUI assets, not a direct string), preferably lazy loaded using `React.lazy`.
 - `description`: Optional user-facing description
 - `documentation`: Optional documentation with details and examples
 
