@@ -46,7 +46,12 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
 
   const clusterParams = buildClusterQueryParams(clusterConfig);
   const signupParams = clusterParams ? `&${clusterParams}` : '';
-  const loginParams = clusterParams ? `%3F${clusterParams}` : '';
+
+  // Build the full redirect URL and encode it for the login link
+  const redirectUrl = clusterParams
+    ? `/connect-cluster-services?${clusterParams}`
+    : '/connect-cluster-services';
+  const encodedRedirectUrl = encodeURIComponent(redirectUrl);
 
   const handleConnect = async () => {
     if (!apiKey.trim()) {
@@ -111,7 +116,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              href={`${cloudUrl}/login?redirectTo=%2Fconnect-cluster-services${loginParams}`}
+              href={`${cloudUrl}/login?redirectTo=${encodedRedirectUrl}`}
               target="_blank"
               iconType="popout"
               iconSide="right"
