@@ -51,7 +51,7 @@ const buildMissingCategoriesDescription = (
   const categoryLinks = missingCategories
     .map((row) => {
       const url = getCategoryUrl(row.category);
-      return `- ${row.category}: ${window.location.origin}${url}`;
+      return `- [${row.category}](${window.location.origin}${url})`;
     })
     .join('\n');
 
@@ -203,13 +203,6 @@ export const DataCoveragePanel: React.FC = () => {
     },
   ];
 
-  const handleViewMissingIntegrations = useCallback(() => {
-    missingCategories.forEach((category) => {
-      const url = getCategoryIntegrationUrl(category.category);
-      window.open(url, '_blank', 'noopener,noreferrer');
-    });
-  }, [missingCategories, getCategoryIntegrationUrl]);
-
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -274,29 +267,9 @@ export const DataCoveragePanel: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.siemReadiness.coverage.dataCoverage.warningDescription"
-                  defaultMessage="Some log categories are missing integrations, limiting your visibility and detection coverage. {createCase} to install the missing {count, plural, one {integration} other {integrations}} or {viewMissing} to restore full visibility. Learn more about installing integrations in our {docs}."
+                  defaultMessage="Some log categories are missing integrations, limiting your visibility and detection coverage. Create a case to install the missing {count, plural, one {integration} other {integrations}} or view missing integrations to restore full visibility. Learn more about installing integrations in our {docs}."
                   values={{
                     count: missingCategoriesCount,
-                    createCase: (
-                      <EuiLink onClick={handleCreateCase}>
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataCoverage.createCaseLink',
-                          {
-                            defaultMessage: 'Create a case',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                    viewMissing: (
-                      <EuiLink onClick={handleViewMissingIntegrations}>
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataCoverage.viewMissingLink',
-                          {
-                            defaultMessage: 'View missing integrations',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
                     docs: (
                       <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
                         {i18n.translate(

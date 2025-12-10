@@ -102,19 +102,17 @@ export const getReadinessCategoriesRoute = (
           const searchResult = await esClient.search({
             index: '*',
             size: 0,
-            body: {
-              aggs: {
-                by_index: {
-                  terms: {
-                    field: '_index',
-                    size: 1000,
-                  },
-                  aggs: {
-                    by_category: {
-                      terms: {
-                        field: 'event.category',
-                        size: 10,
-                      },
+            aggs: {
+              by_index: {
+                terms: {
+                  field: '_index',
+                  size: 1000,
+                },
+                aggs: {
+                  by_category: {
+                    terms: {
+                      field: 'event.category',
+                      size: 10,
                     },
                   },
                 },
