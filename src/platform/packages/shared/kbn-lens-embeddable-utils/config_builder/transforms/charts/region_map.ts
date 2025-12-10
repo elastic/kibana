@@ -43,6 +43,7 @@ import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import {
   getDatasourceLayers,
+  getLensStateLayer,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
 } from './utils';
@@ -205,10 +206,7 @@ export function fromLensStateToAPI(
   const { state } = config;
   const visualization = state.visualization as ChoroplethChartState;
   const layers = getDatasourceLayers(state);
-
-  // Necessary for ESQL panels to find the correct layer, since the old layers are not removed from the state
-  const visLayerId = Object.entries(layers).find(([id]) => id === visualization.layerId);
-  const [layerId, layer] = visLayerId ?? Object.entries(layers)[0];
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
