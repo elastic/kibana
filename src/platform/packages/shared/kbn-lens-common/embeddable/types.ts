@@ -43,6 +43,7 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
+import type { StoredTitles } from '@kbn/presentation-publishing-schemas';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
@@ -252,7 +253,6 @@ export type LensSerializedSharedState = Simplify<
     LensWithReferences &
     LensUnifiedSearchContext &
     LensPanelProps &
-    SerializedTitles &
     Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
@@ -268,7 +268,11 @@ export type LensByRefSerializedState = Simplify<LensSerializedSharedState & Lens
  * - Panel settings
  * - other props from the embeddable
  */
-export type LensSerializedState = LensByRefSerializedState | LensByValueSerializedState;
+export type LensSerializedState = SerializedTitles &
+  (LensByRefSerializedState | LensByValueSerializedState);
+
+export type LensStoredState = StoredTitles &
+  (LensByRefSerializedState | LensByValueSerializedState);
 
 /**
  * Custom props exposed on the Lens exported component
@@ -322,7 +326,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = LensRendererPrivateProps;
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+  hidePanelTitles?: boolean;
+};
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel

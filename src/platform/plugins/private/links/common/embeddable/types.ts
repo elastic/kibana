@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { StoredTitles } from '@kbn/presentation-publishing-schemas';
 import type { StoredLinksState } from '../../server';
 
 export type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../server';
 
-export type StoredLinksEmbeddableState = SerializedTitles & StoredLinksState;
+export type StoredLinksEmbeddableState = StoredTitles & StoredLinksState;

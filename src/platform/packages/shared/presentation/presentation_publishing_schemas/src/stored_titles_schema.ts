@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoredLinksEmbeddableState } from '../../types';
-import type { StoredLinksByValueState910 } from './types';
+import { schema } from '@kbn/config-schema';
 
-export function transformLegacyState(
-  state: StoredLinksByValueState910
-): StoredLinksEmbeddableState {
-  // 9.1.0 by-value state stored state under attributes
-  const { attributes, ...rest } = state;
-  return {
-    ...attributes,
-    ...rest,
-  };
-}
+export const storedTitlesSchema = schema.object({
+  description: schema.maybe(schema.string()),
+  hidePanelTitles: schema.maybe(schema.boolean()),
+  title: schema.maybe(schema.string()),
+});

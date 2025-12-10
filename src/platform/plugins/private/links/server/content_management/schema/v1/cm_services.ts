@@ -8,14 +8,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
-  savedObjectSchema,
-  createResultSchema,
-  updateOptionsSchema,
   createOptionsSchemas,
+  createResultSchema,
   objectTypeToGetResultSchema,
+  savedObjectSchema,
+  updateOptionsSchema,
 } from '@kbn/content-management-utils';
+import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import { storedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
@@ -112,10 +113,8 @@ export const layoutSchema = schema.maybe(
   })
 );
 
-export const linksSchema = schema.object(
+export const linksSchema = storedTitlesSchema.extends(
   {
-    title: schema.string({ meta: { description: 'A human-readable title' } }),
-    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     links: linksArraySchema,
     layout: layoutSchema,
   },

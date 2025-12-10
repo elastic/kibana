@@ -6,7 +6,7 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+import type { SerializedTitles, StoredTitles } from '@kbn/presentation-publishing-schemas';
 
 interface Option {
   label: string;
@@ -25,6 +25,7 @@ export interface OverviewStatsEmbeddableCustomState {
   filters?: MonitorFilters;
 }
 
-export type OverviewStatsEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomState;
+type OverviewStatsState = DynamicActionsSerializedState & OverviewStatsEmbeddableCustomState;
+
+export type OverviewStatsEmbeddableState = SerializedTitles & OverviewStatsState;
+export type OverviewStatsStoredState = StoredTitles & OverviewStatsState;

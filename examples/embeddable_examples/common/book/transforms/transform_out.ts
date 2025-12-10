@@ -8,6 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import type { BookState } from '../../../server';
 import type { BookEmbeddableState, BookEmbeddableState910 } from '../types';
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
@@ -16,11 +17,12 @@ export function transformOut(
   storedState: BookEmbeddableState | BookEmbeddableState910,
   references?: Reference[]
 ): BookEmbeddableState {
+  const stateWithApiTitles = transformTitlesIn(storedState);
   // storedState may contain legacy state stored from dashboards or URL
 
   // 9.1.0 by-value state stored book state under attributes
-  if ('attributes' in storedState) {
-    const { attributes, ...rest } = storedState as { attributes: BookState };
+  if ('attributes' in stateWithApiTitles) {
+    const { attributes, ...rest } = stateWithApiTitles as { attributes: BookState };
     return {
       ...attributes,
       ...rest,
@@ -28,8 +30,8 @@ export function transformOut(
   }
 
   // 9.1.0 by-reference state stored by-reference id as savedBookId
-  if ('savedBookId' in storedState) {
-    const { savedBookId, ...rest } = storedState as { savedBookId: string };
+  if ('savedBookId' in stateWithApiTitles) {
+    const { savedBookId, ...rest } = stateWithApiTitles as { savedBookId: string };
     return {
       ...rest,
       savedObjectId: savedBookId,
@@ -42,11 +44,11 @@ export function transformOut(
   );
   if (savedObjectRef) {
     return {
-      ...(storedState as BookEmbeddableState),
+      ...(stateWithApiTitles as BookEmbeddableState),
       savedObjectId: savedObjectRef.id,
     };
   }
 
-  // storedState is current by-value state
-  return storedState as BookEmbeddableState;
+  // stateWithApiTitles is current by-value state
+  return stateWithApiTitles as BookEmbeddableState;
 }

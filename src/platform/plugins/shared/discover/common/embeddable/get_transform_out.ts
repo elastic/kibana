@@ -10,6 +10,7 @@
 import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableByValueState,
@@ -34,16 +35,16 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;
 
+    const stateWithApiTitles = transformTitlesOut(state);
     const enhancements = enhancementsState ? { enhancements: enhancementsState } : {};
-
-    if (isByValue(state)) {
+    if (isByValue(stateWithApiTitles)) {
       const tabsState = {
-        ...state,
-        attributes: extractTabs(state.attributes),
+        ...stateWithApiTitles,
+        attributes: extractTabs(stateWithApiTitles.attributes),
       };
       const { attributes } = inject({ type: SavedSearchType, ...tabsState }, references ?? []);
       return {
-        ...state,
+        ...stateWithApiTitles,
         attributes,
         ...enhancements,
       } as SearchEmbeddableByValueState;
@@ -53,7 +54,7 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
     );
     return {
-      ...state,
+      ...stateWithApiTitles,
       ...enhancements,
       ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
     } as SearchEmbeddableByReferenceState;

@@ -1,5 +1,5 @@
 {
-  "type": "shared-server",
+  "type": "shared-common",
   "id": "@kbn/presentation-publishing-schemas",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",

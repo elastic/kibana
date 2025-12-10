@@ -6,6 +6,7 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import type { LensTransformDependencies } from '.';
 import { LENS_ITEM_VERSION_V1, transformToV1LensItemAttributes } from '../content_management/v1';
@@ -18,15 +19,16 @@ import type {
 import { findLensReference, isByRefLensState } from './utils';
 
 /**
- * Transform from Lens Serialized State to Lens API format
+ * Transform from Lens Stored State to Lens API format
  */
 export const getTransformOut = ({
   builder,
   transformEnhancementsOut,
 }: LensTransformDependencies): LensTransformOut => {
   return function transformOut(state, references) {
-    const enhancements = state.enhancements
-      ? transformEnhancementsOut?.(state.enhancements, references ?? [])
+    const stateWithApiTitles = transformTitlesOut(state);
+    const enhancements = stateWithApiTitles.enhancements
+      ? transformEnhancementsOut?.(stateWithApiTitles.enhancements, references ?? [])
       : undefined;
     const enhancementsState = (
       enhancements ? { enhancements } : {}
@@ -34,18 +36,18 @@ export const getTransformOut = ({
 
     const savedObjectRef = findLensReference(references);
 
-    if (savedObjectRef && isByRefLensState(state)) {
+    if (savedObjectRef && isByRefLensState(stateWithApiTitles)) {
       return {
-        ...state,
+        ...stateWithApiTitles,
         ...enhancementsState,
         savedObjectId: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 
-    const migratedAttributes = migrateAttributes(state.attributes);
+    const migratedAttributes = migrateAttributes(stateWithApiTitles.attributes);
     const injectedState = injectLensReferences(
       {
-        ...state,
+        ...stateWithApiTitles,
         ...enhancementsState,
         attributes: migratedAttributes,
       },
@@ -65,7 +67,7 @@ export const getTransformOut = ({
     });
 
     return {
-      ...state,
+      ...stateWithApiTitles,
       attributes: apiConfig,
     } satisfies LensByValueTransformOutResult;
   };

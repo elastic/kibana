@@ -6,6 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { transformTitlesOut } from '@kbn/presentation-publishing-schemas';
 import { PATTERN_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { PatternAnalysisEmbeddableState, StoredPatternAnalysisEmbeddableState } from './types';
 
@@ -13,9 +14,10 @@ export function transformOut(
   state: StoredPatternAnalysisEmbeddableState,
   references?: Reference[]
 ): PatternAnalysisEmbeddableState {
+  const stateWithApiTitles = transformTitlesOut(state);
   const dataViewIdRef = references?.find((ref) => ref.name === PATTERN_ANALYSIS_DATA_VIEW_REF_NAME);
   return {
-    ...state,
+    ...stateWithApiTitles,
     ...(dataViewIdRef && { dataViewId: dataViewIdRef.id }),
   };
 }

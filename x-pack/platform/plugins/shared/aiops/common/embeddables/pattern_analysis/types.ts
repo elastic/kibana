@@ -7,19 +7,18 @@
 
 import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-random-sampler-utils';
 import type { SerializedTimeRange } from '@kbn/presentation-publishing';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+import type { SerializedTitles, StoredTitles } from '@kbn/presentation-publishing-schemas';
 
 export type MinimumTimeRangeOption = 'No minimum' | '1 week' | '1 month' | '3 months' | '6 months';
 
-export interface PatternAnalysisEmbeddableState extends SerializedTitles, SerializedTimeRange {
-  dataViewId?: string;
+interface PatternAnalysisCommonState extends SerializedTitles, SerializedTimeRange {
   fieldName?: string;
   minimumTimeRangeOption: MinimumTimeRangeOption;
   randomSamplerMode: RandomSamplerOption;
   randomSamplerProbability: RandomSamplerProbability;
 }
 
-export type StoredPatternAnalysisEmbeddableState = Omit<
-  PatternAnalysisEmbeddableState,
-  'dataViewId'
->;
+export type PatternAnalysisEmbeddableState = SerializedTitles &
+  PatternAnalysisCommonState & { dataViewId?: string };
+
+export type StoredPatternAnalysisEmbeddableState = StoredTitles & PatternAnalysisCommonState;

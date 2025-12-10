@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { Reference } from '@kbn/content-management-utils';
+import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { transformTitlesIn } from '@kbn/presentation-publishing-schemas';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import { extractVisReferences } from '../../references/extract_vis_references';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
   VisualizeEmbeddableState,
 } from '../types';
-import { extractVisReferences } from '../../references/extract_vis_references';
 import type {
   StoredVisualizeByReferenceState,
   StoredVisualizeByValueState,
@@ -29,13 +30,14 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     state: StoredVisualizeEmbeddableState;
     references: Reference[];
   } {
+    const stateWithStoredTitles = transformTitlesIn(state);
     const { enhancementsState, enhancementsReferences } = state.enhancements
       ? transformEnhancementsIn(state.enhancements)
       : { enhancementsState: undefined, enhancementsReferences: [] };
 
     // by ref
-    if ((state as VisualizeByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = state as VisualizeByReferenceState;
+    if ((stateWithStoredTitles as VisualizeByReferenceState).savedObjectId) {
+      const { savedObjectId, ...rest } = stateWithStoredTitles as VisualizeByReferenceState;
       return {
         state: {
           ...rest,
@@ -53,14 +55,14 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     }
 
     // by value
-    if ((state as VisualizeByValueState).savedVis) {
+    if ((stateWithStoredTitles as VisualizeByValueState).savedVis) {
       const { references, savedVis } = extractVisReferences(
-        (state as VisualizeByValueState).savedVis
+        (stateWithStoredTitles as VisualizeByValueState).savedVis
       );
 
       return {
         state: {
-          ...state,
+          ...stateWithStoredTitles,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
           savedVis,
         } as StoredVisualizeByValueState,
@@ -70,7 +72,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
 
     return {
       state: {
-        ...state,
+        ...stateWithStoredTitles,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
       } as StoredVisualizeEmbeddableState,
       references: enhancementsReferences,
