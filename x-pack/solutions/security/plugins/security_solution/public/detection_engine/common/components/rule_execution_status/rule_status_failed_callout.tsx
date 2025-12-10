@@ -54,20 +54,21 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   }, [date, title, ruleNameForChat]);
 
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-  const attachmentData = useMemo(
+  const ruleAttachment = useMemo(
     () => ({
-      text:
-        ruleName != null && dataSources != null
-          ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
-          : `Error message: ${message}`,
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text:
+          ruleName != null && dataSources != null
+            ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
+            : `Error message: ${message}`,
+        attachmentLabel: ruleName,
+      },
+      attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT,
     }),
     [message, ruleName, dataSources]
   );
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.rule,
-    attachmentData,
-    attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT,
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
   if (!shouldBeDisplayed) {
     return null;

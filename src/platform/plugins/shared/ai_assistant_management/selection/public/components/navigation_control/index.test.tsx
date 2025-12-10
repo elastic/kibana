@@ -55,7 +55,10 @@ describe('AIAssistantHeaderButton', () => {
     jest.clearAllMocks();
     getIsAiAgentsEnabled.mockResolvedValue(true);
     mockCoreStart.settings.client.set.mockResolvedValue(true);
-    mockCoreStart.application.capabilities.agentBuilder = { show: true };
+    mockCoreStart.application.capabilities = {
+      ...mockCoreStart.application.capabilities,
+      agentBuilder: { show: true },
+    };
   });
 
   describe('Header Button', () => {
