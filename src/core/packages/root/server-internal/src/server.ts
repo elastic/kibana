@@ -62,6 +62,7 @@ import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -308,6 +309,7 @@ export class Server {
       analytics: analyticsSetup,
       http: httpSetup,
       executionContext: executionContextSetup,
+      fetchCrossProjectExpression: this.fetchCrossProjectExpression.bind(this),
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
@@ -595,6 +597,13 @@ export class Server {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
+  }
+
+  /** @internal */
+  private fetchCrossProjectExpression(request: KibanaRequest) {
+    const soClient = this.coreStart!.savedObjects.getScopedClient(request);
+    const uiSettingsClient = this.coreStart!.uiSettings.asScopedToClient(soClient);
+    return uiSettingsClient.get('elasticsearch:cross_project_expression');
   }
 
   public setupCoreConfig() {

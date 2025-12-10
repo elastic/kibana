@@ -42,11 +42,14 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
+import type { CrossProjectExpressionGetter } from './cross_project_expression';
+import { CrossProjectExpression } from './cross_project_expression';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  fetchCrossProjectExpression: CrossProjectExpressionGetter;
 }
 
 /** @internal */
@@ -64,6 +67,7 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
+  private crossProjectExpression?: CrossProjectExpression;
   // @ts-expect-error - CPS is not yet implemented
   private cpsEnabled = false;
 
@@ -101,6 +105,7 @@ export class ElasticsearchService
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
     this.client = this.createClusterClient('data', config);
+    this.crossProjectExpression = new CrossProjectExpression(deps.fetchCrossProjectExpression);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       kibanaVersion: this.kibanaVersion,
