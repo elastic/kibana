@@ -1,4 +1,0 @@
-| UnboundedArrayInRoute/test.js:14:11:14:41 | schema. ... ring()) | This schema.arrayOf() call does not specify a maxSize, which could allow unbounded input leading to DoS. Consider adding { maxSize: N } as the second argument. |
-| UnboundedArrayInRoute/test.js:32:11:37:5 | schema. ... )\\n    ) | This schema.arrayOf() call does not specify a maxSize, which could allow unbounded input leading to DoS. Consider adding { maxSize: N } as the second argument. |
-| UnboundedArrayInRoute/test.js:45:11:45:57 | schema. ... e: 1 }) | This schema.arrayOf() call does not specify a maxSize, which could allow unbounded input leading to DoS. Consider adding { maxSize: N } as the second argument. |
-| UnboundedArrayInRoute/test.js:96:15:96:72 | schema. ... g() })) | This schema.arrayOf() call does not specify a maxSize, which could allow unbounded input leading to DoS. Consider adding { maxSize: N } as the second argument. |

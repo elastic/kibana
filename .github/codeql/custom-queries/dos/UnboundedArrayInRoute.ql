@@ -1,12 +1,13 @@
 /**
- * @name Unbounded array in API route validation
- * @description Detects schema.arrayOf() calls without maxSize constraint in API route validation,
- *              which could lead to Denial of Service (DoS) vulnerabilities.
+ * @name Unbounded array in schema validation
+ * @description Detects schema.arrayOf() calls without maxSize constraint,
+ *              which could lead to Denial of Service (DoS) vulnerabilities
+ *              when used to validate untrusted input.
  * @kind problem
  * @problem.severity warning
  * @security-severity 6.5
- * @precision high
- * @id js/kibana/unbounded-array-in-route
+ * @precision medium
+ * @id js/kibana/unbounded-array-in-schema
  * @tags security
  *       dos
  *       kibana
@@ -41,52 +42,24 @@ class SchemaArrayOfCall extends CallExpr {
 }
 
 /**
- * Holds if the expression is within a route validation context
+ * Identifies files that should be excluded from analysis:
+ * - config.ts files (plugin configuration, not request validation)
+ * - index.ts files at plugin server root (typically re-exports)
  */
-predicate isInRouteValidationContext(Expr e) {
-  // Check if it's part of a validate object in router.post/get/put/delete
-  exists(ObjectExpr validateObj, Property validateProp |
-    validateProp.getName() = "validate" and
-    validateProp.getInit() = validateObj and
-    validateObj.getAProperty().getInit().getAChildExpr*() = e
-  )
+predicate isInExcludedFile(Expr e) {
+  e.getFile().getBaseName() = "config.ts"
   or
-  // Check if it's part of body/query/params schema
-  exists(Property p |
-    p.getName() = ["body", "query", "params"] and
-    p.getInit().getAChildExpr*() = e
-  )
-  or
-  // Check if it's part of a route repository params
-  exists(Property p |
-    p.getName() = "params" and
-    p.getInit().getAChildExpr*() = e and
-    // Ensure it's in a route definition context (has endpoint property)
-    exists(ObjectExpr routeObj |
-      routeObj.getAProperty() = p and
-      exists(Property endpointProp |
-        endpointProp = routeObj.getAProperty() and
-        endpointProp.getName() = "endpoint"
-      )
-    )
-  )
-}
-
-/**
- * Identifies schema.arrayOf calls that appear to be in response schemas (not request validation)
- */
-predicate isInResponseContext(Expr e) {
-  exists(Property p |
-    p.getName() = ["response", "200", "201", "400", "401", "403", "404", "500"] and
-    p.getInit().getAChildExpr*() = e
+  // Exclude index.ts at plugin server root: plugins/*/server/index.ts or plugins/*/*/server/index.ts
+  (
+    e.getFile().getBaseName() = "index.ts" and
+    e.getFile().getRelativePath().regexpMatch(".*/plugins/[^/]+(/[^/]+)?/server/index\\.ts")
   )
 }
 
 from SchemaArrayOfCall arrayCall
 where
   not arrayCall.hasMaxSize() and
-  isInRouteValidationContext(arrayCall) and
-  not isInResponseContext(arrayCall)
+  not isInExcludedFile(arrayCall)
 select arrayCall,
-  "This schema.arrayOf() call does not specify a maxSize, which could allow unbounded input leading to DoS. Consider adding { maxSize: N } as the second argument."
+  "This schema.arrayOf() call does not specify a maxSize. Unbounded input causes Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument."
 
