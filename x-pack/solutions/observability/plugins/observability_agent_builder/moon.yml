@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/logging'
   - '@kbn/inference-common'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
