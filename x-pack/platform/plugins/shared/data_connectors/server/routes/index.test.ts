@@ -96,7 +96,7 @@ describe('buildSecretsFromConnectorSpec', () => {
       const expectedSecret = {
         authType: 'api_key_header',
         apiKey: 'test-key',
-        headerField: 'Api-Key',
+        headerField: 'ApiKey',
       };
       const actualFromType = buildSecretsFromConnectorSpec('.apikey_header_connector', 'test-key');
       const actualFromString = buildSecretsFromConnectorSpec(
