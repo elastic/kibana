@@ -7,41 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ELASTIC_LLM_TOUR_TITLE = i18n.translate(
-  'xpack.elasticAssistant.elasticLLM.tour.title',
-  {
-    defaultMessage: 'Elastic Managed LLM connector now available',
-  }
-);
-
-export const ELASTIC_LLM_TOUR_SUBTITLE = i18n.translate(
-  'xpack.elasticAssistant.elasticLLM.tour.subtitle',
-  {
-    defaultMessage: 'New AI feature!',
-  }
-);
-
-export const ELASTIC_LLM_TOUR_LEARN_MORE = i18n.translate(
-  'xpack.elasticAssistant.elasticLLM.tour.learnMore',
-  {
-    defaultMessage: 'Learn more',
-  }
-);
-
-export const ELASTIC_LLM_TOUR_FINISH_TOUR = i18n.translate(
-  'xpack.elasticAssistant.elasticLLM.tour.finishTour',
-  {
-    defaultMessage: 'Ok',
-  }
-);
-
-export const ELASTIC_LLM_AS_DEFAULT_CONNECTOR = i18n.translate(
-  'xpack.elasticAssistant.elasticLLM.tour.asDefaultConnector',
-  {
-    defaultMessage: 'Make Elastic Managed LLM the default connector',
-  }
-);
-
 export const ELASTIC_LLM_AI_FEATURES = i18n.translate(
   'xpack.elasticAssistant.elasticLLM.tour.aiFeature',
   {
@@ -69,3 +34,4 @@ export const ELASTIC_LLM_TOUR_PERFORMANCE = i18n.translate(
     defaultMessage: 'performance',
   }
 );
+
