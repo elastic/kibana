@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -124,12 +123,16 @@ export default function ({ getService }: FtrProviderContext) {
           browserTimezone: 'UTC',
           title: 'allowed search',
           objectType: 'search',
-          searchSource: {
-            version: true,
-            fields: [{ field: '*', include_unmapped: true }],
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-          } as unknown as SerializedSearchSourceFields,
-          columns: [],
+          locatorParams: [
+            {
+              id: 'DISCOVER_APP_LOCATOR',
+              version: '7.13.0',
+              params: {
+                dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953',
+                columns: [],
+              },
+            },
+          ],
           version: '7.13.0',
         },
         reportingAPI.REPORTING_USER_USERNAME,

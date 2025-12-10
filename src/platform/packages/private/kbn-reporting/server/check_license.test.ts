@@ -24,7 +24,7 @@ describe('check_license', () => {
   describe('license information is not ready', () => {
     beforeEach(() => {
       exportTypesRegistry = {
-        getAll: () => [{ id: 'csv_searchsource' }],
+        getAll: () => [{ id: 'csv_v2' }],
       } as unknown as ExportTypesRegistry;
     });
 
@@ -32,18 +32,16 @@ describe('check_license', () => {
       expect(checkLicense(exportTypesRegistry, undefined).management.showLinks).toEqual(true);
     });
 
-    it('should set csv_searchsource.showLinks to true', () => {
-      expect(checkLicense(exportTypesRegistry, undefined).csv_searchsource.showLinks).toEqual(true);
+    it('should set csv_v2.showLinks to true', () => {
+      expect(checkLicense(exportTypesRegistry, undefined).csv_v2.showLinks).toEqual(true);
     });
 
     it('should set management.enableLinks to false', () => {
       expect(checkLicense(exportTypesRegistry, undefined).management.enableLinks).toEqual(false);
     });
 
-    it('should set csv_searchsource.enableLinks to false', () => {
-      expect(checkLicense(exportTypesRegistry, undefined).csv_searchsource.enableLinks).toEqual(
-        false
-      );
+    it('should set csv_v2.enableLinks to false', () => {
+      expect(checkLicense(exportTypesRegistry, undefined).csv_v2.enableLinks).toEqual(false);
     });
 
     it('should set management.jobTypes to undefined', () => {
@@ -67,7 +65,7 @@ describe('check_license', () => {
         type: undefined,
       } as ILicense;
       exportTypesRegistry = {
-        getAll: () => [{ id: 'csv_searchsource' }],
+        getAll: () => [{ id: 'csv_v2' }],
       } as unknown as ExportTypesRegistry;
     });
 
@@ -75,18 +73,16 @@ describe('check_license', () => {
       expect(checkLicense(exportTypesRegistry, license).management.showLinks).toEqual(true);
     });
 
-    it('should set csv_searchsource.showLinks to true', () => {
-      expect(checkLicense(exportTypesRegistry, license).csv_searchsource.showLinks).toEqual(true);
+    it('should set csv_v2.showLinks to true', () => {
+      expect(checkLicense(exportTypesRegistry, license).csv_v2.showLinks).toEqual(true);
     });
 
     it('should set management.enableLinks to false', () => {
       expect(checkLicense(exportTypesRegistry, license).management.enableLinks).toEqual(false);
     });
 
-    it('should set csv_searchsource.enableLinks to false', () => {
-      expect(checkLicense(exportTypesRegistry, license).csv_searchsource.enableLinks).toEqual(
-        false
-      );
+    it('should set csv_v2.enableLinks to false', () => {
+      expect(checkLicense(exportTypesRegistry, license).csv_v2.enableLinks).toEqual(false);
     });
 
     it('should set management.jobTypes to undefined', () => {

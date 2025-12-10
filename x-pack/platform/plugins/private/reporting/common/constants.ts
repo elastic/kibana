@@ -26,4 +26,4 @@ export const jobTypes = [CSV_JOB_TYPE, CSV_JOB_TYPE_V2, PDF_JOB_TYPE_V2, PNG_JOB
 
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2];
 
-export const DEPRECATED_JOB_TYPES = ['csv']; // Replaced with csv_searchsource and csv_v2
+export const DEPRECATED_JOB_TYPES = ['csv', 'csv_searchsource']; // csv_v2 is the singular recommended job type for CSV exports

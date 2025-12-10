@@ -52,25 +52,7 @@ interface BaseParams {
 ### CSV [_csv]
 
 
-#### Job parameters of CsvSearchSource [_job_parameters_of_csvsearchsource]
-
-The export type to generate CSV reports and is available in Discover uses "search source" objects. This export type is called `csv_searchsource` in the code. A configuration for a CSV report job is represented with an interface that includes the `BaseParams` and the following fields. To create a request for a CSV report, these required job parameters are Rison encoded into a query string variable of the report generation URL:
-
-```
-interface JobParamsCSV {
-  searchSource: SerializedSearchSourceFields; <1>
-  columns?: string[]; <2>
-};
-```
-
-1. An object of serialized data that internally represents a search object in Kibana. It will contain a reference to a DataView saved object.
-2. An array of field names to include as columns in the CSV report.
-
-
-
-#### Job parameters of CsvFromSavedObject [_job_parameters_of_csvfromsavedobject]
-
-A newer export type to generate CSV reports is available, currently only by API. This export type is called `csv_v2` in the code.
+The `csv_v2` export type is used to generate CSV reports, and uses DicoverAppLocatorParams objects. It supports CSV exports based on Discover sessions and ES|QL queries.
 
 ```
 interface JobParamsCsvFromSavedObject {
@@ -87,7 +69,7 @@ interface JobParamsCsvFromSavedObject {
 After the job parameters are received by the route handler for the report generation URL, an additional field is automatically added to the fields from job parameters:
 
 ```
-interface TaskPayloadCSV {
+interface TaskPayloadCsvFromSavedObject {
   pagingStrategy: 'scan' | 'pit' <1>
 }
 ```
