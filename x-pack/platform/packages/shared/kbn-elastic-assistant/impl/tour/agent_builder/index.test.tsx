@@ -10,10 +10,9 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { I18nProvider } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { AgentBuilderTourStep } from './index';
+import { AgentBuilderTourStep } from '.';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { AGENT_BUILDER_TOUR_CONTINUE, AGENT_BUILDER_TOUR_SKIP } from './translations';
-import { tourDefaultConfig } from './step_config';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 jest.mock('../common/hooks/use_tour_storage_key', () => ({
@@ -27,7 +26,6 @@ jest.mock('@elastic/eui', () => {
     EuiTourStep: ({
       children,
       isStepOpen,
-      onFinish,
       footerAction,
       content,
       title,
@@ -35,7 +33,6 @@ jest.mock('@elastic/eui', () => {
     }: {
       children: React.ReactNode;
       isStepOpen: boolean;
-      onFinish: () => void;
       footerAction: React.ReactNode[];
       content: React.ReactNode;
       title: React.ReactNode;
@@ -97,7 +94,7 @@ describe('AgentBuilderTourStep', () => {
         isDisabled={true}
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -123,7 +120,7 @@ describe('AgentBuilderTourStep', () => {
         isDisabled={false}
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -146,7 +143,7 @@ describe('AgentBuilderTourStep', () => {
         isDisabled={false}
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -174,7 +171,7 @@ describe('AgentBuilderTourStep', () => {
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
         onContinue={mockOnContinue}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -206,7 +203,7 @@ describe('AgentBuilderTourStep', () => {
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
         onContinue={mockOnContinue}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -236,7 +233,7 @@ describe('AgentBuilderTourStep', () => {
         isDisabled={false}
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -269,7 +266,7 @@ describe('AgentBuilderTourStep', () => {
         isDisabled={false}
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -286,7 +283,7 @@ describe('AgentBuilderTourStep', () => {
         isDisabled={false}
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
       >
-        <div data-test-subj="target">Test</div>
+        <div data-test-subj="target">{'Test'}</div>
       </AgentBuilderTourStep>,
       {
         wrapper: Wrapper,
@@ -296,4 +293,3 @@ describe('AgentBuilderTourStep', () => {
     expect(getByTestId('target')).toBeInTheDocument();
   });
 });
-
