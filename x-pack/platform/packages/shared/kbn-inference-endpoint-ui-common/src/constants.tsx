@@ -97,3 +97,6 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
     serverlessOnly: true,
   },
 };
+
+export const SERVICE_SETTINGS = 'service_settings';
+export const TASK_SETTINGS = 'task_settings';

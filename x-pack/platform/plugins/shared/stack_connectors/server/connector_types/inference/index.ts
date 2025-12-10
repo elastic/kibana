@@ -70,27 +70,19 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     const esClient = services.scopedClusterClient.asInternalUser;
 
     try {
-      const { provider, providerConfig, headers } = config ?? {};
+      const {
+        task_settings: taskSettings,
+        service_settings: serviceSettings,
+        headers,
+      } = config ?? {};
 
-      // NOTE: This is a temporary workaround for anthropic max_tokens handling until the services endpoint is updated to reflect the correct structure.
-      // Anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
-      // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
-      if (provider === ServiceProviderKeys.anthropic && providerConfig?.max_tokens) {
-        config.taskTypeConfig = {
-          ...(config.taskTypeConfig ?? {}),
-          max_tokens: providerConfig.max_tokens,
-        };
-        // This field is unknown to the anthropic service config, so we remove it
-        delete providerConfig.max_tokens;
-      }
-
-      const taskSettings = {
-        ...(config.taskTypeConfig ? unflattenObject(config.taskTypeConfig) : {}),
+      const taskSettingsWithHeaders = {
+        ...(unflattenObject(taskSettings ?? {}) ?? {}),
         ...(headers ? { headers } : {}),
       };
 
-      const serviceSettings = {
-        ...(isUpdate === false ? unflattenObject(providerConfig ?? {}) : {}),
+      const serviceSettingsWithSecrets = {
+        ...(isUpdate === false ? unflattenObject(serviceSettings ?? {}) : {}),
         // Update accepts only secrets in service_settings
         ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
@@ -118,8 +110,8 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
           task_type: config?.taskType as InferenceTaskType,
           // @ts-ignore The InferenceInferenceEndpoint type is out of date and has 'service' as a required property but this call will error if service is included
           inference_config: {
-            service_settings: serviceSettings,
-            task_settings: taskSettings,
+            service_settings: serviceSettingsWithSecrets,
+            task_settings: taskSettingsWithHeaders,
           },
         });
       } else {
@@ -128,8 +120,8 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
           task_type: config?.taskType as InferenceTaskType,
           inference_config: {
             service: config!.provider,
-            service_settings: serviceSettings,
-            task_settings: taskSettings,
+            service_settings: serviceSettingsWithSecrets,
+            task_settings: taskSettingsWithHeaders,
           },
         });
       }

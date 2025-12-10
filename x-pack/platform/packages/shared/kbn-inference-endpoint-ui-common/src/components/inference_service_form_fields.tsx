@@ -42,6 +42,8 @@ import {
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
   serviceProviderLinkComponents,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
 } from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import type { TaskTypeOption } from '../utils/helpers';
@@ -55,7 +57,10 @@ import { MoreOptionsFields } from './more_options_fields';
 import { AdditionalOptionsFields } from './additional_options_fields';
 import { AuthenticationFormItems } from './configuration/authentication_form_items';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
-import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
+import {
+  ProviderServiceSettingsHiddenField,
+  ProviderTaskSettingsHiddenField,
+} from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
 
 // Custom trigger button CSS
@@ -145,7 +150,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       'config.contextWindowLength',
       'config.temperature',
       'config.provider',
-      'config.providerConfig',
+      'config.service_settings',
+      'config.task_settings',
     ],
   });
 
@@ -235,13 +241,18 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       }
 
       // Update config and secrets with the new set of fields + keeps the entered data for a common
-      const newConfig = { ...(config.providerConfig ?? {}) };
+      const newServiceSettings = { ...(config.service_settings ?? {}) };
+      const newTaskSettings = { ...(config.task_settings ?? {}) };
       const newSecrets = { ...(secrets?.providerSecrets ?? {}) };
 
       // Iterate through the new provider configurations so we can ensure all fields supporting task type are added
       Object.keys(newProvider?.configurations ?? {}).forEach((k) => {
+        const newConfigToUse =
+          newProvider?.configurations[k]?.location === TASK_SETTINGS
+            ? newTaskSettings
+            : newServiceSettings;
         if (
-          (newConfig[k] !== undefined &&
+          (newConfigToUse[k] !== undefined &&
             newProvider?.configurations[k]?.supported_task_types &&
             !newProvider?.configurations[k].supported_task_types.includes(taskType)) ||
           // Remove fields of unknown and unhandled types
@@ -249,13 +260,13 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             newProvider?.configurations[k]?.type ?? ('' as FieldType)
           ) === false
         ) {
-          delete newConfig[k];
+          delete newConfigToUse[k];
         } else if (
-          newConfig[k] === undefined &&
+          newConfigToUse[k] === undefined &&
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          newConfig[k] = newProvider?.configurations[k]?.default_value ?? null;
+          newConfigToUse[k] = newProvider?.configurations[k]?.default_value ?? null;
         }
       });
 
@@ -274,7 +285,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         config: {
           taskType,
           inferenceId,
-          providerConfig: newConfig,
+          service_settings: newServiceSettings,
+          task_settings: newTaskSettings,
         },
         secrets: {
           providerSecrets: newSecrets,
@@ -336,7 +348,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     },
     [config, onTaskTypeOptionsSelect, updateFieldValues, updatedProviders, getOverrides]
   );
-
+  // Separate into serviceSettings and taskSettings depending on location
   const onSetProviderConfigEntry = useCallback(
     async (key: string, value: unknown) => {
       const entry: ConfigEntryView | undefined = providerSchema.find(
@@ -352,13 +364,15 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           setFieldValue('secrets.providerSecrets', newSecrets);
           await validateFields(['secrets.providerSecrets']);
         } else {
-          if (!config.providerConfig) {
-            config.providerConfig = {};
+          const fieldLocation = entry.location ?? SERVICE_SETTINGS;
+          if (!config[`${fieldLocation}`]) {
+            config[`${fieldLocation}`] = {};
           }
-          const newConfig = { ...config.providerConfig };
-          newConfig[key] = value;
-          setFieldValue('config.providerConfig', newConfig);
-          await validateFields(['config.providerConfig']);
+
+          const newConfigSection = { ...config[`${fieldLocation}`] };
+          newConfigSection[key] = value;
+          setFieldValue(`config.${fieldLocation}`, newConfigSection);
+          await validateFields([`config.${fieldLocation}`]);
         }
       }
     },
@@ -477,7 +491,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   useEffect(() => {
     if (isSubmitting) {
-      validateFields(['config.providerConfig']);
+      validateFields(['config.task_settings', 'config.service_settings']);
       validateFields(['secrets.providerSecrets']);
     }
   }, [isSubmitting, config, validateFields]);
@@ -498,8 +512,15 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             ) {
               itemValue.value = secretValue;
             }
-          } else if (config?.providerConfig) {
-            const configValue = config.providerConfig[item.key];
+          } else if (config?.service_settings || config?.task_settings) {
+            let configValue = null;
+
+            if (item.location === SERVICE_SETTINGS && config?.service_settings) {
+              configValue = config.service_settings[item.key];
+            } else if (item.location === TASK_SETTINGS && config?.task_settings) {
+              configValue = config.task_settings[item.key];
+            }
+
             if (
               typeof configValue === 'string' ||
               typeof configValue === 'number' ||
@@ -518,7 +539,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     setProviderSettingsFormFields(existingConfiguration.filter((p) => p.required && !p.sensitive));
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
     setAuthenticationFormFields(existingConfiguration.filter((p) => p.sensitive));
-  }, [config?.providerConfig, providerSchema, secrets, selectedTaskType]);
+  }, [config?.task_settings, config?.service_settings, providerSchema, secrets, selectedTaskType]);
 
   const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
 
@@ -630,7 +651,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             setRequiredProviderFormFields={setAuthenticationFormFields}
             isSubmitting={isSubmitting}
           />
-          <ProviderConfigHiddenField
+          <ProviderServiceSettingsHiddenField
+            requiredProviderFormFields={providerSettingsFormFields}
+            setRequiredProviderFormFields={setProviderSettingsFormFields}
+            isSubmitting={isSubmitting}
+          />
+          <ProviderTaskSettingsHiddenField
             requiredProviderFormFields={providerSettingsFormFields}
             setRequiredProviderFormFields={setProviderSettingsFormFields}
             isSubmitting={isSubmitting}
