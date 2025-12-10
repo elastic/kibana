@@ -59,14 +59,14 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text:
-          ruleName != null && dataSources != null
-            ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
+          ruleNameForChat != null && dataSources != null
+            ? `Rule name: ${ruleNameForChat}\nData sources: ${dataSources}\nError message: ${message}`
             : `Error message: ${message}`,
-        attachmentLabel: ruleName,
+        attachmentLabel: ruleNameForChat,
       },
       attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT,
     }),
-    [message, ruleName, dataSources]
+    [message, ruleNameForChat, dataSources]
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
