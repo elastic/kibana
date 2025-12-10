@@ -48,7 +48,7 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
     // Otherwise fallback to default thinking label.
     // Agent reasoning can be reasoning directly from the agent or individual tool call progression
     thinkingButtonLabel = agentReasoning
-      ? i18n.translate('...', {
+      ? i18n.translate('xpack.onechat.conversation.thinking.reasoningInProgress', {
           defaultMessage: '{reasoning}…',
           values: { reasoning: agentReasoning },
         })
