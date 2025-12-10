@@ -7,26 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, first, map } from 'rxjs';
+import { BehaviorSubject, first } from 'rxjs';
 import type { initializeFiltersManager } from './filters_manager';
 
 export function initializePauseFetchManager(
   filtersManager: ReturnType<typeof initializeFiltersManager>
 ) {
-  const filtersPublished$ = new BehaviorSubject<boolean>(false);
+  const isFetchPaused$ = new BehaviorSubject<boolean>(true);
+  const setFetchPaused = (paused: boolean) => isFetchPaused$.next(paused);
+
   const filtersSubscription = filtersManager.api.filters$
-    .pipe(first((filters) => Boolean(filters)))
+    .pipe(
+      first((filters) => {
+        return Boolean(filters);
+      })
+    )
     .subscribe(() => {
-      filtersPublished$.next(true);
-      filtersPublished$.complete();
+      setFetchPaused(false);
     });
-
-  const editableFetchPaused$ = new BehaviorSubject<boolean>(false);
-  const setFetchPaused = (paused: boolean) => editableFetchPaused$.next(paused);
-
-  const isFetchPaused$ = combineLatest([editableFetchPaused$, filtersPublished$]).pipe(
-    map(([editableFetchPaused, filtersPublished]) => editableFetchPaused || !filtersPublished)
-  );
 
   return {
     api: {
