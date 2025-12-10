@@ -165,8 +165,13 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                   <h1>{ruleTypeModalTitle}</h1>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <EuiFlexGroup gutterSize="m" alignItems="center">
-                  <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem 
+                    grow={1}
+                    style={{
+                      paddingRight: euiTheme.size.base, // match the column layout for rule type categories
+                    }}
+                  >
                     <EuiButtonGroup
                       legend={i18n.translate(
                         'responseOpsRuleForm.components.ruleTypeModal.modeSelectionLegend',
@@ -178,9 +183,15 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                       idSelected={selectedMode}
                       onChange={(id) => onChangeMode(id as 'ruleType' | 'template')}
                       buttonSize="compressed"
+                      isFullWidth={true}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem>
+                  <EuiFlexItem 
+                    grow={3}
+                    style={{
+                      marginRight: '8px', // the header is already padded on the right which matches the rule type list container, but we need to add the 8px margin from the card itself. 
+                    }}
+                  >
                     <EuiFieldSearch
                       placeholder={searchPlaceholder}
                       value={searchString}
