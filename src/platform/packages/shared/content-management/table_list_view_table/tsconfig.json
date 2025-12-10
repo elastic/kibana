@@ -13,7 +13,10 @@
       "@testing-library/react"
     ]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -38,5 +41,7 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/react-query"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
