@@ -16,14 +16,30 @@
 import javascript
 
 /**
+ * Holds if the variable is the 'schema' imported from '@kbn/config-schema'
+ */
+class SchemaImport extends Import {
+  SchemaImport() {
+    this.getImportedModule() = "@kbn/config-schema" and
+    this.getASpecifier().getImportedName() = "schema"
+  }
+
+  VarDecl getSchemaVarDecl() {
+    result = this.getASpecifier().getTarget()
+  }
+}
+
+/**
  * Holds if the call is to schema.arrayOf from @kbn/config-schema
  */
 class SchemaArrayOfCall extends CallExpr {
   SchemaArrayOfCall() {
-    exists(PropAccess pa |
+    exists(PropAccess pa, SchemaImport si, VarAccess va |
       this.getCallee() = pa and
       pa.getPropertyName() = "arrayOf" and
-      pa.getBase().(VarAccess).getName() = "schema"
+      pa.getBase() = va and
+      va.getName() = "schema" and
+      si.getSchemaVarDecl() = va.getTarget()
     )
   }
 
