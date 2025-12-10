@@ -9,29 +9,26 @@ import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { MouseEvent } from 'react';
 import { useEffect } from 'react';
+import { MANAGEMENT_APP_ID, MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../common';
 import type { MaintenanceWindowDeepLinkIds } from '../../common';
-import {
-  MANAGEMENT_APP_ID,
-  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
-} from '@kbn/maintenance-windows-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 import { useNavigation } from './use_navigation';
 
 const breadcrumbTitle: Record<MaintenanceWindowDeepLinkIds, string> = {
   [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows]: i18n.translate(
-    'xpack.alerting.breadcrumbs.maintenanceWindowsLinkText',
+    'xpack.maintenanceWindows.breadcrumbs.linkText',
     {
       defaultMessage: 'Maintenance Windows',
     }
   ),
   [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate]: i18n.translate(
-    'xpack.alerting.breadcrumbs.createMaintenanceWindowsLinkText',
+    'xpack.maintenanceWindows.breadcrumbs.createMaintenanceWindowsLinkText',
     {
       defaultMessage: 'Create',
     }
   ),
   [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit]: i18n.translate(
-    'xpack.alerting.breadcrumbs.editMaintenanceWindowsLinkText',
+    'xpack.maintenanceWindows.breadcrumbs.editMaintenanceWindowsLinkText',
     {
       defaultMessage: 'Edit',
     }
@@ -85,7 +82,7 @@ export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
       ...(!serverless
         ? [
             {
-              text: i18n.translate('xpack.alerting.breadcrumbs.stackManagementLinkText', {
+              text: i18n.translate('xpack.maintenanceWindows.breadcrumbs.stackManagementLinkText', {
                 defaultMessage: 'Stack Management',
               }),
               href: getAppUrl(),

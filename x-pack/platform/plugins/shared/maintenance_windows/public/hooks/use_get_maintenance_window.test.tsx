@@ -31,7 +31,7 @@ jest.mock('../utils/kibana_react', () => {
 jest.mock('../services/get', () => ({
   getMaintenanceWindow: jest.fn(),
 }));
-jest.mock('../pages/maintenance_windows/helpers/convert_from_maintenance_window_to_form', () => ({
+jest.mock('../helpers/convert_from_maintenance_window_to_form', () => ({
   convertFromMaintenanceWindowToForm: jest.fn(),
 }));
 

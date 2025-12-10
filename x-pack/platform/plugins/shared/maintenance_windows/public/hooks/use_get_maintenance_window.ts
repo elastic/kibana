@@ -34,7 +34,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
 
   const onErrorFn = () => {
     toasts.addDanger(
-      i18n.translate('xpack.alerting.getMaintenanceWindowFailure', {
+      i18n.translate('xpack.maintenanceWindows.getMaintenanceWindowFailure', {
         defaultMessage: 'Unable to get maintenance window.',
       })
     );

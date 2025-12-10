@@ -23,14 +23,14 @@ export const useDeleteMaintenanceWindow = () => {
   return useMutation(mutationFn, {
     onSuccess: () => {
       toasts.addSuccess(
-        i18n.translate('xpack.alerting.maintenanceWindowsDeleteSuccess', {
+        i18n.translate('xpack.maintenanceWindows.deleteSuccess', {
           defaultMessage: 'Deleted maintenance window',
         })
       );
     },
     onError: () => {
       toasts.addDanger(
-        i18n.translate('xpack.alerting.maintenanceWindowsDeleteFailure', {
+        i18n.translate('xpack.maintenanceWindows.deleteFailure', {
           defaultMessage: 'Failed to delete maintenance window.',
         })
       );

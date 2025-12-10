@@ -9,7 +9,7 @@ import type {
   MaintenanceWindow,
   MaintenanceWindowResponse,
   CreateMaintenanceWindowRequestBody,
-} from '@kbn/maintenance-windows-plugin/common';
+} from '../../common';
 
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../common';
 import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';

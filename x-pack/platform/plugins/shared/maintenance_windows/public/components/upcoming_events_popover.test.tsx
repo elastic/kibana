@@ -11,9 +11,9 @@ import { createAppMockRenderer } from '../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../common';
 
-jest.mock('../../../utils/kibana_react');
+jest.mock('../utils/kibana_react');
 
-const { useUiSetting } = jest.requireMock('../../../utils/kibana_react');
+const { useUiSetting } = jest.requireMock('../utils/kibana_react');
 
 useUiSetting.mockReturnValue('YYYY.MM.DD, h:mm:ss');
 

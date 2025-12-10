@@ -29,13 +29,13 @@ export function useArchiveMaintenanceWindow() {
 
   return useMutation(mutationFn, {
     onSuccess: (data, { archive }) => {
-      const archiveToast = i18n.translate('xpack.alerting.maintenanceWindowsArchiveSuccess', {
+      const archiveToast = i18n.translate('xpack.maintenanceWindows.archiveSuccess', {
         defaultMessage: "Archived maintenance window ''{title}''",
         values: {
           title: data.title,
         },
       });
-      const unarchiveToast = i18n.translate('xpack.alerting.maintenanceWindowsUnarchiveSuccess', {
+      const unarchiveToast = i18n.translate('xpack.maintenanceWindows.unarchiveSuccess', {
         defaultMessage: "Unarchived maintenance window ''{title}''",
         values: {
           title: data.title,
@@ -44,10 +44,10 @@ export function useArchiveMaintenanceWindow() {
       toasts.addSuccess(archive ? archiveToast : unarchiveToast);
     },
     onError: (error, { archive }) => {
-      const archiveToast = i18n.translate('xpack.alerting.maintenanceWindowsArchiveFailure', {
+      const archiveToast = i18n.translate('xpack.maintenanceWindows.archiveFailure', {
         defaultMessage: 'Failed to archive maintenance window.',
       });
-      const unarchiveToast = i18n.translate('xpack.alerting.maintenanceWindowsUnarchiveFailure', {
+      const unarchiveToast = i18n.translate('xpack.maintenanceWindows.unarchiveFailure', {
         defaultMessage: 'Failed to unarchive maintenance window.',
       });
       toasts.addDanger(archive ? archiveToast : unarchiveToast);

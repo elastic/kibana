@@ -11,12 +11,12 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 
-jest.mock('../../../utils/kibana_react');
+jest.mock('../utils/kibana_react');
 jest.mock('@kbn/alerts-ui-shared', () => ({
   AlertsSearchBar: () => <div />,
 }));
 
-const { useKibana } = jest.requireMock('../../../utils/kibana_react');
+const { useKibana } = jest.requireMock('../utils/kibana_react');
 
 describe('MaintenanceWindowScopedQuery', () => {
   let appMockRenderer: AppMockRenderer;

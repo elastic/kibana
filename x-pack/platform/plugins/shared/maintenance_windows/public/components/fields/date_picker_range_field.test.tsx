@@ -18,10 +18,10 @@ import { createAppMockRenderer } from '../../lib/test_utils';
 import type { FormProps } from '../schema';
 import { DatePickerRangeField } from './date_picker_range_field';
 
-jest.mock('../../../../utils/kibana_react');
+jest.mock('../../utils/kibana_react');
 jest.mock('../../helpers/get_selected_for_date_picker');
 
-const { useUiSetting } = jest.requireMock('../../../../utils/kibana_react');
+const { useUiSetting } = jest.requireMock('../../utils/kibana_react');
 const { getSelectedForDatePicker } = jest.requireMock('../../helpers/get_selected_for_date_picker');
 
 describe('DatePickerRangeField', () => {

@@ -8,7 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../utils/kibana_react';
-import { loadRuleTypes } from '../services/rule_api';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 
 export const useGetRuleTypes = () => {
   const {
@@ -17,12 +17,12 @@ export const useGetRuleTypes = () => {
   } = useKibana().services;
 
   const queryFn = () => {
-    return loadRuleTypes({ http });
+    return getRuleTypes({ http });
   };
 
   const onError = () => {
     toasts.addDanger(
-      i18n.translate('xpack.alerting.hooks.useGetRuleTypes.error', {
+      i18n.translate('xpack.maintenanceWindows.hooks.useGetRuleTypes.error', {
         defaultMessage: 'Unable to load rule types.',
       })
     );

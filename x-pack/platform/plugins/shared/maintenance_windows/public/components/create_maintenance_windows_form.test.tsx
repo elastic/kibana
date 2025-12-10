@@ -13,17 +13,17 @@ import type { CreateMaintenanceWindowFormProps } from './create_maintenance_wind
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
 import moment from 'moment';
 
-jest.mock('../../../utils/kibana_react');
-jest.mock('../../../services/rule_api', () => ({
-  loadRuleTypes: jest.fn(),
+jest.mock('../utils/kibana_react');
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
 }));
 jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
   AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
 }));
 
-const { loadRuleTypes } = jest.requireMock('../../../services/rule_api');
-const { useKibana, useUiSetting } = jest.requireMock('../../../utils/kibana_react');
+const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const { useKibana, useUiSetting } = jest.requireMock('../utils/kibana_react');
 
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: jest.fn(),
@@ -52,7 +52,7 @@ describe('CreateMaintenanceWindowForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    loadRuleTypes.mockResolvedValue([
+    getRuleTypes.mockResolvedValue([
       { category: 'observability' },
       { category: 'management' },
       { category: 'securitySolution' },
@@ -216,7 +216,7 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should show "Filter alerts" toggle even when no rule types', async () => {
-    loadRuleTypes.mockResolvedValue([]);
+    getRuleTypes.mockResolvedValue([]);
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();

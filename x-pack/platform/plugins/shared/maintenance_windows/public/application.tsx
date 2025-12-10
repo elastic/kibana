@@ -15,7 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { MAINTENANCE_WINDOW_PATHS } from '@kbn/maintenance-windows-plugin/common';
+import { MAINTENANCE_WINDOW_PATHS } from '../common';
 import { useLicense } from './hooks/use_license';
 import type { MaintenanceWindowsPublicStartDependencies } from './types';
 

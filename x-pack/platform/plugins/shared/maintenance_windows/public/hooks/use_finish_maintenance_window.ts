@@ -24,7 +24,7 @@ export function useFinishMaintenanceWindow() {
   return useMutation(mutationFn, {
     onSuccess: (data) => {
       toasts.addSuccess(
-        i18n.translate('xpack.alerting.maintenanceWindowsFinishedSuccess', {
+        i18n.translate('xpack.maintenanceWindows.finishedSuccess', {
           defaultMessage: "Cancelled running maintenance window ''{title}''",
           values: {
             title: data.title,
@@ -34,7 +34,7 @@ export function useFinishMaintenanceWindow() {
     },
     onError: () => {
       toasts.addDanger(
-        i18n.translate('xpack.alerting.maintenanceWindowsFinishedFailure', {
+        i18n.translate('xpack.maintenanceWindows.finishedFailure', {
           defaultMessage: 'Failed to cancel maintenance window.',
         })
       );

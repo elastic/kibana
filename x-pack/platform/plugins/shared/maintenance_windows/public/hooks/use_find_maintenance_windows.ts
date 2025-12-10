@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
-import { type MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
+import { type MaintenanceWindowStatus } from '../../common';
 import { useKibana } from '../utils/kibana_react';
 import { findMaintenanceWindows } from '../services/find';
 
@@ -40,7 +40,7 @@ export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps
   const onErrorFn = (error: Error) => {
     if (error) {
       toasts.addDanger(
-        i18n.translate('xpack.alerting.maintenanceWindowsListFailure', {
+        i18n.translate('xpack.maintenanceWindows.listFailure', {
           defaultMessage: 'Unable to load maintenance windows.',
         })
       );

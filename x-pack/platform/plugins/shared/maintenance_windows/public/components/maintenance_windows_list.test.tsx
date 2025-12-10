@@ -14,8 +14,8 @@ import { MaintenanceWindowsList } from './maintenance_windows_list';
 import type { MaintenanceWindow } from '../../common';
 import { MaintenanceWindowStatus } from '../../common';
 
-jest.mock('../../../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../../../utils/kibana_react');
+jest.mock('../utils/kibana_react', () => {
+  const originalModule = jest.requireActual('../utils/kibana_react');
   return {
     ...originalModule,
     // mocks the date format in settings

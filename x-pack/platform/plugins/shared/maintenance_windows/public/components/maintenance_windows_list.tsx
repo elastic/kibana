@@ -29,11 +29,11 @@ import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { StatusFilter } from './status_filter';
 import type { TableActionsPopoverProps } from './table_actions_popover';
 import { TableActionsPopover } from './table_actions_popover';
-import { useFinishMaintenanceWindow } from '../hooks//use_finish_maintenance_window';
-import { useArchiveMaintenanceWindow } from '../hooks//use_archive_maintenance_window';
-import { useFinishAndArchiveMaintenanceWindow } from '../hooks//use_finish_and_archive_maintenance_window';
+import { useFinishMaintenanceWindow } from '../hooks/use_finish_maintenance_window';
+import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
+import { useFinishAndArchiveMaintenanceWindow } from '../hooks/use_finish_and_archive_maintenance_window';
 import { useUiSetting } from '../utils/kibana_react';
-import { useDeleteMaintenanceWindow } from '../hooks//use_delete_maintenance_window';
+import { useDeleteMaintenanceWindow } from '../hooks/use_delete_maintenance_window';
 
 interface MaintenanceWindowsListProps {
   isLoading: boolean;

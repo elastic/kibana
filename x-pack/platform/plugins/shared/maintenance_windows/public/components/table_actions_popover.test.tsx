@@ -15,8 +15,8 @@ import { TableActionsPopover } from './table_actions_popover';
 import { MaintenanceWindowStatus } from '../../common';
 
 const mockAddSuccess = jest.fn();
-jest.mock('../../../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../../../utils/kibana_react');
+jest.mock('../utils/kibana_react', () => {
+  const originalModule = jest.requireActual('../utils/kibana_react');
   return {
     ...originalModule,
     useKibana: () => {

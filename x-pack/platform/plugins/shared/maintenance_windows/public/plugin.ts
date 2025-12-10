@@ -6,9 +6,9 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { MAINTENANCE_WINDOWS_APP_ID } from '../common';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { MAINTENANCE_WINDOWS_APP_ID } from '../common';
 import type {
   MaintenanceWindowsPublicSetupDependencies,
   MaintenanceWindowsPublicStartDependencies,

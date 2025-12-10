@@ -15,13 +15,13 @@ import type { CreateParams } from '../services/create';
 import { createMaintenanceWindow } from '../services/create';
 
 const onErrorWithMessage = (message: string) =>
-  i18n.translate('xpack.alerting.maintenanceWindowsCreateFailureWithMessage', {
+  i18n.translate('xpack.maintenanceWindows.createFailureWithMessage', {
     defaultMessage: 'Failed to create maintenance window: {message}',
     values: { message },
   });
 
 const onErrorWithoutMessage = i18n.translate(
-  'xpack.alerting.maintenanceWindowsCreateFailureWithoutMessage',
+  'xpack.maintenanceWindows.createFailureWithoutMessage',
   {
     defaultMessage: 'Failed to create maintenance window',
   }
@@ -46,7 +46,7 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
   return useMutation(mutationFn, {
     onSuccess: (data) => {
       toasts.addSuccess(
-        i18n.translate('xpack.alerting.maintenanceWindowsCreateSuccess', {
+        i18n.translate('xpack.maintenanceWindows.createSuccess', {
           defaultMessage: "Created maintenance window ''{title}''",
           values: {
             title: data.title,

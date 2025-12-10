@@ -26,7 +26,7 @@ export function useFinishAndArchiveMaintenanceWindow() {
   return useMutation(mutationFn, {
     onSuccess: (data) => {
       toasts.addSuccess(
-        i18n.translate('xpack.alerting.maintenanceWindowsFinishedAndArchiveSuccess', {
+        i18n.translate('xpack.maintenanceWindows.finishedAndArchiveSuccess', {
           defaultMessage: "Cancelled and archived running maintenance window ''{title}''",
           values: {
             title: data.title,
@@ -36,7 +36,7 @@ export function useFinishAndArchiveMaintenanceWindow() {
     },
     onError: () => {
       toasts.addDanger(
-        i18n.translate('xpack.alerting.maintenanceWindowsFinishedAndArchiveFailure', {
+        i18n.translate('xpack.maintenanceWindows.finishedAndArchiveFailure', {
           defaultMessage: 'Failed to cancel and archive maintenance window.',
         })
       );

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import { useBreadcrumbs } from './use_breadcrumbs';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 

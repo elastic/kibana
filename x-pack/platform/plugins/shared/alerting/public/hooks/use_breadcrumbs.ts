@@ -10,10 +10,7 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { MouseEvent } from 'react';
 import { useEffect } from 'react';
 import type { MaintenanceWindowDeepLinkIds } from '@kbn/maintenance-windows-plugin/common';
-import {
-  MANAGEMENT_APP_ID,
-  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
-} from '@kbn/maintenance-windows-plugin/common';
+import { MANAGEMENT_APP_ID } from '@kbn/maintenance-windows-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 import { useNavigation } from './use_navigation';
 

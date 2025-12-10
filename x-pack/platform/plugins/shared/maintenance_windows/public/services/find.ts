@@ -10,7 +10,7 @@ import type {
   MaintenanceWindowStatus,
   MaintenanceWindow,
   FindMaintenanceWindowsResponse,
-} from '@kbn/maintenance-windows-plugin/common';
+} from '../../common';
 import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../common';
 

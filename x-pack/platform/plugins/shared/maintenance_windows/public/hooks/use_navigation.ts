@@ -12,7 +12,7 @@ import {
   MAINTENANCE_WINDOW_PATHS,
   MANAGEMENT_APP_ID,
   MAINTENANCE_WINDOWS_APP_ID,
-} from '@kbn/maintenance-windows-plugin/common';
+} from '../../common';
 import { useKibana } from '../utils/kibana_react';
 
 export const useNavigation = (appId: string) => {
