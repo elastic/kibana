@@ -64,43 +64,25 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       }
 
       const inferenceClient = pluginsStart.inference.getClient({ request });
-
-      const [coreStart] = await core.getStartServices();
-      const esClient = coreStart.elasticsearch.client.asScoped(request);
       const index = fields.find((field) => field.field === '_index')?.value;
       const id = fields.find((field) => field.field === '_id')?.value;
-      const result = await esClient.asCurrentUser.search({
+
+      const logEntry = await dataRegistry.getData('getLogDocumentById', {
+        request,
         index,
-        query: {
-          bool: {
-            filter: [
-              {
-                ids: {
-                  values: id,
-                },
-              },
-            ],
-          },
-        },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-        ],
+        id,
       });
-      const logEntry = result.hits.hits[0]._source;
-      const logEntryFields = result.hits.hits[0].fields;
+
       if (!logEntry) {
         throw new Error('Log entry not found');
       }
 
       const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-      const logTimestamp = new Date(logEntry['@timestamp']).getTime();
+      const logTimestamp = new Date(logEntry._source['@timestamp']).getTime();
       const serviceSummary = await dataRegistry.getData('apmServiceSummary', {
         request,
-        serviceName: logEntry.service.name,
-        serviceEnvironment: logEntry.service.environment,
+        serviceName: logEntry._source.service.name,
+        serviceEnvironment: logEntry._source.service.environment,
         start: new Date(logTimestamp - TWENTY_FOUR_HOURS_MS).toISOString(),
         end: new Date(logTimestamp + TWENTY_FOUR_HOURS_MS).toISOString(),
       });
@@ -108,7 +90,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const { context, summary } = await getLogAiInsights({
         index,
         id,
-        fields: logEntryFields,
+        fields: logEntry.fields,
         serviceSummary,
         inferenceClient,
         connectorId,

@@ -12,6 +12,7 @@ import { createGetLogsRateTimeseries } from './get_logs_rate_timeseries/get_logs
 import { createGetLogErrorRateTimeseries } from './get_logs_error_rate_timeseries/get_logs_error_rate_timeseries';
 import { createGetLogsRatesService } from './get_logs_rates_service';
 import { createLogSourcesServiceFactory } from './log_sources_service';
+import { createGetLogDocumentById } from './get_log_document_by_id';
 
 export interface RegisterServicesParams {
   logger: Logger;
@@ -27,5 +28,6 @@ export function registerServices(params: RegisterServicesParams) {
     getLogsRateTimeseries: createGetLogsRateTimeseries(),
     getLogsErrorRateTimeseries: createGetLogErrorRateTimeseries(),
     logSourcesServiceFactory: createLogSourcesServiceFactory(params),
+    getLogDocumentById: createGetLogDocumentById(),
   };
 }
