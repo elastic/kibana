@@ -87,9 +87,9 @@ describe('useNewItems', () => {
     it('enforces max 2 new primary items', () => {
       const { result } = renderHook(() => useNewItems([...primaryItems, ...footerItems]));
 
-      expect(result.current.isNewPrimary('home')).toBe(true);
-      expect(result.current.isNewPrimary('dashboards')).toBe(true);
-      expect(result.current.isNewPrimary('settings')).toBe(false);
+      expect(result.current.getIsNewPrimary('home')).toBe(true);
+      expect(result.current.getIsNewPrimary('dashboards')).toBe(true);
+      expect(result.current.getIsNewPrimary('settings')).toBe(false);
     });
 
     it('enforces max 2 new secondary items per parent', () => {
@@ -97,9 +97,9 @@ describe('useNewItems', () => {
         useNewItems([...primaryItemsWithNewSecondaryItems, ...footerItems])
       );
 
-      expect(result.current.isNewSecondary('dashboards-subitem-1')).toBe(true);
-      expect(result.current.isNewSecondary('dashboards-subitem-2')).toBe(true);
-      expect(result.current.isNewSecondary('dashboards-subitem-3')).toBe(false);
+      expect(result.current.getIsNewSecondary('dashboards-subitem-1')).toBe(true);
+      expect(result.current.getIsNewSecondary('dashboards-subitem-2')).toBe(true);
+      expect(result.current.getIsNewSecondary('dashboards-subitem-3')).toBe(false);
     });
   });
 
@@ -110,8 +110,8 @@ describe('useNewItems', () => {
 
       const { result } = renderHook(() => useNewItems([...primaryItems, ...footerItems]));
 
-      expect(result.current.isNewPrimary('dashboards')).toBe(false);
-      expect(result.current.isNewPrimary('settings')).toBe(false);
+      expect(result.current.getIsNewPrimary('dashboards')).toBe(false);
+      expect(result.current.getIsNewPrimary('settings')).toBe(false);
     });
 
     it('persists visited items to localStorage', () => {
@@ -133,12 +133,12 @@ describe('useNewItems', () => {
         useNewItems([...primaryItems, ...footerItems], activeItemId)
       );
 
-      expect(result.current.isNewPrimary('dashboards')).toBe(true);
+      expect(result.current.getIsNewPrimary('dashboards')).toBe(true);
 
       // Rerender with primary item being active
       rerender('dashboards');
 
-      expect(result.current.isNewPrimary('dashboards')).toBe(false);
+      expect(result.current.getIsNewPrimary('dashboards')).toBe(false);
     });
 
     it('marks both parent and child as visited when child is new and becomes active', () => {
@@ -147,16 +147,16 @@ describe('useNewItems', () => {
         useNewItems([...primaryItemsWithNewSecondaryItems, ...footerItems], activeItemId)
       );
 
-      expect(result.current.isNewPrimary('settings')).toBe(true);
-      expect(result.current.isNewSecondary('footer-subitem-1')).toBe(true);
+      expect(result.current.getIsNewPrimary('settings')).toBe(true);
+      expect(result.current.getIsNewSecondary('footer-subitem-1')).toBe(true);
 
       // Rerender with child item being active
       rerender('footer-subitem-1');
 
       // Parent item loses new status
-      expect(result.current.isNewPrimary('settings')).toBe(false);
+      expect(result.current.getIsNewPrimary('settings')).toBe(false);
       // Child item should still be rendered as new
-      expect(result.current.isNewSecondary('footer-subitem-1')).toBe(true);
+      expect(result.current.getIsNewSecondary('footer-subitem-1')).toBe(true);
     });
   });
 });
