@@ -28,13 +28,13 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
+const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   width: ${SIDE_PANEL_WIDTH - 8}px; // we need a gap between the side panel and the app content
-  margin-bottom: ${layoutVar('sidebar.marginBottom', '0px')};
+  margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
   border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
   border: ${euiThemeContext.colorMode === 'DARK' ? euiThemeContext.euiTheme.border.thin : 'none'};
@@ -60,7 +60,10 @@ export interface SidePanelProps {
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const scrollStyles = useScroll();
-  const wrapperStyles = useMemo(() => getWrapperStyles(euiThemeContext), [euiThemeContext]);
+  const wrapperStyles = useMemo(
+    () => getSidePanelWrapperStyles(euiThemeContext),
+    [euiThemeContext]
+  );
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',
   });
