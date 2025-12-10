@@ -70,7 +70,7 @@ describe('useGapAutoFillCapabilities', () => {
       isEnterprise: () => true,
     });
     mockUseUserPrivileges.mockReturnValue({
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: { rules: { read: true, edit: true } },
     });
 
     const { result } = renderHook(() => useGapAutoFillCapabilities());
