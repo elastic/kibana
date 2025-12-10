@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { Dimension, MetricField, MetricUnit } from '../types';
-import { useMetricsExperienceFieldsCapsContext } from '../context/metrics_experience_fields_caps_provider';
+import { useMetricsExperienceFieldsContext } from '../context/metrics_experience_fields_provider';
 import { normalizeUnit } from '../common/utils/metric_unit/normalize_unit';
 import { hasValue } from '../common/utils/fields';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
@@ -25,7 +25,7 @@ import { useMetricFieldsFilter } from './use_metric_fields_filter';
 export const useMetricFields = () => {
   const { searchTerm, selectedDimensions, selectedValuesMetricFields, onDimensionsChange } =
     useMetricsExperienceState();
-  const { metricFields, dimensions, sampleRowByMetric } = useMetricsExperienceFieldsCapsContext();
+  const { metricFields, dimensions, sampleRowByMetric } = useMetricsExperienceFieldsContext();
 
   const sampledMetricFields = useMemo(() => {
     if (metricFields.length === 0 || sampleRowByMetric.size === 0) {

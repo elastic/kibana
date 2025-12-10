@@ -8,14 +8,14 @@
  */
 
 import { useMemo } from 'react';
-import { useMetricsExperienceFieldsCapsContext } from '../context/metrics_experience_fields_caps_provider';
+import { useMetricsExperienceFieldsContext } from '../context/metrics_experience_fields_provider';
 
 /**
  * Extracts dimension values for specific indices and selected dimensions.
  * Calls getRowsByDimension() on demand.
  */
 export const useExtractDimensionsValues = ({ dimensionNames }: { dimensionNames: string[] }) => {
-  const { getValuesByDimension } = useMetricsExperienceFieldsCapsContext();
+  const { getValuesByDimension } = useMetricsExperienceFieldsContext();
 
   const valuesByDimension = useMemo(() => {
     return getValuesByDimension(dimensionNames);

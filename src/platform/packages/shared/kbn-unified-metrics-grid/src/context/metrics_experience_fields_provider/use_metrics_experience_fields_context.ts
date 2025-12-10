@@ -8,8 +8,8 @@
  */
 
 import { useContext } from 'react';
-import { MetricsExperienceFieldsCapsContext } from './metrics_experience_fields_caps_provider';
+import { MetricsExperienceFieldsContext } from './metrics_experience_fields_provider';
 
-export const useMetricsExperienceFieldsCapsContext = () => {
-  return useContext(MetricsExperienceFieldsCapsContext);
+export const useMetricsExperienceFieldsContext = () => {
+  return useContext(MetricsExperienceFieldsContext);
 };

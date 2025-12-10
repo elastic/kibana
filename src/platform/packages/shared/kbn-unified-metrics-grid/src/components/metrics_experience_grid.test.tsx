@@ -24,10 +24,10 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
 import type { UnifiedMetricsGridProps } from '../types';
-import * as metricsExperienceFieldsCapsProvider from '../context/metrics_experience_fields_caps_provider';
+import * as metricsExperienceFieldsCapsProvider from '../context/metrics_experience_fields_provider';
 
 jest.mock('../context/metrics_experience_state_provider');
-jest.mock('../context/metrics_experience_fields_caps_provider');
+jest.mock('../context/metrics_experience_fields_provider');
 jest.mock('../hooks');
 jest.mock('./metrics_experience_grid_content', () => ({
   MetricsExperienceGridContent: jest.fn(() => (
@@ -62,8 +62,8 @@ const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.Mock
 >;
 
 const useMetricFieldsCapsContextMock =
-  metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsCapsContext as jest.MockedFunction<
-    typeof metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsCapsContext
+  metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext as jest.MockedFunction<
+    typeof metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext
   >;
 
 const useMetricFieldsMock = hooks.useMetricFields as jest.MockedFunction<

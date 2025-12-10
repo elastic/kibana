@@ -8,7 +8,7 @@
  */
 
 export {
-  MetricsExperienceFieldsCapsProvider,
-  type MetricsExperienceFieldsCapsProviderProps,
-} from './metrics_experience_fields_caps_provider';
-export { useMetricsExperienceFieldsCapsContext } from './use_metrics_experience_fields_caps_context';
+  MetricsExperienceFieldsProvider as MetricsExperienceFieldsCapsProvider,
+  type MetricsExperienceFieldsProviderProps as MetricsExperienceFieldsCapsProviderProps,
+} from './metrics_experience_fields_provider';
+export { useMetricsExperienceFieldsContext } from './use_metrics_experience_fields_context';

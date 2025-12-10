@@ -13,49 +13,47 @@ import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, MetricField } from '../../types';
 import {
-  createFieldSpecs,
+  extractFields,
   createSampleRowByMetric,
   createValuesByDimensions,
-} from './field_specs_helpers';
+} from './helpers/fields_parser';
 
 export type FieldCapsResponseMap = Record<
   string,
   Record<string, Record<string, FieldCapsFieldCapability>>
 >;
 
-export interface MetricsExperienceFieldsCapsContextValue {
+export interface MetricsExperienceFieldsContextValue {
   metricFields: MetricField[];
   dimensions: Dimension[];
-  /** Map of metric key (index>fieldName) → first row (sample for metadata) */
   sampleRowByMetric: Map<string, DatatableRow>;
-  /** Returns map of dimension key (index>dimensionName) → rows. Computed on demand. */
   getValuesByDimension: (requiredFields: string[]) => Map<string, Map<string, Set<string>>>;
 }
 
-const EMPTY_CONTEXT: MetricsExperienceFieldsCapsContextValue = {
+const EMPTY_CONTEXT: MetricsExperienceFieldsContextValue = {
   metricFields: [],
   dimensions: [],
   sampleRowByMetric: new Map(),
   getValuesByDimension: (_: string[]) => new Map(),
 };
 
-export const MetricsExperienceFieldsCapsContext =
-  createContext<MetricsExperienceFieldsCapsContextValue>(EMPTY_CONTEXT);
+export const MetricsExperienceFieldsContext =
+  createContext<MetricsExperienceFieldsContextValue>(EMPTY_CONTEXT);
 
-export interface MetricsExperienceFieldsCapsProviderProps {
+export interface MetricsExperienceFieldsProviderProps {
   fetchParams: ChartSectionProps['fetchParams'];
 }
 
-export const MetricsExperienceFieldsCapsProvider = ({
+export const MetricsExperienceFieldsProvider = ({
   fetchParams,
   children,
-}: PropsWithChildren<MetricsExperienceFieldsCapsProviderProps>) => {
+}: PropsWithChildren<MetricsExperienceFieldsProviderProps>) => {
   const { table, dataView } = fetchParams;
 
   const { metricFields, dimensions } = useMemo(
     () =>
       dataView != null
-        ? createFieldSpecs({
+        ? extractFields({
             index: dataView.getIndexPattern(),
             dataViewFieldMap: dataView.fields.toSpec(),
             columns: table?.columns,
@@ -84,7 +82,7 @@ export const MetricsExperienceFieldsCapsProvider = ({
     [table?.rows, fieldSpecsByRow, dimensions]
   );
 
-  const value = useMemo<MetricsExperienceFieldsCapsContextValue>(
+  const value = useMemo<MetricsExperienceFieldsContextValue>(
     () => ({
       metricFields,
       dimensions,
@@ -95,8 +93,8 @@ export const MetricsExperienceFieldsCapsProvider = ({
   );
 
   return (
-    <MetricsExperienceFieldsCapsContext.Provider value={value}>
+    <MetricsExperienceFieldsContext.Provider value={value}>
       {children}
-    </MetricsExperienceFieldsCapsContext.Provider>
+    </MetricsExperienceFieldsContext.Provider>
   );
 };
