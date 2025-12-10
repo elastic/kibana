@@ -201,7 +201,7 @@ Register the step definitions in both server and public plugin setup:
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { myStepDefinition } from './workflows/step_types/my_step';
-import { myStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
+import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
 
 
 export interface MyPluginServerSetupDeps {
@@ -214,7 +214,7 @@ export class MyPlugin implements Plugin {
     plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
 
     // Register server-side step definition using its factory function
-    plugins.workflowsExtensions.registerStepDefinition(myStepWithDepsDefinition(core));
+    plugins.workflowsExtensions.registerStepDefinition(getMyStepWithDepsDefinition(core));
   }
 }
 ```
