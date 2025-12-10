@@ -33,6 +33,30 @@ import type {
   StreamsTabVisitedProps,
 } from './types';
 
+const attachmentTypeCountFields: Record<
+  AttachmentType,
+  { type: 'long'; _meta: { description: string } }
+> = {
+  dashboard: {
+    type: 'long',
+    _meta: {
+      description: 'The count of dashboard attachments',
+    },
+  },
+  slo: {
+    type: 'long',
+    _meta: {
+      description: 'The count of SLO attachments',
+    },
+  },
+  rule: {
+    type: 'long',
+    _meta: {
+      description: 'The count of rule attachments',
+    },
+  },
+};
+
 const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
   name: {
     type: 'keyword',
@@ -40,24 +64,7 @@ const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
       description: 'The name of the Stream',
     },
   },
-  dashboard: {
-    type: 'long',
-    _meta: {
-      description: 'The number of dashboard attachments linked to the stream',
-    },
-  },
-  slo: {
-    type: 'long',
-    _meta: {
-      description: 'The number of SLO attachments linked to the stream',
-    },
-  },
-  rule: {
-    type: 'long',
-    _meta: {
-      description: 'The number of rule attachments linked to the stream',
-    },
-  },
+  ...attachmentTypeCountFields,
 };
 
 const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventProps> = {
@@ -85,26 +92,7 @@ const attachmentCountByTypeSchema: SchemaObject<Record<AttachmentType, number>> 
   _meta: {
     description: 'The count of attachments grouped by type',
   },
-  properties: {
-    dashboard: {
-      type: 'long',
-      _meta: {
-        description: 'The count of dashboard attachments',
-      },
-    },
-    slo: {
-      type: 'long',
-      _meta: {
-        description: 'The count of SLO attachments',
-      },
-    },
-    rule: {
-      type: 'long',
-      _meta: {
-        description: 'The count of rule attachments',
-      },
-    },
-  },
+  properties: attachmentTypeCountFields,
 };
 
 const streamsAttachmentLinkChangedSchema: RootSchema<StreamsAttachmentLinkChangedProps> = {
