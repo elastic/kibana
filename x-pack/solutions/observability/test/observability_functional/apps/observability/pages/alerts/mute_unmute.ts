@@ -26,8 +26,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     before(async () => {
       // Create test index with documents that will trigger grouped alerts
-      await es.indices.create({
-        index: TEST_INDEX,
+      await es.transport.request({
+        method: 'PUT',
+        path: `/${TEST_INDEX}`,
         body: {
           mappings: {
             properties: {
@@ -42,8 +43,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       // Insert test documents with different host values to create multiple alert instances
       const now = new Date().toISOString();
       await es.bulk({
-        refresh: true,
-        body: [
+        refresh: 'wait_for',
+        operations: [
           { index: { _index: TEST_INDEX } },
           { '@timestamp': now, host: 'host-a', message: 'test message 1' },
           { index: { _index: TEST_INDEX } },
