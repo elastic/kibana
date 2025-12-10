@@ -35,4 +35,3 @@ export const AGENT_BUILDER_TOUR_SKIP = i18n.translate(
     defaultMessage: 'Skip',
   }
 );
-

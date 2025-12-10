@@ -21,4 +21,3 @@ export const agentBuilderTourStep1 = {
   title: i18n.AGENT_BUILDER_TOUR_TITLE,
   content: i18n.AGENT_BUILDER_TOUR_CONTENT,
 };
-
