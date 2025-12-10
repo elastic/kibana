@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiOverflowScroll, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
@@ -79,6 +79,7 @@ export const Conversation: React.FC<{}> = () => {
   // TODO: Add custom mask for overflow scroll top and bottom
   const scrollableStyles = css`
     ${useEuiScrollBar()}
+    ${useEuiOverflowScroll('y')}
   `;
 
   if (!hasActiveConversation) {
