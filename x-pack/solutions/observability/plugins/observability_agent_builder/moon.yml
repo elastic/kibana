@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
