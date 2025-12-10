@@ -121,7 +121,10 @@ export function getDashboardApi({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
-    lastSavedState: readResult?.data ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: {
+      ...DEFAULT_DASHBOARD_STATE,
+      ...readResult?.data,
+    },
     layoutManager,
     savedObjectId$,
     settingsManager,
