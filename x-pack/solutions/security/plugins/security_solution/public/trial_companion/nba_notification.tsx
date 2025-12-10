@@ -23,8 +23,6 @@ export const NBANotification: React.FC<NBANotificationProps> = ({
   onSeenBanner,
   onViewButton,
 }) => {
-  window.console.log('Rendering NBA Notification:', title, message, viewButtonText);
-
   return (
     <EuiCallOut
       announceOnMount

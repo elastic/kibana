@@ -24,12 +24,6 @@ interface Props {}
 export const TrialCompanion: React.FC<Props> = () => {
   const { ...startServices } = useKibana().services;
   const trialCompanionEnabled = useIsExperimentalFeatureEnabled('trialCompanionEnabled');
-  window.console.log(
-    'Is in trial: ',
-    startServices.cloud?.isInTrial(),
-    ', trial companion enabled: ',
-    trialCompanionEnabled
-  );
   if (!startServices.cloud?.isInTrial() || !trialCompanionEnabled) {
     return null;
   }
@@ -41,9 +35,8 @@ const TrialCompanionImpl: React.FC<Props> = () => {
   const bannerId = useRef<string | undefined>();
   const [count, setCount] = useState(0);
   const [previousMilestone, setPreviousMilestone] = useState<Milestone | undefined>(undefined);
-  const { value, error, loading } = useGetNBA([count]);
+  const { value, loading } = useGetNBA([count]);
 
-  window.console.log('TrialNotification useGetNotification:', error, loading, value); // TODO: remove
   const milestoneId = value?.milestoneId; // no milestoneId means anything to show
 
   useInterval(() => {
@@ -53,9 +46,7 @@ const TrialCompanionImpl: React.FC<Props> = () => {
   // TODO: if error - do not show anything?
 
   useEffect(() => {
-    window.console.log('running effect on change:', milestoneId, loading);
     const removeBanner = () => {
-      window.console.log('remove banner with id:', bannerId.current);
       if (bannerId.current) {
         overlays.banners.remove(bannerId.current);
       }
@@ -71,9 +62,7 @@ const TrialCompanionImpl: React.FC<Props> = () => {
 
     if (!loading && milestoneId && (!bannerId.current || milestoneId !== previousMilestone)) {
       const nba: NBA | undefined = ALL_NBA.get(milestoneId);
-      window.console.log(`nba: ${JSON.stringify(nba)}`);
       if (!nba) {
-        window.console.warn('No NBA found for milestoneId:', milestoneId);
         return;
       }
 
@@ -98,7 +87,6 @@ const TrialCompanionImpl: React.FC<Props> = () => {
         />
       );
       const mount = toMountPoint(component, startServices);
-      window.console.log('mounted banner with id:', bannerId.current, milestoneId);
       bannerId.current = overlays.banners.replace(bannerId.current, mount, 1000);
       setPreviousMilestone(milestoneId);
     } else if (bannerId.current && !milestoneId && !loading) {
