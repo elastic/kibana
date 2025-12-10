@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/connector-specs'
   - '@kbn/response-ops-form-generator'
+  - '@kbn/actions-types'
 tags:
   - plugin
   - prod

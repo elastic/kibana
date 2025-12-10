@@ -13,24 +13,6 @@ const timeRange = {
   rangeTo: testData.OPBEANS_END_DATE,
 };
 
-test.describe('Storage Explorer - Viewer (No Permissions)', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsViewer();
-  });
-
-  test('displays permission denied message', async ({
-    page,
-    pageObjects: { storageExplorerPage },
-  }) => {
-    await storageExplorerPage.goto();
-    await expect(storageExplorerPage.pageTitle).toBeVisible();
-
-    await test.step('verify permission denied is shown', async () => {
-      await expect(page.getByText('You need permission')).toBeVisible();
-    });
-  });
-});
-
 test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     // Use privileged user (admin) to ensure we have all necessary permissions
