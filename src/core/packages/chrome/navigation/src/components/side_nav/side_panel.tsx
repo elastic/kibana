@@ -8,13 +8,7 @@
  */
 
 import React, { type ReactNode, useMemo } from 'react';
-import {
-  EuiScreenReaderOnly,
-  EuiSplitPanel,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  type UseEuiTheme,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiSplitPanel, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -26,13 +20,12 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
+const getPanelWrapperStyles = () => css`
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   width: ${SIDE_PANEL_WIDTH}px;
-  border-left: ${theme.border.width.thin} solid ${theme.colors.borderBaseSubdued};
 `;
 
 export interface SidePanelIds {
@@ -52,9 +45,8 @@ export interface SidePanelProps {
  * Shows only in expanded mode.
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
   const scrollStyles = useScroll();
-  const wrapperStyles = useMemo(() => getWrapperStyles(euiTheme), [euiTheme]);
+  const wrapperStyles = useMemo(() => getPanelWrapperStyles(), []);
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',
   });

@@ -25,7 +25,7 @@ import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => ({
+const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => ({
   root: css`
     align-items: center;
     display: flex;
@@ -99,7 +99,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
     };
 
     const wrapperStyles = useMemo(
-      () => getWrapperStyles(euiTheme, isCollapsed),
+      () => getFooterWrapperStyles(euiTheme, isCollapsed),
       [euiTheme, isCollapsed]
     );
 
