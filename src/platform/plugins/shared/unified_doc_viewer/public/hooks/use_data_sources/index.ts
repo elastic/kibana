@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function emitPipeline(pipelineSteps: string[]) {
-  const pipelineStr = [...new Set(pipelineSteps)].join('\n');
-  console.log(pipelineStr);
+import createContainer from 'constate';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+
+type UseDataSourcesParams = DataSources;
+
+export interface DataSources {
+  indexes: ObservabilityIndexes;
 }
+
+const useDataSources = ({ indexes }: UseDataSourcesParams) => {
+  return { indexes };
+};
+
+export const [DataSourcesProvider, useDataSourcesContext] = createContainer(useDataSources);
