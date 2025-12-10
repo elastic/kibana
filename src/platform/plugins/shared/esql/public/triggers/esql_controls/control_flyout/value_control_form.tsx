@@ -218,34 +218,39 @@ export function ValueControlForm({
     [isMounted, search, timeRange, esqlVariables]
   );
 
+  const setSuggestedQuery = useCallback(async () => {
+    const indexPattern = getIndexPatternFromESQLQuery(queryString);
+    const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
+    const response = (await core.http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch the timefield', error);
+      return undefined;
+    })) as { timeField?: string } | undefined;
+
+    const timeField = response?.timeField;
+    const timeFilter = Boolean(timeField)
+      ? ` | WHERE ${timeField} <= ?_tend and ${timeField} > ?_tstart`
+      : '';
+    const queryForValues = `FROM ${indexPattern}${timeFilter} | STATS BY ${valuesRetrieval}`;
+    onValuesQuerySubmit(queryForValues);
+  }, [queryString, core.http, valuesRetrieval, onValuesQuerySubmit]);
+
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
       if (initialState?.esqlQuery) {
         onValuesQuerySubmit(initialState.esqlQuery);
       } else if (valuesRetrieval) {
-        const indexPattern = getIndexPatternFromESQLQuery(queryString);
-        const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
-        core.http
-          .get<{ timeField?: string }>(`${TIMEFIELD_ROUTE}${encodedQuery}`)
-          .then((result) => {
-            const hasTimeField = result?.timeField ? true : false;
-            const timeFilter = hasTimeField
-              ? ` | WHERE ${result.timeField} <= ?_tend and ${result.timeField} > ?_tstart`
-              : '';
-            const queryForValues = `FROM ${indexPattern}${timeFilter} | STATS BY ${valuesRetrieval}`;
-            onValuesQuerySubmit(queryForValues);
-          });
+        setSuggestedQuery();
       }
     }
   }, [
-    core.http,
-    initialState?.esqlQuery,
-    controlFlyoutType,
-    onValuesQuerySubmit,
-    queryString,
     selectedValues?.length,
-    valuesRetrieval,
+    controlFlyoutType,
+    initialState?.esqlQuery,
     variableName,
+    valuesRetrieval,
+    onValuesQuerySubmit,
+    setSuggestedQuery,
   ]);
 
   useEffect(() => {
