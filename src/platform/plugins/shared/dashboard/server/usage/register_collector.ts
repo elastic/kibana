@@ -9,7 +9,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { DashboardCollectorData } from './dashboard_telemetry';
+import type { DashboardCollectorData } from './types';
 import { collectDashboardTelemetry } from './dashboard_telemetry';
 
 export function registerDashboardUsageCollector(

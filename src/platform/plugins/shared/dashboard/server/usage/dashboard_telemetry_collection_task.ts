@@ -27,18 +27,13 @@ import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
-  collectDashboardSections,
+  collectDashboardInfo,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../dashboard_saved_object';
-
-interface DashboardSavedObjectAttributesAndReferences {
-  attributes: DashboardSavedObjectAttributes;
-  references: SavedObjectReference[];
-  accessControl: SavedObjectAccessControl | undefined;
-}
+import type { DashboardSavedObjectInfo } from './types';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
@@ -101,13 +96,13 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
       async run() {
         let dashboardData = getEmptyDashboardData();
         const controlsCollector = controlsCollectorFactory(embeddable);
-        const processDashboards = (dashboards: DashboardSavedObjectAttributesAndReferences[]) => {
+        const processDashboards = (dashboards: DashboardSavedObjectInfo[]) => {
           for (const dashboard of dashboards) {
             if (dashboard.accessControl?.accessMode === 'write_restricted') {
               dashboardData.write_restricted.total += 1;
             }
+            dashboardData = collectDashboardInfo(dashboard, dashboardData);
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
-            dashboardData = collectDashboardSections(dashboard.attributes, dashboardData);
 
             try {
               const panels = JSON.parse(
@@ -160,7 +155,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                 }
                 return undefined;
               })
-              .filter((s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined)
+              .filter((s): s is DashboardSavedObjectInfo => s !== undefined)
           );
 
           while (result._scroll_id && result.hits.hits.length > 0) {
@@ -179,7 +174,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                   }
                   return undefined;
                 })
-                .filter((s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined)
+                .filter((s): s is DashboardSavedObjectInfo => s !== undefined)
             );
           }
 

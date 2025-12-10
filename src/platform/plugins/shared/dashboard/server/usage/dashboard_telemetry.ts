@@ -23,38 +23,9 @@ import type {
 } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
-
-// TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
-// LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).
-export interface DashboardCollectorData {
-  write_restricted: {
-    total: number;
-  };
-  panels: {
-    total: number;
-    by_reference: number;
-    by_value: number;
-    by_type: {
-      [key: string]: {
-        total: number;
-        by_reference: number;
-        by_value: number;
-        details: {
-          [key: string]: number;
-        };
-      };
-    };
-  };
-  controls: ControlGroupTelemetry;
-  sections: {
-    total: number;
-  };
-}
+import type { DashboardCollectorData, DashboardSavedObjectInfo } from './types';
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
-  write_restricted: {
-    total: 0,
-  },
   panels: {
     total: 0,
     by_reference: 0,
@@ -63,6 +34,9 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
   },
   controls: initializeControlGroupTelemetry({}),
   sections: {
+    total: 0,
+  },
+  write_restricted: {
     total: 0,
   },
 });
@@ -107,11 +81,13 @@ export const collectPanelsByType = (
   }
 };
 
-export const collectDashboardSections = (
-  attributes: DashboardSavedObjectAttributes,
+export const collectDashboardInfo = (
+  dashboard: DashboardSavedObjectInfo,
   collectorData: DashboardCollectorData
 ) => {
-  collectorData.sections.total += attributes.sections?.length ?? 0;
+  collectorData.write_restricted.total +=
+    dashboard.accessControl?.accessMode === 'write_restricted' ? 1 : 0;
+  collectorData.sections.total += dashboard.attributes.sections?.length ?? 0;
   return collectorData;
 };
 
