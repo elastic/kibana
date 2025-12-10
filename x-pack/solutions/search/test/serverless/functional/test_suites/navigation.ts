@@ -24,6 +24,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const common = getPageObject('common');
 
   describe('navigation', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/244961
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
       await svlCommonPage.loginWithRole('admin');
@@ -76,7 +79,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Build', 'Playground'],
+          breadcrumbs: ['Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {

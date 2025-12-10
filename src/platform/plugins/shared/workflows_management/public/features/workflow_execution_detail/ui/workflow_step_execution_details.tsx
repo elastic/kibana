@@ -23,42 +23,39 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-
 import { StepExecutionDataView } from './step_execution_data_view';
-import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
+import { WorkflowExecutionOverview } from './workflow_execution_overview';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
-  isLoading: boolean;
+  workflowExecutionDuration?: number;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, isLoading }) => {
+  ({ workflowExecutionId, stepExecution, workflowExecutionDuration }) => {
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
     );
 
+    const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
+
+    // Extract trigger type from stepType (e.g., 'trigger_manual' -> 'manual')
     const triggerType = isTriggerPseudoStep
       ? stepExecution?.stepType?.replace('trigger_', '')
       : undefined;
 
     const tabs = useMemo(() => {
       if (isTriggerPseudoStep) {
-        const pseudoTabs = [];
+        const pseudoTabs: { id: string; name: string }[] = [];
         if (stepExecution?.input) {
-          const isManualTrigger = triggerType === 'manual';
           pseudoTabs.push({
             id: 'input',
-            name: isManualTrigger ? 'Inputs' : 'Event',
+            name: 'Input',
           });
         }
-        pseudoTabs.push({
-          id: 'output',
-          name: 'Context',
-        });
         return pseudoTabs;
       }
       return [
@@ -70,12 +67,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           id: 'input',
           name: 'Input',
         },
-        {
-          id: 'timeline',
-          name: 'Timeline',
-        },
       ];
-    }, [stepExecution, isTriggerPseudoStep, triggerType]);
+    }, [stepExecution, isTriggerPseudoStep]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
@@ -85,13 +78,22 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stepExecution?.stepId, tabs[0].id]);
 
-    if (isLoading || !stepExecution) {
+    if (!stepExecution) {
       return (
         <EuiPanel hasShadow={false} paddingSize="m">
           <EuiSkeletonText lines={1} />
           <EuiSpacer size="l" />
           <EuiSkeletonText lines={4} />
         </EuiPanel>
+      );
+    }
+
+    if (isOverviewPseudoStep) {
+      return (
+        <WorkflowExecutionOverview
+          stepExecution={stepExecution}
+          workflowExecutionDuration={workflowExecutionDuration}
+        />
       );
     }
 
@@ -185,12 +187,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   <StepExecutionDataView stepExecution={stepExecution} mode="input" />
                 </>
-              )}
-              {selectedTabId === 'timeline' && (
-                <StepExecutionTimelineStateful
-                  executionId={workflowExecutionId}
-                  stepExecutionId={stepExecution.id}
-                />
               )}
             </EuiFlexItem>
           ) : (

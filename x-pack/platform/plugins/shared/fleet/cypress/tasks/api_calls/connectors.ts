@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
+import type { GetAllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,11 +25,16 @@ export const request = <T = unknown>({
     ...options,
   });
 };
-export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
+export const INTERNAL_INFERENCE_CONNECTORS = [
+  'Elastic-Managed-LLM',
+  'Anthropic-Claude-Sonnet-3-7',
+  'Anthropic-Claude-Sonnet-4-5',
+  'OpenAI-GPT-OSS-120B',
+];
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
 export const getConnectors = () =>
-  request<AllConnectorsResponse[]>({
+  request<GetAllConnectorsResponse>({
     method: 'GET',
     url: 'api/actions/connectors',
   });

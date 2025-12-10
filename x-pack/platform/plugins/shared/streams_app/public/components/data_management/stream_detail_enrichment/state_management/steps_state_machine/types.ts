@@ -24,6 +24,7 @@ export interface StepInput {
   parentRef: StepParentActor;
   step: StreamlangStepWithUIAttributes;
   isNew?: boolean;
+  isUpdated?: boolean;
 }
 
 export type StepParentActor = ActorRef<Snapshot<unknown>, StepToParentEvent>;
@@ -54,6 +55,10 @@ export type StepEvent =
   | {
       type: 'step.changeCondition';
       step: StreamlangWhereBlockWithUIAttributes;
+    }
+  | {
+      type: 'step.changeDescription';
+      description?: string;
     }
   | { type: 'step.delete' }
   | { type: 'step.edit' }

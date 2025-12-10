@@ -9,10 +9,10 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { isOnechatError, createInternalError } from '@kbn/onechat-common';
 import type {
   ScopedRunner,
-  ScopedRunnerRunToolsParams,
   ScopedRunnerRunAgentParams,
   RunContext,
   Runner,
@@ -21,6 +21,10 @@ import type {
   WritableToolResultStore,
   ModelProvider,
 } from '@kbn/onechat-server';
+import type {
+  ScopedRunnerRunToolsParams,
+  ScopedRunnerRunInternalToolParams,
+} from '@kbn/onechat-server/runner';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
@@ -28,13 +32,15 @@ import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
 import { createEmptyRunContext } from './utils/run_context';
 import { createResultStore } from './tool_result_store';
-import { runTool } from './run_tool';
+import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 
 export interface CreateScopedRunnerDeps {
   // core services
   elasticsearch: ElasticsearchServiceStart;
   security: SecurityServiceStart;
+  // external plugin deps
+  spaces: SpacesPluginStart | undefined;
   // internal service deps
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
@@ -81,6 +87,19 @@ export class RunnerManager {
           }
         }
       },
+      runInternalTool: <TParams = Record<string, unknown>>(
+        toolExecutionParams: ScopedRunnerRunInternalToolParams<TParams>
+      ): Promise<RunToolReturn> => {
+        try {
+          return runInternalTool<TParams>({ toolExecutionParams, parentManager: this });
+        } catch (e) {
+          if (isOnechatError(e)) {
+            throw e;
+          } else {
+            throw createInternalError(e.message);
+          }
+        }
+      },
       runAgent: (agentExecutionParams: ScopedRunnerRunAgentParams): Promise<RunAgentReturn> => {
         try {
           return runAgent({ agentExecutionParams, parentManager: this });
@@ -115,6 +134,14 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const allDeps = { ...runnerDeps, modelProvider, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runTool(otherParams);
+    },
+    runInternalTool: (runToolParams) => {
+      const { request, defaultConnectorId, ...otherParams } = runToolParams;
+      const resultStore = createResultStore();
+      const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+      const allDeps = { ...runnerDeps, modelProvider, request, defaultConnectorId, resultStore };
+      const runner = createScopedRunner(allDeps);
+      return runner.runInternalTool(otherParams);
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;

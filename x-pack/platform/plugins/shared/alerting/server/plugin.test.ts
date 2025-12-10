@@ -25,6 +25,7 @@ import { dataPluginMock as unifiedSearchPluginMock } from '@kbn/unified-search-p
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { maintenanceWindowsMock } from '@kbn/maintenance-windows-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
@@ -454,6 +455,7 @@ describe('Alerting Plugin', () => {
                   .mockResolvedValue(dataViewPluginMocks.createStartContract()),
                 getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
               } as DataViewsServerPluginStart,
+              maintenanceWindows: maintenanceWindowsMock.createStart(),
             });
 
             expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -506,6 +508,7 @@ describe('Alerting Plugin', () => {
                   .mockResolvedValue(dataViewPluginMocks.createStartContract()),
                 getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
               } as DataViewsServerPluginStart,
+              maintenanceWindows: maintenanceWindowsMock.createStart(),
             });
 
             const fakeRequest = {
@@ -570,6 +573,7 @@ describe('Alerting Plugin', () => {
                 .mockResolvedValue(dataViewPluginMocks.createStartContract()),
               getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
             } as DataViewsServerPluginStart,
+            maintenanceWindows: maintenanceWindowsMock.createStart(),
           });
 
           const fakeRequest = {

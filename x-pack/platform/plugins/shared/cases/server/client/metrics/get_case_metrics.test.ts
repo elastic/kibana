@@ -173,7 +173,7 @@ function createMockClient() {
     } as unknown as Case;
   });
 
-  client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+  client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
     return [{ id: '1', index: '2', attached_at: '3' }];
   });
 

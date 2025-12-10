@@ -885,6 +885,7 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundFilledText",
                   ],
                 },
+                "tableFooterBackground": "#172336",
                 "tableRowBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1315,6 +1316,7 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundFilledText",
                   ],
                 },
+                "tableFooterBackground": "#ECF1F9",
                 "tableRowBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [

@@ -23,6 +23,17 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
 
   function isMappedPanelType(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
+    if (transforms?.throwOnUnmappedPanel) {
+      try {
+        transforms.throwOnUnmappedPanel(panel.config);
+      } catch (e) {
+        warnings.push(
+          `Dropped panel ${panel.uid}, panel config is not supported. Reason: ${e.message}.`
+        );
+        return false;
+      }
+    }
+
     if (!transforms?.schema) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
@@ -42,7 +53,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     };
   }
 
-  const mappedPanels = panels
+  const mappedPanels = (panels ?? [])
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
       if (!isDashboardSection(panel)) return removeEnhancements(panel);
@@ -86,7 +97,7 @@ export function throwOnUnmappedKeys(dashboardState: DashboardState) {
     }
   }
 
-  dashboardState.panels.forEach((panel) => {
+  dashboardState.panels?.forEach((panel) => {
     if (isDashboardSection(panel)) {
       panel.panels.forEach(throwOnUnmappedPanelKeys);
     } else {

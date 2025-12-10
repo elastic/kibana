@@ -10,8 +10,9 @@
 import type { ListrTask } from 'listr2';
 import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
-import { getUpdatedTypes, validateChanges } from '../../snapshots';
+import { getUpdatedTypes, validateChangesExistingType } from '../../snapshots';
 import { getLatestTypeFixtures } from '../../migrations/fixtures';
+import { getVersions } from '../../migrations/versions';
 
 export const validateUpdatedTypes: Task = (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
@@ -31,14 +32,15 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
         const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map(({ name }) => ({
           title: `Checking updates on type '${name}'`,
           task: () =>
-            validateChanges({
-              from: ctx.from?.typeDefinitions[name],
+            validateChangesExistingType({
+              from: ctx.from!.typeDefinitions[name],
               to: ctx.to?.typeDefinitions[name]!,
             }),
         }));
 
         return subtask.newListr<TaskContext>(validateChangesTasks, {
           exitOnError: false,
+          rendererOptions: { showErrorMessage: true },
         });
       },
       skip: () => ctx.updatedTypes.length === 0,
@@ -46,22 +48,28 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
     {
       title: 'Verifying fixtures for updated types',
       task: (_, subtask) => {
-        const fixturesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
+        const loadFixturesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
           const { name } = type;
           return {
             title: `Loading fixtures for type '${name}'`,
-            task: async () => {
+            task: async (__, loadFixturesTask) => {
+              const [current, previous] = getVersions(ctx.to!.typeDefinitions[name]);
               const typeFixtures = await getLatestTypeFixtures({
                 type,
-                snapshot: ctx.to!,
+                current,
+                previous,
                 fix: ctx.fix,
               });
               ctx.fixtures.previous[name] = typeFixtures.previous;
               ctx.fixtures.current[name] = typeFixtures.current;
+              loadFixturesTask.title += `: ${typeFixtures.current.relativePath}`;
             },
           };
         });
-        return subtask.newListr<TaskContext>(fixturesTasks, { exitOnError: false });
+        return subtask.newListr<TaskContext>(loadFixturesTasks, {
+          exitOnError: false,
+          rendererOptions: { showErrorMessage: true },
+        });
       },
       skip: () => ctx.updatedTypes.length === 0,
     },

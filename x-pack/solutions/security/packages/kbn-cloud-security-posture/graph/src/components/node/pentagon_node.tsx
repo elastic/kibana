@@ -40,7 +40,6 @@ const NODE_SHAPE_ON_HOVER_STACKED_Y_POS_DELTA = 6;
 
 export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
   const {
-    id,
     color,
     icon,
     label,
@@ -139,7 +138,7 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
       <NodeDetails
         count={count}
         tag={tag}
-        label={label ? label : id}
+        label={label}
         ips={ips}
         countryCodes={countryCodes}
         onIpClick={ipClickHandler}

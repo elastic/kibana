@@ -105,16 +105,18 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
 
   return (
     <>
-      <BadgeItem text={field} />
-      <OperatorText operator={operatorText} subdued />
-      <BadgeItem text={value?.toString() ?? ''} />
+      <BadgeItem text={field} testSubj="streamsAppConditionDisplayField" />
+      <OperatorText operator={operatorText} subdued testSubj="streamsAppConditionDisplayOperator" />
+      <BadgeItem text={value?.toString() ?? ''} testSubj="streamsAppConditionDisplayValue" />
     </>
   );
 };
 
-const BadgeItem = ({ text }: { text: string }) => (
+const BadgeItem = ({ text, testSubj }: { text: string; testSubj?: string }) => (
   <EuiFlexItem grow={false}>
-    <EuiBadge color="hollow">{text}</EuiBadge>
+    <EuiBadge color="hollow" data-test-subj={testSubj}>
+      {text}
+    </EuiBadge>
   </EuiFlexItem>
 );
 
@@ -203,10 +205,12 @@ const OperatorText = ({
   operator,
   bold,
   subdued,
+  testSubj,
 }: {
   operator: string;
   bold?: boolean;
   subdued?: boolean;
+  testSubj?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -215,6 +219,7 @@ const OperatorText = ({
         size="s"
         color={subdued ? 'subdued' : 'default'}
         style={{ fontWeight: bold ? euiTheme.font.weight.bold : euiTheme.font.weight.regular }}
+        data-test-subj={testSubj}
       >
         {operator}
       </EuiText>
