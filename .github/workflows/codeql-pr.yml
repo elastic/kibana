@@ -33,10 +33,17 @@ jobs:
 
     - name: Run CodeQL unit tests
       run: |
+        set -euo pipefail
         CODEQL_VERSION=$(ls ${{ runner.tool_cache }}/CodeQL | grep -E '^[0-9]' | head -1)
         export PATH="${{ runner.tool_cache }}/CodeQL/$CODEQL_VERSION/x64/codeql:$PATH"
-        # Run tests only from directories containing .qlref files (not .ql files directly)
-        find .github/codeql/custom-queries -name "*.qlref" -exec dirname {} \; | sort -u | while read testdir; do
+        # Find all unique test directories containing .qlref files
+        mapfile -t TEST_DIRS < <(find .github/codeql/custom-queries -name "*.qlref" -exec dirname {} \; | sort -u)
+        if [ "${#TEST_DIRS[@]}" -eq 0 ]; then
+          echo "No test directories with .qlref files found. Failing the workflow."
+          exit 1
+        fi
+        for testdir in "${TEST_DIRS[@]}"; do
+          echo "Running CodeQL tests in $testdir"
           codeql test run "$testdir" --additional-packs .github/codeql/custom-queries
         done
 
