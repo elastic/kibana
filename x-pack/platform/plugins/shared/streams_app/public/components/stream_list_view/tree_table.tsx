@@ -53,9 +53,8 @@ import {
 import { DiscoverBadgeButton } from '../stream_badges';
 
 const datePickerStyle = css`
-  .euiFormControlLayout {
-    height: 40px;
-  }
+  .euiFormControlLayout,
+  .euiSuperDatePicker button,
   .euiButton {
     height: 40px;
   }
@@ -270,17 +269,9 @@ export function StreamsTreeTable({
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
                         item.stream.name
                       }`}
-                      aria-label={i18n.translate(
-                        isCollapsed
-                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
-                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
-                        {
-                          defaultMessage: isCollapsed
-                            ? 'Collapsed node with {childCount} children'
-                            : 'Expanded node with {childCount} children',
-                          values: { childCount: item.children.length },
-                        }
-                      )}
+                      aria-label={i18n.translate('xpack.streams.streamsTreeTable.', {
+                        defaultMessage: '',
+                      })}
                       onClick={(e: React.MouseEvent) => {
                         handleToggleCollapse(item.stream.name);
                       }}
