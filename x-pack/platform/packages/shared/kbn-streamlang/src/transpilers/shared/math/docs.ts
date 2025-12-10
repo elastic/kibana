@@ -43,7 +43,7 @@ Fields are referenced directly by name:
 ### Operators
 
 - **Arithmetic:** \`+\`, \`-\`, \`*\`, \`/\`, \`mod(a, b)\`
-- **Comparison:** \`>\`, \`>=\`, \`<\`, \`<=\`, \`==\`, \`!=\` — returns boolean
+- **Comparison:** \`>\`, \`>=\`, \`<\`, \`<=\`, \`==\`, \`neq(a, b)\` — returns boolean
 - **Grouping:** Parentheses \`(a + b) * c\`
 
 ### Examples
@@ -259,7 +259,7 @@ export const mathFunctionDocs: MathFunctionDoc[] = [
     ],
     description: i18n.translate('xpack.streams.math.docs.neq', {
       defaultMessage:
-        'Returns true if values are not equal, false otherwise. Equivalent to the != operator.',
+        'Returns true if values are not equal, false otherwise. Use this function for inequality checks (the != operator is not supported).',
     }),
     example: 'neq(attributes.error_count, 0)',
     supported: true,

@@ -15,7 +15,7 @@ import {
   FUNCTION_REGISTRY,
   BINARY_ARITHMETIC_OPERATORS,
   validateMathExpression,
-  extractFieldReferencesFromMathExpression,
+  extractFieldsFromMathExpression,
 } from '../../shared/math';
 
 /**
@@ -143,7 +143,7 @@ export function processMathProcessor(
 
   // Handle ignore_missing: wrap in null checks
   if (processor.ignore_missing === true) {
-    const fields = extractFieldReferencesFromMathExpression(processor.expression);
+    const fields = extractFieldsFromMathExpression(processor.expression);
     const nullChecks = buildNullChecks(fields);
     if (nullChecks) {
       source = `if (${nullChecks}) { ${source} }`;

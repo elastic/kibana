@@ -50,6 +50,45 @@ function extractFieldsFromNode(node: TinymathAST, fields: Set<string>): void {
 }
 
 /**
+ * Functions that return boolean values (comparison operators).
+ * These are the root functions that determine if an expression returns boolean.
+ */
+const BOOLEAN_RETURNING_FUNCTIONS = new Set(['eq', 'neq', 'lt', 'lte', 'gt', 'gte']);
+
+/**
+ * Infers the return type of a math expression based on its root operation.
+ *
+ * - Comparison functions (eq, neq, lt, lte, gt, gte) return 'boolean'
+ * - All other expressions return 'number'
+ *
+ * @param expression The TinyMath expression string
+ * @returns 'boolean' if the expression is a comparison, 'number' otherwise
+ *
+ * @example
+ * inferMathExpressionReturnType('a + b')        // => 'number'
+ * inferMathExpressionReturnType('sqrt(x)')      // => 'number'
+ * inferMathExpressionReturnType('a > 10')       // => 'boolean'
+ * inferMathExpressionReturnType('eq(a, b)')     // => 'boolean'
+ * inferMathExpressionReturnType('neq(x, 0)')    // => 'boolean'
+ */
+export function inferMathExpressionReturnType(expression: string): 'number' | 'boolean' {
+  let ast: TinymathAST;
+  try {
+    ast = parse(expression);
+  } catch {
+    // If parsing fails, default to number
+    return 'number';
+  }
+
+  // If root node is a comparison function, it returns boolean
+  if (isTinymathFunction(ast) && BOOLEAN_RETURNING_FUNCTIONS.has(ast.name)) {
+    return 'boolean';
+  }
+
+  return 'number';
+}
+
+/**
  * Extracts all field references from a TinyMath expression string.
  *
  * This is used for:
@@ -61,22 +100,22 @@ function extractFieldsFromNode(node: TinymathAST, fields: Set<string>): void {
  * @returns Array of unique field names referenced in the expression
  *
  * @example
- * extractFieldReferences('price * quantity + tax')
+ * extractFieldsFromMathExpression('price * quantity + tax')
  * // => ['price', 'quantity', 'tax']
  *
  * @example
- * extractFieldReferences('abs(attributes.price - attributes.cost)')
+ * extractFieldsFromMathExpression('abs(attributes.price - attributes.cost)')
  * // => ['attributes.price', 'attributes.cost']
  *
  * @example
- * extractFieldReferences('pow(a, 2) + pow(a, 3)')
+ * extractFieldsFromMathExpression('pow(a, 2) + pow(a, 3)')
  * // => ['a'] (deduplicated)
  *
  * @example
- * extractFieldReferences('2 * pi() + 10')
+ * extractFieldsFromMathExpression('2 * pi() + 10')
  * // => [] (no field references, only constants and literals)
  */
-export function extractFieldReferencesFromMathExpression(expression: string): string[] {
+export function extractFieldsFromMathExpression(expression: string): string[] {
   // Parse the expression
   let ast: TinymathAST;
   try {

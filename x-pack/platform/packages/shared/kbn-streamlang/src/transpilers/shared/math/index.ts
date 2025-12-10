@@ -22,5 +22,5 @@ export type { FunctionDefinition } from './function_registry';
 export { validateMathExpression, getSupportedFunctionNames } from './ast_validator';
 export type { ValidationResult } from './ast_validator';
 
-// Field extractor
-export { extractFieldReferencesFromMathExpression } from './field_extractor';
+// Field extractor and type inference
+export { extractFieldsFromMathExpression, inferMathExpressionReturnType } from './field_extractor';

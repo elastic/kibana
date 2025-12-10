@@ -19,7 +19,7 @@ import {
   FUNCTION_REGISTRY,
   BINARY_ARITHMETIC_OPERATORS,
   validateMathExpression,
-  extractFieldReferencesFromMathExpression,
+  extractFieldsFromMathExpression,
 } from '../../shared/math';
 
 /**
@@ -192,7 +192,7 @@ export function convertMathProcessorToESQL(processor: MathProcessor): ESQLAstCom
   // Handle `ignore_missing: true` - skip if any referenced field is null
   let ignoreMissingExpression: ESQLSingleAstItem | null = null;
   if (processor.ignore_missing === true) {
-    const fields = extractFieldReferencesFromMathExpression(processor.expression);
+    const fields = extractFieldsFromMathExpression(processor.expression);
     ignoreMissingExpression = buildNotNullCheck(fields);
   }
 

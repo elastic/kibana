@@ -11,6 +11,10 @@ import type { StreamlangProcessorDefinition } from '../../types/processors';
 import { flattenSteps } from '../transpilers/shared/flatten_steps';
 import { isAlwaysCondition } from '../../types/conditions';
 import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
+import {
+  inferMathExpressionReturnType,
+  extractFieldsFromMathExpression,
+} from '../transpilers/shared/math';
 
 /**
  * Supported field types for type tracking
@@ -205,6 +209,13 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'math':
+      // Math processor writes result to 'to' field
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -336,6 +347,12 @@ function getProcessorOutputType(
       // Append creates or modifies arrays - not tracking array types for now
       return 'unknown';
 
+    case 'math':
+      // Math processor output type depends on the expression
+      // Comparison expressions (eq, neq, lt, lte, gt, gte) return boolean
+      // All other expressions return number
+      return inferMathExpressionReturnType(processor.expression);
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -387,6 +404,14 @@ function getExpectedInputType(
       // Dissect requires string input to parse
       if (processor.from === fieldName) {
         return ['string'];
+      }
+      return null;
+
+    case 'math':
+      // Math expressions expect numeric inputs for all field references
+      // (logical operators &&, ||, ! are not supported, so no boolean inputs)
+      if (extractFieldsFromMathExpression(processor.expression).includes(fieldName)) {
+        return ['number'];
       }
       return null;
 
@@ -457,6 +482,10 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
         break;
       case 'set':
         if (step.copy_from) fieldsUsed.push(step.copy_from);
+        break;
+      case 'math':
+        // Math expressions expect numeric inputs for all field references
+        fieldsUsed.push(...extractFieldsFromMathExpression(step.expression));
         break;
       case 'append':
       case 'drop_document':

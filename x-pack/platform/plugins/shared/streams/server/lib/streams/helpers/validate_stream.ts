@@ -30,7 +30,7 @@ import {
   isFilterCondition,
   isNotCondition,
   isOrCondition,
-  extractFieldReferencesFromMathExpression,
+  extractFieldsFromMathExpression,
 } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
@@ -145,7 +145,7 @@ const actionStepValidators: {
   math: (step: MathProcessor) => {
     checkFieldName(step.to);
     // Also validate field references in the expression
-    const expressionFields = extractFieldReferencesFromMathExpression(step.expression);
+    const expressionFields = extractFieldsFromMathExpression(step.expression);
     for (const field of expressionFields) {
       checkFieldName(field);
     }

@@ -23,4 +23,4 @@ export * from './src/transpilers/shared/convert_for_ui';
 export * from './src/validation/validate_streamlang';
 export { validateMathExpression } from './src/transpilers/shared/math/ast_validator';
 export { getMathExpressionLanguageDocSections } from './src/transpilers/shared/math/docs';
-export { extractFieldReferencesFromMathExpression } from './src/transpilers/shared/math/field_extractor';
+export { extractFieldsFromMathExpression } from './src/transpilers/shared/math/field_extractor';
