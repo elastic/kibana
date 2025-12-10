@@ -6,9 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import type { EuiCardProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -18,14 +17,12 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiLink,
   EuiPageBody,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiHorizontalRule,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -40,8 +37,6 @@ import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytic
 import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
 import { OverviewFooterItem } from './components/overview_ml_footer_item';
-import bannerImageLight from './components/welcome--light.png';
-import bannerImageDark from './components/welcome--dark.png';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export const overviewPanelDefaultState = Object.freeze({
@@ -111,12 +106,9 @@ export const MLOverviewCard = ({
 };
 
 export const OverviewPage: FC = () => {
-  const [user, setUser] = useState<GetUserProfileResponse | undefined>();
   const {
-    services: { docLinks, uiSettings, userProfile },
+    services: { docLinks, uiSettings },
   } = useMlKibana();
-  const { colorMode } = useEuiTheme();
-  const isDarkTheme = colorMode === 'DARK';
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
   const [canUseAiops] = usePermissionCheck(['canUseAiops']);
   const helpLink = docLinks.links.ml.guide;
@@ -132,60 +124,16 @@ export const OverviewPage: FC = () => {
   );
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
 
-  useEffect(
-    function loadUserName() {
-      async function loadUser() {
-        const currentUser = await userProfile.getCurrent();
-        setUser(currentUser);
-      }
-      loadUser();
-    },
-    [userProfile]
-  );
-
   return (
     <>
-      <MlPageHeader
-        restrictWidth={1200}
-        rightSideItems={[
-          <EuiImage
-            alt={i18n.translate('xpack.ml.overview.welcomeBanner.header.imageAlt', {
-              defaultMessage: 'Welcome to the Machine Learning Hub',
-            })}
-            src={isDarkTheme ? bannerImageDark : bannerImageLight}
-            size="l"
-          />,
-        ]}
-      >
+      <MlPageHeader restrictWidth={1200}>
         <EuiFlexGroup direction="column" gutterSize="s">
-          {Boolean(user) ? (
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued">
-                <h4>
-                  {user
-                    ? i18n.translate(
-                        'xpack.ml.overview.welcomeBanner.header.greeting.customTitle',
-                        {
-                          defaultMessage: '👋 Hi {name}!',
-                          values: { name: user.user.username ?? '' },
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.ml.overview.welcomeBanner.header.greeting.defaultTitle',
-                        {
-                          defaultMessage: '👋 Hi',
-                        }
-                      )}
-                </h4>
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
                   id="xpack.ml.overview.welcomeBanner.header.title"
-                  defaultMessage="Welcome to the Machine Learning Hub"
+                  defaultMessage="Machine Learning"
                 />
               </h1>
             </EuiTitle>
