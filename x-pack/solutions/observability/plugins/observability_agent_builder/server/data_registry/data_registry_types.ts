@@ -55,7 +55,7 @@ interface APMError {
   traceId: string | undefined;
 }
 
-export interface ObservabilityAgentDataRegistryTypes {
+export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
     serviceName: string;
