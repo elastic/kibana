@@ -1,18 +1,20 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
+  agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 10000
   aiops: 15359
   alerting: 26932
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 4694
+  automaticImportVTwo: 4662
   banners: 4087
   canvas: 15142
   cases: 153204
   charts: 40269
   cloud: 10648
+  cloudConnect: 7932
   cloudDataMigration: 5687
   cloudDefend: 8146
   cloudExperiments: 103984
@@ -23,7 +25,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 564938
+  core: 566392
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -89,8 +91,8 @@ pageLoadAssetSize:
   inputControlVis: 7660
   inspectComponent: 4900
   inspector: 17954
-  interactiveSetup: 36654
-  intercepts: 19011
+  interactiveSetup: 36524
+  intercepts: 21246
   kibanaOverview: 6339
   kibanaReact: 22503
   kibanaUsageCollection: 1736
@@ -113,7 +115,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 14703
+  navigation: 18999
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
@@ -123,7 +125,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 25223
+  onechat: 28638
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
@@ -170,7 +172,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 30665
   stackAlerts: 31499
-  stackConnectors: 81148
+  stackConnectors: 85421
   streams: 10000
   streamsApp: 23974
   synthetics: 31571
@@ -205,5 +207,5 @@ pageLoadAssetSize:
   visualizations: 38375
   watcher: 10485
   workflowsExtensions: 2554
-  workflowsManagement: 8545
-  workplaceAIApp: 6454
+  workflowsManagement: 8497
+  workplaceAIApp: 6135

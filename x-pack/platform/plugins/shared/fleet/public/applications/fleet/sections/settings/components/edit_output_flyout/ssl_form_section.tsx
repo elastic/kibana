@@ -166,6 +166,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               useSecretsStorage={useSecretsStorage}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               disabled={!useSecretsStorage}
+              secretType={type === 'download_source' ? 'ssl' : 'output'}
             >
               <EuiTextArea
                 fullWidth
@@ -193,6 +194,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               isConvertedToSecret={isConvertedToSecret}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               cancelEdit={inputs.sslKeySecretInput.cancelEdit}
+              secretType={type === 'download_source' ? 'ssl' : 'output'}
             >
               <EuiTextArea
                 fullWidth
