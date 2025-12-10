@@ -39,7 +39,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
     React.useState<boolean>(false);
 
   const authz = useAuthz();
-  const { notifications, docLinks } = useStartServices();
+  const { cloud, notifications, docLinks } = useStartServices();
 
   const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
     enabled: authz.fleet.readSettings,
@@ -84,6 +84,33 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
     updateSettings(setting);
     onClose();
   };
+  const costNodes =
+    cloud?.isCloudEnabled || cloud?.isServerlessEnabled ? (
+      <>
+        <h3>
+          <FormattedMessage
+            id="xpack.fleet.integrationKnowledgeFlyout.costTitle"
+            defaultMessage="Cost"
+          />
+        </h3>
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.integrationKnowledgeFlyout.costDescription"
+            defaultMessage="Indexing uses Elastic Inference Service and incurs minimal per token charges."
+          />{' '}
+          <EuiLink
+            href={docLinks.links.enterpriseSearch.elasticInferenceService}
+            target="_blank"
+            external
+          >
+            <FormattedMessage
+              id="xpack.fleet.integrationKnowledgeFlyout.learnMoreLink"
+              defaultMessage="Learn more"
+            />
+          </EuiLink>
+        </p>
+      </>
+    ) : null;
   return (
     <EuiFlyout
       onClose={onClose}
@@ -117,7 +144,33 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.integrationKnowledgeFlyout.howItWorksDescription"
-                    defaultMessage="Integration documentation and metadata are processed through Elastic Inference Service to create embeddings that enhance AI Assistant's understanding of your environment."
+                    defaultMessage="Integration documentation and metadata are processed by Elasticsearch to provide context about your installed integrations to {agentBuilder} and {aiAssistant}."
+                    values={{
+                      agentBuilder: (
+                        <EuiLink
+                          href={docLinks.links.agentBuilder.agentBuilder}
+                          target="_blank"
+                          external
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.integrationKnowledgeFlyout.agentBuilderLink"
+                            defaultMessage="Elastic Agent Builder"
+                          />
+                        </EuiLink>
+                      ),
+                      aiAssistant: (
+                        <EuiLink
+                          href="https://www.elastic.co/docs/explore-analyze/ai-features/ai-assistant"
+                          target="_blank"
+                          external
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.integrationKnowledgeFlyout.aiAssistantLink"
+                            defaultMessage="AI Assistant"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
                   />
                 </p>
                 <h3>
@@ -141,32 +194,12 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                   </li>
                   <li>
                     <FormattedMessage
-                      id="xpack.fleet.integrationKnowledgeFlyout.schemaDefinitionsText"
-                      defaultMessage="Schema definitions"
+                      id="xpack.fleet.integrationKnowledgeFlyout.fieldDefinitionsText"
+                      defaultMessage="Field definitions"
                     />
                   </li>
                 </ul>
-                <h3>
-                  <FormattedMessage
-                    id="xpack.fleet.integrationKnowledgeFlyout.costTitle"
-                    defaultMessage="Cost"
-                  />
-                </h3>
-                <p>
-                  <FormattedMessage
-                    id="xpack.fleet.integrationKnowledgeFlyout.costDescription"
-                    defaultMessage="Indexing uses Elastic Inference Service and incurs minimal per-token costs."
-                  />{' '}
-                  <EuiLink
-                    href={docLinks.links.enterpriseSearch.elasticInferenceService}
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.integrationKnowledgeFlyout.learnMoreLink"
-                      defaultMessage="Learn more"
-                    />
-                  </EuiLink>
-                </p>
+                {costNodes}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
