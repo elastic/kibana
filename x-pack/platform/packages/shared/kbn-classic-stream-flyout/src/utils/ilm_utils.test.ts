@@ -55,7 +55,7 @@ describe('ilm_utils', () => {
       );
       // Delete phase min_age becomes the end time for hot
       expect(result).toHaveLength(1);
-      expect(result[0].description).toMatch(/Hot till 180d/);
+      expect(result[0].description).toMatch(/Hot until 180d/);
     });
 
     it('handles single phase', () => {
@@ -73,7 +73,7 @@ describe('ilm_utils', () => {
         },
         colors
       );
-      expect(result[0].description).toMatch(/Warm till 30d/);
+      expect(result[0].description).toMatch(/Warm until 30d/);
       expect(result[1].description).toMatch(/Cold indefinitely/);
     });
 
@@ -85,7 +85,7 @@ describe('ilm_utils', () => {
         },
         colors
       );
-      expect(result[0].description).toMatch(/Hot till 90d/);
+      expect(result[0].description).toMatch(/Hot until 90d/);
       expect(result[1].description).toMatch(/Frozen indefinitely/);
     });
 
@@ -99,9 +99,9 @@ describe('ilm_utils', () => {
         },
         colors
       );
-      expect(result[0].description).toMatch(/till 7d/);
-      expect(result[1].description).toMatch(/till 30d/);
-      expect(result[2].description).toMatch(/till 1h/);
+      expect(result[0].description).toMatch(/until 7d/);
+      expect(result[1].description).toMatch(/until 30d/);
+      expect(result[2].description).toMatch(/until 1h/);
       expect(result[3].description).toMatch(/indefinitely/);
     });
 
@@ -117,7 +117,7 @@ describe('ilm_utils', () => {
         colors
       );
       expect(result).toHaveLength(4);
-      expect(result[3].description).toMatch(/Frozen till 365d/);
+      expect(result[3].description).toMatch(/Frozen until 365d/);
     });
   });
 });

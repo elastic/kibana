@@ -182,7 +182,7 @@ describe('NameStreamSection', () => {
         validationError: null,
       });
 
-      expect(queryByText(/Please supply a valid text string/i)).not.toBeInTheDocument();
+      expect(queryByText(/You must specify a valid text string/i)).not.toBeInTheDocument();
       expect(queryByText(/Stream name cannot include/i)).not.toBeInTheDocument();
       expect(queryByText(/already exists/i)).not.toBeInTheDocument();
       expect(queryByText(/higher priority/i)).not.toBeInTheDocument();

@@ -220,7 +220,7 @@ describe('CreateClassicStreamFlyout', () => {
       fireEvent.click(getByTestId('createButton'));
 
       // Wait for validation error to appear
-      await findByText(/Please supply a valid text string for all wildcards/i);
+      await findByText(/You must specify a valid text string for all wildcards/i);
 
       expect(onCreate).not.toHaveBeenCalled();
     });
@@ -529,7 +529,7 @@ describe('CreateClassicStreamFlyout', () => {
         fireEvent.click(getByTestId('createButton'));
 
         // Should show validation error
-        await findByText(/Please supply a valid text string for all wildcards/i);
+        await findByText(/You must specify a valid text string for all wildcards/i);
 
         // onCreate should not be called
         expect(onCreate).not.toHaveBeenCalled();
@@ -739,7 +739,7 @@ describe('CreateClassicStreamFlyout', () => {
         await act(async () => {
           jest.advanceTimersByTime(500);
         });
-        expect(queryByText(/Please supply a valid text string/i)).not.toBeInTheDocument();
+        expect(queryByText(/You must specify a valid text string/i)).not.toBeInTheDocument();
       });
 
       it('should reset validation when index pattern changes', async () => {
@@ -773,7 +773,7 @@ describe('CreateClassicStreamFlyout', () => {
         await act(async () => {
           jest.advanceTimersByTime(500);
         });
-        expect(queryByText(/Please supply a valid text string/i)).not.toBeInTheDocument();
+        expect(queryByText(/You must specify a valid text string/i)).not.toBeInTheDocument();
       });
     });
 

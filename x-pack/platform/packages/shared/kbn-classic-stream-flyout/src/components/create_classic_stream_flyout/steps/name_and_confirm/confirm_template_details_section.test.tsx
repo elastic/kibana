@@ -325,8 +325,8 @@ describe('ConfirmTemplateDetailsSection', () => {
         const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
         const { findByText } = renderComponent(template, mockGetIlmPolicy);
 
-        await findByText(/Hot till 7d/i);
-        await findByText(/Warm till 30d/i);
+        await findByText(/Hot until 7d/i);
+        await findByText(/Warm until 30d/i);
         await findByText(/Cold indefinitely/i);
       });
 
@@ -520,7 +520,7 @@ describe('ConfirmTemplateDetailsSection', () => {
         const { rerender, findByText, queryByText } = renderComponent(template1, mockGetIlmPolicy);
 
         // Wait for phases to be displayed
-        await findByText(/Hot till 7d/i);
+        await findByText(/Hot until 7d/i);
 
         // Change to template without ILM
         const template2 = createMockTemplate({
@@ -573,7 +573,7 @@ describe('ConfirmTemplateDetailsSection', () => {
       expect(getByText('ILM')).toBeInTheDocument();
 
       // Phases
-      await findByText(/Hot till 7d/i);
+      await findByText(/Hot until 7d/i);
       await findByText(/Warm indefinitely/i);
 
       // Component templates
