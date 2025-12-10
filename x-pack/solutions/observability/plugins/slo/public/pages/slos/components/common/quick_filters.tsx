@@ -69,8 +69,7 @@ export function QuickFilters({
     >
       <ControlGroupRenderer
         onApiAvailable={setControlGroupAPI}
-        getCreationOptions={async (builder) => {
-          const initialState = {};
+        getCreationOptions={async (initialState, builder) => {
           builder.addOptionsListControl(
             initialState,
             {
