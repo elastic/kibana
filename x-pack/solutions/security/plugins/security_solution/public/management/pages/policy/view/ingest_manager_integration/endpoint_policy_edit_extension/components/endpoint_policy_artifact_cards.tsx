@@ -230,7 +230,6 @@ const BlocklistPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
 });
 BlocklistPolicyCard.displayName = 'BlocklistPolicyCard';
 
-
 export interface EndpointPolicyArtifactCardsProps {
   policyId: string;
 }
