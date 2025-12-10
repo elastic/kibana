@@ -16,12 +16,8 @@ export function initializePauseFetchManager(
   const isFetchPaused$ = new BehaviorSubject<boolean>(true);
   const setFetchPaused = (paused: boolean) => isFetchPaused$.next(paused);
 
-  const filtersSubscription = filtersManager.api.filters$
-    .pipe(
-      first((filters) => {
-        return Boolean(filters);
-      })
-    )
+  const filtersSubscription = filtersManager.api.childFiltersLoading$
+    .pipe(first((filtersLoading) => !filtersLoading))
     .subscribe(() => {
       setFetchPaused(false);
     });
