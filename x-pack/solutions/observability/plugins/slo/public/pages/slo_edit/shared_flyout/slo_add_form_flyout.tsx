@@ -12,17 +12,20 @@ import type { RecursivePartial } from '@kbn/utility-types';
 import React from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
+import { transformPartialSLOStateToFormState } from '../helpers/process_slo_form_values';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
 // eslint-disable-next-line import/no-default-export
 export default function SloAddFormFlyout({
   onClose,
-  initialValues,
+  initialValues = {},
 }: {
   onClose: () => void;
-  initialValues?: RecursivePartial<CreateSLOInput>;
+  initialValues: RecursivePartial<CreateSLOInput>;
 }) {
+  const formInitialValues = transformPartialSLOStateToFormState(initialValues);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -39,7 +42,12 @@ export default function SloAddFormFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SloEditForm onSave={onClose} initialValues={initialValues} />
+        <SloEditForm
+          onSave={onClose}
+          initialValues={formInitialValues}
+          isEditMode={false}
+          isFlyout={true}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <OutPortal node={sloEditFormFooterPortal} />

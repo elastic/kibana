@@ -30,14 +30,15 @@ import { SLOInspect } from './common/slo_inspect/slo_inspect';
 export interface Props {
   slo?: GetSLOResponse;
   onSave?: () => void;
+  isFlyout: boolean;
+  isEditMode: boolean;
 }
 
-export function SloEditFormFooter({ slo, onSave }: Props) {
+export function SloEditFormFooter({ slo, onSave, isFlyout, isEditMode }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const isEditMode = slo !== undefined;
 
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
 
@@ -51,8 +52,6 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
     [navigateToUrl]
   );
 
-  const isFlyout = Boolean(onSave);
-
   const handleSubmit = useCallback(async () => {
     const isValid = await trigger();
     if (!isValid) {
@@ -61,7 +60,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
 
     const values = getValues();
 
-    if (isEditMode) {
+    if (isEditMode && !!slo) {
       const processedValues = transformValuesToUpdateSLOInput(values);
       await updateSlo({ sloId: slo.id, slo: processedValues });
       navigate(basePath.prepend(paths.slos));
@@ -85,7 +84,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
     isEditMode,
     navigate,
     onSave,
-    slo?.id,
+    slo,
     trigger,
     updateSlo,
   ]);

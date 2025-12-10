@@ -18,6 +18,8 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloEditForm } from './components/slo_edit_form';
+import { useParseUrlState } from './hooks/use_parse_url_state';
+import { transformSloResponseToFormState } from './helpers/process_slo_form_values';
 
 export function SloEditPage() {
   const {
@@ -33,6 +35,9 @@ export function SloEditPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+
+  const sloFormValuesFromUrlState = useParseUrlState();
+  const sloFormValuesFromSloResponse = transformSloResponseToFormState(slo);
 
   useBreadcrumbs(
     [
@@ -92,7 +97,11 @@ export function SloEditPage() {
       {isEditMode && isLoading ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
       ) : (
-        <SloEditForm slo={slo} />
+        <SloEditForm
+          slo={slo}
+          isEditMode={isEditMode}
+          initialValues={isEditMode ? sloFormValuesFromSloResponse : sloFormValuesFromUrlState}
+        />
       )}
     </ObservabilityPageTemplate>
   );
