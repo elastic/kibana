@@ -65,7 +65,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
+    const [dataInputStep, setDataInputStep] = useState(SplunkDataInputStep.Upload);
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
       setDataInputStep,
