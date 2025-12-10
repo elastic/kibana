@@ -15,7 +15,8 @@ import {
 } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
-import {
+import { SyncGlobalParamsPrivateLocationsTask } from './tasks/sync_global_params_task';
+import type {
   SyntheticsPluginsSetupDependencies,
   SyntheticsPluginsStartDependencies,
   SyntheticsServerSetup,
@@ -40,6 +41,7 @@ export class Plugin implements PluginType {
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
+  private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
@@ -96,6 +98,15 @@ export class Plugin implements PluginType {
       plugins.taskManager,
       this.syntheticsMonitorClient
     );
+    this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
+
+    this.syncGlobalParamsTask = new SyncGlobalParamsPrivateLocationsTask(
+      this.server,
+      plugins.taskManager,
+      this.syntheticsMonitorClient
+    );
+
+    this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
 
     return {};
   }
