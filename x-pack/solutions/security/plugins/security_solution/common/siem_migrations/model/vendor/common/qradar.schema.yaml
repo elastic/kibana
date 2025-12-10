@@ -19,3 +19,4 @@ components:
         - ariel_regex_property
         - reference_data
         - offense_type
+        - lookup

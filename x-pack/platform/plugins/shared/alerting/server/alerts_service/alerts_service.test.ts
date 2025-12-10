@@ -2621,7 +2621,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
           );
         });
 
@@ -2651,10 +2651,17 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
-                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1'] } },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -2709,7 +2716,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
           );
         });
 
@@ -2739,10 +2746,17 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
-                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1'] } },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -2796,7 +2810,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\"}) - no alert indices available"`
           );
         });
 
@@ -2825,9 +2839,14 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [{ term: { 'kibana.alert.rule.uuid': 'rule-1' } }],
+                    },
+                  },
                 ],
               },
             },
@@ -2880,7 +2899,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\"}) - no alert indices available"`
           );
         });
 
@@ -2909,9 +2928,14 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [{ term: { 'kibana.alert.rule.uuid': 'rule-1' } }],
+                    },
+                  },
                 ],
               },
             },
@@ -2938,6 +2962,212 @@ describe('Alerts Service', () => {
           await expect(
             alertsService.unmuteAllAlerts({
               ruleId: 'rule-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('muteAlertInstances', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.muteAlertInstances({
+            targets: [
+              { ruleId: 'rule-1', alertInstanceIds: ['alert-1-1', 'alert-1-2'] },
+              { ruleId: 'rule-2', alertInstanceIds: ['alert-2'] },
+            ],
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1-1', 'alert-1-2'] } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-2' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-2'] } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: true },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('unmuteAlertInstances', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.unmuteAlertInstances({
+            targets: [
+              { ruleId: 'rule-1', alertInstanceIds: ['alert-1-1', 'alert-1-2'] },
+              { ruleId: 'rule-2', alertInstanceIds: ['alert-2'] },
+            ],
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1-1', 'alert-1-2'] } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-2' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-2'] } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: false },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
               indices: ['.alerts-default'],
               logger,
             })
