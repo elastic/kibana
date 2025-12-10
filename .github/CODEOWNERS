@@ -16,6 +16,7 @@ examples/embeddable_examples @elastic/kibana-presentation
 examples/error_boundary @elastic/appex-sharedux
 examples/eso_model_version_example @elastic/kibana-security
 examples/esql_ast_inspector @elastic/kibana-esql
+examples/esql_ux_example @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
 examples/expressions_explorer @elastic/kibana-visualizations
 examples/feature_control_examples @elastic/kibana-security
