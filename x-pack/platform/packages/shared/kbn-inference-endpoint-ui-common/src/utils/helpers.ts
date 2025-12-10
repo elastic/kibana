@@ -11,6 +11,7 @@ import { FieldType } from '../types/types';
 import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
+import { SERVICE_SETTINGS } from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -52,8 +53,9 @@ export const getNonEmptyValidator = (
           // validate secrets fields separately from regular
           if (isSecrets ? field.sensitive : !field.sensitive) {
             if (
-              !configData[field.key] ||
-              (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
+              path.includes(field.location ?? SERVICE_SETTINGS) &&
+              (!configData[field.key] ||
+                (typeof configData[field.key] === 'string' && isEmpty(configData[field.key])))
             ) {
               field.validationErrors = [LABELS.getRequiredMessage(field.label)];
               field.isValid = false;
@@ -116,6 +118,7 @@ export const mapProviderFields = (
         updatable: newProvider.configurations[k].updatable ?? false,
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
+        location: newProvider.configurations[k].location ?? SERVICE_SETTINGS,
       })
     );
 };

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ServiceProviderKeys } from '../../constants';
+import type { SERVICE_SETTINGS, TASK_SETTINGS } from '../../constants';
+import { type ServiceProviderKeys } from '../../constants';
 import type { FieldsConfiguration } from '../types';
 
 export interface SelectOption {
@@ -46,6 +47,7 @@ export interface ConfigProperties {
   updatable: boolean;
   type: FieldType;
   supported_task_types: string[];
+  location?: typeof SERVICE_SETTINGS | typeof TASK_SETTINGS;
 }
 
 interface ConfigEntry extends ConfigProperties {
