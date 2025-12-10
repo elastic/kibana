@@ -11,11 +11,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import {
-  internalStateSlice,
-  type TabActionPayload,
-  type InternalStateThunkActionCreator,
-} from '../internal_state';
+import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
@@ -36,6 +32,7 @@ import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
+import { createInternalStateAsyncThunk } from '../utils';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
@@ -44,24 +41,24 @@ export interface InitializeSingleTabsParams {
   defaultUrlState: DiscoverAppState | undefined;
 }
 
-export const initializeSingleTab: InternalStateThunkActionCreator<
-  [TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>],
-  Promise<{ showNoDataPage: boolean }>
-> =
-  ({
-    tabId,
-    initializeSingleTabParams: {
-      stateContainer,
-      customizationService,
-      dataViewSpec,
-      defaultUrlState,
-    },
-  }) =>
-  async (
-    dispatch,
-    getState,
-    { services, runtimeStateManager, urlStateStorage, searchSessionManager }
-  ) => {
+export const initializeSingleTab = createInternalStateAsyncThunk(
+  'internalState/initializeSingleTab',
+  async function initializeSingleTabThunkFn(
+    {
+      tabId,
+      initializeSingleTabParams: {
+        stateContainer,
+        customizationService,
+        dataViewSpec,
+        defaultUrlState,
+      },
+    }: TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>,
+    {
+      dispatch,
+      getState,
+      extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
+    }
+  ) {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
@@ -314,4 +311,5 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     discoverTabLoadTracker.reportEvent();
 
     return { showNoDataPage: false };
-  };
+  }
+);
