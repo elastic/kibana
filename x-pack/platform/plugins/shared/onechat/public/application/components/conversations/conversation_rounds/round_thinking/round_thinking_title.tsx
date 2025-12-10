@@ -61,6 +61,9 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
       css={css`
         min-height: ${MIN_HEIGHT};
         cursor: ${hasSteps ? 'pointer' : 'default'};
+        &:hover {
+          text-decoration: ${hasSteps ? 'underline' : 'none'};
+        }
       `}
     >
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
