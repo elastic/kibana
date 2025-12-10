@@ -128,9 +128,7 @@ export async function deleteDuplicatePackagePolicies(
   const { fleet } = serverSetup.pluginsStart;
 
   logger.info(
-    ` [PrivateLocationCleanUpTask] Found ${
-      packagePoliciesToDelete.length
-    } duplicate package policies to delete: ${packagePoliciesToDelete.join(', ')}`
+    ` [PrivateLocationCleanUpTask] Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`
   );
   // Delete it in batches of 100 to avoid sending too large payloads at once.
   const BATCH_SIZE = 100;
@@ -140,7 +138,9 @@ export async function deleteDuplicatePackagePolicies(
     const batch = packagePoliciesToDelete.slice(i, i + BATCH_SIZE);
     const batchIndex = Math.floor(i / BATCH_SIZE) + 1;
     logger.info(
-      `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${batch.length})`
+      `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${
+        batch.length
+      }), with ids [${batch.join(`, `)}]`
     );
     await fleet.packagePolicyService.delete(soClient, esClient, batch, {
       force: true,
