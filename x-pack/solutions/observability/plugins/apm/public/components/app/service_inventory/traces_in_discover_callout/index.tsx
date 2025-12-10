@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -13,7 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { from, where } from '@kbn/esql-composer';
 import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 import type { SolutionId } from '@kbn/core-chrome-browser/src/project_navigation';
-import { useFetcher, useKibanaSpace } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import {
   ENVIRONMENT_ALL_VALUE,
@@ -66,8 +67,7 @@ function getEsqlQuery(environment: string, tracesIndex: string): string {
 }
 
 export function TracesInDiscoverCallout() {
-  const { share } = useApmPluginContext();
-  const { space } = useKibanaSpace();
+  const { share, core } = useApmPluginContext();
   const {
     services: { apmSourcesAccess },
   } = useKibana<ApmPluginStartDeps>();
@@ -80,6 +80,8 @@ export function TracesInDiscoverCallout() {
     tracesInDiscoverCalloutStorageKey,
     false
   );
+
+  const currentSolutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
   const obltSolutionId: SolutionId = 'oblt';
 
   const discoverHref = useMemo(() => {
@@ -95,7 +97,7 @@ export function TracesInDiscoverCallout() {
     });
   }, [share.url.locators, tracesIndex, environment, rangeFrom, rangeTo]);
 
-  if (dismissedCallout || !discoverHref || space?.solution !== obltSolutionId) {
+  if (dismissedCallout || !discoverHref || currentSolutionNavId !== obltSolutionId) {
     return null;
   }
 
