@@ -22,7 +22,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
             <p>
               <FormattedMessage
                 id="xpack.streams.streamDetailView.managementTab.enrichment.definitionError"
-                defaultMessage="Please fix this error before saving: {error}"
+                defaultMessage="Fix the following error before saving: {error}"
                 values={{ error: errors.definition_error.message }}
               />
             </p>
