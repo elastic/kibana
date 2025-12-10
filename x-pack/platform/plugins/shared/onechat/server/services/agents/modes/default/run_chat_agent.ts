@@ -11,6 +11,7 @@ import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langch
 import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
+import type { StructuredTool } from '@langchain/core/tools';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -87,7 +88,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     sendEvent: eventEmitter,
   });
 
-  let browserLangchainTools: any[] = [];
+  let browserLangchainTools: StructuredTool[] = [];
   let browserIdMappings = new Map<string, string>();
   if (browserApiTools && browserApiTools.length > 0) {
     const browserToolResult = browserToolsToLangchain({

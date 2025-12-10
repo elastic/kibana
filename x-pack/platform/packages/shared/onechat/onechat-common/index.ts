@@ -109,6 +109,7 @@ export {
   isToolCallStep,
   isReasoningStep,
   ChatEventType,
+  ConversationRoundStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationCreatedEvent,
@@ -148,4 +149,5 @@ export {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isToolProgressEvent,
+  isToolInterruptEvent,
 } from './chat';

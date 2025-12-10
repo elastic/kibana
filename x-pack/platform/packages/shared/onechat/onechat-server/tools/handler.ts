@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { InterruptRequest } from '@kbn/onechat-common/chat/interruptions';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -23,12 +24,33 @@ import type {
  */
 export type ToolHandlerResult = Omit<ToolResult, 'tool_result_id'> & { tool_result_id?: string };
 
+export interface ToolHandlerInterruptReturn {
+  interrupt: InterruptRequest;
+}
+
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
-export interface ToolHandlerReturn {
+export interface ToolHandlerStandardReturn {
   results: ToolHandlerResult[];
 }
+
+/**
+ * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
+ */
+export type ToolHandlerReturn = ToolHandlerStandardReturn | ToolHandlerInterruptReturn;
+
+export const isToolHandlerInterruptReturn = (
+  toolReturn: ToolHandlerReturn
+): toolReturn is ToolHandlerInterruptReturn => {
+  return 'interrupt' in toolReturn;
+};
+
+export const isToolHandlerStandardReturn = (
+  toolReturn: ToolHandlerReturn
+): toolReturn is ToolHandlerStandardReturn => {
+  return 'results' in toolReturn;
+};
 
 /**
  * Tool handler function for {@link BuiltinToolDefinition} handlers.

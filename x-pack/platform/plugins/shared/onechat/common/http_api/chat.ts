@@ -24,4 +24,5 @@ export interface ChatRequestBodyPayload {
 
 export type ChatResponse = Omit<ConversationRound, 'id' | 'input'> & {
   conversation_id: string;
+  round_id: string;
 };

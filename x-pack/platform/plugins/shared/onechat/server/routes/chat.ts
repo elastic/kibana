@@ -253,6 +253,7 @@ export function registerChatRoutes({
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
+            round_id: round.id,
             ...omit(round, ['id', 'input']),
           },
         });

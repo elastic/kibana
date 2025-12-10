@@ -33,6 +33,7 @@ import {
   createToolResultEvent,
   createReasoningEvent,
   createThinkingCompleteEvent,
+  createToolInterruptEvent,
   extractTextContent,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
@@ -46,6 +47,7 @@ import {
   isAnswerAction,
   isStructuredAnswerAction,
   isExecuteToolAction,
+  isInterruptToolAction,
 } from './actions';
 import type { ToolCallResult } from './actions';
 
@@ -186,12 +188,23 @@ export const convertGraphEvents = ({
                 createToolResultEvent({
                   toolCallId: toolResult.toolCallId,
                   toolId: toolId ?? 'unknown',
-                  results: toolReturn.results,
+                  results: toolReturn.results ?? [],
                 })
               );
             }
 
             return of(...toolResultEvents);
+          }
+
+          if (isInterruptToolAction(nextAction)) {
+            const toolId = toolCallIdToIdMap.get(nextAction.tool_call_id);
+            return of(
+              createToolInterruptEvent({
+                toolCallId: nextAction.tool_call_id,
+                toolId: toolId ?? 'unknown',
+                interrupt: nextAction.interrupt,
+              })
+            );
           }
         }
 

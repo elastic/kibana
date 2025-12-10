@@ -20,11 +20,13 @@ import type {
 import {
   ChatEventType,
   ConversationRoundStepType,
+  ConversationRoundStatus,
   isMessageCompleteEvent,
   isThinkingCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
   isToolProgressEvent,
+  isToolInterruptEvent,
   isReasoningEvent,
 } from '@kbn/onechat-common';
 import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
@@ -97,6 +99,7 @@ const createRoundFromEvents = ({
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
+  const toolInterruptEvents = events.filter(isToolInterruptEvent);
 
   const timeToLastToken = endTime.getTime() - startTime.getTime();
   const timeToFirstToken = thinkingCompleteEvent
@@ -116,6 +119,8 @@ const createRoundFromEvents = ({
         .map((progress) => ({
           message: progress.message,
         }));
+
+      // TODO: add interrupt event
 
       return [
         {
@@ -143,14 +148,19 @@ const createRoundFromEvents = ({
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
 
-  const lastMessage = messages[messages.length - 1];
+  const lastMessage = messages.length ? messages[messages.length - 1] : undefined;
+  const interruptEvent = toolInterruptEvents.length ? toolInterruptEvents[0] : undefined;
 
-  if (!lastMessage) {
-    throw new Error('No message complete event found in round events');
+  if (!lastMessage && !interruptEvent) {
+    throw new Error('No response event found in round events');
   }
 
   const round: ConversationRound = {
     id: uuidv4(),
+    status: toolInterruptEvents
+      ? ConversationRoundStatus.interruptionPending
+      : ConversationRoundStatus.completed,
+    current_interrupt: interruptEvent ? interruptEvent.data.interrupt : undefined,
     input,
     steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
@@ -158,10 +168,12 @@ const createRoundFromEvents = ({
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
     model_usage: getModelUsage(modelProvider.getUsageStats()),
-    response: {
-      message: lastMessage.message_content,
-      structured_output: lastMessage.structured_output,
-    },
+    response: lastMessage
+      ? {
+          message: lastMessage.message_content,
+          structured_output: lastMessage.structured_output,
+        }
+      : { message: '' },
   };
 
   return round;

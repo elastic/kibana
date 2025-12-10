@@ -6,6 +6,7 @@
  */
 
 export {
+  ConversationRoundStatus,
   type RoundInput,
   type RawRoundInput,
   type AssistantResponse,
@@ -53,6 +54,8 @@ export {
   type ThinkingCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
+  type ToolInterruptEventData,
+  type ToolInterruptEvent,
   isToolCallEvent,
   isBrowserToolCallEvent,
   isToolResultEvent,
@@ -65,4 +68,5 @@ export {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isConversationIdSetEvent,
+  isToolInterruptEvent,
 } from './events';

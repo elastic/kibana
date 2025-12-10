@@ -6,12 +6,14 @@
  */
 
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
+import type { InterruptRequest } from '@kbn/onechat-common/chat/interruptions';
 import type { ToolCall } from '@kbn/onechat-genai-utils/langchain';
 
 export enum AgentActionType {
   Error = 'error',
   ToolCall = 'tool_call',
   ExecuteTool = 'execute_tool',
+  InterruptTool = 'interrupt_tool',
   HandOver = 'hand_over',
   Answer = 'answer',
   StructuredAnswer = 'structured_answer',
@@ -41,6 +43,12 @@ export interface ExecuteToolAction {
   tool_results: ToolCallResult[];
 }
 
+export interface InterruptToolAction {
+  type: AgentActionType.InterruptTool;
+  tool_call_id: string;
+  interrupt: InterruptRequest;
+}
+
 export interface HandoverAction {
   type: AgentActionType.HandOver;
   /** message of the agent for the handover */
@@ -52,6 +60,7 @@ export interface HandoverAction {
 export type ResearchAgentAction =
   | ToolCallAction
   | ExecuteToolAction
+  | InterruptToolAction
   | HandoverAction
   | AgentErrorAction;
 
@@ -87,6 +96,10 @@ export function isExecuteToolAction(action: AgentAction): action is ExecuteToolA
   return action.type === AgentActionType.ExecuteTool;
 }
 
+export function isInterruptToolAction(action: AgentAction): action is InterruptToolAction {
+  return action.type === AgentActionType.InterruptTool;
+}
+
 export function isHandoverAction(action: AgentAction): action is HandoverAction {
   return action.type === AgentActionType.HandOver;
 }
@@ -120,6 +133,17 @@ export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAct
   return {
     type: AgentActionType.ExecuteTool,
     tool_results: toolResults,
+  };
+}
+
+export function interruptToolAction(
+  toolCallId: string,
+  interrupt: InterruptRequest
+): InterruptToolAction {
+  return {
+    type: AgentActionType.InterruptTool,
+    tool_call_id: toolCallId,
+    interrupt,
   };
 }
 

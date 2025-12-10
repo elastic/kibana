@@ -63,7 +63,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const manager = parentManager.createChild(context);
   const { resultStore } = manager.deps;
 
-  const { results } = await withExecuteToolSpan(
+  const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
     async (): Promise<ToolHandlerReturn> => {
@@ -91,21 +91,28 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   );
 
-  const resultsWithIds = results.map<ToolResult>(
-    (result) =>
-      ({
-        ...result,
-        tool_result_id: result.tool_result_id ?? getToolResultId(),
-      } as ToolResult)
-  );
+  if ('results' in toolReturn) {
+    const resultsWithIds = toolReturn.results.map<ToolResult>(
+      (result) =>
+        ({
+          ...result,
+          tool_result_id: result.tool_result_id ?? getToolResultId(),
+        } as ToolResult)
+    );
 
-  resultsWithIds.forEach((result) => {
-    resultStore.add(result);
-  });
+    resultsWithIds.forEach((result) => {
+      resultStore.add(result);
+    });
 
-  return {
-    results: resultsWithIds,
-  };
+    return {
+      results: resultsWithIds,
+    };
+  } else {
+    return {
+      results: [],
+      interrupt: toolReturn.interrupt,
+    };
+  }
 };
 
 export const createToolHandlerContext = async <TParams = Record<string, unknown>>({

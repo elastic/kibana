@@ -10,6 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { AgentInterruptType } from '@kbn/onechat-common/chat/interruptions';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -34,6 +35,18 @@ This parameter should only be used when you already know of a specific pattern t
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
     handler: async ({ pattern }, { esClient, logger }) => {
+      // TODO: remove
+      return {
+        interrupt: {
+          type: AgentInterruptType.confirm,
+          data: {
+            message: 'Are you sure you want to list all indices?',
+          },
+          state: {},
+        },
+      };
+      ////
+
       logger.debug(`list indices tool called with pattern: ${pattern}`);
       const {
         indices,

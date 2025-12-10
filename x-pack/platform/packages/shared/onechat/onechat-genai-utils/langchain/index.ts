@@ -19,6 +19,7 @@ export {
   createBrowserToolCallEvent,
   createToolResultEvent,
   createThinkingCompleteEvent,
+  createToolInterruptEvent,
 } from './graph_events';
 export {
   extractTextContent,

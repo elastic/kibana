@@ -35,6 +35,7 @@ import {
   isAgentErrorAction,
   isAnswerAction,
   isStructuredAnswerAction,
+  isInterruptToolAction,
   errorAction,
   handoverAction,
 } from './actions';
@@ -146,6 +147,25 @@ export const createAgentGraph = ({
     };
   };
 
+  const executeToolEdge = async (state: StateType) => {
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+    if (isInterruptToolAction(lastAction)) {
+      return steps.handleToolInterrupt;
+    }
+    return steps.researchAgent;
+  };
+
+  const handleToolInterrupt = async (state: StateType) => {
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+    if (!isInterruptToolAction(lastAction)) {
+      throw invalidState(`[handleToolInterrupt] last action type was ${lastAction.type}}`);
+    }
+    return {
+      interrupted: true,
+      interruption: lastAction.interrupt,
+    };
+  };
+
   const prepareToAnswer = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
     const maxCycleReached = state.currentCycle > state.cycleLimit;
@@ -249,17 +269,22 @@ export const createAgentGraph = ({
     // nodes
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
+    .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.prepareToAnswer, prepareToAnswer)
     .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
     // edges
     .addEdge(_START_, steps.researchAgent)
-    .addEdge(steps.executeTool, steps.researchAgent)
     .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
+    .addConditionalEdges(steps.executeTool, executeToolEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.handleToolInterrupt]: steps.handleToolInterrupt,
+    })
+    .addEdge(steps.handleToolInterrupt, _END_)
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
     .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
       [steps.answerAgent]: steps.answerAgent,
