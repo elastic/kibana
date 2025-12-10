@@ -47,7 +47,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
               <p>
                 <FormattedMessage
                   id="xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.ignoredFieldsFailure.fieldsList"
-                  defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
+                  defaultMessage="The following fields are malformed and won’t be stored correctly: {fields}"
                   values={{
                     fields: errors.ignoredFields.map((field) => (
                       <>
