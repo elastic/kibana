@@ -73,7 +73,7 @@ export const PrimaryMenuItem = forwardRef<
       gap: ${euiTheme.size.xs};
     `;
 
-    const getTooltipBadge = (label?: ReactNode) => (
+    const getBadgeContent = (label?: ReactNode) => (
       <div css={betaContentStyles}>
         {label && <span>{label}</span>}
         {badgeType && <BetaBadge type={badgeType} isInverted={isIconOnlyBadge} />}
@@ -82,8 +82,8 @@ export const PrimaryMenuItem = forwardRef<
 
     const getTooltipContent = () => {
       if (hasContent) return null;
-      if (isCollapsed) return badgeType ? getTooltipBadge(children) : children;
-      if (!isCollapsed && badgeType) return getTooltipBadge();
+      if (isCollapsed) return badgeType ? getBadgeContent(children) : children;
+      if (!isCollapsed && badgeType) return getBadgeContent();
 
       return null;
     };
