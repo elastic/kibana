@@ -59,7 +59,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   useEffect(() => {
     if (isOpen && hasMonitors && defaultRulesEnabled && !loading) {
       // If rules haven't been loaded yet, fetch/create them
-      if (rulesLoaded === null || !defaultRules) {
+      if (rulesLoaded === null || (!defaultRules?.statusRule && !defaultRules?.tlsRule)) {
         getOrCreateAlerts();
       }
     }
