@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable import/no-default-export */
+
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
-
-import virusTotalIcon from '../../../icons/virustotal/virustotal.png';
+import virusTotalIcon from './virustotal.png';
 
 export default (props: ConnectorIconProps) => {
   return <EuiIcon type={virusTotalIcon} {...props} />;
