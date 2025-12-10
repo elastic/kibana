@@ -14,22 +14,22 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { SignificantEventsGetResponse, StreamQueryKql } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { AssetClient } from '../streams/assets/asset_client';
+import type { SignificantEventLink } from '../../../common/significant_events';
+import type { SignificantEventsClient } from '../streams/significant_events/significant_events_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
-import type { QueryLink } from '../../../common/assets';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string },
   dependencies: {
-    assetClient: AssetClient;
+    significantEventsClient: SignificantEventsClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
-  const { assetClient, scopedClusterClient } = dependencies;
+  const { significantEventsClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize } = params;
 
-  const { [name]: queryLinks } = await assetClient.getAssetLinks([name], ['query']);
+  const { [name]: queryLinks } = await significantEventsClient.getSignificantEventLinks([name]);
   if (isEmpty(queryLinks)) {
     return [];
   }
@@ -161,7 +161,7 @@ export async function readSignificantEventsFromAlertsIndices(
   return [...significantEvents, ...notFoundSignificantEvents];
 }
 
-const toStreamQueryKql = (queryLink: QueryLink): StreamQueryKql => {
+const toStreamQueryKql = (queryLink: SignificantEventLink): StreamQueryKql => {
   return {
     id: queryLink.query.id,
     title: queryLink.query.title,

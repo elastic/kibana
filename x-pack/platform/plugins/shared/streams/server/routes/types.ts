@@ -14,10 +14,9 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ContentClient } from '../lib/content/content_client';
-import type { AssetClient } from '../lib/streams/assets/asset_client';
+import type { SignificantEventsClient } from '../lib/streams/significant_events/significant_events_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
-import type { AssetService } from '../lib/streams/assets/asset_service';
-import type { QueryClient } from '../lib/streams/assets/query/query_client';
+import type { SignificantEventsService } from '../lib/streams/significant_events/significant_events_service';
 import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
@@ -33,20 +32,19 @@ type GetScopedClients = ({
 export interface RouteHandlerScopedClients {
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
-  assetClient: AssetClient;
+  significantEventsClient: SignificantEventsClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   featureClient: FeatureClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
-  queryClient: QueryClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface RouteDependencies {
-  assets: AssetService;
+  significantEvents: SignificantEventsService;
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;

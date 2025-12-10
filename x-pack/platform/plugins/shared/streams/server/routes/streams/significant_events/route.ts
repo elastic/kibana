@@ -126,10 +126,15 @@ const readSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      streamsClient,
+      significantEventsClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
@@ -143,7 +148,7 @@ const readSignificantEventsRoute = createServerRoute({
         to,
         bucketSize,
       },
-      { assetClient, scopedClusterClient }
+      { significantEventsClient, scopedClusterClient }
     );
   },
 });
