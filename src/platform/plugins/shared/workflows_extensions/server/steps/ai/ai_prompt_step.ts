@@ -8,7 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { resolveConnectorId } from './resolve_connector_id';
+import { resolveConnectorId } from './utils/resolve_connector_id';
 import { AiPromptStepCommonDefinition } from '../../../common/steps/ai';
 import { createServerStepDefinition } from '../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
@@ -21,14 +21,14 @@ export const aiPromptStepDefinition = (
     handler: async (context) => {
       const [, { inference }] = await coreSetup.getStartServices();
 
-      const connectorId = await resolveConnectorId(
+      const resolvedConnectorId = await resolveConnectorId(
         context.input.connectorId,
         inference,
         context.contextManager.getFakeRequest()
       );
 
       const chatModel = await inference.getChatModel({
-        connectorId,
+        connectorId: resolvedConnectorId,
         request: context.contextManager.getFakeRequest(),
         chatModelOptions: {
           temperature: context.input.temperature,

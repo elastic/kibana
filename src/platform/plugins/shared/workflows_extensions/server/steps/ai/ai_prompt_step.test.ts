@@ -11,7 +11,7 @@ import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 // Mock external dependencies
-jest.mock('./resolve_connector_id', () => ({
+jest.mock('./utils/resolve_connector_id', () => ({
   resolveConnectorId: jest.fn(),
 }));
 
@@ -28,7 +28,7 @@ jest.mock('../../step_registry/types', () => ({
 }));
 
 import { aiPromptStepDefinition } from './ai_prompt_step';
-import { resolveConnectorId } from './resolve_connector_id';
+import { resolveConnectorId } from './utils/resolve_connector_id';
 import { createServerStepDefinition } from '../../step_registry/types';
 import type { ContextManager, StepHandlerContext } from '../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
