@@ -60,6 +60,16 @@ export interface APIKeys {
   ): Promise<UpdateAPIKeyResult | null>;
 
   /**
+   * Tries to grant an API key for the current user.
+   * @param request Request instance.
+   * @param createParams Create operation parameters.
+   */
+  grantAsInternalUser(
+    request: KibanaRequest,
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+  ): Promise<GrantAPIKeyResult | null>;
+
+  /**
    * Tries to validate an API key.
    * @param apiKeyPrams ValidateAPIKeyParams.
    */

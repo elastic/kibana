@@ -271,16 +271,13 @@ export class APIKeys implements Omit<APIKeysType, 'uiam'> {
       );
     }
 
-    const { expiration, name } = createParams;
-
-    const { metadata } = createParams;
-
     // Try to extract optional Elasticsearch client credentials (currently only used by JWT).
     const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
       request,
       ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
     );
 
+    const { expiration, metadata, name } = createParams;
     const roleDescriptors =
       'role_descriptors' in createParams
         ? createParams.role_descriptors
