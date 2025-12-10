@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants/plugin';
 import type { Dependencies } from './types';
@@ -24,11 +24,13 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   private readonly apiRoutes: ApiRoutes;
   private readonly indexDataEnricher: IndexDataEnricher;
   private readonly config: IndexManagementConfig;
+  private readonly logger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
     this.apiRoutes = new ApiRoutes();
     this.indexDataEnricher = new IndexDataEnricher();
     this.config = initContext.config.get();
+    this.logger = initContext.logger.get();
   }
 
   setup({ http }: CoreSetup, { features, security }: Dependencies): IndexManagementPluginSetup {
@@ -58,6 +60,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
 
     this.apiRoutes.setup({
       router: http.createRouter(),
+      logger: this.logger,
       config: {
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
         isLegacyTemplatesEnabled: this.config.enableLegacyTemplates,

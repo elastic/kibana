@@ -24,6 +24,7 @@ export function registerReloadRoute({
   indexDataEnricher,
   lib: { handleEsError },
   config,
+  logger,
 }: RouteDependencies) {
   router.post(
     {
@@ -49,14 +50,20 @@ export function registerReloadRoute({
         // if we try to execute an action with too many indices that account for a long string in the request
         // ES will throw an error saying that the HTTP line is too large.
         if (indexNames.length <= MAX_INDICES_PER_REQUEST) {
-          indices = await fetchIndices({ client, indexDataEnricher, config, indexNames });
+          indices = await fetchIndices({ client, indexDataEnricher, config, indexNames, logger });
         } else {
           const chunks = chunk(indexNames, MAX_INDICES_PER_REQUEST);
 
           indices = (
             await Promise.all(
               chunks.map((indexNamesChunk) =>
-                fetchIndices({ client, indexDataEnricher, config, indexNames: indexNamesChunk })
+                fetchIndices({
+                  client,
+                  indexDataEnricher,
+                  config,
+                  indexNames: indexNamesChunk,
+                  logger,
+                })
               )
             )
           ).flat();

@@ -6,7 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { IndexDataEnricher } from '../services';
 import type { Index } from '..';
 import type { RouteDependencies } from '../types';
@@ -19,7 +19,8 @@ interface MeteringStatsResponse {
 async function fetchIndicesCall(
   client: IScopedClusterClient,
   config: RouteDependencies['config'],
-  indexNames?: string[]
+  indexNames?: string[],
+  logger?: Logger
 ): Promise<Index[]> {
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
@@ -56,42 +57,55 @@ async function fetchIndicesCall(
       metric: ['docs', 'store'],
     });
 
-    return indicesNames.map((indexName: string) => {
-      const indexData = indices[indexName];
-      const aliases = Object.keys(indexData.aliases!);
-      const baseResponse = {
-        name: indexName,
-        primary: indexData.settings?.index?.number_of_shards,
-        replica: indexData.settings?.index?.number_of_replicas,
-        isFrozen: indexData.settings?.index?.frozen === 'true',
-        aliases: aliases.length ? aliases : 'none',
-        hidden: indexData.settings?.index?.hidden === 'true',
-        data_stream: indexData.data_stream,
-        mode: indexData.settings?.index?.mode,
-      };
+    return await Promise.all(
+      indicesNames.map(async (indexName: string) => {
+        // Use _count API for document counts
+        const countResult = await client.asCurrentUser
+          .count({
+            index: indexName,
+          })
+          .catch((error) => {
+            logger?.warn(`_count API failed for index "${indexName}": ${error.message}`);
+            return { count: 0 };
+          });
 
-      if (indicesStats) {
-        const indexStats = indicesStats[indexName];
-
-        return {
-          ...baseResponse,
-          health: indexStats?.health,
-          status: indexStats?.status,
-          uuid: indexStats?.uuid,
-          documents: indexStats?.primaries?.docs?.count ?? 0,
-          documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
-          size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
-          primary_size: new ByteSizeValue(
-            indexStats?.primaries?.store?.size_in_bytes ?? 0
-          ).toString(),
+        const indexData = indices[indexName];
+        const aliases = Object.keys(indexData.aliases!);
+        const baseResponse = {
+          name: indexName,
+          primary: indexData.settings?.index?.number_of_shards,
+          replica: indexData.settings?.index?.number_of_replicas,
+          isFrozen: indexData.settings?.index?.frozen === 'true',
+          aliases: aliases.length ? aliases : 'none',
+          hidden: indexData.settings?.index?.hidden === 'true',
+          data_stream: indexData.data_stream,
+          mode: indexData.settings?.index?.mode,
         };
-      }
 
-      return baseResponse;
-    });
+        if (indicesStats) {
+          const indexStats = indicesStats[indexName];
+          const documentCount = countResult.count;
+
+          return {
+            ...baseResponse,
+            health: indexStats?.health,
+            status: indexStats?.status,
+            uuid: indexStats?.uuid,
+            documents: documentCount,
+            documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
+            size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
+            primary_size: new ByteSizeValue(
+              indexStats?.primaries?.store?.size_in_bytes ?? 0
+            ).toString(),
+          };
+        }
+
+        return baseResponse;
+      })
+    );
   }
 
-  // uses the _metering/stats API to get the number of documents and size of the index
+  // uses the _metering/stats API to get the size of the index
   // this API is only available in ES3
   if (config.isSizeAndDocCountEnabled) {
     const { indices: indicesStats } =
@@ -100,30 +114,43 @@ async function fetchIndicesCall(
         path: `/_metering/stats/` + indexNamesString,
       });
 
-    return indicesNames.map((indexName: string) => {
-      const indexData = indices[indexName];
-      const aliases = Object.keys(indexData.aliases!);
-      const baseResponse = {
-        name: indexName,
-        isFrozen: false,
-        aliases: aliases.length ? aliases : 'none',
-        hidden: indexData.settings?.index?.hidden === 'true',
-        data_stream: indexData.data_stream,
-        mode: indexData.settings?.index?.mode,
-      };
+    return await Promise.all(
+      indicesNames.map(async (indexName: string) => {
+        // Use _count API for document counts
+        const countResult = await client.asCurrentUser
+          .count({
+            index: indexName,
+          })
+          .catch((error) => {
+            logger?.warn(`_count API failed for index "${indexName}": ${error.message}`);
+            return { count: 0 };
+          });
 
-      if (indicesStats) {
-        const indexStats = indicesStats.find((index) => index.name === indexName);
-
-        return {
-          ...baseResponse,
-          documents: indexStats?.num_docs ?? 0,
-          size: new ByteSizeValue(indexStats?.size_in_bytes ?? 0).toString(),
+        const indexData = indices[indexName];
+        const aliases = Object.keys(indexData.aliases!);
+        const baseResponse = {
+          name: indexName,
+          isFrozen: false,
+          aliases: aliases.length ? aliases : 'none',
+          hidden: indexData.settings?.index?.hidden === 'true',
+          data_stream: indexData.data_stream,
+          mode: indexData.settings?.index?.mode,
         };
-      }
 
-      return baseResponse;
-    });
+        if (indicesStats) {
+          const indexStats = indicesStats.find((index) => index.name === indexName);
+          const documentCount = countResult.count;
+
+          return {
+            ...baseResponse,
+            documents: documentCount,
+            size: new ByteSizeValue(indexStats?.size_in_bytes ?? 0).toString(),
+          };
+        }
+
+        return baseResponse;
+      })
+    );
   }
 
   // if neither index stats (Stateful only API)
@@ -150,12 +177,14 @@ export const fetchIndices = async ({
   indexDataEnricher,
   config,
   indexNames,
+  logger,
 }: {
   client: IScopedClusterClient;
   indexDataEnricher: IndexDataEnricher;
   config: RouteDependencies['config'];
   indexNames?: string[];
+  logger?: Logger;
 }) => {
-  const indices = await fetchIndicesCall(client, config, indexNames);
+  const indices = await fetchIndicesCall(client, config, indexNames, logger);
   return await indexDataEnricher.enrichIndices(indices, client);
 };

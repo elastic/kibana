@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { handleEsError } from '../../shared_imports';
 import { IndexDataEnricher } from '../../services';
 import type { RouteDependencies } from '../../types';
+
+export const mockLogger = loggingSystemMock.createLogger();
 
 export const routeDependencies: Omit<RouteDependencies, 'router'> = {
   config: {
@@ -22,6 +25,7 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
     enableFailureStoreRetentionDisabling: true,
   },
   indexDataEnricher: new IndexDataEnricher(),
+  logger: mockLogger,
   lib: {
     handleEsError,
   },

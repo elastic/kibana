@@ -17,6 +17,7 @@ export function registerGetRoute({
   indexDataEnricher,
   lib: { handleEsError },
   config,
+  logger,
 }: RouteDependencies) {
   router.get(
     {
@@ -42,6 +43,7 @@ export function registerGetRoute({
           indexDataEnricher,
           indexNames: [indexName],
           config,
+          logger,
         });
         if (indices.length !== 1) {
           return reportServerError(
