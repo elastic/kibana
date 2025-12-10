@@ -8,9 +8,9 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useGetGenerateDiscoverLink } from './use_get_generate_discover_link';
+import { useGetGenerateDiscoverLink } from '.';
 
-jest.mock('../../../../plugin', () => ({
+jest.mock('../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
@@ -18,7 +18,7 @@ const DISCOVER_URL = 'http://discover/url';
 
 describe('useGetGenerateDiscoverLink', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mockGetUnifiedDocViewerServices = require('../../../../plugin').getUnifiedDocViewerServices;
+  const mockGetUnifiedDocViewerServices = require('../../plugin').getUnifiedDocViewerServices;
   const mockDiscoverLocator = {
     getRedirectUrl: jest.fn(() => DISCOVER_URL),
   };
