@@ -16,7 +16,6 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants'
 import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import { css, Global } from '@emotion/react';
-import { SideNavCollapseButton } from '@kbn/core-chrome-browser-internal/src/ui/project/sidenav/collapse_button';
 
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
 import { Navigation } from '../components/navigation';
@@ -165,7 +164,7 @@ const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
       isCollapsed={isCollapsed}
       activeItemId={activeItemId}
       onItemClick={(item) => setActiveItemId(item.id)}
-      collapseButton={<SideNavCollapseButton isCollapsed={isCollapsed} toggle={setIsCollapsed} />}
+      onToggleCollapsed={setIsCollapsed}
     />
   );
 };
@@ -221,9 +220,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               isCollapsed={isCollapsed}
               activeItemId={activeItemId}
               onItemClick={(item) => setActiveItemId(item.id)}
-              collapseButton={
-                <SideNavCollapseButton isCollapsed={isCollapsed} toggle={setIsCollapsed} />
-              }
+              onToggleCollapsed={setIsCollapsed}
             />
           }
           sidebar={

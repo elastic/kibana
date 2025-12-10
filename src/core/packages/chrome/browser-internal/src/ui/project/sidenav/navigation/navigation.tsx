@@ -56,8 +56,8 @@ export interface ChromeNavigationProps {
 
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
 
-  // collapse button
-  collapseButton?: React.ReactNode;
+  // collapse toggle callback
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
@@ -92,8 +92,8 @@ export const Navigation = (props: ChromeNavigationProps) => {
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         onSidePanelStateChange={props.onSidePanelStateChange}
+        onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
-        collapseButton={props.collapseButton}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
