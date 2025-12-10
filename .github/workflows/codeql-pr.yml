@@ -33,7 +33,8 @@ jobs:
 
     - name: Run CodeQL unit tests
       run: |
-        PATH="${{ runner.tool_cache }}/CodeQL/$(ls ${{ runner.tool_cache }}/CodeQL)/x64/codeql:$PATH"
+        CODEQL_VERSION=$(ls ${{ runner.tool_cache }}/CodeQL | grep -E '^[0-9]' | head -1)
+        export PATH="${{ runner.tool_cache }}/CodeQL/$CODEQL_VERSION/x64/codeql:$PATH"
         codeql test run .github/codeql/custom-queries --additional-packs .github/codeql/custom-queries
 
   analyze:
