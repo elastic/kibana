@@ -68,6 +68,7 @@ export class Alert<
     this.meta = meta;
     this.meta.uuid = meta.uuid ?? uuidV4();
     this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
+    this.meta.maintenanceWindowNames = meta.maintenanceWindowNames ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
@@ -267,6 +268,7 @@ export class Alert<
           // the flapping flag, and the UUID
           meta: {
             maintenanceWindowIds: this.meta.maintenanceWindowIds,
+            maintenanceWindowNames: this.meta.maintenanceWindowNames,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
             uuid: this.meta.uuid,
@@ -342,6 +344,14 @@ export class Alert<
 
   getMaintenanceWindowIds() {
     return this.meta.maintenanceWindowIds ?? [];
+  }
+
+  setMaintenanceWindowNames(maintenanceWindowNames: string[] = []) {
+    this.meta.maintenanceWindowNames = maintenanceWindowNames;
+  }
+
+  getMaintenanceWindowNames() {
+    return this.meta.maintenanceWindowNames ?? [];
   }
 
   incrementActiveCount() {
