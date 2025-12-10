@@ -24,6 +24,7 @@ import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
 import { borderRadiusXlStyles } from '../../conversation.styles';
 import { RoundIcon } from './round_icon';
+import { InputOutputTokensDisplay } from './input_output_tokens_display';
 
 const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
   defaultMessage: 'View JSON',
@@ -101,9 +102,10 @@ export const RoundThinkingPanel = ({
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             <EuiHorizontalRule margin="none" />
             <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-              <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="l">
                 <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
-              </EuiFlexItem>
+                <InputOutputTokensDisplay modelUsage={rawRound.model_usage} />
+              </EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton iconType={'code'} color="text" iconSide="left" onClick={toggleFlyout}>
                   {rawResponseButtonLabel}
