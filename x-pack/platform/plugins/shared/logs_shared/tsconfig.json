@@ -60,5 +60,8 @@
     "@kbn/xstate-utils",
     "@kbn/ml-plugin",
     "@kbn/saved-search-component",
+    "@kbn/observability-agent-builder",
+    "@kbn/onechat-plugin",
+    "@kbn/observability-agent-builder-plugin",
   ]
 }
