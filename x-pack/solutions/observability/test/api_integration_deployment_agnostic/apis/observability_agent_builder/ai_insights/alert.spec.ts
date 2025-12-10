@@ -48,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let connectorId: string;
       let createdRuleId: string;
       let alertId: string;
+      let alertIndexName: string;
       let llmProxy: LlmProxy;
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       let roleAuthc: RoleCredentials;
@@ -60,7 +61,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
 
-        // Create and run a rule to generate an alert
+        // Create a rule and wait for an alert to be generated
         createdRuleId = await createRule({
           getService,
           roleAuthc,
@@ -68,27 +69,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           data: alertRuleData,
         });
 
-        await alertingApi.runRule(roleAuthc, createdRuleId);
-
         // Fetch the alert ID from the generated alert
         const es = getService('es');
+
+        // Refresh the index to ensure the alert is searchable
+        await es.indices.refresh({ index: APM_ALERTS_INDEX });
+
         const alertsResponse = await es.search({
           index: APM_ALERTS_INDEX,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'kibana.alert.rule.uuid': createdRuleId } },
-                  { term: { 'kibana.alert.status': 'active' } },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                { term: { 'kibana.alert.rule.uuid': createdRuleId } },
+                { term: { 'kibana.alert.status': 'active' } },
+              ],
             },
-            size: 1,
           },
+          size: 1,
         });
 
         const alertDoc = alertsResponse.hits.hits[0];
-        alertId = alertDoc?._id as string;
+        if (!alertDoc) {
+          throw new Error(`No alert found for rule ${createdRuleId}`);
+        }
+        alertId = alertDoc._id as string;
+        alertIndexName = alertDoc._index as string;
 
         llmProxy = await createLlmProxy(log);
         connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
@@ -120,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await scoped
           .post('/internal/observability_agent_builder/ai_insights/alert')
           .set('kbn-xsrf', 'true')
+          .set(internalReqHeader)
           .send({ alertId })
           .expect(200);
 
@@ -141,6 +147,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await scoped
           .post('/internal/observability_agent_builder/ai_insights/alert')
           .set('kbn-xsrf', 'true')
+          .set(internalReqHeader)
           .send({ alertId })
           .expect(200);
 
@@ -157,22 +164,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns no related signals when alert has no service.name', async () => {
         llmProxy.clear();
 
-        // Manually index an alert without service.name
         const es = getService('es');
-        const alertWithoutServiceName = await es.index({
-          index: '.internal.alerts-observability.apm.alerts-default-000001',
+        await es.update({
+          index: alertIndexName,
+          id: alertId,
           refresh: 'wait_for',
-          document: {
-            '@timestamp': new Date().toISOString(),
-            'kibana.alert.start': new Date().toISOString(),
-            'kibana.alert.status': 'active',
-            'kibana.alert.rule.name': 'Alert Without Service Name',
-            'kibana.alert.rule.consumer': 'apm',
-            'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
-            'kibana.space_ids': ['default'],
-            'event.kind': 'signal',
-            'event.action': 'open',
-            'kibana.alert.workflow_status': 'open',
+          doc: {
+            'service.name': null,
           },
         });
 
@@ -184,7 +182,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await scoped
           .post('/internal/observability_agent_builder/ai_insights/alert')
           .set('kbn-xsrf', 'true')
-          .send({ alertId: alertWithoutServiceName._id })
+          .set(internalReqHeader)
+          .send({ alertId })
           .expect(200);
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -200,6 +199,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await scoped
           .post('/internal/observability_agent_builder/ai_insights/alert')
           .set('kbn-xsrf', 'true')
+          .set(internalReqHeader)
           .send({ alertId: 'non-existent-alert-id' })
           .expect(404);
       });
