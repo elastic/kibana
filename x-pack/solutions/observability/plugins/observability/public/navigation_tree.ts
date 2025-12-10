@@ -340,12 +340,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           },
           { link: 'maps' },
           { link: 'graph' },
-          {
-            link: 'visualize',
-            title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
-              defaultMessage: 'Visualize library',
-            }),
-          },
         ],
       },
     ],

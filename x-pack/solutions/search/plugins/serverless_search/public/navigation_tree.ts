@@ -277,7 +277,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             children: [
               { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
               { link: 'management:spaces', breadcrumbStatus: 'hidden' },
-              { link: 'visualize' },
               { link: 'management:objects', breadcrumbStatus: 'hidden' },
               { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
               { link: 'management:reporting', breadcrumbStatus: 'hidden' },

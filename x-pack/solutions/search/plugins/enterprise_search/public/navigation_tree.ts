@@ -293,7 +293,6 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:dataViews' },
                     { link: 'management:filesManagement' },
-                    { link: 'visualize' },
                     { link: 'management:objects' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },
