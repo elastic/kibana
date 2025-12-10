@@ -333,39 +333,6 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
-   * Calculate the appropriate range for the hover
-   */
-  private calculateHoverRange(
-    model: monaco.editor.ITextModel,
-    position: monaco.Position,
-    context: HoverContext
-  ): monaco.Range | null {
-    try {
-      // If we have a step context and are hovering over the type, use the type node range
-      if (context.stepContext?.typeNode && context.yamlPath.includes('type')) {
-        const typeNode = context.stepContext.typeNode;
-        if (typeNode?.range) {
-          const [startOffset, , endOffset] = typeNode.range;
-          const startPos = model.getPositionAt(startOffset);
-          const endPos = model.getPositionAt(endOffset);
-
-          return new monaco.Range(
-            startPos.lineNumber,
-            startPos.column,
-            endPos.lineNumber,
-            endPos.column
-          );
-        }
-      }
-
-      return null;
-    } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error calculating range', error);
-      return null;
-    }
-  }
-
-  /**
    * Determine if we should show connector hover for this context
    * Only show for the 'type' field or relevant parameter fields
    */
