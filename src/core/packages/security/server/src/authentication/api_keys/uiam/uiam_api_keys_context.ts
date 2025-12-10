@@ -21,7 +21,7 @@ export interface UiamAPIKeysServiceWithContext {
    * Grants an API key via the UIAM service.
    *
    * @param params The parameters for creating the API key (name and optional expiration).
-   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details.
+   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available.
    */
   grantApiKey(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
@@ -29,9 +29,9 @@ export interface UiamAPIKeysServiceWithContext {
   /**
    * Invalidates an API key via the UIAM service.
    *
-   * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation.
-   * @throws {Error} If the license is not enabled or if the request does not contain an authorization header.
-   * @param params
+   * @param params The parameters containing the ID of the API key to invalidate.
+   * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
+   * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
   invalidateApiKey(params: InvalidateUiamAPIKeyParams): Promise<InvalidateAPIKeyResult | null>;
 

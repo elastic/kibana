@@ -19,9 +19,8 @@ import type { UserProfileGrant } from '../user_profile';
 
 /**
  * Represents the request body for granting an API key via UIAM.
- * @internal
  */
-interface GrantUiamApiKeyRequestBody {
+export interface GrantUiamApiKeyRequestBody {
   /** A descriptive name for the API key. */
   description: string;
   /** Indicates whether this is an internal API key. */
@@ -43,7 +42,7 @@ interface GrantUiamApiKeyRequestBody {
 /**
  * Represents the response from granting an API key via UIAM.
  */
-interface GrantUiamApiKeyResponse {
+export interface GrantUiamApiKeyResponse {
   /** The unique identifier for the API key. */
   id: string;
   /** The API key value (encoded). */

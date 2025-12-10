@@ -10,7 +10,11 @@ import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { UiamService } from './uiam_service';
+import {
+  type GrantUiamApiKeyRequestBody,
+  type GrantUiamApiKeyResponse,
+  UiamService,
+} from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import { HTTPAuthorizationHeader } from '../authentication';
 import { ConfigSchema } from '../config';
@@ -313,22 +317,31 @@ describe('UiamService', () => {
 
   describe('#grantApiKey', () => {
     it('properly calls UIAM service to grant an API key with Bearer scheme and name', async () => {
+      const mockResponse: GrantUiamApiKeyResponse = {
+        id: 'api-key-id',
+        key: 'encoded-key-value',
+        description: 'my-api-key',
+      };
+
       fetchSpy.mockResolvedValue({
         ok: true,
-        json: async () => ({
-          id: 'api-key-id',
-          key: 'encoded-key-value',
-          description: 'my-api-key',
-        }),
+        json: async () => mockResponse,
       });
 
       await expect(
         uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'my-api-key')
-      ).resolves.toEqual({
-        id: 'api-key-id',
-        key: 'encoded-key-value',
+      ).resolves.toEqual(mockResponse);
+
+      const expectedRequestBody: GrantUiamApiKeyRequestBody = {
         description: 'my-api-key',
-      });
+        internal: true,
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
@@ -338,28 +351,21 @@ describe('UiamService', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
-        body: JSON.stringify({
-          description: 'my-api-key',
-          internal: true,
-          role_assignments: {
-            limit: {
-              access: ['application'],
-              resource: ['project'],
-            },
-          },
-        }),
+        body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
       });
     });
 
     it('properly calls UIAM service to grant an API key with ApiKey scheme and name', async () => {
+      const mockResponse: GrantUiamApiKeyResponse = {
+        id: 'api-key-id',
+        key: 'essu_api_key_from_grant',
+        description: 'api-key-from-grant',
+      };
+
       fetchSpy.mockResolvedValue({
         ok: true,
-        json: async () => ({
-          id: 'api-key-id',
-          key: 'essu_api_key_from_grant',
-          description: 'api-key-from-grant',
-        }),
+        json: async () => mockResponse,
       });
 
       await expect(
@@ -367,11 +373,18 @@ describe('UiamService', () => {
           new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'),
           'api-key-from-grant'
         )
-      ).resolves.toEqual({
-        id: 'api-key-id',
-        key: 'essu_api_key_from_grant',
+      ).resolves.toEqual(mockResponse);
+
+      const expectedRequestBody: GrantUiamApiKeyRequestBody = {
         description: 'api-key-from-grant',
-      });
+        internal: true,
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
@@ -381,71 +394,21 @@ describe('UiamService', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'ApiKey essu_api_key',
         },
-        body: JSON.stringify({
-          description: 'api-key-from-grant',
-          internal: true,
-          role_assignments: {
-            limit: {
-              access: ['application'],
-              resource: ['project'],
-            },
-          },
-        }),
-        dispatcher: AGENT_MOCK,
-      });
-    });
-
-    it('properly calls UIAM service to grant an API key without expiration', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          id: 'api-key-id-no-exp',
-          key: 'encoded-key-no-expiration',
-          description: 'test-key-no-exp',
-        }),
-      });
-
-      await expect(
-        uiamService.grantApiKey(
-          new HTTPAuthorizationHeader('Bearer', 'access-token'),
-          'test-key-no-exp'
-        )
-      ).resolves.toEqual({
-        id: 'api-key-id-no-exp',
-        key: 'encoded-key-no-expiration',
-        description: 'test-key-no-exp',
-      });
-
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-          Authorization: 'Bearer access-token',
-        },
-        body: JSON.stringify({
-          description: 'test-key-no-exp',
-          internal: true,
-          role_assignments: {
-            limit: {
-              access: ['application'],
-              resource: ['project'],
-            },
-          },
-        }),
+        body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
       });
     });
 
     it('properly calls UIAM service to grant an API key with expiration', async () => {
+      const mockResponse: GrantUiamApiKeyResponse = {
+        id: 'api-key-id-with-exp',
+        key: 'encoded-key-with-expiration',
+        description: 'test-key-with-exp',
+      };
+
       fetchSpy.mockResolvedValue({
         ok: true,
-        json: async () => ({
-          id: 'api-key-id-with-exp',
-          key: 'encoded-key-with-expiration',
-          description: 'test-key-with-exp',
-        }),
+        json: async () => mockResponse,
       });
 
       await expect(
@@ -454,11 +417,19 @@ describe('UiamService', () => {
           'test-key-with-exp',
           '7d'
         )
-      ).resolves.toEqual({
-        id: 'api-key-id-with-exp',
-        key: 'encoded-key-with-expiration',
+      ).resolves.toEqual(mockResponse);
+
+      const expectedRequestBody: GrantUiamApiKeyRequestBody = {
         description: 'test-key-with-exp',
-      });
+        internal: true,
+        expiration: '7d',
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
@@ -468,17 +439,7 @@ describe('UiamService', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
-        body: JSON.stringify({
-          description: 'test-key-with-exp',
-          internal: true,
-          expiration: '7d',
-          role_assignments: {
-            limit: {
-              access: ['application'],
-              resource: ['project'],
-            },
-          },
-        }),
+        body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
       });
     });
@@ -495,6 +456,17 @@ describe('UiamService', () => {
         uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), 'test-key')
       ).rejects.toThrowError('Invalid request');
 
+      const expectedRequestBody: GrantUiamApiKeyRequestBody = {
+        description: 'test-key',
+        internal: true,
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
+
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
         method: 'POST',
@@ -503,16 +475,7 @@ describe('UiamService', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
-        body: JSON.stringify({
-          description: 'test-key',
-          internal: true,
-          role_assignments: {
-            limit: {
-              access: ['application'],
-              resource: ['project'],
-            },
-          },
-        }),
+        body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
       });
     });

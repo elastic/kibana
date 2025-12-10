@@ -35,8 +35,8 @@ export interface UiamAPIKeys {
    *
    * @param request The Kibana request instance containing the authorization header.
    * @param params The parameters containing the ID of the API key to invalidate.
-   * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation.
-   * @throws {Error} If the license is not enabled or if the request does not contain an authorization header.
+   * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
+   * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
   invalidateApiKey(
     request: KibanaRequest,

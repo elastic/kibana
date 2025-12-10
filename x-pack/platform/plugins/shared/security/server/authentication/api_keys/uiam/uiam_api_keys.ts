@@ -50,16 +50,15 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   /**
    * Grants an API key via the UIAM service.
    *
-   * @param request
+   * @param request The Kibana request instance containing the authorization header.
    * @param params The parameters for creating the API key (name and optional expiration).
-   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details.
+   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
    * @throws {Error} If the UIAM service is not available.
    */
   async grantApiKey(
     request: KibanaRequest,
     params: GrantUiamAPIKeyParams
   ): Promise<GrantAPIKeyResult | null> {
-    console.log('UiamAPIKeys grantApiKey called');
     if (!this.license.isEnabled()) {
       return null;
     }
@@ -108,9 +107,9 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * Invalidates an API key via the UIAM service.
    *
    * @param request The Kibana request instance containing the authorization header.
-   * @param params
-   * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation.
-   * @throws {Error} If the license is not enabled or if the request does not contain an authorization header.
+   * @param params The parameters containing the ID of the API key to invalidate.
+   * @returns A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled.
+   * @throws {Error} If the UIAM service is not available or if the request does not contain an authorization header.
    */
   async invalidateApiKey(
     request: KibanaRequest,
@@ -166,7 +165,8 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * authentication headers.
    *
    * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication.
+   * @returns A scoped cluster client configured with API key authentication, or null if the license is not enabled.
+   * @throws {Error} If the UIAM service is not available.
    */
   getScopedClusterClientWithApiKey(apiKey: string) {
     if (!this.license.isEnabled()) {
@@ -210,10 +210,11 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   /**
-   * Checks if the request contains UIAM credentials.
+   * Extracts and returns the authorization header from the request.
    *
    * @param request The Kibana request instance.
-   * @returns True if the request contains UIAM credentials, false otherwise.
+   * @returns The HTTP authorization header extracted from the request.
+   * @throws {Error} If the request does not contain an authorization header.
    */
   static getAuthorizationHeader(request: KibanaRequest): HTTPAuthorizationHeader {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
