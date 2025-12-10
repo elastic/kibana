@@ -26,10 +26,8 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, toggle, navProps }: Pro
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
-    (width: number, metadata: { isSidePanelOpen: boolean }) => {
-      // add gap spacing if we are using the secondary navigation panel, because that panel has the same background color as the app space
-      const finalWidth = metadata.isSidePanelOpen ? width + 8 : width;
-      updateLayout({ navigationWidth: finalWidth });
+    (width: number) => {
+      updateLayout({ navigationWidth: width });
     },
     [updateLayout]
   );

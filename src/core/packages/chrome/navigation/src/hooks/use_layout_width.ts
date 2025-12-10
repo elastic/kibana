@@ -16,7 +16,7 @@ export const SIDE_PANEL_WIDTH = 240;
 interface UseLayoutWidthArgs {
   isCollapsed: boolean;
   isSidePanelOpen: boolean;
-  setWidth: (width: number, metadata: { isSidePanelOpen: boolean }) => void;
+  setWidth: (width: number) => void;
 }
 
 /**
@@ -31,6 +31,6 @@ export const useLayoutWidth = ({ isCollapsed, isSidePanelOpen, setWidth }: UseLa
     const baseWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
     const width = isSidePanelOpen ? baseWidth + SIDE_PANEL_WIDTH : baseWidth;
 
-    setWidth(width, { isSidePanelOpen });
+    setWidth(width);
   }, [isCollapsed, isSidePanelOpen, setWidth]);
 };
