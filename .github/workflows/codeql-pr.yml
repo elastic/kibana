@@ -32,7 +32,9 @@ jobs:
         languages: javascript
 
     - name: Run CodeQL unit tests
-      run: codeql test run .github/codeql/custom-queries --additional-packs .github/codeql/custom-queries
+      run: |
+        PATH="${{ runner.tool_cache }}/CodeQL/$(ls ${{ runner.tool_cache }}/CodeQL)/x64/codeql:$PATH"
+        codeql test run .github/codeql/custom-queries --additional-packs .github/codeql/custom-queries
 
   analyze:
     name: Analyze javascript
