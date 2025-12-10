@@ -56,7 +56,7 @@ export interface ChromeNavigationProps {
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
 
   // collapse toggle callback
-  onToggleCollapsed?: (isCollapsed: boolean) => void;
+  onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {

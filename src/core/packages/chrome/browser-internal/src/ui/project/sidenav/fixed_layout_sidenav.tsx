@@ -18,13 +18,11 @@ import { Navigation } from './navigation';
 import type { NavigationProps } from './types';
 
 interface CollapsibleNavigationProps {
-  toggle: (isVisible: boolean) => void;
   isCollapsed$: BehaviorSubject<boolean>;
   navProps: NavigationProps;
 }
 
 export const FixedLayoutProjectSideNav: FunctionComponent<CollapsibleNavigationProps> = ({
-  toggle,
   isCollapsed$,
   navProps,
 }) => {
@@ -37,7 +35,6 @@ export const FixedLayoutProjectSideNav: FunctionComponent<CollapsibleNavigationP
           {...navProps}
           isCollapsed={isCollapsed}
           setWidth={setWidth}
-          onToggleCollapsed={toggle}
         />
         )}
       </CollapsibleNavigationFlyout>

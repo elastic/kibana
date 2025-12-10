@@ -17,11 +17,10 @@ import type { NavigationProps } from './types';
 
 export interface Props {
   isCollapsed$: BehaviorSubject<boolean>;
-  toggle: (isCollapsed: boolean) => void;
   navProps: NavigationProps;
 }
 
-export const GridLayoutProjectSideNav = ({ isCollapsed$, toggle, navProps }: Props) => {
+export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
@@ -44,7 +43,6 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, toggle, navProps }: Pro
       <Navigation
         isCollapsed={isCollapsed}
         setWidth={setWidth}
-        onToggleCollapsed={toggle}
         {...navProps}
       />
     </>

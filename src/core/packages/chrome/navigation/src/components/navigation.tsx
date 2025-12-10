@@ -59,9 +59,12 @@ export interface NavigationProps {
    */
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /**
-   * (optional) Callback fired when the collapse button is toggled.
+   * Callback fired when the collapse button is toggled.
+   *
+   * The collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject
+   * that is persisted to localStorage. External consumers rely on this state.
    */
-  onToggleCollapsed?: (isCollapsed: boolean) => void;
+  onToggleCollapsed: (isCollapsed: boolean) => void;
   /**
    * (optional) Content to display inside the side panel footer.
    */

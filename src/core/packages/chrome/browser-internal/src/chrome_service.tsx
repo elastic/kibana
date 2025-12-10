@@ -422,6 +422,7 @@ export class ChromeService {
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       navigationTourManager: projectNavigation.tourManager,
       feedbackUrlParams$,
+      onToggleCollapsed: setIsSideNavCollapsed,
     };
 
     const getProjectHeader = ({
@@ -475,7 +476,6 @@ export class ChromeService {
           <Router history={application.history}>
             <FixedLayoutProjectSideNav
               isCollapsed$={this.isSideNavCollapsed$}
-              toggle={setIsSideNavCollapsed}
               navProps={navProps}
             />
           </Router>
@@ -539,7 +539,6 @@ export class ChromeService {
       return (
         <GridLayoutProjectSideNav
           isCollapsed$={this.isSideNavCollapsed$}
-          toggle={setIsSideNavCollapsed}
           navProps={navProps}
         />
       );
