@@ -43,7 +43,7 @@ Update the data stream lifecycle of the specified data streams.
     headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
-    bodyParams: ['data_retention', 'downsampling', 'enabled'],
+    bodyParams: ['data_retention', 'downsampling', 'downsampling_method', 'enabled'],
   },
   paramsSchema: z.object({
     ...getShapeAt(indices_put_data_lifecycle_request, 'body'),
