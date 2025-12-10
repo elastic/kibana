@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowInput } from '@kbn/workflows';
+
 /**
  * Map of workflow IDs to workflow details
  * Used for quick lookup of workflow names by ID
@@ -15,6 +17,7 @@ export interface WorkflowsMap {
   [workflowId: string]: {
     id: string;
     name: string;
+    inputs?: WorkflowInput[];
   };
 }
 

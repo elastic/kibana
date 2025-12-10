@@ -58,6 +58,12 @@ export interface WorkflowLineParseResult extends BaseLineParseResult {
   valueStartIndex: number;
 }
 
+export interface WorkflowInputsLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-inputs';
+  match: RegExpMatchArray | null;
+  valueStartIndex?: number;
+}
+
 export interface TypeLineParseResult extends BaseLineParseResult {
   matchType: 'type';
   match: RegExpMatchArray;
@@ -77,6 +83,7 @@ export type LineParseResult =
   | LiquidSyntaxLineParseResult
   | ConnectorIdLineParseResult
   | WorkflowLineParseResult
+  | WorkflowInputsLineParseResult
   | TypeLineParseResult
   | TimezoneLineParseResult;
 
@@ -127,6 +134,35 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       fullKey: workflowValue,
       match: workflowIdMatch,
       valueStartIndex: workflowIdMatch.groups.prefix.length + 1,
+    };
+  }
+
+  // Check for inputs: field in workflow.execute step
+  const workflowInputsMatch = lineUpToCursor.match(/^(?<prefix>\s*inputs:)\s*(?<value>.*)$/);
+  if (workflowInputsMatch && workflowInputsMatch.groups) {
+    const inputsValue = workflowInputsMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'workflow-inputs',
+      fullKey: inputsValue,
+      match: workflowInputsMatch,
+      valueStartIndex: workflowInputsMatch.groups.prefix.length + 1,
+    };
+  }
+
+  // Check for input key-value pairs in inputs section
+  const workflowInputKeyMatch = lineUpToCursor.match(
+    /^(?<prefix>\s+)(?<key>[a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(?<value>.*)$/
+  );
+  if (workflowInputKeyMatch && workflowInputKeyMatch.groups) {
+    const inputValue = workflowInputKeyMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'workflow-inputs',
+      fullKey: inputValue || workflowInputKeyMatch.groups.key,
+      match: workflowInputKeyMatch,
+      valueStartIndex:
+        (workflowInputKeyMatch.groups.prefix?.length || 0) +
+        (workflowInputKeyMatch.groups.key?.length || 0) +
+        2, // +2 for ": "
     };
   }
   // Try @ trigger first (e.g., "@const" or "@steps.step1")

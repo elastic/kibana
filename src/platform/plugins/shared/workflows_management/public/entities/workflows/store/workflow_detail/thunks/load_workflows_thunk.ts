@@ -39,6 +39,7 @@ export const loadWorkflowsThunk = createAsyncThunk<
       workflowsMap[workflow.id] = {
         id: workflow.id,
         name: workflow.name,
+        inputs: workflow.definition?.inputs || undefined,
       };
     });
 
