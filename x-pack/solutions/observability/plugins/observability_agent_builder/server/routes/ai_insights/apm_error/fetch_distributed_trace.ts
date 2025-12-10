@@ -20,8 +20,8 @@ interface ServiceAggregate {
 
 export interface DistributedTrace {
   traceDocuments: Array<UnflattenedApmEvent>;
-  traceServiceAggregates: ServiceAggregate[];
   isPartialTrace: boolean;
+  services: ServiceAggregate[];
 }
 
 export async function fetchDistributedTrace({
@@ -105,7 +105,7 @@ export async function fetchDistributedTrace({
   const isPartialTrace = total.relation === 'gte';
 
   const serviceAggs = traceResponse.aggregations?.services.buckets ?? [];
-  const traceServiceAggregates = serviceAggs
+  const services = serviceAggs
     .map((bucket) => ({
       serviceName: bucket.key as string,
       count: bucket.doc_count,
@@ -114,12 +114,12 @@ export async function fetchDistributedTrace({
     .sort((a, b) => b.count - a.count);
 
   logger.debug(
-    `Fetched distributed trace for ${traceId}: ${traceDocuments.length} documents, ${traceServiceAggregates.length} services, partial: ${isPartialTrace}`
+    `Fetched distributed trace for ${traceId}: ${traceDocuments.length} documents, ${services.length} services, partial: ${isPartialTrace}`
   );
 
   return {
     traceDocuments,
-    traceServiceAggregates,
     isPartialTrace,
+    services,
   };
 }

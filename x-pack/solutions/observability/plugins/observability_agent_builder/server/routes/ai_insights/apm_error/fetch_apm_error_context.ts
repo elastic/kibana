@@ -132,7 +132,7 @@ export async function fetchApmErrorContext({
       name: 'TraceServices',
       start,
       end,
-      handler: async () => (await traceContextPromise).traceServiceAggregates,
+      handler: async () => (await traceContextPromise).services,
     });
 
     contextParts.push({
