@@ -32,7 +32,9 @@ export async function create(
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
 
-  const isAccessControlEnabled = core.savedObjects.typeRegistry.isAccessControlEnabled();
+  const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
+    DASHBOARD_SAVED_OBJECT_TYPE
+  );
 
   const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
@@ -42,7 +44,7 @@ export async function create(
       ...(createBody.id && { id: createBody.id }),
       ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
       ...(accessControl?.access_mode &&
-        isAccessControlEnabled && {
+        supportsAccessControl && {
           accessControl: {
             accessMode: accessControl.access_mode ?? 'default',
           },

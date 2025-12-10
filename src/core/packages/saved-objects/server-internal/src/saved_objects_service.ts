@@ -153,6 +153,9 @@ export class SavedObjectsService
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+    const accessControlEnabled = this.config.enableAccessControl;
+    this.typeRegistry.setAccessControlEnabled(accessControlEnabled);
+
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
         kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
@@ -179,8 +182,6 @@ export class SavedObjectsService
     registerCoreObjectTypes(this.typeRegistry);
 
     const skipMigration = this.config.migration.skip;
-    const accessControlEnabled = this.config.enableAccessControl;
-    this.typeRegistry.setAccessControlEnabled(accessControlEnabled);
 
     return {
       status$: calculateStatus$(
