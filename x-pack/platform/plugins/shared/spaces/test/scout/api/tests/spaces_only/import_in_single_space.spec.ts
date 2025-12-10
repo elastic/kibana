@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RequestAuthFixture, RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
 
 import {
   ATTRIBUTE_TITLE_KEY,
@@ -17,6 +17,7 @@ import {
   TEST_SPACES,
 } from './constants';
 import { prepareImportFormData } from './helpers';
+import { apiTest } from '../../fixtures';
 
 /**
  * Tests for the Saved Objects Import API (_import) within individual spaces (default space and a "space_1" space).
@@ -30,26 +31,6 @@ import { prepareImportFormData } from './helpers';
  */
 TEST_SPACES.forEach((space) => {
   const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
-
-  const createApiKeyWithSavedObjectsManagementPrivileges = async (
-    requestAuth: RequestAuthFixture
-  ) => {
-    return await requestAuth.getApiKeyForCustomRole({
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-      },
-      kibana: [
-        {
-          base: [],
-          feature: {
-            savedObjectsManagement: ['all'],
-          },
-          spaces: ['*'], // Access to all spaces
-        },
-      ],
-    });
-  };
 
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
     let savedObjectsManagementCredentials: RoleApiCredentials;
@@ -68,9 +49,7 @@ TEST_SPACES.forEach((space) => {
         log.info(`Using default space for test suite`);
       }
 
-      savedObjectsManagementCredentials = await createApiKeyWithSavedObjectsManagementPrivileges(
-        requestAuth
-      );
+      savedObjectsManagementCredentials = await requestAuth.getSavedObjectsManagementApiKey();
     });
 
     apiTest.afterEach(async ({ kbnClient, log }) => {

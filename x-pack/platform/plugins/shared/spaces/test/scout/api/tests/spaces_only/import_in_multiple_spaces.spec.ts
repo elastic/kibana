@@ -13,11 +13,12 @@
  * proper role-based access control.
  */
 
-import type { KbnClient, RequestAuthFixture, RoleApiCredentials, ScoutLogger } from '@kbn/scout';
-import { apiTest, expect, tags } from '@kbn/scout';
+import type { KbnClient, RoleApiCredentials, ScoutLogger } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
 
 import { ATTRIBUTE_TITLE_KEY, ATTRIBUTE_TITLE_VALUE, COMMON_HEADERS, SPACES } from './constants';
 import { prepareImportFormData } from './helpers';
+import { apiTest } from '../../fixtures';
 
 apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () => {
   // Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs
@@ -25,26 +26,6 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
 
   const spacesToCreate = [SPACES.SPACE_1, SPACES.SPACE_2];
   let savedObjectsManagementCredentials: RoleApiCredentials;
-
-  const createApiKeyWithSavedObjectsManagementPrivileges = async (
-    requestAuth: RequestAuthFixture
-  ) => {
-    return await requestAuth.getApiKeyForCustomRole({
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-      },
-      kibana: [
-        {
-          base: [],
-          feature: {
-            savedObjectsManagement: ['all'],
-          },
-          spaces: ['*'], // Access to all spaces
-        },
-      ],
-    });
-  };
 
   const createSpaces = async (kbnClient: KbnClient, log: ScoutLogger) => {
     await Promise.all(
@@ -62,9 +43,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
 
   apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
     await createSpaces(kbnClient, log);
-    savedObjectsManagementCredentials = await createApiKeyWithSavedObjectsManagementPrivileges(
-      requestAuth
-    );
+    savedObjectsManagementCredentials = await requestAuth.getSavedObjectsManagementApiKey();
   });
 
   apiTest.afterEach(async ({ kbnClient, log }) => {
