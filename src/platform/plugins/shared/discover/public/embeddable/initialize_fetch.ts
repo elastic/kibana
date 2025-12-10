@@ -180,10 +180,10 @@ export function initializeFetch({
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews, esqlVariables]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
-        const isDocumentViewMode = savedSearch.viewMode === VIEW_MODE.DOCUMENT_LEVEL;
+        const isAggregatedViewMode = savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL;
 
         setBlockingError(undefined);
-        if (!dataView || !savedSearch.searchSource || !isDocumentViewMode) {
+        if (!dataView || !savedSearch.searchSource || isAggregatedViewMode) {
           return;
         }
 
