@@ -23,7 +23,7 @@ import { useHasActiveConversation } from '../../../../../hooks/use_conversation'
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { RobotIcon } from '../../../../common/icons/robot';
-import { useSelectorListStyles } from '../input_actions.styles';
+import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
 import { SelectorListHeader } from '../selector_list_header';
@@ -139,11 +139,15 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     selectedAgentId: selectedAgent?.id,
   });
   const selectorListStyles = css`
-    ${useSelectorListStyles({ listId: agentListId, withHeader: true })}
+    ${useSelectorListStyles({ listId: agentListId })}
     &#${agentListId} .euiSelectableListItem {
       align-items: flex-start;
     }
   `;
+
+  const listItemsHeight = agentOptions.length * AGENT_OPTION_ROW_HEIGHT;
+  // Calculate height based on item count, capped at max rows
+  const listHeight = Math.min(listItemsHeight, getMaxListHeight({ withHeader: true }));
 
   return (
     <EuiPopover
@@ -178,6 +182,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         renderOption={(option, searchValue) =>
           renderAgentOption({ agent: option.agent, searchValue })
         }
+        height={listHeight}
         listProps={{
           id: agentListId,
           isVirtualized: true,

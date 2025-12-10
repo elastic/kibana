@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useSelectorListStyles } from '../input_actions.styles';
+import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
 
 const selectableAriaLabel = i18n.translate(
@@ -40,6 +40,7 @@ const defaultConnectorLabel = i18n.translate(
 
 const connectorSelectId = 'agentBuilderConnectorSelect';
 const connectorListId = `${connectorSelectId}_listbox`;
+const CONNECTOR_OPTION_ROW_HEIGHT = 32;
 
 const ConnectorPopoverButton: React.FC<{
   isPopoverOpen: boolean;
@@ -157,7 +158,10 @@ export const ConnectorSelector: React.FC<{}> = () => {
     }
   }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
 
-  const selectorListStyles = useSelectorListStyles({ listId: connectorListId, withHeader: false });
+  const selectorListStyles = useSelectorListStyles({ listId: connectorListId });
+  const listItemsHeight = connectorOptions.length * CONNECTOR_OPTION_ROW_HEIGHT;
+  // Calculate height based on item count, capped at max rows
+  const listHeight = Math.min(listItemsHeight, getMaxListHeight({ withHeader: false }));
 
   return (
     <EuiPopover
@@ -199,7 +203,12 @@ export const ConnectorSelector: React.FC<{}> = () => {
             />
           );
         }}
-        listProps={{ id: connectorListId, css: selectorListStyles }}
+        height={listHeight}
+        listProps={{
+          id: connectorListId,
+          css: selectorListStyles,
+          rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
+        }}
       >
         {(list) => <div>{list}</div>}
       </EuiSelectable>
