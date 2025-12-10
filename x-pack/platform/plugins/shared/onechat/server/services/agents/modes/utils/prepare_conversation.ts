@@ -115,7 +115,7 @@ const prepareRoundInput = async ({
     );
   }
   return {
-    message: input.message,
+    message: input.message ?? '',
     attachments,
   };
 };

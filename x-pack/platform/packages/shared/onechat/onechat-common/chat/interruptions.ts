@@ -22,8 +22,25 @@ export interface InterruptDataMap {
 
 export type InterruptDataOfType<T extends AgentInterruptType> = InterruptDataMap[T];
 
-export interface InterruptRequest<IType extends AgentInterruptType = AgentInterruptType> {
+export interface InterruptRequestMixin<IType extends AgentInterruptType = AgentInterruptType> {
   type: IType;
   data: InterruptDataOfType<IType>;
   state: Record<string, unknown>;
+}
+
+export type ConfirmInterruptRequest = InterruptRequestMixin<AgentInterruptType.confirm>;
+
+// only one subtype for now
+export type InterruptRequest = ConfirmInterruptRequest;
+
+export const isConfirmInterruptRequest = (
+  request: InterruptRequest
+): request is ConfirmInterruptRequest => {
+  return request.type === AgentInterruptType.confirm;
+};
+
+export interface ToolInterruption {
+  type: 'tool';
+  toolId: string;
+  toolCallId: string;
 }

@@ -17,6 +17,7 @@ import type {
   ScopedRunner,
   ToolProvider,
   ToolResultStore,
+  ToolInterruptManager,
 } from '../runner';
 
 /**
@@ -104,4 +105,8 @@ export interface ToolHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Service used to send and read interruptions.
+   */
+  interrupts: ToolInterruptManager;
 }

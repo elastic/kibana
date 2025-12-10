@@ -73,6 +73,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachmentsService: attachments,
   });
 
+  /////
+  console.log('*** runAgent', nextInput);
+  throw new Error('dev mode');
+  /////
+
   const selectedTools = await selectTools({
     conversation: processedConversation,
     toolProvider,

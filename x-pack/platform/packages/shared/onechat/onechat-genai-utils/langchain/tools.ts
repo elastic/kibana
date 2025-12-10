@@ -115,9 +115,10 @@ export const toolToLangchain = async ({
 
   return toTool(
     async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {
+      const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
+
       let onEvent: ToolEventHandlerFn | undefined;
       if (sendEvent) {
-        const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
         const convertEvent = getToolEventConverter({ toolCallId });
         onEvent = (event) => {
           sendEvent(convertEvent(event));
@@ -129,7 +130,7 @@ export const toolToLangchain = async ({
 
       try {
         logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
-        const toolReturn = await tool.execute({ toolParams: input, onEvent });
+        const toolReturn = await tool.execute({ toolParams: input, onEvent, toolCallId });
         const content = JSON.stringify({ results: toolReturn.results });
         logger.debug(`Tool ${tool.id} returned reply of length ${content.length}`);
         return [content, toolReturn];

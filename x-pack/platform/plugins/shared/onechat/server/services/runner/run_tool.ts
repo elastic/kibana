@@ -122,9 +122,17 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent } = toolExecutionParams;
-  const { request, elasticsearch, spaces, modelProvider, toolsService, resultStore, logger } =
-    manager.deps;
+  const { onEvent, toolCallId } = toolExecutionParams;
+  const {
+    request,
+    elasticsearch,
+    spaces,
+    modelProvider,
+    toolsService,
+    resultStore,
+    logger,
+    interruptManager,
+  } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
     request,
@@ -138,6 +146,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
       request,
     }),
+    interrupts: interruptManager.forToolCallId(toolCallId),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
