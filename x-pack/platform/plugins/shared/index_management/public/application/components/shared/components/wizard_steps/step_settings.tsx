@@ -22,10 +22,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 
-import { LOOKUP_INDEX_MODE, indexModeLabels } from '../../../../../../common/constants';
+import { LOOKUP_INDEX_MODE } from '../../../../../../common/constants';
 import { Forms, isJSON } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 import { documentationService } from '../../../mappings_editor/shared_imports';
+import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import type { IndexMode } from '../../../../../../common/types';
 
 interface Props {

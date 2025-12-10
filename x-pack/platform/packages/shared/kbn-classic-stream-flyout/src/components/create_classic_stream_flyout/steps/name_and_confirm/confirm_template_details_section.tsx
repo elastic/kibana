@@ -25,7 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
-import { indexModeLabels } from '@kbn/index-management-plugin/common/constants';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import {
   formatDataRetention,
@@ -228,7 +227,7 @@ export const ConfirmTemplateDetailsSection = ({
       title: i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.indexModeLabel', {
         defaultMessage: 'Index mode',
       }),
-      description: indexModeLabels[indexMode],
+      description: indexMode.charAt(0).toUpperCase() + indexMode.slice(1),
     });
 
     // Retention - ILM policy or data retention

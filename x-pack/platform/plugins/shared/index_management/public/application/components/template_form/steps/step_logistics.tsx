@@ -42,9 +42,8 @@ import {
   TIME_SERIES_MODE,
   LOGSDB_INDEX_MODE,
   LOOKUP_INDEX_MODE,
-  indexModeLabels,
-  indexModeDescriptions,
 } from '../../../../../common/constants';
+import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });

@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataStreamOptions } from '../../../../../common/types/data_streams';
-import { allowAutoCreateRadioIds, indexModeLabels } from '../../../../../common/constants';
+import { indexModeLabels } from '../../../lib/index_mode_labels';
+import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';

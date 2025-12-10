@@ -35,7 +35,7 @@ import {
 } from '@elastic/eui';
 
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
-import { indexModeLabels } from '../../../../../../common/constants';
+import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { getLifecycleValue, getRetentionPeriod } from '../../../../lib/data_streams';
 import { SectionLoading } from '../../../../../shared_imports';
