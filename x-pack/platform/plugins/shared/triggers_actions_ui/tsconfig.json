@@ -92,7 +92,8 @@
     "@kbn/discover-utils",
     "@kbn/react-query",
     "@kbn/router-utils",
-    "@kbn/maintenance-windows-plugin"
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/shared-ux-page-kibana-template"
   ],
   "exclude": ["target/**/*"]
 }

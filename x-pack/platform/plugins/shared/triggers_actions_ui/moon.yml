@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/router-utils'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/shared-ux-page-kibana-template'
 tags:
   - plugin
   - prod
