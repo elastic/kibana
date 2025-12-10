@@ -33,18 +33,16 @@ export function QuickFilters({
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.appliedFilters$
-      .pipe(skip(1))
-      .subscribe((newFilters = []) => {
-        if (newFilters.length === 0) {
-          onStateChange({ tagsFilter: undefined, statusFilter: undefined });
-        } else {
-          onStateChange({
-            tagsFilter: newFilters.filter((filter) => filter.meta.key === 'slo.tags')?.[0],
-            statusFilter: newFilters.filter((filter) => filter.meta.key === 'status')?.[0],
-          });
-        }
-      });
+    const subscription = controlGroupAPI.filters$.pipe(skip(1)).subscribe((newFilters = []) => {
+      if (newFilters.length === 0) {
+        onStateChange({ tagsFilter: undefined, statusFilter: undefined });
+      } else {
+        onStateChange({
+          tagsFilter: newFilters.filter((filter) => filter.meta.key === 'slo.tags')?.[0],
+          statusFilter: newFilters.filter((filter) => filter.meta.key === 'status')?.[0],
+        });
+      }
+    });
     return () => {
       subscription.unsubscribe();
     };

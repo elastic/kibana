@@ -23,7 +23,7 @@ export const getControlGroupMock = () => {
     updateInput: jest.fn(),
     getInput$: getInput$Mock,
     openAddDataControlFlyout: jest.fn(),
-    appliedFilters$: controlGroupFilterOutputMock$,
+    filters$: controlGroupFilterOutputMock$,
     setChainingSystem: jest.fn(),
     getInput: jest.fn(),
   };
