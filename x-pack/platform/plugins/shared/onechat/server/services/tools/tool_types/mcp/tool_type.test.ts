@@ -293,7 +293,7 @@ describe('MCP tool_type', () => {
         expect(schema).toBe(mockZodSchema);
       });
 
-      it('should fall back to passthrough schema when saved object not found', async () => {
+      it('should throw error when saved object not found', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
@@ -303,14 +303,12 @@ describe('MCP tool_type', () => {
 
         mockSavedObjectsClient.get.mockRejectedValue(new Error('Saved object not found'));
 
-        const schema = await dynamicProps.getSchema();
-
-        // Verify it's a passthrough schema by checking its structure
-        expect(schema._def.typeName).toBe('ZodObject');
-        expect(schema._def.unknownKeys).toBe('passthrough');
+        await expect(dynamicProps.getSchema()).rejects.toThrow(
+          `Failed to retrieve input schema for MCP tool 'test_tool' from connector 'test-connector-id'`
+        );
       });
 
-      it('should fall back to passthrough schema when tool not found in saved object', async () => {
+      it('should throw error when tool not found in saved object', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
@@ -332,14 +330,13 @@ describe('MCP tool_type', () => {
           references: [],
         });
 
-        const schema = await dynamicProps.getSchema();
-
+        await expect(dynamicProps.getSchema()).rejects.toThrow(
+          `Failed to retrieve input schema for MCP tool 'test_tool' from connector 'test-connector-id'`
+        );
         expect(mockJsonSchemaToZod).not.toHaveBeenCalled();
-        expect(schema._def.typeName).toBe('ZodObject');
-        expect(schema._def.unknownKeys).toBe('passthrough');
       });
 
-      it('should fall back to passthrough schema when jsonSchemaToZod throws', async () => {
+      it('should throw error when jsonSchemaToZod fails', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
@@ -366,11 +363,10 @@ describe('MCP tool_type', () => {
           throw new Error('Invalid JSON Schema');
         });
 
-        const schema = await dynamicProps.getSchema();
-
+        await expect(dynamicProps.getSchema()).rejects.toThrow(
+          `Failed to convert JSON Schema to Zod for MCP tool 'test_tool': Invalid JSON Schema`
+        );
         expect(mockJsonSchemaToZod).toHaveBeenCalledWith(malformedSchema);
-        expect(schema._def.typeName).toBe('ZodObject');
-        expect(schema._def.unknownKeys).toBe('passthrough');
       });
     });
 

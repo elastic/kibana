@@ -6,3 +6,4 @@
  */
 
 export { getMcpToolType } from './tool_type';
+export { getMcpToolDescription } from './get_mcp_tool_description';

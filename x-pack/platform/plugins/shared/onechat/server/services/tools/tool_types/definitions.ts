@@ -30,6 +30,21 @@ export interface ToolTypeDefinition<
   updateSchema: ObjectType;
   validateForCreate: ToolTypeCreateValidator<TConfig>;
   validateForUpdate: ToolTypeUpdateValidator<TConfig>;
+
+/**
+ * Optional hook to auto-populate the tool description at creation time.
+ *
+ * If implemented, this hook is called when the user doesn't provide a description,
+ * allowing the tool type to fetch one from an external source (e.g., MCP tools
+ * fetch from the MCP server's tool definition).
+ *
+ * Tool types without an external description source should not implement this hook.
+ * In that case, tools created without a description will have an empty description.
+ */
+  getAutoDescription?: (
+    config: TConfig,
+    context: ToolTypeValidatorContext
+  ) => MaybePromise<string | undefined>;
 }
 
 /**

@@ -19,6 +19,7 @@ import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
+import { getMcpToolDescription } from './get_mcp_tool_description';
 
 /**
  * Retrieves the input schema for a specific MCP tool from the saved object.
@@ -37,7 +38,7 @@ async function getMcpToolInputSchema(
     const tool = toolsSO.attributes.tools.find((t) => t.name === toolName);
     return tool?.inputSchema;
   } catch (error) {
-    // Saved object not found or other error - return undefined to fall back to passthrough schema
+    // Saved object not found or other error - return undefined so getSchema will throw
     return undefined;
   }
 }
@@ -228,6 +229,14 @@ export const getMcpToolType = (): ToolTypeDefinition<
       });
 
       return mergedConfig;
+    },
+
+    getAutoDescription: async (config, { savedObjectsClient }) => {
+      return getMcpToolDescription(
+        savedObjectsClient,
+        config.connector_id,
+        config.tool_name
+      );
     },
   };
 };
