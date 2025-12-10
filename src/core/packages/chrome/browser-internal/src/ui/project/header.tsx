@@ -230,6 +230,7 @@ export const ProjectHeader = ({
     box-shadow: none !important;
     background-color: ${euiTheme.colors.backgroundTransparent};
     border-bottom-color: ${euiTheme.colors.backgroundTransparent};
+    padding-inline: 4px 8px;
   `;
 
   return (
