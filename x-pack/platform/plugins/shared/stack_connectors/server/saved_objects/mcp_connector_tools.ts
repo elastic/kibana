@@ -39,7 +39,6 @@ export const mcpConnectorToolsType: SavedObjectsType<McpConnectorToolsAttributes
       },
       tools: {
         type: 'object',
-        enabled: false,
       },
       createdAt: {
         type: 'date',
@@ -60,7 +59,6 @@ export const mcpConnectorToolsType: SavedObjectsType<McpConnectorToolsAttributes
             },
             tools: {
               type: 'object',
-              enabled: false,
             },
             createdAt: {
               type: 'date',
