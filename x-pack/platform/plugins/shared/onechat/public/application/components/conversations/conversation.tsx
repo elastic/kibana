@@ -26,7 +26,6 @@ import {
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
-import { useConversationContext } from '../../context/conversation/conversation_context';
 
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
@@ -35,7 +34,6 @@ export const Conversation: React.FC<{}> = () => {
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
-  const { isEmbeddedContext } = useConversationContext();
 
   useSendPredefinedInitialMessage();
 
@@ -78,9 +76,10 @@ export const Conversation: React.FC<{}> = () => {
     min-height: 0;
   `;
 
+  // TODO: Add custom mask for overflow scroll top and bottom
   const scrollableStyles = css`
     ${useEuiScrollBar()}
-    ${useEuiOverflowScroll('y', isEmbeddedContext ? false : true)}
+    ${useEuiOverflowScroll('y')}
   `;
 
   if (!hasActiveConversation) {
