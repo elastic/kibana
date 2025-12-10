@@ -8,21 +8,19 @@
  */
 
 import { useMemo } from 'react';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_MUTED } from '@kbn/rule-data-utils';
 import type { Alert } from '@kbn/alerting-types';
-import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 export const useAlertMutedState = (alert?: Alert) => {
-  const { mutedAlerts } = useAlertsTableContext();
   const alertInstanceId = alert && (alert[ALERT_INSTANCE_ID]?.[0] as string);
   const ruleId = alert && (alert[ALERT_RULE_UUID]?.[0] as string);
+  const alertMutedValue = alert?.[ALERT_MUTED];
+  const isMuted = Array.isArray(alertMutedValue) && alertMutedValue[0] === true;
   return useMemo(() => {
-    const rule = ruleId ? mutedAlerts?.[ruleId] ?? [] : [];
     return {
-      isMuted: alertInstanceId ? rule?.includes(alertInstanceId) : null,
+      isMuted,
       ruleId,
-      rule,
       alertInstanceId,
     };
-  }, [alertInstanceId, mutedAlerts, ruleId]);
+  }, [alertInstanceId, isMuted, ruleId]);
 };
