@@ -26,6 +26,7 @@ import { checkParamsVersion } from '../../../lib';
 import { type Counters } from '..';
 import type { ReportingCore } from '../../..';
 import type { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
+import { validateJobParams } from './validator';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -119,6 +120,17 @@ export abstract class RequestHandler<
       throw res.customError({
         statusCode: 400,
         body: `invalid rison: ${jobParamsRison}`,
+      });
+    }
+
+    console.log('jobParams:', jobParams);
+
+    try {
+      validateJobParams(jobParams);
+    } catch (err) {
+      throw res.customError({
+        statusCode: 400,
+        body: `invalid params: ${err.message}`,
       });
     }
 
