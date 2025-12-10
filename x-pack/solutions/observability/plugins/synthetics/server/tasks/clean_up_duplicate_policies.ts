@@ -73,7 +73,6 @@ export async function cleanUpDuplicatedPackagePolicies(
 
     const policiesIterator = await fleet.packagePolicyService.fetchAllItemIds(soClient, {
       kuery: packagePoliciesKuery,
-      spaceIds: ['*'],
       perPage: 100,
     });
     const packagePoliciesToDelete: string[] = [];
