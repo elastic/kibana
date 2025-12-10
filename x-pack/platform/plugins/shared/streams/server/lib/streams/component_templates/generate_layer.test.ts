@@ -142,7 +142,6 @@ describe('generateLayer', () => {
                 "type": "alias",
               },
             },
-            "subobjects": false,
           },
           "settings": Object {
             "index": Object {
