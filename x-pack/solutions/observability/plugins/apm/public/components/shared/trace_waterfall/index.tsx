@@ -5,13 +5,14 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { i18n } from '@kbn/i18n';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
@@ -80,6 +81,9 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
+    showAccordion,
+    isAccordionOpen,
+    toggleAccordionOpen,
   } = useTraceWaterfallContext();
 
   return (
@@ -101,6 +105,32 @@ function TraceWaterfallComponent() {
               border-bottom: ${euiTheme.border.thin};
             `}
           >
+            {showAccordion && (
+              <EuiButtonIcon
+                data-test-subj="apmWaterfallButton"
+                size="m"
+                css={css`
+                  position: absolute;
+                  z-index: ${euiTheme.levels.menu};
+                  padding: ${euiTheme.size.m};
+                  width: auto;
+                `}
+                aria-label={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
+                  defaultMessage: 'Click to {isAccordionOpen} the waterfall',
+                  values: {
+                    isAccordionOpen: isAccordionOpen
+                      ? i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.fold', {
+                          defaultMessage: 'fold',
+                        })
+                      : i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.unfold', {
+                          defaultMessage: 'unfold',
+                        }),
+                  },
+                })}
+                iconType={isAccordionOpen ? 'fold' : 'unfold'}
+                onClick={toggleAccordionOpen}
+              />
+            )}
             <TimelineAxisContainer
               xMax={duration}
               margins={{
@@ -135,22 +165,16 @@ function TraceWaterfallComponent() {
 }
 
 function TraceTree() {
-  const { traceWaterfallMap, traceWaterfall, scrollElement } = useTraceWaterfallContext();
+  const {
+    traceWaterfallMap,
+    traceWaterfall,
+    scrollElement,
+    accordionStatesMap,
+    toggleAccordionState,
+  } = useTraceWaterfallContext();
+
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
-  const [accordionStatesMap, setAccordionStateMap] = useState(
-    traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
-      acc[item.id] = 'open';
-      return acc;
-    }, {})
-  );
-
-  function toggleAccordionState(id: string) {
-    setAccordionStateMap((prevStates) => ({
-      ...prevStates,
-      [id]: prevStates[id] === 'open' ? 'closed' : 'open',
-    }));
-  }
 
   const onRowLoad = (index: number, size: number) => {
     rowSizeMapRef.current.set(index, size);
