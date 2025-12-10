@@ -167,6 +167,14 @@ router.get({
 **Key Points for Reviewers:**
 
 1. **Privilege names must follow `<operation>_<subject>` convention**
+   - Incorrect privilege names:
+     - `read-entity-a`: Uses `-` instead of `_`
+     - `delete_entity-a`: Mixes `_` and `-`
+     - `entity_manage`: Places the subject name before the operation
+   - Correct privilege names:
+     - `read_entity_a`
+     - `delete_entity_a`
+     - `manage_entity`
 2. **Routes with privilege-based branching MUST use `request.authzResult`**
 3. **Opt-out routes must have clear, specific reasons with context (not just "Opt out from authorization")**
 
