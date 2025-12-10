@@ -10,7 +10,7 @@ import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-interface WaterfallFoldButtonProps {
+export interface WaterfallFoldButtonProps {
   isOpen: boolean;
   onClick: () => void;
 }
