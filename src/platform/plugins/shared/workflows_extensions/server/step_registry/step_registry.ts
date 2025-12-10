@@ -21,15 +21,14 @@ export class ServerStepRegistry {
    * @param definition - The step definition to register
    * @throws Error if a step with the same ID is already registered
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public register(definition: ServerStepDefinition<any, any>): void {
+  public register<TInput, TOutput>(definition: ServerStepDefinition<TInput, TOutput>): void {
     const stepTypeId = String(definition.id);
     if (this.registry.has(stepTypeId)) {
       throw new Error(
         `Step type "${stepTypeId}" is already registered. Each step type must have a unique identifier.`
       );
     }
-    this.registry.set(stepTypeId, definition);
+    this.registry.set(stepTypeId, definition as ServerStepDefinition);
   }
 
   /**

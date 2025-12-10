@@ -25,8 +25,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if definition for the same step type ID is already registered
    */
   // Accept any input and output types to avoid type inference issues within the plugin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  registerStepDefinition(definition: ServerStepDefinition<any, any>): void;
+  registerStepDefinition<TInput, TOutput>(definition: ServerStepDefinition<TInput, TOutput>): void;
 }
 
 /**
