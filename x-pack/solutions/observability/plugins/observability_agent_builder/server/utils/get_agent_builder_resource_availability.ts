@@ -9,13 +9,13 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/onechat-server';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 
 /**
- * Availability handler for Observability Agent Builder tools.
- * Gates availability to Observability ('oblt') or Classic ('classic') solution spaces.
+ * Availability handler for Observability Agent Builder resources.
+ * Gates availability to Observability or Classic solution spaces.
  * If spaces are unavailable, returns available.
  */
 export async function getAgentBuilderResourceAvailability({
@@ -23,7 +23,10 @@ export async function getAgentBuilderResourceAvailability({
   request,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   request: KibanaRequest;
   logger: Logger;
 }): Promise<ToolAvailabilityResult> {
@@ -35,17 +38,17 @@ export async function getAgentBuilderResourceAvailability({
 
     if (!isAllowedSolution) {
       logger.debug(
-        'Observability agent builder tools are not available in this space, skipping registration.'
+        'Observability agent builder resources are not available in this space, skipping registration.'
       );
 
       return {
         status: 'unavailable',
-        reason: 'Observability tools are not available in this space',
+        reason: 'Observability agent builder resources are not available in this space',
       };
     }
   } catch (error) {
     logger.debug(
-      'Spaces are unavailable, returning available for Observability agent builder tools.'
+      'Spaces are unavailable, returning available for Observability agent builder resources.'
     );
     logger.debug(error);
   }

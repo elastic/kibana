@@ -45,7 +45,7 @@ export class ObservabilityAgentBuilderPlugin
     core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>,
     plugins: ObservabilityAgentPluginSetupDependencies
   ): ObservabilityAgentPluginSetup {
-    registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
+    registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
       this.logger.error(`Error registering observability agent: ${error}`);
     });
 
