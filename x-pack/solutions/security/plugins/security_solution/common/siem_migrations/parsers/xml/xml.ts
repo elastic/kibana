@@ -17,9 +17,12 @@ export interface XmlElement extends BaseXmlElement {
 }
 
 export class XmlParser {
-  constructor(private readonly xml: string) {}
+  constructor(private readonly xml?: string) {}
 
   public async parse(): Promise<XmlElement> {
+    if (!this.xml) {
+      throw new Error('No XML content to parse');
+    }
     return xml2js.parseStringPromise(this.xml, {
       explicitArray: true,
     }) as Promise<XmlElement>;
