@@ -115,11 +115,11 @@ export const ConnectorCommand: GenerateCommand = {
  */
 
 import { z } from '@kbn/zod/v4';
-import type { SingleFileConnectorDefinition } from '../../connector_spec';
+import type { ConnectorSpec } from '../../connector_spec';
 
 export const ${connectorName
       .replace(/[-_](\w)/g, (_, c) => (c ? c.toUpperCase() : ''))
-      .replace(/^\w/, (c) => c.toUpperCase())}: SingleFileConnectorDefinition = {
+      .replace(/^\w/, (c) => c.toUpperCase())}: ConnectorSpec = {
   metadata: {
     id: '${connectorId}',
     displayName: '${connectorName.replace(/[-_]/g, ' ').replace(/^\w/, (c) => c.toUpperCase())}',
@@ -147,6 +147,8 @@ export const ${connectorName
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+/* eslint-disable import/no-default-export */
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
