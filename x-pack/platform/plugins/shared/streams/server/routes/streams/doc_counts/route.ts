@@ -35,7 +35,7 @@ const degradedDocCountsRoute = createServerRoute({
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
-    const streamName = params.query?.stream;
+    const streamName = params?.query?.stream;
 
     return await getDegradedDocCountsForStreams({
       esClient,
@@ -63,7 +63,7 @@ const totalDocCountsRoute = createServerRoute({
   }),
   handler: async ({ getScopedClients, request, server, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
-    const streamName = params.query?.stream;
+    const streamName = params?.query?.stream;
 
     return await getDocCountsForStreams({
       isServerless: server.isServerless,
