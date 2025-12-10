@@ -447,7 +447,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="dataStreamTable"
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"
             defaultMessage="No data streams found"
