@@ -49,21 +49,28 @@ export const MetricsExperienceGrid = ({
 
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
-    onPageReady({
-      meta: {
-        rangeFrom: fetchParams.timeRange?.from,
-        rangeTo: fetchParams.timeRange?.to,
-      },
-      customMetrics: {
-        key1: 'metric_experience_fields_count',
-        value1: allMetricFields.length,
-      },
-    });
-  }, [allMetricFields.length, onPageReady, fetchParams.timeRange?.from, fetchParams.timeRange?.to]);
+    if (!isDiscoverLoading && allMetricFields.length > 0) {
+      onPageReady({
+        meta: {
+          rangeFrom: fetchParams.timeRange?.from,
+          rangeTo: fetchParams.timeRange?.to,
+        },
+        customMetrics: {
+          key1: 'metric_experience_fields_count',
+          value1: allMetricFields.length,
+        },
+      });
+    }
+  }, [
+    allMetricFields.length,
+    onPageReady,
+    fetchParams.timeRange?.from,
+    fetchParams.timeRange?.to,
+    isDiscoverLoading,
+  ]);
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     allMetricFields,
-    visibleMetricFields,
     dimensions,
     renderToggleActions,
     isLoading: isDiscoverLoading,

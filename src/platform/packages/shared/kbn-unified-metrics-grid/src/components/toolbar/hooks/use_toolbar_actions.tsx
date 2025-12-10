@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -20,7 +20,6 @@ import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allMetricFields: MetricField[];
-  visibleMetricFields: MetricField[];
   dimensions: Dimension[];
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
@@ -29,17 +28,12 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
 
 export const useToolbarActions = ({
   allMetricFields,
-  visibleMetricFields,
   dimensions,
   renderToggleActions,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
   isLoading = false,
 }: UseToolbarActionsProps) => {
-  const [indices, setIndices] = useState<string[]>([
-    ...new Set(allMetricFields.map((field) => field.index)),
-  ]);
-
   const {
     selectedDimensions,
     selectedDimensionValues,
