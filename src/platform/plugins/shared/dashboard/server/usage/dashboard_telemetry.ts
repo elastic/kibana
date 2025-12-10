@@ -22,10 +22,10 @@ import type {
   SavedDashboardPanel,
 } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
-import { emptyState, type LatestTaskStateSchema } from './task_state';
-import type { DashboardCollectorData, DashboardSavedObjectInfo } from './types';
+import { emptyState, type WritableLatestTaskStateSchema } from './task_state';
+import type { DashboardSavedObjectInfo } from './types';
 
-export const getEmptyDashboardData = (): DashboardCollectorData => ({
+export const getEmptyDashboardData = (): WritableLatestTaskStateSchema['telemetry'] => ({
   panels: {
     total: 0,
     by_reference: 0,
@@ -48,7 +48,7 @@ export const getEmptyPanelTypeData = () => ({
 
 export const collectPanelsByType = (
   panels: SavedDashboardPanel[],
-  collectorData: DashboardCollectorData,
+  collectorData: WritableLatestTaskStateSchema['telemetry'],
   embeddableService: EmbeddablePersistableStateService
 ) => {
   collectorData.panels.total += panels.length;
@@ -81,13 +81,11 @@ export const collectPanelsByType = (
 
 export const collectDashboardInfo = (
   dashboard: DashboardSavedObjectInfo,
-  collectorData: DashboardCollectorData
+  collectorData: WritableLatestTaskStateSchema['telemetry']
 ) => {
   if (dashboard.accessControl?.accessMode) {
     const mode = dashboard.accessControl.accessMode;
-    if (!collectorData.access_mode[mode]) {
-      collectorData.access_mode[mode] = { total: 0 };
-    }
+    collectorData.access_mode[mode] ??= { total: 0 };
     collectorData.access_mode[mode].total += 1;
   }
   collectorData.sections.total += dashboard.attributes.sections?.length ?? 0;
@@ -96,7 +94,10 @@ export const collectDashboardInfo = (
 
 export const controlsCollectorFactory =
   (embeddableService: EmbeddablePersistableStateService) =>
-  (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
+  (
+    attributes: DashboardSavedObjectAttributes,
+    collectorData: WritableLatestTaskStateSchema['telemetry']
+  ) => {
     if (!isEmpty(attributes.controlGroupInput)) {
       collectorData.controls = embeddableService.telemetry(
         {
@@ -135,7 +136,7 @@ export async function collectDashboardTelemetry(taskManager: TaskManagerStartCon
   const latestTaskState = await getLatestTaskState(taskManager);
 
   if (latestTaskState !== null) {
-    const state = latestTaskState[0].state as LatestTaskStateSchema;
+    const state = latestTaskState[0].state;
     return state.telemetry;
   }
 

@@ -7,38 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupTelemetry } from '@kbn/controls-plugin/server';
 import type { SavedObjectAccessControl, SavedObjectReference } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-
-// TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
-// LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).
-export interface DashboardCollectorData {
-  panels: {
-    total: number;
-    by_reference: number;
-    by_value: number;
-    by_type: {
-      [key: string]: {
-        total: number;
-        by_reference: number;
-        by_value: number;
-        details: {
-          [key: string]: number;
-        };
-      };
-    };
-  };
-  controls: ControlGroupTelemetry;
-  sections: {
-    total: number;
-  };
-  access_mode: {
-    [key: string]: {
-      total: number;
-    };
-  };
-}
 
 export interface DashboardSavedObjectInfo {
   attributes: DashboardSavedObjectAttributes;

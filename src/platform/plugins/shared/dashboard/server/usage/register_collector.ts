@@ -9,14 +9,16 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { DashboardCollectorData } from './types';
 import { collectDashboardTelemetry } from './dashboard_telemetry';
+import type { WritableLatestTaskStateSchema } from './task_state';
 
 export function registerDashboardUsageCollector(
   usageCollection: UsageCollectionSetup,
   getTaskManager: Promise<TaskManagerStartContract>
 ) {
-  const dashboardCollector = usageCollection.makeUsageCollector<DashboardCollectorData>({
+  const dashboardCollector = usageCollection.makeUsageCollector<
+    WritableLatestTaskStateSchema['telemetry']
+  >({
     type: 'dashboard',
     isReady: () => true,
     fetch: async () => {
