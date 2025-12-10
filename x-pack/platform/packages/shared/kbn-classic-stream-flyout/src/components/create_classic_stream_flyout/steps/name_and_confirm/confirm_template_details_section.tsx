@@ -82,12 +82,37 @@ interface ConfirmTemplateDetailsSectionProps {
   getIlmPolicy?: IlmPolicyFetcher;
 }
 
+const useStyles = () => {
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+
+  return {
+    panel: css`
+      padding: ${euiTheme.size.l};
+      border-top: ${euiTheme.border.thin};
+    `,
+    descriptionList: css`
+      row-gap: 16px;
+      column-gap: 16px;
+
+      .euiDescriptionList__title {
+        white-space: nowrap;
+        ${euiFontSize(euiThemeContext, 'xs')}
+      }
+
+      .euiDescriptionList__description {
+        ${euiFontSize(euiThemeContext, 'xs')}
+      }
+    `,
+  };
+};
+
 export const ConfirmTemplateDetailsSection = ({
   template,
   getIlmPolicy,
 }: ConfirmTemplateDetailsSectionProps) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const styles = useStyles();
+  const { euiTheme } = useEuiTheme();
 
   const [ilmPolicy, setIlmPolicy] = useState<PolicyFromES | null>(null);
   const [isLoadingIlmPolicy, setIsLoadingIlmPolicy] = useState(false);
@@ -212,13 +237,8 @@ export const ConfirmTemplateDetailsSection = ({
     return items;
   }, [template, ilmPolicyName, ilmPhases, isLoadingIlmPolicy]);
 
-  const panelStyles = css`
-    padding: ${euiTheme.size.l};
-    border-top: ${euiTheme.border.thin};
-  `;
-
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" css={panelStyles}>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" css={styles.panel}>
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage
@@ -240,19 +260,7 @@ export const ConfirmTemplateDetailsSection = ({
         columnWidths={[1, 3]}
         compressed
         data-test-subj="templateDetails"
-        css={css`
-          row-gap: 16px;
-          column-gap: 16px;
-
-          .euiDescriptionList__title {
-            white-space: nowrap;
-            ${euiFontSize(euiThemeContext, 'xs')}
-          }
-
-          .euiDescriptionList__description {
-            ${euiFontSize(euiThemeContext, 'xs')}
-          }
-        `}
+        css={styles.descriptionList}
       />
     </EuiPanel>
   );
