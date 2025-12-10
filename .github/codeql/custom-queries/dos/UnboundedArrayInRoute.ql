@@ -61,5 +61,5 @@ where
   not arrayCall.hasMaxSize() and
   not isInExcludedFile(arrayCall)
 select arrayCall,
-  "This schema.arrayOf() call does not specify a maxSize. Unbounded input causes Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument."
+  "This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument."
 
