@@ -128,7 +128,7 @@ export const useNewItems = (menuItems: MenuItem[], activeItemId?: string) => {
     }
   }, [menuItems, activeItemId, markAsVisited]);
 
-  const isNewPrimary = useCallback(
+  const getIsNewPrimary = useCallback(
     (itemId: string) => {
       const item = getPrimaryItemById(menuItems, itemId);
       if (!item) return false;
@@ -139,7 +139,7 @@ export const useNewItems = (menuItems: MenuItem[], activeItemId?: string) => {
     [menuItems, newItems, visitedItems]
   );
 
-  const isNewSecondary = useCallback((itemId: string) => newItems.includes(itemId), [newItems]);
+  const getIsNewSecondary = useCallback((itemId: string) => newItems.includes(itemId), [newItems]);
 
-  return { isNewPrimary, isNewSecondary, markAsVisited };
+  return { getIsNewPrimary, getIsNewSecondary, markAsVisited };
 };

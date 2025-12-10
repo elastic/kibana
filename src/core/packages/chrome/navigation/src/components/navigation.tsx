@@ -102,7 +102,7 @@ export const Navigation = ({
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
-  const { isNewPrimary, isNewSecondary, markAsVisited } = useNewItems(
+  const { getIsNewPrimary, getIsNewSecondary, markAsVisited } = useNewItems(
     [...items.primaryItems, ...items.footerItems],
     activeItemId
   );
@@ -153,7 +153,7 @@ export const Navigation = ({
                         isCollapsed={isCollapsed}
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
-                        isNew={isNewPrimary(item.id)}
+                        isNew={getIsNewPrimary(item.id)}
                         onClick={() => handleItemClick(item)}
                         {...itemProps}
                       >
@@ -165,7 +165,7 @@ export const Navigation = ({
                       <SideNav.SecondaryMenu
                         title={item.label}
                         badgeType={item.badgeType}
-                        isNew={isNewSecondary(item.id)}
+                        isNew={getIsNewSecondary(item.id)}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -186,7 +186,7 @@ export const Navigation = ({
                                     key={subItem.id}
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
-                                    isNew={isNewSecondary(subItem.id)}
+                                    isNew={getIsNewSecondary(subItem.id)}
                                     onClick={() => {
                                       handleItemClick(subItem, item);
                                       if (subItem.href) {
@@ -231,7 +231,7 @@ export const Navigation = ({
                       isHighlighted={overflowMenuItems.some(
                         (item) => item.id === visuallyActivePageId
                       )}
-                      isNew={overflowMenuItems.some((item) => isNewPrimary(item.id))}
+                      isNew={overflowMenuItems.some((item) => getIsNewPrimary(item.id))}
                       label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
                         defaultMessage: 'More',
                       })}
@@ -270,7 +270,7 @@ export const Navigation = ({
                                   key={item.id}
                                   aria-describedby={ariaDescribedBy}
                                   isHighlighted={item.id === visuallyActivePageId}
-                                  isNew={isNewSecondary(item.id)}
+                                  isNew={getIsNewSecondary(item.id)}
                                   hasSubmenu={hasSubmenu}
                                   onClick={() => {
                                     handleItemClick(item);
@@ -306,7 +306,7 @@ export const Navigation = ({
                                       key={subItem.id}
                                       isHighlighted={subItem.id === visuallyActiveSubpageId}
                                       isCurrent={actualActiveItemId === subItem.id}
-                                      isNew={isNewSecondary(subItem.id)}
+                                      isNew={getIsNewSecondary(subItem.id)}
                                       onClick={() => {
                                         handleItemClick(subItem, item);
                                         closePopover();
@@ -352,7 +352,7 @@ export const Navigation = ({
                         aria-describedby={ariaDescribedBy}
                         isHighlighted={item.id === visuallyActivePageId}
                         isCurrent={actualActiveItemId === item.id}
-                        isNew={isNewPrimary(item.id)}
+                        isNew={getIsNewPrimary(item.id)}
                         hasContent={getHasSubmenu(item)}
                         onClick={() => handleItemClick(item)}
                         {...itemProps}
@@ -363,7 +363,7 @@ export const Navigation = ({
                       <SideNav.SecondaryMenu
                         title={item.label}
                         badgeType={item.badgeType}
-                        isNew={isNewSecondary(item.id)}
+                        isNew={getIsNewSecondary(item.id)}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -384,7 +384,7 @@ export const Navigation = ({
                                     key={subItem.id}
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
-                                    isNew={isNewSecondary(subItem.id)}
+                                    isNew={getIsNewSecondary(subItem.id)}
                                     onClick={() => {
                                       handleItemClick(subItem, item);
                                       if (subItem.href) {
@@ -423,7 +423,7 @@ export const Navigation = ({
                 badgeType={openerNode.badgeType}
                 isPanel
                 title={openerNode.label}
-                isNew={isNewSecondary(openerNode.id)}
+                isNew={getIsNewSecondary(openerNode.id)}
               >
                 {openerNode.sections?.map((section, sectionIndex) => (
                   <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
@@ -440,7 +440,7 @@ export const Navigation = ({
                           key={subItem.id}
                           isCurrent={actualActiveItemId === subItem.id}
                           isHighlighted={subItem.id === visuallyActiveSubpageId}
-                          isNew={isNewSecondary(subItem.id)}
+                          isNew={getIsNewSecondary(subItem.id)}
                           onClick={() => handleItemClick(subItem, openerNode)}
                           testSubjPrefix={sidePanelItemPrefix}
                           {...subItem}
