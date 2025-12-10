@@ -30,7 +30,7 @@ describe('useLayoutWidth', () => {
 
     renderHook(() => useLayoutWidth({ isCollapsed: false, isSidePanelOpen: true, setWidth }));
 
-    expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH, { isSidePanelOpen: true });
+    expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH);
   });
 
   it('updates when dependencies change', () => {
@@ -47,6 +47,6 @@ describe('useLayoutWidth', () => {
 
     rerender({ isCollapsed: true, isSidePanelOpen: true });
 
-    expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH, { isSidePanelOpen: true });
+    expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH);
   });
 });
