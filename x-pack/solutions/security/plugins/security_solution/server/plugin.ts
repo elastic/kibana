@@ -862,6 +862,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
+        telemetryConfigProvider: this.telemetryConfigProvider,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {
