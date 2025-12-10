@@ -54,7 +54,16 @@ steps:
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label)).toEqual(
-      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'])
+      expect.arrayContaining([
+        'consts',
+        'event',
+        'now',
+        'workflow',
+        'steps',
+        'execution',
+        'inputs',
+        'parent',
+      ])
     );
   });
 
@@ -72,7 +81,17 @@ steps:
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label).sort()).toEqual(
-      ['consts', 'event', 'kibanaUrl', 'now', 'workflow', 'steps', 'execution', 'inputs'].sort()
+      [
+        'consts',
+        'event',
+        'kibanaUrl',
+        'now',
+        'parent',
+        'workflow',
+        'steps',
+        'execution',
+        'inputs',
+      ].sort()
     );
     expect(suggestions.map((s) => s.insertText).sort()).toEqual(
       [
@@ -83,6 +102,7 @@ steps:
         '"{{ inputs$0 }}"',
         '"{{ consts$0 }}"',
         '"{{ now$0 }}"',
+        '"{{ parent$0 }}"',
         '"{{ steps$0 }}"',
       ].sort()
     );
@@ -110,6 +130,7 @@ steps:
         '{{ inputs$0 }}',
         '{{ consts$0 }}',
         '{{ now$0 }}',
+        '{{ parent$0 }}',
         '{{ steps$0 }}',
       ].sort()
     );
@@ -130,7 +151,16 @@ steps:
 
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label)).toEqual(
-      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'])
+      expect.arrayContaining([
+        'consts',
+        'event',
+        'now',
+        'workflow',
+        'steps',
+        'execution',
+        'inputs',
+        'parent',
+      ])
     );
     expect(suggestions.map((s) => s.insertText)).toEqual(
       expect.arrayContaining([expect.not.stringMatching(/^"[^"]*$/)])
@@ -426,6 +456,7 @@ steps:
           'steps',
           'execution',
           'inputs',
+          'parent',
         ])
       );
       // Verify that suggestions include curly braces when not already inside braces
@@ -457,6 +488,7 @@ steps:
           'steps',
           'execution',
           'inputs',
+          'parent',
         ])
       );
     });

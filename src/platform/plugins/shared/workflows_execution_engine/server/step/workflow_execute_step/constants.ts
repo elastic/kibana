@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecutionRepositoryMock } from './workflow_execution_repository.mock';
-export { StepExecutionRepositoryMock } from './step_execution_repository.mock';
-export { LogsRepositoryMock } from './logs_repository.mock';
-export { WorkflowRepositoryMock } from './workflow_repository.mock';
+/**
+ * Polling interval for checking sub-workflow execution status.
+ * When a workflow.execute step is waiting for a sub-workflow to complete,
+ * it will schedule resume tasks at this interval to check the status.
+ */
+export const SUB_WORKFLOW_POLL_INTERVAL = '1s';

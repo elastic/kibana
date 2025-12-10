@@ -21,6 +21,7 @@ import type {
   ExitNormalPathNode,
   ExitRetryNode,
   HttpGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
@@ -60,6 +61,7 @@ import {
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -249,6 +251,37 @@ export class NodesFactory {
           this.connectorExecutor,
           this.workflowRuntime,
           stepLogger
+        );
+      case 'workflow.execute':
+        if (!this.dependencies.workflowsExecutionEngine) {
+          throw new Error('WorkflowsExecutionEngine is not available in dependencies');
+        }
+        if (!this.dependencies.workflowRepository) {
+          throw new Error('WorkflowRepository is not available in dependencies');
+        }
+        if (!this.dependencies.workflowExecutionRepository) {
+          throw new Error('WorkflowExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.stepExecutionRepository) {
+          throw new Error('StepExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.spaceId) {
+          throw new Error('spaceId is not available in dependencies');
+        }
+        if (!this.dependencies.request) {
+          throw new Error('request is not available in dependencies');
+        }
+        return new WorkflowExecuteStepImpl(
+          node as WorkflowExecuteGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          this.dependencies.workflowRepository,
+          this.dependencies.spaceId,
+          this.dependencies.request,
+          this.dependencies.workflowsExecutionEngine,
+          this.dependencies.workflowExecutionRepository,
+          this.dependencies.stepExecutionRepository,
+          this.workflowLogger
         );
       case 'http':
         return new HttpStepImpl(

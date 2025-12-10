@@ -9,6 +9,7 @@
 
 import { stringify, type ToStringOptions } from 'yaml';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { isBuiltInStepType } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getZodTypeName } from '../../../../../common/lib/zod';
 import { isMac } from '../../../../shared/utils/is_mac';
@@ -133,8 +134,8 @@ export function connectorTypeRequiresConnectorId(
   dynamicConnectorTypes?: Record<string, unknown>
 ): boolean {
   // Built-in step types don't need connector-id
-  const builtInStepTypes = ['foreach', 'if', 'parallel', 'merge', 'http', 'wait'];
-  if (builtInStepTypes.includes(connectorType)) {
+  // Use isBuiltInStepType to check against the actual schema definition
+  if (isBuiltInStepType(connectorType)) {
     return false;
   }
 

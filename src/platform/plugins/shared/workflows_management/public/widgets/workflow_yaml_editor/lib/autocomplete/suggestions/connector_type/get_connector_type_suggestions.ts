@@ -16,6 +16,7 @@ import {
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
+  WorkflowExecuteStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -232,6 +233,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
+    },
+    {
+      schema: WorkflowExecuteStepSchema,
+      description: 'Execute another workflow',
+      icon: monaco.languages.CompletionItemKind.Function,
     },
   ];
 

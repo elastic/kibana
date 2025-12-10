@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecutionRepositoryMock } from './workflow_execution_repository.mock';
-export { StepExecutionRepositoryMock } from './step_execution_repository.mock';
-export { LogsRepositoryMock } from './logs_repository.mock';
-export { WorkflowRepositoryMock } from './workflow_repository.mock';
+export { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
+export { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
+export { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
+export { SUB_WORKFLOW_POLL_INTERVAL } from './constants';

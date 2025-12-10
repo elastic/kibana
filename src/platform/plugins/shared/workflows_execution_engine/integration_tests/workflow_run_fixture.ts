@@ -137,6 +137,7 @@ export class WorkflowRunFixture {
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       dependencies: this.dependencies,
+      workflowsExecutionEngine: (this.dependencies as any).workflowsExecutionEngine,
     });
   }
 

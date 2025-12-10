@@ -25,6 +25,12 @@ export function buildWorkflowContext(
     workflowExecution.id
   );
 
+  // Extract parent workflow information from context if available
+  const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;
+  const parentWorkflowExecutionId = workflowExecution.context?.parentWorkflowExecutionId as
+    | string
+    | undefined;
+
   return {
     execution: {
       id: workflowExecution.id,
@@ -43,5 +49,12 @@ export function buildWorkflowContext(
     event: workflowExecution.context?.event,
     inputs: workflowExecution.context?.inputs,
     now: new Date(),
+    parent:
+      parentWorkflowId && parentWorkflowExecutionId
+        ? {
+            workflowId: parentWorkflowId,
+            executionId: parentWorkflowExecutionId,
+          }
+        : undefined,
   };
 }
