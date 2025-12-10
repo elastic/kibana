@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -17,16 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  AIAssistantType,
-  AIChatExperience,
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-} from '@kbn/ai-assistant-management-plugin/public';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import { TourCallout } from './tour_callout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useAIAgentTourDismissed } from '../../hooks/use_ai_agent_tour_dismissed';
+import { useAgentBuilderOptIn } from '../../hooks/use_agent_builder_opt_in';
 
 interface AIAgentTourCalloutProps {
   children: ReactElement;
@@ -39,87 +34,31 @@ export const AIAgentTourCallout = ({
   zIndex,
   isConversationApp = false,
 }: AIAgentTourCalloutProps) => {
-  const {
-    application,
-    notifications,
-    settings,
-    docLinks,
-    plugins: {
-      start: { aiAssistantManagementSelection },
-    },
-  } = useKibana().services;
+  const { application, docLinks } = useKibana().services;
 
-  const canEditAdvancedSettings = Boolean(application?.capabilities?.advancedSettings?.save);
+  const {
+    showAgentBuilderOptInCta,
+    isAgentBuilderConfirmationModalOpen,
+    openAgentBuilderConfirmationModal,
+    closeAgentBuilderConfirmationModal,
+    confirmAgentBuilderOptIn,
+  } = useAgentBuilderOptIn({ navigateFromConversationApp: isConversationApp });
 
   const [dismissed, setDismissed] = useAIAgentTourDismissed();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (!canEditAdvancedSettings || dismissed) {
-      setIsOpen(false);
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      setIsOpen(true);
-    }, 250);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [canEditAdvancedSettings, dismissed]);
 
   const handleSkip = useCallback(() => {
-    setIsOpen(false);
     setDismissed(true);
   }, [setDismissed]);
 
   const handleContinue = useCallback(() => {
-    setIsOpen(false);
-    setIsConfirmModalOpen(true);
-  }, []);
+    openAgentBuilderConfirmationModal();
+  }, [openAgentBuilderConfirmationModal]);
 
-  const handleConfirmAgent = useCallback(async () => {
-    setIsConfirmModalOpen(false);
-    setDismissed(true);
+  const handleCancelInConfirmationModal = useCallback(() => {
+    closeAgentBuilderConfirmationModal();
+  }, [closeAgentBuilderConfirmationModal]);
 
-    try {
-      await Promise.all([
-        settings.client.set(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, AIChatExperience.Agent),
-        settings.client.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default),
-      ]);
-
-      if (isConversationApp) {
-        await application.navigateToApp('observability', { path: '/' });
-      }
-
-      aiAssistantManagementSelection?.openChat?.(AIChatExperience.Agent);
-    } catch (error) {
-      const err = error as any;
-      const message =
-        err?.body?.message || err?.message || 'An unknown error occurred while updating settings';
-
-      notifications?.toasts.addError(new Error(message), {
-        title: i18n.translate('xpack.observabilityAiAssistant.agentTour.errorTitle', {
-          defaultMessage: 'Could not switch to AI Agent experience',
-        }),
-      });
-    }
-  }, [
-    isConversationApp,
-    setDismissed,
-    application,
-    notifications,
-    settings.client,
-    aiAssistantManagementSelection,
-  ]);
-
-  const handleCancelAgent = useCallback(() => {
-    setIsConfirmModalOpen(false);
-  }, []);
-
-  if (!canEditAdvancedSettings || dismissed) {
+  if (dismissed || !showAgentBuilderOptInCta) {
     return children;
   }
 
@@ -178,7 +117,6 @@ export const AIAgentTourCallout = ({
         step={1}
         stepsTotal={1}
         anchorPosition="downLeft"
-        isOpen={isOpen}
         hasArrow
         zIndex={zIndex}
         dismissTour={handleSkip}
@@ -191,21 +129,29 @@ export const AIAgentTourCallout = ({
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={handleContinue} color="success">
-                {i18n.translate('xpack.observabilityAiAssistant.agentTour.continueButton', {
-                  defaultMessage: 'Continue',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+            {showAgentBuilderOptInCta ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" onClick={handleContinue} color="success">
+                  {i18n.translate('xpack.observabilityAiAssistant.agentTour.continueButton', {
+                    defaultMessage: 'Continue',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         }
       >
         {children}
       </TourCallout>
 
-      {isConfirmModalOpen && (
-        <AIAgentConfirmationModal onConfirm={handleConfirmAgent} onCancel={handleCancelAgent} />
+      {isAgentBuilderConfirmationModalOpen && (
+        <AIAgentConfirmationModal
+          onConfirm={async () => {
+            setDismissed(true);
+            await confirmAgentBuilderOptIn();
+          }}
+          onCancel={handleCancelInConfirmationModal}
+        />
       )}
     </>
   );

@@ -10,10 +10,9 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { Observable } from 'rxjs';
 import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type {
-  AIAssistantManagementSelectionPluginPublicSetup,
-  AIAssistantManagementSelectionPluginPublicStart,
-} from '@kbn/ai-assistant-management-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -141,13 +140,14 @@ export interface ConfigSchema {
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: {};
   security: SecurityPluginSetup;
-  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
-  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  onechat?: OnechatPluginStart;
+  cloud?: CloudStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}

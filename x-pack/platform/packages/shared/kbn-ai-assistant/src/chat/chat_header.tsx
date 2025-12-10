@@ -281,6 +281,7 @@ export function ChatHeader({
                     connectors={connectors}
                     disabled={licenseInvalid}
                     navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+                    isConversationApp={isConversationApp}
                   />
                 </AIAgentTourCallout>
               </EuiFlexItem>

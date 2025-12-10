@@ -18,10 +18,9 @@
       "dataViews",
       "inference",
       "llmTasks",
-      "productDocBase",
-      "aiAssistantManagementSelection"
+      "productDocBase"
     ],
-    "optionalPlugins": ["cloud", "serverless", "usageCollection"],
+    "optionalPlugins": ["cloud", "serverless", "usageCollection", "onechat", "spaces"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []

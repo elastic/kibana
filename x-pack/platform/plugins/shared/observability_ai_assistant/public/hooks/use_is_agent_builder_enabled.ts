@@ -10,13 +10,27 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
-/**
- * Hook that returns true when the Agent Builder experience is enabled.
- * This requires:
- * - Chat experience set to Agent
- * - Agent Builder capability (RBAC) enabled
- */
-export const useIsAgentBuilderEnabled = (): boolean => {
+export interface UseIsAgentBuilderEnabledResult {
+  /**
+   * True when the Agent Builder experience is enabled for the user.
+   * This requires:
+   * - Chat experience being set to Agent
+   * - Agent Builder capability (RBAC) enabled
+   */
+  isAgentBuilderEnabled: boolean;
+
+  /**
+   * True when the user has the Agent Builder capability (RBAC).
+   */
+  hasAgentBuilderAccess: boolean;
+
+  /**
+   * True when the preferred chat experience is set to Agent.
+   */
+  isAgentChatExperienceEnabled: boolean;
+}
+
+export const useIsAgentBuilderEnabled = (): UseIsAgentBuilderEnabledResult => {
   const [chatExperience] = useUiSetting$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
     AIChatExperience.Classic
@@ -26,7 +40,14 @@ export const useIsAgentBuilderEnabled = (): boolean => {
     application: { capabilities },
   } = useKibana().services;
 
-  const hasAgentBuilderAccess = capabilities?.agentBuilder?.show === true;
+  const agentBuilderCapabilities = capabilities?.agentBuilder;
 
-  return chatExperience === AIChatExperience.Agent && hasAgentBuilderAccess;
+  const hasAgentBuilderAccess = agentBuilderCapabilities?.show === true;
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
+
+  return {
+    isAgentBuilderEnabled: hasAgentBuilderAccess && isAgentChatExperienceEnabled,
+    hasAgentBuilderAccess,
+    isAgentChatExperienceEnabled,
+  };
 };

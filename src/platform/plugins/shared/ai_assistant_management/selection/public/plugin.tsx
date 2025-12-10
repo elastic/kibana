@@ -37,7 +37,6 @@ export interface AIAssistantManagementSelectionPluginPublicSetup {}
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
   openChat$: Observable<AIExperienceSelection>;
-  openChat: (selection: AIExperienceSelection) => void;
   completeOpenChat(): void;
 }
 
@@ -205,7 +204,6 @@ export class AIAssistantManagementPlugin
     return {
       aiAssistantType$: aiAssistantType$.asObservable(),
       openChat$: openChatSubject.asObservable(),
-      openChat: (selection: AIExperienceSelection) => openChatSubject.next(selection),
       completeOpenChat,
     };
   }

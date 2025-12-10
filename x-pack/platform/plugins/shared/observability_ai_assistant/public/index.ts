@@ -145,3 +145,8 @@ export {
 } from './context/observability_ai_assistant_flyout_state_context';
 
 export { useIsAgentBuilderEnabled } from './hooks/use_is_agent_builder_enabled';
+export {
+  useAgentBuilderOptIn,
+  type UseAgentBuilderOptInParams,
+  type UseAgentBuilderOptInResult,
+} from './hooks/use_agent_builder_opt_in';
