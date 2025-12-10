@@ -158,6 +158,28 @@ describe('Region Map Schema', () => {
       expect(() => regionMapStateSchema.validate(input)).toThrow();
     });
 
+    it('throws on missing ems join field', () => {
+      const input: Omit<RegionMapWithoutDefaultsConfig, 'region'> & {
+        region: { operation: 'terms'; fields: string[]; size: number; ems: { boundaries: string } };
+      } = {
+        ...baseRegionMapConfig,
+        metric: {
+          operation: 'average',
+          field: 'bytes',
+        },
+        region: {
+          operation: 'terms',
+          fields: ['location'],
+          size: 5,
+          ems: {
+            boundaries: 'world_countries',
+          },
+        },
+      };
+
+      expect(() => regionMapStateSchema.validate(input)).toThrow();
+    });
+
     it('throw when using term buckets operation in an esql configuration', () => {
       const input: RegionMapWithoutDefaultsConfig = {
         type: 'region_map',
