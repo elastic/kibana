@@ -8,6 +8,7 @@
  */
 
 import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
@@ -37,6 +38,37 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
           (attribute) => 'name' in attribute && attribute.name.name === 'id'
         ) as TSESTree.JSXAttribute;
 
+        const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
+
+        // Check if the id attribute is a JSX expression containing a ternary (ConditionalExpression)
+        // e.g., id={isCollapsed ? 'xpack.foo.collapsed' : 'xpack.foo.expanded'}
+        if (
+          idAttribute &&
+          idAttribute.value &&
+          'expression' in idAttribute.value &&
+          idAttribute.value.expression.type === AST_NODE_TYPES.ConditionalExpression
+        ) {
+          const conditionalExpr = idAttribute.value.expression as TSESTree.ConditionalExpression;
+          const consequent = conditionalExpr.consequent;
+          const alternate = conditionalExpr.alternate;
+
+          // Check if both branches are string literals
+          const consequentValue =
+            'value' in consequent && typeof consequent.value === 'string' && consequent.value;
+          const alternateValue =
+            'value' in alternate && typeof alternate.value === 'string' && alternate.value;
+
+          // If both branches are valid strings starting with the correct prefix, skip reporting
+          if (
+            consequentValue &&
+            alternateValue &&
+            consequentValue.startsWith(`${i18nAppId}.`) &&
+            alternateValue.startsWith(`${i18nAppId}.`)
+          ) {
+            return;
+          }
+        }
+
         const identifier =
           idAttribute &&
           'value' in idAttribute &&
@@ -44,8 +76,6 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
           'value' in idAttribute.value &&
           typeof idAttribute.value.value === 'string' &&
           idAttribute.value.value;
-
-        const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
         // @ts-expect-error upgrade typescript v5.1.6
         const functionDeclaration = sourceCode.getScope(node as TSNode)
           .block as TSESTree.FunctionDeclaration;

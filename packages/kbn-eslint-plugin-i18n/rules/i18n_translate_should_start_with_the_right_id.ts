@@ -8,6 +8,7 @@
  */
 
 import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
@@ -40,14 +41,42 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
         )
           return;
 
+        const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
+
+        // Check if the first argument is a ternary expression (ConditionalExpression)
+        // If so, validate both branches have correct i18n identifiers
+        if (
+          Array.isArray(node.arguments) &&
+          node.arguments.length &&
+          node.arguments[0].type === AST_NODE_TYPES.ConditionalExpression
+        ) {
+          const conditionalExpr = node.arguments[0] as TSESTree.ConditionalExpression;
+          const consequent = conditionalExpr.consequent;
+          const alternate = conditionalExpr.alternate;
+
+          // Check if both branches are string literals
+          const consequentValue =
+            'value' in consequent && typeof consequent.value === 'string' && consequent.value;
+          const alternateValue =
+            'value' in alternate && typeof alternate.value === 'string' && alternate.value;
+
+          // If both branches are valid strings starting with the correct prefix, skip reporting
+          if (
+            consequentValue &&
+            alternateValue &&
+            consequentValue.startsWith(`${i18nAppId}.`) &&
+            alternateValue.startsWith(`${i18nAppId}.`)
+          ) {
+            return;
+          }
+        }
+
         const identifier =
           Array.isArray(node.arguments) &&
           node.arguments.length &&
           'value' in node.arguments[0] &&
           typeof node.arguments[0].value === 'string' &&
           node.arguments[0].value;
-
-        const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
         // @ts-expect-error upgrade typescript v5.1.6
         const functionDeclaration = sourceCode.getScope(node as TSNode)
           .block as TSESTree.FunctionDeclaration;
