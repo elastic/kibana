@@ -30,4 +30,3 @@ export { getPolicyHelper, getSourcesHelper } from './src/shared/resources_helper
 export { getHoverItem } from './src/hover';
 // Signature help function
 export { getSignatureHelp } from './src/signature_help';
-export type { SignatureHelpItem } from './src/signature_help';

@@ -22,7 +22,7 @@ import { getArgumentToHighlightIndex, getParameterList } from './helpers';
 
 const MAX_PARAM_TYPES_TO_SHOW = 3;
 
-export interface SignatureHelpItem {
+interface SignatureHelpItem {
   signatures: Array<{
     label: string;
     documentation?: string;
