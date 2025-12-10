@@ -13,7 +13,6 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { from, where } from '@kbn/esql-composer';
 import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
-import type { SolutionId } from '@kbn/core-chrome-browser/src/project_navigation';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import {
@@ -82,7 +81,6 @@ export function TracesInDiscoverCallout() {
   );
 
   const currentSolutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
-  const obltSolutionId: SolutionId = 'oblt';
 
   const discoverHref = useMemo(() => {
     if (!tracesIndex) return undefined;
@@ -97,7 +95,7 @@ export function TracesInDiscoverCallout() {
     });
   }, [share.url.locators, tracesIndex, environment, rangeFrom, rangeTo]);
 
-  if (dismissedCallout || !discoverHref || currentSolutionNavId !== obltSolutionId) {
+  if (dismissedCallout || !discoverHref || currentSolutionNavId !== 'oblt') {
     return null;
   }
 
