@@ -120,20 +120,3 @@ export function parseRestoreStatus(recoveryResponse: Record<string, unknown>): R
 
   return { completed: allCompleted && Object.keys(indices).length > 0, failed: anyFailed, indices };
 }
-
-export async function deleteIndices({
-  esClient,
-  logger,
-  indexPattern,
-}: {
-  esClient: Client;
-  logger: Logger;
-  indexPattern: string;
-}): Promise<void> {
-  logger.debug(`Deleting indices: ${indexPattern}`);
-  try {
-    await esClient.indices.delete({ index: indexPattern, ignore_unavailable: true });
-  } catch (error) {
-    logger.debug(`Failed to delete indices: ${error}`);
-  }
-}

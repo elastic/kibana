@@ -29,7 +29,7 @@ export async function createTimestampPipeline({
   logger: Logger;
   maxTimestamp: string;
 }): Promise<string> {
-  logger.debug(`Creating timestamp transformationpipeline (max: ${maxTimestamp})`);
+  logger.debug(`Creating timestamp transformation pipeline (max: ${maxTimestamp})`);
 
   try {
     await esClient.ingest.putPipeline({
