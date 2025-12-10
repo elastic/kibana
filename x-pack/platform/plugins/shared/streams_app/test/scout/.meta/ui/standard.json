@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-05T15:42:58.234Z",
-  "sha1": "2741d1358cb9369b8a610566cc62da6cfe7f6293",
+  "lastModified": "2025-12-10T13:16:18.579Z",
+  "sha1": "e2a2a88335a60cae50879d0fede5b0599fb8d592",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -513,7 +513,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 75,
+        "line": 97,
         "column": 7
       }
     },
@@ -527,7 +527,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 83,
+        "line": 105,
         "column": 7
       }
     },
@@ -541,7 +541,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 98,
+        "line": 120,
         "column": 7
       }
     },
@@ -555,7 +555,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 106,
+        "line": 128,
         "column": 7
       }
     },
@@ -569,7 +569,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 121,
+        "line": 143,
         "column": 7
       }
     },
@@ -583,7 +583,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 129,
+        "line": 151,
         "column": 7
       }
     },
@@ -597,7 +597,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 143,
+        "line": 165,
         "column": 7
       }
     },
@@ -1523,7 +1523,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 84,
+        "line": 86,
         "column": 7
       }
     },
@@ -1536,7 +1536,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 101,
+        "line": 103,
         "column": 7
       }
     },
@@ -1549,7 +1549,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 137,
+        "line": 139,
         "column": 7
       }
     },
@@ -1653,7 +1653,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 122,
+        "line": 125,
         "column": 7
       }
     },
@@ -1666,7 +1666,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 156,
+        "line": 159,
         "column": 7
       }
     },
@@ -1680,7 +1680,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 22,
+        "line": 24,
         "column": 7
       }
     },
@@ -1694,7 +1694,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 57,
+        "line": 59,
         "column": 7
       }
     },
@@ -1708,13 +1708,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 70,
+        "line": 72,
         "column": 7
       }
     },
     {
-      "id": "92d7bc6cddf5121-316753192558f23",
-      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names",
+      "id": "92d7bc6cddf5121-d8dbc074e0c1e71",
+      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names verified on the client",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -1722,7 +1722,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 83,
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-615e268c0f49a9b",
+      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names verified on the server",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 118,
         "column": 7
       }
     },
@@ -1736,7 +1750,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 101,
+        "line": 140,
         "column": 7
       }
     },
@@ -1750,7 +1764,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 115,
+        "line": 154,
         "column": 7
       }
     },
@@ -1764,7 +1778,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 128,
+        "line": 167,
         "column": 7
       }
     },
@@ -1778,7 +1792,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 153,
+        "line": 192,
         "column": 7
       }
     },
@@ -1792,7 +1806,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 178,
+        "line": 217,
         "column": 7
       }
     },

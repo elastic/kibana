@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:03:05.925Z",
-  "sha1": "dbd9da4001835c087a2177ee80c997429f8d6e54",
+  "lastModified": "2025-12-10T13:16:14.296Z",
+  "sha1": "f807bf5831e2ff18c1f1ff10507788d06789ff72",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -919,85 +919,85 @@
     {
       "id": "a4680a65c2cc2c2-fcfaa8c15cd7dfa",
       "title": "Cross-compatibility - Operator Coercion eq boolean (strict): true matches boolean true, not string \"true\"",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 20,
-        "column": 12
+        "line": 15,
+        "column": 10
       }
     },
     {
       "id": "a4680a65c2cc2c2-a2234e5ae5852ee",
       "title": "Cross-compatibility - Operator Coercion eq numeric vs string against string doc: both 450 and \"450\" match",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 52,
+        "column": 10
       }
     },
     {
       "id": "a4680a65c2cc2c2-251e507c373d077",
       "title": "Cross-compatibility - Operator Coercion eq numeric vs string against numeric doc: both 450 and \"450\" match",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 100,
-        "column": 12
+        "line": 96,
+        "column": 10
       }
     },
     {
       "id": "a4680a65c2cc2c2-937247eaf4502b7",
       "title": "Cross-compatibility - Operator Coercion contains(\"450\") matches both string and numeric 450",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 141,
+        "column": 10
       }
     },
     {
       "id": "a4680a65c2cc2c2-229918e37bbb2b0",
       "title": "Cross-compatibility - Operator Coercion range (string bounds) matches both numeric 8500 and string '8500'",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 181,
-        "column": 12
+        "line": 177,
+        "column": 10
       }
     },
     {
       "id": "a4680a65c2cc2c2-ce6d65fab3408b2",
       "title": "Cross-compatibility - Operator Coercion range (numeric bounds) matches both numeric 8500 and string \"8500\"",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 221,
-        "column": 12
+        "line": 216,
+        "column": 10
       }
     },
     {
