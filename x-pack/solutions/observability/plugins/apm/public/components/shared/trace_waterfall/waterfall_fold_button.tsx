@@ -31,9 +31,9 @@ export function WaterfallFoldButton({ isOpen, onClick }: WaterfallFoldButtonProp
         width: auto;
       `}
       aria-label={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
-        defaultMessage: 'Click to {action} the waterfall',
+        defaultMessage: 'Click to {isAccordionOpen} the waterfall',
         values: {
-          action: isOpen
+          isAccordionOpen: isOpen
             ? i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.fold', {
                 defaultMessage: 'fold',
               })
