@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type {
-  AWS_ORGANIZATION_ACCOUNT,
-  AWS_SINGLE_ACCOUNT,
-  AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
-} from '@kbn/cloud-security-posture-common';
+  NewPackagePolicy,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+} from '@kbn/fleet-plugin/common';
+import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 import type {
   AWS_SETUP_FORMAT,
@@ -101,7 +99,7 @@ export type AwsSetupFormat =
   | typeof AWS_SETUP_FORMAT.CLOUD_FORMATION
   | typeof AWS_SETUP_FORMAT.MANUAL;
 
-export type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
+export type AwsAccountType = typeof SINGLE_ACCOUNT | typeof ORGANIZATION_ACCOUNT;
 export type AwsCredentialsType =
   | CloudConnectorType
   | 'assume_role'
@@ -140,4 +138,4 @@ export type AzureCredentialsType =
   | 'service_principal_with_client_username_and_password'
   | 'managed_identity';
 
-export type AzureAccountType = typeof AZURE_SINGLE_ACCOUNT | typeof AZURE_ORGANIZATION_ACCOUNT;
+export type AzureAccountType = typeof SINGLE_ACCOUNT | typeof ORGANIZATION_ACCOUNT;
