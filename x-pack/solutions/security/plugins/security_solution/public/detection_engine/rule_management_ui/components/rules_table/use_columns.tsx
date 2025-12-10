@@ -149,12 +149,14 @@ const useRuleSnoozeColumn = (): TableColumn => {
 };
 
 export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
-  const {alertsPrivileges, rulesPrivileges} = useUserPrivileges()
-  const canReadAlerts = alertsPrivileges.alerts.read
-  const canReadExceptions = rulesPrivileges.exceptions.read
-  const landingTab = canReadAlerts ? RuleDetailTabs.alerts
-                  : canReadExceptions ? RuleDetailTabs.exceptions
-                  : RuleDetailTabs.executionResults
+  const { alertsPrivileges, rulesPrivileges } = useUserPrivileges();
+  const canReadAlerts = alertsPrivileges.alerts.read;
+  const canReadExceptions = rulesPrivileges.exceptions.read;
+  const landingTab = canReadAlerts
+    ? RuleDetailTabs.alerts
+    : canReadExceptions
+    ? RuleDetailTabs.exceptions
+    : RuleDetailTabs.executionResults;
 
   return (
     <EuiToolTip content={name} anchorClassName="eui-textTruncate">
