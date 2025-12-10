@@ -169,5 +169,3 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
     description: 'Verifies AlienVault OTX API key',
   },
 };
-
-

@@ -145,5 +145,3 @@ export const ShodanConnector: ConnectorSpec = {
     description: 'Verifies Shodan API key',
   },
 };
-
-

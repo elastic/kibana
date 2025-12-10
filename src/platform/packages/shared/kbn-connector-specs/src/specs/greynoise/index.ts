@@ -138,5 +138,3 @@ export const GreyNoiseConnector: ConnectorSpec = {
     description: 'Verifies GreyNoise API key',
   },
 };
-
-
