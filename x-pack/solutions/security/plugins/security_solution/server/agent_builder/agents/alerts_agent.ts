@@ -8,6 +8,9 @@
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { platformCoreTools } from '@kbn/onechat-common';
+import type { Logger } from '@kbn/logging';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
@@ -15,7 +18,10 @@ import {
 } from '../tools';
 
 export const ALERTS_AGENT_ID = `${internalNamespaces.security}.alerts`;
-export const createAlertsAgent = (): BuiltInAgentDefinition => {
+export const createAlertsAgent = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): BuiltInAgentDefinition => {
   return {
     id: ALERTS_AGENT_ID,
     avatar_icon: 'logoSecurity',
@@ -23,6 +29,12 @@ export const createAlertsAgent = (): BuiltInAgentDefinition => {
     description:
       'Agent specialized in security alert analysis tasks, including alert investigation and security documentation.',
     labels: ['security'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     configuration: {
       instructions: `You are an Agent specialized in security alerts analysis and threat intelligence.`,
       tools: [

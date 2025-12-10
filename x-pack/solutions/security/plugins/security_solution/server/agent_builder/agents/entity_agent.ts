@@ -8,6 +8,9 @@
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { platformCoreTools } from '@kbn/onechat-common';
+import type { Logger } from '@kbn/logging';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
@@ -17,13 +20,22 @@ import {
 
 export const ENTITY_AGENT_ID = `${internalNamespaces.security}.entity`;
 
-export const createEntityAgent = (): BuiltInAgentDefinition => {
+export const createEntityAgent = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): BuiltInAgentDefinition => {
   return {
     id: ENTITY_AGENT_ID,
     avatar_icon: 'logoSecurity',
     name: 'Entity Agent',
     description: 'Agent specialized in security entities including hosts, users, and services.',
     labels: ['security'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     configuration: {
       instructions: `You are an Agent specialized in security entity analysis.`,
       tools: [
