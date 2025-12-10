@@ -76,7 +76,7 @@ function extractFieldsFromNode(node: TinymathAST, fields: Set<string>): void {
  * extractFieldReferences('2 * pi() + 10')
  * // => [] (no field references, only constants and literals)
  */
-export function extractFieldReferences(expression: string): string[] {
+export function extractFieldReferencesFromMathExpression(expression: string): string[] {
   // Parse the expression
   let ast: TinymathAST;
   try {

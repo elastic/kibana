@@ -422,6 +422,104 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     expect(ingestArea).toBeCloseTo(esqlArea, 10);
   });
 
+  // === Function Availability ===
+  // This test validates that ALL supported math functions are available in both
+  // ES|QL and Painless. It serves as a smoke test to catch typos or non-existent functions.
+  apiTest(
+    'should validate all supported functions are available in both transpilers',
+    async ({ testBed, esql }) => {
+      // We test each function with valid inputs to ensure:
+      // 1. The function name is correctly mapped (no typos like ASIIN instead of ASIN)
+      // 2. The function exists in both ES|QL and Painless (Math.xyz)
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          // Basic math functions
+          { action: 'math', expression: 'abs(val)', to: 'r_abs' } as MathProcessor,
+          { action: 'math', expression: 'ceil(val)', to: 'r_ceil' } as MathProcessor,
+          { action: 'math', expression: 'floor(val)', to: 'r_floor' } as MathProcessor,
+          { action: 'math', expression: 'round(val)', to: 'r_round' } as MathProcessor,
+          { action: 'math', expression: 'sqrt(val)', to: 'r_sqrt' } as MathProcessor,
+          { action: 'math', expression: 'cbrt(val)', to: 'r_cbrt' } as MathProcessor,
+          { action: 'math', expression: 'exp(small)', to: 'r_exp' } as MathProcessor,
+          { action: 'math', expression: 'log(val)', to: 'r_log' } as MathProcessor,
+          { action: 'math', expression: 'log_ten(val)', to: 'r_log_ten' } as MathProcessor,
+          { action: 'math', expression: 'pow(small, small)', to: 'r_pow' } as MathProcessor,
+          { action: 'math', expression: 'mod(val, small)', to: 'r_mod' } as MathProcessor,
+          { action: 'math', expression: 'signum(val)', to: 'r_signum' } as MathProcessor,
+          { action: 'math', expression: 'hypot(small, small)', to: 'r_hypot' } as MathProcessor,
+
+          // Trigonometric functions
+          { action: 'math', expression: 'sin(small)', to: 'r_sin' } as MathProcessor,
+          { action: 'math', expression: 'cos(small)', to: 'r_cos' } as MathProcessor,
+          { action: 'math', expression: 'tan(small)', to: 'r_tan' } as MathProcessor,
+
+          // Inverse trigonometric functions
+          { action: 'math', expression: 'asin(ratio)', to: 'r_asin' } as MathProcessor,
+          { action: 'math', expression: 'acos(ratio)', to: 'r_acos' } as MathProcessor,
+          { action: 'math', expression: 'atan(small)', to: 'r_atan' } as MathProcessor,
+          {
+            action: 'math',
+            expression: 'atan_two(small, small)',
+            to: 'r_atan_two',
+          } as MathProcessor,
+
+          // Hyperbolic functions
+          { action: 'math', expression: 'sinh(small)', to: 'r_sinh' } as MathProcessor,
+          { action: 'math', expression: 'cosh(small)', to: 'r_cosh' } as MathProcessor,
+          { action: 'math', expression: 'tanh(small)', to: 'r_tanh' } as MathProcessor,
+
+          // Constants
+          { action: 'math', expression: 'pi()', to: 'r_pi' } as MathProcessor,
+          { action: 'math', expression: 'e()', to: 'r_e' } as MathProcessor,
+          { action: 'math', expression: 'tau()', to: 'r_tau' } as MathProcessor,
+
+          // Comparison operators (return boolean)
+          { action: 'math', expression: 'eq(small, small)', to: 'r_eq' } as MathProcessor,
+          { action: 'math', expression: 'neq(small, val)', to: 'r_neq' } as MathProcessor,
+          { action: 'math', expression: 'lt(small, val)', to: 'r_lt' } as MathProcessor,
+          { action: 'math', expression: 'lte(small, val)', to: 'r_lte' } as MathProcessor,
+          { action: 'math', expression: 'gt(val, small)', to: 'r_gt' } as MathProcessor,
+          { action: 'math', expression: 'gte(val, small)', to: 'r_gte' } as MathProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      // Use values that work for all functions:
+      // - val: 4 (positive, good for sqrt, log, etc.)
+      // - small: 1 (small positive, good for trig, exp)
+      // - ratio: 0.5 (between -1 and 1 for asin/acos)
+      const docs = [{ val: 4, small: 1, ratio: 0.5 }];
+
+      // Test Ingest Pipeline (Painless) - all functions should work
+      await testBed.ingest('ingest-all-functions', docs, processors);
+      const ingestResult = await testBed.getDocsOrdered('ingest-all-functions');
+      expect(ingestResult).toHaveLength(1);
+
+      // Verify a sample of results to confirm functions executed
+      const ingestDoc = ingestResult[0] as Record<string, unknown>;
+      expect(ingestDoc.r_abs).toBe(4);
+      expect(ingestDoc.r_sqrt).toBe(2);
+      expect(ingestDoc.r_signum).toBe(1);
+      expect(ingestDoc.r_pi).toBeCloseTo(Math.PI, 5);
+      expect(ingestDoc.r_tau).toBeCloseTo(2 * Math.PI, 5);
+
+      // Test ES|QL - all functions should work
+      await testBed.ingest('esql-all-functions', docs);
+      const esqlResult = await esql.queryOnIndex('esql-all-functions', query);
+      expect(esqlResult.documentsOrdered).toHaveLength(1);
+
+      // Verify same sample of results
+      const esqlDoc = esqlResult.documentsOrdered[0];
+      expect(esqlDoc.r_abs).toBe(4);
+      expect(esqlDoc.r_sqrt).toBe(2);
+      expect(esqlDoc.r_signum).toBe(1);
+      expect(esqlDoc.r_pi).toBeCloseTo(Math.PI, 5);
+      expect(esqlDoc.r_tau).toBeCloseTo(2 * Math.PI, 5);
+    }
+  );
+
   // === Validation Errors (consistent rejection) ===
   apiTest(
     'should consistently reject unsupported aggregation functions in both transpilers',

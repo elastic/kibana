@@ -36,7 +36,7 @@ describe('processMathProcessor', () => {
       expect(result).toEqual({
         script: {
           lang: 'painless',
-          source: "ctx['total'] = (ctx['price'] * ctx['quantity']);",
+          source: "ctx['total'] = ($('price', null) * $('quantity', null));",
           description: 'Math processor: price * quantity',
         },
       });
@@ -44,10 +44,10 @@ describe('processMathProcessor', () => {
 
     it('should handle all basic operators', () => {
       const expressions = [
-        { expr: 'a + b', expected: "(ctx['a'] + ctx['b'])" },
-        { expr: 'a - b', expected: "(ctx['a'] - ctx['b'])" },
-        { expr: 'a * b', expected: "(ctx['a'] * ctx['b'])" },
-        { expr: 'a / b', expected: "(ctx['a'] / ctx['b'])" },
+        { expr: 'a + b', expected: "($('a', null) + $('b', null))" },
+        { expr: 'a - b', expected: "($('a', null) - $('b', null))" },
+        { expr: 'a * b', expected: "($('a', null) * $('b', null))" },
+        { expr: 'a / b', expected: "($('a', null) / $('b', null))" },
       ];
 
       for (const { expr, expected } of expressions) {
@@ -61,7 +61,7 @@ describe('processMathProcessor', () => {
   });
 
   describe('nested field paths', () => {
-    it('should handle dotted field paths', () => {
+    it('should handle dotted field paths with flat key assignment', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'attributes.price * attributes.quantity',
@@ -71,22 +71,37 @@ describe('processMathProcessor', () => {
       expect(result).toEqual({
         script: {
           lang: 'painless',
+          // Uses flat key assignment to be consistent with $() reading
           source:
-            "ctx['attributes']['total'] = (ctx['attributes']['price'] * ctx['attributes']['quantity']);",
+            "ctx['attributes.total'] = ($('attributes.price', null) * $('attributes.quantity', null));",
           description: 'Math processor: attributes.price * attributes.quantity',
         },
       });
     });
 
-    it('should handle deeply nested paths', () => {
+    it('should handle deeply nested paths with flat key assignment', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'order.item.price * order.item.qty',
         to: 'order.item.total',
       };
       const result = processMathProcessor(processor);
+      // Uses flat key for target to be consistent with $() flexible access
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['order']['item']['total'] = (ctx['order']['item']['price'] * ctx['order']['item']['qty']);"
+        "ctx['order.item.total'] = ($('order.item.price', null) * $('order.item.qty', null));"
+      );
+    });
+
+    it('should not add initialization for non-nested target field', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'price * quantity',
+        to: 'total',
+      };
+      const result = processMathProcessor(processor);
+      // Flat key assignment - no parent initialization needed
+      expect((result.script as Record<string, unknown>).source).toBe(
+        "ctx['total'] = ($('price', null) * $('quantity', null));"
       );
     });
   });
@@ -100,7 +115,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['result'] = Math.abs(ctx['value']);"
+        "ctx['result'] = Math.abs($('value', null));"
       );
     });
 
@@ -112,7 +127,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['std_dev'] = Math.sqrt(ctx['variance']);"
+        "ctx['std_dev'] = Math.sqrt($('variance', null));"
       );
     });
 
@@ -124,7 +139,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['squared'] = Math.pow(ctx['base'], 2);"
+        "ctx['squared'] = Math.pow($('base', null), 2);"
       );
     });
 
@@ -136,7 +151,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded_up'] = Math.ceil(ctx['price']);"
+        "ctx['rounded_up'] = Math.ceil($('price', null));"
       );
     });
 
@@ -148,7 +163,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded_down'] = Math.floor(ctx['price']);"
+        "ctx['rounded_down'] = Math.floor($('price', null));"
       );
     });
 
@@ -160,7 +175,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded'] = Math.round(ctx['price']);"
+        "ctx['rounded'] = Math.round($('price', null));"
       );
     });
 
@@ -172,7 +187,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded'] = (Math.round(ctx['price'] * Math.pow(10, 2)) / Math.pow(10, 2));"
+        "ctx['rounded'] = (Math.round($('price', null) * Math.pow(10, 2)) / Math.pow(10, 2));"
       );
     });
 
@@ -184,7 +199,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['ln_value'] = Math.log(ctx['value']);"
+        "ctx['ln_value'] = Math.log($('value', null));"
       );
     });
 
@@ -196,7 +211,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['log10_value'] = (Math.log(ctx['value']) / Math.log(10));"
+        "ctx['log10_value'] = (Math.log($('value', null)) / Math.log(10));"
       );
     });
 
@@ -210,9 +225,87 @@ describe('processMathProcessor', () => {
         };
         const result = processMathProcessor(processor);
         expect((result.script as Record<string, unknown>).source).toBe(
-          `ctx['result'] = Math.${fn}(ctx['angle']);`
+          `ctx['result'] = Math.${fn}($('angle', null));`
         );
       }
+    });
+
+    it('should transpile inverse trig functions', () => {
+      const functions = ['asin', 'acos', 'atan'];
+      for (const fn of functions) {
+        const processor: MathProcessor = {
+          action: 'math',
+          expression: `${fn}(ratio)`,
+          to: 'angle',
+        };
+        const result = processMathProcessor(processor);
+        expect((result.script as Record<string, unknown>).source).toBe(
+          `ctx['angle'] = Math.${fn}($('ratio', null));`
+        );
+      }
+    });
+
+    it('should transpile atan_two()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'atan_two(y, x)',
+        to: 'heading',
+      };
+      const result = processMathProcessor(processor);
+      expect((result.script as Record<string, unknown>).source).toBe(
+        "ctx['heading'] = Math.atan2($('y', null), $('x', null));"
+      );
+    });
+
+    it('should transpile hyperbolic functions', () => {
+      const functions = ['sinh', 'cosh', 'tanh'];
+      for (const fn of functions) {
+        const processor: MathProcessor = {
+          action: 'math',
+          expression: `${fn}(x)`,
+          to: 'result',
+        };
+        const result = processMathProcessor(processor);
+        expect((result.script as Record<string, unknown>).source).toBe(
+          `ctx['result'] = Math.${fn}($('x', null));`
+        );
+      }
+    });
+
+    it('should transpile signum()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'signum(delta)',
+        to: 'sign',
+      };
+      const result = processMathProcessor(processor);
+      expect((result.script as Record<string, unknown>).source).toBe(
+        "ctx['sign'] = Math.signum($('delta', null));"
+      );
+    });
+
+    it('should transpile log_ten()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'log_ten(bytes)',
+        to: 'magnitude',
+      };
+      const result = processMathProcessor(processor);
+      expect((result.script as Record<string, unknown>).source).toBe(
+        "ctx['magnitude'] = Math.log10($('bytes', null));"
+      );
+    });
+
+    it('should transpile hypot()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'hypot(x, y)',
+        to: 'distance',
+      };
+      const result = processMathProcessor(processor);
+      expect((result.script as Record<string, unknown>).source).toBe(
+        "ctx['distance'] = Math.hypot($('x', null), $('y', null));"
+      );
     });
 
     it('should transpile exp()', () => {
@@ -223,7 +316,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['result'] = Math.exp(ctx['x']);"
+        "ctx['result'] = Math.exp($('x', null));"
       );
     });
 
@@ -235,7 +328,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['side'] = Math.cbrt(ctx['volume']);"
+        "ctx['side'] = Math.cbrt($('volume', null));"
       );
     });
   });
@@ -249,7 +342,19 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['circumference'] = ((ctx['radius'] * 2) * Math.PI);"
+        "ctx['circumference'] = (($('radius', null) * 2) * Math.PI);"
+      );
+    });
+
+    it('should transpile tau()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'radius * tau()',
+        to: 'circumference',
+      };
+      const result = processMathProcessor(processor);
+      expect((result.script as Record<string, unknown>).source).toBe(
+        "ctx['circumference'] = ($('radius', null) * (2 * Math.PI));"
       );
     });
   });
@@ -263,7 +368,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['remainder'] = (ctx['total'] % 10);"
+        "ctx['remainder'] = ($('total', null) % 10);"
       );
     });
   });
@@ -277,7 +382,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['is_cheap'] = (ctx['price'] < 100);"
+        "ctx['is_cheap'] = ($('price', null) < 100);"
       );
     });
 
@@ -289,7 +394,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['is_expensive'] = (ctx['price'] > 100);"
+        "ctx['is_expensive'] = ($('price', null) > 100);"
       );
     });
 
@@ -301,7 +406,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['is_active'] = (ctx['status'] == 1);"
+        "ctx['is_active'] = ($('status', null) == 1);"
       );
     });
 
@@ -313,7 +418,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['is_not_zero'] = (ctx['status'] != 0);"
+        "ctx['is_not_zero'] = ($('status', null) != 0);"
       );
     });
 
@@ -325,7 +430,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['in_budget'] = (ctx['price'] <= 50);"
+        "ctx['in_budget'] = ($('price', null) <= 50);"
       );
     });
 
@@ -337,7 +442,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['passed'] = (ctx['score'] >= 60);"
+        "ctx['passed'] = ($('score', null) >= 60);"
       );
     });
 
@@ -349,7 +454,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['is_expensive'] = (ctx['price'] > 100);"
+        "ctx['is_expensive'] = ($('price', null) > 100);"
       );
     });
   });
@@ -363,7 +468,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['hypotenuse'] = Math.sqrt((Math.pow(ctx['a'], 2) + Math.pow(ctx['b'], 2)));"
+        "ctx['hypotenuse'] = Math.sqrt((Math.pow($('a', null), 2) + Math.pow($('b', null), 2)));"
       );
     });
 
@@ -375,7 +480,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['result'] = Math.ceil(Math.abs(Math.floor(ctx['x'])));"
+        "ctx['result'] = Math.ceil(Math.abs(Math.floor($('x', null))));"
       );
     });
   });
@@ -390,7 +495,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "if (ctx['value'] != null) { ctx['result'] = Math.abs(ctx['value']); }"
+        "if ($('value', null) != null) { ctx['result'] = Math.abs($('value', null)); }"
       );
     });
 
@@ -403,7 +508,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "if (ctx['price'] != null && ctx['quantity'] != null && ctx['tax'] != null) { ctx['total'] = ((ctx['price'] * ctx['quantity']) + ctx['tax']); }"
+        "if ($('price', null) != null && $('quantity', null) != null && $('tax', null) != null) { ctx['total'] = (($('price', null) * $('quantity', null)) + $('tax', null)); }"
       );
     });
 
@@ -416,7 +521,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "if (ctx['attributes']['price'] != null && ctx['attributes']['qty'] != null) { ctx['total'] = (ctx['attributes']['price'] * ctx['attributes']['qty']); }"
+        "if ($('attributes.price', null) != null && $('attributes.qty', null) != null) { ctx['total'] = ($('attributes.price', null) * $('attributes.qty', null)); }"
       );
     });
 
@@ -429,7 +534,7 @@ describe('processMathProcessor', () => {
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['total'] = (ctx['price'] * ctx['quantity']);"
+        "ctx['total'] = ($('price', null) * $('quantity', null));"
       );
     });
 

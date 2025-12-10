@@ -306,6 +306,119 @@ describe('convertMathProcessorToESQL', () => {
       const result = commandsToString(convertMathProcessorToESQL(processor));
       expect(result).toBe('EVAL tangent_value = TAN(angle)');
     });
+
+    // Inverse trigonometric functions
+    it('should transpile asin(): "asin(ratio)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'asin(ratio)',
+        to: 'angle',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL angle = ASIN(ratio)');
+    });
+
+    it('should transpile acos(): "acos(ratio)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'acos(ratio)',
+        to: 'angle',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL angle = ACOS(ratio)');
+    });
+
+    it('should transpile atan(): "atan(slope)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'atan(slope)',
+        to: 'angle',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL angle = ATAN(slope)');
+    });
+
+    it('should transpile atan_two(): "atan_two(y, x)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'atan_two(delta_y, delta_x)',
+        to: 'heading',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL heading = ATAN2(delta_y, delta_x)');
+    });
+
+    // Hyperbolic functions
+    it('should transpile sinh(): "sinh(x)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'sinh(x)',
+        to: 'result',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL result = SINH(x)');
+    });
+
+    it('should transpile cosh(): "cosh(x)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'cosh(x)',
+        to: 'result',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL result = COSH(x)');
+    });
+
+    it('should transpile tanh(): "tanh(x)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'tanh(x)',
+        to: 'result',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL result = TANH(x)');
+    });
+
+    // Additional math functions
+    it('should transpile signum(): "signum(delta)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'signum(delta)',
+        to: 'sign',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL sign = SIGNUM(delta)');
+    });
+
+    it('should transpile log_ten(): "log_ten(bytes)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'log_ten(bytes)',
+        to: 'magnitude',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL magnitude = LOG10(bytes)');
+    });
+
+    it('should transpile hypot(): "hypot(x, y)"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'hypot(delta_x, delta_y)',
+        to: 'distance',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL distance = HYPOT(delta_x, delta_y)');
+    });
+
+    it('should transpile tau(): "radius * tau()"', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'radius * tau()',
+        to: 'circumference',
+      };
+      const result = commandsToString(convertMathProcessorToESQL(processor));
+      expect(result).toBe('EVAL circumference = radius * TAU()');
+    });
   });
 
   describe('variable-arity functions', () => {

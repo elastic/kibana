@@ -9,12 +9,13 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 import { parse } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
 import type { MathProcessor } from '../../../../types/processors';
+import { painlessFieldAccessor, painlessFieldAssignment } from '../../../../types/utils';
 import { conditionToPainless } from '../../../conditions/condition_to_painless';
 import {
   FUNCTION_REGISTRY,
   BINARY_ARITHMETIC_OPERATORS,
   validateMathExpression,
-  extractFieldReferences,
+  extractFieldReferencesFromMathExpression,
 } from '../../shared/math';
 
 /**
@@ -32,19 +33,6 @@ function isTinymathFunction(node: TinymathAST): node is TinymathFunction {
 }
 
 /**
- * Converts a field name to Painless ctx accessor syntax.
- * Handles both simple and nested field paths.
- *
- * @example
- * fieldToPainless('price') -> "ctx['price']"
- * fieldToPainless('order.total') -> "ctx['order']['total']"
- */
-function fieldToPainless(field: string): string {
-  const parts = field.split('.');
-  return parts.map((p, i) => (i === 0 ? `ctx['${p}']` : `['${p}']`)).join('');
-}
-
-/**
  * Converts a TinyMath AST node to Painless expression string.
  */
 function convertTinymathToPainless(node: TinymathAST): string {
@@ -53,9 +41,9 @@ function convertTinymathToPainless(node: TinymathAST): string {
     return String(node);
   }
 
-  // Handle variable (field reference)
+  // Handle variable (field reference) - uses flexible field access for reading
   if (isTinymathVariable(node)) {
-    return fieldToPainless(node.value);
+    return painlessFieldAccessor(node.value);
   }
 
   // Handle function
@@ -117,13 +105,13 @@ function convertTinymathToPainless(node: TinymathAST): string {
  * Builds null check condition for multiple fields.
  *
  * @example
- * buildNullChecks(['price', 'quantity']) -> "ctx['price'] != null && ctx['quantity'] != null"
+ * buildNullChecks(['price', 'quantity']) -> "$('price', null) != null && $('quantity', null) != null"
  */
 function buildNullChecks(fields: string[]): string | null {
   if (fields.length === 0) {
     return null;
   }
-  return fields.map((field) => `${fieldToPainless(field)} != null`).join(' && ');
+  return fields.map((field) => `${painlessFieldAccessor(field)} != null`).join(' && ');
 }
 
 /**
@@ -149,13 +137,13 @@ export function processMathProcessor(
   const ast = parse(processor.expression);
   const painlessExpression = convertTinymathToPainless(ast);
 
-  // Build the assignment statement
-  const targetField = fieldToPainless(processor.to);
+  // Build the assignment statement using flat key notation
+  const targetField = painlessFieldAssignment(processor.to);
   let source = `${targetField} = ${painlessExpression};`;
 
   // Handle ignore_missing: wrap in null checks
   if (processor.ignore_missing === true) {
-    const fields = extractFieldReferences(processor.expression);
+    const fields = extractFieldReferencesFromMathExpression(processor.expression);
     const nullChecks = buildNullChecks(fields);
     if (nullChecks) {
       source = `if (${nullChecks}) { ${source} }`;

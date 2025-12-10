@@ -23,4 +23,4 @@ export { validateMathExpression, getSupportedFunctionNames } from './ast_validat
 export type { ValidationResult } from './ast_validator';
 
 // Field extractor
-export { extractFieldReferences } from './field_extractor';
+export { extractFieldReferencesFromMathExpression } from './field_extractor';

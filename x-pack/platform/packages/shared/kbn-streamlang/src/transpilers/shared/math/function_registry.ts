@@ -43,16 +43,16 @@ export interface FunctionDefinition {
  * 1. Validation: Only functions in this registry are allowed
  * 2. Transpilation: Maps TinyMath AST to target language syntax
  *
- * IMPORTANT: Only functions that exist in TinyMath AND are parseable by its grammar
- * are included here. TinyMath's grammar only allows function names with letters,
- * underscores, and hyphens (no digits), so functions like 'log10' cannot be used.
+ * NAMING: TinyMath grammar allows [a-zA-Z_-]+ for function names (no digits).
+ * For ES|QL functions with digits (like LOG10), we use underscore naming:
+ * - log_ten → LOG10, atan_two → ATAN2
  *
  * Binary operators (add, subtract, multiply, divide) are handled separately
  * in the transpilers as they are the core TinyMath operators.
  */
 export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   // ============================================
-  // Single-argument functions
+  // Single-argument math functions
   // ============================================
   abs: { esql: 'ABS', painless: 'Math.abs', arity: 1 },
   sqrt: { esql: 'SQRT', painless: 'Math.sqrt', arity: 1 },
@@ -60,20 +60,42 @@ export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   ceil: { esql: 'CEIL', painless: 'Math.ceil', arity: 1 },
   floor: { esql: 'FLOOR', painless: 'Math.floor', arity: 1 },
   exp: { esql: 'EXP', painless: 'Math.exp', arity: 1 },
+  signum: { esql: 'SIGNUM', painless: 'Math.signum', arity: 1 },
+
+  // ============================================
+  // Trigonometric functions
+  // ============================================
   sin: { esql: 'SIN', painless: 'Math.sin', arity: 1 },
   cos: { esql: 'COS', painless: 'Math.cos', arity: 1 },
   tan: { esql: 'TAN', painless: 'Math.tan', arity: 1 },
 
+  // Inverse trigonometric functions
+  asin: { esql: 'ASIN', painless: 'Math.asin', arity: 1 },
+  acos: { esql: 'ACOS', painless: 'Math.acos', arity: 1 },
+  atan: { esql: 'ATAN', painless: 'Math.atan', arity: 1 },
+  atan_two: { esql: 'ATAN2', painless: 'Math.atan2', arity: 2 }, // atan2(y, x)
+
+  // Hyperbolic functions
+  sinh: { esql: 'SINH', painless: 'Math.sinh', arity: 1 },
+  cosh: { esql: 'COSH', painless: 'Math.cosh', arity: 1 },
+  tanh: { esql: 'TANH', painless: 'Math.tanh', arity: 1 },
+
   // ============================================
-  // Variable-arity functions (1 or 2 arguments)
+  // Logarithmic functions
+  // ============================================
+  log: { esql: 'LOG', painless: 'Math.log', arity: [1, 2], esqlArgOrder: 'swap' },
+  log_ten: { esql: 'LOG10', painless: 'Math.log10', arity: 1 },
+
+  // ============================================
+  // Variable-arity functions
   // ============================================
   round: { esql: 'ROUND', painless: 'Math.round', arity: [1, 2] },
-  log: { esql: 'LOG', painless: 'Math.log', arity: [1, 2], esqlArgOrder: 'swap' },
 
   // ============================================
   // Two-argument functions
   // ============================================
   pow: { esql: 'POW', painless: 'Math.pow', arity: 2 },
+  hypot: { esql: 'HYPOT', painless: 'Math.hypot', arity: 2 }, // sqrt(x^2 + y^2)
 
   // ============================================
   // Binary operators (rendered as infix: a op b)
@@ -95,6 +117,7 @@ export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   // ============================================
   pi: { esql: 'PI', painless: 'Math.PI', arity: 0, isConstant: true },
   e: { esql: 'E', painless: 'Math.E', arity: 0, isConstant: true },
+  tau: { esql: 'TAU', painless: '(2 * Math.PI)', arity: 0, isConstant: true },
 };
 
 /**

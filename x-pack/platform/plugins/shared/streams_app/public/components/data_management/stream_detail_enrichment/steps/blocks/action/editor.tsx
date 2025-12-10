@@ -50,6 +50,7 @@ import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './pro
 import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
 import { DropProcessorForm } from './drop_document';
+import { MathProcessorForm } from './math';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -143,6 +144,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
               {type === 'grok' && <GrokProcessorForm />}
               {type === 'dissect' && <DissectProcessorForm />}
               {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
+              {type === 'math' && <MathProcessorForm />}
               {type === 'set' && <SetProcessorForm />}
               {type === 'drop_document' && <DropProcessorForm />}
               {!SPECIALISED_TYPES.includes(type) && (

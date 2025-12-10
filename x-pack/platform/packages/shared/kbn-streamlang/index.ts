@@ -16,3 +16,6 @@ export * from './src/conditions/helpers';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
+export { validateMathExpression } from './src/transpilers/shared/math/ast_validator';
+export { getMathExpressionLanguageDocSections } from './src/transpilers/shared/math/docs';
+export { extractFieldReferencesFromMathExpression } from './src/transpilers/shared/math/field_extractor';
