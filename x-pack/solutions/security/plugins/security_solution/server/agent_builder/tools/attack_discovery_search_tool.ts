@@ -67,7 +67,7 @@ export const attackDiscoverySearchTool = (
         }
       },
     },
-    handler: async ({ alertIds }, { request, esClient, logger }) => {
+    handler: async ({ alertIds }, { request, esClient }) => {
       const spaceId = getSpaceIdFromRequest(request);
 
       logger.debug(

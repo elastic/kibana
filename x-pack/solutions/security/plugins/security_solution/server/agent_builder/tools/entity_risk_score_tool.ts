@@ -167,7 +167,7 @@ export const entityRiskScoreTool = (
         }
       },
     },
-    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient, logger }) => {
+    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient }) => {
       const spaceId = getSpaceIdFromRequest(request);
       const alertsIndexPattern = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
       const entityType = identifierType as EntityType;

@@ -85,7 +85,7 @@ export const securityLabsSearchTool = (
         }
       },
     },
-    handler: async ({ query: nlQuery }, { request, esClient, modelProvider, logger, events }) => {
+    handler: async ({ query: nlQuery }, { request, esClient, modelProvider, events }) => {
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {

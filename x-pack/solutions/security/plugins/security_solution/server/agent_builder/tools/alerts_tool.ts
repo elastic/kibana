@@ -81,7 +81,7 @@ export const alertsTool = (
     },
     handler: async (
       { query: nlQuery, index, isCount },
-      { request, esClient, modelProvider, logger, events }
+      { request, esClient, modelProvider, events }
     ) => {
       // Determine the index to use: either explicitly provided or based on the current space
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${getSpaceIdFromRequest(request)}`;
