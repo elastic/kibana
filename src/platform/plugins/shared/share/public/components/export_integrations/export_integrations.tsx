@@ -128,7 +128,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-function ManagedFlyout({
+export function ManagedFlyout({
   exportIntegration,
   intl,
   isDirty,
@@ -185,7 +185,7 @@ function ManagedFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody">
         <EuiFlexGroup direction="column">
           <Fragment>
             {exportIntegration.config.renderLayoutOptionSwitch && (
