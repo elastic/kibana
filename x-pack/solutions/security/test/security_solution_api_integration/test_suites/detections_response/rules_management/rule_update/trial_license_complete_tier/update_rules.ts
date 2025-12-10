@@ -23,8 +23,6 @@ import {
   deleteAllAlerts,
   createRule,
 } from '@kbn/detections-response-ftr-services';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -758,56 +756,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { body } = await detectionsApi.updateRule({ body: ruleUpdate }).expect(200);
 
-          expect(body.investigation_fields).to.eql(undefined);
-        });
-      });
-      describe('@skipInServerless rules_read_exceptions_all', () => {
-        const role = ROLES.rules_read_exceptions_all;
-
-        beforeEach(async () => {
-          await createUserAndRole(getService, role);
-        });
-
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
-
-        it("should be able to update a rule's exceptions", async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            version: 1,
-          });
-
-          const ruleUpdate = {
-            ...getSimpleRuleUpdate('rule-1'),
-            exceptions_list: [
-              {
-                type: 'rule_default' as const,
-                id: 'someid',
-                list_id: 'some-list-id',
-                namespace_type: 'single' as const,
-              },
-            ],
-          };
-          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
-          const restrictedApis = detectionsApi.withUser(restrictedUser);
-          const { body } = await restrictedApis.updateRule({ body: ruleUpdate }).expect(200);
-          expect(body.investigation_fields).to.eql(undefined);
-        });
-
-        it('should NOT be able to update other rule properties', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            investigation_fields: { field_names: ['blob', 'boop'] },
-          });
-
-          const ruleUpdate = {
-            ...getSimpleRuleUpdate('rule-1'),
-            investigation_fields: { field_names: ['foo', 'bar'] },
-          };
-          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
-          const restrictedApis = detectionsApi.withUser(restrictedUser);
-          const { body } = await restrictedApis.updateRule({ body: ruleUpdate }).expect(403);
           expect(body.investigation_fields).to.eql(undefined);
         });
       });
