@@ -440,27 +440,6 @@ function handleStatsByColumnLeafOperation(
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
 
-  // include all the existing commands up to the operating stats command in the cascade operation query
-  editorQuery.ast.commands.slice(0, operatingStatsCommandIndex + 1).forEach((cmd, idx, arr) => {
-    if (idx === arr.length - 1 && cmd.name === 'stats') {
-      const hasAggregates = cmd.args.some(isFunctionExpression);
-
-      if (hasAggregates) {
-        // We know the operating stats command is the last command in the array,
-        // so we modify it into an INLINE STATS command
-        mutate.generic.commands.append(
-          cascadeOperationQuery.ast,
-          synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false })
-        );
-      } else {
-        // if the stats command does not have any aggregates, then we don't want to include it in the cascade operation query
-        return;
-      }
-    } else {
-      mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
-    }
-  });
-
   let operationColumnName = columnNode.definition.name;
 
   let operationColumnNameParamValue;
@@ -480,6 +459,28 @@ function handleStatsByColumnLeafOperation(
 
   const shouldUseMatchPhrase = requiresMatchPhrase(operationColumnName, dataViewFields);
 
+  // include all the existing commands up to the operating stats command in the cascade operation query
+  editorQuery.ast.commands.slice(0, operatingStatsCommandIndex + 1).forEach((cmd, idx, arr) => {
+    if (idx === arr.length - 1 && cmd.name === 'stats') {
+      const hasAggregates = cmd.args.some(isFunctionExpression);
+
+      if (hasAggregates && !shouldUseMatchPhrase) {
+        // We know the operating stats command is the last command in the array,
+        // so we modify it into an INLINE STATS command
+        mutate.generic.commands.append(
+          cascadeOperationQuery.ast,
+          synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false })
+        );
+      } else {
+        // if the stats command does not have any aggregates, or will require a match phrase query,
+        // then we omit the STATS command to simply apply the where command to the query
+        return;
+      }
+    } else {
+      mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+    }
+  });
+
   // build a where command with match expressions for the selected column
   const filterCommand = Builder.command({
     name: 'where',
@@ -493,7 +494,8 @@ function handleStatsByColumnLeafOperation(
             Builder.expression.column({
               args: [Builder.identifier({ name: operationColumnName })],
             }),
-            Number.isNaN(Number(operationValue))
+            Number.isNaN(Number(operationValue)) ||
+            dataViewFields.getByName(operationColumnName)?.type === 'string'
               ? Builder.expression.literal.string(operationValue as string)
               : Builder.expression.literal.integer(Number(operationValue)),
           ]),

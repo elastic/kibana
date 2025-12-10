@@ -365,7 +365,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | INLINE STATS count = COUNT(bytes), average = AVG(memory) BY tags | WHERE MATCH_PHRASE(tags, "some random pattern")'
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(tags, "some random pattern")'
           );
         });
       });
