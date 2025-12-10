@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './logs';
-export * from './traces';
-export * from './apm';
-export * from './metrics';
-export type * from './observability';
+export type * from './types';

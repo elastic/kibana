@@ -8,21 +8,16 @@
  */
 
 import { fieldConstants } from '..';
-import { getLogFieldWithFallback } from './get_log_field_with_fallback';
 import type { LogDocumentOverview } from '../types';
+import { getLogFieldWithFallback } from './get_log_field_with_fallback';
 
 const rankingOrder = [
-  fieldConstants.MESSAGE_FIELD,
-  fieldConstants.ERROR_MESSAGE_FIELD,
-  fieldConstants.EVENT_ORIGINAL_FIELD,
-  fieldConstants.EXCEPTION_MESSAGE_FIELD,
-  fieldConstants.ERROR_EXCEPTION_MESSAGE,
-  fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE,
+  fieldConstants.OTEL_EXCEPTION_TYPE_FIELD,
+  fieldConstants.ERROR_EXCEPTION_TYPE_FIELD,
 ] as const;
 
-export const getMessageFieldWithFallbacks = (
-  doc: Record<string, unknown> | LogDocumentOverview,
-  { includeFormattedValue = false }: { includeFormattedValue?: boolean } = {}
+export const getLogExceptionTypeFieldWithFallback = (
+  doc: Record<string, unknown> | LogDocumentOverview
 ) => {
-  return getLogFieldWithFallback(doc, rankingOrder, { includeFormattedValue });
+  return getLogFieldWithFallback(doc, rankingOrder, { includeOriginalValue: true });
 };

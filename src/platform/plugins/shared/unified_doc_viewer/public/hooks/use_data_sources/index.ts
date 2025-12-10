@@ -8,12 +8,12 @@
  */
 
 import createContainer from 'constate';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 
 type UseDataSourcesParams = DataSources;
 
 export interface DataSources {
-  indexes: TraceIndexes;
+  indexes: ObservabilityIndexes;
 }
 
 const useDataSources = ({ indexes }: UseDataSourcesParams) => {
