@@ -77,7 +77,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       {/* Response Message */}
       <EuiFlexItem grow={false}>
         <EuiFlexItem>
-          <RoundResponse response={response} steps={steps} isLoading={isLoadingCurrentRound} />
+          <RoundResponse
+            hasError={isErrorCurrentRound}
+            response={response}
+            steps={steps}
+            isLoading={isLoadingCurrentRound}
+          />
         </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>

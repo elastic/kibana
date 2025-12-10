@@ -18,9 +18,11 @@ export interface RoundResponseProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
+  hasError: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
+  hasError,
   response: { message },
   steps,
   isLoading,
@@ -43,7 +45,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
         <ChatMessageText content={message} steps={steps} />
       )}
     </EuiFlexItem>
-    {!isLoading && (
+    {!isLoading && !hasError && (
       <EuiFlexItem grow={false}>
         <RoundResponseActions content={message} isVisible />
       </EuiFlexItem>
