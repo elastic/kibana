@@ -39,6 +39,7 @@ import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builde
 import type { DeepLinkId as DataSourcesLink } from '@kbn/deeplinks-data-sources';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
+import type { BadgeType } from '@kbn/core-chrome-navigation';
 
 import type { ChromeNavLink } from './nav_links';
 
@@ -154,9 +155,9 @@ interface NodeDefinitionBase {
   renderAs?: RenderAs;
 
   /**
-   * Sidenav for now supports only 3 types of badges:
+   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
-  badgeType?: 'beta' | 'techPreview' | 'new';
+  badgeType?: BadgeType;
 }
 
 /** @public */
