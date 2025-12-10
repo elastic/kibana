@@ -2697,7 +2697,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.trusted_ancestors',
       {
-        defaultMessage: 'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
+        defaultMessage:
+          'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
       }
     ),
   },
@@ -2707,7 +2708,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.trusted_ancestors',
       {
-        defaultMessage: 'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
+        defaultMessage:
+          'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
       }
     ),
   },
@@ -2717,7 +2719,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.trusted_ancestors',
       {
-        defaultMessage: 'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
+        defaultMessage:
+          'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
       }
     ),
   },
