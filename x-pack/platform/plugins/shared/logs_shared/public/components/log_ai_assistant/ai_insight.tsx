@@ -9,9 +9,8 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { getIsObservabilityAgentEnabled } from '@kbn/observability-agent-builder-plugin/server/utils/get_is_obs_agent_enabled';
 import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/server/attachments/ai_insight';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LogAIAssistantDocument } from './log_ai_assistant';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
 
