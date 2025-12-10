@@ -53,6 +53,7 @@ jest.mock('../api', () => ({
 }));
 
 jest.mock('../../common/service/capabilities', () => ({
+  ...jest.requireActual('../../common/service/capabilities'),
   getMissingCapabilitiesChecker: jest.fn(() => []),
 }));
 
