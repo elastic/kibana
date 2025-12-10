@@ -28,6 +28,7 @@
     "@kbn/ml-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
+    "@kbn/spaces-plugin",
   ],
   "exclude": ["target/**/*"]
 }
