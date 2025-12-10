@@ -32,6 +32,7 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { validateStreamlang } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH } from '../../../../../common/constants';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -386,7 +387,29 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     // validate routing
     const children: Set<string> = new Set();
+    const prefix = this.definition.name + '.';
     for (const routing of this._definition.ingest.wired.routing) {
+      const hasUpperCaseChars = routing.destination !== routing.destination.toLowerCase();
+      if (hasUpperCaseChars) {
+        return {
+          isValid: false,
+          errors: [new Error(`Stream name cannot contain uppercase characters.`)],
+        };
+      }
+      if (routing.destination.length <= prefix.length) {
+        return {
+          isValid: false,
+          errors: [new Error(`Stream name must not be empty.`)],
+        };
+      }
+      if (routing.destination.length > MAX_STREAM_NAME_LENGTH) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(`Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`),
+          ],
+        };
+      }
       if (children.has(routing.destination)) {
         return {
           isValid: false,

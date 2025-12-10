@@ -256,7 +256,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             },
           ]}
           restrictWidth
-          color="primary"
           data-test-subj="queryRulesetDetailHeader"
           rightSideItems={[
             <EuiFlexGroup
