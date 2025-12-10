@@ -129,7 +129,7 @@ export class AttachmentClient {
   > = {
     dashboard: async (id) => {
       try {
-        await this.clients.soClient.get('dashboard', id);
+        await this.clients.soClient.get(attachmentTypeToSavedObjectTypeMap.dashboard, id);
       } catch (error) {
         throw new AttachmentNotFoundError(
           `Dashboard with id "${id}" not found in the current space`
@@ -145,7 +145,7 @@ export class AttachmentClient {
     },
     slo: async (id) => {
       try {
-        await this.clients.soClient.get('slo', id);
+        await this.clients.soClient.get(attachmentTypeToSavedObjectTypeMap.slo, id);
       } catch (error) {
         throw new AttachmentNotFoundError(`SLO with id "${id}" not found in the current space`);
       }

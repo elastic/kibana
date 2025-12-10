@@ -99,6 +99,21 @@ export const attachmentTypeToSavedObjectTypeMap: Record<AttachmentType, string> 
 };
 
 /**
+ * Builds a KQL filter to exclude specific saved object IDs from search results.
+ * The filter uses the format: NOT ({soType}.id:"{soType}:{id1}" OR {soType}.id:"{soType}:{id2}" ...)
+ *
+ * @param soType - The saved object type (e.g., 'dashboard', 'alert')
+ * @param excludeIds - Array of IDs to exclude
+ * @returns KQL filter string or undefined if no IDs to exclude
+ */
+const buildExcludeIdsFilter = (soType: string, excludeIds?: string[]): string | undefined => {
+  if (!excludeIds || excludeIds.length === 0) {
+    return undefined;
+  }
+  return `NOT (${excludeIds.map((id) => `${soType}.id:"${soType}:${id}"`).join(' OR ')})`;
+};
+
+/**
  * Fetches saved objects by IDs for dashboards and SLOs only.
  * Rules use the rule client instead.
  */
@@ -154,49 +169,6 @@ const searchFieldsByType: Record<Extract<AttachmentType, 'dashboard' | 'slo'>, s
 };
 
 /**
- * Paginates through results, filtering out excluded IDs, until we have enough items.
- * This is needed because neither the saved objects client nor the rules client
- * support filtering by ID in the query.
- */
-async function paginateWithExclusion<
-  T extends SavedObject<DashboardSOAttributes | SloSOAttributes> | SanitizedRule
->({
-  limit,
-  excludeIds,
-  fetchPage,
-}: {
-  limit: number;
-  excludeIds?: string[];
-  fetchPage: ({
-    page,
-    perPage,
-  }: {
-    page: number;
-    perPage: number;
-  }) => Promise<{ items: T[]; total: number }>;
-}): Promise<T[]> {
-  const MAX_PAGES = 10;
-  const PAGE_SIZE = 100;
-  const excludeIdsSet = new Set(excludeIds ?? []);
-  const results: T[] = [];
-  let page = 1;
-  let hasMore = true;
-
-  while (results.length < limit && hasMore && page <= MAX_PAGES) {
-    const { items, total } = await fetchPage({ page, perPage: PAGE_SIZE });
-
-    const filteredItems = items.filter((item) => !excludeIdsSet.has(item.id));
-    results.push(...filteredItems);
-
-    const fetchedSoFar = page * PAGE_SIZE;
-    hasMore = fetchedSoFar < total;
-    page++;
-  }
-
-  return results.slice(0, limit);
-}
-
-/**
  * Searches for suggested saved objects for dashboards and SLOs only.
  * Rules use the rule client instead.
  */
@@ -215,43 +187,59 @@ export const getSuggestedSo = async ({
   limit: number;
   excludeIds?: string[];
 }): Promise<AttachmentData[]> => {
+  const soType = attachmentTypeToSavedObjectTypeMap[attachmentType];
+
   const searchOptions: SavedObjectsFindOptions = {
-    type: attachmentType,
+    type: soType,
     search: query ? `${query}*` : undefined,
     searchFields: searchFieldsByType[attachmentType],
     ...(tags
       ? {
-          hasReferenceOperator: 'OR',
+          hasReferenceOperator: 'OR' as const,
           hasReference: tags.map((tag) => ({ type: 'tag', id: tag })),
         }
       : {}),
   };
 
   if (attachmentType === 'dashboard') {
-    const dashboardResults = await paginateWithExclusion({
-      limit,
-      excludeIds,
-      fetchPage: async ({ page, perPage }) => {
-        const result = await soClient.find<DashboardSOAttributes>({
-          ...searchOptions,
-          page,
-          perPage,
-        });
-        return { items: result.saved_objects, total: result.total };
-      },
+    const result = await soClient.find<DashboardSOAttributes>({
+      ...searchOptions,
+      perPage: limit,
+      filter: buildExcludeIdsFilter(soType, excludeIds),
     });
-    return processDashboardResults(dashboardResults);
-  } else {
-    const sloResults = await paginateWithExclusion({
-      limit,
-      excludeIds,
-      fetchPage: async ({ page, perPage }) => {
-        const result = await soClient.find<SloSOAttributes>({ ...searchOptions, page, perPage });
-        return { items: result.saved_objects, total: result.total };
-      },
-    });
-    return processSloResults(sloResults);
+    return processDashboardResults(result.saved_objects);
   }
+
+  // SLOs have an 'id' attribute that shadows the SO _id, preventing KQL filter exclusion.
+  // We need to paginate and filter in memory instead.
+  if (!excludeIds || excludeIds.length === 0) {
+    const result = await soClient.find<SloSOAttributes>({ ...searchOptions, perPage: limit });
+    return processSloResults(result.saved_objects);
+  }
+
+  const MAX_PAGES = 10;
+  const PAGE_SIZE = 100;
+  const excludeIdsSet = new Set(excludeIds);
+  const results: Array<SavedObject<SloSOAttributes>> = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (results.length < limit && hasMore && page <= MAX_PAGES) {
+    const result = await soClient.find<SloSOAttributes>({
+      ...searchOptions,
+      page,
+      perPage: PAGE_SIZE,
+    });
+
+    const filteredItems = result.saved_objects.filter((item) => !excludeIdsSet.has(item.id));
+    results.push(...filteredItems);
+
+    const fetchedSoFar = page * PAGE_SIZE;
+    hasMore = fetchedSoFar < result.total;
+    page++;
+  }
+
+  return processSloResults(results.slice(0, limit));
 };
 
 /**
@@ -270,26 +258,24 @@ export const getSuggestedRules = async ({
   limit: number;
   excludeIds?: string[];
 }): Promise<AttachmentData[]> => {
+  const soType = attachmentTypeToSavedObjectTypeMap.rule;
+
   const tagsFilter =
     tags && tags.length > 0
-      ? tags.map((tag) => `alert.attributes.tags:"${tag}"`).join(' or ')
+      ? tags.map((tag) => `${soType}.attributes.tags:"${tag}"`).join(' OR ')
       : undefined;
 
-  const results = await paginateWithExclusion({
-    limit,
-    excludeIds,
-    fetchPage: async ({ page, perPage }) => {
-      const { data, total } = await rulesClient.find({
-        options: {
-          search: query ? `${query}*` : undefined,
-          page,
-          perPage,
-          ...(tagsFilter ? { filter: tagsFilter } : {}),
-        },
-      });
-      return { items: data, total };
+  // Combine filters with AND
+  const filters = [tagsFilter, buildExcludeIdsFilter(soType, excludeIds)].filter(Boolean);
+  const combinedFilter = filters.length > 0 ? `(${filters.join(') AND (')})` : undefined;
+
+  const { data } = await rulesClient.find({
+    options: {
+      search: query ? `${query}*` : undefined,
+      perPage: limit,
+      ...(combinedFilter ? { filter: combinedFilter } : {}),
     },
   });
 
-  return processRuleResults(results);
+  return processRuleResults(data);
 };
