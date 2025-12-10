@@ -9,12 +9,11 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import type { HttpHandler } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-// import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-plugin/server/attachments/ai_insight';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { getIsObservabilityAgentEnabled } from '@kbn/observability-agent-builder-plugin/server/utils/get_is_obs_agent_enabled';
+import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/server/attachments/ai_insight';
 import type { LogAIAssistantDocument } from './log_ai_assistant';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
-import { createCallApi } from '../../services/call_api';
 
 export function LogEntryAgentBuilderAiInsight({
   doc,
@@ -23,7 +22,9 @@ export function LogEntryAgentBuilderAiInsight({
   doc: LogAIAssistantDocument | undefined;
   onechat?: OnechatPluginStart;
 }) {
-  const { services } = useKibana();
+  const {
+    services: { http, core },
+  } = useKibanaContextForPlugin();
   // const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -32,21 +33,18 @@ export function LogEntryAgentBuilderAiInsight({
 
   const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
 
-  const httpFetch = services?.http?.fetch as HttpHandler;
-  const callApi = createCallApi(httpFetch);
-
   const fetchAiInsights = async () => {
     setIsLoading(true);
     try {
-      const response = await callApi('POST /internal/apm/agent_builder/ai_insight/log', {
-        params: {
-          body: {
+      const response = await http.post<{ summary: string; context: string }>(
+        '/internal/observability_agent_builder/ai_insights/log',
+        {
+          body: JSON.stringify({
             fields: doc?.fields,
             connectorId: lastUsedConnectorId,
-          },
-        },
-        signal: null,
-      });
+          }),
+        }
+      );
       setSummary(response?.summary ?? '');
       setContext(response?.context);
     } catch (e) {
@@ -73,8 +71,7 @@ export function LogEntryAgentBuilderAiInsight({
       },
       {
         id: 'log_entry_ai_insight',
-        // type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-        type: 'observability.ai_insight',
+        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
         getContent: () => ({
           summary,
           context,
@@ -82,11 +79,6 @@ export function LogEntryAgentBuilderAiInsight({
       },
     ];
   }, [summary, context]);
-  // }, [error, onechat, isObservabilityAgentEnabled, summary, context]);
-
-  // if (!onechat || !isObservabilityAgentEnabled || !inference) {
-  //   return <></>;
-  // }
 
   return (
     <>

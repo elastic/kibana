@@ -23,7 +23,7 @@ export const similarLogMessagesTitle = i18n.translate(
 export const explainLogMessageButtonLabel = i18n.translate(
   'xpack.logsShared.logFlyout.explainLogMessageButtonLabel',
   {
-    defaultMessage: 'Explain this log message',
+    defaultMessage: 'Explain this log entry',
   }
 );
 

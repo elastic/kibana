@@ -22,6 +22,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
@@ -37,6 +38,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   security: SecurityPluginSetup;
   ml?: MlPluginSetup;
+  inference?: InferenceServerSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
@@ -48,4 +50,5 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   ml?: MlPluginStart;
+  inference?: InferenceServerStart;
 }

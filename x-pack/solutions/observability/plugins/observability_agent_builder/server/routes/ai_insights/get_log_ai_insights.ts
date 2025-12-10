@@ -7,15 +7,22 @@
 import { MessageRole, type InferenceClient } from '@kbn/inference-common';
 import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
+import type { ServiceSummary } from '../../data_registry/data_registry_types';
 
 export interface GetLogAiInsightsParams {
+  index: string;
+  id: string;
   fields: Record<string, any>;
+  serviceSummary: ServiceSummary;
   inferenceClient: InferenceClient;
   connectorId: string;
 }
 
 export async function getLogAiInsights({
+  index,
+  id,
   fields,
+  serviceSummary,
   inferenceClient,
   connectorId,
 }: GetLogAiInsightsParams): Promise<{ context: string; summary: string }> {
@@ -34,7 +41,11 @@ export async function getLogAiInsights({
       {
         role: MessageRole.User,
         content: dedent`Explain this log message: what it means, where it is from, whether it is expected, and if it is an issue.
-        The log entry is: ${safeJsonStringify(fields)}`,
+        The log entry:
+        - Index: ${index}
+        - ID: ${id}
+        - Fields: ${safeJsonStringify(fields)}
+        - Service Summary: ${safeJsonStringify(serviceSummary)}`,
       },
     ],
     functionCalling: 'auto',
