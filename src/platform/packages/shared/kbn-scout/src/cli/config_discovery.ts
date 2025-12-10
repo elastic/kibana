@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
+import path from 'path';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
-import fs from 'fs';
-import path from 'path';
-import { filterModulesByScoutCiConfig } from '../config/discovery';
 import { tags } from '../playwright/tags';
+import { filterModulesByScoutCiConfig } from '../servers/configs/discovery';
 
 type TargetType = 'all' | 'mki' | 'ech';
 

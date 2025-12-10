@@ -11,7 +11,7 @@ import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import { filterModulesByScoutCiConfig } from '../config/discovery';
+import { filterModulesByScoutCiConfig } from '../servers/configs/discovery';
 import type { ModuleDiscoveryInfo } from './config_discovery';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
 
@@ -23,16 +23,12 @@ jest.mock('@kbn/scout-info', () => ({
 
 let mockTestableModules: ScoutTestableModuleWithConfigs[] = [];
 
-jest.mock('@kbn/scout-reporting/src/registry', () => ({
-  testableModules: {
-    get allIncludingConfigs() {
-      return mockTestableModules;
-    },
-  },
+jest.mock('../servers/configs', () => ({
+  getScoutPlaywrightConfigs: jest.fn(),
 }));
 
-jest.mock('../config/discovery', () => ({
-  filterModulesByScoutCiConfig: jest.fn(),
+jest.mock('../servers/configs/discovery', () => ({
+  validateWithScoutCiConfig: jest.fn(),
 }));
 
 describe('runDiscoverPlaywrightConfigs', () => {
