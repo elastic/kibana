@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ClusterGetSettingsResponse,
-  NodesStatsResponseBase,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { NodesStatsResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
@@ -19,31 +16,6 @@ interface NodeWithLowDiskSpace {
   nodeName: string;
   available: string;
 }
-
-const getLowDiskWatermarkSetting = (
-  clusterSettings: ClusterGetSettingsResponse
-): string | undefined => {
-  const { defaults, persistent, transient } = clusterSettings;
-
-  const defaultLowDiskWatermarkSetting =
-    defaults && defaults['cluster.routing.allocation.disk.watermark.low'];
-  const transientLowDiskWatermarkSetting =
-    transient && transient['cluster.routing.allocation.disk.watermark.low'];
-  const persistentLowDiskWatermarkSetting =
-    persistent && persistent['cluster.routing.allocation.disk.watermark.low'];
-
-  // ES applies cluster settings in the following order of precendence: transient, persistent, default
-  if (transientLowDiskWatermarkSetting) {
-    return transientLowDiskWatermarkSetting;
-  } else if (persistentLowDiskWatermarkSetting) {
-    return persistentLowDiskWatermarkSetting;
-  } else if (defaultLowDiskWatermarkSetting) {
-    return defaultLowDiskWatermarkSetting;
-  }
-
-  // May be undefined if defined in elasticsearch.yml
-  return undefined;
-};
 
 interface NodeWithLowDiskSpace {
   nodeId: string;
@@ -113,18 +85,6 @@ export function registerNodeDiskSpaceRoute({
         const {
           elasticsearch: { client },
         } = await core;
-        const clusterSettings = await client.asCurrentUser.cluster.getSettings({
-          flat_settings: true,
-          include_defaults: true,
-        });
-
-        const lowDiskWatermarkSetting = getLowDiskWatermarkSetting(clusterSettings);
-
-        if (!lowDiskWatermarkSetting) {
-          // If the low disk watermark setting is undefined, send empty array
-          // This could occur if the setting is configured in elasticsearch.yml
-          return response.ok({ body: [] });
-        }
 
         const nodeStats = await client.asCurrentUser.nodes.stats({
           metric: 'fs',
