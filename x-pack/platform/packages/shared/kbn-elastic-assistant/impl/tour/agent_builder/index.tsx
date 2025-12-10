@@ -43,24 +43,24 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
     tourDefaultConfig
   );
 
-  const [showTour, setShowTour] = useState(tourState?.isTourActive && !isDisabled);
-
+  const shouldShowTour = tourState?.isTourActive && !isDisabled;
   const [isTimerExhausted, setIsTimerExhausted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsTimerExhausted(true);
-    }, 1000);
+    if (shouldShowTour) {
+      const timer = setTimeout(() => {
+        setIsTimerExhausted(true);
+      }, 1000);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowTour]);
 
   const finishTour = useCallback(() => {
     setTourState((prev = tourDefaultConfig) => ({
       ...prev,
       isTourActive: false,
     }));
-    setShowTour(false);
   }, [setTourState]);
 
   const handleContinue = useCallback(() => {
@@ -68,21 +68,11 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
     onContinue?.();
   }, [finishTour, onContinue]);
 
-  useEffect(() => {
-    if (isDisabled || !tourState?.isTourActive) {
-      setShowTour(false);
-    } else {
-      setShowTour(true);
-    }
-  }, [tourState, isDisabled]);
-
   if (!children) {
     return null;
   }
 
-  if (!showTour) {
-    return children;
-  }
+  const isStepOpen = shouldShowTour && isTimerExhausted;
 
   return (
     <EuiTourStep
@@ -91,7 +81,7 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
         display: flex;
       `}
       content={<EuiText size="m">{agentBuilderTourStep1.content}</EuiText>}
-      isStepOpen={isTimerExhausted}
+      isStepOpen={isStepOpen}
       maxWidth={384}
       onFinish={finishTour}
       panelProps={{

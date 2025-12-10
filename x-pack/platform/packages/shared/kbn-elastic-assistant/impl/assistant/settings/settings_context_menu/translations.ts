@@ -105,3 +105,10 @@ export const TRY_AI_AGENT = i18n.translate(
     defaultMessage: 'Try AI Agent',
   }
 );
+
+export const AI_AGENT_SWITCH_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsContextMenu.aiAgentSwitchError',
+  {
+    defaultMessage: 'Failed to switch to AI Agent',
+  }
+);
