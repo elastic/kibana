@@ -138,8 +138,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     display: flex;
     flex-direction: column;
     height: 100%;
-    /* Aligns editor text with action menus' text */
-    padding-left: ${euiTheme.size.m};
   `;
   // Hide attachments if there's an error from current round or if message has been just sent
   const shouldHideAttachments = Boolean(error) || isSendingMessage;
