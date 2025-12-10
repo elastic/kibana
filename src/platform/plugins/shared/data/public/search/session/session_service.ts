@@ -299,7 +299,7 @@ export class SessionService {
                   );
                 }),
                 repeat(),
-                takeUntil(pollingError$),
+                takeUntil(pollingError$.pipe(filter((hasError) => hasError))),
                 takeUntil(stopOnFinishedState$)
               );
             };
