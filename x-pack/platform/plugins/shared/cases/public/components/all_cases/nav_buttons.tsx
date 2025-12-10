@@ -42,6 +42,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
     <EuiFlexItem>
       <EuiFlexGroup
         responsive={false}
+        gutterSize="m"
         css={css`
           & {
             @media only screen and (max-width: ${euiTheme.breakpoint.s}) {
