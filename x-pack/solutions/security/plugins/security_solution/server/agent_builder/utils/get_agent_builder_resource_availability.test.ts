@@ -30,7 +30,11 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: undefined,
     });
-    mockCore.getStartServices.mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
+    (mockCore.getStartServices as jest.Mock).mockResolvedValue([
+      {},
+      { spaces: mockSpacesStart },
+      {},
+    ]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -46,7 +50,11 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: 'classic',
     });
-    mockCore.getStartServices.mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
+    (mockCore.getStartServices as jest.Mock).mockResolvedValue([
+      {},
+      { spaces: mockSpacesStart },
+      {},
+    ]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -62,7 +70,11 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: 'security',
     });
-    mockCore.getStartServices.mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
+    (mockCore.getStartServices as jest.Mock).mockResolvedValue([
+      {},
+      { spaces: mockSpacesStart },
+      {},
+    ]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -78,7 +90,11 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: 'oblt',
     });
-    mockCore.getStartServices.mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
+    (mockCore.getStartServices as jest.Mock).mockResolvedValue([
+      {},
+      { spaces: mockSpacesStart },
+      {},
+    ]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -94,7 +110,7 @@ describe('getAgentBuilderResourceAvailability', () => {
   });
 
   it('returns available when spaces service is unavailable', async () => {
-    mockCore.getStartServices.mockResolvedValue([{}, { spaces: undefined }, {}]);
+    (mockCore.getStartServices as jest.Mock).mockResolvedValue([{}, { spaces: undefined }, {}]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -109,7 +125,11 @@ describe('getAgentBuilderResourceAvailability', () => {
     (mockSpacesStart.spacesService.getActiveSpace as jest.Mock).mockRejectedValue(
       new Error('Spaces unavailable')
     );
-    mockCore.getStartServices.mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
+    (mockCore.getStartServices as jest.Mock).mockResolvedValue([
+      {},
+      { spaces: mockSpacesStart },
+      {},
+    ]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
