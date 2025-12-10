@@ -953,7 +953,11 @@ describe('parseRecords', () => {
       const userNode = result.nodes.find((n) => n.label === 'actor1') as EntityNodeDataModel;
       expect(userNode).toBeDefined();
       expect(userNode.documentsData).toEqual([
-        { id: 'actor1', type: 'entity', entity: { ecsParentField: 'user', availableInEntityStore: false } },
+        {
+          id: 'actor1',
+          type: 'entity',
+          entity: { ecsParentField: 'user', availableInEntityStore: false },
+        },
       ]);
 
       const serviceNode = result.nodes.find((n) => n.label === 'target1') as EntityNodeDataModel;
