@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Document, type Range, parseDocument } from 'yaml';
+import { type Document, parseDocument, type Range } from 'yaml';
 import { isSeq } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { TriggerType } from '@kbn/workflows';
@@ -30,7 +30,10 @@ function getTriggersKeyInfo(
 
   const triggersKey = triggersPair.key;
   const triggersKeyRange =
-    typeof triggersKey === 'object' && triggersKey !== null && 'range' in triggersKey && triggersKey.range
+    typeof triggersKey === 'object' &&
+    triggersKey !== null &&
+    'range' in triggersKey &&
+    triggersKey.range
       ? getMonacoRangeFromYamlRange(model, triggersKey.range as Range)
       : null;
 
@@ -44,10 +47,7 @@ function getTriggersKeyInfo(
 /**
  * Creates a replacement range for an empty item line
  */
-function createReplacementRange(
-  model: monaco.editor.ITextModel,
-  lineNumber: number
-): monaco.Range {
+function createReplacementRange(model: monaco.editor.ITextModel, lineNumber: number): monaco.Range {
   const nextLineNumber = lineNumber + 1;
   if (nextLineNumber <= model.getLineCount()) {
     return new monaco.Range(lineNumber, 1, nextLineNumber, 1);
@@ -83,10 +83,18 @@ export function insertTriggerSnippet(
 
   if (triggersPair) {
     insertTriggersSection = false;
-    const { range: triggersKeyRange, indentLevel: expectedIndent } = getTriggersKeyInfo(model, triggersPair);
+    const { range: triggersKeyRange, indentLevel: expectedIndent } = getTriggersKeyInfo(
+      model,
+      triggersPair
+    );
 
     // If triggers section is empty (no triggers with type field), replace the empty content
-    if (triggerNodes.length === 0 && triggersPair.value && isSeq(triggersPair.value) && triggersPair.value.items.length > 0) {
+    if (
+      triggerNodes.length === 0 &&
+      triggersPair.value &&
+      isSeq(triggersPair.value) &&
+      triggersPair.value.items.length > 0
+    ) {
       const lastItem = triggersPair.value.items[triggersPair.value.items.length - 1];
       let emptyItemLineNumber: number | null = null;
 
@@ -114,7 +122,10 @@ export function insertTriggerSnippet(
         indentLevel = indentMatch ? indentMatch[1].length : expectedIndent;
       }
     } else if (triggerNodes.length > 0) {
-      const lastTriggerRange = getMonacoRangeFromYamlNode(model, triggerNodes[triggerNodes.length - 1].node);
+      const lastTriggerRange = getMonacoRangeFromYamlNode(
+        model,
+        triggerNodes[triggerNodes.length - 1].node
+      );
       if (lastTriggerRange) {
         // add a newline after the last trigger
         insertAtLineNumber = lastTriggerRange.endLineNumber;

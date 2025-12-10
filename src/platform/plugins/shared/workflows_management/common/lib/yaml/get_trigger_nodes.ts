@@ -27,10 +27,10 @@ export function getTriggersPair(yamlDocument: Document): Pair | null {
 }
 
 /**
-* Finds all trigger nodes in the YAML document
-* @param yamlDocument The YAML document to search for trigger nodes
-* @returns An array of objects containing the trigger node, trigger type, and type pair
-*/
+ * Finds all trigger nodes in the YAML document
+ * @param yamlDocument The YAML document to search for trigger nodes
+ * @returns An array of objects containing the trigger node, trigger type, and type pair
+ */
 export function getTriggerNodes(
   yamlDocument: Document
 ): Array<{ node: YAMLMap; triggerType: string; typePair: Pair }> {
