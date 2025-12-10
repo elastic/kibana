@@ -21,7 +21,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.streams.streamDetailView.managementTab.enrichment.definitionError"
+                id="xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.definitionError"
                 defaultMessage="Fix the following error before saving: {error}"
                 values={{ error: errors.definition_error.message }}
               />
@@ -59,7 +59,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
               </p>
               <p>
                 {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
+                  'xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.ignoredFieldsFailure.causesLabel',
                   {
                     defaultMessage:
                       'Potential causes include type mismatches or fields exceeding configured limits.',
@@ -68,7 +68,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
               </p>
               <p>
                 {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.suggestionsLabel',
+                  'xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.ignoredFieldsFailure.suggestionsLabel',
                   {
                     defaultMessage:
                       'Check your field mappings, add processors to normalize values, or remove the conflicting fields.',
@@ -85,7 +85,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
             id="mapping-failures-accordion"
             initialIsOpen
             buttonContent={i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+              'xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.fieldMappingsFailure.title',
               {
                 defaultMessage: 'Field conflicts during simulation',
               }
@@ -94,7 +94,7 @@ export const SimulationErrorsList = ({ errors }: { errors: SimulationErrors }) =
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
+                  id="xpack.streams.streamDetailView.managementTab.enrichment.simulationErrorsList.fieldMappingsFailure.fieldsList"
                   defaultMessage="The following mapping failures occurred during the simulation:"
                 />
               </p>
