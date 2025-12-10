@@ -154,19 +154,23 @@ export class UptimeEsClient {
 
     await this.initSettings();
 
-    // Get excluded data tiers and apply filter
+    // Get excluded data tiers and apply filter only when there are tiers to exclude
     const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
-    const mustNot = mergeDataTierFilter(params.query?.bool?.must_not, excludedDataTiers);
-    const filteredParams: TParams = {
-      ...params,
-      query: {
-        ...params.query,
-        bool: {
-          ...params.query?.bool,
-          must_not: mustNot,
+    let filteredParams: TParams = params;
+
+    if (excludedDataTiers.length > 0) {
+      const mustNot = mergeDataTierFilter(params.query?.bool?.must_not, excludedDataTiers);
+      filteredParams = {
+        ...params,
+        query: {
+          ...params.query,
+          bool: {
+            ...params.query?.bool,
+            must_not: mustNot,
+          },
         },
-      },
-    };
+      };
+    }
 
     const esParams = { index: this.heartbeatIndices, ...filteredParams };
 

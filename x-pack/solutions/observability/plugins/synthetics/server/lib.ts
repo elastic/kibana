@@ -137,23 +137,28 @@ export class SyntheticsEsClient {
     requests: SearchSearchRequestBody[],
     operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
-    // Apply data tier filter
+    // Apply data tier filter only when there are tiers to exclude
     const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
 
     const searches: Array<MsearchMultisearchHeader | SearchSearchRequestBody> = [];
     for (const request of requests) {
       searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
-      const mustNot = mergeDataTierFilter(request.query?.bool?.must_not, excludedDataTiers);
-      searches.push({
-        ...request,
-        query: {
-          ...request.query,
-          bool: {
-            ...request.query?.bool,
-            must_not: mustNot,
+
+      if (excludedDataTiers.length > 0) {
+        const mustNot = mergeDataTierFilter(request.query?.bool?.must_not, excludedDataTiers);
+        searches.push({
+          ...request,
+          query: {
+            ...request.query,
+            bool: {
+              ...request.query?.bool,
+              must_not: mustNot,
+            },
           },
-        },
-      });
+        });
+      } else {
+        searches.push(request);
+      }
     }
 
     const startTimeNow = Date.now();
@@ -205,19 +210,23 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    // Apply data tier filter
+    // Apply data tier filter only when there are tiers to exclude
     const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
-    const mustNot = mergeDataTierFilter(params.query?.bool?.must_not, excludedDataTiers);
-    const filteredParams: TParams = {
-      ...params,
-      query: {
-        ...params.query,
-        bool: {
-          ...params.query?.bool,
-          must_not: mustNot,
+    let filteredParams: TParams = params;
+
+    if (excludedDataTiers.length > 0) {
+      const mustNot = mergeDataTierFilter(params.query?.bool?.must_not, excludedDataTiers);
+      filteredParams = {
+        ...params,
+        query: {
+          ...params.query,
+          bool: {
+            ...params.query?.bool,
+            must_not: mustNot,
+          },
         },
-      },
-    };
+      };
+    }
 
     const esParams = {
       index: SYNTHETICS_INDEX_PATTERN,

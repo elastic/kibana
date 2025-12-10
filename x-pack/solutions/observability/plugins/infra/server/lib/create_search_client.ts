@@ -24,21 +24,25 @@ export const createSearchClient =
     const { uiSettings } = await requestContext.core;
     const excludedDataTiers = await getExcludedDataTiers(uiSettings.client);
 
-    // Apply data tier filter if configured
-    const mustNot = mergeDataTierFilter(opts.body?.query?.bool?.must_not, excludedDataTiers);
-    const searchOpts: CallWithRequestParams = {
-      ...opts,
-      body: {
-        ...opts.body,
-        query: {
-          ...opts.body?.query,
-          bool: {
-            ...opts.body?.query?.bool,
-            must_not: mustNot,
+    // Apply data tier filter only when there are tiers to exclude
+    let searchOpts: CallWithRequestParams = opts;
+
+    if (excludedDataTiers.length > 0) {
+      const mustNot = mergeDataTierFilter(opts.body?.query?.bool?.must_not, excludedDataTiers);
+      searchOpts = {
+        ...opts,
+        body: {
+          ...opts.body,
+          query: {
+            ...opts.body?.query,
+            bool: {
+              ...opts.body?.query?.bool,
+              must_not: mustNot,
+            },
           },
         },
-      },
-    };
+      };
+    }
 
     return framework.callWithRequest(requestContext, 'search', searchOpts, request);
   };
