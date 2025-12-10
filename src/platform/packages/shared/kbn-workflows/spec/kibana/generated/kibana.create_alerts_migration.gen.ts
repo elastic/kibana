@@ -49,7 +49,7 @@ Migrations are initiated per index. While the process is neither destructive nor
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['index', 'requests_per_second', 'size', 'slices'],
   },
   paramsSchema: z.object({
     ...getShapeAt(create_alerts_migration_request, 'body'),

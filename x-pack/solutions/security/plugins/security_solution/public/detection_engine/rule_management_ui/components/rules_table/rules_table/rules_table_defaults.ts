@@ -6,7 +6,6 @@
  */
 
 import type { FilterOptions, SortingOptions } from '../../../../rule_management/logic/types';
-import { defaultRangeValue } from '../../../../rule_gaps/constants';
 
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   filter: '',
@@ -15,8 +14,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   showElasticRules: false,
   enabled: undefined,
   ruleExecutionStatus: undefined,
-  gapSearchRange: defaultRangeValue,
-  showRulesWithGaps: false,
+  gapFillStatuses: undefined,
 };
 export const DEFAULT_SORTING_OPTIONS: SortingOptions = {
   field: 'enabled',

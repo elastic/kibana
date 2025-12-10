@@ -17,12 +17,23 @@ import type { GaugeState } from './charts/gauge';
 import { gaugeStateSchema } from './charts/gauge';
 import type { TagcloudState } from './charts/tagcloud';
 import { tagcloudStateSchema } from './charts/tagcloud';
+import { mosaicStateSchema } from './charts/mosaic';
+import { pieStateSchema } from './charts/pie';
+import { treemapStateSchema } from './charts/treemap';
+import { waffleStateSchema } from './charts/waffle';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 import { xyStateSchema } from './charts/xy';
+
+export const partitionStateSchema = schema.oneOf([
+  mosaicStateSchema,
+  pieStateSchema,
+  treemapStateSchema,
+  waffleStateSchema,
+]);
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -38,6 +49,9 @@ export const _lensApiStateSchema: any = schema.oneOf([
   xyStateSchema,
   gaugeStateSchema,
   tagcloudStateSchema,
+  // disable for now to avoid type issues at the config builder root level
+  // TODO: enabled once transformations are available
+  // partitionStateSchema,
 ]);
 
 export type LensApiState = MetricState | LegacyMetricState | GaugeState | TagcloudState;
