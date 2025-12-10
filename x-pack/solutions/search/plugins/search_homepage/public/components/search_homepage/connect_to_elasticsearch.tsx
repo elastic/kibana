@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
-import { FormInfoField } from '@kbn/search-shared-ui';
 import { css } from '@emotion/react';
+import { FormInfoField } from '@kbn/search-shared-ui';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -24,7 +24,7 @@ export const ConnectToElasticsearch = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s">
           <p>
@@ -51,18 +51,19 @@ export const ConnectToElasticsearch = () => {
           borderLeft: euiTheme.colors.borderBaseSubdued,
         })}
       >
-        <EuiButtonEmpty
+        <EuiButton
           data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
           href={manageKeysLink}
           color="text"
-          iconType="key"
+          iconType="plusInCircle"
           target="_blank"
+          size="s"
         >
           <FormattedMessage
             id="xpack.searchHomepage.connectToElasticsearch.apiKeysButtonEmptyLabel"
             defaultMessage="API keys"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

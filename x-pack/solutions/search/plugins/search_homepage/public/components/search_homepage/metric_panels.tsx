@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -17,6 +18,7 @@ import {
   EuiPanel,
   EuiSplitPanel,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -254,27 +256,18 @@ interface BasicMetricPanelProps {
 const BasicMetricPanel = ({ title, metric }: BasicMetricPanelProps) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="xs"
+    <EuiBadge
+      color={euiTheme.colors.backgroundBaseSubdued}
       css={css({
-        borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-        '&:last-child': {
-          borderRight: 'none',
-        },
+        padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
       })}
     >
-      <EuiFlexItem>
-        <EuiText color="subdued" size="xs">
-          <p>{title}</p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText>
-          <strong>{metric}</strong>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <EuiText size="s">
+        <EuiTextColor color="subdued">{title}</EuiTextColor>
+        &nbsp;&nbsp;
+        {metric}
+      </EuiText>
+    </EuiBadge>
   );
 };
 
@@ -357,7 +350,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       ))}
     </EuiFlexGrid>
   ) : (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       {basicPanels.map((panel) => {
         return <BasicMetricPanel title={panel.title} metric={panel.metric} key={panel.id} />;
       })}

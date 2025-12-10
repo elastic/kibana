@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -22,6 +22,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
+import { MetricPanels } from './metric_panels';
 
 export const SearchHomepagePage = () => {
   const {
@@ -50,8 +51,7 @@ export const SearchHomepagePage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  const { isTrial, daysLeft } = useGetLicenseInfo();
-
+  const { isTrial } = useGetLicenseInfo();
   return (
     <KibanaPageTemplate
       offset={0}
@@ -61,83 +61,77 @@ export const SearchHomepagePage = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiFlexGroup responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="l">
-                      <h1>
-                        {username
-                          ? i18n.translate('xpack.searchHomepage.welcome.title', {
-                              defaultMessage: 'Welcome, {username}',
-                              values: { username },
-                            })
-                          : i18n.translate('xpack.searchHomepage.welcome.title.default', {
-                              defaultMessage: 'Welcome',
-                            })}
-                      </h1>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
+            <EuiFlexGroup responsive={false} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} justifyContent="flexEnd" alignItems="center">
-                  {isTrial && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="success" iconSide="left" iconType="clock">
-                        {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
-                          defaultMessage:
-                            '{daysLeft} trial {daysLeft, plural, one {day} other {days}} remaining.',
-                          values: {
-                            daysLeft,
-                          },
+                <EuiTitle size="l">
+                  <h1>
+                    {username
+                      ? i18n.translate('xpack.searchHomepage.welcome.title', {
+                          defaultMessage: 'Welcome, {username}',
+                          values: { username },
+                        })
+                      : i18n.translate('xpack.searchHomepage.welcome.title.default', {
+                          defaultMessage: 'Welcome',
                         })}
-                      </EuiBadge>
-                    </EuiFlexItem>
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              {isTrial && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">
+                    {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
+                      defaultMessage: 'Trial',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
+                  external
+                  href="#"
+                  color="text"
+                >
+                  {i18n.translate(
+                    'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
+                    { defaultMessage: 'Manage' }
                   )}
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
-                      external
-                      href="#"
-                    >
-                      {i18n.translate(
-                        'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
-                        { defaultMessage: 'Manage subscription' }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} />
-                </EuiFlexGroup>
+                </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup responsive={false} gutterSize="none">
+            <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <ConnectToElasticsearch />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
+                <EuiButtonIcon
+                  display="base"
+                  size="s"
+                  iconSize="m"
                   iconType="plugs"
-                  iconSide="left"
                   onClick={() => openWiredConnectionDetails()}
                   data-test-subj="search-homepage-context-menu-button"
                   color="text"
-                >
-                  {i18n.translate('xpack.searchHomepage.connectionDetails.buttonLabel', {
-                    defaultMessage: 'Connect',
-                  })}
-                </EuiButtonEmpty>
+                  aria-label={i18n.translate(
+                    'xpack.searchHomepage.searchHomepagePage.euiButtonIcon.connectionDetailsPressToLabel',
+                    {
+                      defaultMessage:
+                        'Show connection details for connecting to the Elasticsearch API',
+                    }
+                  )}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiHorizontalRule />
+        <EuiHorizontalRule margin="s" />
+
+        <MetricPanels />
       </KibanaPageTemplate.Section>
       <SearchHomepageBody />
       {embeddableConsole}

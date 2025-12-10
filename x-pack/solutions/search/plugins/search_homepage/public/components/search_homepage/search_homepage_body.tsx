@@ -24,9 +24,6 @@ export const SearchHomepageBody = () => {
     <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow paddingSize="none">
       <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem>
-          <MetricPanels />
-        </EuiFlexItem>
-        <EuiFlexItem>
           <EuiSpacer size="l" />
           <MetricPanels panelType="complex" />
         </EuiFlexItem>
