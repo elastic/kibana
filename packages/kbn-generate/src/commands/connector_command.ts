@@ -60,7 +60,15 @@ export const ConnectorCommand: GenerateCommand = {
   async run({ log, flags }) {
     const connectorName =
       (flags._[0] as string | undefined) ||
-      ((await ask({ question: 'Connector folder name (e.g. virustotal)' })) as string);
+      ((await ask({
+        question: 'Connector folder name (e.g. virustotal)',
+        async validate(input) {
+          if (typeof input === 'string' && input.length > 0 && !input.includes(' ')) {
+            return input;
+          }
+          return { err: 'connector name must be non-empty and contain no spaces' };
+        },
+      })) as string);
     if (!connectorName || connectorName.includes(' ')) {
       throw createFlagError(`expected connectorName without spaces`);
     }
@@ -204,30 +212,48 @@ export default (props: ConnectorIconProps) => {
       }
     }
 
-    // append to CODEOWNERS under the overrides section, before ultimate priority rules
+    // append to CODEOWNERS: insert right after the latest rule that mentions "kbn-connector-specs"
     {
       let content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
       const line = `/src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
       if (content.includes(line)) {
         log.info('CODEOWNERS already has rule for', connectorName);
       } else {
-        // find the insertion point: after GENERATED_END marker, but before ultimate priority comment if present
-        const genEndIdx = content.indexOf(GENERATED_END);
-        const ultIdx = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
-        if (genEndIdx !== -1) {
-          const prefix = content.slice(0, genEndIdx + GENERATED_END.length);
-          const middle = content.slice(
-            genEndIdx + GENERATED_END.length,
-            ultIdx === -1 ? undefined : ultIdx
-          );
-          const suffix = ultIdx === -1 ? '' : content.slice(ultIdx);
-          // ensure the rule is on its own line and followed by a newline
-          const middleUpdated = (middle.endsWith('\n') ? middle : middle + '\n') + line + '\n';
-          content = prefix + middleUpdated + suffix;
-        } else {
-          // fallback: append at end
-          content = content.trimEnd() + '\n' + line + '\n';
+        // Try to insert after the last rule that contains "kbn-connector-specs" in the path
+        const lines = content.split('\n');
+        let lastIdx = -1;
+        for (let i = lines.length - 1; i >= 0; i--) {
+          const l = lines[i];
+          // check if this is a rule line (not a comment) and mentions kbn-connector-specs
+          if (l && !l.trim().startsWith('#') && l.includes('kbn-connector-specs')) {
+            lastIdx = i;
+            break;
+          }
         }
+
+        if (lastIdx !== -1) {
+          // insert directly below the last matching rule
+          lines.splice(lastIdx + 1, 0, line);
+          content = lines.join('\n');
+        } else {
+          // fallback: after GENERATED_END marker, but before ultimate priority comment if present
+          const genEndIdx = content.indexOf(GENERATED_END);
+          const ultIdx = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
+          if (genEndIdx !== -1) {
+            const prefix = content.slice(0, genEndIdx + GENERATED_END.length);
+            const middle = content.slice(
+              genEndIdx + GENERATED_END.length,
+              ultIdx === -1 ? undefined : ultIdx
+            );
+            const suffix = ultIdx === -1 ? '' : content.slice(ultIdx);
+            const middleUpdated = (middle.endsWith('\n') ? middle : middle + '\n') + line + '\n';
+            content = prefix + middleUpdated + suffix;
+          } else {
+            // final fallback: append at end
+            content = content.trimEnd() + '\n' + line + '\n';
+          }
+        }
+
         await Fsp.writeFile(CODEOWNERS_FILE, content);
         log.info('Updated', Path.relative(REPO_ROOT, CODEOWNERS_FILE));
       }
