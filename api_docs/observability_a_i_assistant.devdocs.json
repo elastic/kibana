@@ -6715,7 +6715,7 @@
           "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
           "IKibanaResponse",
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
-          "Stream",
+          "stream",
           " | { message: string | Error; attributes?: ",
           "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
@@ -6900,21 +6900,6 @@
           "[] | undefined; description?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/functions/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.E5_LARGE_IN_EIS_INFERENCE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "E5_LARGE_IN_EIS_INFERENCE_ID",
-        "description": [],
-        "signature": [
-          "\".multilingual-e5-large-elastic\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8928,7 +8913,9 @@
                       "ActionTypeSecrets",
                       ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
                       "ActionsConfigurationUtilities",
-                      ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
+                      ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; getAxiosInstance: (actionId: string) => Promise<",
+                      "AxiosInstance",
+                      ">; bulkEnqueueExecution: (options: ",
                       "ExecuteOptions",
                       "[]) => Promise<",
                       "ExecutionResponse",
@@ -14657,21 +14644,6 @@
           ".ConversationUpdate; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.E5_LARGE_IN_EIS_INFERENCE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "E5_LARGE_IN_EIS_INFERENCE_ID",
-        "description": [],
-        "signature": [
-          "\".multilingual-e5-large-elastic\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
