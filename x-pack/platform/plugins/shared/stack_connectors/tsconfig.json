@@ -52,6 +52,7 @@
     "@kbn/zod",
     "@kbn/connector-schemas",
     "@kbn/connector-specs",
+    "@kbn/actions-utils",
     "@kbn/response-ops-form-generator",
     "@kbn/actions-types",
   ],

@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './auth_types/api_key_header';
-export * from './auth_types/bearer';
-export * from './auth_types/basic';
-export * from './auth_types/none';
-export * from './auth_types/oauth';
-
-// Skipping PFX and CRT exports for now as they will require updates to
-// the formbuilder to support file upload fields.
-// export * from './auth_types/pfx';
-// export * from './auth_types/crt';
+export type { CustomHostSettings, ProxySettings, SSLSettings } from './utils/types';
+export { customHostSettingsSchema } from './utils/types';
+export { getNodeSSLOptions, getSSLSettingsFromConfig } from './utils/get_node_ssl_options';
+export { getCustomAgents } from './utils/get_custom_agents';
