@@ -43,7 +43,7 @@ export default function SloAddFormFlyout({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SloEditForm
-          onSave={onClose}
+          onFlyoutClose={onClose}
           initialValues={formInitialValues}
           isEditMode={false}
           isFlyout={true}
