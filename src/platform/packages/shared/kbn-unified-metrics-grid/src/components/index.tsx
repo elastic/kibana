@@ -8,26 +8,13 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
-import { MetricsExperienceClientProvider } from '../context/metrics_experience_client_provider';
 import { withRestorableState } from '../restorable_state';
 import { MetricsExperienceStateProvider } from '../context/metrics_experience_state_provider';
 import type { UnifiedMetricsGridProps } from '../types';
 import { MetricsExperienceFieldsCapsProvider } from '../context/metrics_experience_fields_caps_provider';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
 
 const InternalUnifiedMetricsExperienceGrid = (
   props: UnifiedMetricsGridProps & { client?: MetricsExperienceClient }
@@ -37,15 +24,11 @@ const InternalUnifiedMetricsExperienceGrid = (
   }
 
   return (
-    <MetricsExperienceClientProvider value={{ client: props.client }}>
-      <QueryClientProvider client={queryClient}>
-        <PerformanceContextProvider>
-          <MetricsExperienceFieldsCapsProvider fetchParams={props.fetchParams}>
-            <MetricsExperienceGrid {...props} />
-          </MetricsExperienceFieldsCapsProvider>
-        </PerformanceContextProvider>
-      </QueryClientProvider>
-    </MetricsExperienceClientProvider>
+    <PerformanceContextProvider>
+      <MetricsExperienceFieldsCapsProvider fetchParams={props.fetchParams}>
+        <MetricsExperienceGrid {...props} />
+      </MetricsExperienceFieldsCapsProvider>
+    </PerformanceContextProvider>
   );
 };
 
