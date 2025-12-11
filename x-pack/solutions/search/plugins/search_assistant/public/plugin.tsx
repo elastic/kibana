@@ -73,7 +73,9 @@ export class SearchAssistantPlugin
           () => {}
         );
 
-        return () => {};
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
       },
       // right before the user profile
       order: 1001,

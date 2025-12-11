@@ -4554,6 +4554,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-agent-confirmation-modal@link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
