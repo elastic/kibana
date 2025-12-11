@@ -47,7 +47,6 @@
     "@kbn/core-application-browser",
     "@kbn/deeplinks-management",
     "@kbn/connector-schemas",
-    "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
   ]
 }

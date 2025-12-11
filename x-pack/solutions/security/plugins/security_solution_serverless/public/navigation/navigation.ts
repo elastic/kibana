@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { switchMap, take, firstValueFrom } from 'rxjs';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import * as Rx from 'rxjs';
 import { ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
@@ -22,30 +20,13 @@ export const registerSolutionNavigation = async (
     (productType) => productType.product_tier === ProductTier.searchAiLake
   );
 
-  const chatExperience$ = services.settings.client.get$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
+  const navigationTree = shouldUseAINavigation
+    ? createAiNavigationTree(services)
+    : await createNavigationTree(services);
 
-  // Get initial chat experience for setting initial navigation tree
-  const initialChatExperience = await firstValueFrom(chatExperience$.pipe(take(1)));
+  services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  const initialNavigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(initialChatExperience)
-    : await createNavigationTree(services, initialChatExperience);
-
-  services.securitySolution.setSolutionNavigationTree(initialNavigationTree);
-
-  // Create reactive navigation tree observable
-  const navigationTree$ = chatExperience$.pipe(
-    switchMap(async (chatExperience) => {
-      return shouldUseAINavigation
-        ? createAiNavigationTree(chatExperience)
-        : createNavigationTree(services, chatExperience);
-    })
-  );
-
-  services.serverless.initNavigation('security', navigationTree$, {
+  services.serverless.initNavigation('security', Rx.of(navigationTree), {
     dataTestSubj: 'securitySolutionSideNav',
   });
 };

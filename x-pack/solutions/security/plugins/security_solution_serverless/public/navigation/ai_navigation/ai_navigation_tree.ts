@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import {
+  defaultNavigationTree,
+  LazyIconAgentBuilder,
+} from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
+import { type Services } from '../../common/services';
 import { AiNavigationIcon } from './icon';
 
 const SOLUTION_NAME = i18n.translate(
@@ -20,9 +24,7 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (
-  chatExperience: AIChatExperience = AIChatExperience.Classic
-): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (services: Services): NavigationTreeDefinition => ({
   body: [
     {
       id: 'ease_home',
@@ -72,6 +74,16 @@ export const createAiNavigationTree = (
         {
           link: 'discover',
         },
+        ...(services.application.capabilities.agentBuilder?.show === true &&
+        services.uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false) === true
+          ? [
+              {
+                // TODO: update icon to 'robot' once it's available in EUI
+                icon: LazyIconAgentBuilder,
+                link: 'agent_builder' as AppDeepLinkId,
+              },
+            ]
+          : []),
         {
           id: SecurityPageName.aiValue,
           link: securityLink(SecurityPageName.aiValue),
@@ -164,13 +176,10 @@ export const createAiNavigationTree = (
         {
           title: i18nStrings.stackManagement.ai.title,
           breadcrumbStatus: 'hidden',
-          children:
-            chatExperience !== AIChatExperience.Agent
-              ? [
-                  { link: 'management:genAiSettings' },
-                  { link: 'management:securityAiAssistantManagement' },
-                ]
-              : [{ link: 'management:genAiSettings' }],
+          children: [
+            { link: 'management:genAiSettings' },
+            { link: 'management:securityAiAssistantManagement' },
+          ],
         },
         {
           title: i18nStrings.stackManagementV2.data.title,
