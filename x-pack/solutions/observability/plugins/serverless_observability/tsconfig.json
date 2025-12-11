@@ -32,7 +32,6 @@
     "@kbn/cases-plugin",
     "@kbn/observability-nav-icons",
     "@kbn/deeplinks-management",
-    "@kbn/observability-agent-builder",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
   ]
