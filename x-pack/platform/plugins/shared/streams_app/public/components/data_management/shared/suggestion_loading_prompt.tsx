@@ -29,6 +29,7 @@ export function SuggestionLoadingPrompt({ onCancel }: SuggestionLoadingPromptPro
         defaultMessage: 'Analyzing your data...',
       })}
       color="primary"
+      data-test-subj="streamsAppPipelineSuggestionLoadingPrompt"
     >
       <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
@@ -44,7 +45,7 @@ export function SuggestionLoadingPrompt({ onCancel }: SuggestionLoadingPromptPro
       <EuiSpacer size="s" />
       <EuiProgress size="s" color="accent" />
       <EuiSpacer size="s" />
-      <EuiLink onClick={onCancel}>
+      <EuiLink onClick={onCancel} data-test-subj="streamsAppPipelineSuggestionCancelButton">
         {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
           defaultMessage: 'Cancel',
         })}
