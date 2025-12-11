@@ -9,6 +9,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Intercepts API', function () {
+    this.tags(['skipMKI']);
     loadTestFile(require.resolve('./interaction_apis'));
     loadTestFile(require.resolve('./trigger_apis'));
   });
