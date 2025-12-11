@@ -7,94 +7,78 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, TimeRange } from '@kbn/es-query';
-import { type AggregateQuery, type Query } from '@kbn/es-query';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type {
+  PublishesProjectRoutingOverrides,
+  ProjectRoutingOverrides,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { CpsUsageOverridesBadge } from './cps_usage_overrides_badge';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getProjectRoutingFromEsqlQuery: jest.fn(),
-}));
-
-import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
-
-const mockGetProjectRoutingFromEsqlQuery = getProjectRoutingFromEsqlQuery as jest.MockedFunction<
-  typeof getProjectRoutingFromEsqlQuery
->;
-
-const mockEsqlQueryWithProjectRouting: AggregateQuery = {
-  esql: 'SET project_routing = "_alias: *" | FROM kibana_sample_data_ecommerce',
-};
-
-const mockEsqlQueryWithoutProjectRouting: AggregateQuery = {
-  esql: 'FROM kibana_sample_data_ecommerce',
-};
-
-const mockKqlQuery: Query = {
-  query: 'test',
-  language: 'kuery',
-};
-
 describe('CPS usage overrides badge action', () => {
   let action: CpsUsageOverridesBadge;
-  let context: { embeddable: PublishesUnifiedSearch };
+  let context: { embeddable: PublishesProjectRoutingOverrides };
 
-  let updateQuery: (query: Query | AggregateQuery | undefined) => void;
+  let updateOverrides: (overrides: ProjectRoutingOverrides) => void;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-
-    const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
-    updateQuery = (query) => querySubject.next(query);
+    const overridesSubject = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
+    updateOverrides = (overrides) => overridesSubject.next(overrides);
 
     action = new CpsUsageOverridesBadge();
     context = {
       embeddable: {
-        timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-        filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-        query$: querySubject,
+        projectRoutingOverrides$: overridesSubject,
       },
     };
   });
 
-  it('is compatible when ESQL query has project routing override', async () => {
-    mockGetProjectRoutingFromEsqlQuery.mockReturnValue('_alias: *');
-    updateQuery(mockEsqlQueryWithProjectRouting);
+  it('is compatible when embeddable has project routing overrides', async () => {
+    updateOverrides([{ value: '_alias: *' }]);
     expect(await action.isCompatible(context)).toBe(true);
   });
 
-  it('is incompatible when ESQL query has no project routing override', async () => {
-    mockGetProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
-    updateQuery(mockEsqlQueryWithoutProjectRouting);
+  it('is compatible when embeddable has multiple project routing overrides', async () => {
+    updateOverrides([
+      { name: 'Layer 1', value: 'project-a' },
+      { name: 'Layer 2', value: 'project-b' },
+    ]);
+    expect(await action.isCompatible(context)).toBe(true);
+  });
+
+  it('is incompatible when embeddable has no project routing overrides', async () => {
+    updateOverrides(undefined);
     expect(await action.isCompatible(context)).toBe(false);
   });
 
-  it('is incompatible when query is KQL/Lucene', async () => {
-    updateQuery(mockKqlQuery);
+  it('is incompatible when embeddable has empty array of overrides', async () => {
+    updateOverrides([]);
     expect(await action.isCompatible(context)).toBe(false);
   });
 
-  describe('getOverrideValue', () => {
-    it('returns project routing value from ESQL query', async () => {
-      mockGetProjectRoutingFromEsqlQuery.mockReturnValue('_alias: *');
-      updateQuery(mockEsqlQueryWithProjectRouting);
+  it('is incompatible when embeddable does not publish project routing overrides', async () => {
+    const nonPublishingContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(nonPublishingContext as any)).toBe(false);
+  });
+
+  describe('getOverrideValues', () => {
+    it('returns override values array for single override', async () => {
+      updateOverrides([{ value: '_alias: *' }]);
       expect(await action.isCompatible(context)).toBe(true);
-      expect(mockGetProjectRoutingFromEsqlQuery).toHaveBeenCalledWith(
-        'SET project_routing = "_alias: *" | FROM kibana_sample_data_ecommerce'
-      );
     });
 
-    it('returns undefined when ESQL query has no project routing', async () => {
-      mockGetProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
-      updateQuery(mockEsqlQueryWithoutProjectRouting);
-      expect(await action.isCompatible(context)).toBe(false);
+    it('returns override values array for multiple overrides with names', async () => {
+      updateOverrides([
+        { name: 'Sales Data', value: 'project-a' },
+        { name: 'Inventory', value: 'project-b' },
+      ]);
+      expect(await action.isCompatible(context)).toBe(true);
     });
 
-    it('returns undefined for non-ESQL queries', async () => {
-      updateQuery(mockKqlQuery);
+    it('returns undefined when no overrides present', async () => {
+      updateOverrides(undefined);
       expect(await action.isCompatible(context)).toBe(false);
-      expect(mockGetProjectRoutingFromEsqlQuery).not.toHaveBeenCalled();
     });
   });
 });

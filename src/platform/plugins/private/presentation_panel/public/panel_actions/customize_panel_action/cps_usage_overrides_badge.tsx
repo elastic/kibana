@@ -24,10 +24,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import {
+  apiPublishesProjectRoutingOverrides,
+  type ProjectRoutingOverrides,
+} from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import { CPS_USAGE_OVERRIDES_BADGE } from './constants';
 import { uiActions, core } from '../../kibana_services';
 import { ACTION_EDIT_PANEL } from '../edit_panel_action/constants';
@@ -41,8 +42,8 @@ export class CpsUsageOverridesBadge
   public order = 8;
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    const overrideValue = this.getOverrideValue(embeddable);
-    if (!overrideValue) {
+    const overrideValues = this.getOverrideValues(embeddable);
+    if (!overrideValues || overrideValues.length === 0) {
       throw new IncompatibleActionError();
     }
     return strings.displayName;
@@ -52,8 +53,8 @@ export class CpsUsageOverridesBadge
     const { embeddable } = context;
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const { euiTheme } = useEuiTheme();
-    const overrideValue = this.getOverrideValue(embeddable);
-    if (!overrideValue) throw new IncompatibleActionError();
+    const overrideValues = this.getOverrideValues(embeddable);
+    if (!overrideValues || overrideValues.length === 0) throw new IncompatibleActionError();
 
     return (
       <EuiPopover
@@ -98,7 +99,16 @@ export class CpsUsageOverridesBadge
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCodeBlock paddingSize="s">{overrideValue}</EuiCodeBlock>
+          {overrideValues.map((override, index) => (
+            <div key={index} css={{ marginTop: index > 0 ? euiTheme.size.s : 0 }}>
+              {override.name && (
+                <EuiText size="xs" css={{ marginBottom: euiTheme.size.xs }}>
+                  {override.name}
+                </EuiText>
+              )}
+              <EuiCodeBlock paddingSize="s">{override.value}</EuiCodeBlock>
+            </div>
+          ))}
         </div>
       </EuiPopover>
     );
@@ -109,14 +119,12 @@ export class CpsUsageOverridesBadge
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return (
-      apiPublishesUnifiedSearch(embeddable) && isOfAggregateQueryType(embeddable.query$.getValue())
-    );
+    return apiPublishesProjectRoutingOverrides(embeddable);
   }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesUnifiedSearch(embeddable)
-      ? embeddable.query$.pipe(map(() => undefined))
+    return apiPublishesProjectRoutingOverrides(embeddable)
+      ? embeddable.projectRoutingOverrides$.pipe(map(() => undefined))
       : undefined;
   }
 
@@ -125,16 +133,15 @@ export class CpsUsageOverridesBadge
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return Boolean(this.getOverrideValue(embeddable));
+    const values = this.getOverrideValues(embeddable);
+    return values !== undefined && values.length > 0;
   }
 
-  private getOverrideValue(embeddable: unknown): string | undefined {
-    if (apiPublishesUnifiedSearch(embeddable)) {
-      const query = embeddable.query$.getValue();
-      if (isOfAggregateQueryType(query)) {
-        return getProjectRoutingFromEsqlQuery(query.esql);
-      }
+  private getOverrideValues(embeddable: unknown): ProjectRoutingOverrides {
+    if (apiPublishesProjectRoutingOverrides(embeddable)) {
+      return embeddable.projectRoutingOverrides$.getValue();
     }
+    return undefined;
   }
 }
 

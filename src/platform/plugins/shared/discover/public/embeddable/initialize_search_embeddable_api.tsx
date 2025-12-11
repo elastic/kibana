@@ -30,6 +30,7 @@ import {
   type Filter,
   type Query,
 } from '@kbn/es-query';
+import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
@@ -76,6 +77,13 @@ const initializedSavedSearch = (
     }, discoverServices.savedSearch.getNew()),
     searchSource,
   };
+};
+
+const getProjectRoutingOverrides = (query: Query | AggregateQuery | undefined) => {
+  if (isOfAggregateQueryType(query)) {
+    const value = getProjectRoutingFromEsqlQuery(query.esql);
+    return value ? [{ value }] : undefined;
+  }
 };
 
 export const initializeSearchEmbeddableApi = async (
@@ -126,6 +134,11 @@ export const initializeSearchEmbeddableApi = async (
   );
   const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
     searchSource.getField('query')
+  );
+
+  const initialQuery = searchSource.getField('query');
+  const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverride[] | undefined>(
+    getProjectRoutingOverrides(initialQuery)
   );
 
   const canEditUnifiedSearch = () => false;
@@ -203,9 +216,20 @@ export const initializeSearchEmbeddableApi = async (
       savedSearch$.next(newSavedSearch);
     });
 
+  /** Keep projectRoutingOverrides$ in sync with query$ changes */
+  const syncProjectRoutingOverrides = query$.subscribe((query) => {
+    const currentOverrides = projectRoutingOverrides$.getValue();
+    const nextOverrides = getProjectRoutingOverrides(query);
+
+    if (!deepEqual(currentOverrides, nextOverrides)) {
+      projectRoutingOverrides$.next(nextOverrides);
+    }
+  });
+
   return {
     cleanup: () => {
       syncSavedSearch.unsubscribe();
+      syncProjectRoutingOverrides.unsubscribe();
     },
     api: {
       setDataViews,
@@ -215,6 +239,7 @@ export const initializeSearchEmbeddableApi = async (
       setFilters,
       query$,
       setQuery,
+      projectRoutingOverrides$,
       canEditUnifiedSearch,
       setColumns,
     },
