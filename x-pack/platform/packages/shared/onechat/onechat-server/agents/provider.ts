@@ -23,7 +23,7 @@ import type {
   ToolProvider,
   WritableToolResultStore,
   AttachmentsService,
-  InterruptManager,
+  PromptManager,
 } from '../runner';
 
 export type AgentHandlerFn = (
@@ -80,7 +80,7 @@ export interface AgentHandlerContext {
   /**
    * Used to manage interruptions.
    */
-  interruptManager: InterruptManager;
+  interruptManager: PromptManager;
   /**
    * Event emitter that can be used to emits custom events
    */

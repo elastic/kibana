@@ -12,13 +12,13 @@ import type {
   ReasoningEvent,
   ThinkingCompleteEvent,
   ToolCallEvent,
-  ToolInterruptEvent,
+  PromptRequestEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common/chat/events';
 import { ChatEventType } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { InterruptRequest } from '@kbn/onechat-common/chat/interruptions';
+import type { AgentPrompt } from '@kbn/onechat-common/agents/prompts';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -59,17 +59,15 @@ export const createToolCallEvent = (data: {
   };
 };
 
-export const createToolInterruptEvent = (data: {
-  toolCallId: string;
-  toolId: string;
-  interrupt: InterruptRequest;
-}): ToolInterruptEvent => {
+export const createPromptRequestEvent = ({
+  prompt,
+}: {
+  prompt: AgentPrompt;
+}): PromptRequestEvent => {
   return {
-    type: ChatEventType.toolInterrupt,
+    type: ChatEventType.promptRequest,
     data: {
-      tool_call_id: data.toolCallId,
-      tool_id: data.toolId,
-      interrupt: data.interrupt,
+      prompt,
     },
   };
 };

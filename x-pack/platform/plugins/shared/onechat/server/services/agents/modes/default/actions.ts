@@ -6,14 +6,14 @@
  */
 
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
-import type { InterruptRequest } from '@kbn/onechat-common/chat/interruptions';
+import type { ToolPrompt } from '@kbn/onechat-common/agents/prompts';
 import type { ToolCall } from '@kbn/onechat-genai-utils/langchain';
 
 export enum AgentActionType {
   Error = 'error',
   ToolCall = 'tool_call',
   ExecuteTool = 'execute_tool',
-  InterruptTool = 'interrupt_tool',
+  ToolPrompt = 'tool_prompt',
   HandOver = 'hand_over',
   Answer = 'answer',
   StructuredAnswer = 'structured_answer',
@@ -43,10 +43,10 @@ export interface ExecuteToolAction {
   tool_results: ToolCallResult[];
 }
 
-export interface InterruptToolAction {
-  type: AgentActionType.InterruptTool;
+export interface ToolPromptAction {
+  type: AgentActionType.ToolPrompt;
   tool_call_id: string;
-  interrupt: InterruptRequest;
+  prompt: ToolPrompt;
 }
 
 export interface HandoverAction {
@@ -60,7 +60,7 @@ export interface HandoverAction {
 export type ResearchAgentAction =
   | ToolCallAction
   | ExecuteToolAction
-  | InterruptToolAction
+  | ToolPromptAction
   | HandoverAction
   | AgentErrorAction;
 
@@ -96,8 +96,8 @@ export function isExecuteToolAction(action: AgentAction): action is ExecuteToolA
   return action.type === AgentActionType.ExecuteTool;
 }
 
-export function isInterruptToolAction(action: AgentAction): action is InterruptToolAction {
-  return action.type === AgentActionType.InterruptTool;
+export function isToolPromptAction(action: AgentAction): action is ToolPromptAction {
+  return action.type === AgentActionType.ToolPrompt;
 }
 
 export function isHandoverAction(action: AgentAction): action is HandoverAction {
@@ -136,14 +136,11 @@ export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAct
   };
 }
 
-export function interruptToolAction(
-  toolCallId: string,
-  interrupt: InterruptRequest
-): InterruptToolAction {
+export function toolPromptAction(toolCallId: string, prompt: ToolPrompt): ToolPromptAction {
   return {
-    type: AgentActionType.InterruptTool,
+    type: AgentActionType.ToolPrompt,
     tool_call_id: toolCallId,
-    interrupt,
+    prompt,
   };
 }
 

@@ -26,7 +26,7 @@ import {
   isToolCallEvent,
   isToolResultEvent,
   isToolProgressEvent,
-  isToolInterruptEvent,
+  isPromptRequestEvent,
   isReasoningEvent,
 } from '@kbn/onechat-common';
 import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
@@ -99,7 +99,7 @@ const createRoundFromEvents = ({
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
-  const toolInterruptEvents = events.filter(isToolInterruptEvent);
+  const promptRequestEvents = events.filter(isPromptRequestEvent);
 
   const timeToLastToken = endTime.getTime() - startTime.getTime();
   const timeToFirstToken = thinkingCompleteEvent
@@ -149,18 +149,18 @@ const createRoundFromEvents = ({
   };
 
   const lastMessage = messages.length ? messages[messages.length - 1] : undefined;
-  const interruptEvent = toolInterruptEvents.length ? toolInterruptEvents[0] : undefined;
+  const promptRequest = promptRequestEvents.length ? promptRequestEvents[0] : undefined;
 
-  if (!lastMessage && !interruptEvent) {
+  if (!lastMessage && !promptRequest) {
     throw new Error('No response event found in round events');
   }
 
   const round: ConversationRound = {
     id: uuidv4(),
-    status: toolInterruptEvents
-      ? ConversationRoundStatus.interruptionPending
+    status: promptRequest
+      ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
-    current_interrupt: interruptEvent ? interruptEvent.data.interrupt : undefined,
+    pending_prompt: promptRequest ? promptRequest.data.prompt : undefined,
     input,
     steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),

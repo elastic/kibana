@@ -10,14 +10,14 @@ import { isToolMessage } from '@langchain/core/messages';
 import { extractTextContent, extractToolCalls } from '@kbn/onechat-genai-utils/langchain';
 import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
-import type { ToolHandlerInterruptReturn, ToolHandlerReturn } from '@kbn/onechat-server/tools';
+import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/onechat-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/onechat-server/tools';
 import type {
   ToolCallAction,
   HandoverAction,
   AgentErrorAction,
   ExecuteToolAction,
-  InterruptToolAction,
+  ToolPromptAction,
   AnswerAction,
   StructuredAnswerAction,
 } from './actions';
@@ -25,7 +25,7 @@ import {
   toolCallAction,
   handoverAction,
   executeToolAction,
-  interruptToolAction,
+  toolPromptAction,
   answerAction,
   errorAction,
   structuredAnswerAction,
@@ -57,17 +57,20 @@ export const processResearchResponse = (
  */
 export const processToolNodeResponse = (
   toolNodeResult: BaseMessage[]
-): ExecuteToolAction | InterruptToolAction => {
+): ExecuteToolAction | ToolPromptAction => {
   const toolMessages = toolNodeResult.filter(isToolMessage);
 
   const interruptMessage = toolMessages.find((message) => {
     const result: ToolHandlerReturn | undefined = message.artifact;
+
+    console.log('result', JSON.stringify(result, undefined, 2));
+
     return result && isToolHandlerInterruptReturn(result);
   });
 
   if (interruptMessage) {
-    const toolResult: ToolHandlerInterruptReturn = interruptMessage.artifact;
-    return interruptToolAction(interruptMessage.tool_call_id, toolResult.interrupt);
+    const toolResult: ToolHandlerPromptReturn = interruptMessage.artifact;
+    return toolPromptAction(interruptMessage.tool_call_id, toolResult.prompt);
   }
 
   return executeToolAction(

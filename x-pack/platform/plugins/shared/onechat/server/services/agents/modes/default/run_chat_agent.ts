@@ -74,8 +74,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   /////
-  console.log('*** runAgent', nextInput);
-  throw new Error('dev mode');
+  // console.log('*** runAgent', nextInput);
+  // throw new Error('dev mode');
   /////
 
   const selectedTools = await selectTools({

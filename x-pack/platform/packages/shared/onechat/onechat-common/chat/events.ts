@@ -8,18 +8,18 @@
 import type { OnechatEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
-import type { InterruptRequest } from './interruptions';
+import type { AgentPrompt } from '../agents/prompts';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
   browserToolCall = 'browser_tool_call',
   toolProgress = 'tool_progress',
   toolResult = 'tool_result',
-  toolInterrupt = 'tool_interrupt',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
   thinkingComplete = 'thinking_complete',
+  promptRequest = 'tool_result',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -91,20 +91,18 @@ export const isToolResultEvent = (event: OnechatEvent<string, any>): event is To
   return event.type === ChatEventType.toolResult;
 };
 
-// Tool interrupt
+// Prompt request
 
-export interface ToolInterruptEventData {
-  tool_call_id: string;
-  tool_id: string;
-  interrupt: InterruptRequest;
+export interface PromptRequestEventData {
+  prompt: AgentPrompt;
 }
 
-export type ToolInterruptEvent = ChatEventBase<ChatEventType.toolInterrupt, ToolInterruptEventData>;
+export type PromptRequestEvent = ChatEventBase<ChatEventType.promptRequest, PromptRequestEventData>;
 
-export const isToolInterruptEvent = (
+export const isPromptRequestEvent = (
   event: OnechatEvent<string, any>
-): event is ToolInterruptEvent => {
-  return event.type === ChatEventType.toolInterrupt;
+): event is PromptRequestEvent => {
+  return event.type === ChatEventType.promptRequest;
 };
 
 // reasoning
@@ -255,7 +253,7 @@ export type ChatAgentEvent =
   | BrowserToolCallEvent
   | ToolProgressEvent
   | ToolResultEvent
-  | ToolInterruptEvent
+  | PromptRequestEvent
   | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent

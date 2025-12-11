@@ -109,8 +109,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     };
   } else {
     return {
-      results: [],
-      interrupt: toolReturn.interrupt,
+      prompt: toolReturn.prompt,
     };
   }
 };
@@ -122,7 +121,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent, toolCallId } = toolExecutionParams;
+  const { onEvent, toolId, toolCallId } = toolExecutionParams;
   const {
     request,
     elasticsearch,
@@ -131,7 +130,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     toolsService,
     resultStore,
     logger,
-    interruptManager,
+    promptManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
@@ -146,7 +145,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
       request,
     }),
-    interrupts: interruptManager.forToolCallId(toolCallId),
+    prompts: promptManager.forTool({ toolId, toolCallId }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };

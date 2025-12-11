@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import type { InterruptRequest } from '@kbn/onechat-common/chat/interruptions';
+import type { ConfirmPromptDefinition } from '@kbn/onechat-common/agents/prompts';
+import type { ToolConfirmationPromptWithResponse } from '../agents/prompts';
+import type { ToolHandlerPromptReturn } from '../tools/handler';
 
-export interface InterruptManager {
-  set(toolCallId: string, interruptRequest: InterruptRequest): void;
+export interface PromptManager {
+  set(toolCallId: string, prompt: ToolConfirmationPromptWithResponse): void;
   clear(): void;
-  forToolCallId(toolCallId: string): ToolInterruptManager;
+  forTool(opts: { toolId: string; toolCallId?: string }): ToolPromptManager;
 }
 
-export interface ToolInterruptManager {
+export interface ToolPromptManager {
   /**
    * Returns the current interrupt request, if any.
    */
-  getCurrentInterrupt(): InterruptRequest | undefined;
+  getCurrentPrompt(): ToolConfirmationPromptWithResponse | undefined;
+  /**
+   * Creates a confirmation prompt which can be returned by the tool handler
+   */
+  confirm(opts: ConfirmPromptDefinition & { state?: object }): ToolHandlerPromptReturn;
 }

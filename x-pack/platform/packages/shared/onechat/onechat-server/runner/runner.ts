@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { InterruptRequest } from '@kbn/onechat-common/chat/interruptions';
+import type { ToolPrompt } from '@kbn/onechat-common/agents/prompts';
 import type { ToolType } from '@kbn/onechat-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
@@ -23,12 +23,11 @@ export interface RunToolReturn {
   /**
    * The result value as returned by the tool.
    */
-  results?: ToolResult[]; // TODO: make optional ?
-
+  results?: ToolResult[];
   /**
    * Interruption returned by the tool
    */
-  interrupt?: InterruptRequest;
+  prompt?: ToolPrompt;
 }
 
 /**

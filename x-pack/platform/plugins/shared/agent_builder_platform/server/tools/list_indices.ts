@@ -34,17 +34,12 @@ The 'pattern' optional parameter is an index pattern which can be used to filter
 This parameter should only be used when you already know of a specific pattern to filter on,
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient, logger }) => {
+    handler: async ({ pattern }, { esClient, logger, prompts }) => {
       // TODO: remove
-      return {
-        interrupt: {
-          type: AgentInterruptType.confirm,
-          data: {
-            message: 'Are you sure you want to list all indices?',
-          },
-          state: {},
-        },
-      };
+      return prompts.confirm({
+        message: 'Are you sure you want to list all indices?',
+        state: {},
+      });
       ////
 
       logger.debug(`list indices tool called with pattern: ${pattern}`);

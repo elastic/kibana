@@ -35,7 +35,7 @@ import {
   isAgentErrorAction,
   isAnswerAction,
   isStructuredAnswerAction,
-  isInterruptToolAction,
+  isToolPromptAction,
   errorAction,
   handoverAction,
 } from './actions';
@@ -149,7 +149,7 @@ export const createAgentGraph = ({
 
   const executeToolEdge = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
-    if (isInterruptToolAction(lastAction)) {
+    if (isToolPromptAction(lastAction)) {
       return steps.handleToolInterrupt;
     }
     return steps.researchAgent;
@@ -157,12 +157,12 @@ export const createAgentGraph = ({
 
   const handleToolInterrupt = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
-    if (!isInterruptToolAction(lastAction)) {
+    if (!isToolPromptAction(lastAction)) {
       throw invalidState(`[handleToolInterrupt] last action type was ${lastAction.type}}`);
     }
     return {
       interrupted: true,
-      interruption: lastAction.interrupt,
+      prompt: lastAction.prompt,
     };
   };
 

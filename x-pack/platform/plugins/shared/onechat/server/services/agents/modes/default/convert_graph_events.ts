@@ -18,7 +18,7 @@ import type {
   ToolCallEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
-  ToolInterruptEvent,
+  PromptRequestEvent,
   ReasoningEvent,
 } from '@kbn/onechat-common/chat';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
@@ -34,7 +34,7 @@ import {
   createToolResultEvent,
   createReasoningEvent,
   createThinkingCompleteEvent,
-  createToolInterruptEvent,
+  createPromptRequestEvent,
   extractTextContent,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
@@ -48,7 +48,7 @@ import {
   isAnswerAction,
   isStructuredAnswerAction,
   isExecuteToolAction,
-  isInterruptToolAction,
+  isToolPromptAction,
 } from './actions';
 import type { ToolCallResult } from './actions';
 
@@ -57,7 +57,7 @@ export type ConvertedEvents =
   | MessageCompleteEvent
   | ThinkingCompleteEvent
   | ToolCallEvent
-  | ToolInterruptEvent
+  | PromptRequestEvent
   | BrowserToolCallEvent
   | ToolResultEvent
   | ReasoningEvent;
@@ -198,13 +198,10 @@ export const convertGraphEvents = ({
             return of(...toolResultEvents);
           }
 
-          if (isInterruptToolAction(nextAction)) {
-            const toolId = toolCallIdToIdMap.get(nextAction.tool_call_id);
+          if (isToolPromptAction(nextAction)) {
             return of(
-              createToolInterruptEvent({
-                toolCallId: nextAction.tool_call_id,
-                toolId: toolId ?? 'unknown',
-                interrupt: nextAction.interrupt,
+              createPromptRequestEvent({
+                prompt: nextAction.prompt,
               })
             );
           }

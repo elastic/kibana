@@ -24,14 +24,14 @@ import type {
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
-  InterruptManager,
+  PromptManager,
 } from '@kbn/onechat-server/runner';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
-import { createEmptyRunContext, createInterruptManager, initInterruptManager } from './utils';
+import { createEmptyRunContext, createInterruptManager, initPromptManager } from './utils';
 import { createResultStore } from './tool_result_store';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
@@ -47,7 +47,7 @@ export interface CreateScopedRunnerDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
-  interruptManager: InterruptManager;
+  promptManager: PromptManager;
   trackingService?: TrackingService;
   // other deps
   logger: Logger;
@@ -59,7 +59,7 @@ export interface CreateScopedRunnerDeps {
 
 export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
-  'request' | 'defaultConnectorId' | 'resultStore' | 'modelProvider' | 'interruptManager'
+  'request' | 'defaultConnectorId' | 'resultStore' | 'modelProvider' | 'promptManager'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
 };
@@ -132,7 +132,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
       const resultStore = createResultStore();
-      const interruptManager = createInterruptManager();
+      const promptManager = createInterruptManager();
       const modelProvider = modelProviderFactory({ request, defaultConnectorId });
       const allDeps = {
         ...runnerDeps,
@@ -140,7 +140,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         resultStore,
-        interruptManager,
+        promptManager,
       };
       const runner = createScopedRunner(allDeps);
       return runner.runTool(otherParams);
@@ -148,7 +148,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runInternalTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
       const resultStore = createResultStore();
-      const interruptManager = createInterruptManager();
+      const promptManager = createInterruptManager();
       const modelProvider = modelProviderFactory({ request, defaultConnectorId });
       const allDeps = {
         ...runnerDeps,
@@ -156,7 +156,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         resultStore,
-        interruptManager,
+        promptManager,
       };
       const runner = createScopedRunner(allDeps);
       return runner.runInternalTool(otherParams);
@@ -165,9 +165,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const { request, defaultConnectorId, ...otherParams } = params;
       const resultStore = createResultStore(params.agentParams.conversation?.rounds);
 
-      const interruptManager = createInterruptManager();
-      initInterruptManager({
-        interruptManager,
+      const promptManager = createInterruptManager();
+      initPromptManager({
+        promptManager,
         conversation: params.agentParams.conversation,
         input: params.agentParams.nextInput,
       });
@@ -179,7 +179,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         resultStore,
-        interruptManager,
+        promptManager,
       };
       const runner = createScopedRunner(allDeps);
       return runner.runAgent(otherParams);

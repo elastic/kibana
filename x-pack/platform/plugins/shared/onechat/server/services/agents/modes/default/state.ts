@@ -8,7 +8,7 @@
 import { Annotation } from '@langchain/langgraph';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
-import type { InterruptRequest } from '@kbn/onechat-common/chat/interruptions';
+import type { AgentPrompt } from '@kbn/onechat-common/agents/prompts';
 import type { AnswerAgentAction, ResearchAgentAction } from './actions';
 
 export const StateAnnotation = Annotation.Root({
@@ -43,7 +43,7 @@ export const StateAnnotation = Annotation.Root({
   }),
   // outputs
   interrupted: Annotation<boolean>(),
-  interruption: Annotation<InterruptRequest>(),
+  prompt: Annotation<AgentPrompt>(),
   finalAnswer: Annotation<string>(),
 });
 

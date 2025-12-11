@@ -8,7 +8,7 @@
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
 import type { Attachment, AttachmentInput } from '../attachments';
-import type { InterruptRequest } from './interruptions';
+import type { AgentPrompt } from '../agents/prompts';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -154,7 +154,7 @@ export enum ConversationRoundStatus {
   /** the round is completed */
   completed = 'completed',
   /** round has been interrupted and is awaiting user input */
-  interruptionPending = 'interruption_pending',
+  awaitingPrompt = 'awaiting_prompt',
 }
 
 /**
@@ -166,8 +166,8 @@ export interface ConversationRound {
   id: string;
   /** current status of the round */
   status: ConversationRoundStatus;
-  /** if status is interrupt_pending, contains the interrupt request*/
-  current_interrupt?: InterruptRequest;
+  /** if status is awaiting_prompt, contains the current prompt request*/
+  pending_prompt?: AgentPrompt;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */

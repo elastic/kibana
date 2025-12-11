@@ -54,8 +54,8 @@ export {
   type ThinkingCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
-  type ToolInterruptEventData,
-  type ToolInterruptEvent,
+  type PromptRequestEventData,
+  type PromptRequestEvent,
   isToolCallEvent,
   isBrowserToolCallEvent,
   isToolResultEvent,
@@ -68,5 +68,5 @@ export {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isConversationIdSetEvent,
-  isToolInterruptEvent,
+  isPromptRequestEvent,
 } from './events';

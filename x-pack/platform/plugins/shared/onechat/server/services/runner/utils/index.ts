@@ -14,4 +14,4 @@ export { createToolEventEmitter, createAgentEventEmitter } from './events';
 export { createAttachmentsService } from './attachments';
 export { createToolProvider } from './tools';
 export { extractConversationToolResults } from './extract_conversation_tool_results';
-export { createInterruptManager, initInterruptManager } from './interrupts';
+export { createInterruptManager, initPromptManager } from './interrupts';

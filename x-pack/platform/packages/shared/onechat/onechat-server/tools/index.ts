@@ -21,7 +21,7 @@ export {
   type ToolHandlerReturn,
   type ToolHandlerContext,
   type ToolHandlerResult,
-  type ToolHandlerInterruptReturn,
+  type ToolHandlerPromptReturn,
   type ToolHandlerStandardReturn,
   isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,

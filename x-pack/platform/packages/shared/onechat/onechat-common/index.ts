@@ -149,5 +149,5 @@ export {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isToolProgressEvent,
-  isToolInterruptEvent,
+  isPromptRequestEvent,
 } from './chat';
