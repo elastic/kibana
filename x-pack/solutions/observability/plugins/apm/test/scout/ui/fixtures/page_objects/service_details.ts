@@ -33,7 +33,7 @@ export class ServiceDetailsPage {
         rangeTo: end,
       })}`
     );
-    await this.page.getByTestId('apmMainTemplateHeaderServiceName').waitFor();
+    await this.page.waitForLoadingIndicatorHidden();
   }
 
   // #region Go to Tabs
@@ -53,7 +53,7 @@ export class ServiceDetailsPage {
         rangeTo: end,
       })}`
     );
-    await this.page.getByTestId(`${tabName}Tab`).waitFor();
+    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async gotoOverviewTab(params: { serviceName: string; start: string; end: string }) {

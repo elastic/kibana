@@ -1,0 +1,40 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt';
+
+export class DependenciesInventoryPage {
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+
+  async gotoPage(params: { start: string; end: string }) {
+    const { start, end } = params;
+
+    await this.page.goto(
+      `${this.kbnUrl.app('apm')}/dependencies/inventory?${new URLSearchParams({
+        rangeFrom: start,
+        rangeTo: end,
+      })}`
+    );
+    await this.page.waitForLoadingIndicatorHidden();
+  }
+
+  async expectPageHeaderVisible() {
+    await expect(this.page.getByRole('heading', { name: 'Dependencies' })).toBeVisible();
+  }
+
+  async expectDependenciesTableVisible() {
+    await expect(this.page.getByTestId('dependenciesTable')).toBeVisible();
+  }
+
+  async expectDependencyInDependenciesTable(dependencyName: string) {
+    await expect(this.page.getByRole('link', { name: dependencyName })).toBeVisible();
+  }
+
+  async clickDependencyInDependenciesTable(dependencyName: string) {
+    await this.page.getByRole('link', { name: dependencyName }).click();
+  }
+}
