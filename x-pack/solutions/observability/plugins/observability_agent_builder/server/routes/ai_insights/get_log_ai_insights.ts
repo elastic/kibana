@@ -46,10 +46,14 @@ export async function getLogAiInsights({
           ${id}
           </LogEntryId>
           <LogEntryFields>
+          \`\`\`json
           ${safeJsonStringify(fields)}
+          \`\`\`
           </LogEntryFields>
           <ServiceSummary>
+          \`\`\`json
           ${safeJsonStringify(serviceSummary)}
+          \`\`\`
           </ServiceSummary>
           `),
       },
