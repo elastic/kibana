@@ -8,7 +8,6 @@
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { Walker, type WalkerAstNode } from '../../ast';
-import { getBracketsToClose } from '../../commands/definitions/utils/ast';
 
 export const getVariablesHoverContent = (
   node?: WalkerAstNode,
@@ -29,26 +28,3 @@ export const getVariablesHoverContent = (
 
   return hoverContents;
 };
-
-/**
- * Corrects the query syntax by closing any unclosed brackets and removing incomplete args.
- * @param offset
- * @param query
- * @returns
- */
-export function correctQuerySyntax(query: string, offset: number): string {
-  // Dispose any following commands after the current offset
-  const nextPipeIndex = query.indexOf('|', offset);
-  if (nextPipeIndex !== -1) {
-    query = query.substring(0, nextPipeIndex);
-  }
-
-  // Close any pending to be closed bracket
-  const bracketsToAppend = getBracketsToClose(query);
-  query += bracketsToAppend.join('');
-
-  // Replace partially written function arguments: ,) with )
-  query = query.replace(/,\s*\)/g, ')');
-
-  return query;
-}

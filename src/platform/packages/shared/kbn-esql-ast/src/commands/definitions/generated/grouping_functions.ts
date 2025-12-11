@@ -47,11 +47,14 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'date_period',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -63,23 +66,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -91,107 +100,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'keyword',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'date',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'text',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'keyword',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'date',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'keyword',
-          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -203,23 +134,63 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
-          type: 'text',
+          type: 'date',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -231,51 +202,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
-          type: 'text',
+          type: 'keyword',
           optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'date',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'text',
-          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -287,23 +236,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
-          type: 'text',
+          type: 'keyword',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -315,11 +270,116 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -331,11 +391,14 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'date_period',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -347,23 +410,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -375,23 +444,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -403,23 +478,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -431,23 +512,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -459,23 +546,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -487,23 +580,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -515,23 +614,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'text',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -543,23 +648,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'text',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -571,23 +682,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'text',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -599,11 +716,14 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -615,11 +735,14 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'double',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -631,11 +754,14 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -647,23 +773,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -675,23 +807,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -703,51 +841,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -759,23 +875,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
-          type: 'integer',
+          type: 'double',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -787,23 +909,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -815,51 +943,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
           type: 'long',
           optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -871,23 +977,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'long',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
-          type: 'long',
+          type: 'double',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -899,11 +1011,82 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'long',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -915,11 +1098,14 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'double',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -931,11 +1117,14 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -947,323 +1136,29 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'long',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1273,25 +1168,31 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1301,25 +1202,31 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1329,25 +1236,31 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1357,25 +1270,31 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1385,25 +1304,31 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1413,25 +1338,31 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'long',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1441,25 +1372,31 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'long',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
       ],
@@ -1469,25 +1406,50 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
         {
           name: 'from',
           type: 'long',
           optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -1499,11 +1461,358 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric or date expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'long',
           optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           constantOnly: true,
         },
       ],
@@ -1541,6 +1850,7 @@ const categorizeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
+          description: 'Expression to categorize',
         },
       ],
       license: 'platinum',
@@ -1552,6 +1862,7 @@ const categorizeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
+          description: 'Expression to categorize',
         },
       ],
       license: 'platinum',
@@ -1581,6 +1892,7 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'date_period',
           optional: false,
+          description: 'Desired bucket size.',
         },
       ],
       returnType: 'date',
@@ -1591,6 +1903,7 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'date_period',
           optional: false,
+          description: 'Desired bucket size.',
         },
       ],
       returnType: 'date_nanos',
@@ -1601,6 +1914,7 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
+          description: 'Desired bucket size.',
         },
       ],
       returnType: 'date',
@@ -1611,6 +1925,7 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
+          description: 'Desired bucket size.',
         },
       ],
       returnType: 'date_nanos',
