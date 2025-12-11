@@ -188,6 +188,11 @@ const ESQLEditorInternal = function ESQLEditor({
   const [abortController, setAbortController] = useState(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useState(false);
 
+  // Refs for dynamic dependencies that commands need to access
+  const esqlVariablesRef = useRef(esqlVariables);
+  const controlsContextRef = useRef(controlsContext);
+  const isVisorOpenRef = useRef(isVisorOpen);
+
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -219,7 +224,6 @@ const ESQLEditorInternal = function ESQLEditor({
           setCodeStateOnSubmission(currentValue);
         }
 
-        // TODO: add rest of options
         if (currentValue) {
           telemetryService.trackQuerySubmitted({
             source,
@@ -310,6 +314,13 @@ const ESQLEditorInternal = function ESQLEditor({
       variablesService?.disableCreateControlSuggestion();
     }
   }, [variablesService, controlsContext, esqlVariables]);
+
+  // Update refs used for the custom commands
+  useEffect(() => {
+    esqlVariablesRef.current = esqlVariables;
+    controlsContextRef.current = controlsContext;
+    isVisorOpenRef.current = isVisorOpen;
+  }, [esqlVariables, controlsContext, isVisorOpen]);
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
@@ -756,6 +767,10 @@ const ESQLEditorInternal = function ESQLEditor({
     ]
   );
 
+  const toggleVisor = useCallback(() => {
+    setIsVisorOpen(!isVisorOpenRef.current);
+  }, []);
+
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
       // forces refresh
@@ -829,6 +844,10 @@ const ESQLEditorInternal = function ESQLEditor({
     [esqlCallbacks, telemetryCallbacks]
   );
 
+  const signatureProvider = useMemo(() => {
+    return ESQLLang.getSignatureProvider?.(esqlCallbacks);
+  }, [esqlCallbacks]);
+
   const inlineCompletionsProvider = useMemo(() => {
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
@@ -888,6 +907,10 @@ const ESQLEditorInternal = function ESQLEditor({
       hover: {
         above: false,
       },
+      parameterHints: {
+        enabled: true,
+        cycle: true,
+      },
       accessibilitySupport: 'auto',
       autoIndent: 'keep',
       automaticLayout: true,
@@ -937,6 +960,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
   const [labelInFocus, setLabelInFocus] = useState(false);
+
   const editorPanel = (
     <>
       <Global styles={lookupIndexBadgeStyle} />
@@ -1036,6 +1060,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
+                  signatureProvider={signatureProvider}
                   inlineCompletionsProvider={inlineCompletionsProvider}
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
@@ -1057,15 +1082,15 @@ const ESQLEditorInternal = function ESQLEditor({
                       getCurrentQuery: () =>
                         fixESQLQueryWithVariables(
                           editorRef.current?.getValue() || '',
-                          esqlVariables
+                          esqlVariablesRef.current
                         ),
-                      esqlVariables,
-                      controlsContext,
+                      esqlVariables: esqlVariablesRef,
+                      controlsContext: controlsContextRef,
                       openTimePickerPopover,
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, setIsVisorOpen, isVisorOpen);
+                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;
@@ -1273,5 +1298,4 @@ const ESQLEditorInternal = function ESQLEditor({
 };
 
 export const ESQLEditor = withRestorableState(ESQLEditorInternal);
-
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;
