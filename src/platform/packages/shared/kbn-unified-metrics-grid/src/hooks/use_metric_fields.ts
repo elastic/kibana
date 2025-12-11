@@ -16,17 +16,33 @@ import { hasValue } from '../common/utils/fields';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { useMetricFieldsFilter } from './use_metric_fields_filter';
 
+interface UseMetricFieldsReturn {
+  allMetricFields: MetricField[];
+  visibleMetricFields: MetricField[];
+  dimensions: Dimension[];
+}
+
 /**
  * Builds MetricField[] from the context's metric fieldSpecs and sampleRowByMetric.
  * Returns:
- * - metricFields: Complete set of metric fields (for dimension selector, filtering source)
- * - visibleFields: Currently visible fields based on filters (for grid, value selector)
+ * - allMetricFields: Complete set of metric fields (for dimension selector, filtering source)
+ * - visibleMetricFields: Currently visible fields based on filters (for grid, value selector)
+ * - dimensions: Unique dimensions extracted from sampled metric fields
  */
-export const useMetricFields = () => {
+export const useMetricFields = (): UseMetricFieldsReturn => {
   const { searchTerm, selectedDimensions, selectedValuesMetricFields, onDimensionsChange } =
     useMetricsExperienceState();
   const { metricFields, dimensions, sampleRowByMetric } = useMetricsExperienceFieldsContext();
 
+  // Ref to access current values in effects without adding them to dependencies
+  const stateRef = useRef({
+    selectedDimensions: [] as Dimension[],
+    returnValue: null as UseMetricFieldsReturn | null,
+  });
+
+  stateRef.current.selectedDimensions = selectedDimensions;
+
+  // Computed values
   const sampledMetricFields = useMemo(() => {
     if (metricFields.length === 0 || sampleRowByMetric.size === 0) {
       return [];
@@ -54,38 +70,29 @@ export const useMetricFields = () => {
     dimensionValuesMetricFields: selectedValuesMetricFields,
   });
 
-  const lastValueRef = useRef<{
-    allMetricFields: MetricField[];
-    visibleMetricFields: MetricField[];
-    dimensions: Dimension[];
-  }>({
-    allMetricFields: sampledMetricFields,
-    visibleMetricFields,
-    dimensions: sampledDimensions,
-  });
-
-  lastValueRef.current = {
+  // Update return value
+  stateRef.current.returnValue = {
     allMetricFields: sampledMetricFields,
     visibleMetricFields,
     dimensions: sampledDimensions,
   };
 
-  // Sync selected dimensions when available dimensions change
+  // Sync selected dimensions when context data changes - removes invalid selections
   useEffect(() => {
-    const currentDimensions = lastValueRef.current.dimensions;
-    if (currentDimensions.length === 0) {
+    const currentSelection = stateRef.current.selectedDimensions;
+    if (sampledDimensions.length === 0 || currentSelection.length === 0) {
       return;
     }
 
-    const availableDimNames = new Set(currentDimensions.map((d) => d.name));
-    const validSelection = selectedDimensions.filter((d) => availableDimNames.has(d.name));
+    const availableDimNames = new Set(sampledDimensions.map((d) => d.name));
+    const validSelection = currentSelection.filter((d) => availableDimNames.has(d.name));
 
-    if (validSelection.length !== selectedDimensions.length) {
+    if (validSelection.length !== currentSelection.length) {
       onDimensionsChange(validSelection);
     }
-  }, [selectedDimensions, onDimensionsChange, dimensions]);
+  }, [onDimensionsChange, sampledDimensions]);
 
-  return lastValueRef.current;
+  return stateRef.current.returnValue;
 };
 
 // utility functions

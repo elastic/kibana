@@ -87,7 +87,7 @@ export const MetricsExperienceGrid = ({
   );
 
   if (allMetricFields.length === 0 && selectedDimensionValues.length === 0) {
-    return <EmptyState />;
+    return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
   return (

@@ -28,6 +28,12 @@ import * as metricsExperienceFieldsCapsProvider from '../context/metrics_experie
 
 jest.mock('../context/metrics_experience_state_provider');
 jest.mock('../context/metrics_experience_fields_provider');
+jest.mock('@kbn/ebt-tools', () => ({
+  PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  usePerformanceContext: () => ({
+    onPageReady: jest.fn(),
+  }),
+}));
 jest.mock('../hooks');
 jest.mock('./metrics_experience_grid_content', () => ({
   MetricsExperienceGridContent: jest.fn(() => (
@@ -61,7 +67,7 @@ const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.Mock
   typeof hooks.useMetricsGridFullScreen
 >;
 
-const useMetricFieldsCapsContextMock =
+const useMetricFieldsContextMock =
   metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext as jest.MockedFunction<
     typeof metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext
   >;
@@ -149,7 +155,7 @@ describe('MetricsExperienceGrid', () => {
       },
     });
 
-    useMetricFieldsCapsContextMock.mockReturnValue({
+    useMetricFieldsContextMock.mockReturnValue({
       metricFields: [],
       dimensions: [],
       sampleRowByMetric: new Map(),
@@ -169,7 +175,7 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('renders the loading state when fields API is fetching', () => {
-    useMetricFieldsCapsContextMock.mockReturnValue({
+    useMetricFieldsContextMock.mockReturnValue({
       metricFields: [],
       dimensions: [],
       sampleRowByMetric: new Map(),
@@ -182,7 +188,7 @@ describe('MetricsExperienceGrid', () => {
       dimensions: [],
     });
 
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} isChartLoading />, {
       wrapper: IntlProvider,
     });
 
@@ -190,7 +196,7 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('renders the no data state covering the entire container when Fields API returns no data', () => {
-    useMetricFieldsCapsContextMock.mockReturnValue({
+    useMetricFieldsContextMock.mockReturnValue({
       metricFields: [],
       dimensions: [],
       sampleRowByMetric: new Map(),
