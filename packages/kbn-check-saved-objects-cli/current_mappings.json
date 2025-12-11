@@ -1088,7 +1088,7 @@
       "features": {
         "type": "keyword"
       },
-      "kscId": {
+      "kscIds": {
         "type": "keyword"
       },
       "name": {
