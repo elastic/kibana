@@ -27,7 +27,9 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
       announceOnMount
       color="danger"
       iconType="alert"
-      title={title}
+      title={i18n.translate('observabilityAgentBuilder.aiInsight.errorTitle', {
+    defaultMessage: 'Failed to generate AI insight',
+  })}
       data-test-subj={`AiInsightErrorBanner`}
     >
       <p>{message}</p>
