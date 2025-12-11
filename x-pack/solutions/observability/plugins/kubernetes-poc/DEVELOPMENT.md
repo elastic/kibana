@@ -66,7 +66,7 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 
 ### Plugin Structure
 ```
-kubernetes-poc/
+x-pack/solutions/observability/plugins/kubernetes-poc/
 ├── common/              # Shared code (client & server)
 ├── public/              # Client-side code
 │   ├── application/     # React components
@@ -87,16 +87,6 @@ kubernetes-poc/
 
 ## Development Workflow
 
-### Bootstrap Plugin
-```bash
-yarn kbn bootstrap
-```
-
-### Start Kibana
-```bash
-yarn start
-```
-
 ### Access Plugin
 - **URL**: http://localhost:5601/app/kubernetesPoc
 - **API Endpoint**: `GET /internal/kubernetes_poc/hello_world`
@@ -110,6 +100,8 @@ yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc --no-watchm
 ## API Endpoints
 
 ### Hello World
+> **Note**: This is a temporary endpoint for initial plugin setup and should be removed once actual implementation for the project is added.
+
 - **Endpoint**: `GET /internal/kubernetes_poc/hello_world`
 - **Security**: Requires `kibana_read` privilege
 - **Response**: 
@@ -134,16 +126,34 @@ yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc --no-watchm
 
 ## Useful Commands
 
-```bash
-# Check for linting errors
-yarn kbn run lint --scope @kbn/kubernetes-poc-plugin
+Verify **only the files you changed in this commit**:
 
-# Type check
-yarn kbn run type-check --scope @kbn/kubernetes-poc-plugin
+1. **Branch validation:** Verify you're on the correct branch (`git branch --show-current`)
+2. **Bootstrap check:** Run `yarn kbn bootstrap` if any dependencies changed
+3. **Linting (scoped):** Run ESLint only on changed files - MUST pass with 0 errors
 
-# Build plugin
-yarn kbn run build --focus @kbn/kubernetes-poc-plugin
-```
+   ```bash
+   # Lint changed files
+   node scripts/eslint --fix $(git diff --name-only)
+   ```
+
+4. **Type checking (scoped):** Check types only for affected project(s) - MUST pass with 0 errors
+
+   ```bash
+   # Pass closest tsconfig.json file to your changed tests/helpers
+   node scripts/type_check --project x-pack/solutions/observability/plugins/kubernetes-poc/tsconfig.json
+   ```
+
+5. **Unit tests (scoped):** Run tests only for affected code - MUST pass with 0 failures
+
+   ```bash
+   # Run tests for specific files/directories you changed
+   yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc/path/to/changed/file.test.ts --no-watchman
+   yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc --no-watchman
+
+   # Run tests matching a pattern
+   yarn test:jest --testPathPattern=kubernetes-poc --no-watchman
+   ```
 
 ## References
 
