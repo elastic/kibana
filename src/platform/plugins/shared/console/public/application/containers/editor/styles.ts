@@ -42,7 +42,7 @@ export const useHighlightedLinesClassName = () => {
       position: absolute;
       top: 0;
       bottom: calc(-${euiTheme.size.base} * 0.1);
-      left: calc(-${euiTheme.size.base} * 0.5);
+      left: calc(-${euiTheme.size.base} * 0.35);
       right: 0;
       background: ${transparentize(euiTheme.colors.primary, 0.05)};
       border: ${euiTheme.border.thin};
