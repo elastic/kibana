@@ -29,7 +29,7 @@ const getNavWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolea
   flex-direction: column;
   gap: ${isCollapsed ? theme.size.s : theme.size.m};
   height: 100%;
-  padding-bottom: ${theme.size.xs};
+  padding-bottom: ${theme.size.s};
   width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
 `;
 

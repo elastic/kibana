@@ -52,7 +52,7 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
       <EuiButtonIcon
         data-test-subj="sideNavCollapseButton"
         css={styles.sideNavCollapseButton}
-        size="m"
+        size="s"
         color="text"
         iconType={iconType}
         aria-label={
