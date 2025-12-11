@@ -65,19 +65,6 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
         });
       `,
     },
-    // Single bare describe()
-    {
-      code: dedent`
-        describe('my test suite', () => {
-          test('should work', () => {
-            expect(true).toBe(true);
-          });
-        });
-      `,
-    },
-  ],
-
-  invalid: [
     // Two bare describe() calls
     {
       code: dedent`
@@ -92,12 +79,10 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
           });
         });
       `,
-      errors: [
-        {
-          message: ERROR_MSG,
-        },
-      ],
     },
+  ],
+
+  invalid: [
     // Two apiTest.describe() calls
     {
       code: dedent`
@@ -149,10 +134,10 @@ ruleTester.run('@kbn/eslint/scout_max_one_describe', rule, {
         },
       ],
     },
-    // Mixed bare and method describe calls
+    // Two different method describe calls
     {
       code: dedent`
-        describe('bare describe', () => {
+        apiTest.describe('api describe', () => {
           test('test 1', () => {});
         });
 

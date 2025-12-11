@@ -14,16 +14,11 @@ const ERROR_MSG =
   'Only one root-level describe block is allowed per file. This is required for auto-skip functionality in CI.';
 
 /**
- * Checks if a node represents a describe() call (bare or method)
+ * Checks if a node represents a method describe() call (e.g., test.describe, apiTest.describe)
  * @param {CallExpression} node
- * @returns {boolean} True if this is a describe call
+ * @returns {boolean} True if this is a method describe call
  */
 const isDescribeCall = (node) => {
-  // Check for bare describe() call
-  if (node.callee.type === 'Identifier' && node.callee.name === 'describe') {
-    return true;
-  }
-
   // Check for *.describe() pattern
   if (
     node.callee.type === 'MemberExpression' &&
