@@ -43,7 +43,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       steps: [
         {
           action: 'math',
-          expression: 'attributes.price * attributes.quantity', // To make tinymath parse dotted fields correctly
+          expression: 'attributes.price * attributes.quantity',
           to: 'attributes.total',
         } as MathProcessor,
       ],
@@ -59,7 +59,10 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     await testBed.ingest('esql-math-nested', docs);
     const esqlResult = await esql.queryOnIndex('esql-math-nested', query);
 
-    expect(ingestResult[0]).toHaveProperty('attributes.total', 100);
+    // Ingest pipeline uses flat key storage: attributes.total as separate key
+    const ingestDoc = ingestResult[0] as Record<string, unknown>;
+    expect(ingestDoc['attributes.total']).toBe(100);
+    // ES|QL also produces a flat key
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(
       expect.objectContaining({ 'attributes.total': 100 })
     );
@@ -523,7 +526,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
   // === Validation Errors (consistent rejection) ===
   apiTest(
     'should consistently reject unsupported aggregation functions in both transpilers',
-    async () => {
+    async ({ testBed }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -534,14 +537,23 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
-        /Function 'mean' is not supported/
+      // Ingest pipeline: generates error-throwing script, error at runtime
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const docs = [{ values: 10 }];
+      const { errors: ingestErrors } = await testBed.ingest(
+        'ingest-math-unsupported',
+        docs,
+        processors
       );
-      expect(() => transpileEsql(streamlangDSL)).toThrow(/Function 'mean' is not supported/);
+      expect(ingestErrors.length).toBeGreaterThan(0);
+      expect(ingestErrors[0].caused_by?.reason).toMatch(/mean.*not supported/i);
+
+      // ES|QL: throws during transpilation
+      expect(() => transpileEsql(streamlangDSL)).toThrow(/mean.*not supported/i);
     }
   );
 
-  apiTest('should consistently reject invalid syntax in both transpilers', async () => {
+  apiTest('should consistently reject invalid syntax in both transpilers', async ({ testBed }) => {
     const streamlangDSL: StreamlangDSL = {
       steps: [
         {
@@ -552,8 +564,18 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    // Both transpilers should throw on invalid syntax
-    expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(/parse/i);
+    // Ingest pipeline: generates error-throwing script, error at runtime
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const docs = [{ price: 10, quantity: 5 }];
+    const { errors: ingestErrors } = await testBed.ingest(
+      'ingest-math-syntax-error',
+      docs,
+      processors
+    );
+    expect(ingestErrors.length).toBeGreaterThan(0);
+    expect(ingestErrors[0].caused_by?.reason).toMatch(/parse/i);
+
+    // ES|QL: throws during transpilation
     expect(() => transpileEsql(streamlangDSL)).toThrow(/parse/i);
   });
 

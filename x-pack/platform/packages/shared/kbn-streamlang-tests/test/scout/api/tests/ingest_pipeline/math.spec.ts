@@ -123,7 +123,8 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.total', 100);
+      const doc = (ingestedDocs as Array<Record<string, unknown>>)[0];
+      expect(doc['attributes.total']).toBe(100);
     });
 
     // === Custom Behaviors: mod and neq ===
@@ -527,7 +528,9 @@ apiTest.describe(
     );
 
     // === Validation Errors ===
-    apiTest('should throw error for unsupported function', async () => {
+    // Math processor generates error-throwing scripts for invalid expressions,
+    // so errors are reported at runtime via simulation rather than during transpilation
+    apiTest('should report error for unsupported function via simulation', async ({ testBed }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -538,10 +541,16 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrow(/Function 'mean' is not supported/);
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ values: 10 }];
+      const { errors } = await testBed.ingest('stream-e2e-test-math-error', docs, processors);
+
+      // Should have errors from the script processor (error details in caused_by)
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].caused_by?.reason).toMatch(/mean.*not supported/i);
     });
 
-    apiTest('should throw error for invalid syntax', async () => {
+    apiTest('should report error for invalid syntax via simulation', async ({ testBed }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -552,7 +561,17 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrow(/parse/i);
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ price: 10, quantity: 5 }];
+      const { errors } = await testBed.ingest(
+        'stream-e2e-test-math-syntax-error',
+        docs,
+        processors
+      );
+
+      // Should have errors from the script processor (error details in caused_by)
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].caused_by?.reason).toMatch(/parse/i);
     });
   }
 );
