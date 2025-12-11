@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 // TODO: Remove Gradient constants when EUI supports AI gradients (borders, icons, etc.)
+// see https://github.com/elastic/kibana-team/issues/2398
 
 // Shared gradient variables
 const gradientStartPercent = 2.98;
