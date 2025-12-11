@@ -153,15 +153,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await findFirstDocViewerTokens()).to.eql([
         'Text',
+        'Keyword',
         'Text',
+        'Keyword',
         'Date',
         'Text',
+        'Keyword',
         'Number',
         'IP address',
         'Text',
-        'Geo point',
-        'Keyword',
-        'Keyword',
       ]);
     });
 

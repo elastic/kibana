@@ -290,7 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
 
         expect(
-          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+          fieldNames.join(',').startsWith('@message,@message.raw,@tags,@tags.raw,@timestamp,agent')
         ).to.be(true);
       });
 
