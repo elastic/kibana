@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type {
+  StreamlangProcessorDefinitionWithUIAttributes,
+  StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
-import { uniq } from 'lodash';
-import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import type { FieldDefinitionType } from '@kbn/streams-schema/src/fields';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
-import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation, SimulationContext } from './types';
+import { uniq } from 'lodash';
 import type {
   MappedSchemaField,
   SchemaField,
@@ -19,6 +21,13 @@ import type {
 } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type {
+  DetectedField,
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+} from './types';
 
 export function getSourceField(
   processor: StreamlangProcessorDefinitionWithUIAttributes
@@ -47,6 +56,173 @@ export function getSourceField(
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
+}
+
+/**
+ * Recursively collects all descendant step IDs
+ * for a given parent step ID.
+ */
+function collectDescendantStepIds(steps: StreamlangStepWithUIAttributes[], parentId: string) {
+  const ids = new Set<string>();
+
+  steps.forEach((step) => {
+    if (step.parentId === parentId) {
+      ids.add(step.customIdentifier);
+      collectDescendantStepIds(steps, step.customIdentifier).forEach((childId) => ids.add(childId));
+    }
+  });
+
+  return ids;
+}
+
+/**
+ * For the cases when we need to run a partial simulation
+ * for a particular isolated step, this function collects
+ * all steps to the target step including its ancestors
+ * because they might affect the target step.
+ *
+ * The collected steps include:
+ * - The condition step itself
+ * - All preceding steps
+ * - All descendant steps of the condition
+ */
+function collectStepIdsForCondition(steps: StreamlangStepWithUIAttributes[], conditionId: string) {
+  const conditionIndex = steps.findIndex((step) => step.customIdentifier === conditionId);
+
+  if (conditionIndex === -1) {
+    return [];
+  }
+
+  const descendants = collectDescendantStepIds(steps, conditionId);
+  const ids = new Set<string>();
+
+  steps.forEach((step, index) => {
+    if (
+      index < conditionIndex ||
+      step.customIdentifier === conditionId ||
+      descendants.has(step.customIdentifier)
+    ) {
+      ids.add(step.customIdentifier);
+    }
+  });
+
+  return Array.from(ids);
+}
+
+/**
+ * Collects all processor IDs related to an isolated
+ * condition step, including:
+ * - All processors within the target condition
+ * - Processors in preceding steps before the target condition
+ */
+export function collectProcessorIdsForCondition(
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+) {
+  const stepIdsForCondition = new Set(collectStepIdsForCondition(steps, conditionId));
+  if (stepIdsForCondition.size === 0) {
+    return [];
+  }
+
+  return steps
+    .filter((step) => stepIdsForCondition.has(step.customIdentifier))
+    .filter((step) => isActionBlock(step))
+    .map((step) => step.customIdentifier);
+}
+
+/**
+ * Recursively collects all descendant processor IDs
+ * for a given condition step ID.
+ */
+export function collectDescendantProcessorIdsForCondition(
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+) {
+  const descendantStepIds = collectDescendantStepIds(steps, conditionId);
+
+  if (descendantStepIds.size === 0) {
+    return [];
+  }
+
+  return steps
+    .filter((step) => descendantStepIds.has(step.customIdentifier))
+    .filter((step) => isActionBlock(step))
+    .map((step) => step.customIdentifier);
+}
+
+/**
+ * Collects the document indexes affected by the processors
+ * related to the currently selected condition.
+ */
+export function getConditionDocIndexes(context: SimulationContext): number[] | undefined {
+  if (!context.selectedConditionId) {
+    return undefined;
+  }
+
+  const simulation = context.baseSimulation ?? context.simulation;
+  const processorIds = collectDescendantProcessorIdsForCondition(
+    context.steps,
+    context.selectedConditionId
+  );
+
+  return getAffectedDocumentIndexes(simulation?.documents, processorIds);
+}
+
+/**
+ * Filters documents based on the processors
+ * that affected them during simulation.
+ */
+export function getAffectedDocumentIndexes(
+  documents: Simulation['documents'] | undefined,
+  processorIds: string[]
+) {
+  if (!documents || processorIds.length === 0) {
+    return [];
+  }
+
+  return documents.reduce<number[]>((acc, doc, index) => {
+    if (doc.processed_by?.some((processorId) => processorIds.includes(processorId))) {
+      acc.push(index);
+    }
+    return acc;
+  }, []);
+}
+
+/**
+ * Selects an active subset of samples based on
+ * the currently selected condition.
+ */
+export function getActiveSamples(context: SimulationContext) {
+  if (!context.selectedConditionId) {
+    return context.samples;
+  }
+
+  const docIndexes = getConditionDocIndexes(context);
+
+  if (docIndexes === undefined) {
+    return context.samples;
+  }
+  if (!docIndexes.length) {
+    return [];
+  }
+
+  return docIndexes
+    .map((index) => context.samples[index])
+    .filter((sample): sample is SampleDocumentWithUIAttributes => Boolean(sample));
+}
+
+export function getActiveSteps(context: SimulationContext) {
+  if (!context.selectedConditionId) {
+    return context.steps;
+  }
+
+  const stepIds = collectStepIdsForCondition(context.steps, context.selectedConditionId);
+
+  if (!stepIds.length) {
+    return context.steps;
+  }
+
+  return context.steps.filter((step) => stepIds.includes(step.customIdentifier));
 }
 
 export function getAllFieldsInOrder(

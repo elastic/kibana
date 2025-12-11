@@ -46,6 +46,8 @@ export type SimulationEvent =
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'simulation.filterByCondition'; conditionId: string }
+  | { type: 'simulation.clearConditionFilter' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
@@ -68,7 +70,9 @@ export interface SimulationContext {
   };
   steps: StreamlangStepWithUIAttributes[];
   samples: SampleDocumentWithUIAttributes[];
+  selectedConditionId?: string;
   simulation?: Simulation;
+  baseSimulation?: Simulation;
   streamName: string;
   streamType: 'wired' | 'classic' | 'unknown';
 }

@@ -65,6 +65,8 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.refresh' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
+  | { type: 'simulation.clearConditionFilter' }
+  | { type: 'simulation.filterByCondition'; conditionId: string }
   | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }
   | { type: 'dataSources.select'; id: string }
   | { type: 'dataSources.closeManagement' }

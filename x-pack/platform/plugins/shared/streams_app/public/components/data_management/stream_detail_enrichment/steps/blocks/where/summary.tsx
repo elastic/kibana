@@ -6,16 +6,20 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isWhereBlock } from '@kbn/streamlang';
-import React from 'react';
-import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { CreateStepButton } from '../../../create_step_button';
-import { StepContextMenu } from '../context_menu';
-import { BlockDisableOverlay } from '../block_disable_overlay';
+import { isWhereBlock } from '@kbn/streamlang';
+import { useSelector } from '@xstate5/react';
+import React from 'react';
 import { ConditionDisplay } from '../../../../shared';
+import { CreateStepButton } from '../../../create_step_button';
 import type { StepConfigurationProps } from '../../steps_list';
+import { BlockDisableOverlay } from '../block_disable_overlay';
+import { StepContextMenu } from '../context_menu';
+
+interface WhereBlockSummaryProps extends StepConfigurationProps {
+  onClick?: () => void;
+}
 
 export const WhereBlockSummary = ({
   stepRef,
@@ -25,10 +29,12 @@ export const WhereBlockSummary = ({
   isFirstStepInLevel,
   isLastStepInLevel,
   readOnly = false,
-}: StepConfigurationProps) => {
+  onClick,
+}: WhereBlockSummaryProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
-  const handleTitleClick = () => {
+  const handleTitleClick = (event?: React.MouseEvent) => {
+    event?.stopPropagation();
     stepRef.send({ type: 'step.edit' });
   };
 
@@ -52,6 +58,7 @@ export const WhereBlockSummary = ({
           // Facilitates text truncation
           overflow: hidden;
         `}
+        onClick={onClick}
       >
         <ConditionDisplay
           condition={step.where}

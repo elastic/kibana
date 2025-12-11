@@ -13,7 +13,7 @@ import { ActionBlock } from './blocks/action';
 import type { StreamEnrichmentContextType } from '../state_management/stream_enrichment_state_machine';
 import { WhereBlock } from './blocks/where';
 import type { RootLevelMap } from '../state_management/stream_enrichment_state_machine/utils';
-import type { StepsProcessingSummaryMap } from '../state_management/use_steps_processing_summary';
+import type { StepsProcessingSummaryMap } from '../hooks/use_steps_processing_summary';
 
 export interface StepConfigurationProps {
   stepRef: StreamEnrichmentContextType['stepRefs'][number];

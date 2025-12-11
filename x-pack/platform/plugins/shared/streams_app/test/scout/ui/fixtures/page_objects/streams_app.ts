@@ -9,11 +9,11 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import {
-  expect,
+  EuiCodeBlockWrapper,
+  EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  EuiComboBoxWrapper,
-  EuiCodeBlockWrapper,
+  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';

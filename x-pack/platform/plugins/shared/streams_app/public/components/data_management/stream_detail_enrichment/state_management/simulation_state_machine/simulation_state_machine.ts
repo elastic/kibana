@@ -4,29 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { assign, setup } from 'xstate5';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import { isEmpty } from 'lodash';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, setup } from 'xstate5';
+import type { MappedSchemaField } from '../../../schema_editor/types';
 import { getValidSteps } from '../../utils';
-import type {
-  SimulationInput,
-  SimulationContext,
-  SimulationEvent,
-  Simulation,
-  SimulationMachineDeps,
-  SampleDocumentWithUIAttributes,
-} from './types';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
-  createSimulationRunnerActor,
   createSimulationRunFailureNotifier,
+  createSimulationRunnerActor,
 } from './simulation_runner_actor';
-import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
-import type { MappedSchemaField } from '../../../schema_editor/types';
+import type {
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+  SimulationEvent,
+  SimulationInput,
+  SimulationMachineDeps,
+} from './types';
+import {
+  getActiveSamples,
+  getActiveSteps,
+  getSchemaFieldsFromSimulation,
+  mapField,
+  unmapField,
+} from './utils';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -57,12 +63,15 @@ export const simulationMachine = setup({
     })),
     storeSteps: assign((_, params: StepsEventParams) => ({
       steps: params.steps,
+      selectedConditionId: undefined,
     })),
     storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
+      selectedConditionId: undefined,
     })),
-    storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
+    storeSimulation: assign(({ context }, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
+      baseSimulation: context.selectedConditionId ? context.baseSimulation : params.simulation,
     })),
     storeExplicitlyEnabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
       explicitlyEnabledPreviewColumns: params.columns,
@@ -111,10 +120,21 @@ export const simulationMachine = setup({
       explicitlyDisabledPreviewColumns: [],
       previewColumnsOrder: [],
       simulation: undefined,
+      baseSimulation: undefined,
       previewDocsFilter: 'outcome_filter_all',
+      selectedConditionId: undefined,
     }),
     resetSteps: assign({ steps: [] }),
-    resetSamples: assign({ samples: [] }),
+    resetSamples: assign({
+      samples: [],
+      selectedConditionId: undefined,
+    }),
+    applyConditionFilter: assign((_, params: { conditionId: string }) => ({
+      selectedConditionId: params.conditionId,
+    })),
+    clearConditionFilter: assign({
+      selectedConditionId: undefined,
+    }),
   },
   delays: {
     processorChangeDebounceTime: 300,
@@ -124,6 +144,9 @@ export const simulationMachine = setup({
     hasSteps: (_, params: StepsEventParams) => !isEmpty(params.steps),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
+    isConditionFilterActive: ({ context }, params: { conditionId: string }) =>
+      context.selectedConditionId === params.conditionId,
+    hasActiveConditionFilter: ({ context }) => Boolean(context.selectedConditionId),
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmAJw1DAJgAs544cOWAHPoeGAjABoQAT0SvzAX39PCmx8IjIQqnCaTlgwPHklJBA1DXDtPQQAVgB2Tx8EV30cyxobfXNDEstLVztDQOD0UM1yZqjaTjowFC4wAH1YKRVYRO1UlE0MxFz8xGtXGgcsh2M5OVtXV0sjHMaQSLCSNsoj4hiwbt6B2Bw0FSw4MeSJqeTM2e9fStLcnP1XE4snZbA59odWhDol0en1BncHk9XElVOpJul3jM8l9soCzH5XHJlkS5NVwe0zicWtDLrCbgjHqNzCiUmi3qAPtiCtssqVLFVDMsbOZ9FkReTTq0VJwePwAMKELAYNDEWA0DAqCD4MAAUR0DxQdEmWC8OuIOAARo8IAqlSrRopxmyMRysXNCnUHDQ-DUtqT9DsVhLqcdpdxeHxbcrVerNdq9QajXgTQIULcrZAo-bnqi0iRptkub4csYcjQcnJzOYciZrHJXMYssGOmQw7LI4ro2rCOwINIc6y81pMYX3YTajRin45PZjI2qmCggcKVKZRGszG4ngAMo9ggsAevF26N04uq5GjGBy1HK31y5KyWZuUoZgFT0JgsMCH535kefApqz5ORciyLJCQqVwSybJcoWOV93z7R4pB-IcCwA4sy0bEUcgcKC5Esetn0hYYaCQ+Jv2RJ00P-ItCjAuQljWUkZxAup9GI6IUAgR4qRbGgADNeCwCA1TQHAVFQ9E-1dQp1kYqtRRrMDCKJMc7CyJYslLLJ9AIgFLBgppJS4niwD4s5BOE0T1WIcTJMdF5f2HWTCXWMoRVyQwVPWBwx35cx8XKQwKkMUkGlgldoj7C1CAwYgjRYOVPxgWBSB0IZtRoHABKkdgAAppWEOBYB7ZLmBgAQwFi+LugAFXQMAAEoLM0MjqrihKUCSlKnkc3NpJck85PcxSvJ8tScQsUpBUqPDgTkYor042gcFgOJ2H3KAACUwAARwwFBODQMBiDwNKpPZYatiKGh+RybT6wbMVLHdfQKhoGcHByPxymBa8VvONaNq23aDqOsATrOi6qKcmjXMWr1inMRbDPrRaPDPKxDEvRaAXMQF7BewGYni4huqgbcouOCASDAGhuq4QgAGt6bg4htrJ6QAEE6DwHtLuPTJLEbMw1gDXkKxKBwCPdb6cbnQE6hFCocnFSKTM6MmKapzWyGkdgexoB58AEns0BodnOeIYgeb5gX+sHQaCxFzSTFRyXSUcWWcVwxj-oDPDRSyesYKXYhCD7eBknZ6jnZHYx3TWO6xWcEOfRcSw9g1kNzm4x446uzI8MCwm3FLGWbF0sdqxxkOHBRytwIegGc-4mLOsSqByq-aOBqLxBcLdlGibAh71kMd0LBx2aq2MUVtjWCLjNz7L1ukUH9sO47TvOwuhd8CxFm0wUK35ZZCTo4FTH+DYjBR96HFWEn2G1lhddz-eZOuuoylyb6G7GDRhsSeOJRT6EvOxNWfhdIAjDv4IAA */
@@ -138,8 +161,10 @@ export const simulationMachine = setup({
     previewColumnsSorting: { fieldName: undefined, direction: 'asc' },
     steps: input.steps,
     samples: [],
+    selectedConditionId: undefined,
     streamName: input.streamName,
     streamType: input.streamType,
+    baseSimulation: undefined,
   }),
   initial: 'idle',
   on: {
@@ -193,6 +218,25 @@ export const simulationMachine = setup({
         actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
       },
     ],
+    'simulation.filterByCondition': [
+      {
+        guard: {
+          type: 'isConditionFilterActive',
+          params: ({ event }) => ({ conditionId: event.conditionId }),
+        },
+        target: '.assertingRequirements',
+        actions: [{ type: 'clearConditionFilter' }],
+      },
+      {
+        target: '.assertingRequirements',
+        actions: [{ type: 'applyConditionFilter', params: ({ event }) => event }],
+      },
+    ],
+    'simulation.clearConditionFilter': {
+      guard: 'hasActiveConditionFilter',
+      target: '.assertingRequirements',
+      actions: [{ type: 'clearConditionFilter' }],
+    },
   },
   states: {
     idle: {
@@ -259,10 +303,10 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples
+          documents: getActiveSamples(context)
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
-          steps: getValidSteps(context.steps),
+          steps: getValidSteps(getActiveSteps(context)),
           detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
