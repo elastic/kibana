@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { AbsoluteTimeRange } from '@kbn/es-query';
 import { StreamExistingFeaturesTable } from './stream_existing_features_table';
 
 const getUnderlineOnHoverStyle = (textDecorationValue: 'underline' | 'none') => css`
@@ -30,6 +31,12 @@ export const StreamFeaturesAccordion = ({
   loading: boolean;
   refresh: () => void;
 }) => {
+  const last24Hrs: AbsoluteTimeRange = useMemo(() => {
+    const now = Date.now();
+    const start = new Date(now - 24 * 60 * 60 * 1000);
+    return { from: start.toISOString(), to: new Date(now).toISOString(), mode: 'absolute' };
+  }, [features]);
+
   return (
     <EuiAccordion
       initialIsOpen={true}
@@ -54,6 +61,7 @@ export const StreamFeaturesAccordion = ({
         features={features}
         definition={definition}
         refreshFeatures={refresh}
+        timeRange={last24Hrs}
       />
     </EuiAccordion>
   );

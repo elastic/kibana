@@ -49,24 +49,3 @@ export const FeatureEventsSparkline = ({
     />
   );
 };
-
-export const FeatureEventsSparklineLast24hrs = ({
-  feature,
-  definition,
-}: {
-  feature: Feature;
-  definition: Streams.all.Definition;
-}) => {
-  const now = Date.now();
-  return (
-    <FeatureEventsSparkline
-      feature={feature}
-      definition={definition}
-      timeRange={{
-        from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-        to: new Date(now).toISOString(),
-        mode: 'absolute',
-      }}
-    />
-  );
-};
