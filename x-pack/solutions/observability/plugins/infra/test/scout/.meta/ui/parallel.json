@@ -1,9 +1,9 @@
 {
-  "lastModified": "2025-12-03T19:03:41.370Z",
-  "sha1": "e628a886b96bfe0af1d7122b4cef0457f38dbb82",
+  "lastModified": "2025-12-11T10:19:28.330Z",
+  "sha1": "74b8bec2b85a64707503f6c2fb28e9c6bf8fdd99",
   "tests": [
     {
-      "id": "1f9c91634ae4e39-f2cd2d3cdc77643",
+      "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
       "expectedStatus": "passed",
       "tags": [
@@ -11,7 +11,7 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global_setup.ts",
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 10,
         "column": 16
       }

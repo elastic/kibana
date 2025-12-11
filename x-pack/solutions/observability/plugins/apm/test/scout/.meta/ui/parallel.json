@@ -1,9 +1,9 @@
 {
-  "lastModified": "2025-12-05T15:43:00.594Z",
-  "sha1": "ae4a243c1d35cd3e40f29727163c232b5e1d6953",
+  "lastModified": "2025-12-11T10:19:24.838Z",
+  "sha1": "c00251da300c2224a40813ed0c213db64b446a4c",
   "tests": [
     {
-      "id": "78d42dfeebef544-f2cd2d3cdc77643",
+      "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
       "expectedStatus": "passed",
       "tags": [
@@ -11,7 +11,7 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global_setup.ts",
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 14,
         "column": 16
       }
@@ -439,7 +439,20 @@
       }
     },
     {
-      "id": "225bc2da3609e29-53f098b0f4c049f",
+      "id": "b823835fc8ed203-c0d7ecffab644e9",
+      "title": "Storage Explorer - Admin User user navigates and explores storage explorer functionality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "c3f1c3da077a5f2-53f098b0f4c049f",
       "title": "Storage Explorer - Viewer (No Permissions) displays permission denied message",
       "expectedStatus": "passed",
       "tags": [
@@ -447,21 +460,8 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 21,
-        "column": 7
-      }
-    },
-    {
-      "id": "225bc2da3609e29-c0d7ecffab644e9",
-      "title": "Storage Explorer - Admin User user navigates and explores storage explorer functionality",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 40,
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
+        "line": 16,
         "column": 7
       }
     }
