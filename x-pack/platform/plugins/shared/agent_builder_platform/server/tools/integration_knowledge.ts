@@ -20,7 +20,7 @@ const integrationKnowledgeSchema = z.object({
   query: z
     .string()
     .describe(
-      'Search query to retrieve knowledge about Fleet-installed integrations, like specific integration names, configuration questions, or data ingestion topics.'
+      'Search query to retrieve knowledge about Fleet-installed integrations, like specific integration names, configuration questions, or data ingestion topics. Rewrite the query to English and incorporate relevant context from the conversation history.'
     ),
   max: z
     .number()
@@ -112,7 +112,7 @@ export const integrationKnowledgeTool = (
     },
     tags: ['integration', 'knowledge-base', 'fleet'],
     availability: {
-      cacheMode: 'space',
+      cacheMode: 'global',
       handler: async () => {
         try {
           const [coreStart] = await coreSetup.getStartServices();

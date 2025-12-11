@@ -16,7 +16,11 @@ import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/serve
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
 const productDocumentationSchema = z.object({
-  query: z.string().describe('Search query to retrieve documentation about Elastic products'),
+  query: z
+    .string()
+    .describe(
+      'Search query to retrieve documentation about Elastic products. Rewritten in English to best match the documentation content.'
+    ),
   product: z
     .enum(['kibana', 'elasticsearch', 'observability', 'security'])
     .optional()
@@ -119,7 +123,7 @@ export const productDocumentationTool = (
     },
     tags: [],
     availability: {
-      cacheMode: 'space',
+      cacheMode: 'global',
       handler: async () => {
         try {
           const [, plugins] = await coreSetup.getStartServices();
