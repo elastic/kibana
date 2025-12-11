@@ -57,6 +57,8 @@ export const selectOriginalPreviewRecords = createSelector(
     }
 
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
+
+    // return the samples where the filterFn matches the documents at the same index
     return activeSamples.filter((_, index) => {
       const doc = activeDocuments[index];
       return doc ? filterFn(doc) : false;
