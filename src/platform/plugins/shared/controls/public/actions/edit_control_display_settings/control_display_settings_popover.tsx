@@ -22,7 +22,10 @@ import {
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
-import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
+import {
+  apiCanLockHoverActions,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { PinnableControlApi } from './types';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
 
@@ -42,7 +45,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(isPopoverOpenInitialState);
 
-  const layoutState = api.parentApi.layout$.value;
+  const layoutState = useStateFromPublishingSubject(api.parentApi.layout$);
   const layoutEntry = useMemo(() => layoutState.controls[api.uuid], [layoutState, api.uuid]);
   const isToRightOfGrowControl = useMemo(
     () => layoutEntry.order > 0 && Object.values(layoutState.controls)[layoutEntry.order - 1].grow,
@@ -76,6 +79,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
     }
     setIsPopoverOpen(false);
   }, [api]);
+
   const onClickButton = useCallback(() => {
     if (isPopoverOpen) onClose();
     else if (apiCanLockHoverActions(api)) {
@@ -90,6 +94,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
     },
     [applyNextLayout, grow]
   );
+
   const onGrowChange = useCallback(
     (e: EuiSwitchEvent) => {
       applyNextLayout(e.target.checked, width);
@@ -140,22 +145,9 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
     <>
       {!isToRightOfGrowControl && settingsButton}
       <PopoverComponent data-test-subj={`controlDisplaySettings-${api.uuid}`}>
-        <EuiFormRow
-          label={i18n.translate(
-            'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.label',
-            {
-              defaultMessage: 'Minimum width',
-            }
-          )}
-          fullWidth
-        >
+        <EuiFormRow label={strings.minimumWidth} fullWidth>
           <EuiButtonGroup
-            legend={i18n.translate(
-              'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.label',
-              {
-                defaultMessage: 'Minimum width',
-              }
-            )}
+            legend={strings.minimumWidth}
             options={widthOptions}
             idSelected={width}
             onChange={onWidthChange}
@@ -166,12 +158,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
         <EuiSpacer size="m" />
         <EuiSwitch
           compressed
-          label={i18n.translate(
-            'controls.controlGroup.floatingActions.editDisplaySettings.grow.label',
-            {
-              defaultMessage: 'Expand width to fit available space',
-            }
-          )}
+          label={strings.grow}
           color="primary"
           checked={grow}
           onChange={(e) => onGrowChange(e)}
@@ -179,6 +166,18 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
       </PopoverComponent>
     </>
   );
+};
+
+const strings = {
+  minimumWidth: i18n.translate(
+    'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.label',
+    {
+      defaultMessage: 'Minimum width',
+    }
+  ),
+  grow: i18n.translate('controls.controlGroup.floatingActions.editDisplaySettings.grow.label', {
+    defaultMessage: 'Expand width to fit available space',
+  }),
 };
 
 const widthOptions = [
