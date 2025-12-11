@@ -12,6 +12,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { ESLint } from 'eslint';
 
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
@@ -113,15 +114,7 @@ export const ConnectorCommand: GenerateCommand = {
 
     // write spec index.ts
     const specIndexPath = Path.resolve(connectorDir, 'index.ts');
-    const specIndexContent = `/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
+    const specIndexContent = `
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -147,17 +140,7 @@ export const ${connectorName
 
     // write icon component placeholder
     const iconIndexPath = Path.resolve(iconDir, 'index.tsx');
-    const iconIndexContent = `/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
-/* eslint-disable import/no-default-export */
-
+    const iconIndexContent = `
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
@@ -257,6 +240,20 @@ export default (props: ConnectorIconProps) => {
         await Fsp.writeFile(CODEOWNERS_FILE, content);
         log.info('Updated', Path.relative(REPO_ROOT, CODEOWNERS_FILE));
       }
+    }
+
+    // run eslint --fix on the generated connector folder and updated spec/icon maps
+    {
+      log.info('Linting generated connector files');
+      const eslint = new ESLint({
+        cache: false,
+        cwd: REPO_ROOT,
+        fix: true,
+        extensions: ['.js', '.mjs', '.ts', '.tsx'],
+      });
+      await ESLint.outputFixes(
+        await eslint.lintFiles([connectorDir, ICONS_MAP_FILE, ALL_SPECS_FILE])
+      );
     }
 
     log.success(`Connector scaffolded at ${Path.relative(REPO_ROOT, connectorDir)}`);
