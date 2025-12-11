@@ -17,39 +17,10 @@ import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
-export interface StreamsFeatures {
-  ui?: {
-    enabled: boolean;
-  };
-  significantEvents?: {
-    available: boolean;
-    enabled: boolean;
-  };
-  significantEventsDiscovery?: {
-    available: boolean;
-    enabled: boolean;
-  };
-  groupStreams?: {
-    enabled: boolean;
-  };
-  contentPacks?: {
-    enabled: boolean;
-  };
-  attachments?: {
-    enabled: boolean;
-  };
-}
+export type StreamsPrivileges = ReturnType<typeof useStreamsPrivileges>;
+export type StreamsFeatures = StreamsPrivileges['features'];
 
-export interface StreamsPrivileges {
-  ui: {
-    manage: boolean;
-    show: boolean;
-  };
-  features: StreamsFeatures;
-  isLoading?: boolean;
-}
-
-export function useStreamsPrivileges(): StreamsPrivileges {
+export function useStreamsPrivileges() {
   const {
     core: {
       pricing,
