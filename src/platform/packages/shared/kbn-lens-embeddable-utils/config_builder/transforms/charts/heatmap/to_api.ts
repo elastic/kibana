@@ -14,7 +14,7 @@ import {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
-import { getDatasourceLayers, getSharedChartLensStateToAPI } from '../utils';
+import { getDatasourceLayers, getSharedChartLensStateToAPI, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueLensStateToAPI } from '../../coloring';
 import { DEFAULT_LAYER_ID, type LensAttributes } from '../../../types';
@@ -33,8 +33,10 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
   return {
     visible: legend.isVisible,
     position: legend.position,
-    ...(legend.maxLines !== undefined && { truncate_after_lines: legend.maxLines }),
-    ...(legend.legendSize !== undefined && { size: legend.legendSize }),
+    ...stripUndefined<HeatmapState['legend']>({
+      truncate_after_lines: legend.maxLines,
+      size: legend.legendSize,
+    }),
   };
 }
 

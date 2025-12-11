@@ -16,8 +16,12 @@ import type {
 } from '@kbn/lens-common';
 import { HEATMAP_GRID_NAME, LENS_HEATMAP_ID } from '@kbn/lens-common';
 import type { LegendSize } from '@kbn/chart-expressions-common';
+import type {
+  HeatmapGridConfigResult,
+  HeatmapLegendConfigResult,
+} from '@kbn/lens-common/visualizations/heatmap/types';
 
-import { getSharedChartAPIToLensState } from '../utils';
+import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueAPIToLensState } from '../../coloring';
 import { DEFAULT_LAYER_ID } from '../../../types';
@@ -61,22 +65,24 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     gridConfig: {
       type: HEATMAP_GRID_NAME,
       isCellLabelVisible: layer.cells?.labels?.visible ?? false,
-      xTitle: layer.axes?.x?.title?.value,
-      yTitle: layer.axes?.y?.title?.value,
       isXAxisLabelVisible: layer.axes?.x?.labels?.visible ?? true,
       isXAxisTitleVisible: layer.axes?.x?.title?.visible ?? false,
-      ...(xAxisLabelRotation !== undefined && { xAxisLabelRotation }),
       isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
       isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
+      ...stripUndefined<HeatmapGridConfigResult>({
+        xTitle: layer.axes?.x?.title?.value,
+        yTitle: layer.axes?.y?.title?.value,
+        xAxisLabelRotation,
+      }),
     },
     legend: {
       isVisible: layer.legend?.visible ?? true,
-      position: layer.legend?.position ?? 'left',
+      position: layer.legend?.position ?? 'right',
       type: 'heatmap_legend',
-      ...(layer.legend?.truncate_after_lines
-        ? { maxLines: layer.legend?.truncate_after_lines }
-        : {}),
-      ...(layer.legend?.size ? { legendSize: layer.legend?.size as LegendSize } : {}),
+      ...stripUndefined<HeatmapLegendConfigResult>({
+        maxLines: layer.legend?.truncate_after_lines,
+        legendSize: layer.legend?.size as LegendSize,
+      }),
     },
     ...(basePalette && {
       palette: {
