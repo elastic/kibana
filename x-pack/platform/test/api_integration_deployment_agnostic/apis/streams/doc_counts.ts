@@ -15,6 +15,8 @@ import {
 } from './helpers/repository_client';
 import { enableStreams, putStream, indexDocument } from './helpers/requests';
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const MORE_THAN_1024_CHARS =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
 
@@ -157,6 +159,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         refresh: 'wait_for',
       });
+
+      // In serverless, indexing documents takes a while to be visible in the metering stats API
+      // so we wait for 35 seconds to ensure the documents are indexed and visible in the metering stats API
+      await sleep(35000);
     });
 
     after(async () => {
@@ -276,12 +282,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        // eslint-disable-next-line no-console
-        console.log(
-          '[streams doc_counts degraded] single-stream response.body =',
-          JSON.stringify(response.body)
-        );
-
         expect(response.status).to.eql(200);
         expect(response.body).to.be.an('array');
         expect(response.body.length).to.be.greaterThan(0);
@@ -319,7 +319,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body).to.have.length(0);
       });
 
-      it('returns failed document counts from failure store', async () => {
+      it('returns failed document counts from failure store', async function () {
+        // Increase timeout to account for 35s sleep waiting for metering cache
+        this.timeout(120000);
+
         // Create a stream with a processor that always fails
         await esClient.indices.createDataStream({
           name: 'logs-failing-stream',
@@ -360,8 +363,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           '@timestamp': timestamp,
           message: 'failing document',
         };
-        const indexResponse = await indexDocument(esClient, 'logs-failing-stream', doc);
+        // Use refresh: false to avoid timeout - doc goes to failure store which may take time in serverless
+        const indexResponse = await indexDocument(esClient, 'logs-failing-stream', doc, false);
         expect(indexResponse.result).to.eql('created');
+
+        // In serverless, wait for metering stats cache to refresh (30s cycle)
+        await sleep(35000);
 
         const response = await apiClient.fetch('GET /internal/streams/doc_counts/failed', {
           params: {
