@@ -18,10 +18,12 @@ export interface ChatRequestBodyPayload {
   conversation_id?: string;
   capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
-  input: string;
+  input?: string;
+  confirm?: boolean;
   browser_api_tools?: BrowserApiToolMetadata[];
 }
 
 export type ChatResponse = Omit<ConversationRound, 'id' | 'input'> & {
   conversation_id: string;
+  round_id: string;
 };

@@ -18,8 +18,9 @@ import type {
   ToolCallEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
+  PromptRequestEvent,
   ReasoningEvent,
-} from '@kbn/onechat-common';
+} from '@kbn/onechat-common/chat';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
   matchGraphName,
@@ -33,6 +34,7 @@ import {
   createToolResultEvent,
   createReasoningEvent,
   createThinkingCompleteEvent,
+  createPromptRequestEvent,
   extractTextContent,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
@@ -46,6 +48,7 @@ import {
   isAnswerAction,
   isStructuredAnswerAction,
   isExecuteToolAction,
+  isToolPromptAction,
 } from './actions';
 import type { ToolCallResult } from './actions';
 
@@ -54,6 +57,7 @@ export type ConvertedEvents =
   | MessageCompleteEvent
   | ThinkingCompleteEvent
   | ToolCallEvent
+  | PromptRequestEvent
   | BrowserToolCallEvent
   | ToolResultEvent
   | ReasoningEvent;
@@ -186,12 +190,20 @@ export const convertGraphEvents = ({
                 createToolResultEvent({
                   toolCallId: toolResult.toolCallId,
                   toolId: toolId ?? 'unknown',
-                  results: toolReturn.results,
+                  results: toolReturn.results ?? [],
                 })
               );
             }
 
             return of(...toolResultEvents);
+          }
+
+          if (isToolPromptAction(nextAction)) {
+            return of(
+              createPromptRequestEvent({
+                prompt: nextAction.prompt,
+              })
+            );
           }
         }
 

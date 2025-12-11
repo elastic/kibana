@@ -8,6 +8,7 @@
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
 import type { Attachment, AttachmentInput } from '../attachments';
+import type { AgentPrompt } from '../agents/prompts';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -16,11 +17,15 @@ export interface RoundInput {
   /**
    * A text message from the user.
    */
-  message: string;
+  message?: string;
   /**
    * Optional attachments to provide to the agent.
    */
   attachments?: Attachment[];
+  /**
+   * Response from the user to an interrupt request.
+   */
+  interrupt_response?: Record<string, unknown>;
 }
 
 /**
@@ -30,11 +35,15 @@ export interface RawRoundInput {
   /**
    * A text message from the user.
    */
-  message: string;
+  message?: string;
   /**
    * Optional attachments to provide to the agent.
    */
   attachments?: AttachmentInput[];
+  /**
+   * Response from the user to an interrupt request.
+   */
+  interrupt_response?: Record<string, unknown>;
 }
 
 /**
@@ -139,6 +148,15 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
  */
 export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 
+export enum ConversationRoundStatus {
+  /** round is currently being processed */
+  inProgress = 'in_progress',
+  /** the round is completed */
+  completed = 'completed',
+  /** round has been interrupted and is awaiting user input */
+  awaitingPrompt = 'awaiting_prompt',
+}
+
 /**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
@@ -146,6 +164,10 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 export interface ConversationRound {
   /** unique id for this round */
   id: string;
+  /** current status of the round */
+  status: ConversationRoundStatus;
+  /** if status is awaiting_prompt, contains the current prompt request*/
+  pending_prompt?: AgentPrompt;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */

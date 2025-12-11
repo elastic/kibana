@@ -23,6 +23,7 @@ import type {
   ToolProvider,
   WritableToolResultStore,
   AttachmentsService,
+  PromptManager,
 } from '../runner';
 
 export type AgentHandlerFn = (
@@ -80,6 +81,10 @@ export interface AgentHandlerContext {
    * Result store to access and add tool results during execution.
    */
   resultStore: WritableToolResultStore;
+  /**
+   * Used to manage interruptions.
+   */
+  interruptManager: PromptManager;
   /**
    * Event emitter that can be used to emits custom events
    */

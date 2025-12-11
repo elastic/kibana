@@ -10,6 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { AgentInterruptType } from '@kbn/onechat-common/chat/interruptions';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -33,7 +34,14 @@ The 'pattern' optional parameter is an index pattern which can be used to filter
 This parameter should only be used when you already know of a specific pattern to filter on,
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient, logger }) => {
+    handler: async ({ pattern }, { esClient, logger, prompts }) => {
+      // TODO: remove
+      return prompts.confirm({
+        message: 'Are you sure you want to list all indices?',
+        state: {},
+      });
+      ////
+
       logger.debug(`list indices tool called with pattern: ${pattern}`);
       const {
         indices,

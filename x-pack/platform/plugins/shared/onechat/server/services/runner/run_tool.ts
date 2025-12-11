@@ -63,7 +63,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const manager = parentManager.createChild(context);
   const { resultStore } = manager.deps;
 
-  const { results } = await withExecuteToolSpan(
+  const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
     async (): Promise<ToolHandlerReturn> => {
@@ -91,21 +91,27 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   );
 
-  const resultsWithIds = results.map<ToolResult>(
-    (result) =>
-      ({
-        ...result,
-        tool_result_id: result.tool_result_id ?? getToolResultId(),
-      } as ToolResult)
-  );
+  if ('results' in toolReturn) {
+    const resultsWithIds = toolReturn.results.map<ToolResult>(
+      (result) =>
+        ({
+          ...result,
+          tool_result_id: result.tool_result_id ?? getToolResultId(),
+        } as ToolResult)
+    );
 
-  resultsWithIds.forEach((result) => {
-    resultStore.add(result);
-  });
+    resultsWithIds.forEach((result) => {
+      resultStore.add(result);
+    });
 
-  return {
-    results: resultsWithIds,
-  };
+    return {
+      results: resultsWithIds,
+    };
+  } else {
+    return {
+      prompt: toolReturn.prompt,
+    };
+  }
 };
 
 export const createToolHandlerContext = async <TParams = Record<string, unknown>>({
@@ -115,9 +121,17 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent } = toolExecutionParams;
-  const { request, elasticsearch, spaces, modelProvider, toolsService, resultStore, logger } =
-    manager.deps;
+  const { onEvent, toolId, toolCallId } = toolExecutionParams;
+  const {
+    request,
+    elasticsearch,
+    spaces,
+    modelProvider,
+    toolsService,
+    resultStore,
+    logger,
+    promptManager,
+  } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
     request,
@@ -131,6 +145,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
       request,
     }),
+    prompts: promptManager.forTool({ toolId, toolCallId }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
