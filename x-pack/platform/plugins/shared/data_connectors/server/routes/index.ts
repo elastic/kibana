@@ -209,7 +209,7 @@ export function registerRoutes(
           updatedAt: now,
           workflowIds: [],
           toolIds: [],
-          kscId: stackConnector.id,
+          kscIds: [stackConnector.id],
         });
 
         return response.ok({
@@ -255,7 +255,7 @@ export function registerRoutes(
           });
         const connectors = findResponse.saved_objects;
 
-        const kscIds: string[] = connectors.map((connector) => connector.attributes.kscId);
+        const kscIds: string[] = connectors.flatMap((connector) => connector.attributes.kscIds);
         logger.info(
           `Found ${connectors.length} data connectors and ${kscIds.length} stack connectors to delete.`
         );
@@ -309,12 +309,12 @@ export function registerRoutes(
           DATA_CONNECTOR_SAVED_OBJECT_TYPE,
           request.params.id
         );
-        const kscId: string = savedObject.attributes.kscId;
+        const kscIds: string[] = savedObject.attributes.kscIds;
 
         const [, { actions }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        await actionsClient.delete({ id: kscId });
-        logger.info(`Successfully deleted Kibana stack connector ${kscId}`);
+        kscIds.forEach((kscId) => actionsClient.delete({ id: kscId }));
+        logger.info(`Successfully deleted Kibana stack connectors: ${kscIds.join(', ')}`);
 
         await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
         logger.info(`Successfully deleted data connector ${savedObject.id}`);

@@ -15,7 +15,7 @@ export interface DataConnectorAPIResponse {
   type: string;
   createdAt: string;
   updatedAt: string;
-  stackConnector: string;
+  stackConnectors: string[];
 }
 
 export function convertSOtoAPIResponse(
@@ -27,7 +27,7 @@ export function convertSOtoAPIResponse(
     type: savedObject.attributes.type,
     createdAt: savedObject.attributes.createdAt,
     updatedAt: savedObject.attributes.updatedAt,
-    stackConnector: savedObject.attributes.kscId,
+    stackConnectors: savedObject.attributes.kscIds,
   };
 }
 

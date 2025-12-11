@@ -17,7 +17,7 @@ export interface DataConnectorAttributes {
   features?: string[];
   workflowIds: string[];
   toolIds: string[];
-  kscId: string;
+  kscIds: string[];
 }
 
 export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
@@ -52,7 +52,7 @@ export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
     toolIds: {
       type: 'keyword',
     },
-    kscId: {
+    kscIds: {
       type: 'keyword',
     },
   },
