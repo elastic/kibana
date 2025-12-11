@@ -7,37 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowInput } from '@kbn/workflows';
+import type { WorkflowOutput } from '@kbn/workflows';
 import { makeWorkflowFieldsValidator, validateWorkflowFields } from './validate_workflow_fields';
 
 /**
- * Creates a Zod validator for workflow inputs
+ * Creates a Zod validator for workflow outputs
  * Delegates to shared field validator
  */
-export function makeWorkflowInputsValidator(inputs: WorkflowInput[]) {
-  return makeWorkflowFieldsValidator(inputs);
+export function makeWorkflowOutputsValidator(outputs: WorkflowOutput[]) {
+  return makeWorkflowFieldsValidator(outputs);
 }
 
-export interface WorkflowInputValidationError {
-  inputName: string;
+export interface WorkflowOutputValidationError {
+  outputName: string;
   message: string;
 }
 
 /**
- * Validates workflow inputs against the target workflow's input schema
+ * Validates workflow outputs against the workflow's output schema
  * Returns validation errors if any
  */
-export function validateWorkflowInputs(
-  inputs: Record<string, unknown> | undefined,
-  targetWorkflowInputs: WorkflowInput[] | undefined
-): { isValid: boolean; errors: WorkflowInputValidationError[] } {
-  const result = validateWorkflowFields(inputs, targetWorkflowInputs, 'input');
+export function validateWorkflowOutputs(
+  outputs: Record<string, unknown> | undefined,
+  targetWorkflowOutputs: WorkflowOutput[] | undefined
+): { isValid: boolean; errors: WorkflowOutputValidationError[] } {
+  const result = validateWorkflowFields(outputs, targetWorkflowOutputs, 'output');
 
-  // Map generic field errors to input-specific errors
+  // Map generic field errors to output-specific errors
   return {
     isValid: result.isValid,
     errors: result.errors.map((error) => ({
-      inputName: error.fieldName,
+      outputName: error.fieldName,
       message: error.message,
     })),
   };

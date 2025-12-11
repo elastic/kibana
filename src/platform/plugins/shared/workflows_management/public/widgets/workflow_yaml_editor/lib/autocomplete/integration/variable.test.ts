@@ -91,6 +91,7 @@ steps:
         'steps',
         'execution',
         'inputs',
+        'outputs',
       ].sort()
     );
     expect(suggestions.map((s) => s.insertText).sort()).toEqual(
@@ -104,6 +105,7 @@ steps:
         '"{{ now$0 }}"',
         '"{{ parent$0 }}"',
         '"{{ steps$0 }}"',
+        '"{{ outputs$0 }}"',
       ].sort()
     );
   });
@@ -132,6 +134,7 @@ steps:
         '{{ now$0 }}',
         '{{ parent$0 }}',
         '{{ steps$0 }}',
+        '{{ outputs$0 }}',
       ].sort()
     );
   });
