@@ -15,6 +15,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   type UseEuiTheme,
+  type EuiThemeHighContrastMode,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +29,10 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
+const getSidePanelWrapperStyles = (
+  euiThemeContext: UseEuiTheme,
+  highContrastMode: EuiThemeHighContrastMode
+) => css`
   box-sizing: border-box;
   position: relative;
   display: flex;
@@ -37,7 +41,11 @@ const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
   border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-  border: ${euiThemeContext.colorMode === 'DARK' ? euiThemeContext.euiTheme.border.thin : 'none'};
+  border: ${highContrastMode
+    ? `${euiThemeContext.euiTheme.border.width.thin} solid ${euiThemeContext.euiTheme.border.color}`
+    : euiThemeContext.colorMode === 'DARK'
+    ? euiThemeContext.euiTheme.border.thin
+    : 'none'};
   ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
 `;
 
@@ -59,10 +67,11 @@ export interface SidePanelProps {
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
+  const { highContrastMode } = euiThemeContext;
   const scrollStyles = useScroll();
   const wrapperStyles = useMemo(
-    () => getSidePanelWrapperStyles(euiThemeContext),
-    [euiThemeContext]
+    () => getSidePanelWrapperStyles(euiThemeContext, highContrastMode),
+    [euiThemeContext, highContrastMode]
   );
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',

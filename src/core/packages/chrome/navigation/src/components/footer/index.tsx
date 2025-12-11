@@ -17,6 +17,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   type UseEuiTheme,
+  type EuiThemeHighContrastMode,
 } from '@elastic/eui';
 
 import { FooterItem } from './item';
@@ -25,7 +26,11 @@ import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => ({
+const getFooterWrapperStyles = (
+  theme: UseEuiTheme['euiTheme'],
+  isCollapsed: boolean,
+  highContrastMode: EuiThemeHighContrastMode
+) => ({
   root: css`
     align-items: center;
     display: flex;
@@ -35,6 +40,9 @@ const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boo
     justify-content: center;
     padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
 
+    ${highContrastMode
+      ? `border-top: ${theme.border.width.thin} solid ${theme.border.color};`
+      : `
     &::before {
       content: '';
       position: absolute;
@@ -46,11 +54,15 @@ const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boo
       height: ${theme.border.width.thin};
       background-color: ${theme.colors.borderBaseSubdued};
     }
+    `}
   `,
   collapseDivider: css`
     position: relative;
     background-color: transparent;
 
+    ${highContrastMode
+      ? `border-top: ${theme.border.width.thin} solid ${theme.border.color};`
+      : `
     &::before {
       content: '';
       position: absolute;
@@ -62,6 +74,7 @@ const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boo
       height: ${theme.border.width.thin};
       background-color: ${theme.colors.borderBaseSubdued};
     }
+    `}
   `,
 });
 
@@ -84,7 +97,8 @@ interface FooterComponent
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
   ({ children, isCollapsed, collapseButton }, ref) => {
-    const { euiTheme } = useEuiTheme();
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme, highContrastMode } = euiThemeContext;
     const footerNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'footer-navigation-instructions',
     });
@@ -103,8 +117,8 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
     };
 
     const wrapperStyles = useMemo(
-      () => getFooterWrapperStyles(euiTheme, isCollapsed),
-      [euiTheme, isCollapsed]
+      () => getFooterWrapperStyles(euiTheme, isCollapsed, highContrastMode),
+      [euiTheme, isCollapsed, highContrastMode]
     );
 
     const renderChildren = () => {
