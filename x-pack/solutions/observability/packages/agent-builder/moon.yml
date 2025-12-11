@@ -19,6 +19,8 @@ project:
     sourceRoot: x-pack/solutions/observability/packages/agent-builder
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/licensing-types'
+  - '@kbn/kibana-react-plugin'
 tags:
   - shared-browser
   - package

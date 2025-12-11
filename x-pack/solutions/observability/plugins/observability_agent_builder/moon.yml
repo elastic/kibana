@@ -43,15 +43,29 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
+  - '@kbn/spaces-plugin'
   - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
   - group-observability
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - server/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
