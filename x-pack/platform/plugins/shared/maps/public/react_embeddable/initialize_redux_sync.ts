@@ -12,10 +12,8 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
-import type { ProjectRoutingOverrides } from '@kbn/presentation-publishing';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
-import { APP_ID, getEditPath, RENDER_TIMEOUT, SOURCE_TYPES } from '../../common/constants';
+import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import type { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -55,32 +53,6 @@ function getHiddenLayerIds(state: MapStoreState) {
   return getLayerListRaw(state)
     .filter((layer) => !layer.visible)
     .map((layer) => layer.id);
-}
-
-function getProjectRoutingOverridesFromLayers(state: MapStoreState): ProjectRoutingOverrides {
-  const layers = getLayerListRaw(state);
-  const overrides: ProjectRoutingOverrides = [];
-
-  for (let i = 0; i < layers.length; i++) {
-    const layer = layers[i];
-    if (
-      layer.sourceDescriptor &&
-      'type' in layer.sourceDescriptor &&
-      layer.sourceDescriptor.type === SOURCE_TYPES.ESQL &&
-      'esql' in layer.sourceDescriptor &&
-      typeof layer.sourceDescriptor.esql === 'string'
-    ) {
-      const projectRouting = getProjectRoutingFromEsqlQuery(layer.sourceDescriptor.esql);
-      if (projectRouting) {
-        overrides.push({
-          name: layer.label || `Layer ${i + 1}`,
-          value: projectRouting,
-        });
-      }
-    }
-  }
-
-  return overrides.length > 0 ? overrides : undefined;
 }
 
 export const reduxSyncComparators: StateComparators<
@@ -133,9 +105,6 @@ export function initializeReduxSync({
     state.openTOCDetails ?? getOpenTOCDetails(store.getState())
   );
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-  const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
-    getProjectRoutingOverridesFromLayers(store.getState())
-  );
 
   const unsubscribeFromStore = store.subscribe(() => {
     if (!getMapReady(store.getState())) {
@@ -164,11 +133,6 @@ export function initializeReduxSync({
     const nextIsMapLoading = isMapLoading(store.getState());
     if (nextIsMapLoading !== dataLoading$.value) {
       dataLoading$.next(nextIsMapLoading);
-    }
-
-    const nextProjectRoutingOverrides = getProjectRoutingOverridesFromLayers(store.getState());
-    if (!fastIsEqual(nextProjectRoutingOverrides, projectRoutingOverrides$.value)) {
-      projectRoutingOverrides$.next(nextProjectRoutingOverrides);
     }
   });
 
@@ -222,7 +186,6 @@ export function initializeReduxSync({
     api: {
       dataLoading$,
       filters$,
-      projectRoutingOverrides$,
       getInspectorAdapters: () => {
         return getInspectorAdapters(store.getState());
       },

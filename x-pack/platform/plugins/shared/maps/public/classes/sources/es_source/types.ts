@@ -54,6 +54,8 @@ export interface IESSource extends IVectorSource {
 
   getGeoFieldName(): string | undefined;
 
+  getProjectRouting?: () => string | undefined;
+
   loadStylePropsMeta({
     layerName,
     style,
