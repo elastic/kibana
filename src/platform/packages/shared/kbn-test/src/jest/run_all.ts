@@ -166,7 +166,12 @@ export async function runJestAll() {
     }
   }
 
-  log.write('--- Combined Jest run summary');
+  // Output result summary in a separate Buildkite block with status
+  const passedCount = results.filter((r) => r.code === 0).length;
+  const failedCount = results.filter((r) => r.code !== 0).length;
+  const status = globalExit === 0 ? '✅ PASSED' : '❌ FAILED';
+  
+  log.write(`--- ${status} - Jest Results Summary (${passedCount} passed, ${failedCount} failed)`);
 
   await writeSummary(results, log, totalMs);
 

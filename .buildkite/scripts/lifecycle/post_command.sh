@@ -65,6 +65,12 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     buildkite-agent artifact upload 'target/agent_diagnostics/**/*'
   fi
 
+  # Upload Scout reporter events (moved to post-command to avoid bloating test run logs)
+  if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+    echo "Uploading Scout reporter events to AppEx QA's team cluster..."
+    node scripts/scout upload-events --dontFailOnError
+  fi
+
 fi
 
 if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then

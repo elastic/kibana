@@ -459,7 +459,9 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.write).toHaveBeenCalledWith('--- Combined Jest run summary');
+        expect(mockLog.write).toHaveBeenCalledWith(
+          expect.stringMatching(/--- ✅ PASSED - Jest Results Summary \(\d+ passed, \d+ failed\)/)
+        );
         expect(mockLog.info).toHaveBeenCalledWith(
           expect.stringMatching(/Total duration \(wall to wall\): \d+s/)
         );
