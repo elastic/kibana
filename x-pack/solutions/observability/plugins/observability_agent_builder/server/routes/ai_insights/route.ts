@@ -10,8 +10,59 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
+import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
+import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
+  const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
+    endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
+    options: {
+      access: 'internal',
+    },
+    security: {
+      authz: {
+        requiredPrivileges: [apiPrivileges.readOnechat],
+      },
+    },
+    params: t.type({
+      body: t.type({
+        alertId: t.string,
+      }),
+    }),
+    handler: async ({
+      core,
+      dataRegistry,
+      logger,
+      request,
+      params,
+    }): Promise<{ summary: string; context: string }> => {
+      const { alertId } = params.body;
+
+      const [coreStart, startDeps] = await core.getStartServices();
+      const { inference, ruleRegistry } = startDeps;
+
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const inferenceClient = inference.getClient({ request });
+
+      const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+      const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
+
+      const { summary, context } = await getAlertAiInsight({
+        alertDoc,
+        inferenceClient,
+        connectorId,
+        dataRegistry,
+        request,
+        logger,
+      });
+
+      return {
+        summary,
+        context,
+      };
+    },
+  });
+
   const errorAiInsightsRoute = createObservabilityAgentBuilderServerRoute({
     endpoint: 'POST /internal/observability_agent_builder/ai_insights/error',
     options: {
@@ -79,5 +130,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
 
   return {
     ...errorAiInsightsRoute,
+    ...getAlertAiInsightRoute,
   };
 }
