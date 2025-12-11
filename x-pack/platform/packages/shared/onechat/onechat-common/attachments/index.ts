@@ -22,3 +22,27 @@ export {
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
 } from './attachment_types';
+
+// Versioned attachment types and utilities
+export type {
+  VersionedAttachment,
+  AttachmentVersion,
+  AttachmentVersionRef,
+  AttachmentDiff,
+  VersionedAttachmentInput,
+} from './versioned_attachment';
+export {
+  attachmentVersionSchema,
+  versionedAttachmentSchema,
+  attachmentVersionRefSchema,
+  versionedAttachmentInputSchema,
+  attachmentDiffSchema,
+  getLatestVersion,
+  getVersion,
+  createVersionId,
+  parseVersionId,
+  isAttachmentActive,
+  getActiveAttachments,
+  hashContent,
+  estimateTokens,
+} from './versioned_attachment';
