@@ -75,7 +75,6 @@ export default ({ getService }: FtrProviderContext) => {
       // The data view id will be returned as a non-deterministic uuid
       // so we cannot assert the actual id returned. We'll just assert
       // that a data view has been created a no errors were returned.
-
       expect(body.dataViewsCreated.length).to.be(1);
       expect(body.dataViewsErrors.length).to.be(0);
       expect(body.errors.length).to.be(0);
