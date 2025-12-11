@@ -7,19 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiProgress,
-  transparentize,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { STATUS, useFileUploadContext, FileUploadLiteLookUpView } from '@kbn/file-upload';
 import type { PropsWithChildren } from 'react';
-import React, { type FC, useCallback, useEffect } from 'react';
+import React, { type FC, useCallback, useEffect, useState } from 'react';
 import type { FileRejection } from 'react-dropzone';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -27,7 +19,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
-import { FilesPreview } from './file_preview';
 import type { KibanaContextExtra } from '../types';
 import { IndexEditorErrors } from '../types';
 
@@ -55,17 +46,10 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 }) => {
   const { services } = useKibana<KibanaContextExtra>();
   const { indexUpdateService } = services;
-  const { fileUploadManager, filesStatus, uploadStatus, indexName } = useFileUploadContext();
+  const { fileUploadManager, filesStatus, uploadStatus, indexName, reset } = useFileUploadContext();
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
-
-  const isAnalyzing =
-    uploadStatus.analysisStatus === STATUS.STARTED &&
-    uploadStatus.overallImportStatus === STATUS.NOT_STARTED;
-
-  const isUploading =
-    uploadStatus.overallImportStatus === STATUS.STARTED ||
-    (uploadStatus.overallImportStatus === STATUS.COMPLETED && isSaving);
-  const overallImportProgress = uploadStatus.overallImportProgress;
+  const [dropzoneDisabled, setDropzoneDisabled] = useState(false);
+  const [fileUploadActive, setFileUploadActive] = useState(false);
 
   useEffect(
     function checkForErrors() {
@@ -125,7 +109,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
-      if (!files?.length) {
+      if (!files?.length || dropzoneDisabled) {
         return;
       }
 
@@ -138,7 +122,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
       await fileUploadManager.addFiles(files);
     },
-    [services, indexUpdateService, fileUploadManager]
+    [dropzoneDisabled, services, indexUpdateService, fileUploadManager]
   );
 
   const onDropRejected = useCallback(
@@ -161,6 +145,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
+    disabled: dropzoneDisabled,
   });
 
   const onFileSelectorClick = useCallback(() => {
@@ -192,46 +177,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     },
   ]);
 
-  const loadingIndicator = (
-    <div css={[overlayBase, { cursor: 'progress' }]}>
-      {overallImportProgress ? (
-        <EuiProgress
-          value={overallImportProgress}
-          max={100}
-          size="s"
-          color="primary"
-          position="absolute"
-        />
-      ) : null}
-      <div
-        css={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          translate: '-50% -50%',
-          textAlign: 'center',
-          pointerEvents: 'none',
-        }}
-      >
-        <EuiLoadingSpinner size="xl" />
-        <div>
-          {isAnalyzing ? (
-            <FormattedMessage
-              id="indexEditor.fileUpload.analyzingIndicator"
-              defaultMessage={'Analyzing...'}
-            />
-          ) : null}
-          {isUploading ? (
-            <FormattedMessage
-              id="indexEditor.fileUpload.uploadingIndicator"
-              defaultMessage={'Uploading...'}
-            />
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-
   const successfulPreviews = filesStatus.filter(
     (f) => f.analysisStatus === STATUS.COMPLETED && f.importStatus !== STATUS.COMPLETED
   );
@@ -239,7 +184,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   let content: React.ReactNode = children;
 
-  if (noResults && !showFilePreview && !isSaving) {
+  if (noResults && !showFilePreview && !isSaving && !fileUploadActive) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>{content}</EuiFlexItem>
@@ -248,11 +193,19 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  } else if (showFilePreview) {
-    content = <FilesPreview />;
+  } else if (showFilePreview || fileUploadActive) {
+    content = (
+      <FileUploadLiteLookUpView
+        setFileUploadActive={setFileUploadActive}
+        setDropzoneDisabled={setDropzoneDisabled}
+        onClose={async () => {
+          await indexUpdateService.onFileUploadFinished(indexName);
+          setDropzoneDisabled(false);
+          reset?.(indexName);
+        }}
+      />
+    );
   }
-
-  const showLoadingOverlay = isUploading || isAnalyzing;
 
   if (indexName) {
     return (
@@ -260,7 +213,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         {indexUpdateService.canEditIndex ? (
           <div {...getRootProps({ css: { height: '100%', cursor: 'default' } })}>
             {isDragActive ? <div css={overlayDraggingFile} /> : null}
-            {showLoadingOverlay ? loadingIndicator : null}
             <input {...getInputProps()} data-test-subj="indexEditorFileInput" />
             {content}
           </div>
