@@ -15,7 +15,6 @@ import { getBracketsToClose } from '@kbn/esql-ast/src/definitions/utils/ast';
  * @param query
  * @returns
  */
-
 export function correctQuerySyntax(query: string, offset: number): string {
   // Dispose any following commands after the current offset
   const nextPipeIndex = query.indexOf('|', offset);
@@ -28,6 +27,7 @@ export function correctQuerySyntax(query: string, offset: number): string {
   query += bracketsToAppend.join('');
 
   // Replace partially written function arguments: ,) with )
+  // It preserves the spaces in the query: func(arg1,   ) => func(arg1   )
   query = query.replace(/,(\s*)\)/g, '$1)');
 
   return query;
