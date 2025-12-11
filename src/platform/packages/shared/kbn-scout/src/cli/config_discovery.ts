@@ -184,9 +184,9 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * or validates the results.
  *
  * The command supports three deployment targets:
- * - 'all': Finds configs with deployment-agnostic tags (works for both ESS and serverless)
- * - 'mki': Finds configs with serverless-only tags (for Managed Kibana Infrastructure)
- * - 'ech': Finds configs with ESS-only tags (for Elastic Cloud Hosted)
+ * - 'all': Finds configs with deployment-agnostic tags
+ * - 'mki': Finds configs with serverless-only tags
+ * - 'ech': Finds configs with stateful-only tag
  *
  * Output formats:
  * - Standard: Lists modules grouped by plugin/package with their configs and tags
