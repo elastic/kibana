@@ -557,7 +557,8 @@ export class VisualizationsPlugin
       spaces.getActiveSpace$().subscribe((space) => {
         if (!space) return;
         this.appStateUpdater.next(() => ({
-          visibleIn: space.solution && space.solution !== 'classic' ? [] : ['globalSearch'],
+          visibleIn:
+            space.solution && space.solution !== 'classic' ? [] : ['globalSearch', 'sideNav'],
         }));
       });
     }
