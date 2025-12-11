@@ -206,9 +206,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const extractedDocs = await getDocumentsToScore();
           const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
           const actualTexts = extractedDocs.map((doc) => doc.text).sort();
-          expectedTexts.forEach((text) => {
-            expect(actualTexts).to.contain(text);
-          });
+          expect(actualTexts).to.eql(expectedTexts);
         });
       });
 
@@ -254,9 +252,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
           const actualTexts = learnings.map((learning: KnowledgeBaseEntry) => learning.text).sort();
 
-          expectedTexts.forEach((text) => {
-            expect(actualTexts).to.contain(text);
-          });
+          expect(actualTexts).to.eql(expectedTexts);
         });
       });
 
@@ -287,7 +283,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           );
           expect(parsedContextResponseData).to.have.property('suggestions');
           expect(parsedContextResponseData.suggestions).to.be.an('array');
-          expect(parsedContextResponseData.suggestions.length).to.be.greaterThan(2);
+          expect(parsedContextResponseData.suggestions.length).to.be(3);
 
           parsedContextResponseData.suggestions.forEach((suggestion: RecalledSuggestion) => {
             expect(suggestion).to.have.property('id');
@@ -303,9 +299,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             .map((doc: Instruction & { title: string }) => doc.text)
             .sort();
 
-          sampleDocTexts.forEach((text: any) => {
-            expect(suggestionTexts).to.contain(text);
-          });
+          expect(suggestionTexts).to.eql(sampleDocTexts);
         });
       });
     });

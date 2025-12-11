@@ -47,15 +47,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const entries = await recall('What happened during the database outage?');
         const uniqueScores = uniq(entries.map(({ esScore }) => esScore));
         expect(uniqueScores.length).to.be.greaterThan(1);
-        expect(uniqueScores.length).to.be.greaterThan(7);
+        expect(uniqueScores.length).to.be(8);
       });
 
       it('returns results from both search connectors and internal kb', async () => {
         const entries = await recall('What happened during the database outage?');
         const docTypes = uniq(entries.map(({ id }) => id.split('_')[0]));
-        ['animal', 'technical'].forEach((type) => {
-          expect(docTypes).to.contain(type);
-        });
+        expect(docTypes).to.eql(['animal', 'technical']);
       });
 
       it('returns the "Cheetah" entry from search connectors as the top result', async () => {
@@ -72,8 +70,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const databasePromptEntries = await recall('What happened during the database outage?');
         const animalPromptEntries = await recall('Do you have knowledge about animals?');
 
-        expect(databasePromptEntries.length).to.be.greaterThan(7);
-        expect(animalPromptEntries.length).to.be.greaterThan(7);
+        expect(databasePromptEntries.length).to.be(8);
+        expect(animalPromptEntries.length).to.be(8);
 
         expect(databasePromptEntries.map(({ id }) => id)).not.to.eql(
           animalPromptEntries.map(({ id }) => id)
