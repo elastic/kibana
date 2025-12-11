@@ -236,6 +236,7 @@ describe('createAgentPolicyWithPackages', () => {
         namespace: 'default',
         supports_agentless: true,
         monitoring_enabled: [],
+        keep_monitoring_alive: true,
       },
       expect.objectContaining({ skipDeploy: true })
     );

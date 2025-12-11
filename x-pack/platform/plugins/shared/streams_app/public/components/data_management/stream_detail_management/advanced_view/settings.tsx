@@ -125,6 +125,7 @@ export function Settings({
           body: {
             ingest: {
               ...definition.stream.ingest,
+              processing: omit(definition.stream.ingest.processing, 'updated_at'),
               settings: prepareSettings(settings),
             },
           },

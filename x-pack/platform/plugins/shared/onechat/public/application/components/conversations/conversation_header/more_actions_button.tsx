@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiButtonIcon,
@@ -13,8 +14,10 @@ import {
   EuiContextMenuPanel,
   EuiTitle,
   EuiSpacer,
-  EuiHorizontalRule,
+  EuiIcon,
   useEuiTheme,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -25,8 +28,10 @@ import { useHasActiveConversation, useAgentId } from '../../../hooks/use_convers
 import { useKibana } from '../../../hooks/use_kibana';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { DeleteConversationModal } from './delete_conversation_modal';
+import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { RobotIcon } from '../../common/icons/robot';
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.onechat.conversationActions.actions', {
@@ -38,7 +43,7 @@ const fullscreenLabels = {
   conversationTitleLabel: i18n.translate(
     'xpack.onechat.conversationActions.conversationTitleLabel',
     {
-      defaultMessage: 'CONVERSATION',
+      defaultMessage: 'Conversation',
     }
   ),
   editCurrentAgent: i18n.translate('xpack.onechat.conversationActions.editCurrentAgent', {
@@ -50,13 +55,13 @@ const fullscreenLabels = {
   conversationAgentLabel: i18n.translate(
     'xpack.onechat.conversationActions.conversationAgentLabel',
     {
-      defaultMessage: 'AGENT',
+      defaultMessage: 'Agent',
     }
   ),
   conversationManagementLabel: i18n.translate(
     'xpack.onechat.conversationActions.conversationManagementLabel',
     {
-      defaultMessage: 'MANAGEMENT',
+      defaultMessage: 'Management',
     }
   ),
   agents: i18n.translate('xpack.onechat.conversationActions.agents', {
@@ -71,8 +76,11 @@ const fullscreenLabels = {
   delete: i18n.translate('xpack.onechat.conversationActions.delete', {
     defaultMessage: 'Delete',
   }),
-  agentBuilderSettings: i18n.translate('xpack.onechat.conversationActions.agentBuilderSettings', {
+  genAiSettings: i18n.translate('xpack.onechat.conversationActions.genAiSettings', {
     defaultMessage: 'Gen AI Settings',
+  }),
+  externalLinkAriaLabel: i18n.translate('xpack.onechat.conversationActions.externalLinkAriaLabel', {
+    defaultMessage: 'Open in new tab',
   }),
 };
 
@@ -81,15 +89,74 @@ const popoverMinWidthStyles = css`
 `;
 
 const MenuSectionTitle = ({ title }: { title: string }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <>
-      <EuiSpacer size="xs" />
-      <EuiTitle size="xxxs">
+      <EuiSpacer size="s" />
+      <EuiTitle
+        size="xxxs"
+        css={css`
+          padding-left: ${euiTheme.size.s};
+        `}
+      >
         <h1>{title}</h1>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" />
     </>
+  );
+};
+
+interface ExternalLinkProps {
+  href: string;
+  icon: IconType;
+  children: React.ReactNode;
+  dataTestSubj: string;
+  onClick: () => void;
+}
+const ExternalLink = ({ href, icon, children, dataTestSubj, onClick }: ExternalLinkProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  const containerStyles = css`
+    justify-content: space-between;
+    padding-left: ${euiTheme.size.s};
+
+    .externalLinkIcon {
+      opacity: 0;
+      transition: opacity ${euiTheme.animation.normal};
+    }
+
+    &:hover .externalLinkIcon {
+      opacity: 1;
+    }
+  `;
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      direction="row"
+      responsive={false}
+      css={containerStyles}
+      data-test-subj={dataTestSubj}
+    >
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+        <EuiIcon type={icon} color="text" size="m" />
+        {children}
+      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          className="externalLinkIcon"
+          target="_blank"
+          rel="noopener noreferrer"
+          iconType="popout"
+          color="text"
+          size="m"
+          href={href}
+          aria-label={fullscreenLabels.externalLinkAriaLabel}
+          onClick={onClick}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -102,13 +169,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
   const agentId = useAgentId();
-  const { isEmbeddedContext } = useConversationContext();
   const isAgentReadOnly = useIsAgentReadOnly(agentId);
   const { createOnechatUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
+  const { manageAgents } = useUiPrivileges();
+
   const {
     services: { application },
   } = useKibana();
+  const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -159,7 +228,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="edit-current-agent"
       icon="pencil"
       size="s"
-      disabled={isAgentReadOnly}
+      disabled={isAgentReadOnly || !manageAgents}
       onClick={closePopover}
       href={agentId ? createOnechatUrl(appPaths.agents.edit({ agentId })) : undefined}
     >
@@ -169,7 +238,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="clone-agent"
       icon="copy"
       size="s"
-      disabled={!agentId}
+      disabled={!agentId || !manageAgents}
       onClick={closePopover}
       href={
         agentId
@@ -183,36 +252,37 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="management-title"
       title={fullscreenLabels.conversationManagementLabel}
     />,
-    <EuiContextMenuItem
+    <ExternalLink
       key="agents"
-      icon="machineLearningApp"
-      size="s"
+      icon={() => <RobotIcon />}
       onClick={closePopover}
       href={createOnechatUrl(appPaths.agents.list)}
-      data-test-subj="onechatActionsAgents"
+      dataTestSubj="onechatActionsAgents"
     >
       {fullscreenLabels.agents}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
+    </ExternalLink>,
+    <ExternalLink
       key="tools"
       icon="wrench"
-      size="s"
       onClick={closePopover}
       href={createOnechatUrl(appPaths.tools.list)}
-      data-test-subj="onechatActionsTools"
+      dataTestSubj="onechatActionsTools"
     >
       {fullscreenLabels.tools}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="agentBuilderSettings"
-      icon="gear"
-      size="s"
-      onClick={closePopover}
-      href={application.getUrlForApp('management', { path: '/ai/agentBuilder' })}
-      data-test-subj="onechatActionsAgentBuilderSettings"
-    >
-      {fullscreenLabels.agentBuilderSettings}
-    </EuiContextMenuItem>,
+    </ExternalLink>,
+    ...(hasAccessToGenAiSettings
+      ? [
+          <ExternalLink
+            key="agentBuilderSettings"
+            icon="gear"
+            onClick={closePopover}
+            href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
+            dataTestSubj="agentBuilderGenAiSettingsButton"
+          >
+            {fullscreenLabels.genAiSettings}
+          </ExternalLink>,
+        ]
+      : []),
   ];
 
   const buttonProps = {
@@ -222,7 +292,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',
   };
-  const showButtonIcon = isEmbeddedContext || hasActiveConversation;
+  const showButtonIcon = hasActiveConversation;
   const button = showButtonIcon ? (
     <EuiButtonIcon {...buttonProps} />
   ) : (
@@ -235,13 +305,14 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="s"
-        anchorPosition="upRight"
+        panelPaddingSize="xs"
+        anchorPosition="downCenter"
         panelProps={{
           css: popoverMinWidthStyles,
         }}
       >
         <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiSpacer size="s" />
       </EuiPopover>
       <DeleteConversationModal
         isOpen={isDeleteModalOpen}

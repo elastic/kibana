@@ -6,12 +6,8 @@
  */
 
 import { type FrozenTierPreference } from '@kbn/ml-date-picker';
-import type { MinimumTimeRangeOption } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
-
-import {
-  type RandomSamplerOption,
-  type RandomSamplerProbability,
-} from '../components/log_categorization/sampling_menu/random_sampler';
+import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-random-sampler-utils';
+import type { MinimumTimeRangeOption } from '../../common/embeddables/pattern_analysis/types';
 
 export const AIOPS_FROZEN_TIER_PREFERENCE = 'aiops.frozenDataTierPreference';
 export const AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE = 'aiops.randomSamplingModePreference';

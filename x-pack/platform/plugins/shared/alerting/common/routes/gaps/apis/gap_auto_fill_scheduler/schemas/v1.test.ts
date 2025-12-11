@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { gapAutoFillSchedulerBodySchema } from './v1';
+import { gapAutoFillSchedulerBodySchema, gapAutoFillSchedulerLogsRequestQuerySchema } from './v1';
 import { MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS } from '../../../../../constants';
 
 const getBody = () => ({
@@ -73,5 +73,46 @@ describe('gapAutoFillSchedulerBodySchema', () => {
     expect(() => gapAutoFillSchedulerBodySchema.validate(body)).toThrow(
       `rule_types contains duplicate entry: type="rule-type-1" consumer="alerts"`
     );
+  });
+});
+
+describe('gapAutoFillSchedulerLogsRequestQuerySchema', () => {
+  test('allows valid start and end dates', () => {
+    expect(() =>
+      gapAutoFillSchedulerLogsRequestQuerySchema.validate({
+        start: '2024-01-01T00:00:00.000Z',
+        end: '2024-01-02T00:00:00.000Z',
+        page: 1,
+        per_page: 50,
+        sort_field: '@timestamp',
+        sort_direction: 'desc',
+      })
+    ).not.toThrow();
+  });
+
+  test('rejects invalid start date', () => {
+    expect(() =>
+      gapAutoFillSchedulerLogsRequestQuerySchema.validate({
+        start: 'invalid-date',
+        end: '2024-01-02T00:00:00.000Z',
+        page: 1,
+        per_page: 50,
+        sort_field: '@timestamp',
+        sort_direction: 'desc',
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`"[start]: query start must be valid date"`);
+  });
+
+  test('rejects invalid end date', () => {
+    expect(() =>
+      gapAutoFillSchedulerLogsRequestQuerySchema.validate({
+        start: '2024-01-01T00:00:00.000Z',
+        end: 'invalid-date',
+        page: 1,
+        per_page: 50,
+        sort_field: '@timestamp',
+        sort_direction: 'desc',
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`"[end]: query end must be valid date"`);
   });
 });

@@ -13,7 +13,7 @@ import {
   populateTimeline,
 } from '../../../tasks/timeline';
 
-import { hostsUrl, ALERTS_URL } from '../../../urls/navigation';
+import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 
@@ -29,8 +29,7 @@ import { SAVE_FIELD_BUTTON } from '../../../screens/create_runtime_field';
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
-// Failing: See https://github.com/elastic/kibana/issues/236607
-describe.skip('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteRuntimeField('security-solution-default', alertRunTimeField);
