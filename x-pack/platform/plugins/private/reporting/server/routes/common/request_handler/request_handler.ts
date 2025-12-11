@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import moment from 'moment';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -155,10 +154,7 @@ export abstract class RequestHandler<
     return { job, version, jobType: exportType.jobType, name: exportType.name };
   }
 
-  protected async checkLicenseAndTimezone(
-    exportTypeId: string,
-    browserTimezone: string
-  ): Promise<IKibanaResponse | null> {
+  protected async checkLicense(exportTypeId: string): Promise<IKibanaResponse | null> {
     const { reporting, context, res } = this.opts;
 
     // ensure the async dependencies are loaded
@@ -175,12 +171,6 @@ export abstract class RequestHandler<
 
     if (!licenseResults.enableLinks) {
       return res.forbidden({ body: licenseResults.message });
-    }
-
-    if (browserTimezone && !moment.tz.zone(browserTimezone)) {
-      return res.badRequest({
-        body: `Invalid timezone "${browserTimezone ?? ''}".`,
-      });
     }
 
     return null;

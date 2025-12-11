@@ -181,7 +181,17 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+        expect(body.message).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `)
       );
   });
 

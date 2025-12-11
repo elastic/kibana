@@ -98,10 +98,7 @@ export class GenerateRequestHandler extends RequestHandler<
       reporting.getUsageCounter()
     );
 
-    const checkErrorResponse = await this.checkLicenseAndTimezone(
-      exportTypeId,
-      jobParams.browserTimezone
-    );
+    const checkErrorResponse = await this.checkLicense(exportTypeId);
     if (checkErrorResponse) {
       return checkErrorResponse;
     }
