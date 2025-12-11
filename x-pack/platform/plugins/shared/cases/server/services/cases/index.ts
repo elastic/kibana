@@ -302,11 +302,32 @@ export class CasesService {
       return accMap;
     }, new Map<string, Case>());
 
+    // TODO: imported cases do not have populate stats when importing
+    // Remove once https://github.com/elastic/kibana/issues/245939 is fixed
+    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
+      caseIds: Array.from(casesMap.keys()),
+    });
+
+    const casesWithComments = new Map<string, Case>();
+    for (const [id, caseInfo] of casesMap.entries()) {
+      const { alerts, userComments, events } = commentTotals.get(id) ?? {
+        alerts: 0,
+        userComments: 0,
+        events: 0,
+      };
+
+      casesWithComments.set(id, {
+        ...caseInfo,
+        totalComment: userComments,
+        totalAlerts: alerts,
+        totalEvents: events,
+      });
+    }
     const total =
       typeof cases.hits.total === 'object' ? cases.hits.total.value ?? 0 : cases.hits.total ?? 0;
 
     return {
-      casesMap,
+      casesMap: casesWithComments,
       page: caseOptions.page ?? 1,
       perPage: caseOptions.perPage ?? DEFAULT_PER_PAGE,
       total,

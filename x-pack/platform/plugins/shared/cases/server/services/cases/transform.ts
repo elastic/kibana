@@ -216,7 +216,7 @@ export function transformESModelToCase(
     version: version ?? '0',
     totalComment: total_comments ?? 0,
     totalAlerts: total_alerts ?? 0,
-    totalEvents: total_events,
+    totalEvents: total_events ?? 0,
     ...caseAttributes,
     severity,
     status,
@@ -228,6 +228,7 @@ export function transformESModelToCase(
     total_observables,
     incremental_id,
     settings,
+    comments: [],
   };
 }
 
