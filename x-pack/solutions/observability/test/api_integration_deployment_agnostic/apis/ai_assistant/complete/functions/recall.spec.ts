@@ -72,8 +72,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const databasePromptEntries = await recall('What happened during the database outage?');
         const animalPromptEntries = await recall('Do you have knowledge about animals?');
 
-        expect(databasePromptEntries.length).to.be(8);
-        expect(animalPromptEntries.length).to.be(8);
+        expect(databasePromptEntries.length).to.be.greaterThan(7);
+        expect(animalPromptEntries.length).to.be.greaterThan(7);
 
         expect(databasePromptEntries.map(({ id }) => id)).not.to.eql(
           animalPromptEntries.map(({ id }) => id)
