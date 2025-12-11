@@ -180,7 +180,7 @@ export const strings = {
     }),
   getSplitAccessorHelp: () =>
     i18n.translate('expressionXY.dataLayer.splitAccessors.help', {
-      defaultMessage: 'The column to split by',
+      defaultMessage: 'The columns to split by',
     }),
   getAccessorsHelp: () =>
     i18n.translate('expressionXY.dataLayer.accessors.help', {
