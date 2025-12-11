@@ -299,8 +299,8 @@ export function AlertDetails() {
             switchTabs={showRelatedAlertsFromCallout}
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
-          <AlertAiInsight alert={alertDetail} />
           <AlertDetailContextualInsights alert={alertDetail} />
+          <AlertAiInsight alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -325,8 +325,8 @@ export function AlertDetails() {
           switchTabs={showRelatedAlertsFromCallout}
         />
         <EuiSpacer size="l" />
-        <AlertAiInsight alert={alertDetail} />
         <AlertDetailContextualInsights alert={alertDetail} />
+        <AlertAiInsight alert={alertDetail} />
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>

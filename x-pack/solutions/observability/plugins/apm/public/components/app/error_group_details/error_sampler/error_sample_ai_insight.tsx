@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import {
@@ -53,6 +53,7 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [aiInsightError, setAiInsightError] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
 
@@ -64,6 +65,7 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
 
   const fetchAiInsights = async () => {
     setIsLoading(true);
+    setAiInsightError(undefined);
     try {
       const response = await observabilityAgentBuilderApiClient.fetch(
         'POST /internal/observability_agent_builder/ai_insights/error',
@@ -84,58 +86,47 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
       setSummary(response?.summary ?? '');
       setContext(response?.context ?? '');
     } catch (e) {
-      setSummary('');
-      setContext('');
+      setAiInsightError(e instanceof Error ? e.message : 'Failed to load AI insight');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const attachments = useMemo(() => {
-    if (!onechat || !hasEnterpriseLicense || !isAgentChatExperienceEnabled) {
-      return [];
-    }
+  const onStartConversation = () => {
+    if (!onechat?.openConversationFlyout) return;
 
-    return [
-      {
-        type: 'screen_context',
-        data: {
-          app: 'apm',
-          url: window.location.href,
-          description: `APM error details page for error ID ${errorId} on service ${serviceName}`,
+    onechat.openConversationFlyout({
+      newConversation: true,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'apm',
+            url: window.location.href,
+            description: `APM error details page for error ID ${errorId} on service ${serviceName}`,
+          },
+          hidden: true,
         },
-        hidden: true,
-      },
-      {
-        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-        data: {
-          summary,
-          context,
+        {
+          type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+          data: {
+            summary,
+            context,
+          },
         },
-      },
-      {
-        type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
-        data: {
-          errorId,
-          serviceName,
-          environment,
-          start,
-          end,
+        {
+          type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+          data: {
+            errorId,
+            serviceName,
+            environment,
+            start,
+            end,
+          },
         },
-      },
-    ];
-  }, [
-    onechat,
-    hasEnterpriseLicense,
-    isAgentChatExperienceEnabled,
-    errorId,
-    serviceName,
-    summary,
-    context,
-    environment,
-    start,
-    end,
-  ]);
+      ],
+    });
+  };
 
   if (!onechat || !isAgentChatExperienceEnabled) {
     return null;
@@ -153,13 +144,9 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
         license={license}
         content={summary}
         isLoading={isLoading}
+        error={aiInsightError}
         onOpen={fetchAiInsights}
-        onStartConversation={() => {
-          onechat.openConversationFlyout({
-            attachments,
-            newConversation: true,
-          });
-        }}
+        onStartConversation={onStartConversation}
       />
       <EuiSpacer size="s" />
     </>

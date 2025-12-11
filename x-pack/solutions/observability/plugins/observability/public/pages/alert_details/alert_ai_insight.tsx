@@ -91,7 +91,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
     });
   };
 
-  if (!onechat || !hasAgentBuilderAccess || !isAgentChatExperienceEnabled) {
+  if (!onechat || !isAgentChatExperienceEnabled) {
     return null;
   }
 
