@@ -3404,7 +3404,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<object> | undefined; }"
+          "<object> | undefined; throwOnUnmappedPanel?: ((config: EmbeddableState) => void) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
