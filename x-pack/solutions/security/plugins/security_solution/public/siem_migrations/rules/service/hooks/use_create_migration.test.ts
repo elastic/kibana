@@ -63,7 +63,11 @@ describe('useCreateMigration', () => {
       });
     });
 
-    expect(createRuleMigration).toHaveBeenCalledWith(rules, 'test-migration');
+    expect(createRuleMigration).toHaveBeenCalledWith({
+      rules,
+      migrationName: 'test-migration',
+      migrationSource: MigrationSource.SPLUNK,
+    });
     expect(getRuleMigrationStats).toHaveBeenCalledWith({ migrationId: 'migration-id' });
     expect(addSuccess).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalledWith({ id: 'migration-id', items: { total: 1 } });
