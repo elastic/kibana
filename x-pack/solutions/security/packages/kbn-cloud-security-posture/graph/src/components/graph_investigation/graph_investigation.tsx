@@ -367,6 +367,20 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return (
         data?.nodes.map((node) => {
           if (isEntityNode(node)) {
+            // Populate missing type and sub_type values for entity nodes
+            if (node.documentsData && Array.isArray(node.documentsData)) {
+              node.documentsData.forEach((doc) => {
+                if (doc.entity) {
+                  if (!doc.entity.type || doc.entity.type === '') {
+                    doc.entity.type = `type_${Math.random().toString(36).substring(2, 9)}`;
+                  }
+                  if (!doc.entity.sub_type || doc.entity.sub_type === '') {
+                    doc.entity.sub_type = `subtype_${Math.random().toString(36).substring(2, 9)}`;
+                  }
+                }
+              });
+            }
+
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
             return {
