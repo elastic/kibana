@@ -11,7 +11,7 @@ jobs:
     runs-on: kibana
     if: |
       (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
-      github.event.pull_request.labels.length > 0 &&
+      fromJSON(github.event.pull_request.labels).length > 0 &&
       github.event.pull_request.user.type != 'Bot' &&
       github.event.pull_request.draft == false)
     permissions:
