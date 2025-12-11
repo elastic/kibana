@@ -32,11 +32,11 @@ export function validateConverter(attributes: LensAttributes, schema: Type<any>)
 
   expect(() => {
     schema.validate(newApiConfig);
-  }).not.toThrow('API schema validation failed - 1st pass');
+  }).not.toThrow();
 
   expect(() => {
     lensApiStateSchema.validate(newApiConfig);
-  }).not.toThrow('General API schema validation failed - 1st pass');
+  }).not.toThrow();
 
   const newLensAttributes = builder.fromAPIFormat(newApiConfig);
 
@@ -44,11 +44,11 @@ export function validateConverter(attributes: LensAttributes, schema: Type<any>)
 
   expect(() => {
     schema.validate(newApiConfig2);
-  }).not.toThrow('API schema validation failed - 2nd pass');
+  }).not.toThrow();
 
   expect(() => {
     lensApiStateSchema.validate(newApiConfig2);
-  }).not.toThrow('General API schema validation failed - 2nd pass');
+  }).not.toThrow();
 
   expect(newApiConfig).toEqual(newApiConfig2);
 }
