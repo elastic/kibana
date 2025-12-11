@@ -548,6 +548,7 @@ const AlertsTableContent = typedForwardRef(
           expandedAlertIndex,
           onExpandedAlertIndexChange: updateExpandedAlertIndex,
           renderExpandedAlertView,
+          mutedAlertsEnabled,
         } as RenderContext<AC>),
       [
         additionalContext,
@@ -581,6 +582,7 @@ const AlertsTableContent = typedForwardRef(
         expandedAlertIndex,
         updateExpandedAlertIndex,
         renderExpandedAlertView,
+        mutedAlertsEnabled,
       ]
     );
 

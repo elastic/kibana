@@ -48,7 +48,7 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
       <ViewRuleDetailsAlertAction {...props} />
       <ViewAlertDetailsAlertAction {...props} />
       {showModifyOption && <MarkAsUntrackedAlertAction {...props} />}
-      {showModifyOption && <MuteAlertAction {...props} />}
+      {showModifyOption && props.mutedAlertsEnabled && <MuteAlertAction {...props} />}
       {showModifyOption && <EditTagsAction {...props} />}
     </>
   );

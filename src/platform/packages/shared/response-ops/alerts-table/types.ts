@@ -504,6 +504,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'services'
     | 'casesConfiguration'
     | 'openLinksInNewTab'
+    | 'mutedAlertsEnabled'
   >,
   | 'columns'
   | 'pageIndex'
@@ -513,6 +514,7 @@ export type RenderContext<AC extends AdditionalContext> = {
   | 'openLinksInNewTab'
   | 'expandedAlertIndex'
   | 'onExpandedAlertIndexChange'
+  | 'mutedAlertsEnabled'
 > &
   AC;
 
