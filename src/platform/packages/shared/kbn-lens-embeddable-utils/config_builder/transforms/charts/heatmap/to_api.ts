@@ -12,7 +12,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { getDatasourceLayers, getSharedChartLensStateToAPI } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueLensStateToAPI } from '../../coloring';
-import type { LensAttributes } from '../../../types';
+import { DEFAULT_LAYER_ID, type LensAttributes } from '../../../types';
 import {
   buildDatasetStateESQL,
   buildDatasetStateNoESQL,
@@ -23,7 +23,7 @@ import {
 import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
 import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
-import { API_VISUALIZATION_TYPE, LENS_DEFAULT_LAYER_ID } from './constants';
+import { API_VISUALIZATION_TYPE } from './constants';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
@@ -147,7 +147,7 @@ export function fromLensStateToAPI(config: LensAttributes): HeatmapState {
     ...reverseBuildVisualizationState(
       visualization,
       layer as FormBasedLayer | TextBasedLayer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

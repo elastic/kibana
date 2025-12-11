@@ -60,7 +60,6 @@ const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -457,7 +456,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -488,7 +487,7 @@ export function fromLensStateToAPI(config: LensAttributes): MetricState {
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

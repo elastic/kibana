@@ -30,12 +30,7 @@ import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
-import {
-  ACCESSOR,
-  HEATMAP_GRID_NAME,
-  LENS_DEFAULT_LAYER_ID,
-  VISUALIZATION_TYPE,
-} from './constants';
+import { ACCESSOR, HEATMAP_GRID_NAME, VISUALIZATION_TYPE } from './constants';
 
 function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
@@ -139,7 +134,7 @@ export function fromAPItoLensState(config: HeatmapState): LensAttributes {
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {

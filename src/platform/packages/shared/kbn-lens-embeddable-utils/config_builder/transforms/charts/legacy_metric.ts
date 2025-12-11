@@ -41,7 +41,6 @@ import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '
 import { isEsqlTableTypeDataset } from '../../utils';
 
 const ACCESSOR = 'metric_formula_accessor';
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
 function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisualizationState {
   const layer = config;
@@ -156,7 +155,7 @@ export function fromAPItoLensState(
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -191,7 +190,7 @@ export function fromLensStateToAPI(
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

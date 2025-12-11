@@ -10,5 +10,4 @@
 export const VISUALIZATION_TYPE = 'lnsHeatmap';
 export const API_VISUALIZATION_TYPE = 'heatmap';
 export const ACCESSOR = 'heatmap_value_accessor';
-export const LENS_DEFAULT_LAYER_ID = 'layer_0';
 export const HEATMAP_GRID_NAME = 'heatmap_grid';
