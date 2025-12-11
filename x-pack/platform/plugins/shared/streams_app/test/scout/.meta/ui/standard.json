@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-10T13:16:18.579Z",
-  "sha1": "e2a2a88335a60cae50879d0fede5b0599fb8d592",
+  "lastModified": "2025-12-11T10:19:20.201Z",
+  "sha1": "a92fb513bf08dbc38812c820341ef6565d61f809",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -599,6 +599,244 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
         "line": 165,
         "column": 7
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-f8d44b650682af6",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-2315daf2c42d27d",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to edit existing processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-6dfdbbced407ed7",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to duplicate processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 61,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-984b17bddf52f58",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to delete processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-92513d001d973b8",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add conditions (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 89,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-54177f2f2b1d75a",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT show save changes button for viewer (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 97,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-782eccbcbedcd18",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to add processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 142,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-6dc5ca4973457c5",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to edit existing processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 150,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-fe6cd89dee5117d",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to duplicate processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-f898866e7c6a1f5",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to delete processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-074bc7b5d0a9019",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT show save changes button for editor (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 189,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-10300c4c52ff3ef",
+      "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to edit existing conditions (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 237,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-c67b471c8eff15f",
+      "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to delete conditions (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 248,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-89774db8a07beae",
+      "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to add nested steps to conditions (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 264,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-5a4e6cd12593697",
+      "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to edit existing conditions (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 315,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-94be4ccd82b589f",
+      "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to delete conditions (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 326,
+        "column": 9
+      }
+    },
+    {
+      "id": "cafd7c07a64c62c-9dd357f4eba4f70",
+      "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to add nested steps to conditions (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
+        "line": 342,
+        "column": 9
       }
     },
     {

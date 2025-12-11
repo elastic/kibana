@@ -315,13 +315,65 @@
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgentBuilder",
+            "id": "def-server.ObservabilityAgentBuilderPluginStartDependencies.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-server.ObservabilityAgentBuilderServerRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "ObservabilityAgentBuilderServerRouteRepository",
+        "description": [],
+        "signature": [
+          "{ \"POST /internal/observability_agent_builder/ai_insights/alert\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/observability_agent_builder/ai_insights/alert\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ alertId: ",
+          "StringC",
+          "; }>; }>, ",
+          "ObservabilityAgentBuilderRouteHandlerResources",
+          ", { summary: string; context: string; }, undefined>; }"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/routes/get_global_observability_agent_builder_route_repository.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "observabilityAgentBuilder",
