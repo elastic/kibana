@@ -1,0 +1,220 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { TrialCompanionMilestoneServiceImpl } from './trial_companion_milestone_service';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { lazyObject } from '@kbn/lazy-object';
+import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
+import { Milestone } from '../../../../common/trial_companion/types';
+
+describe('TrialCompanionMilestoneServiceImpl', () => {
+  let sut: TrialCompanionMilestoneServiceImpl;
+  const taskManagerSetup = taskManagerMock.createSetup();
+  const taskManagerStart = taskManagerMock.createStart();
+  const repo: jest.Mocked<TrialCompanionMilestoneRepository> = lazyObject({
+    getCurrent: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+  });
+  beforeEach(() => {
+    sut = new TrialCompanionMilestoneServiceImpl(loggingSystemMock.createLogger());
+    jest.clearAllMocks();
+  });
+  describe('setup', () => {
+    it.each([true, false])('should register a task when enabled: %s', (enabled) => {
+      sut.setup({
+        enabled,
+        taskManager: taskManagerSetup,
+      });
+      expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
+        'security:trial-companion-milestone': {
+          title: 'This task periodically checks currently achieved milestones.',
+          maxAttempts: 1,
+          timeout: '10m',
+          createTaskRunner: expect.any(Function),
+        },
+      });
+    });
+  });
+  describe('start', () => {
+    it.each([true, false])('should start the task only when enabled: %s', async (enabled) => {
+      sut.setup({
+        enabled,
+        taskManager: taskManagerSetup,
+      });
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [],
+        repo,
+      });
+      const assertion = expect(taskManagerStart.ensureScheduled);
+      if (!enabled) {
+        assertion.not.toHaveBeenCalled();
+      } else {
+        assertion.toHaveBeenCalledWith({
+          id: 'security:trial-companion-milestone:1.0.0',
+          taskType: 'security:trial-companion-milestone',
+          schedule: { interval: '1m' },
+          params: {},
+          state: {},
+          scope: ['securitySolution'],
+        });
+      }
+    });
+  });
+  describe('refreshMilestones', () => {
+    beforeEach(() => {
+      sut.setup({
+        enabled: true,
+        taskManager: taskManagerSetup,
+      });
+    });
+
+    it('runs detectors - does not store result if no milestone', async () => {
+      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [
+          mockDetectorUndefined,
+          mockDetectorUndefined,
+          mockDetectorUndefined,
+          mockDetectorUndefined,
+        ],
+        repo,
+      });
+      await sut.refreshMilestones();
+      expect(repo.update).not.toHaveBeenCalled();
+      expect(repo.create).not.toHaveBeenCalled();
+      expect(mockDetectorUndefined).toHaveBeenCalledTimes(4);
+    });
+
+    it('no detectors - nothing to do', async () => {
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [],
+        repo,
+      });
+      await sut.refreshMilestones();
+      expect(repo.update).not.toHaveBeenCalled();
+      expect(repo.create).not.toHaveBeenCalled();
+    });
+
+    it('runs detectors - first detector wins and creates milestone', async () => {
+      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
+      const mockDetectorM1 = jest.fn(() => Promise.resolve(Milestone.M1));
+      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      repo.getCurrent.mockResolvedValueOnce(undefined);
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [mockDetectorUndefined, mockDetectorM1, mockDetectorM2, mockDetectorUndefined],
+        repo,
+      });
+      await sut.refreshMilestones();
+      expect(mockDetectorUndefined).toHaveBeenCalledTimes(1);
+      expect(mockDetectorM1).toHaveBeenCalledTimes(1);
+      expect(mockDetectorM2).not.toHaveBeenCalled();
+      expect(repo.create).toHaveBeenCalledWith(Milestone.M1);
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('runs detectors - update existing milestone', async () => {
+      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
+      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      repo.getCurrent.mockResolvedValueOnce({ milestoneId: Milestone.M1, savedObjectId: 'abc' });
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [
+          mockDetectorUndefined,
+          mockDetectorUndefined,
+          mockDetectorM2,
+          mockDetectorUndefined,
+        ],
+        repo,
+      });
+      await sut.refreshMilestones();
+      expect(mockDetectorUndefined).toHaveBeenCalledTimes(2);
+      expect(mockDetectorM2).toHaveBeenCalled();
+      expect(repo.create).not.toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith({ milestoneId: Milestone.M2, savedObjectId: 'abc' });
+    });
+
+    it('runs detectors - does not update the same milestone', async () => {
+      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
+      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      repo.getCurrent.mockResolvedValueOnce({ milestoneId: Milestone.M2, savedObjectId: 'abc' });
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [
+          mockDetectorUndefined,
+          mockDetectorUndefined,
+          mockDetectorUndefined,
+          mockDetectorM2,
+        ],
+        repo,
+      });
+      await sut.refreshMilestones();
+      expect(mockDetectorUndefined).toHaveBeenCalledTimes(3);
+      expect(mockDetectorM2).toHaveBeenCalled();
+      expect(repo.create).not.toHaveBeenCalled();
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+
+    it('does not propagate an error from repo.getCurrent', async () => {
+      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      repo.getCurrent.mockRejectedValueOnce(new Error('test error'));
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [mockDetectorM2],
+        repo,
+      });
+      await expect(sut.refreshMilestones()).resolves.not.toThrowError();
+      expect(repo.getCurrent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not propagate an error from repo.update', async () => {
+      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      repo.getCurrent.mockResolvedValueOnce({ milestoneId: Milestone.M1, savedObjectId: 'abc' });
+      repo.update.mockRejectedValueOnce(new Error('test error'));
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [mockDetectorM2],
+        repo,
+      });
+      await expect(sut.refreshMilestones()).resolves.not.toThrowError();
+      expect(repo.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not propagate an error from repo.create', async () => {
+      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      repo.getCurrent.mockResolvedValueOnce(undefined);
+      repo.create.mockRejectedValueOnce(new Error('test error'));
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [mockDetectorM2],
+        repo,
+      });
+      await expect(sut.refreshMilestones()).resolves.not.toThrowError();
+      expect(repo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not propagate an error from detectors', async () => {
+      const mockDetectorError = jest.fn(() => Promise.reject(new Error('test error')));
+      repo.getCurrent.mockResolvedValueOnce(undefined);
+      await sut.start({
+        taskManager: taskManagerStart,
+        detectors: [mockDetectorError],
+        repo,
+      });
+      await expect(sut.refreshMilestones()).resolves.not.toThrowError();
+      expect(repo.getCurrent).toHaveBeenCalledTimes(1);
+      expect(mockDetectorError).toHaveBeenCalledTimes(1);
+      expect(repo.create).not.toHaveBeenCalled();
+      expect(repo.update).not.toHaveBeenCalled();
+    });
+  });
+});

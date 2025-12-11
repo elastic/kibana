@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -150,7 +150,13 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import type { TrialCompanionMilestoneService } from './lib/trial_companion/services/trial_companion_milestone_service.types';
+import {
+  createTrialCompanionMilestoneServiceDeps,
+  TrialCompanionMilestoneServiceImpl,
+} from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
+import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -181,6 +187,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
+  private trialCompanionMilestoneService: TrialCompanionMilestoneService;
+  private usageCollection?: UsageCollectionSetup;
 
   private isServerless: boolean;
 
@@ -228,6 +236,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('plugin initialized');
 
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
+    this.trialCompanionMilestoneService = new TrialCompanionMilestoneServiceImpl(this.logger);
   }
 
   private registerOnechatAttachmentsAndTools(
@@ -382,6 +391,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    this.usageCollection = plugins.usageCollection;
     plugins.cases.attachmentFramework.registerExternalReference({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
     });
@@ -464,6 +474,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
 
+    const trialCompanionDeps: TrialCompanionRoutesDeps = {
+      router,
+      logger,
+      enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
+    };
+
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
@@ -481,7 +497,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver,
       this.isServerless,
       core.docLinks,
-      this.endpointContext
+      this.endpointContext,
+      trialCompanionDeps
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -628,6 +645,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
+      });
+
+      this.trialCompanionMilestoneService.setup({
+        taskManager: plugins.taskManager,
+        enabled: trialCompanionDeps.enabled,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
@@ -887,9 +909,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     if (plugins.taskManager) {
+      const esInternalUserClient = core.elasticsearch.client.asInternalUser;
       const serviceStart = {
         taskManager: plugins.taskManager,
-        esClient: core.elasticsearch.client.asInternalUser,
+        esClient: esInternalUserClient,
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
         telemetryConfigProvider: this.telemetryConfigProvider,
@@ -900,6 +923,23 @@ export class Plugin implements ISecuritySolutionPlugin {
           error: e.message,
         } as LogMeta);
       });
+
+      this.trialCompanionMilestoneService
+        .start(
+          createTrialCompanionMilestoneServiceDeps(
+            logger,
+            plugins.taskManager,
+            packageService,
+            core.savedObjects,
+            esInternalUserClient,
+            this.usageCollection
+          )
+        )
+        .catch((e) => {
+          this.logger.warn('Error starting trialCompanionMilestoneService', {
+            error: e.message,
+          } as LogMeta);
+        });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }

@@ -11,6 +11,10 @@ import { promptType } from '@kbn/security-ai-prompts';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { scriptsLibrarySavedObjectType } from './endpoint/lib/scripts_library';
 import type { ExperimentalFeatures } from '../common';
+import {
+  trialCompanionNBASavedObject,
+  trialCompanionNBAUserSeenSavedObject,
+} from './lib/trial_companion/saved_objects';
 import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
@@ -54,6 +58,8 @@ const types = [
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,
+  trialCompanionNBASavedObject,
+  trialCompanionNBAUserSeenSavedObject,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

@@ -32,6 +32,7 @@ import { UserPrivilegesProvider } from '../common/components/user_privileges/use
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../assistant/provider';
+import { TrialCompanion } from '../trial_companion/trial_companion';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -66,6 +67,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                         <UpsellingProvider upsellingService={upselling}>
                           <DiscoverInTimelineContextProvider>
                             <PageRouter history={history}>
+                              <TrialCompanion />
                               <AssistantProvider>{children}</AssistantProvider>
                             </PageRouter>
                           </DiscoverInTimelineContextProvider>
