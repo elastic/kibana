@@ -10,17 +10,19 @@
 import React, { type HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiSlightShadowHover, type EuiThemeComputed } from '@elastic/eui';
+import classNames from 'classnames';
 import type { TabsServices } from '../../types';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isSelected: boolean;
   isDragging?: boolean;
+  hideRightSeparator?: boolean;
   services: TabsServices;
   children: React.ReactNode;
 }
 
 export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgroundProps>(
-  ({ isSelected, isDragging, services, children, ...otherProps }, ref) => {
+  ({ isSelected, isDragging, hideRightSeparator, services, children, ...otherProps }, ref) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
 
@@ -28,8 +30,12 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
       <div
         {...otherProps}
         ref={ref}
+        className={classNames('unifiedTabs__tabWithBackground', {
+          'unifiedTabs__tabWithBackground--selected': isSelected,
+        })}
         // tab main background and another background color on hover
         css={css`
+          position: relative;
           display: inline-block;
           border-radius: ${euiTheme.border.radius.small};
           background: ${isSelected || isDragging
@@ -38,7 +44,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           transition: background ${euiTheme.animation.fast};
           margin: ${euiTheme.size.xs};
           margin-bottom: 0;
-          padding-bottom: ${euiTheme.size.xs};
+          padding-bottom: ${isDragging ? '0' : euiTheme.size.xs};
 
           ${isSelected
             ? `
@@ -56,6 +62,23 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
               border-radius: ${euiTheme.border.radius.small};
           `
             : ''}
+
+          // right vertical separator
+          &::before {
+            content: '';
+            position: absolute;
+            right: -${euiTheme.size.xs};
+            top: calc(
+              50% - ${euiTheme.size.xs} / 2
+            ); // 50% is the tab height midpoint, we want it centered in the middle of the whole tab bar
+            transform: translateY(-50%);
+            width: 1px;
+            height: ${euiTheme.size.base};
+            background-color: ${euiTheme.colors.borderBasePlain};
+            transition: opacity ${euiTheme.animation.fast};
+            opacity: ${hideRightSeparator || isDragging ? '0' : '1'};
+            pointer-events: none;
+          }
         `}
       >
         <div

@@ -31,13 +31,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
-      describe('Getting Started page is not accessible for viewer role', function () {
+      describe('Displays page with limited functionality', function () {
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('searchGettingStarted');
         });
-        it('Should display not found error page', async () => {
+        it('No access to manage API keys', async () => {
           const bodyText = await pageObjects.common.getBodyText();
-          expect(bodyText).to.contain('No application was found at this URL');
+          expect(bodyText).to.contain("You don't have access to manage API keys");
         });
       });
     });
