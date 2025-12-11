@@ -101,6 +101,13 @@ export class DiscoverApp {
     });
   }
 
+  async waitForDocTableLoadingComplete() {
+    await this.page.testSubj.waitForSelector('discoverDocTable', {
+      state: 'visible',
+      timeout: 30000,
+    });
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
@@ -228,5 +235,12 @@ export class DiscoverApp {
     await this.page.testSubj.hover(`dataGridHeaderCell-${fieldName}`);
     await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
     await this.page.getByText(`Move ${direction}`).click();
+  }
+
+  async selectTextBaseLang() {
+    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
+      await this.page.testSubj.click('select-text-based-language-btn');
+      await this.waitForDocTableLoadingComplete();
+    }
   }
 }
