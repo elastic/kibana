@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:04:17.097Z",
-  "sha1": "b72df4fa5abc546e5f21e6c2f6eaaaa523755720",
+  "lastModified": "2025-12-11T11:26:59.737Z",
+  "sha1": "f54420036154e014641f02ed29641be6a01eccde",
   "tests": [
     {
       "id": "f44f18cc703276d-178a4921f7b18d0",
@@ -110,13 +110,13 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 38,
+        "line": 36,
         "column": 10
       }
     },
     {
-      "id": "fce093fbca08710-90abc09aa216d42",
-      "title": "Cases Helpers should update case with a new severity with 'cases.update'",
+      "id": "fce093fbca08710-e761bb7e6b898c6",
+      "title": "Cases Helpers should update case with 'cases.update'",
       "expectedStatus": "passed",
       "tags": [
         "@svlSecurity",
@@ -124,91 +124,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 43,
-        "column": 10
-      }
-    },
-    {
-      "id": "fce093fbca08710-5408585221b6fe5",
-      "title": "Cases Helpers should add a new connector to a case",
-      "expectedStatus": "passed",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 60,
-        "column": 10
-      }
-    },
-    {
-      "id": "fce093fbca08710-ce6612540863f1f",
-      "title": "Cases Helpers should delete multiple cases",
-      "expectedStatus": "passed",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 78,
-        "column": 10
-      }
-    },
-    {
-      "id": "fce093fbca08710-867e650994dc709",
-      "title": "Cases Helpers should delete cases by tags",
-      "expectedStatus": "passed",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 98,
-        "column": 10
-      }
-    },
-    {
-      "id": "fce093fbca08710-f9fa16a32a85b71",
-      "title": "Cases Helpers should post and find a comment",
-      "expectedStatus": "passed",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 125,
-        "column": 10
-      }
-    },
-    {
-      "id": "fce093fbca08710-e2cb6fcca5c3e88",
-      "title": "Cases Helpers should post an alert",
-      "expectedStatus": "passed",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 147,
-        "column": 10
-      }
-    },
-    {
-      "id": "fce093fbca08710-c6649d9e4143889",
-      "title": "Cases Helpers should search for a case by category",
-      "expectedStatus": "passed",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 160,
+        "line": 41,
         "column": 10
       }
     },

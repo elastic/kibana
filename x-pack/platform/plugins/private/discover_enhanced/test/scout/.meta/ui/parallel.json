@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:03:09.722Z",
-  "sha1": "4ebdabbb2f59457a685a6b803aa5b45701dfb583",
+  "lastModified": "2025-12-11T11:26:41.518Z",
+  "sha1": "7b58211aa926cbc511c2569bb8f93e12bbf69872",
   "tests": [
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
@@ -81,7 +81,6 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch"
       ],
       "location": {
@@ -100,7 +99,6 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch"
       ],
       "location": {
@@ -119,7 +117,6 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch"
       ],
       "location": {
@@ -138,7 +135,6 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch"
       ],
       "location": {
@@ -157,7 +153,6 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch"
       ],
       "location": {

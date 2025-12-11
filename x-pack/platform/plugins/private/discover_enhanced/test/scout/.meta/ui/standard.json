@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:03:13.427Z",
-  "sha1": "4ebdabbb2f59457a685a6b803aa5b45701dfb583",
+  "lastModified": "2025-12-11T11:26:43.531Z",
+  "sha1": "7b58211aa926cbc511c2569bb8f93e12bbf69872",
   "tests": [
     {
       "id": "451ff2b9982142c-9a17f71a4f5ef91",
@@ -12,13 +12,12 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch",
         "@perf"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 41,
+        "line": 40,
         "column": 9
       }
     },
@@ -32,13 +31,12 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch",
         "@perf"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 92,
+        "line": 91,
         "column": 9
       }
     },
@@ -52,7 +50,6 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch",
         "@perf"
       ],
@@ -72,12 +69,11 @@
         "@svlSecurityEssentials",
         "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts",
-        "line": 64,
+        "line": 63,
         "column": 7
       }
     }
