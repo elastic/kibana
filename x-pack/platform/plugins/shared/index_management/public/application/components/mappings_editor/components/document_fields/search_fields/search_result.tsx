@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { FixedSizeList as VirtualList, areEqual } from 'react-window';
+import { List as VirtualList, type RowComponentProps } from 'react-window';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,18 +24,18 @@ interface Props {
 const ITEM_HEIGHT = 64;
 
 interface RowProps {
-  index: number;
-  style: React.CSSProperties;
-  data: {
-    result: Props['result'];
-    status: Props['documentFieldsState']['status'];
-    fieldToEdit: Props['documentFieldsState']['fieldToEdit'];
-  };
+  result: Props['result'];
+  status: Props['documentFieldsState']['status'];
+  fieldToEdit: Props['documentFieldsState']['fieldToEdit'];
 }
 
-const Row = React.memo<RowProps>(({ data, index, style }) => {
-  // Data passed to List as "itemData" is available as props.data
-  const { fieldToEdit, result, status } = data;
+const RowComponent = ({
+  index,
+  style,
+  result,
+  status,
+  fieldToEdit,
+}: RowComponentProps<RowProps>) => {
   const item = result[index];
 
   return (
@@ -48,7 +48,7 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
       />
     </div>
   );
-}, areEqual);
+};
 
 export const SearchResult = React.memo(
   ({
@@ -68,7 +68,7 @@ export const SearchResult = React.memo(
       }
     };
 
-    const itemData = useMemo(
+    const rowProps = useMemo(
       () => ({ result, status, fieldToEdit }),
       [fieldToEdit, result, status]
     );
@@ -95,17 +95,16 @@ export const SearchResult = React.memo(
         }
       />
     ) : (
-      <VirtualList
-        data-test-subj="mappingsEditorSearchResult"
-        style={{ overflowX: 'hidden', ...virtualListStyle }}
-        width="100%"
-        height={listHeight}
-        itemData={itemData}
-        itemCount={result.length}
-        itemSize={ITEM_HEIGHT}
-      >
-        {Row}
-      </VirtualList>
+      <div style={{ height: listHeight, width: '100%' }}>
+        <VirtualList<RowProps>
+          data-test-subj="mappingsEditorSearchResult"
+          style={{ height: '100%', width: '100%', overflowX: 'hidden', ...virtualListStyle }}
+          rowCount={result.length}
+          rowHeight={ITEM_HEIGHT}
+          rowProps={rowProps}
+          rowComponent={RowComponent}
+        />
+      </div>
     );
   }
 );
