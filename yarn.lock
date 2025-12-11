@@ -6570,6 +6570,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ux-example-plugin@link:examples/esql_ux_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
@@ -7731,6 +7735,10 @@
   uid ""
 
 "@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
+  version "0.0.0"
+  uid ""
+
+"@kbn/otel-demo@link:src/platform/packages/shared/kbn-otel-demo":
   version "0.0.0"
   uid ""
 
@@ -8899,6 +8907,10 @@
   uid ""
 
 "@kbn/streamlang-tests@link:x-pack/platform/packages/shared/kbn-streamlang-tests":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streamlang-yaml-editor@link:x-pack/platform/packages/shared/kbn-streamlang-yaml-editor":
   version "0.0.0"
   uid ""
 

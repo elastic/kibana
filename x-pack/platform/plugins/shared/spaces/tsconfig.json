@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -57,6 +57,7 @@
     "@kbn/css-utils",
     "@kbn/licensing-types",
     "@kbn/react-query",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
