@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiShadow, useEuiTheme } from '
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { borderRadiusXlStyles } from '../../conversation.styles';
+import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const labels = {
   reasoningError: i18n.translate('xpack.onechat.round.error.reasoningError', {

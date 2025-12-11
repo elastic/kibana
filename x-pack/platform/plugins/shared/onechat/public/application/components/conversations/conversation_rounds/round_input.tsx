@@ -17,7 +17,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { type Attachment } from '@kbn/onechat-common/attachments';
-import { ROUNDED_BORDER_RADIUS_LARGE } from '../conversation.styles';
+import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
 import { AttachmentPillsRow } from '../conversation_input/attachment_pills_row';
 import { RoundResponseActions } from './round_response/round_response_actions';
 

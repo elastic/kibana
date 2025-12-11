@@ -29,8 +29,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   const samlAuth = getService('samlAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/240900
-  describe.skip('SyntheticsAlertOnNoData', function () {
+  describe('SyntheticsAlertOnNoData', function () {
     // Test failing on MKI and ECH
     this.tags(['skipCloud']);
 
@@ -71,6 +70,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
         ignore_unavailable: true,
+        conflicts: 'proceed',
+        refresh: true,
       });
       await server.savedObjects.clean({ types: ['rule'] });
     });
