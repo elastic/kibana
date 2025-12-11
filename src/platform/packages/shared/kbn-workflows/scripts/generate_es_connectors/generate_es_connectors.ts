@@ -22,6 +22,7 @@ import {
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
+import { INCLUDED_OPERATIONS } from './included_operations';
 import type { SpecificationTypes } from './types';
 import type { HttpMethod } from '../../types/latest';
 import {
@@ -39,12 +40,12 @@ import {
   getSchemaNamePrefix,
   StaticImports,
 } from '../shared';
-import { INCLUDED_OPERATIONS_MAP, INCLUDED_OPERATIONS_V2 } from './included_operations';
 
 export async function run() {
   cleanGeneratedFolder();
-  await generateZodSchemas();
-  generateAndSaveEsConnectors();
+  const relevantEndpoints = getRelevantEndpoints();
+  await generateZodSchemas(relevantEndpoints);
+  generateAndSaveEsConnectors(relevantEndpoints);
   eslintFixGeneratedCode({
     paths: [
       ES_CONTRACTS_OUTPUT_FILE_PATH,
@@ -58,11 +59,19 @@ function cleanGeneratedFolder() {
   fs.mkdirSync(ES_GENERATED_OUTPUT_FOLDER_PATH);
 }
 
-function generateAndSaveEsConnectors() {
+function getRelevantEndpoints() {
+  const schema = JSON.parse(
+    fs.readFileSync(ES_SPEC_SCHEMA_PATH, 'utf8')
+  ) as SpecificationTypes.Model;
+
+  return schema.endpoints.filter((endpoint) => INCLUDED_OPERATIONS.includes(endpoint.name));
+}
+
+function generateAndSaveEsConnectors(endpoints: SpecificationTypes.Endpoint[]) {
   try {
     const startedAt = performance.now();
     console.log('2/3 Generating Elasticsearch connectors...');
-    const contracts = generateContracts();
+    const contracts = generateContracts(endpoints);
     const indexFile = generateEsConnectorsIndexFile(contracts);
     fs.writeFileSync(ES_CONTRACTS_OUTPUT_FILE_PATH, indexFile);
     for (const contract of contracts) {
@@ -90,26 +99,10 @@ function generateAndSaveEsConnectors() {
   }
 }
 
-function generateContracts() {
-  const schema = JSON.parse(
-    fs.readFileSync(ES_SPEC_SCHEMA_PATH, 'utf8')
-  ) as SpecificationTypes.Model;
+function generateContracts(endpoints: SpecificationTypes.Endpoint[]) {
   const openApiSpec = JSON.parse(
     fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')
   ) as OpenAPIV3.Document;
-
-  const endpoints = schema.endpoints
-    .filter((endpoint) => !endpoint.name.startsWith('_internal.'))
-    .map((endpoint) => ({
-      ...endpoint,
-      urls: endpoint.urls
-        .filter((urlTemplate) => urlTemplate.path in INCLUDED_OPERATIONS_V2) // filter out paths that should not be included
-        .map((url) => ({
-          ...url,
-          methods: url.methods.filter((method) => INCLUDED_OPERATIONS_V2[url.path]?.has(method)), // filter out methods that should not be included for the current path
-        })),
-    }))
-    .filter((x) => x.urls.length); // filter out endpoints without urls.
 
   console.log(`Generating Elasticsearch connectors from ${endpoints.length} endpoints...`);
 
@@ -184,19 +177,24 @@ function getShortEsSpecCommitHash(): string {
   }
 }
 
-async function generateZodSchemas() {
+async function generateZodSchemas(endpoints: SpecificationTypes.Endpoint[]) {
   try {
     const startedAt = performance.now();
     console.log('1/3 Generating Zod schemas from OpenAPI spec...');
 
     console.log('- Importing openapi-ts config...');
-    const openapiTsConfig = await import('./openapi_ts.config').then((module) => module.default);
+    const buildTsConfig = await import('./openapi_ts.config').then((module) => module.default);
     console.log(`- Openapi-ts config imported in ${formatDuration(startedAt, performance.now())}`);
+    const endpointRequests = endpoints.flatMap((endpoint) =>
+      endpoint.urls.flatMap((urlTemplate) =>
+        urlTemplate.methods.map((method) => `${method} ${urlTemplate.path}`)
+      )
+    );
 
     const createClientStartedAt = performance.now();
     console.log('- Creating Zod schemas with openapi-ts...');
     // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
-    await createClient(openapiTsConfig);
+    await createClient(buildTsConfig({ include: endpointRequests }));
     console.log(
       `- Zod schemas generated in ${formatDuration(createClientStartedAt, performance.now())}`
     );

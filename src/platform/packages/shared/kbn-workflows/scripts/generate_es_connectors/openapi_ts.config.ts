@@ -10,7 +10,6 @@ import {
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
-import { INCLUDED_OPERATIONS, INCLUDED_OPERATIONS_V2 } from './included_operations';
 import { alignDefaultWithEnum } from '../shared/oas_align_default_with_enum';
 import { allowShortQuerySyntax } from '../shared/oas_allow_short_query_syntax';
 import { removeDiscriminatorsWithoutMapping } from '../shared/oas_remove_discriminators_without_mapping';
@@ -28,39 +27,38 @@ const preprocessedOpenApiSpec = [
   createRemoveServerDefaults(ES_SPEC_SCHEMA_PATH),
 ].reduce((acc, fn) => fn(acc), openApiSpec);
 
-const config: UserConfig = {
-  // @ts-expect-error - for some reason openapi-ts doesn't accept OpenAPIV3.Document
-  input: preprocessedOpenApiSpec,
-  output: {
-    path: OPENAPI_TS_OUTPUT_FOLDER_PATH,
-    fileName: OPENAPI_TS_OUTPUT_FILENAME,
-  },
-  parser: {
-    filters: {
-      operations: {
-        include: Object.entries(INCLUDED_OPERATIONS_V2).flatMap(([path, methods]) =>
-          Array.from(methods).map((method) => `${method} ${path}`)
-        ),
+function buildConfig({ include }: { include: string[] }): UserConfig {
+  return {
+    // @ts-expect-error - for some reason openapi-ts doesn't accept OpenAPIV3.Document
+    input: preprocessedOpenApiSpec,
+    output: {
+      path: OPENAPI_TS_OUTPUT_FOLDER_PATH,
+      fileName: OPENAPI_TS_OUTPUT_FILENAME,
+    },
+    parser: {
+      filters: {
+        operations: {
+          include: include || [],
+        },
       },
     },
-  },
-  plugins: [
-    {
-      name: 'zod',
-      case: 'snake_case',
-      requests: {
-        name: '{{name}}_request',
+    plugins: [
+      {
+        name: 'zod',
+        case: 'snake_case',
+        requests: {
+          name: '{{name}}_request',
+        },
+        responses: {
+          name: '{{name}}_response',
+        },
+        definitions: {
+          name: '{{name}}',
+        },
+        metadata: true,
+        compatibilityVersion: 4,
       },
-      responses: {
-        name: '{{name}}_response',
-      },
-      definitions: {
-        name: '{{name}}',
-      },
-      metadata: true,
-      compatibilityVersion: 4,
-    },
-  ],
-};
-
-export default config;
+    ],
+  };
+}
+export default buildConfig;
