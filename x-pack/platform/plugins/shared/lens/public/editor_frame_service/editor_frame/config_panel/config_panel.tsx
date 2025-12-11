@@ -78,34 +78,33 @@ export function ConfigPanel(
 
   // Determine if there is only one layer, or if multiple layers exist but only one is visible.
   // This avoids some rerendering when there's just one layer but the selectedLayerId hadn't been set yet.
-  const { isOnlyLayer, selectedLayerId }: { isOnlyLayer: boolean; selectedLayerId: string | null } =
-    useMemo(() => {
-      if (layerIds.length === 1) {
-        return { isOnlyLayer: true, selectedLayerId: layerIds[0] };
-      }
+  const { isOnlyLayer, selectedLayerId } = useMemo(() => {
+    if (layerIds.length === 1) {
+      return { isOnlyLayer: true, selectedLayerId: layerIds[0] };
+    }
 
-      const visibleLayerIds = layerIds.filter((id) => {
-        const config = activeVisualization.getConfiguration({
-          layerId: id,
-          frame: props.framePublicAPI,
-          state: visualization.state,
-        });
-        return !config.hidden;
+    const visibleLayerIds = layerIds.filter((id) => {
+      const config = activeVisualization.getConfiguration({
+        layerId: id,
+        frame: props.framePublicAPI,
+        state: visualization.state,
       });
+      return !config.hidden;
+    });
 
-      const isOnlyVisibleLayer = visibleLayerIds.length === 1;
+    const isOnlyVisibleLayer = visibleLayerIds.length === 1;
 
-      return {
-        isOnlyLayer: isOnlyVisibleLayer,
-        selectedLayerId: isOnlyVisibleLayer ? visibleLayerIds[0] : selectedLayerIdFromState,
-      };
-    }, [
-      activeVisualization,
-      props.framePublicAPI,
-      visualization.state,
-      layerIds,
-      selectedLayerIdFromState,
-    ]);
+    return {
+      isOnlyLayer: isOnlyVisibleLayer,
+      selectedLayerId: isOnlyVisibleLayer ? visibleLayerIds[0] : selectedLayerIdFromState,
+    };
+  }, [
+    activeVisualization,
+    props.framePublicAPI,
+    visualization.state,
+    layerIds,
+    selectedLayerIdFromState,
+  ]);
 
   const focusLayerTabsContent = () => {
     setTimeout(() => {
