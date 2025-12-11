@@ -22,20 +22,12 @@ export const injectLensReferences = (
   }
 
   const panelReferencesMap = references.reduce<Map<string, Reference>>((acc, reference) => {
-    const name = reference.name.split(':').at(-1); // name can be dashboard or panel reference name
-
-    if (name) {
-      acc.set(name, reference);
-    }
-
-    return acc;
+    return acc.set(reference.name, reference);
   }, new Map());
 
   const newReferences = clonedState.attributes.references.map((lensRef) => {
     const panelReference = panelReferencesMap.get(lensRef.name);
-    return panelReference?.type === lensRef.type
-      ? { ...panelReference, name: lensRef.name }
-      : lensRef;
+    return panelReference?.type === lensRef.type ? panelReference : lensRef;
   });
 
   clonedState.attributes.references = newReferences;
