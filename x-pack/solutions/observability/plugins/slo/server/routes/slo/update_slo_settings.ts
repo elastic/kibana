@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { PutSLOSettingsParams } from '@kbn/slo-schema';
 import { putSLOServerlessSettingsParamsSchema, putSLOSettingsParamsSchema } from '@kbn/slo-schema';
-import { storeSloSettings } from '../../services/slo_settings';
+import { assign } from 'lodash';
+import { DEFAULT_SETTINGS } from '../../services/slo_settings_repository';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
-export const putSloSettings = (isServerless?: boolean) =>
+export const updateSloSettings = (isServerless?: boolean) =>
   createSloServerRoute({
     endpoint: 'PUT /internal/slo/settings',
     options: { access: 'internal' },
@@ -23,11 +23,11 @@ export const putSloSettings = (isServerless?: boolean) =>
     params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
     handler: async ({ request, logger, params, plugins, getScopedClients }) => {
       await assertPlatinumLicense(plugins);
-      const { soClient } = await getScopedClients({
+      const { settingsRepository } = await getScopedClients({
         request,
         logger,
       });
 
-      return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
+      return await settingsRepository.save(assign({}, DEFAULT_SETTINGS, params.body));
     },
   });
