@@ -62,14 +62,37 @@ export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibana
   );
 };
 
-export function useUserProfilesServices() {
-  const context = useContext(UserProfilesContext);
+export interface UseUserProfilesServicesOptions {
+  /**
+   * If `true`, throws an error when the provider is missing.
+   * If `false`, returns `undefined` when the provider is missing.
+   * @default true
+   */
+  strict?: boolean;
+}
 
-  if (!context) {
+/**
+ * Returns user profile services from context.
+ *
+ * @param opts - Optional configuration.
+ * @param opts.strict - If `true` (default), throws an error when the provider is missing.
+ *   If `false`, returns `undefined` instead, allowing graceful degradation.
+ */
+export function useUserProfilesServices(opts: { strict: false }): UserProfilesServices | undefined;
+export function useUserProfilesServices(
+  opts?: UseUserProfilesServicesOptions
+): UserProfilesServices;
+export function useUserProfilesServices(
+  opts?: UseUserProfilesServicesOptions
+): UserProfilesServices | undefined {
+  const context = useContext(UserProfilesContext);
+  const strict = opts?.strict ?? true;
+
+  if (!context && strict) {
     throw new Error(
       'UserProfilesContext is missing. Ensure your component or React root is wrapped with <UserProfilesProvider />'
     );
   }
 
-  return context;
+  return context ?? undefined;
 }
