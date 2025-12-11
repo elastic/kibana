@@ -15,6 +15,7 @@
       "data",
       "dataViews",
       "developerExamples",
+      "esql",
       "kibanaReact",
       "kibanaUtils",
       "uiActions"

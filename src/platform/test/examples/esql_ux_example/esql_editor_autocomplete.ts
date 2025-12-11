@@ -8,106 +8,90 @@
  */
 
 import expect from '@kbn/expect';
-import { Key } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+
+const SOURCE_QUERY = 'FROM logstash-* | ';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const { common } = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const monacoEditor = getService('monacoEditor');
-  const findService = getService('find');
+  const find = getService('find');
   const browser = getService('browser');
+  const esql = getService('esql');
 
-  describe('ES|QL UX examples', function () {
-    before(async () => {
-      await PageObjects.common.navigateToApp('esql_ux_example');
+  async function waitForSuggestionWidget(visible: boolean) {
+    await retry.try(async () => {
+      const suggestWidget = await find.byCssSelector('.monaco-editor .suggest-widget');
+      const isDisplayed = await suggestWidget.isDisplayed();
+
+      expect(isDisplayed).to.be(visible);
+    });
+  }
+
+  describe('ES|QL Editor autocomplete', function () {
+    beforeEach(async () => {
+      await esql.setEsqlEditorQuery('');
     });
 
-    describe('ES|QL Editor autocomplete', function () {
-      before(async () => {
-        await monacoEditor.waitCodeEditorReady('esqlUxExampleEditor');
+    it('should show suggestions automatically after typing space', async () => {
+      await esql.typeEsqlEditorQuery('FROM ');
+      await waitForSuggestionWidget(true);
+    });
+
+    it('should show suggestions automatically after pipe and space', async () => {
+      await esql.typeEsqlEditorQuery(SOURCE_QUERY);
+      await waitForSuggestionWidget(true);
+    });
+
+    it('should not insert unwanted characters after operator selection', async () => {
+      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}WHERE bytes `);
+      await waitForSuggestionWidget(true);
+
+      await browser.pressKeys(browser.keys.ENTER);
+
+      const finalValue = await esql.getEsqlEditorQuery();
+      expect(finalValue).to.not.contain('$0');
+    });
+
+    it('should accept inline suggestion from query history with TAB', async () => {
+      await esql.typeEsqlEditorQuery('FROM logstash-*');
+      await common.sleep(1000); // inline suggestions don't appear immediately
+      await browser.pressKeys(browser.keys.TAB); // Then accept inline suggestion
+
+      await retry.try(async () => {
+        const finalValue = await esql.getEsqlEditorQuery();
+        expect(finalValue).to.be('FROM logstash-* | WHERE KQL("term")');
       });
+    });
 
-      async function focusEditor() {
-        // Click on margin-view-overlays to focus the editor (same pattern as console_page.ts)
-        const editor = await testSubjects.find('esqlUxExampleEditor');
-        await (await editor.findByClassName('margin-view-overlays')).click();
-      }
+    it('should open timepicker and insert date when selecting a day', async () => {
+      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}WHERE @timestamp > `);
+      await browser.pressKeys(browser.keys.ENTER);
 
-      async function waitForSuggestions() {
-        await retry.try(async () => {
-          const suggestWidget = await findService.byCssSelector('.monaco-editor .suggest-widget');
-          const isDisplayed = await suggestWidget.isDisplayed();
+      const todayButton = await find.byCssSelector('.react-datepicker__day--today');
+      await todayButton.click();
 
-          expect(isDisplayed).to.be(true);
-        });
-      }
+      const finalValue = await esql.getEsqlEditorQuery();
+      expect(finalValue).to.contain('T');
+    });
 
-      async function waitForSuggestionsHidden() {
-        await retry.try(async () => {
-          const suggestWidget = await findService.byCssSelector('.monaco-editor .suggest-widget');
-          const isDisplayed = await suggestWidget.isDisplayed();
+    it('should close suggestions when clicking on editor footer', async () => {
+      await esql.typeEsqlEditorQuery(SOURCE_QUERY);
+      await waitForSuggestionWidget(true);
 
-          expect(isDisplayed).to.be(false);
-        });
-      }
+      await testSubjects.click('ESQLEditor-run-query');
+      await waitForSuggestionWidget(false);
+    });
 
-      async function typeInEditor(text: string) {
-        await focusEditor();
-        const editor = await testSubjects.find('esqlUxExampleEditor');
-        const textarea = await editor.findByCssSelector('textarea');
+    it('should automatically show suggestions when refocusing editor', async () => {
+      await esql.typeEsqlEditorQuery(SOURCE_QUERY);
+      await waitForSuggestionWidget(true);
 
-        // Clear editor first with Ctrl+A and Backspace
-        await textarea.pressKeys([Key.CONTROL, 'a']);
-        await textarea.pressKeys(Key.BACK_SPACE);
-        // Type the new text
-        await monacoEditor.typeCodeEditorValue(text, 'esqlUxExampleEditor');
-      }
-
-      describe('suggestion visibility', () => {
-        it('should show suggestions automatically after typing space', async () => {
-          await typeInEditor('FROM ');
-          await waitForSuggestions();
-        });
-
-        it('should show suggestions automatically after pipe and space', async () => {
-          await typeInEditor('FROM index | ');
-
-          await waitForSuggestions();
-        });
-      });
-
-      describe('suggestion selection', () => {
-        it('should not insert unwanted characters after operator selection', async () => {
-          await typeInEditor('FROM index | WHERE field ');
-          await waitForSuggestions();
-
-          await browser.pressKeys(browser.keys.ENTER);
-
-          const finalValue = await monacoEditor.getCodeEditorValue();
-          expect(finalValue).to.not.contain('$0');
-        });
-      });
-
-      describe('editor focus behavior', () => {
-        it('should close suggestions when clicking on editor footer', async () => {
-          await typeInEditor('FROM index | ');
-          await waitForSuggestions();
-          // Click on "Run query" text to blur the editor
-          await testSubjects.click('ESQLEditor-run-query');
-          await waitForSuggestionsHidden();
-        });
-
-        it('should automatically show suggestions when refocusing editor', async () => {
-          await typeInEditor('FROM index | ');
-          await waitForSuggestions();
-          await testSubjects.click('ESQLEditor-run-query');
-          await focusEditor();
-          await waitForSuggestions();
-        });
-      });
+      await testSubjects.click('ESQLEditor-run-query');
+      await esql.focusEditor();
+      await waitForSuggestionWidget(true);
     });
   });
 }

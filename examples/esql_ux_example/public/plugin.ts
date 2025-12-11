@@ -12,6 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EsqlPluginStart } from '@kbn/esql/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {
@@ -22,6 +23,7 @@ export interface StartDependencies {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
+  esql: EsqlPluginStart;
 }
 
 export class ESQLUxExamplePlugin
