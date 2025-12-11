@@ -35,8 +35,6 @@ interface TemplateCardProps {
 }
 
 const TemplateCard: React.FC<TemplateCardProps> = React.memo(({ template, onSelectTemplate }) => {
-  const { euiTheme } = useEuiTheme();
-
   const handleClick = useCallback(() => {
     onSelectTemplate(template.id);
   }, [onSelectTemplate, template.id]);
