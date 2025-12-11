@@ -18,11 +18,7 @@ import {
   isParamLiteral,
 } from '../../../../ast/is';
 import { getLocationInfo } from '../../../registry/location';
-import type {
-  ICommandCallbacks,
-  ICommandContext,
-  Location,
-} from '../../../registry/types';
+import type { ICommandCallbacks, ICommandContext, Location } from '../../../registry/types';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
