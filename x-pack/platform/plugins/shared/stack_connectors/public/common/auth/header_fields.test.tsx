@@ -199,4 +199,83 @@ describe('HeaderFields', () => {
       });
     });
   });
+
+  describe('required is false', () => {
+    it('is valid with empty key and value', async () => {
+      const testData = {
+        __internal__: {
+          headers: [{ key: '', value: '', type: 'config' }],
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testData} onSubmit={onSubmit}>
+          <HeaderFields maxHeaders={20} readOnly={false} required={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: expect.objectContaining({
+            __internal__: expect.objectContaining({
+              headers: expect.arrayContaining([expect.objectContaining({ type: 'config' })]),
+            }),
+          }),
+          isValid: true,
+        });
+      });
+    });
+
+    it('is valid with empty secret value and key is empty', async () => {
+      const testData = {
+        __internal__: {
+          headers: [{ key: '', value: '', type: 'secret' }],
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testData} onSubmit={onSubmit}>
+          <HeaderFields maxHeaders={20} readOnly={false} required={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: expect.objectContaining({
+            __internal__: expect.objectContaining({
+              headers: expect.arrayContaining([expect.objectContaining({ type: 'secret' })]),
+            }),
+          }),
+          isValid: true,
+        });
+      });
+    });
+
+    it('fails validation when key is present but value is empty', async () => {
+      const testData = {
+        __internal__: {
+          headers: [{ key: 'some-key', value: '', type: 'config' }],
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testData} onSubmit={onSubmit}>
+          <HeaderFields maxHeaders={20} readOnly={false} required={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+    });
+  });
 });
