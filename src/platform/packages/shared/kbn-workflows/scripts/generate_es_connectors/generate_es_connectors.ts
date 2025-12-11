@@ -39,6 +39,7 @@ import {
   getSchemaNamePrefix,
   StaticImports,
 } from '../shared';
+import { INCLUDED_OPERATIONS_MAP, INCLUDED_OPERATIONS_V2 } from './included_operations';
 
 export async function run() {
   cleanGeneratedFolder();
@@ -97,7 +98,18 @@ function generateContracts() {
     fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')
   ) as OpenAPIV3.Document;
 
-  const endpoints = schema.endpoints.filter((endpoint) => !endpoint.name.startsWith('_internal.'));
+  const endpoints = schema.endpoints
+    .filter((endpoint) => !endpoint.name.startsWith('_internal.'))
+    .map((endpoint) => ({
+      ...endpoint,
+      urls: endpoint.urls
+        .filter((urlTemplate) => urlTemplate.path in INCLUDED_OPERATIONS_V2) // filter out paths that should not be included
+        .map((url) => ({
+          ...url,
+          methods: url.methods.filter((method) => INCLUDED_OPERATIONS_V2[url.path]?.has(method)), // filter out methods that should not be included for the current path
+        })),
+    }))
+    .filter((x) => x.urls.length); // filter out endpoints without urls.
 
   console.log(`Generating Elasticsearch connectors from ${endpoints.length} endpoints...`);
 
