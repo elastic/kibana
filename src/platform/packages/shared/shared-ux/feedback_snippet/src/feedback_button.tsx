@@ -11,7 +11,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 
 import type { CommonProps } from '@elastic/eui';
-import { EuiButton, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface FeedbackButtonProps extends CommonProps {
@@ -47,7 +47,7 @@ export const FeedbackButton = ({
         padding: ${euiTheme.size.m};
       `}
     >
-      <EuiButton
+      <EuiButtonEmpty
         data-test-subj={`${feedbackSnippetId}ButtonSurveyLink`}
         onClick={handleOpenSurvey}
         css={css`
@@ -61,7 +61,7 @@ export const FeedbackButton = ({
         aria-label={feedbackButtonAriaLabel}
       >
         {feedbackButtonMessage}
-      </EuiButton>
+      </EuiButtonEmpty>
     </div>
   );
 };
