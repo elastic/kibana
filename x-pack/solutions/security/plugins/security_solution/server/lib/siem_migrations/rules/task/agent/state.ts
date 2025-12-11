@@ -7,7 +7,7 @@
 
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import { uniq } from 'lodash/fp';
-import type { AIMessage } from '@langchain/core/messages';
+import type { AIMessage, HumanMessage } from '@langchain/core/messages';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRulePartial,
@@ -41,7 +41,7 @@ export const migrateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  messages: Annotation<AIMessage[]>({
+  messages: Annotation<AIMessage | HumanMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),

@@ -184,6 +184,15 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     };
   }
 
+  override bindTools(tools: BindToolsInput[], kwargs?: Partial<InferenceChatModelCallOptions>) {
+    // conversion will be done at call time for simplicity's sake
+    // so we just need to implement this method with the default behavior to support tools
+    return this.withConfig({
+      tools,
+      ...kwargs,
+    });
+  }
+
   completionWithRetry = <TStream extends boolean | undefined = false>(
     request: ChatCompleteOptions & { stream?: TStream }
   ) => {
@@ -346,11 +355,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       ];
     }
 
-    const llm = this.bindTools?.(tools, { tool_choice: functionName });
-
-    if (!llm) {
-      throw new Error('bindTools method is not available');
-    }
+    const llm = this.bindTools(tools, { tool_choice: functionName });
 
     const outputParser = RunnableLambda.from<AIMessageChunk, RunOutput>(
       (input: AIMessageChunk): RunOutput => {
