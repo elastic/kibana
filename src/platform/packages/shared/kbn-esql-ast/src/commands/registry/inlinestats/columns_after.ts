@@ -8,7 +8,7 @@
  */
 import uniqBy from 'lodash/uniqBy';
 import type { ESQLCommand } from '../../../types';
-import { columnsAfter as columnsAfterStats } from 'stats/columns_after';
+import { columnsAfter as columnsAfterStats } from '../stats/columns_after';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (

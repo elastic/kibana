@@ -37,7 +37,7 @@ import {
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
 import { Parser } from '../../../parser';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
-import { getDateHistogramCompletionItem } from '../../../..';
+import { getDateHistogramCompletionItem } from '../complete_items';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
-import { validate } from 'stats/validate';
+import { validate } from '../stats/validate';
 import { Parser } from '../../../parser';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { getNoValidCallSignatureError } from '../../definitions/utils/validation/utils';

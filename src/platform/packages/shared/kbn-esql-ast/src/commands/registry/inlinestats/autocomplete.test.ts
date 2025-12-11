@@ -13,7 +13,7 @@ import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import type { ESQLColumnData, ICommandCallbacks } from '../types';
 import { columnsAfter } from './columns_after';
-import { columnsAfter as statsColumnsAfter } from 'stats/columns_after';
+import { columnsAfter as statsColumnsAfter } from '../stats/columns_after';
 
 const inlineStatsExpectSuggestions = (
   query: string,

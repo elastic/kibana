@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { commaCompleteItem, pipeCompleteItem } from '../../../..';
+import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
