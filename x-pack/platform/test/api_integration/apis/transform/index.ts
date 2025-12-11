@@ -28,17 +28,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./delete_transforms'));
+    // The majority of transform tests was moved to Scout, see x-pack/platform/plugins/private/transform/test/scout/api/playwright.config.ts
     loadTestFile(require.resolve('./reauthorize_transforms'));
-    loadTestFile(require.resolve('./reset_transforms'));
-    loadTestFile(require.resolve('./start_transforms'));
-    loadTestFile(require.resolve('./stop_transforms'));
-    loadTestFile(require.resolve('./schedule_now_transforms'));
-    loadTestFile(require.resolve('./transforms'));
-    loadTestFile(require.resolve('./transforms_nodes'));
-    loadTestFile(require.resolve('./transforms_preview'));
-    loadTestFile(require.resolve('./transforms_stats'));
-    loadTestFile(require.resolve('./transforms_update'));
-    loadTestFile(require.resolve('./transforms_create'));
   });
 }
