@@ -59,7 +59,6 @@ export const FilterInBtn = ({
       iconType="plusInCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
-      disabled={false}
       data-test-subj="filterForButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterFor', {
@@ -92,7 +91,6 @@ export const FilterOutBtn = ({
       iconType="minusInCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
-      disabled={false}
       data-test-subj="filterOutButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterOut', {
