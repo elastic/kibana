@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/spaces-utils'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod
