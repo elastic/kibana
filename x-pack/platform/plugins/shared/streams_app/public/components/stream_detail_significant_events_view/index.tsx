@@ -32,6 +32,7 @@ import {
   SELECTED_FEATURES_URL_PARAM,
 } from '../../constants';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
+import { formatChangePoint } from './utils/change_point';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -269,7 +270,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               <SignificantEventsHistogramChart
                 id={'all-events'}
                 occurrences={significantEventsFetchState.value?.all ?? []}
-                change={undefined}
+                changes={
+                  significantEventsFetchState.value?.significant_events
+                    .map((item) =>
+                      formatChangePoint({
+                        change_points: item.change_points,
+                        occurrences: item.occurrences,
+                      })
+                    )
+                    .filter(Boolean) ?? []
+                }
                 xFormatter={xFormatter}
                 compressed={false}
                 hideAxis={false}

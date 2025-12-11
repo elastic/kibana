@@ -43,6 +43,7 @@ export function SparkPlot({
   xFormatter: givenXFormatter,
   hideAxis = false,
   height,
+  maxYValue,
 }: {
   id: string;
   name?: string;
@@ -53,6 +54,7 @@ export function SparkPlot({
   xFormatter?: TickFormatter;
   hideAxis?: boolean;
   height?: number;
+  maxYValue?: number;
 }) {
   const {
     dependencies: {
@@ -131,7 +133,7 @@ export function SparkPlot({
         id="y_axis"
         position="left"
         hide={compressed || hideAxis}
-        domain={{ min: 0, max: NaN }}
+        domain={{ min: 0, max: maxYValue }}
       />
       <Axis id="x_axis" position="bottom" hide={compressed || hideAxis} />
       <Settings

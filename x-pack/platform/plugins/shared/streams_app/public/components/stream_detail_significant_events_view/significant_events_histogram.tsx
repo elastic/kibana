@@ -17,37 +17,41 @@ import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_fr
 interface Props {
   id: string;
   occurrences: Array<{ x: number; y: number }>;
-  change?: FormattedChangePoint;
+  changes: FormattedChangePoint[];
   xFormatter: TickFormatter;
   hideAxis?: boolean;
   height?: number;
   compressed?: boolean;
+  maxYValue?: number;
 }
 
 export function SignificantEventsHistogramChart({
   id,
   occurrences,
-  change,
+  changes,
   xFormatter,
   hideAxis = true,
   compressed = true,
   height,
+  maxYValue,
 }: Props) {
   const theme = useEuiTheme().euiTheme;
 
   const annotations = useMemo((): SparkPlotAnnotation[] => {
-    if (!change) {
+    if (!changes.length) {
       return [];
     }
-    return [
-      getAnnotationFromFormattedChangePoint({
+    return changes.map((change, index) => {
+      const annotation = getAnnotationFromFormattedChangePoint({
         query: { id },
         change,
         theme,
         xFormatter,
-      }),
-    ];
-  }, [change, id, theme, xFormatter]);
+      });
+      annotation.id = `${annotation.id}_${index}`;
+      return annotation;
+    });
+  }, [changes, id, theme, xFormatter]);
 
   return (
     <SparkPlot
@@ -61,6 +65,7 @@ export function SignificantEventsHistogramChart({
       xFormatter={xFormatter}
       compressed={compressed}
       height={height}
+      maxYValue={maxYValue}
     />
   );
 }
