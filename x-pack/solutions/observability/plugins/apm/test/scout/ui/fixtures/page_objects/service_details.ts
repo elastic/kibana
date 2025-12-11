@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
 
@@ -57,43 +58,43 @@ export class ServiceDetailsPage {
   }
 
   async gotoOverviewTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'overview' });
+    await this.gotoTab({ ...params, tabName: 'overview' });
   }
 
   async gotoTransactionsTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'transactions' });
+    await this.gotoTab({ ...params, tabName: 'transactions' });
   }
 
   async gotoDependenciesTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'dependencies' });
+    await this.gotoTab({ ...params, tabName: 'dependencies' });
   }
 
   async gotoErrorsTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'errors' });
+    await this.gotoTab({ ...params, tabName: 'errors' });
   }
 
   async gotoMetricsTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'metrics' });
+    await this.gotoTab({ ...params, tabName: 'metrics' });
   }
 
   async gotoInfrastructureTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'infrastructure' });
+    await this.gotoTab({ ...params, tabName: 'infrastructure' });
   }
 
   async gotoServiceMapTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'service-map' });
+    await this.gotoTab({ ...params, tabName: 'service-map' });
   }
 
   async gotoLogsTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'logs' });
+    await this.gotoTab({ ...params, tabName: 'logs' });
   }
 
   async gotoAlertsTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'alerts' });
+    await this.gotoTab({ ...params, tabName: 'alerts' });
   }
 
   async gotoDashboardsTab(params: { serviceName: string; start: string; end: string }) {
-    return this.gotoTab({ ...params, tabName: 'dashboards' });
+    await this.gotoTab({ ...params, tabName: 'dashboards' });
   }
   // #endregion
 
@@ -103,43 +104,43 @@ export class ServiceDetailsPage {
   }
 
   async clickOverviewTab() {
-    return this.clickTab('overview');
+    await this.clickTab('overview');
   }
 
   async clickTransactionsTab() {
-    return this.clickTab('transactions');
+    await this.clickTab('transactions');
   }
 
   async clickDependenciesTab() {
-    return this.clickTab('dependencies');
+    await this.clickTab('dependencies');
   }
 
   async clickErrorsTab() {
-    return this.clickTab('errors');
+    await this.clickTab('errors');
   }
 
   async clickMetricsTab() {
-    return this.clickTab('metrics');
+    await this.clickTab('metrics');
   }
 
   async clickInfrastructureTab() {
-    return this.clickTab('infrastructure');
+    await this.clickTab('infrastructure');
   }
 
   async clickServiceMapTab() {
-    return this.clickTab('service-map');
+    await this.clickTab('service-map');
   }
 
   async clickLogsTab() {
-    return this.clickTab('logs');
+    await this.clickTab('logs');
   }
 
   async clickAlertsTab() {
-    return this.clickTab('alerts');
+    await this.clickTab('alerts');
   }
 
   async clickDashboardsTab() {
-    return this.clickTab('dashboards');
+    await this.clickTab('dashboards');
   }
   // #endregion
 
@@ -149,43 +150,89 @@ export class ServiceDetailsPage {
   }
 
   async expectOverviewTabVisible() {
-    return this.expectTabVisible('overview');
+    await this.expectTabVisible('overview');
   }
 
   async expectTransactionsTabVisible() {
-    return this.expectTabVisible('transactions');
+    await this.expectTabVisible('transactions');
   }
 
   async expectDependenciesTabVisible() {
-    return this.expectTabVisible('dependencies');
+    await this.expectTabVisible('dependencies');
   }
 
   async expectErrorsTabVisible() {
-    return this.expectTabVisible('errors');
+    await this.expectTabVisible('errors');
   }
 
   async expectMetricsTabVisible() {
-    return this.expectTabVisible('metrics');
+    await this.expectTabVisible('metrics');
   }
 
   async expectInfrastructureTabVisible() {
-    return this.expectTabVisible('infrastructure');
+    await this.expectTabVisible('infrastructure');
   }
 
   async expectServiceMapTabVisible() {
-    return this.expectTabVisible('service-map');
+    await this.expectTabVisible('service-map');
   }
 
   async expectLogsTabVisible() {
-    return this.expectTabVisible('logs');
+    await this.expectTabVisible('logs');
   }
 
   async expectAlertsTabVisible() {
-    return this.expectTabVisible('alerts');
+    await this.expectTabVisible('alerts');
   }
 
   async expectDashboardsTabVisible() {
-    return this.expectTabVisible('dashboards');
+    await this.expectTabVisible('dashboards');
+  }
+  // #endregion
+
+  // #region Expect Tabs Selected
+  private async expectTabSelected(tabName: ServiceDetailsPageTabName) {
+    await expect(this.page.getByTestId(`${tabName}Tab`)).toHaveAttribute('aria-selected', 'true');
+  }
+
+  async expectOverviewTabSelected() {
+    await this.expectTabSelected('overview');
+  }
+
+  async expectTransactionsTabSelected() {
+    await this.expectTabSelected('transactions');
+  }
+
+  async expectDependenciesTabSelected() {
+    await this.expectTabSelected('dependencies');
+  }
+
+  async expectErrorsTabSelected() {
+    await this.expectTabSelected('errors');
+  }
+
+  async expectMetricsTabSelected() {
+    await this.expectTabSelected('metrics');
+  }
+
+  async expectInfrastructureTabSelected() {
+    await this.expectTabSelected('infrastructure');
+  }
+
+  async expectServiceMapTabSelected() {
+    await this.expectTabSelected('service-map');
+  }
+
+  async expectLogsTabSelected() {
+    await this.expectTabSelected('logs');
+  }
+
+  async expectAlertsTabSelected() {
+    await this.expectTabSelected('alerts');
+  }
+
+  async expectDashboardsTabSelected() {
+    await this.expectTabSelected('dashboards');
   }
   // #endregion
 

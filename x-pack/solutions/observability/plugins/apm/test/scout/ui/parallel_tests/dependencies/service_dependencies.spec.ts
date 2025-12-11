@@ -37,6 +37,7 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('Land on dependencies tab', async () => {
       expect(page.url()).toContain(`/dependencies`);
+      await serviceDetailsPage.expectDependenciesTabSelected();
     });
   });
 
@@ -54,7 +55,7 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Links to service overview when clicking on a dependency in dependencies table', async ({
+  test('Links to dependency overview when clicking on a dependency in dependencies table', async ({
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
