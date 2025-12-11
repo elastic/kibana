@@ -9,9 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
@@ -106,11 +103,6 @@ export function AlertDetails() {
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const { getUrlTabId, setUrlTabId } = useTabId();
-  const [chatExperience] = useUiSetting$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
-  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
   const urlTabId = getUrlTabId();
   const {
     isLoadingRelatedDashboards,
@@ -307,11 +299,8 @@ export function AlertDetails() {
             switchTabs={showRelatedAlertsFromCallout}
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
-          {isAgentChatExperienceEnabled ? (
-            <AlertAiInsight alert={alertDetail} />
-          ) : (
-            <AlertDetailContextualInsights alert={alertDetail} />
-          )}
+          <AlertAiInsight alert={alertDetail} />
+          <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -336,11 +325,8 @@ export function AlertDetails() {
           switchTabs={showRelatedAlertsFromCallout}
         />
         <EuiSpacer size="l" />
-        {isAgentChatExperienceEnabled ? (
-          <AlertAiInsight alert={alertDetail} />
-        ) : (
-          <AlertDetailContextualInsights alert={alertDetail} />
-        )}
+        <AlertAiInsight alert={alertDetail} />
+        <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>

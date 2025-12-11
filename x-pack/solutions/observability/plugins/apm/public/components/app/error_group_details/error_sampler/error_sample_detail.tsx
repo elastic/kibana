@@ -89,7 +89,7 @@ export function ErrorSampleDetails({
     urlParams: { detailTab, offset, comparisonEnabled },
   } = useLegacyUrlParams();
 
-  const { uiActions, core, onechat } = useApmPluginContext();
+  const { uiActions, core } = useApmPluginContext();
 
   const router = useApmRouter();
 
@@ -292,11 +292,8 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
-      {onechat ? (
-        <ErrorSampleAiInsight error={error} />
-      ) : (
-        <ErrorSampleContextualInsight error={error} transaction={transaction} />
-      )}
+      <ErrorSampleAiInsight error={error} />
+      <ErrorSampleContextualInsight error={error} transaction={transaction} />
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {

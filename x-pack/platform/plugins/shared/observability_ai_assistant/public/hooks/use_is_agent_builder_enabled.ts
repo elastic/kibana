@@ -40,9 +40,7 @@ export const useIsAgentBuilderEnabled = (): UseIsAgentBuilderEnabledResult => {
     application: { capabilities },
   } = useKibana().services;
 
-  const agentBuilderCapabilities = capabilities?.agentBuilder;
-
-  const hasAgentBuilderAccess = agentBuilderCapabilities?.show === true;
+  const hasAgentBuilderAccess = capabilities?.agentBuilder?.show === true;
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   return {

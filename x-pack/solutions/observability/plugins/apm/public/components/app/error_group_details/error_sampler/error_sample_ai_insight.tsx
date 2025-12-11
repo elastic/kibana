@@ -18,6 +18,9 @@ import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
 } from '@kbn/observability-agent-builder-plugin/common';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -29,6 +32,12 @@ type ErrorSampleDetails =
 
 export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'>) {
   const { onechat, core } = useApmPluginContext();
+
+  const [chatExperience] = useUiSetting$<AIChatExperience>(
+    AI_CHAT_EXPERIENCE_TYPE,
+    AIChatExperience.Classic
+  );
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   const observabilityAgentBuilderApiClient = createRepositoryClient<
     ObservabilityAgentBuilderServerRouteRepository,
@@ -83,7 +92,7 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
   };
 
   const attachments = useMemo(() => {
-    if (!onechat || !hasEnterpriseLicense) {
+    if (!onechat || !hasEnterpriseLicense || !isAgentChatExperienceEnabled) {
       return [];
     }
 
@@ -118,6 +127,7 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
   }, [
     onechat,
     hasEnterpriseLicense,
+    isAgentChatExperienceEnabled,
     errorId,
     serviceName,
     summary,
@@ -127,8 +137,8 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
     end,
   ]);
 
-  if (!onechat || !hasEnterpriseLicense) {
-    return <></>;
+  if (!onechat || !isAgentChatExperienceEnabled) {
+    return null;
   }
 
   return (

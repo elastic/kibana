@@ -8,6 +8,9 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiInsight } from '@kbn/observability-agent-builder';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
@@ -24,6 +27,12 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
       application: { capabilities },
     },
   } = useKibana();
+
+  const [chatExperience] = useUiSetting$<AIChatExperience>(
+    AI_CHAT_EXPERIENCE_TYPE,
+    AIChatExperience.Classic
+  );
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   const { getLicense } = useLicense();
   const license = getLicense();
@@ -82,7 +91,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
     });
   };
 
-  if (!onechat || !hasAgentBuilderAccess) {
+  if (!onechat || !hasAgentBuilderAccess || !isAgentChatExperienceEnabled) {
     return null;
   }
 
