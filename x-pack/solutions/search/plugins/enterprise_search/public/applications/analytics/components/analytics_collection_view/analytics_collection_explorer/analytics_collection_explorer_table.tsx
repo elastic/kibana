@@ -331,7 +331,7 @@ export const AnalyticsCollectionExplorerTable = () => {
         ))}
       </EuiTabs>
 
-      {table && selectedTab && (
+      {table && (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFieldSearch
             placeholder={i18n.translate(
