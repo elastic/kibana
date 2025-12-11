@@ -1658,6 +1658,7 @@
     "@kbn/optimizer": "link:packages/kbn-optimizer",
     "@kbn/optimizer-webpack-helpers": "link:src/platform/packages/private/kbn-optimizer-webpack-helpers",
     "@kbn/osquery-plugin-cypress": "link:x-pack/platform/plugins/shared/osquery/cypress",
+    "@kbn/otel-demo": "link:src/platform/packages/shared/kbn-otel-demo",
     "@kbn/peggy": "link:src/platform/packages/private/kbn-peggy",
     "@kbn/peggy-loader": "link:packages/kbn-peggy-loader",
     "@kbn/performance-testing-dataset-extractor": "link:packages/kbn-performance-testing-dataset-extractor",
