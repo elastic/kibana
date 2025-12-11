@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-
-const SERVERLESS_ONLY = ['@svlSecurity', '@svlSecurityEssentials', '@svlSecurityEase', '@svlOblt', '@svlSearch'];
+const SERVERLESS_ONLY = [
+  '@svlSecurity',
+  '@svlSecurityEssentials',
+  '@svlSecurityEase',
+  '@svlOblt',
+  '@svlSearch',
+];
 const ESS_ONLY = ['@ess'];
 const DEPLOYMENT_AGNOSTIC = SERVERLESS_ONLY.concat(ESS_ONLY);
 const PERFORMANCE = ['@perf'];
