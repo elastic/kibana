@@ -78,6 +78,7 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -184,6 +185,7 @@ export interface LensPluginStartDependencies {
   licensing?: LicensingPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
+  cps?: CPSPluginStart;
 }
 
 export interface LensPublicSetup {
