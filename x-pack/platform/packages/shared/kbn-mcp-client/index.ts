@@ -8,6 +8,10 @@
 // Client
 export { McpClient } from './mcp/src/client';
 
+// Errors - re-exported from SDK for use by consumers
+export { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+export { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
+
 // Types
 export type {
   ClientDetails,
