@@ -9,7 +9,3 @@ export {
   type SubAgent,
 } from "./subagents";
 export { createPatchToolCallsMiddleware } from "./patch_tool_calls";
-export {
-  createSkillsMiddleware,
-  type SkillsMiddlewareOptions,
-} from "./skills";

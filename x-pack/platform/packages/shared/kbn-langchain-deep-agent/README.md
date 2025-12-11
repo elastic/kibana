@@ -97,7 +97,6 @@ Creates a Deep Agent instance with the specified configuration.
 - `createFilesystemMiddleware(options)`: Adds filesystem operation capabilities
 - `createSubAgentMiddleware(options)`: Enables subagent delegation
 - `createPatchToolCallsMiddleware(options)`: Provides tool call patching
-- `createSkillsMiddleware(options)`: Adds skills-based capabilities
 
 ### Backends
 

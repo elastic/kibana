@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createDeepAgent, createSkillsMiddleware } from './src/index';
-export type { SkillsMiddlewareOptions } from './src/index';
+export { createDeepAgent } from './src/index';

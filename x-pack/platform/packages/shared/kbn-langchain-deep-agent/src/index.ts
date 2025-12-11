@@ -15,12 +15,10 @@ export {
   createFilesystemMiddleware,
   createSubAgentMiddleware,
   createPatchToolCallsMiddleware,
-  createSkillsMiddleware,
   type FilesystemMiddlewareOptions,
   type SubAgentMiddlewareOptions,
   type SubAgent,
   type FileData,
-  type SkillsMiddlewareOptions,
 } from "./middleware/index";
 
 // Export backends
