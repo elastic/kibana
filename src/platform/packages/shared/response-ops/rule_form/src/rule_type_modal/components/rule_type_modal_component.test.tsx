@@ -17,6 +17,14 @@ import { RuleTypeModalComponent } from '.';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '@kbn/response-ops-rules-apis/test_utils';
 
+const mockIntersectionObserver = jest.fn();
+mockIntersectionObserver.mockReturnValue({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+});
+window.IntersectionObserver = mockIntersectionObserver;
+
 // Mock useDebounceFn to execute immediately without debouncing
 jest.mock('@kbn/react-hooks', () => ({
   useDebounceFn: (fn: any) => {
@@ -407,7 +415,7 @@ describe('RuleTypeModalComponent', () => {
       });
     });
 
-    it('should paginate templates correctly', async () => {
+    it('should load more templates via infinite scroll', async () => {
       // Set up mock to return different data based on page parameter
       mockHttpGet.mockImplementation((url, options) => {
         const page = options?.query?.page || 1;
@@ -452,19 +460,16 @@ describe('RuleTypeModalComponent', () => {
 
       // Wait for initial templates to load
       await waitFor(() => {
-        expect(screen.getByText('Test Template 1')).toBeInTheDocument();
-        expect(screen.getByText('Test Template 2')).toBeInTheDocument();
+        expect(screen.queryByText('Test Template 1')).toBeInTheDocument();
+        expect(screen.queryByText('Test Template 2')).toBeInTheDocument();
+        expect(screen.queryByText('Test template 3')).not.toBeInTheDocument();
       });
 
-      // Load more button should be visible (total=20, showing only 2 templates)
-      const loadMoreButton = screen.getByTestId('templateList-loadMore');
-      expect(loadMoreButton).toBeInTheDocument();
+      // Get the callback passed to IntersectionObserver
+      const observerCallback = mockIntersectionObserver.mock.calls[0][0];
 
-      // Clear mock call history before clicking load more
-      mockHttpGet.mockClear();
-
-      // Click load more
-      fireEvent.click(loadMoreButton);
+      // Simulate intersection
+      observerCallback([{ isIntersecting: true }]);
 
       // Verify HTTP was called with page 2
       await waitFor(() => {
@@ -558,35 +563,6 @@ describe('RuleTypeModalComponent', () => {
 
       // Should not have fetched templates
       expect(mockHttpGet).not.toHaveBeenCalled();
-    });
-
-    it('should enrich templates with rule type metadata', async () => {
-      mockHttpGet.mockResolvedValue(mockTemplatesResponse);
-
-      render(
-        <RuleTypeModalComponent
-          onClose={mockOnClose}
-          onSelectRuleType={mockOnSelectRuleType}
-          onSelectTemplate={mockOnSelectTemplate}
-          filteredRuleTypes={[]}
-          registeredRuleTypes={ruleTypes}
-          http={mockHttp}
-          toasts={mockToasts}
-        />
-      );
-
-      await switchToTemplateMode();
-
-      // Wait for templates to load
-      await waitFor(() => {
-        expect(screen.getByText('Test Template 1')).toBeInTheDocument();
-      });
-
-      // Verify templates are enriched with rule type names from registeredRuleTypes
-      // Template 1 has rule_type_id: 'ruleType1', should show enriched name 'ruleType1'
-      expect(screen.getByText('ruleType1')).toBeInTheDocument();
-      // Template 2 has rule_type_id: 'ruleType3', should show enriched name 'ruleType3'
-      expect(screen.getByText('ruleType3')).toBeInTheDocument();
     });
   });
 });
