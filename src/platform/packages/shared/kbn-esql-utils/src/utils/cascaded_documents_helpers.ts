@@ -40,7 +40,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
-import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query';
+import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query/utils';
 
 type NodeType = 'group' | 'leaf';
 
