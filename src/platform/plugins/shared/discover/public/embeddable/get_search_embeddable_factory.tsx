@@ -12,7 +12,7 @@ import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +26,6 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -43,6 +42,7 @@ import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
+import { isFieldStatsMode } from './utils/should_fetch_documents';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -313,12 +313,8 @@ export const getSearchEmbeddableFactory = ({
           );
 
           const renderAsFieldStatsTable = useMemo(
-            () =>
-              Boolean(discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS)) &&
-              viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-              Boolean(dataView) &&
-              Array.isArray(savedSearch.columns),
-            [savedSearch, dataView, viewMode]
+            () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
+            [savedSearch, dataView]
           );
 
           return (
