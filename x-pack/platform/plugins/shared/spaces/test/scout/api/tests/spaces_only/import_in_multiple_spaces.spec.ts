@@ -35,7 +35,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
   const createSpaces = async (kbnClient: KbnClient, log: ScoutLogger) => {
     await Promise.all(
       spacesToCreate.map(async (space) => {
-        log.info(`Creating ${space.spaceId} for multi-space test suite`);
+        log.debug(`Creating ${space.spaceId} for multi-space test suite`);
         return kbnClient.spaces.create({
           id: space.spaceId,
           name: space.name,
@@ -55,7 +55,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
     await Promise.all(
       spacesToCreate.map(async (space) => {
         await kbnClient.savedObjects.clean({ space: space.spaceId, types: ['dashboard'] });
-        log.info(`Removed dashboards in space [${space.spaceId}] after test`);
+        log.debug(`Removed dashboards in space [${space.spaceId}] after test`);
       })
     );
   });
@@ -65,7 +65,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
     await Promise.all(
       spacesToCreate.map(async (space) => {
         await kbnClient.spaces.delete(space.spaceId);
-        log.info(`Deleted space [${space.spaceId}] after multi-space test suite`);
+        log.debug(`Deleted space [${space.spaceId}] after multi-space test suite`);
       })
     );
   });

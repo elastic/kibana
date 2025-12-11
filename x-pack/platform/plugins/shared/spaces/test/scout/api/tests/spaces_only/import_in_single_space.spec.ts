@@ -38,7 +38,7 @@ TEST_SPACES.forEach((space) => {
     apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
       // Create the space (skip for default which always exists)
       if (space.spaceId !== SPACES.DEFAULT.spaceId) {
-        log.info(`Creating space [${space.spaceId}] for test suite`);
+        log.debug(`Creating space [${space.spaceId}] for test suite`);
         await kbnClient.spaces.create({
           id: space.spaceId,
           name: space.name,
@@ -46,7 +46,7 @@ TEST_SPACES.forEach((space) => {
           disabledFeatures: [...space.disabledFeatures],
         });
       } else {
-        log.info(`Using default space for test suite`);
+        log.debug(`Using default space for test suite`);
       }
 
       savedObjectsManagementCredentials = await requestAuth.getSavedObjectsManagementApiKey();
@@ -54,14 +54,14 @@ TEST_SPACES.forEach((space) => {
 
     apiTest.afterEach(async ({ kbnClient, log }) => {
       await kbnClient.savedObjects.clean({ space: space.spaceId, types: ['dashboard'] });
-      log.info(`Cleaned up saved objects in space [${space.spaceId}] after test`);
+      log.debug(`Cleaned up saved objects in space [${space.spaceId}] after test`);
     });
 
     apiTest.afterAll(async ({ kbnClient, log }) => {
       // Delete the space (skip for default)
       if (space.spaceId !== SPACES.DEFAULT.spaceId) {
         await kbnClient.spaces.delete(space.spaceId);
-        log.info(`Deleted space [${space.spaceId}] after test suite`);
+        log.debug(`Deleted space [${space.spaceId}] after test suite`);
       }
     });
 
