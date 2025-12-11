@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common';
 import { platformCoreTools } from '@kbn/onechat-common';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
@@ -61,9 +61,9 @@ describe('integrationKnowledgeTool', () => {
       expect(tool.tags).toEqual(['integration', 'knowledge-base', 'fleet']);
     });
 
-    it('has availability config with space cache mode', () => {
+    it('has availability config with global cache mode', () => {
       const tool = integrationKnowledgeTool(mockCoreSetup);
-      expect(tool.availability?.cacheMode).toBe('space');
+      expect(tool.availability?.cacheMode).toBe('global');
     });
   });
 
@@ -80,7 +80,7 @@ describe('integrationKnowledgeTool', () => {
       events: {} as any,
     });
 
-    it('returns resource results for successful search', async () => {
+    it('returns resource results with highlighted chunks from semantic search', async () => {
       const mockSearchResponse = {
         hits: {
           hits: [
@@ -89,8 +89,14 @@ describe('integrationKnowledgeTool', () => {
               _source: {
                 package_name: 'nginx',
                 filename: 'README.md',
-                content: 'Nginx integration documentation content.',
+                content: 'Full nginx integration documentation content that is very long.',
                 version: '1.2.3',
+              },
+              highlight: {
+                content: [
+                  'Relevant chunk about nginx configuration.',
+                  'Another relevant chunk about nginx setup.',
+                ],
               },
             },
             {
@@ -101,6 +107,7 @@ describe('integrationKnowledgeTool', () => {
                 content: 'Apache setup instructions.',
                 version: '2.0.0',
               },
+              // No highlight - should fall back to full content
             },
           ],
         },
@@ -123,26 +130,95 @@ describe('integrationKnowledgeTool', () => {
             query: 'How to configure nginx?',
           },
         },
+        highlight: {
+          fields: {
+            content: {
+              order: 'score',
+              number_of_fragments: 5,
+            },
+          },
+        },
         _source: ['package_name', 'filename', 'content', 'version'],
       });
 
       expect(result.results).toHaveLength(2);
+
+      // First result should use highlighted chunks
       expect(result.results[0]).toMatchObject({
-        type: ToolResultType.resource,
+        type: ToolResultType.other,
         data: {
           reference: {
             url: '/app/integrations/detail/nginx',
             title: 'nginx integration (v1.2.3) - README.md',
           },
-          partial: false,
+          partial: true, // partial because we're returning chunks, not full content
           content: {
             package_name: 'nginx',
             filename: 'README.md',
             version: '1.2.3',
-            content: 'Nginx integration documentation content.',
+            content:
+              'Relevant chunk about nginx configuration.\n\n---\n\nAnother relevant chunk about nginx setup.',
           },
         },
       });
+
+      // Second result should fall back to full content (no highlights)
+      expect(result.results[1]).toMatchObject({
+        type: ToolResultType.other,
+        data: {
+          reference: {
+            url: '/app/integrations/detail/apache',
+            title: 'apache integration (v2.0.0) - setup.md',
+          },
+          partial: false,
+          content: {
+            package_name: 'apache',
+            filename: 'setup.md',
+            version: '2.0.0',
+            content: 'Apache setup instructions.',
+          },
+        },
+      });
+    });
+
+    it('truncates content when no highlights and content is very long', async () => {
+      const veryLongContent = 'A'.repeat(5000);
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _id: 'doc-1',
+              _source: {
+                package_name: 'system',
+                filename: 'README.md',
+                content: veryLongContent,
+                version: '1.0.0',
+              },
+              // No highlights - should fall back to truncated content
+            },
+          ],
+        },
+      };
+
+      mockSearch.mockResolvedValue(mockSearchResponse);
+
+      const tool = integrationKnowledgeTool(mockCoreSetup);
+      const result = await tool.handler(
+        { query: 'system integration', max: 5 },
+        createHandlerContext() as any
+      );
+
+      expect(result.results[0]).toMatchObject({
+        type: ToolResultType.other,
+        data: {
+          partial: true,
+          content: {
+            content: expect.stringContaining('[Content truncated...]'),
+          },
+        },
+      });
+      // Verify content is truncated to MAX_CONTENT_LENGTH (4000) + truncation message
+      expect(result.results[0].data.content.content.length).toBeLessThan(veryLongContent.length);
     });
 
     it('handles packages without version', async () => {
@@ -170,7 +246,7 @@ describe('integrationKnowledgeTool', () => {
       );
 
       expect(result.results[0]).toMatchObject({
-        type: ToolResultType.resource,
+        type: ToolResultType.other,
         data: {
           reference: {
             url: '/app/integrations/detail/mysql',
@@ -249,6 +325,14 @@ describe('integrationKnowledgeTool', () => {
       expect(mockSearch).toHaveBeenCalledWith(
         expect.objectContaining({
           size: 5,
+          highlight: {
+            fields: {
+              content: {
+                order: 'score',
+                number_of_fragments: 5,
+              },
+            },
+          },
         })
       );
     });

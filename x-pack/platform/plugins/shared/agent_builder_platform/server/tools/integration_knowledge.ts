@@ -9,12 +9,17 @@ import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common';
 import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
 const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
 const INTEGRATIONS_BASE_PATH = '/app/integrations/detail';
+
+// Maximum number of highlighted fragments (chunks) to return per document
+const MAX_FRAGMENTS_PER_DOC = 5;
+// Fallback: maximum content length when highlights unavailable
+const MAX_CONTENT_LENGTH = 4000;
 
 const integrationKnowledgeSchema = z.object({
   query: z
@@ -36,6 +41,35 @@ interface IntegrationKnowledgeDoc {
   version?: string;
 }
 
+/**
+ * Extracts relevant text from highlighted fragments returned by semantic search.
+ * Falls back to truncated full content if highlights are not available.
+ */
+function extractRelevantContent(
+  highlights: string[] | undefined,
+  fullContent: string
+): { content: string; isPartial: boolean } {
+  // Use highlighted fragments if available - these are the matching chunks
+  if (highlights && highlights.length > 0) {
+    // Join highlighted fragments - they represent the most relevant chunks
+    const highlightedContent = highlights.join('\n\n---\n\n');
+    return {
+      content: highlightedContent,
+      isPartial: true, // Always partial since we're only returning matching chunks
+    };
+  }
+
+  // Fallback: truncate full content if highlights unavailable
+  if (fullContent.length > MAX_CONTENT_LENGTH) {
+    return {
+      content: fullContent.substring(0, MAX_CONTENT_LENGTH) + '\n\n[Content truncated...]',
+      isPartial: true,
+    };
+  }
+
+  return { content: fullContent, isPartial: false };
+}
+
 export const integrationKnowledgeTool = (
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>
 ): BuiltinToolDefinition<typeof integrationKnowledgeSchema> => {
@@ -47,6 +81,7 @@ export const integrationKnowledgeTool = (
     handler: async ({ query, max = 5 }, { esClient, logger }) => {
       try {
         // Search the .integration_knowledge index using semantic search on the content field
+        // Use highlighting to retrieve only the relevant chunks instead of full document content
         const response = await esClient.asInternalUser.search({
           index: INTEGRATION_KNOWLEDGE_INDEX,
           size: max,
@@ -54,6 +89,14 @@ export const integrationKnowledgeTool = (
             semantic: {
               field: 'content',
               query,
+            },
+          },
+          highlight: {
+            fields: {
+              content: {
+                order: 'score',
+                number_of_fragments: MAX_FRAGMENTS_PER_DOC,
+              },
             },
           },
           _source: ['package_name', 'filename', 'content', 'version'],
@@ -72,7 +115,7 @@ export const integrationKnowledgeTool = (
           };
         }
 
-        // Return integration knowledge results
+        // Return integration knowledge results with extracted relevant chunks from highlights
         return {
           results: response.hits.hits.map((hit) => {
             const source = hit._source as IntegrationKnowledgeDoc;
@@ -81,19 +124,26 @@ export const integrationKnowledgeTool = (
               source.version ? ` (v${source.version})` : ''
             } - ${source.filename}`;
 
+            // Extract only relevant chunks from highlights, or fall back to truncated content
+            const highlights = hit.highlight?.content;
+            const { content: extractedContent, isPartial } = extractRelevantContent(
+              highlights,
+              source.content
+            );
+
             return {
-              type: ToolResultType.resource,
+              type: ToolResultType.other,
               data: {
                 reference: {
                   url: packageUrl,
                   title,
                 },
-                partial: false,
+                partial: isPartial,
                 content: {
                   package_name: source.package_name,
                   filename: source.filename,
                   version: source.version,
-                  content: source.content,
+                  content: extractedContent,
                 },
               },
             };

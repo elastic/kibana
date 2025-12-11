@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common';
 import type { CoreSetup } from '@kbn/core/server';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
@@ -94,7 +94,7 @@ export const productDocumentationTool = (
         // Return documentation results
         return {
           results: result.documents.map((doc: RetrieveDocumentationResultDoc) => ({
-            type: ToolResultType.resource,
+            type: ToolResultType.other,
             data: {
               reference: {
                 url: doc.url,
