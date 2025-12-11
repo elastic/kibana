@@ -65,6 +65,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { validateSettingsWithDryRun } from './validate_settings';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -530,6 +531,22 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     validateSettings(this._definition, this.dependencies.isServerless);
+
+    if (this._changes.settings && existsInStartingState) {
+      const { existsAsDataStream } = await this.getMatchingDataStream();
+      if (existsAsDataStream) {
+        const inheritedSettings = getInheritedSettings(ancestors);
+        const settingsValidation = await validateSettingsWithDryRun({
+          scopedClusterClient: this.dependencies.scopedClusterClient,
+          streamName: this._definition.name,
+          settings: inheritedSettings,
+          isServerless: this.dependencies.isServerless,
+        });
+        if (!settingsValidation.isValid) {
+          return settingsValidation;
+        }
+      }
+    }
 
     return { isValid: true, errors: [] };
   }

@@ -731,6 +731,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         await putStream(apiClient, TEST_STREAM_NAME, body, 400);
       });
+
+      (isServerless ? it : it.skip)('fails to store invalid refresh_interval setting', async () => {
+        const body: Streams.ClassicStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              settings: {
+                'index.refresh_interval': { value: '1s' }, // Less than 5s minimum in serverless
+              },
+              processing: {
+                steps: [],
+              },
+              classic: {
+                field_overrides: {},
+              },
+              failure_store: { inherit: {} },
+            },
+          },
+        };
+
+        const response = await putStream(apiClient, TEST_STREAM_NAME, body, 400);
+        expect((response as any).message).to.contain('Invalid stream settings');
+        expect((response as any).message).to.contain('index.refresh_interval');
+      });
     });
 
     describe('Orphaned classic stream', () => {

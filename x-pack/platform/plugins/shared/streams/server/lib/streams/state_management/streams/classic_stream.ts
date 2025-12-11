@@ -39,6 +39,7 @@ import { validateClassicFields } from '../../helpers/validate_fields';
 import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -232,6 +233,19 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateBracketsInFieldNames(this._definition);
 
     validateSettings(this._definition, this.dependencies.isServerless);
+
+    // Validate settings with dry_run against ES (classic streams always have an existing data stream)
+    if (this._changes.settings) {
+      const settingsValidation = await validateSettingsWithDryRun({
+        scopedClusterClient: this.dependencies.scopedClusterClient,
+        streamName: this._definition.name,
+        settings: this._definition.ingest.settings,
+        isServerless: this.dependencies.isServerless,
+      });
+      if (!settingsValidation.isValid) {
+        return settingsValidation;
+      }
+    }
 
     return { isValid: true, errors: [] };
   }
