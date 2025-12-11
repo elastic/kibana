@@ -32,8 +32,6 @@ export const OnechatNavControlInitiator = ({
 }: OnechatNavControlInitiatorProps) => {
   const [isAgentsExperience, setIsAgentsExperience] = useState(false);
 
-  // Subscribe to chat experience setting from core settings
-  // This keeps all nav controls in sync when the chat experience changes
   useEffect(() => {
     const sub = coreStart.settings.client
       .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)

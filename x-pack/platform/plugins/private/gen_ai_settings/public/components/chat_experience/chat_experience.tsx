@@ -16,13 +16,12 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
-  const kibana = useKibana();
   const {
-    services: { settings, notifications, docLinks, application },
-  } = kibana;
+    services: { settings, notifications, docLinks, application, featureFlags },
+  } = useKibana();
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
-  const isAiAgentsEnabled = getIsAiAgentsEnabled(kibana.services.featureFlags);
+  const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
 
   // Show confirmation modal for AI Agents selection
   const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
