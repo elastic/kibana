@@ -58,21 +58,35 @@ export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
 }
 
-const collectDescendantStepIds = (steps: StreamlangStepWithUIAttributes[], parentId: string) => {
+/**
+ * Recursively collects all descendant step IDs
+ * for a given parent step ID.
+ */
+function collectDescendantStepIds(steps: StreamlangStepWithUIAttributes[], parentId: string) {
   const ids = new Set<string>();
+
   steps.forEach((step) => {
     if (step.parentId === parentId) {
       ids.add(step.customIdentifier);
       collectDescendantStepIds(steps, step.customIdentifier).forEach((childId) => ids.add(childId));
     }
   });
-  return ids;
-};
 
-const collectStepIdsForCondition = (
-  steps: StreamlangStepWithUIAttributes[],
-  conditionId: string
-) => {
+  return ids;
+}
+
+/**
+ * For the cases when we need to run a partial simulation
+ * for a particular isolated step, this function collects
+ * all steps to the target step including its ancestors
+ * because they might affect the target step.
+ *
+ * The collected steps include:
+ * - The condition step itself
+ * - All preceding steps
+ * - All descendant steps of the condition
+ */
+function collectStepIdsForCondition(steps: StreamlangStepWithUIAttributes[], conditionId: string) {
   const conditionIndex = steps.findIndex((step) => step.customIdentifier === conditionId);
 
   if (conditionIndex === -1) {
@@ -93,12 +107,18 @@ const collectStepIdsForCondition = (
   });
 
   return Array.from(ids);
-};
+}
 
-export const collectProcessorIdsForCondition = (
+/**
+ * Collects all processor IDs related to an isolated
+ * condition step, including:
+ * - All processors within the target condition
+ * - Processors in preceding steps before the target condition
+ */
+export function collectProcessorIdsForCondition(
   steps: StreamlangStepWithUIAttributes[],
   conditionId: string
-) => {
+) {
   const stepIdsForCondition = new Set(collectStepIdsForCondition(steps, conditionId));
   if (stepIdsForCondition.size === 0) {
     return [];
@@ -108,25 +128,77 @@ export const collectProcessorIdsForCondition = (
     .filter((step) => stepIdsForCondition.has(step.customIdentifier))
     .filter((step) => isActionBlock(step))
     .map((step) => step.customIdentifier);
-};
+}
 
-export const getConditionDocIndexes = (context: SimulationContext) => {
+/**
+ * Recursively collects all descendant processor IDs
+ * for a given condition step ID.
+ */
+export function collectDescendantProcessorIdsForCondition(
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+) {
+  const descendantStepIds = collectDescendantStepIds(steps, conditionId);
+
+  if (descendantStepIds.size === 0) {
+    return [];
+  }
+
+  return steps
+    .filter((step) => descendantStepIds.has(step.customIdentifier))
+    .filter((step) => isActionBlock(step))
+    .map((step) => step.customIdentifier);
+}
+
+/**
+ * Collects the document indexes affected by the processors
+ * related to the currently selected condition.
+ */
+export function getConditionDocIndexes(context: SimulationContext): number[] | undefined {
   if (!context.selectedConditionId) {
     return undefined;
   }
 
   const simulation = context.baseSimulation ?? context.simulation;
-  const processorIds = collectProcessorIdsForCondition(context.steps, context.selectedConditionId);
+  const processorIds = collectDescendantProcessorIdsForCondition(
+    context.steps,
+    context.selectedConditionId
+  );
 
   return getAffectedDocumentIndexes(simulation?.documents, processorIds);
-};
+}
 
+/**
+ * Filters documents based on the processors
+ * that affected them during simulation.
+ */
+export function getAffectedDocumentIndexes(
+  documents: Simulation['documents'] | undefined,
+  processorIds: string[]
+) {
+  if (!documents || processorIds.length === 0) {
+    return [];
+  }
+
+  return documents.reduce<number[]>((acc, doc, index) => {
+    if (doc.processed_by?.some((processorId) => processorIds.includes(processorId))) {
+      acc.push(index);
+    }
+    return acc;
+  }, []);
+}
+
+/**
+ * Selects an active subset of samples based on
+ * the currently selected condition.
+ */
 export function getActiveSamples(context: SimulationContext) {
   if (!context.selectedConditionId) {
     return context.samples;
   }
 
   const docIndexes = getConditionDocIndexes(context);
+
   if (docIndexes === undefined) {
     return context.samples;
   }
@@ -210,22 +282,6 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
     default:
       return (_doc: SimulationDocReport) => true;
   }
-}
-
-export function getAffectedDocumentIndexes(
-  documents: Simulation['documents'] | undefined,
-  processorIds: string[]
-) {
-  if (!documents || processorIds.length === 0) {
-    return [];
-  }
-
-  return documents.reduce<number[]>((acc, doc, index) => {
-    if (doc.processed_by?.some((processorId) => processorIds.includes(processorId))) {
-      acc.push(index);
-    }
-    return acc;
-  }, []);
 }
 
 export function getSchemaFieldsFromSimulation(context: SimulationContext): {

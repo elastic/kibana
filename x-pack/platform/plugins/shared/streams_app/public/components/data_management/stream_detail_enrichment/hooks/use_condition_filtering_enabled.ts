@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { collectProcessorIdsForCondition } from '../state_management/simulation_state_machine';
+import { collectDescendantProcessorIdsForCondition } from '../state_management/simulation_state_machine';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -22,9 +22,11 @@ export function useConditionFilteringEnabled(conditionId: string) {
   const stepsProcessingSummaryMap = useStepsProcessingSummary();
 
   const successfulProcessorsForCondition = useMemo(() => {
-    return collectProcessorIdsForCondition(simulatorSteps, conditionId).filter((processorId) => {
-      return stepsProcessingSummaryMap?.get(processorId) === 'successful';
-    });
+    return collectDescendantProcessorIdsForCondition(simulatorSteps, conditionId).filter(
+      (processorId) => {
+        return stepsProcessingSummaryMap?.get(processorId) === 'successful';
+      }
+    );
   }, [simulatorSteps, conditionId, stepsProcessingSummaryMap]);
 
   return hasActiveConditionFilter || successfulProcessorsForCondition.length !== 0;

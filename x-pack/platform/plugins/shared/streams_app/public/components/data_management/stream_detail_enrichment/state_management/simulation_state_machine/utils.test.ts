@@ -10,6 +10,7 @@ import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import type { SampleDocumentWithUIAttributes, Simulation, SimulationContext } from './types';
 import {
   collectProcessorIdsForCondition,
+  collectDescendantProcessorIdsForCondition,
   getActiveSamples,
   getActiveSteps,
   getConditionDocIndexes,
@@ -36,6 +37,13 @@ describe('simulation utils', () => {
     });
   });
 
+  describe('collectDirectProcessorIdsForCondition', () => {
+    it('includes only processors directly inside the condition subtree', () => {
+      const ids = collectDescendantProcessorIdsForCondition(steps, 'c1');
+      expect(ids).toEqual(['p2', 'p3']);
+    });
+  });
+
   describe('getConditionDocIndexes', () => {
     it('returns indexes of documents processed by condition processors', () => {
       const documents = [
@@ -46,7 +54,7 @@ describe('simulation utils', () => {
       const simulation = { documents } as unknown as Simulation;
       const context = buildSimulationContext({ selectedConditionId: 'c1', simulation, steps });
 
-      expect(getConditionDocIndexes(context)).toEqual([0, 2]);
+      expect(getConditionDocIndexes(context)).toEqual([2]);
     });
 
     it('returns undefined when no condition is selected', () => {
@@ -81,7 +89,7 @@ describe('simulation utils', () => {
         steps,
       });
 
-      expect(getActiveSamples(context)).toEqual([samples[0], samples[2]]);
+      expect(getActiveSamples(context)).toEqual([samples[2]]);
     });
 
     it('returns empty array when no documents match the condition', () => {
