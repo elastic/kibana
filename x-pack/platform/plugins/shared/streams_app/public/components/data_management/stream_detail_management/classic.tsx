@@ -158,7 +158,7 @@ export function ClassicStreamDetailManagement({
     ),
   };
 
-  if (attachments?.enabled) {
+  if (attachments.enabled) {
     tabs.attachments = {
       content: <StreamDetailAttachments definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {

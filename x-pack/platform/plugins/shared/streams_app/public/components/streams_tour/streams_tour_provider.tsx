@@ -161,7 +161,7 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
       share.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID) as StreamsAppLocator,
     [share.url.locators]
   );
-  const attachmentsEnabled = features.attachments?.enabled ?? false;
+  const attachmentsEnabled = features.attachments.enabled;
 
   const [isCalloutDismissed = false, setCalloutDismissed] = useLocalStorage(
     STREAMS_TOUR_CALLOUT_DISMISSED_KEY,

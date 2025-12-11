@@ -164,7 +164,7 @@ export function Wrapper({
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
-                {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
+                {groupStreams.enabled && Streams.GroupStream.GetResponse.is(definition) && (
                   <GroupStreamControls />
                 )}
               </EuiFlexGroup>

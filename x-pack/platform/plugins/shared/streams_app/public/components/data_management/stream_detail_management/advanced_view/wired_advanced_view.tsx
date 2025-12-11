@@ -30,7 +30,7 @@ export function WiredAdvancedView({
 
   return (
     <>
-      {contentPacks?.enabled && (
+      {contentPacks.enabled && (
         <>
           <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />

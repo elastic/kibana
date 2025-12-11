@@ -157,7 +157,7 @@ export function WiredStreamDetailManagement({
         </EuiToolTip>
       ),
     },
-    ...(attachments?.enabled
+    ...(attachments.enabled
       ? {
           attachments: {
             content: <StreamDetailAttachments definition={definition} />,
