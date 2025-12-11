@@ -394,4 +394,57 @@ describe('useSyntheticsRules', () => {
     expect(result.current.EditAlertFlyout).not.toBeNull();
     expect(result.current.NewRuleFlyout).toBeNull();
   });
+
+  it('does not dispatch when isOpen is true, one rule exists but the other is null, and success is true', () => {
+    // This test verifies the hook doesn't keep trying to fetch rules when the API
+    // has already returned a partial result (one rule exists, one is null)
+    const stateWithPartialRules = createState({
+      defaultAlerting: {
+        data: {
+          statusRule: { id: 'status-rule-1', name: 'Status Rule' },
+          tlsRule: null,
+        },
+        loading: false,
+        success: true, // API call completed successfully
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithPartialRules);
+
+    renderHook(() => useSyntheticsRules(true), {
+      wrapper: TestWrapper,
+    });
+
+    // Should not dispatch because:
+    // 1. rulesLoaded is true (success: true)
+    // 2. At least one rule exists (statusRule)
+    // This prevents infinite loops when API returns partial results
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it('does not dispatch when isOpen is true, TLS rule exists but status rule is null, and success is true', () => {
+    // Test the reverse scenario - TLS rule exists but status rule is null
+    const stateWithPartialRules = createState({
+      defaultAlerting: {
+        data: {
+          statusRule: null,
+          tlsRule: { id: 'tls-rule-1', name: 'TLS Rule' },
+        },
+        loading: false,
+        success: true, // API call completed successfully
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithPartialRules);
+
+    renderHook(() => useSyntheticsRules(true), {
+      wrapper: TestWrapper,
+    });
+
+    // Should not dispatch because:
+    // 1. rulesLoaded is true (success: true)
+    // 2. At least one rule exists (tlsRule)
+    // This prevents infinite loops when API returns partial results
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
 });
