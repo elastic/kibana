@@ -68,6 +68,8 @@ export const initializeDataControlManager = <EditorState extends object = object
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): DataControlStateManager => {
+  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+
   const titlesManager = initializeTitleManager(state);
 
   const dataControlStateManager = initializeStateManager<
@@ -82,7 +84,7 @@ export const initializeDataControlManager = <EditorState extends object = object
   }
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const filtersLoading$ = new BehaviorSubject<boolean>(Boolean(willHaveInitialFilter));
-
+  console.log({ willHaveInitialFilter });
   function setDataLoading(loading: boolean | undefined) {
     dataLoading$.next(loading);
   }
@@ -174,8 +176,6 @@ export const initializeDataControlManager = <EditorState extends object = object
       },
     });
   };
-
-  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   return {
     api: {

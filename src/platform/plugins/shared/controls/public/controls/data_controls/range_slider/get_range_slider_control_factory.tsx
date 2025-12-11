@@ -57,6 +57,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         typeDisplayName: RangeSliderStrings.control.getDisplayName(),
         state,
         parentApi,
+        willHaveInitialFilter: state.value !== undefined,
         editorStateManager,
       });
 
@@ -180,6 +181,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, value]) => {
           const dataView = dataViews?.[0];
+          if (!dataView) return;
+
           const dataViewField =
             dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
           const gte = parseFloat(value?.[0] ?? '');
@@ -198,6 +201,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             rangeFilter.meta.params = params;
             rangeFilter.meta.controlledBy = uuid;
           }
+          console.log({ rangeFilter });
           dataControlManager.internalApi.setOutputFilter(rangeFilter);
         });
 

@@ -27,7 +27,6 @@ export function initializeRangeControlSelections(
   }
 
   return {
-    hasInitialSelections: initialState.value !== undefined,
     value$: value$ as PublishingSubject<RangeSliderValue | undefined>,
     hasRangeSelection$: hasRangeSelection$ as PublishingSubject<boolean | undefined>,
     setValue,
