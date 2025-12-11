@@ -77,11 +77,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(finalValue).to.contain('T');
     });
 
-    it('should close suggestions when clicking on editor footer', async () => {
+    it('should close suggestions when pressing ESC', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
 
-      await testSubjects.click('ESQLEditor-run-query');
+      await browser.pressKeys(browser.keys.ESCAPE);
       await waitForSuggestionWidget(false);
     });
 
