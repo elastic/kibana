@@ -1284,6 +1284,8 @@
       "@kbn/kibana-utils-plugin/*": ["src/platform/plugins/shared/kibana_utils/*"],
       "@kbn/langchain": ["x-pack/platform/packages/shared/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/platform/packages/shared/kbn-langchain/*"],
+      "@kbn/langchain-deep-agent": ["x-pack/platform/packages/shared/kbn-langchain-deep-agent"],
+      "@kbn/langchain-deep-agent/*": ["x-pack/platform/packages/shared/kbn-langchain-deep-agent/*"],
       "@kbn/langgraph-checkpoint-saver": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver"],
       "@kbn/langgraph-checkpoint-saver/*": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver/*"],
       "@kbn/language-documentation": ["src/platform/packages/private/kbn-language-documentation"],
