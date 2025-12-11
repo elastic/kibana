@@ -16,7 +16,7 @@ import type {
   MathProcessor,
   ReplaceProcessor,
   SetProcessor,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -51,7 +51,7 @@ export type SpecialisedFormState =
   | MathFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
-export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
+export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>

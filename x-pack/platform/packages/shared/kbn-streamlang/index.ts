@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export type { StreamlangDSL } from './types/streamlang';
-export { streamlangDSLSchema, isActionBlock, isWhereBlock } from './types/streamlang';
+export type { StreamlangDSL, StreamType, StreamlangConditionBlock } from './types/streamlang';
+export { streamlangDSLSchema, isActionBlock, isConditionBlock } from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export {
   transpile as transpileEsql,
@@ -20,11 +20,13 @@ export * from './src/conditions/helpers';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
-export * from './src/validation/validate_streamlang';
+export * from './src/utilities';
+export { ACTION_METADATA_MAP, type ActionMetadata } from './src/actions/action_metadata';
+export { getJsonSchemaFromStreamlangSchema } from './src/schema/get_json_schema_from_streamlang_schema';
+export * from './src/validation';
 export { validateMathExpression } from './src/transpilers/shared/math/ast_validator';
 export { getMathExpressionLanguageDocSections } from './src/transpilers/shared/math/language_docs';
 export { extractFieldsFromMathExpression } from './src/transpilers/shared/math/field_extractor';
-// Math expression language
 export {
   ALL_MATH_FUNCTIONS,
   BOOLEAN_RETURNING_MATH_FUNCTIONS,
