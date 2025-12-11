@@ -37,7 +37,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('renders the correct nav and navigate to links', async () => {
         await solutionNavigation.expectExists();
         await solutionNavigation.breadcrumbs.expectExists();
-
+        // Navigate to the home page to account for the getting started page redirect
+        await common.navigateToApp('elasticsearch/home', { basePath: `/s/${spaceCreated.id}` });
         // check side nav links
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'searchHomepage',
@@ -86,6 +87,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
         await solutionNavigation.sidenav.tour.nextStep();
         await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible(
+          'sidenav-search-getting-started'
+        );
         await solutionNavigation.sidenav.tour.nextStep();
         await solutionNavigation.sidenav.tour.expectHidden();
         await browser.refresh();
