@@ -24,7 +24,7 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
-import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
+import { type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
@@ -69,6 +69,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
       setDataInputStep,
+      resourceType: migrationSource === MigrationSource.QRADAR ? 'reference_data' : undefined,
     });
 
     const onMigrationCreated = useCallback(

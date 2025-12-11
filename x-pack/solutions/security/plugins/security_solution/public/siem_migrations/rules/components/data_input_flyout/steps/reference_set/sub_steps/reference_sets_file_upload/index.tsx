@@ -8,15 +8,15 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import { type AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
-import { LookupsFileUpload } from '../../../../../../../common/components/migration_steps';
+import { LookupsFileUpload } from '../../../../../../../common/components';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
-import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
-export interface DashboardsFileUploadStepProps {
+export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
-  migrationStats: DashboardMigrationTaskStats;
+  migrationStats: RuleMigrationTaskStats;
   missingLookups: string[];
   addUploadedLookups: AddUploadedLookups;
 }
@@ -24,7 +24,7 @@ export const useLookupsFileUploadStep = ({
   status,
   migrationStats,
   addUploadedLookups,
-}: DashboardsFileUploadStepProps): EuiStepProps => {
+}: RulesFileUploadStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
 
   const upsertMigrationResources = useCallback(
@@ -48,13 +48,14 @@ export const useLookupsFileUploadStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_TITLE,
+    title: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_TITLE,
     status: uploadStepStatus,
     children: (
       <LookupsFileUpload
         createResources={upsertMigrationResources}
         isLoading={isLoading}
         apiError={error?.message}
+        resourceType={'reference_data'}
       />
     ),
   };

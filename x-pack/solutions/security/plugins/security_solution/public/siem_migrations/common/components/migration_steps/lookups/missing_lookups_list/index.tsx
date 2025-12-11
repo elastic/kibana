@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import type { UploadedLookups } from '../../types';
+import type { ResourceType } from '../../../../../rules/types';
 
 const scrollPanelCss = css`
   max-height: 200px;
@@ -28,23 +29,28 @@ const scrollPanelCss = css`
 `;
 
 interface MissingLookupsListProps {
+  resourceType?: ResourceType;
   missingLookups: string[];
   uploadedLookups: UploadedLookups;
   omitLookup: (lookupsName: string) => void;
   onCopied: () => void;
 }
 export const MissingLookupsList = React.memo<MissingLookupsListProps>(
-  ({ missingLookups, uploadedLookups, omitLookup, onCopied }) => {
+  ({ resourceType = 'lookup', missingLookups, uploadedLookups, omitLookup, onCopied }) => {
     const { euiTheme } = useEuiTheme();
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.copyExportQuery.description"
-              defaultMessage="Log in to your Splunk admin account, go to the {app}, download the following lookups individually and upload them below. You can also omit lookups that are empty or not needed, and they will be ignored in the translation."
-              values={{ app: <b>{i18n.LOOKUPS_SPLUNK_APP}</b> }}
-            />
+            {resourceType === 'reference_data' ? (
+              i18n.REFERENCE_SETS_QRADAR_APP
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.copyExportQuery.splunk.description"
+                defaultMessage="Log in to your Splunk admin account, go to the {app}, download the following lookups individually and upload them below. You can also omit lookups that are empty or not needed, and they will be ignored in the translation."
+                values={{ app: <b>{i18n.LOOKUPS_SPLUNK_APP}</b> }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -82,6 +88,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                               lookupName={lookupName}
                               onCopied={onCopied}
                               copy={copy}
+                              resourceType={resourceType}
                             />
                           )}
                         </EuiCopy>
@@ -91,6 +98,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                           lookupName={lookupName}
                           omitLookup={omitLookup}
                           isDisabled={isOmitted}
+                          resourceType={resourceType}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -110,21 +118,38 @@ interface CopyLookupNameButtonProps {
   lookupName: string;
   onCopied: () => void;
   copy: () => void;
+  resourceType: ResourceType;
 }
+
+interface ConfigSetting {
+  tooltip: string;
+  label: string;
+}
+
+const CONFIGS: Record<string, ConfigSetting> = {
+  lookup: {
+    tooltip: i18n.COPY_LOOKUP_NAME_TOOLTIP,
+    label: i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP,
+  },
+  reference_data: {
+    tooltip: i18n.COPY_REFERENCE_SET_NAME_TOOLTIP,
+    label: i18n.CLEAR_EMPTY_REFERENCE_SET_TOOLTIP,
+  },
+};
 const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
-  ({ lookupName, onCopied, copy }) => {
+  ({ lookupName, onCopied, copy, resourceType }) => {
     const onClick = useCallback(() => {
       copy();
       onCopied();
     }, [copy, onCopied]);
     return (
-      <EuiToolTip content={i18n.COPY_LOOKUP_NAME_TOOLTIP}>
+      <EuiToolTip content={CONFIGS[resourceType].tooltip} disableScreenReaderOutput>
         <EuiButtonIcon
           onClick={onClick}
           iconType="copy"
           color="text"
-          aria-label={`${i18n.COPY_LOOKUP_NAME_TOOLTIP} ${lookupName}`}
-          data-test-subj="lookupNameCopy"
+          aria-label={`${CONFIGS[resourceType].tooltip} ${lookupName}`}
+          data-test-subj={`${resourceType}NameCopy`}
         />
       </EuiToolTip>
     );
@@ -136,9 +161,10 @@ interface OmitLookupButtonProps {
   lookupName: string;
   omitLookup: (lookupName: string) => void;
   isDisabled: boolean;
+  resourceType: ResourceType;
 }
 const OmitLookupButton = React.memo<OmitLookupButtonProps>(
-  ({ lookupName, omitLookup, isDisabled: isDisabledDefault }) => {
+  ({ lookupName, omitLookup, isDisabled: isDisabledDefault, resourceType }) => {
     const [isDisabled, setIsDisabled] = useState(isDisabledDefault);
     const onClick = useCallback(() => {
       setIsDisabled(true);
@@ -151,17 +177,17 @@ const OmitLookupButton = React.memo<OmitLookupButtonProps>(
           onClick={onClick}
           iconType="cross"
           color="text"
-          aria-label={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}
-          data-test-subj="lookupNameClear"
+          aria-label={CONFIGS[resourceType].label}
+          data-test-subj={`${resourceType}NameClear`}
           isDisabled={isDisabled}
         />
       ),
-      [onClick, isDisabled]
+      [onClick, resourceType, isDisabled]
     );
     if (isDisabled) {
       return button;
     }
-    return <EuiToolTip content={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}>{button}</EuiToolTip>;
+    return <EuiToolTip content={CONFIGS[resourceType].label}>{button}</EuiToolTip>;
   }
 );
 OmitLookupButton.displayName = 'OmitLookupButton';

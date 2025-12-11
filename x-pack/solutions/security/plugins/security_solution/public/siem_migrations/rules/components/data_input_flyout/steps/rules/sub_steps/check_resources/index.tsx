@@ -11,15 +11,18 @@ import { useGetMissingResources } from '../../../../../../../common/hooks/use_ge
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { OnMissingResourcesFetched } from '../../../../../../../common/types';
+import type { ResourceType } from '../../../../../../types';
 
 export interface CheckResourcesStepProps {
   status: EuiStepStatus;
   migrationStats: RuleMigrationTaskStats | undefined;
   onMissingResourcesFetched: OnMissingResourcesFetched;
+  resourceType?: ResourceType;
 }
 export const useCheckResourcesStep = ({
   status,
   migrationStats,
+  resourceType,
   onMissingResourcesFetched,
 }: CheckResourcesStepProps): EuiStepProps => {
   const { getMissingResources, isLoading, error } = useGetMissingResources(
@@ -43,8 +46,20 @@ export const useCheckResourcesStep = ({
     return status;
   }, [isLoading, error, status]);
 
+  if (resourceType === 'reference_data') {
+    return {
+      title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_TITLE,
+      status: uploadStepStatus,
+      children: (
+        <EuiText size="s" data-test-subj="checkResourcesDescription">
+          {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION}
+        </EuiText>
+      ),
+    };
+  }
+
   return {
-    title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_TITLE,
+    title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_TITLE,
     status: uploadStepStatus,
     children: (
       <EuiText size="s" data-test-subj="checkResourcesDescription">

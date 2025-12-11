@@ -9,11 +9,15 @@ import { useCallback, useState } from 'react';
 import type { SiemMigrationResourceBase } from '../../../../../../../common/siem_migrations/model/common.gen';
 import type { MigrationStepProps, MissingResourcesIndexed } from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
+import { QradarDataInputStep } from '../../types';
+import type { ResourceType } from '../../../../types';
 
 export const useMissingResources = ({
   setDataInputStep,
+  resourceType,
 }: {
   setDataInputStep: MigrationStepProps['setDataInputStep'];
+  resourceType?: ResourceType;
 }) => {
   const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
     MissingResourcesIndexed | undefined
@@ -33,17 +37,30 @@ export const useMissingResources = ({
         { macros: [], lookups: [] }
       );
       setMissingResourcesIndexed(newMissingResourcesIndexed);
+
+      if (resourceType === 'reference_data') {
+        if (newMissingResourcesIndexed.lookups.length) {
+          setDataInputStep(QradarDataInputStep.ReferenceSet);
+          return;
+        }
+
+        setDataInputStep(QradarDataInputStep.End);
+        return;
+      }
+
       if (newMissingResourcesIndexed.macros.length) {
         setDataInputStep(SplunkDataInputStep.Macros);
         return;
       }
+
       if (newMissingResourcesIndexed.lookups.length) {
         setDataInputStep(SplunkDataInputStep.Lookups);
         return;
       }
+
       setDataInputStep(SplunkDataInputStep.End);
     },
-    [setDataInputStep]
+    [setDataInputStep, resourceType]
   );
 
   return { missingResourcesIndexed, onMissingResourcesFetched };

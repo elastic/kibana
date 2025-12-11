@@ -7,9 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RULES_DATA_INPUT_CHECK_RESOURCES_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.title',
+export const RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.splunk.title',
   { defaultMessage: 'Check for macros and lookups' }
+);
+
+export const RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.qradar.title',
+  { defaultMessage: 'Check for reference sets' }
 );
 
 export const RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION = i18n.translate(

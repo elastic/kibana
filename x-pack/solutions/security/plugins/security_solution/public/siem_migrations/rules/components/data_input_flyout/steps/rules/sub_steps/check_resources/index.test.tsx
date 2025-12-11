@@ -114,4 +114,26 @@ describe('useCheckResourcesStep', () => {
 
     expect(getMissingResources).not.toHaveBeenCalled();
   });
+
+  it('returns reference sets content', () => {
+    const getMissingResources = jest.fn();
+    mockUseGetMissingResources.mockReturnValue({
+      getMissingResources,
+      isLoading: false,
+      error: null,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useCheckResourcesStep({
+          status: 'incomplete',
+          migrationStats: mockMigrationStats,
+          onMissingResourcesFetched: jest.fn(),
+          resourceType: 'reference_data',
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(result.current.title).toEqual('Check for reference sets');
+  });
 });

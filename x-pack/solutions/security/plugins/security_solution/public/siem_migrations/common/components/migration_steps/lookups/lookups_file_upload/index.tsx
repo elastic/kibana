@@ -15,14 +15,29 @@ import { UploadFileButton } from '../..';
 import { FILE_UPLOAD_ERROR } from '../../../../translations/file_upload_error';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
+import type { ResourceType } from '../../../../../rules/types';
+import { convertQradarReferenceSetToLookup } from '../utils';
 
 export interface LookupsFileUploadProps {
   createResources: (resources: SiemMigrationResourceData[]) => void;
   apiError?: string;
   isLoading?: boolean;
+  resourceType?: ResourceType;
 }
+
+const CONFIGS: Record<string, { prompt: string; label: string }> = {
+  lookup: {
+    prompt: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT,
+    label: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_LABEL,
+  },
+  reference_data: {
+    prompt: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_PROMPT,
+    label: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_LABEL,
+  },
+};
+
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
-  ({ createResources, apiError, isLoading }) => {
+  ({ createResources, apiError, isLoading, resourceType = 'lookup' }) => {
     const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
@@ -71,6 +86,15 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
                 }
 
                 const name = file.name.replace(/\.[^/.]+$/, '').trim();
+
+                if (resourceType === 'reference_data') {
+                  resolve(
+                    convertQradarReferenceSetToLookup({
+                      fileContent: content,
+                      fallbackName: name,
+                    })
+                  );
+                }
                 resolve({ type: 'lookup', name, content });
               };
 
@@ -96,7 +120,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
         // Set the loaded lookups to the state
         setLookupResources((current) => [...current, ...lookups]);
       },
-      [addError]
+      [addError, resourceType]
     );
 
     const errors = useMemo(() => {
@@ -123,22 +147,22 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           >
             <EuiFilePicker
               isInvalid={errors.length > 0}
-              id="lookupsFilePicker"
+              id={`${resourceType}FilePicker`}
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                  {CONFIGS[resourceType].prompt}
                 </EuiText>
               }
               accept="application/text"
               onChange={parseFile}
               multiple
               display="large"
-              aria-label="Upload lookups files"
+              aria-label={CONFIGS[resourceType].label}
               isLoading={showLoader}
               disabled={showLoader}
-              data-test-subj="lookupsFilePicker"
+              data-test-subj={`${resourceType}FilePicker`}
               data-loading={isParsing}
             />
           </EuiFormRow>
