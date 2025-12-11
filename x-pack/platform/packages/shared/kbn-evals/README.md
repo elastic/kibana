@@ -189,7 +189,7 @@ const ragEvaluators = createRagEvaluators({
     // Extract { index, id } objects from your task output
     return output.results.map((r) => ({ index: r.index, id: r.id }));
   },
-  extractGroundTruth: (metadata) => metadata?.groundTruth ?? {},
+  extractGroundTruth: (referenceOutput) => referenceOutput?.groundTruth ?? {},
 });
 ```
 

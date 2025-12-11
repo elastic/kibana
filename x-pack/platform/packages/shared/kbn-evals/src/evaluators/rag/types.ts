@@ -28,20 +28,20 @@ export type GroundTruth = Record<string, Record<string, number>>;
 export type RetrievedDocsExtractor<T = unknown> = (output: T) => RetrievedDoc[];
 
 /**
- * Function to extract ground truth from example metadata.
- * Implement this based on your specific metadata structure.
+ * Function to extract ground truth from the reference output (expected output).
+ * Implement this based on your specific reference output structure.
  */
-export type GroundTruthExtractor<T = unknown> = (metadata: T) => GroundTruth;
+export type GroundTruthExtractor<T = unknown> = (referenceOutput: T) => GroundTruth;
 
-export interface RagEvaluatorConfig<TOutput = unknown, TMetadata = unknown> {
+export interface RagEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknown> {
   /** Number of top results to evaluate (K in Precision@K, Recall@K) */
   k: number;
   /** Minimum score in ground truth to consider a document relevant. Default: 1 */
   relevanceThreshold?: number;
   /** Function to extract retrieved docs from task output */
   extractRetrievedDocs: RetrievedDocsExtractor<TOutput>;
-  /** Function to extract ground truth from example metadata */
-  extractGroundTruth: GroundTruthExtractor<TMetadata>;
+  /** Function to extract ground truth from reference output (expected output) */
+  extractGroundTruth: GroundTruthExtractor<TReferenceOutput>;
   /** Filter evaluation to only indices present in ground truth. Default: from env var INDEX_FOCUSED_RAG_EVAL */
   filterByGroundTruthIndices?: boolean;
 }

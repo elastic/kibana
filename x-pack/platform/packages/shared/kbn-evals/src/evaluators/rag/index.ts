@@ -39,15 +39,15 @@ interface RagMetrics {
   totalRelevant: number;
 }
 
-function computeRagMetrics<TOutput, TMetadata>(
-  config: RagEvaluatorConfig<TOutput, TMetadata>,
+function computeRagMetrics<TOutput, TReferenceOutput>(
+  config: RagEvaluatorConfig<TOutput, TReferenceOutput>,
   output: TOutput,
-  metadata: TMetadata
+  referenceOutput: TReferenceOutput
 ): RagMetrics | null {
   const { k, extractRetrievedDocs, extractGroundTruth } = config;
   const threshold = config.relevanceThreshold ?? DEFAULT_RELEVANCE_THRESHOLD;
 
-  const groundTruth: GroundTruth = extractGroundTruth(metadata);
+  const groundTruth: GroundTruth = extractGroundTruth(referenceOutput);
   if (!groundTruth || Object.keys(groundTruth).length === 0) {
     return null;
   }
@@ -70,14 +70,14 @@ function computeRagMetrics<TOutput, TMetadata>(
   return { precision, recall, f1, hits, k, totalRelevant };
 }
 
-export function createPrecisionAtKEvaluator<TOutput = unknown, TMetadata = unknown>(
-  config: RagEvaluatorConfig<TOutput, TMetadata>
+export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
+  config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator {
   return {
     name: PRECISION_EVALUATOR_NAME,
     kind: 'CODE',
-    evaluate: async ({ output, metadata }) => {
-      const metrics = computeRagMetrics(config, output as TOutput, metadata as TMetadata);
+    evaluate: async ({ output, expected }) => {
+      const metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
 
       if (!metrics) {
         return {
@@ -98,14 +98,14 @@ export function createPrecisionAtKEvaluator<TOutput = unknown, TMetadata = unkno
   };
 }
 
-export function createRecallAtKEvaluator<TOutput = unknown, TMetadata = unknown>(
-  config: RagEvaluatorConfig<TOutput, TMetadata>
+export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
+  config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator {
   return {
     name: RECALL_EVALUATOR_NAME,
     kind: 'CODE',
-    evaluate: async ({ output, metadata }) => {
-      const metrics = computeRagMetrics(config, output as TOutput, metadata as TMetadata);
+    evaluate: async ({ output, expected }) => {
+      const metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
 
       if (!metrics) {
         return {
@@ -126,14 +126,14 @@ export function createRecallAtKEvaluator<TOutput = unknown, TMetadata = unknown>
   };
 }
 
-export function createF1AtKEvaluator<TOutput = unknown, TMetadata = unknown>(
-  config: RagEvaluatorConfig<TOutput, TMetadata>
+export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
+  config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator {
   return {
     name: F1_EVALUATOR_NAME,
     kind: 'CODE',
-    evaluate: async ({ output, metadata }) => {
-      const metrics = computeRagMetrics(config, output as TOutput, metadata as TMetadata);
+    evaluate: async ({ output, expected }) => {
+      const metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
 
       if (!metrics) {
         return {
@@ -163,8 +163,8 @@ export function createF1AtKEvaluator<TOutput = unknown, TMetadata = unknown>(
 /**
  * Creates all RAG evaluators (Precision@K, Recall@K, F1@K) with shared configuration.
  */
-export function createRagEvaluators<TOutput = unknown, TMetadata = unknown>(
-  config: RagEvaluatorConfig<TOutput, TMetadata>
+export function createRagEvaluators<TOutput = unknown, TReferenceOutput = unknown>(
+  config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator[] {
   return [
     createPrecisionAtKEvaluator(config),

@@ -40,14 +40,14 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 'You can start accepting payments on your site using [Wix Payments](https://support.wix.com/en/article/about-wix-payments) almost immediately. However, we need to verify your identity before your account can be fully activated.',
-            },
-            metadata: {
-              query_intent: 'Factual',
               groundTruth: {
                 wix_knowledge_base: {
                   '49d9e88fadbf11fa4e685c847590078ff9394c2fe7566094f504f53ca4aca465': 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Factual',
             },
           },
           {
@@ -58,14 +58,14 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 'When you purchase a yearly Premium plan, the free domain voucher is not immediately visible at checkout. Instead, the voucher becomes available after you complete the purchase of the plan. You can then claim the voucher by visiting the [Premium Vouchers page](https://manage.wix.com/account/vouchers?referralAdditionalInfo=%7Btheir) in your Wix account. The voucher is valid for two months from the date of purchase, and you can use it to register a domain for free for one year. If you have already purchased the plan and still do not see the voucher, ensure that you meet all eligibility criteria, such as not having purchased a monthly plan or a domain prior to the plan. If issues persist, you can [contact Wix Customer Care](https://support.wix.com/en/article/contacting-wix-customer-care-for-support) for further assistance.',
-            },
-            metadata: {
-              query_intent: 'Procedural',
               groundTruth: {
                 wix_knowledge_base: {
                   '06535db983ea0ffe0214af14497a1d158f279d92c92f211e87b8820aa95dbe43': 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Procedural',
             },
           },
           {
@@ -75,14 +75,14 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 "To upgrade your email marketing plan:\n[Go to Email Marketing](https://www.wix.com/my-account/site-selector/?buttonText=Email%20Marketing%20Dashboard&title=Select%20a%20Site&autoSelectOnSingleSite=true&actionUrl=https://www.wix.com/dashboard/%7B%7BmetaSiteId%7D%7D/shoutout/) in your site's dashboard.  Under Monthly Balance click Upgrade.\n  Choose a plan that works best for you and checkout.",
-            },
-            metadata: {
-              query_intent: 'Procedural',
               groundTruth: {
                 wix_knowledge_base: {
                   de6e96935f0b3321cf29416ec164482247b5035f1d2e12b36e203be8126ca8b8: 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Procedural',
             },
           },
           {
@@ -93,15 +93,15 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 'Wix Stores gives you all the tools you need to create a sleek, professional online store and grow your eCommerce business.\n  \nWix Bookings, however, is an easy-to-use scheduling system that lets your members book and [pay for] (https://support.wix.com/en/article/wix-bookings-about-getting-paid-online) services online, so you can focus on managing your business. Whether you offer services like workshops, courses, or private sessions, online or in-person, Wix Bookings has you covered.',
-            },
-            metadata: {
-              query_intent: 'Factual',
               groundTruth: {
                 wix_knowledge_base: {
                   a513a215c1798f329293330cb5f5e975a18978954b5ee27d84441e029f900d51: 1,
                   b9ba8c318ee75f49eaa89c1d5b8d461fa2b4c27167381b869aeb31027d7187f9: 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Factual',
             },
           },
           {
@@ -112,14 +112,14 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 "To add discounts to your service prices when customers pay for a plan, you can create discount coupons for your pricing plans. You can choose to offer a price discount or a percentage discount coupon. You can also choose whether your discount coupons apply to a specific plan or to all your pricing plans. Your clients redeem the coupon at checkout to take advantage of the discounted plans. Note: Discount coupons for Pricing Plans cover the plans themselves, but not any setup fees you may have enabled. To create discount coupons for your pricing plans:\n\n1. Go to Pricing Plans in your site's dashboard.\n2. Click the More Actions icon at the top.\n3. Click Create a coupon.\n4. Select the type of coupon you want to offer:\n   - $ Discount: Offer a fixed monetary discount amount.\n   - % Discount: Offer a percentage discount.\n5. Enter the Coupon code clients use to redeem the coupon.\n6. Enter the Coupon name for your own records.\n7. Click the Apply to drop-down and choose the relevant pricing plan(s):\n   - All plans: This is applied to all your available pricing plans.\n   - Specific plan: Click the Pricing plan drop-down and select the relevant plan.\n8. Choose how the coupon works with your pricing plans:\n   - First billing cycle: The coupon offers a one-time discount at the start of the pricing plan.\n   - All billing cycles: The coupon offers a recurring discount, every time your client is charged.\n   - Custom: You choose how your coupons work with recurring payments (e.g. give a discount for the first 4 billing cycles).\n9. Select the dates the coupon is valid between.\n10. (Optional) Select the Limit the total number of uses for this coupon checkbox and enter the number of times the coupon can be used.\n11. (Optional) Select the Limit to one use per customer checkbox if you want clients to be able to use the coupon only one time.\n12. Click Create Coupon.",
-            },
-            metadata: {
-              query_intent: 'Procedural',
               groundTruth: {
                 wix_knowledge_base: {
                   '8cc75fbcc571336d1ef1768e7727bd9d1e6c1333f22eeb5366232b9a1a066418': 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Procedural',
             },
           },
           {
@@ -130,9 +130,6 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 "To change the order of items within a CMS collection on your Wix site, you should follow these steps:\n\n1. Go to the CMS in your site's dashboard or editor.\n2. Click on the relevant collection.\n3. If you have multiple collection views, select the view you want to sort items in.\n4. Click 'Sort' at the top of your collection.\n5. Click '+ Add a Sort'.\n6. Choose the field you want to sort by from the 'Sort by' drop-down menu.\n7. Select the sorting order (e.g., A-Z, Low-High, Oldest-Newest).\n8. Click 'Add Sort'.\n9. To apply this order to your live site, enable the 'Mirror on Site' toggle at the top of the collection.\n\nIf these steps did not work, ensure that the 'Mirror on Site' feature is enabled, as this is necessary for the order in your collection view to be reflected on your live site. Additionally, check if there are any sort conditions added to datasets, as these can override the order set in your mirrored collection view. For more detailed guidance, you can refer to the [Wix support article on mirroring item order](https://support.wix.com/en/article/cms-mirroring-the-order-of-items-in-your-collection-to-your-sites-connected-elements).",
-            },
-            metadata: {
-              query_intent: 'Issue Resolution',
               groundTruth: {
                 wix_knowledge_base: {
                   f346781bc6cf23c95342ce003927de9d985a99eeb7561c69f03e65da7c10f2fb: 1,
@@ -140,6 +137,9 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
                   '2df694686b70b35ed389ff590354cfaf19aafc07659b12b02078f2ebcf015ac8': 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Issue Resolution',
             },
           },
           {
@@ -150,14 +150,14 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 'To sync your hotel app with your calendars using an iCal link, you can import reservations from external services like Airbnb, HomeAway, and VRBO to your Wix Hotels reservation calendar. This is a one-way sync from iCal to the Wix Calendar.\nTo import your external calendar - \n  1. [Locate your iCal URL.] (https://support.wix.com/en/article/finding-your-ical-url)\n  2. [Go to your dashboard.] (https://support.wix.com/en/article/accessing-your-sites-dashboard)\n  3. Click the Hotels tab.\n  4. Click to expand the Reservations tab.\n  5. Select iCal.\n  6. Click the Choose Type drop-down menu and select a room type.\n  7. Paste your iCal URL into the URL field. \n  8. (Optional) Click Add Calendar to add another room type and paste the iCal URL in the URL field.\n  9. Click Save.\nPlease note that - \n  * You can only import from services that allow you to export your calendar in iCal format.\n  * The sync is one way only, from iCal to the Wix Calendar.\n  * If you have multiple room types, you must add a different iCal URL for each room type.\n  * Imported rates do not appear in the calendar. Rates can be viewed by clicking on the reservation in the calendar and scrolling down to the Payment Details section.\n  * This feature is not compatible with the Wix Hotels Channel Manager. If you want to connect the Channel Manager please delete all the URLs in this tab before doing so.',
-            },
-            metadata: {
-              query_intent: 'Procedural',
               groundTruth: {
                 wix_knowledge_base: {
                   '5f02fc2f8937d16a4d8cdca47da36ae34429e0b279fb0cc56af72e2d91991a28': 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Procedural',
             },
           },
           {
@@ -168,15 +168,15 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 "To verify your domain with Google Workspace by adding a TXT record, you need to manage your DNS settings with your domain host, not Wix, since your domain is connected via pointing. Follow these steps:\n\n1. Log in to your domain host account where your DNS records are managed.\n2. Add the TXT record provided by Google Workspace to your domain's DNS settings.\n3. After adding the TXT record, return to the Google Admin Console and click 'Verify'.",
-            },
-            metadata: {
-              query_intent: 'Procedural',
               groundTruth: {
                 wix_knowledge_base: {
                   '65806b123ff355cef16c8abe4301f1df982e2c3bddcd33b81ed446b92a79e336': 1,
                   db6a6c4be5c11fae531b4fdd546601bab6d4a26b669a8a7ea6063c62a045e9d4: 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Procedural',
             },
           },
           {
@@ -187,15 +187,15 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
             output: {
               expected:
                 "If you've previously added a Recovery Phone Number to your Wix account, you can get a one-time SMS code sent to your mobile phone to recover your Wix account.\n  To recover your account:\n  1. Go to the Wix Log In page. (https://users.wix.com/signin)\n  2. Click Forgot Email?.\n  3. Select Can't access my login email.\n  4. Click Next.\n  5. Enter the email address associated with your Wix account. \n  6. Click Next.\n  7. Select Send me a code to my phone number ending with XXXX and click Next.\n  8. Enter the one-time verification code sent to your phone under Enter code here.\n  9. Click Verify.\n  10. Enter a new password and retype it.\n  11. Click Save New Password. \n  \n  After you recover your account, you should change the email address of your account (https://support.wix.com/en/article/changing-the-email-address-of-your-wix-account) to one that you are able to access.\n  To change your email address:\n  1. Go to Account Settings in your Wix account.\n  2. Click the Account email field.\n  3. Enter your Wix account password in the pop-up.\n  4. Enter your new account email address.\n  5. Retype your new email account email address to confirm it.\n  6. Click Next.\n  7. Check your email account for an email from Wix.\n  8. Copy the 6-digit confirmation code.\n  9. Go back to Account Settings in your Wix account.\n  10. Paste the code into the pop-up.\n  11. Click Submit.",
-            },
-            metadata: {
-              query_intent: 'Procedural',
               groundTruth: {
                 wix_knowledge_base: {
                   '39158650c97235d1f9b98a71be41c5222ddb3ee3e497cfb1d10ef3bd0bc166cf': 1,
                   e9366441d1e037a1470c9bad57455dbadc24db0ca931791edd0f3b026ea6a58f: 1,
                 },
               },
+            },
+            metadata: {
+              query_intent: 'Procedural',
             },
           },
         ],

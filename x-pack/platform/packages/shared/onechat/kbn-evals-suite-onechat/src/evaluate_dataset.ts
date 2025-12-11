@@ -30,9 +30,9 @@ interface DatasetExample extends Example {
   };
   output: {
     expected?: string;
+    groundTruth?: GroundTruth;
   };
   metadata?: {
-    groundTruth?: GroundTruth;
     [key: string]: unknown;
   };
 }
@@ -138,7 +138,8 @@ export function createEvaluateDataset({
           }))
           .filter((doc) => doc.id && doc.index);
       },
-      extractGroundTruth: (metadata: DatasetExample['metadata']) => metadata?.groundTruth ?? {},
+      extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
+        referenceOutput?.groundTruth ?? {},
     });
 
     await phoenixClient.runExperiment(

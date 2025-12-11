@@ -17,16 +17,16 @@ interface TestOutput {
   retrievedDocs: RetrievedDoc[];
 }
 
-interface TestMetadata {
+interface TestReferenceOutput {
   groundTruth: GroundTruth;
 }
 
 describe('RAG Evaluators', () => {
-  const config: RagEvaluatorConfig<TestOutput, TestMetadata> = {
+  const config: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
     k: 5,
     relevanceThreshold: 1,
     extractRetrievedDocs: (output) => output.retrievedDocs,
-    extractGroundTruth: (metadata) => metadata.groundTruth,
+    extractGroundTruth: (referenceOutput) => referenceOutput.groundTruth,
   };
 
   const groundTruth: GroundTruth = {
@@ -55,8 +55,8 @@ describe('RAG Evaluators', () => {
             createDoc('doc_3'),
           ],
         },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       // 3 relevant docs (doc_1, doc_2, doc_3) out of 5
@@ -70,8 +70,8 @@ describe('RAG Evaluators', () => {
       const result = await evaluator.evaluate({
         input: {},
         output: { retrievedDocs: [createDoc('doc_1'), createDoc('doc_2')] },
-        expected: {},
-        metadata: { groundTruth: {} },
+        expected: { groundTruth: {} },
+        metadata: {},
       });
 
       expect(result.score).toBeNull();
@@ -84,8 +84,8 @@ describe('RAG Evaluators', () => {
       const result = await evaluator.evaluate({
         input: {},
         output: { retrievedDocs: [createDoc('doc_1'), createDoc('doc_2')] },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       // 2 relevant docs out of K=5
@@ -114,8 +114,8 @@ describe('RAG Evaluators', () => {
             createDoc('doc_3'),
           ],
         },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       // 3 relevant docs retrieved out of 4 total relevant
@@ -129,8 +129,8 @@ describe('RAG Evaluators', () => {
       const result = await evaluator.evaluate({
         input: {},
         output: { retrievedDocs: [createDoc('doc_1')] },
-        expected: {},
-        metadata: { groundTruth: {} },
+        expected: { groundTruth: {} },
+        metadata: {},
       });
 
       expect(result.score).toBeNull();
@@ -159,8 +159,8 @@ describe('RAG Evaluators', () => {
             createDoc('doc_3'),
           ],
         },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       // Precision = 3/5 = 0.6, Recall = 3/4 = 0.75
@@ -175,8 +175,8 @@ describe('RAG Evaluators', () => {
       const result = await evaluator.evaluate({
         input: {},
         output: { retrievedDocs: [createDoc('doc_1')] },
-        expected: {},
-        metadata: { groundTruth: {} },
+        expected: { groundTruth: {} },
+        metadata: {},
       });
 
       expect(result.score).toBeNull();
@@ -200,10 +200,10 @@ describe('RAG Evaluators', () => {
 
   describe('relevance threshold', () => {
     it('should use default threshold of 1 when not specified', async () => {
-      const configWithoutThreshold: RagEvaluatorConfig<TestOutput, TestMetadata> = {
+      const configWithoutThreshold: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         k: 5,
         extractRetrievedDocs: (output) => output.retrievedDocs,
-        extractGroundTruth: (metadata) => metadata.groundTruth,
+        extractGroundTruth: (referenceOutput) => referenceOutput.groundTruth,
       };
 
       const evaluator = createPrecisionAtKEvaluator(configWithoutThreshold);
@@ -219,8 +219,8 @@ describe('RAG Evaluators', () => {
             createDoc('doc_X'),
           ],
         },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       // All 4 docs with score >= 1 are relevant
@@ -228,7 +228,7 @@ describe('RAG Evaluators', () => {
     });
 
     it('should respect higher relevance threshold', async () => {
-      const highThresholdConfig: RagEvaluatorConfig<TestOutput, TestMetadata> = {
+      const highThresholdConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
         relevanceThreshold: 2,
       };
@@ -246,8 +246,8 @@ describe('RAG Evaluators', () => {
             createDoc('doc_X'),
           ],
         },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       // Only doc_2 has score >= 2
@@ -273,8 +273,8 @@ describe('RAG Evaluators', () => {
             { index: 'index-a', id: 'doc_X' },
           ],
         },
-        expected: {},
-        metadata: { groundTruth: multiIndexGroundTruth },
+        expected: { groundTruth: multiIndexGroundTruth },
+        metadata: {},
       });
 
       // 2 relevant docs retrieved out of 4 total relevant
@@ -295,8 +295,8 @@ describe('RAG Evaluators', () => {
             { index: 'wrong-index', id: 'doc_5' },
           ],
         },
-        expected: {},
-        metadata: { groundTruth: multiIndexGroundTruth },
+        expected: { groundTruth: multiIndexGroundTruth },
+        metadata: {},
       });
 
       // No docs match because index is wrong
@@ -310,7 +310,7 @@ describe('RAG Evaluators', () => {
     };
 
     it('should filter docs to only ground truth indices when enabled via config', async () => {
-      const filterConfig: RagEvaluatorConfig<TestOutput, TestMetadata> = {
+      const filterConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
         filterByGroundTruthIndices: true,
       };
@@ -328,8 +328,8 @@ describe('RAG Evaluators', () => {
             { index: 'index-c', id: 'doc_W' },
           ],
         },
-        expected: {},
-        metadata: { groundTruth: multiIndexGroundTruth },
+        expected: { groundTruth: multiIndexGroundTruth },
+        metadata: {},
       });
 
       // After filtering: only index-a docs remain: [doc_1, doc_Z]
@@ -339,7 +339,7 @@ describe('RAG Evaluators', () => {
     });
 
     it('should not filter when filterByGroundTruthIndices is false', async () => {
-      const noFilterConfig: RagEvaluatorConfig<TestOutput, TestMetadata> = {
+      const noFilterConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
         filterByGroundTruthIndices: false,
       };
@@ -357,8 +357,8 @@ describe('RAG Evaluators', () => {
             { index: 'index-c', id: 'doc_W' },
           ],
         },
-        expected: {},
-        metadata: { groundTruth: multiIndexGroundTruth },
+        expected: { groundTruth: multiIndexGroundTruth },
+        metadata: {},
       });
 
       // No filtering: all 5 docs are considered
@@ -375,8 +375,8 @@ describe('RAG Evaluators', () => {
       const result = await evaluator.evaluate({
         input: {},
         output: { retrievedDocs: [] },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       expect(result.score).toBe(0);
@@ -390,8 +390,8 @@ describe('RAG Evaluators', () => {
         output: {
           retrievedDocs: [createDoc('unknown_1'), createDoc('unknown_2'), createDoc('unknown_3')],
         },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       expect(result.score).toBe(0);
@@ -413,8 +413,8 @@ describe('RAG Evaluators', () => {
             createDoc('doc_4'),
           ],
         },
-        expected: {},
-        metadata: { groundTruth },
+        expected: { groundTruth },
+        metadata: {},
       });
 
       // Perfect precision (4/4) and perfect recall (4/4)
