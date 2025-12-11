@@ -15,6 +15,7 @@
   "guided-setup-state",
   "investigation",
   "maps-telemetry",
+  "mcp-connector-tools",
   "ml-telemetry",
   "osquery-usage-metric",
   "server",
