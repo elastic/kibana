@@ -245,6 +245,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           onAppLeave: params.onAppLeave,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          setHeaderActionMenuBeta: params.setHeaderActionMenuBeta,
         };
 
         return mountApp({

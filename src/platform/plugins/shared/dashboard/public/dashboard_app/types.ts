@@ -21,6 +21,7 @@ export interface DashboardMountContextProps {
   scopedHistory: () => ScopedHistory;
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenuBeta: AppMountParameters['setHeaderActionMenuBeta'];
 }
 
 export type DashboardRedirect = (props: RedirectToProps) => void;

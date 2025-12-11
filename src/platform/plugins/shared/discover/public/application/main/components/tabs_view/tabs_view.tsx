@@ -22,6 +22,7 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
+import { useRegisterTopNavRightSideContent } from '../top_nav/discover_topnav_menu';
 
 const MAX_TABS_COUNT = 25;
 
@@ -67,7 +68,8 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
-  return (
+  // Register the tabs bar separately in top nav
+  const tabsBar = !hideTabsBar ? (
     <UnifiedTabs
       services={services}
       items={items}
@@ -75,13 +77,17 @@ export const TabsView = (props: SingleTabViewProps) => {
       recentlyClosedItems={recentlyClosedItems}
       unsavedItemIds={unsavedTabIds}
       maxItemsCount={MAX_TABS_COUNT}
-      hideTabsBar={hideTabsBar}
       createItem={createItem}
       getPreviewData={getPreviewData}
-      renderContent={renderContent}
       onChanged={onChanged}
       onEBTEvent={onEvent}
       onClearRecentlyClosed={onClearRecentlyClosed}
+      // No renderContent - renders only the tabs bar
     />
-  );
+  ) : null;
+
+  useRegisterTopNavRightSideContent(tabsBar);
+
+  // Render only the content part
+  return renderContent(items.find((item) => item.id === currentTabId) || items[0]);
 };
