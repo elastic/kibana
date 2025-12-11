@@ -7,7 +7,7 @@
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { getModifiedValue } from '../../../../../../../../../../platform/plugins/shared/alerting/server/rules_client/common';
+import { getModifiedValue } from '@kbn/alerting-plugin/server/rules_client/common';
 
 export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
 
