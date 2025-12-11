@@ -50,7 +50,7 @@ export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'
   };
 };
 
-export const initializeDataControlManager = async <EditorState extends object = object>({
+export const initializeDataControlManager = <EditorState extends object = object>({
   controlId,
   controlType,
   typeDisplayName,
@@ -58,7 +58,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   parentApi,
   editorStateManager,
   willHaveInitialFilter,
-  getInitialFilter,
 }: {
   controlId: string;
   controlType: string;
@@ -68,7 +67,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   editorStateManager: ReturnType<typeof initializeStateManager<EditorState>>;
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
-}): Promise<DataControlStateManager> => {
+}): DataControlStateManager => {
   const titlesManager = initializeTitleManager(state);
 
   const dataControlStateManager = initializeStateManager<
@@ -87,11 +86,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   function setDataLoading(loading: boolean | undefined) {
     dataLoading$.next(loading);
   }
-
-  let resolveInitialDataViewReady: (dataView: DataView) => void;
-  const initialDataViewPromise = new Promise<DataView>((resolve) => {
-    resolveInitialDataViewReady = resolve;
-  });
 
   const defaultTitle$ = new BehaviorSubject<string | undefined>(state.fieldName);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -122,7 +116,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (error) {
         setBlockingError(error);
       }
-      if (dataView) resolveInitialDataViewReady(dataView);
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
@@ -182,15 +175,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     });
   };
 
-  // build initial filter
-  let initialFilter: Filter | undefined;
-  if (willHaveInitialFilter && getInitialFilter) {
-    const initialDataView = await initialDataViewPromise;
-    initialFilter = getInitialFilter(initialDataView);
-  }
-  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
-    initialFilter ? [initialFilter] : undefined
-  );
+  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   return {
     api: {
