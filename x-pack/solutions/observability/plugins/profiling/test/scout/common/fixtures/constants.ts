@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Path from 'path';
+import Path from 'node:path';
 
 // Test data time range constants
 export const PROFILING_TEST_DATES = {
