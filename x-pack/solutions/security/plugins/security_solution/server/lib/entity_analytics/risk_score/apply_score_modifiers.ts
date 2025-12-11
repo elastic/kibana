@@ -23,7 +23,6 @@ import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_VALUE } from './constants';
 import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
 
-import { getGlobalWeightForIdentifierType } from './calculate_risk_scores';
 import {
   applyCriticalityModifier,
   buildLegacyCriticalityFields,

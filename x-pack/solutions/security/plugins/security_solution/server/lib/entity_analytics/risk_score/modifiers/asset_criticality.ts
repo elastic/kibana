@@ -69,7 +69,7 @@ const buildModifier = (
   globalWeight?: number
 ): Modifier<'asset_criticality'> | undefined => {
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
-  if (!criticalityModifier) {
+  if (!criticality || !criticalityModifier) {
     return;
   }
 
