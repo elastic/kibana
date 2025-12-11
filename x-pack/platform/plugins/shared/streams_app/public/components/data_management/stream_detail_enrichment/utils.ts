@@ -14,28 +14,31 @@ import type {
   GrokProcessor,
   ProcessorType,
   ReplaceProcessor,
+  StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   conditionSchema,
   convertStepToUIDefinition,
   streamlangProcessorSchema,
+  stripCustomIdentifiers,
 } from '@kbn/streamlang';
-import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
+import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
-  ConfigDrivenProcessors,
   ConfigDrivenProcessorType,
+  ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
 import type {
   ConvertFormState,
@@ -48,7 +51,7 @@ import type {
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
-  WhereBlockFormState,
+  ConditionBlockFormState,
 } from './types';
 
 /**
@@ -74,7 +77,7 @@ interface RecalcColumnWidthsParams {
   visibleColumns: string[];
 }
 
-const PRIORITIZED_CONTENT_FIELDS = [
+export const PRIORITIZED_CONTENT_FIELDS = [
   'message',
   'body.text',
   'error.message',
@@ -93,7 +96,7 @@ const PRIORITIZED_DATE_FIELDS = [
   'attributes.custom.timestamp',
 ];
 
-const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
   // Count occurrences of well-known text fields in the sample documents
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
     Object.keys(doc).filter((key) => prioritizedFields.includes(key))
@@ -112,6 +115,27 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
 
   const mostCommonField = sortedFields[0];
   return mostCommonField ? mostCommonField[0] : '';
+};
+
+/**
+ * Checks if the sample documents have valid message fields with actual content
+ * that can be used for pipeline suggestion generation.
+ */
+export const hasValidMessageFieldsForSuggestion = (sampleDocs: FlattenRecord[]): boolean => {
+  if (!sampleDocs || sampleDocs.length === 0) {
+    return false;
+  }
+
+  // Check if any of the prioritized content fields exist with non-empty values
+  const docsWithValidFields = sampleDocs.filter((doc) => {
+    return PRIORITIZED_CONTENT_FIELDS.some((fieldName) => {
+      const value = doc[fieldName];
+      return value !== undefined && value !== null && String(value).trim().length > 0;
+    });
+  });
+
+  // Require at least 50% of documents to have valid message fields
+  return docsWithValidFields.length >= sampleDocs.length * 0.5;
 };
 
 const defaultConvertProcessorFormState = (): ConvertFormState => ({
@@ -265,21 +289,21 @@ export const getFormStateFromActionStep = (
   throw new Error(`Form state for processor type "${step.action}" is not implemented.`);
 };
 
-export const getFormStateFromWhereStep = (
-  step: StreamlangWhereBlockWithUIAttributes
-): WhereBlockFormState => {
+export const getFormStateFromConditionStep = (
+  step: StreamlangConditionBlockWithUIAttributes
+): ConditionBlockFormState => {
   return structuredClone({
     ...step,
   });
 };
 
-export const convertWhereBlockFormStateToConfiguration = (
-  formState: WhereBlockFormState
+export const convertConditionBlockFormStateToConfiguration = (
+  formState: ConditionBlockFormState
 ): {
-  whereDefinition: StreamlangWhereBlockWithUIAttributes;
+  conditionBlockDefinition: StreamlangConditionBlockWithUIAttributes;
 } => {
   return {
-    whereDefinition: {
+    conditionBlockDefinition: {
       ...formState,
     },
   };
@@ -534,9 +558,9 @@ export const getValidSteps = (
 
   // Helper to recursively skip invalid where blocks and their children
   function processStep(step: StreamlangStepWithUIAttributes): boolean {
-    if (isWhereBlock(step)) {
+    if (isConditionBlock(step)) {
       // If the where block is invalid, skip it and all its children
-      if (!isSchema(conditionSchema, step.where)) {
+      if (!isSchema(conditionSchema, step.condition)) {
         return false;
       }
 
@@ -572,7 +596,7 @@ export const getValidSteps = (
     const isValid = processStep(step);
 
     // If this is an invalid where block, add its id to skipParentIds
-    if (isWhereBlock(step) && !isValid) {
+    if (isConditionBlock(step) && !isValid) {
       skipParentIds.add(step.customIdentifier);
     }
   }
@@ -582,4 +606,38 @@ export const getValidSteps = (
 export const getStepPanelColour = (stepIndex: number) => {
   const isEven = stepIndex % 2 === 0;
   return isEven ? 'subdued' : undefined;
+};
+
+export const buildUpsertStreamRequestPayload = (
+  definition: Streams.ingest.all.GetResponse,
+  dsl: StreamlangDSL,
+  fields?: FieldDefinition
+): { ingest: IngestUpsertRequest } => {
+  const dslWithStrippedIds = stripCustomIdentifiers(dsl);
+
+  return Streams.WiredStream.GetResponse.is(definition)
+    ? {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields,
+            },
+          }),
+        },
+      }
+    : {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            classic: {
+              ...definition.stream.ingest.classic,
+              field_overrides: fields,
+            },
+          }),
+        },
+      };
 };

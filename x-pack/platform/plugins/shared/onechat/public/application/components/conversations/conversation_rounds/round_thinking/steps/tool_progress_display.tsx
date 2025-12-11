@@ -13,11 +13,16 @@ import { ThinkingItemLayout } from './thinking_item_layout';
 interface ToolProgressDisplayProps {
   progress: ToolCallProgress;
   icon?: ReactNode;
+  textColor?: string;
 }
 
-export const ToolProgressDisplay: React.FC<ToolProgressDisplayProps> = ({ progress, icon }) => {
+export const ToolProgressDisplay: React.FC<ToolProgressDisplayProps> = ({
+  progress,
+  icon,
+  textColor,
+}) => {
   return (
-    <ThinkingItemLayout icon={icon}>
+    <ThinkingItemLayout textColor={textColor} icon={icon}>
       <div role="status" aria-live="polite">
         {progress.message}
       </div>
