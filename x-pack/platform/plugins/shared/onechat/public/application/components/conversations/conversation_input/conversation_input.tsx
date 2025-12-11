@@ -134,7 +134,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
-  const { euiTheme } = useEuiTheme();
   const editorContainerStyles = css`
     display: flex;
     flex-direction: column;
