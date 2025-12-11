@@ -451,6 +451,50 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  math: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.math.name', {
+      defaultMessage: 'Math',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.math.description', {
+      defaultMessage: 'Evaluate arithmetic and logical expressions to compute derived fields',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.math.usage', {
+      defaultMessage:
+        'Provide an `expression` using field names and math functions, and a `to` field for the result. Expressions can use arithmetic operators (+, -, *, /), comparison operators (>, <, ==), and functions like abs(), sqrt(), round().',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.math.examples.duration', {
+          defaultMessage: 'Convert milliseconds to seconds',
+        }),
+        yaml: `- action: math
+  expression: "floor(duration_ms / 1000)"
+  to: duration_sec`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.math.examples.comparison', {
+          defaultMessage: 'Flag high memory usage',
+        }),
+        yaml: `- action: math
+  expression: "memory_used > memory_limit * 0.9"
+  to: high_memory_flag`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.math.tips.functions', {
+        defaultMessage:
+          'Use arithmetic (+, -, *, /), comparison (>, <, ==), trigonometric (sin, cos), and logarithmic (log, exp) functions with field values or constants like pi()',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.math.tips.types', {
+        defaultMessage: 'Results are stored as numbers or booleans depending on the expression',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.math.tips.convert', {
+        defaultMessage:
+          'Use the Convert processor to ensure fields are numeric before math operations',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

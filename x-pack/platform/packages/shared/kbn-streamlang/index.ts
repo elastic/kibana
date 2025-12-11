@@ -24,13 +24,13 @@ export * from './src/utilities';
 export { ACTION_METADATA_MAP, type ActionMetadata } from './src/actions/action_metadata';
 export { getJsonSchemaFromStreamlangSchema } from './src/schema/get_json_schema_from_streamlang_schema';
 export * from './src/validation';
-export { validateMathExpression } from './src/transpilers/shared/math/ast_validator';
-export { getMathExpressionLanguageDocSections } from './src/transpilers/shared/math/language_docs';
-export { extractFieldsFromMathExpression } from './src/transpilers/shared/math/field_extractor';
 export {
+  validateMathExpression,
+  getMathExpressionLanguageDocSections,
+  extractFieldsFromMathExpression,
   ALL_MATH_FUNCTIONS,
   BOOLEAN_RETURNING_MATH_FUNCTIONS,
   getMathFunctionDefinition,
   getMathParameterNames,
-} from './src/transpilers/shared/math/language_definition';
-export type { MathFunctionDefinition } from './src/transpilers/shared/math/language_definition';
+} from './src/transpilers/shared/math';
+export type { MathFunctionDefinition } from './src/transpilers/shared/math';
