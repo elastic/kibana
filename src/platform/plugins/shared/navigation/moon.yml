@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/core-chrome-navigation-tour'
   - '@kbn/split-button'
   - '@kbn/tour-queue'
-  - '@kbn/unified-tabs'
 tags:
   - plugin
   - prod

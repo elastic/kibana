@@ -84,7 +84,6 @@ dependsOn:
   - '@kbn/recently-accessed'
   - '@kbn/content-management-content-insights-public'
   - '@kbn/content-management-content-insights-server'
-  - '@kbn/managed-content-badge'
   - '@kbn/content-management-favorites-public'
   - '@kbn/core-custom-branding-browser-mocks'
   - '@kbn/core-mount-utils-browser'
