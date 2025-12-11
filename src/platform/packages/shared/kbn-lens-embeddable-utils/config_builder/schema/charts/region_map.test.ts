@@ -113,27 +113,6 @@ describe('Region Map Schema', () => {
       const validated = regionMapStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
-
-    it('validates with ems boundaries', () => {
-      const input: RegionMapWithoutDefaultsConfig = {
-        ...baseRegionMapConfig,
-        metric: {
-          operation: 'average',
-          field: 'bytes',
-        },
-        region: {
-          operation: 'terms',
-          fields: ['location'],
-          size: 5,
-          ems: {
-            boundaries: 'world_countries',
-          },
-        },
-      };
-
-      const validated = regionMapStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
-    });
   });
 
   describe('validation errors', () => {
@@ -176,6 +155,28 @@ describe('Region Map Schema', () => {
           fields: ['location'],
         },
       };
+      expect(() => regionMapStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws on missing ems join field', () => {
+      const input: Omit<RegionMapWithoutDefaultsConfig, 'region'> & {
+        region: { operation: 'terms'; fields: string[]; size: number; ems: { boundaries: string } };
+      } = {
+        ...baseRegionMapConfig,
+        metric: {
+          operation: 'average',
+          field: 'bytes',
+        },
+        region: {
+          operation: 'terms',
+          fields: ['location'],
+          size: 5,
+          ems: {
+            boundaries: 'world_countries',
+          },
+        },
+      };
+
       expect(() => regionMapStateSchema.validate(input)).toThrow();
     });
 
