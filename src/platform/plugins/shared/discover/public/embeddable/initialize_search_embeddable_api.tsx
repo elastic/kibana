@@ -19,6 +19,8 @@ import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
   StateComparators,
+  ProjectRoutingOverrides,
+  PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -96,7 +98,8 @@ export const initializeSearchEmbeddableApi = async (
 ): Promise<{
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
-    Partial<PublishesWritableUnifiedSearch>;
+    Partial<PublishesWritableUnifiedSearch> & 
+    PublishesProjectRoutingOverrides;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
@@ -137,7 +140,7 @@ export const initializeSearchEmbeddableApi = async (
   );
 
   const initialQuery = searchSource.getField('query');
-  const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverride[] | undefined>(
+  const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
     getProjectRoutingOverrides(initialQuery)
   );
 
