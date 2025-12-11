@@ -1,13 +1,9 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": [
     "target/**/*"
   ],

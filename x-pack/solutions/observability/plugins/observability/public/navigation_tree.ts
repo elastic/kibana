@@ -212,6 +212,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 },
               },
               {
+                link: 'kubernetesPoc:overview',
+                title: i18n.translate('xpack.observability.infrastructure.kubernetesOverview', {
+                  defaultMessage: 'Kubernetes',
+                }),
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/kubernetesPoc'));
+                },
+              },
+              {
                 link: 'metrics:metrics-explorer',
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.metricsExplorer',

@@ -11,21 +11,69 @@ import type {
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  AppDeepLink,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 
-export class KubernetesPocPlugin implements Plugin {
+interface KubernetesPocPluginSetupDeps {
+  observabilityShared: ObservabilitySharedPluginSetup;
+}
+
+interface KubernetesPocPluginStartDeps {
+  observabilityShared: ObservabilitySharedPluginStart;
+}
+
+const kubernetesOverviewTitle = i18n.translate(
+  'xpack.kubernetesPoc.navigation.kubernetesOverviewTitle',
+  {
+    defaultMessage: 'Kubernetes Overview',
+  }
+);
+
+const kubernetesClustersTitle = i18n.translate(
+  'xpack.kubernetesPoc.navigation.kubernetesClustersTitle',
+  {
+    defaultMessage: 'Kubernetes Clusters',
+  }
+);
+
+// Deep links for the navigation system
+const deepLinks: AppDeepLink[] = [
+  {
+    id: 'overview',
+    title: kubernetesOverviewTitle,
+    path: '/overview',
+  },
+  {
+    id: 'clusters',
+    title: kubernetesClustersTitle,
+    path: '/clusters',
+  },
+];
+
+export class KubernetesPocPlugin
+  implements Plugin<void, void, KubernetesPocPluginSetupDeps, KubernetesPocPluginStartDeps>
+{
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: any) {
+  public setup(
+    core: CoreSetup<KubernetesPocPluginStartDeps>,
+    pluginsSetup: KubernetesPocPluginSetupDeps
+  ) {
     core.application.register({
       id: 'kubernetesPoc',
-      title: 'Kubernetes POC',
+      title: 'Kubernetes',
       order: 8600,
       euiIconType: 'logoKubernetes',
       category: DEFAULT_APP_CATEGORIES.observability,
+      deepLinks,
       async mount(appMountParameters: AppMountParameters) {
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application/app'),
           core.getStartServices(),
         ]);
@@ -34,14 +82,18 @@ export class KubernetesPocPlugin implements Plugin {
 
         createCallApi(core);
 
-        return renderApp(coreStart, appMountParameters);
+        return renderApp({
+          core: coreStart,
+          appMountParameters,
+          ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        });
       },
     });
 
-    return {};
+    return;
   }
 
   public start(core: CoreStart) {
-    return {};
+    return;
   }
 }
