@@ -12,7 +12,7 @@ import { generateLogsData } from '../fixtures/generators';
 const WIRED_STREAM_NAME = 'logs.child';
 const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
-test.describe.only(
+test.describe(
   'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
   { tag: ['@ess'] },
   () => {
@@ -129,7 +129,7 @@ test.describe.only(
   }
 );
 
-test.describe.only(
+test.describe(
   'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
   { tag: ['@ess'] },
   () => {
