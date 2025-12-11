@@ -235,6 +235,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -292,6 +293,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
           isDeprecated: false,
+          source: 'stack',
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -304,6 +306,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
 
@@ -449,6 +452,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -481,6 +485,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: true,
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
     });
@@ -514,6 +519,7 @@ describe('actionTypeRegistry', () => {
           subFeature: 'endpointSecurity',
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
     });
