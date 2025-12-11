@@ -8,11 +8,12 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getConfigFilePath } from './get_config_file';
-import { readConfigFile } from '../loader';
+import fs from 'fs';
 import { loadServersConfig } from '..';
+import type { CliSupportedServerModes, ScoutTestConfig } from '../../../types';
+import { readConfigFile } from '../loader';
+import { getConfigFilePath } from './get_config_file';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
-import type { CliSupportedServerModes, ScoutTestConfig } from '../../types';
 
 jest.mock('./get_config_file', () => ({
   getConfigFilePath: jest.fn(),
@@ -25,6 +26,14 @@ jest.mock('../loader', () => ({
 jest.mock('./save_scout_test_config', () => ({
   saveScoutTestConfigOnDisk: jest.fn(),
 }));
+
+jest.mock('fs', () => {
+  const actualFs = jest.requireActual('fs');
+  return {
+    ...actualFs,
+    existsSync: jest.fn(),
+  };
+});
 
 const mockScoutTestConfig: ScoutTestConfig = {
   hosts: {
@@ -59,33 +68,58 @@ describe('loadServersConfig', () => {
       info: jest.fn(),
       error: jest.fn(),
     } as unknown as ToolingLog;
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
   });
 
   it('should load, save, and return cluster configuration', async () => {
+    const configRootDir = '/mock/config/root/default/serverless';
     (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
     (readConfigFile as jest.Mock).mockResolvedValue(mockClusterConfig);
 
-    const result = await loadServersConfig(mockMode, mockLog);
+    const result = await loadServersConfig(mockMode, mockLog, configRootDir);
 
-    expect(getConfigFilePath).toHaveBeenCalledWith(mockMode);
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
     expect(readConfigFile).toHaveBeenCalledWith(mockConfigPath);
     expect(mockClusterConfig.getScoutTestConfig).toHaveBeenCalled();
     expect(saveScoutTestConfigOnDisk).toHaveBeenCalledWith(mockScoutTestConfig, mockLog);
     expect(result).toBe(mockClusterConfig);
-
-    // no errors should be logged
-    expect(mockLog.info).not.toHaveBeenCalledWith(expect.stringContaining('error'));
   });
 
   it('should throw an error if readConfigFile fails', async () => {
-    const errorMessage = 'Failed to read config file';
+    const configRootDir = '/mock/config/root/default/serverless';
     (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
+    const errorMessage = 'Failed to read config file';
     (readConfigFile as jest.Mock).mockRejectedValue(new Error(errorMessage));
 
-    await expect(loadServersConfig(mockMode, mockLog)).rejects.toThrow(errorMessage);
+    await expect(loadServersConfig(mockMode, mockLog, configRootDir)).rejects.toThrow(errorMessage);
 
-    expect(getConfigFilePath).toHaveBeenCalledWith(mockMode);
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
+    expect(saveScoutTestConfigOnDisk).not.toHaveBeenCalled();
+  });
+
+  it('should load custom config from custom directory', async () => {
+    const configRootDir = '/mock/config/root/custom/uiam_local/serverless';
+    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
+    (readConfigFile as jest.Mock).mockResolvedValue(mockClusterConfig);
+
+    const result = await loadServersConfig(mockMode, mockLog, configRootDir);
+
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
     expect(readConfigFile).toHaveBeenCalledWith(mockConfigPath);
+    expect(result).toBe(mockClusterConfig);
+  });
+
+  it('should throw error when config file does not exist', async () => {
+    const configRootDir = '/mock/config/root/custom/uiam_local/serverless';
+    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
+    (fs.existsSync as jest.Mock).mockReturnValue(false);
+
+    await expect(loadServersConfig(mockMode, mockLog, configRootDir)).rejects.toThrow(
+      'Config file not found'
+    );
+
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
+    expect(readConfigFile).not.toHaveBeenCalled();
     expect(saveScoutTestConfigOnDisk).not.toHaveBeenCalled();
   });
 });
