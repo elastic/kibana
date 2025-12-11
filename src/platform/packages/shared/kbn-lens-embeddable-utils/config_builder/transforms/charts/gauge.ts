@@ -257,7 +257,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type?: 'gauge' }> {
+): Extract<LensApiState, { type: 'gauge' }> {
   const { state } = config;
   const visualization = state.visualization as GaugeVisualizationState;
   const layers =
