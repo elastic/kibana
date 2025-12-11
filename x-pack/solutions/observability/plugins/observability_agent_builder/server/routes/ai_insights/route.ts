@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
@@ -88,23 +87,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const soClient = coreStart.savedObjects.getScopedClient(request);
-      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-
-      const defaultConnectorSetting = await uiSettingsClient.get<string | undefined>(
-        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR
-      );
-      const hasValidDefaultConnector =
-        defaultConnectorSetting && defaultConnectorSetting !== 'NO_DEFAULT_CONNECTOR';
-
-      const connectorId = hasValidDefaultConnector
-        ? defaultConnectorSetting
-        : (await inference.getDefaultConnector(request))?.connectorId;
-
-      if (!connectorId) {
-        throw new Error('No default connector found');
-      }
-
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
 
       const { summary, context } = await generateErrorAiInsight({
