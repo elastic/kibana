@@ -450,7 +450,7 @@ export const breakdownXY: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
       ],
       legend: {
@@ -579,7 +579,7 @@ export const barWithTwoLayersAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
         {
           accessors: ['layer2_metric1'],
@@ -588,7 +588,7 @@ export const barWithTwoLayersAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: 'layer2_date_histogram',
-          splitAccessor: 'layer2_terms',
+          splitAccessors: ['layer2_terms'],
         },
       ],
       legend: {
@@ -764,7 +764,7 @@ export const mixedChartAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
         {
           accessors: ['layer2_metric1'],
@@ -773,7 +773,7 @@ export const mixedChartAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'bar',
           xAccessor: 'layer2_date_histogram',
-          splitAccessor: 'layer2_terms',
+          splitAccessors: ['layer2_terms'],
         },
         {
           accessors: ['layer3_metric1'],
@@ -782,7 +782,7 @@ export const mixedChartAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'area',
           xAccessor: 'layer3_date_histogram',
-          splitAccessor: 'layer3_terms',
+          splitAccessors: ['layer3_terms'],
         },
       ],
       legend: {
