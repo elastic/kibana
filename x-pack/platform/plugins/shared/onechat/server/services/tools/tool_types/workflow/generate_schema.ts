@@ -8,8 +8,6 @@
 import { z } from '@kbn/zod';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/v1';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
-// Note: convertJsonSchemaToZod is in the workflows_management plugin, not in the kbn-workflows package
-// For now, we'll use z.any() as a fallback for complex JSON Schema types
 import type { JSONSchema7 } from 'json-schema';
 
 // Simple JSON Schema to Zod converter for basic types
