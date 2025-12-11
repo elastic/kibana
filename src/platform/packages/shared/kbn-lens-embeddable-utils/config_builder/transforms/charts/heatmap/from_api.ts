@@ -6,11 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  FormBasedPersistedState,
-  HeatmapPalette,
-  HeatmapVisualizationState,
-  PersistedIndexPatternLayer,
+import {
+  HEATMAP_GRID_NAME,
+  LENS_HEATMAP_ID,
+  type FormBasedPersistedState,
+  type HeatmapPalette,
+  type HeatmapVisualizationState,
+  type PersistedIndexPatternLayer,
 } from '@kbn/lens-common';
 import type { LegendSize } from '@kbn/chart-expressions-common';
 import { getSharedChartAPIToLensState } from '../utils';
@@ -30,7 +32,8 @@ import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
-import { ACCESSOR, HEATMAP_GRID_NAME, VISUALIZATION_TYPE } from './constants';
+
+export const ACCESSOR = 'heatmap_value_accessor';
 
 function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
@@ -138,7 +141,7 @@ export function fromAPItoLensState(config: HeatmapState): LensAttributes {
     : [];
 
   return {
-    visualizationType: VISUALIZATION_TYPE,
+    visualizationType: LENS_HEATMAP_ID,
     ...getSharedChartAPIToLensState(config),
     references,
     state: {

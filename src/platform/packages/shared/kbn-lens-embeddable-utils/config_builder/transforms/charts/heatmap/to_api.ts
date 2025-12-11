@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { FormBasedLayer, HeatmapVisualizationState, TextBasedLayer } from '@kbn/lens-common';
+import {
+  HEATMAP_NAME,
+  type FormBasedLayer,
+  type HeatmapVisualizationState,
+  type TextBasedLayer,
+} from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import { getDatasourceLayers, getSharedChartLensStateToAPI } from '../utils';
@@ -23,7 +28,6 @@ import {
 import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
 import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
-import { API_VISUALIZATION_TYPE } from './constants';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
@@ -79,7 +83,7 @@ function reverseBuildVisualizationState(
 
   const sharedProps = {
     ...generateApiLayer(layer),
-    type: API_VISUALIZATION_TYPE,
+    type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
     axes: getGridConfigProps(visualization.gridConfig),
     cells: {
