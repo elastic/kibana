@@ -15,8 +15,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeader, EuiPageTemplate, useEuiTheme } fr
 import { UnifiedTabs, useNewTabProps, type TabItem } from '@kbn/unified-tabs';
 import { TabStatus, type TabPreviewData } from '@kbn/unified-tabs';
 import { css } from '@emotion/react';
-import { TopNavMenuBeta } from './top_nav_menu_beta';
-import type { TopNavMenuConfigBeta } from './types';
+import { TopNavMenuBeta } from '@kbn/app-menu';
+import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
 
 interface TopNavMenuBetaWrapperProps extends ComponentProps<typeof TopNavMenuBeta> {
   showTabs?: boolean;

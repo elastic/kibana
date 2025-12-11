@@ -16,7 +16,7 @@ import { TopNavMenuBeta } from '@kbn/app-menu';
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };
-  config: Observable<TopNavMenuConfigBeta | undefined> | null | undefined;
+  config?: Observable<TopNavMenuConfigBeta | undefined> | null;
 }
 
 export const useHeaderActionMenuMounter = (

@@ -59,7 +59,7 @@ export interface InternalApplicationStart extends ApplicationStart {
    * @internal
    */
   currentActionMenu$: Observable<MountPoint | undefined>;
-  currentActionMenuBeta$: Observable<TopNavMenuConfigBeta | undefined>;
+  currentActionMenuBeta$?: Observable<TopNavMenuConfigBeta | undefined>;
 
   /**
    * The global history instance, exposed only to Core.

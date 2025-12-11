@@ -206,7 +206,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 
-  setHeaderActionMenuBeta: (config: TopNavMenuConfigBeta) => void;
+  setHeaderActionMenuBeta?: (config: TopNavMenuConfigBeta) => void;
 
   /**
    * An observable emitting {@link CoreTheme | Core's theme}.
