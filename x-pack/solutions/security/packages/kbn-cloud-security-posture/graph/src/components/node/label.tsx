@@ -85,6 +85,7 @@ const LabelComponent = ({ text = '' }: LabelProps) => {
           width={NODE_LABEL_WIDTH * 1.5}
         >
           {(truncatedText) => (
+            // @ts-expect-error upgrade typescript v5.9.3
             <>
               {setIsTruncated(truncatedText.length !== text.length)}
               {<GeneratedText>{truncatedText}</GeneratedText>}

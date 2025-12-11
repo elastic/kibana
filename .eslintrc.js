@@ -666,6 +666,8 @@ module.exports = {
         'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
+        '**/playwright.config.ts',
+        '**/parallel.playwright.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -1471,9 +1473,9 @@ module.exports = {
         'packages/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['packages/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -2346,6 +2348,8 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {

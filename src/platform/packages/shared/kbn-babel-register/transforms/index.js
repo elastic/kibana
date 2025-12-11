@@ -11,6 +11,9 @@ const { peggyTransform } = require('./peggy');
 const { babelTransform } = require('./babel');
 
 module.exports = {
+  /**
+   * @type {Record<string, import('./types').Transform>}
+   */
   TRANSFORMS: {
     '.peggy': peggyTransform,
     default: babelTransform,
