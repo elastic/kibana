@@ -105,9 +105,13 @@ export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
 
-// Attack discovery internal API (depreciated)
+// Attack discovery internal API
 export const ATTACK_DISCOVERY_INTERNAL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+export const ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES =
+  `${ATTACK_DISCOVERY_INTERNAL}/_missing_privileges` as const;
+
+// Attack discovery internal API (depreciated)
 export const ATTACK_DISCOVERY_INTERNAL_BULK = `${ATTACK_DISCOVERY_INTERNAL}/_bulk` as const;
 export const ATTACK_DISCOVERY_INTERNAL_FIND = `${ATTACK_DISCOVERY_INTERNAL}/_find` as const;
 export const ATTACK_DISCOVERY_GENERATIONS_INTERNAL =

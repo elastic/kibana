@@ -78,6 +78,9 @@ export interface UsageStats {
   'securitySolution:enableEsqlRiskScoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
+  'securitySolution:defaultValueReportMinutes': string;
+  'securitySolution:defaultValueReportRate': string;
+  'securitySolution:defaultValueReportTitle': string;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;

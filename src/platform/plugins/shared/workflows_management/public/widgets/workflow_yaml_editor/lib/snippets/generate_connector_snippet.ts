@@ -37,7 +37,7 @@ export function generateConnectorSnippet(
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, unknown>;
 
-  const isConnectorIdRequired = getCachedAllConnectors().find(
+  const isConnectorIdRequired = getCachedAllConnectors(dynamicConnectorTypes).find(
     (c) => c.type === connectorType
   )?.connectorIdRequired;
 

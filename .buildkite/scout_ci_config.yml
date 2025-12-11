@@ -12,6 +12,7 @@ plugins:
     - security_solution
     - streams_app
     - slo
+    - workflows_extensions
   disabled:
 
 packages:

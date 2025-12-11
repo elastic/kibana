@@ -20,6 +20,8 @@ project:
 dependsOn:
   - '@kbn/logging'
   - '@kbn/core'
+  - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - shared-server
   - package

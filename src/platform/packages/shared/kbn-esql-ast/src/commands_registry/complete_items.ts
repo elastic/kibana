@@ -206,7 +206,7 @@ export const semiColonCompleteItem = buildCharCompleteItem(
 
 export const listCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '( ... )',
-  text: '( $0 )',
+  text: '($0)',
   asSnippet: true,
   kind: 'Operator',
   detail: i18n.translate('kbn-esql-ast.esql.autocomplete.listDoc', {

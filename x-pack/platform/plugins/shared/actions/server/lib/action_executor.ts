@@ -40,6 +40,7 @@ import type {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   ActionTypeSecrets,
+  ConnectorTokenClientContract,
   GetServicesFunction,
   GetUnsecuredServicesFunction,
   InMemoryConnector,
@@ -89,10 +90,12 @@ export interface ExecuteOptions<Source = unknown> {
   request: KibanaRequest;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  connectorTokenClient?: ConnectorTokenClientContract;
 }
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
+  connectorTokenClient?: ConnectorTokenClientContract;
   checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
   executeLabel: string;
   namespace: { namespace?: string };
@@ -139,6 +142,7 @@ export class ActionExecutor {
   public async execute({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     executionId,
     request,
@@ -164,6 +168,7 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
+      connectorTokenClient,
       consumer,
       currentUser,
       checkCanExecuteFn: async (connectorTypeId: string) => {
@@ -369,6 +374,7 @@ export class ActionExecutor {
   private async executeHelper({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     currentUser,
     checkCanExecuteFn,
@@ -534,6 +540,7 @@ export class ActionExecutor {
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
             connectorUsageCollector,
+            connectorTokenClient,
           });
 
           if (rawResult && rawResult.status === 'error') {

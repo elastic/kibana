@@ -155,7 +155,7 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} css={{ overflow: 'hidden', minHeight: 0 }}>
           <EuiSpacer size="s" />
           {viewMode === 'table' && tabularData && (
             <JSONDataTable

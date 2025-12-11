@@ -10,7 +10,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -38,6 +38,7 @@ export type ESQLEditorProps = Simplify<
   {
     isTextBasedLanguage: boolean;
     uiSettings: IUiSettingsClient;
+    http: CoreStart['http'];
   } & Pick<
     LayerPanelProps,
     | 'attributes'
@@ -66,6 +67,7 @@ export type ESQLEditorProps = Simplify<
  */
 export function ESQLEditor({
   data,
+  http,
   uiSettings,
   attributes,
   framePublicAPI,
@@ -148,6 +150,7 @@ export function ESQLEditor({
       const attrs = await getSuggestions(
         q,
         data,
+        http,
         uiSettings,
         datasourceMap,
         visualizationMap,
@@ -170,6 +173,7 @@ export function ESQLEditor({
     [
       uiSettings,
       data,
+      http,
       datasourceMap,
       visualizationMap,
       adHocDataViews,

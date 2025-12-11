@@ -78,3 +78,37 @@ export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
 export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.label', {
   defaultMessage: 'None',
 });
+
+export const OAUTH_LABEL = i18n.translate('connectorSpecs.oauth.label', {
+  defaultMessage: 'OAuth Client Credentials',
+});
+
+export const OAUTH_TOKEN_URL_LABEL = i18n.translate('connectorSpecs.oauthTokenUrl.label', {
+  defaultMessage: 'Token URL',
+});
+
+export const OAUTH_CLIENT_ID_LABEL = i18n.translate('connectorSpecs.oauthClientId.label', {
+  defaultMessage: 'Client ID',
+});
+
+export const OAUTH_CLIENT_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientId.requiredMessage',
+  {
+    defaultMessage: 'Client ID is required',
+  }
+);
+
+export const OAUTH_SCOPE_LABEL = i18n.translate('connectorSpecs.oauthScope.label', {
+  defaultMessage: 'Scope',
+});
+
+export const OAUTH_CLIENT_SECRET_LABEL = i18n.translate('connectorSpecs.oauthClientSecret.label', {
+  defaultMessage: 'Client secret',
+});
+
+export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientSecret.requiredMessage',
+  {
+    defaultMessage: 'Client secret is required',
+  }
+);
