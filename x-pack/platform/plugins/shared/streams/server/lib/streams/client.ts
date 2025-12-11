@@ -718,10 +718,6 @@ export class StreamsClient {
   }
 
   private async checkElasticsearchStreamStatus(): Promise<boolean> {
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return false;
-    }
     const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
