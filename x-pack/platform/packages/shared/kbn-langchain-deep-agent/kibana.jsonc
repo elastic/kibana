@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/langchain-deep-agent",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

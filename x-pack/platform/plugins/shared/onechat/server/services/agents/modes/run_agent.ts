@@ -12,7 +12,8 @@ import type {
   AgentConfiguration,
 } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
-import { runDefaultAgentMode } from './default';
+import { runDeepAgentMode } from './deep_agent';
+//import { runDefaultAgentMode } from './default';
 
 export interface RunAgentParams {
   /**
@@ -53,5 +54,8 @@ export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
-  return runDefaultAgentMode(params, context);
+  return runDeepAgentMode(params, context).catch((error) => {
+    console.error(error);
+    throw error
+  })
 };

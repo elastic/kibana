@@ -675,6 +675,7 @@
     "@kbn/kibana-usage-collection-plugin": "link:src/platform/plugins/private/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/platform/plugins/shared/kibana_utils",
     "@kbn/langchain": "link:x-pack/platform/packages/shared/kbn-langchain",
+    "@kbn/langchain-deep-agent": "link:x-pack/platform/packages/shared/kbn-langchain-deep-agent",
     "@kbn/langgraph-checkpoint-saver": "link:x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver",
     "@kbn/language-documentation": "link:src/platform/packages/private/kbn-language-documentation",
     "@kbn/lens-common": "link:src/platform/packages/shared/kbn-lens-common",
