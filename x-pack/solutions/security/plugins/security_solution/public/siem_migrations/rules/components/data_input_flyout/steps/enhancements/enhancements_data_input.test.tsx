@@ -12,16 +12,20 @@ import { QradarDataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
+import { MigrationSource, type MigrationStepProps } from '../../../../../common/types';
 
 jest.mock('../../../../service/hooks/use_enhance_rules');
 
 const mockEnhanceRules = jest.fn();
 
 describe('EnhancementsDataInput', () => {
-  const defaultProps = {
+  const defaultProps: MigrationStepProps = {
     dataInputStep: QradarDataInputStep.Enhancements,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    onEnhancementsDone: jest.fn(),
+    migrationSource: MigrationSource.QRADAR,
+    setDataInputStep: jest.fn(),
+    onMigrationCreated: jest.fn(),
+    onMissingResourcesFetched: jest.fn(),
   };
 
   beforeEach(() => {
@@ -111,7 +115,7 @@ describe('EnhancementsDataInput', () => {
   });
 
   it('shows error and keeps Add button disabled for invalid JSON file', async () => {
-    const { getByTestId, getByText } = render(<EnhancementsDataInput {...defaultProps} />);
+    const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     const invalidJsonContent = 'not valid json {{{';
     const file = new File([invalidJsonContent], 'invalid.json', {
@@ -163,7 +167,7 @@ describe('EnhancementsDataInput', () => {
     });
 
     expect(mockEnhanceRules).toHaveBeenCalledWith({
-      migrationId: defaultProps.migrationStats.id,
+      migrationId: defaultProps?.migrationStats?.id,
       body: {
         vendor: 'qradar',
         type: 'mitre',

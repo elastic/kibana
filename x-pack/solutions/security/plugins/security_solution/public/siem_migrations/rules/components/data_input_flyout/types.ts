@@ -7,16 +7,14 @@
 
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationStats } from '../../types';
-import type {
-  QradarDataInputStep,
-  QradarDataInputStepId,
-  SplunkDataInputStep,
-  SplunkDataInputStepId,
-} from './steps/constants';
+import type { QradarDataInputStep, SplunkDataInputStep } from './steps/constants';
 import type { LookupsDataInput } from './steps/lookups/lookups_data_input';
 import type { MacrosDataInput } from './steps/macros/macros_data_input';
 import type { RulesDataInput } from './steps/rules/rules_data_input';
 import type { EnhancementsDataInput } from './steps/enhancements/enhancements_data_input';
+import type { SplunkDataInputStepId } from './configs/splunk';
+import type { QradarDataInputStepId } from './configs/qradar';
+import type { MigrationSource } from '../../../common/types';
 
 export type OnMigrationCreated = (migrationStats: RuleMigrationStats) => void;
 export type OnResourcesCreated = () => void;

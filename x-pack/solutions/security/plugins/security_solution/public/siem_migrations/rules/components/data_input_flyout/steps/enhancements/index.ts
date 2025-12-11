@@ -6,6 +6,5 @@
  */
 
 export { EnhancementsDataInput } from './enhancements_data_input';
-export type { EnhancementsDataInputProps } from './enhancements_data_input';
 export { EnhancementType, QRADAR_ENHANCEMENT_OPTS as ENHANCEMENT_TYPE_OPTIONS } from './types';
 export type { AddedEnhancement, EnhancementTypeOption } from './types';
