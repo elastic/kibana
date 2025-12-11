@@ -15,6 +15,7 @@ tasks:
       - '--no-error-on-unmatched-pattern'
     options:
       runFromWorkspaceRoot: true
+      cache: true
     inputs:
       - '@group(src)'
       # Other config files
