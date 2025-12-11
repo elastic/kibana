@@ -38,3 +38,7 @@ export type PersistedTask<TPayload extends {} = {}> =
   | InProgressTask
   | CompletedTask<TPayload>
   | FailedTask;
+
+export type TaskParams<TParams extends {} = {}> = TParams & {
+  _task: PersistedTask;
+};

@@ -7,9 +7,9 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { isNotFoundError } from '@kbn/es-errors';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { TaskStorageClient } from './storage';
-import type { PersistedTask } from './types';
+import type { PersistedTask, TaskParams } from './types';
 
 interface TaskRequest<TaskType, TParams extends {}> {
   task: Omit<PersistedTask & { type: TaskType }, 'status' | 'created_at' | 'task'>;
@@ -34,15 +34,7 @@ export class TaskClient<TaskType extends string> {
 
       if (!response._source) {
         // Should not happen
-        this.logger.warn(`Task ${id} has no source`);
-        return {
-          id,
-          status: 'not_started',
-          created_at: '',
-          space: '',
-          stream: '',
-          type: '',
-        };
+        throw new Error(`Task ${id} has no source`);
       }
 
       return response._source as PersistedTask<TPayload>;
@@ -67,27 +59,43 @@ export class TaskClient<TaskType extends string> {
     params,
     request,
   }: TaskRequest<TaskType, TParams>): Promise<PersistedTask> {
-    this.logger.debug(`Scheduling ${task.type} task (${task.id})`);
-
-    await this.taskManagerStart.schedule(
-      {
-        id: task.id,
-        taskType: task.type,
-        params,
-        state: {},
-        scope: ['streams'],
-        priority: 1,
-      },
-      {
-        request,
-      }
-    );
-
-    return await this.update({
+    const taskDoc: PersistedTask = {
       ...task,
       status: 'in_progress',
       created_at: new Date().toISOString(),
-    });
+    };
+
+    try {
+      await this.taskManagerStart.schedule(
+        {
+          id: task.id,
+          taskType: task.type,
+          params: {
+            ...params,
+            _task: {
+              ...taskDoc,
+            },
+          } satisfies TaskParams<TParams>,
+          state: {},
+          scope: ['streams'],
+          priority: 1,
+        },
+        {
+          request,
+        }
+      );
+
+      this.logger.debug(`Scheduled ${task.type} task (${task.id})`);
+      await this.update(taskDoc);
+    } catch (error) {
+      const isVersionConflict =
+        isResponseError(error) && error.message.includes('version conflict');
+      if (!isVersionConflict) {
+        throw error;
+      }
+    }
+
+    return taskDoc;
   }
 
   public async update<TPayload extends {} = {}>(
@@ -98,6 +106,7 @@ export class TaskClient<TaskType extends string> {
     await this.storageClient.index({
       id: task.id,
       document: task,
+      // This might cause issues if there are many updates in a short time from multiple tasks running concurrently
       refresh: true,
     });
 
