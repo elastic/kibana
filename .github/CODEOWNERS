@@ -557,6 +557,7 @@ src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-r
 src/platform/packages/shared/kbn-opentelemetry-attributes @elastic/kibana-core
 src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-otel-demo @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiler @elastic/obs-knowledge-team
@@ -2303,6 +2304,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
+
+# Connector Specs
+src/platform/packages/shared/kbn-connector-specs/src/specs/** @elastic/workflows-eng
 
 # Gap fill feature has shared responsibility between response-ops and security-detection-engine
 /x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine

@@ -10,6 +10,7 @@ import { licenseService } from '../../../common/hooks/use_license';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
+  CreateQRadarRuleMigrationRulesRequestBody,
   CreateRuleMigrationRulesRequestBody,
   StartRuleMigrationResponse,
   StopRuleMigrationResponse,
@@ -30,11 +31,24 @@ import {
   getNoConnectorToast,
 } from '../../common/service';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
+import { MigrationSource } from '../../common/types';
 import { raiseSuccessToast } from './notification/success_notification';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import { requiredRuleMigrationCapabilities } from './capabilities';
 
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
+
+export type CreateRuleMigrationParams =
+  | {
+      rules: CreateRuleMigrationRulesRequestBody;
+      migrationName: string;
+      migrationSource: MigrationSource.SPLUNK;
+    }
+  | {
+      rules: CreateQRadarRuleMigrationRulesRequestBody;
+      migrationName: string;
+      migrationSource: MigrationSource.QRADAR;
+    };
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
   public telemetry: SiemRulesMigrationsTelemetry;
@@ -69,6 +83,20 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     return api;
   }
 
+  public async addQradarRulesToMigration(
+    migrationId: string,
+    rules: CreateQRadarRuleMigrationRulesRequestBody
+  ) {
+    const rulesCount = rules.xml.length;
+    if (rulesCount === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+
+    const { count } = await api.addRulesToQRadarMigration({ migrationId, body: rules });
+
+    return { count };
+  }
+
   /** Adds rules to a rule migration, batching the requests to avoid hitting the max payload size limit of the API */
   public async addRulesToMigration(
     migrationId: string,
@@ -87,29 +115,47 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   }
 
   /** Creates a rule migration with a name and adds the rules to it, returning the migration ID */
-  public async createRuleMigration(
-    data: CreateRuleMigrationRulesRequestBody,
-    migrationName: string
-  ): Promise<string> {
-    const rulesCount = data.length;
-    if (rulesCount === 0) {
+  public async createRuleMigration({
+    rules,
+    migrationName,
+    migrationSource,
+  }: CreateRuleMigrationParams): Promise<string> {
+    if (!rules) {
       const emptyRulesError = new Error(i18n.EMPTY_RULES_ERROR);
-      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error: emptyRulesError });
+      this.telemetry.reportSetupMigrationCreated({ count: 0, error: emptyRulesError });
       throw emptyRulesError;
     }
 
     try {
-      // create the migration
-      const { migration_id: migrationId } = await api.createRuleMigration({
-        name: migrationName,
-      });
+      if (migrationSource === MigrationSource.QRADAR) {
+        if (!rules.xml) {
+          throw new Error(i18n.EMPTY_RULES_ERROR);
+        }
 
-      await this.addRulesToMigration(migrationId, data);
+        // create the migration
+        const { migration_id: migrationId } = await api.createRuleMigration({
+          name: migrationName,
+        });
+        const { count } = await this.addQradarRulesToMigration(migrationId, rules);
+        this.telemetry.reportSetupMigrationCreated({ migrationId, count });
 
-      this.telemetry.reportSetupMigrationCreated({ migrationId, count: rulesCount });
-      return migrationId;
+        return migrationId;
+      } else {
+        if (rules.length === 0) {
+          throw new Error(i18n.EMPTY_RULES_ERROR);
+        }
+
+        // create the migration
+        const { migration_id: migrationId } = await api.createRuleMigration({
+          name: migrationName,
+        });
+        await this.addRulesToMigration(migrationId, rules);
+        this.telemetry.reportSetupMigrationCreated({ migrationId, count: rules.length });
+
+        return migrationId;
+      }
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error });
+      this.telemetry.reportSetupMigrationCreated({ count: 0, error });
       throw error;
     }
   }
