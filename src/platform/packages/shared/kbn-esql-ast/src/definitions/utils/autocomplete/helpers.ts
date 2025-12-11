@@ -553,10 +553,14 @@ export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionIte
  * @param commandToAppend
  * @returns
  */
-function appendCommandToSuggestionItem(
+export function appendCommandToSuggestionItem(
   suggestionItem: ISuggestionItem,
   commandToAppend: ISuggestionItem['command']
 ): ISuggestionItem {
+  if (!commandToAppend) {
+    return suggestionItem;
+  }
+
   // If the suggestion has multiCommands, append the new command
   if (suggestionItem.command?.id === 'esql.multiCommands') {
     const existingCommands: ISuggestionItem['command'][] = suggestionItem.command.arguments
@@ -572,7 +576,7 @@ function appendCommandToSuggestionItem(
   // If the suggestion already has a command, use multiCommands to execute the existing one
   // and then the new command
   const command =
-    suggestionItem.command && suggestionItem.command.id !== commandToAppend?.id
+    suggestionItem.command && suggestionItem.command.id !== commandToAppend.id
       ? createMultiCommand([suggestionItem.command, commandToAppend])
       : commandToAppend;
 
