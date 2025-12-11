@@ -12,6 +12,7 @@ import { EuiCheckbox, EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
+import { YamlCodeEditorWithPlaceholder } from '../../sections/settings/components/edit_output_flyout/yaml_code_editor_with_placeholder';
 
 import { SettingsFieldGroup } from './settings_field_group';
 import { getInnerType, SettingsFieldWrapper } from './settings_field_wrapper';
@@ -47,6 +48,28 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, ({ disabled, ...se
 });
 
 settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...settingsConfig }) => {
+  if (settingsConfig.type === 'yaml') {
+    return (
+      <SettingsFieldWrapper
+        settingsConfig={settingsConfig}
+        typeName={ZodFirstPartyTypeKind.ZodString}
+        renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
+          <YamlCodeEditorWithPlaceholder
+            value={fieldValue}
+            onChange={(value) => handleChange({ target: { value } })}
+            disabled={disabled}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.agentPolicyAdvanced.yamlSettingsPlaceholder',
+              {
+                defaultMessage: '# Add YAML settings here',
+              }
+            )}
+            data-test-subj={fieldKey}
+          />
+        )}
+      />
+    );
+  }
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
