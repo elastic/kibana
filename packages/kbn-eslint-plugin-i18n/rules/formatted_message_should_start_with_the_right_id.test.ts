@@ -61,6 +61,30 @@ for (const [name, tester] of [tsTester, babelTester]) {
               '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
             code: `<FormattedMessage id="xpack.observability.testComponent" defaultMessage="foo" />`,
           },
+          {
+            name: 'When a ternary is passed to the id attribute of FormattedMessage, and both branches have the correct i18n identifier, it should not mark the code as incorrect',
+            filename:
+              '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
+            code: `import { FormattedMessage } from '@kbn/i18n-react';
+
+function TestComponent() {
+  return (
+    <FormattedMessage
+      id={
+        isCollapsed
+          ? 'xpack.observability.foo.collapsedNodeAriaLabel'
+          : 'xpack.observability.foo.expandedNodeAriaLabel'
+      }
+      defaultMessage={
+        isCollapsed
+          ? 'Collapsed node with {childCount} children'
+          : 'Expanded node with {childCount} children'
+      }
+      values={{ childCount: item.children.length }}
+    />
+  );
+}`,
+          },
         ],
         invalid: [
           {

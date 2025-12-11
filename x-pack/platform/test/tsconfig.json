@@ -178,6 +178,7 @@
     "@kbn/es-types",
     "@kbn/streamlang",
     "@kbn/dashboard-plugin",
-    "@kbn/automatic-import-v2-plugin"
+    "@kbn/automatic-import-v2-plugin",
+    "@kbn/connector-specs"
   ]
 }
