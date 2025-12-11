@@ -22,10 +22,16 @@ export type EmbeddableTransforms<
   transformOutInjectsReferences?: boolean;
   /**
    * Converts StoredEmbeddableState and injects references into EmbeddableState
+   * @param storedState
+   * @param panelReferences Panel references - BWC issue where panel references can not be determined for by-value panels created in 7.12
+   *                                           Use containerReferences to look for missing panel references
+   * @param containerReferences Container references
+   * @returns EmbeddableState
    */
   transformOut?: (
     storedState: StoredEmbeddableState,
-    references?: Reference[],
+    panelReferences?: Reference[],
+    containerReferences?: Reference[],
     /**
      * @deprecated ID is passed as an argument for legacy reference names that require it
      * to fetch their old references. It should not be used for new reference names.
@@ -48,4 +54,8 @@ export type EmbeddableTransforms<
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
   schema?: Type<object>;
+  /**
+   * Throws error when panel config is not supported.
+   */
+  throwOnUnmappedPanel?: (config: EmbeddableState) => void;
 };

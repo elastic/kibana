@@ -55,9 +55,9 @@ export const simulationMachine = setup({
     storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption }) => ({
       previewDocsFilter: params.filter,
     })),
-    storeSteps: assign((_, params: StepsEventParams) => ({
-      steps: params.steps,
-    })),
+    storeSteps: assign((_, params: StepsEventParams) => {
+      return { steps: params.steps };
+    }),
     storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
     })),
@@ -173,20 +173,14 @@ export const simulationMachine = setup({
         actions: [{ type: 'storeSamples', params: ({ event }) => event }],
       },
     ],
-    'step.change': {
-      target: '.debouncingChanges',
-      reenter: true,
-      description: 'Re-enter debouncing state and reinitialize the delayed processing.',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
-    'step.delete': [
+    'simulation.updateSteps': [
       {
         guard: {
           type: 'hasSteps',
           params: ({ event }) => ({ steps: event.steps }),
         },
-        target: '.assertingRequirements',
         actions: [{ type: 'storeSteps', params: ({ event }) => event }],
+        target: '.debouncingChanges',
       },
       {
         target: '.idle',

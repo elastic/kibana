@@ -22,14 +22,14 @@ import { embeddableService, logger } from '../../../kibana_services';
  */
 export const transformControlsState: (
   serializedControlState: string,
-  references: Reference[]
-) => DashboardControlsState = (serializedControlState, references) => {
+  containerReferences: Reference[]
+) => DashboardControlsState = (serializedControlState, containerReferences) => {
   const state = flow(
     JSON.parse,
     transformControlObjectToArray,
     transformControlProperties
   )(serializedControlState);
-  return injectControlReferences(state, references);
+  return injectControlReferences(state, containerReferences);
 };
 
 export function transformControlObjectToArray(
@@ -54,7 +54,7 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
 
 function injectControlReferences(
   controls: ControlsGroupState['controls'],
-  references: Reference[]
+  containerReferences: Reference[]
 ): DashboardControlsState {
   const transformedControls: DashboardControlsState = [];
 
@@ -65,7 +65,7 @@ function injectControlReferences(
       try {
         transformedControls.push({
           ...rest,
-          config: transforms.transformOut(config, references, control.uid),
+          config: transforms.transformOut(config, [], containerReferences, control.uid),
         } as DashboardControlsState[number]);
       } catch (transformOutError) {
         // do not prevent read on transformOutError

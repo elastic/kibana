@@ -145,6 +145,7 @@ dependsOn:
   - '@kbn/control-group-renderer'
   - '@kbn/unified-tabs'
   - '@kbn/esql-composer'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

@@ -18,11 +18,11 @@ import type { DashboardState } from '../../types';
 
 export function transformControlGroupOut(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
-  references: Reference[],
+  containerReferences: Reference[],
   ignoreParentSettingsJSON?: string
 ): DashboardState['controlGroupInput'] {
   const controls = controlGroupInput.panelsJSON
-    ? transformControlsState(controlGroupInput.panelsJSON, references)
+    ? transformControlsState(controlGroupInput.panelsJSON, containerReferences)
     : [];
 
   /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
