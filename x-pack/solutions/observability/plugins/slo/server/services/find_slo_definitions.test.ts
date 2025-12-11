@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, type ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  type ScopedClusterClientMock,
+} from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/logging';
 import * as computeHealth from '../domain/services/compute_health';
 import { FindSLODefinitions } from './find_slo_definitions';
 import { createSLO } from './fixtures/slo';
@@ -18,11 +23,17 @@ describe('FindSLODefinitions with Health validation', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let findSLODefinitions: FindSLODefinitions;
   let mockScopedClusterClient: ScopedClusterClientMock;
+  let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    findSLODefinitions = new FindSLODefinitions(mockRepository, mockScopedClusterClient);
+    mockLogger = loggingSystemMock.createLogger();
+    findSLODefinitions = new FindSLODefinitions(
+      mockRepository,
+      mockScopedClusterClient,
+      mockLogger
+    );
   });
 
   describe('default behavior', () => {
@@ -73,6 +84,29 @@ describe('FindSLODefinitions with Health validation', () => {
       expect(computeHealth.computeHealth).toHaveBeenCalledWith([slo], {
         scopedClusterClient: mockScopedClusterClient,
       });
+    });
+
+    it('returns definitions without health when computeHealth fails', async () => {
+      const slo = createSLO();
+      mockRepository.search.mockResolvedValueOnce({
+        results: [slo],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+      jest
+        .spyOn(computeHealth, 'computeHealth')
+        .mockRejectedValueOnce(new Error('Failed to compute health'));
+
+      const result = await findSLODefinitions.execute({
+        includeHealth: true,
+      });
+
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Failed to compute SLO health: Error: Failed to compute health'
+      );
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0]).not.toHaveProperty('health');
     });
   });
 });
