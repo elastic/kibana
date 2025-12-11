@@ -11,7 +11,7 @@ import { searchIdField, useLocalSearch } from '../../../../../hooks';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { ExtendedIntegrationCategory } from '../../home/category_facets';
-import { IntegrationCardItem } from '../../home';
+import type { IntegrationCardItem } from '../../home';
 
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
