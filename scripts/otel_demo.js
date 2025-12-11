@@ -9,4 +9,3 @@
 
 require('@kbn/setup-node-env');
 require('@kbn/otel-demo/scripts/otel_demo');
-

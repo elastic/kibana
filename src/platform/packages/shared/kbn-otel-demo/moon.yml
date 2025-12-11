@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/otel-demo'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-infra_services-team'
+  defaultOwner: '@elastic/obs-onboarding-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/otel-demo'
   description: Moon project for @kbn/otel-demo
   channel: ''
-  owner: '@elastic/obs-ux-infra_services-team'
+  owner: '@elastic/obs-onboarding-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-otel-demo
 dependsOn:
