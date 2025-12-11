@@ -183,7 +183,7 @@ export const FeedbackPanel = ({
       css={css`
         margin: ${euiTheme.size.base} ${euiTheme.size.m};
       `}
-      color='transparent'
+      color="transparent"
     >
       <EuiFlexGroup
         gutterSize="s"
@@ -198,12 +198,13 @@ export const FeedbackPanel = ({
         {feedbackView !== 'positive' && closePanelIcon}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none"
+      <EuiFlexGroup
+        gutterSize="none"
         justifyContent="center"
         css={css`
           gap: ${euiTheme.size.s};
         `}
-        >
+      >
         {panelFooter[feedbackView]}
       </EuiFlexGroup>
       {feedbackView === 'positive' && <Confetti />}
