@@ -5,55 +5,27 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  useEuiShadow,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { roundedBorderRadiusStyles } from '../../../../../common.styles';
+import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const labels = {
   reasoningError: i18n.translate('xpack.onechat.round.error.reasoningError', {
     defaultMessage: 'Reasoning error',
   }),
-  closeAriaLabel: i18n.translate('xpack.onechat.round.error.closeAriaLabel', {
-    defaultMessage: 'Close error panel',
-  }),
 };
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`;
 
 interface RoundErrorThinkingPanelProps {
   children: React.ReactNode;
-  onClose: () => void;
 }
-export const RoundErrorThinkingPanel: React.FC<RoundErrorThinkingPanelProps> = ({
-  children,
-  onClose,
-}) => {
+export const RoundErrorThinkingPanel: React.FC<RoundErrorThinkingPanelProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
 
-  const fadeInStyles = css`
-    animation: ${fadeIn} ${euiTheme.animation.normal} ease-in;
-  `;
-
   const containerStyles = css`
-    ${fadeInStyles}
     background-color: ${euiTheme.colors.backgroundBasePlain};
-    ${roundedBorderRadiusStyles}
+    ${borderRadiusXlStyles}
     border: 1px solid ${euiTheme.colors.borderStrongDanger};
     padding: ${euiTheme.size.base};
     ${useEuiShadow('l')};
@@ -72,14 +44,6 @@ export const RoundErrorThinkingPanel: React.FC<RoundErrorThinkingPanelProps> = (
           >
             <p>{labels.reasoningError}</p>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={labels.closeAriaLabel}
-            iconType="cross"
-            color="text"
-            onClick={onClose}
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {/* Error thinking panel content */}

@@ -16,10 +16,11 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
-import { mapValues } from 'lodash';
 import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
+import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
+import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { mapValues } from 'lodash';
+import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -34,6 +35,7 @@ import {
   DefaultTransformManager,
   KibanaSavedObjectsSLORepository,
 } from './services';
+import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
 import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
@@ -46,7 +48,6 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -181,6 +182,7 @@ export class SLOPlugin
           ]);
 
           const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+          const settingsRepository = new DefaultSLOSettingsRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless),
@@ -201,6 +203,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
+            settingsRepository,
             transformManager,
             summaryTransformManager,
             racClient,

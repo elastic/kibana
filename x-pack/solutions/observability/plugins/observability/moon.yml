@@ -147,7 +147,7 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/onechat-plugin'
-  - '@kbn/observability-agent-builder'
+  - '@kbn/ai-insights'
 tags:
   - plugin
   - prod

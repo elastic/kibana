@@ -151,7 +151,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsCodeEditor();
       });
     });
-    describe('Update Saved Playground', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/242276
+    describe.skip('Update Saved Playground', function () {
       before(async () => {
         await pageObjects.common.navigateToUrl('searchPlayground');
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();

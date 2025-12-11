@@ -102,6 +102,8 @@ dependsOn:
   - '@kbn/lists-plugin'
   - '@kbn/connector-schemas'
   - '@kbn/react-query'
+  - '@kbn/core-ui-settings-browser-mocks'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
