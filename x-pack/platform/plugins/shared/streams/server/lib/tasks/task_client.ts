@@ -11,9 +11,9 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask } from './types';
 
-interface TaskRequest<TaskType> {
-  id: string;
-  type: TaskType;
+interface TaskRequest<TaskType, TParams extends {}> {
+  task: Omit<PersistedTask & { type: TaskType }, 'status' | 'created_at' | 'task'>;
+  params: TParams;
   request: KibanaRequest;
 }
 
@@ -38,6 +38,10 @@ export class TaskClient<TaskType extends string> {
         return {
           id,
           status: 'not_started',
+          created_at: '',
+          space: '',
+          stream: '',
+          type: '',
         };
       }
 
@@ -47,6 +51,10 @@ export class TaskClient<TaskType extends string> {
         return {
           id,
           status: 'not_started',
+          created_at: '',
+          space: '',
+          stream: '',
+          type: '',
         };
       }
 
@@ -54,18 +62,18 @@ export class TaskClient<TaskType extends string> {
     }
   }
 
-  public async schedule<TPayload extends {} = {}>({
-    id,
-    type,
+  public async schedule<TParams extends {} = {}>({
+    task,
+    params,
     request,
-  }: TaskRequest<TaskType>): Promise<PersistedTask<TPayload>> {
-    this.logger.debug(`Scheduling ${type} task (${id})`);
+  }: TaskRequest<TaskType, TParams>): Promise<PersistedTask> {
+    this.logger.debug(`Scheduling ${task.type} task (${task.id})`);
 
     await this.taskManagerStart.schedule(
       {
-        id,
-        taskType: type,
-        params: {},
+        id: task.id,
+        taskType: task.type,
+        params,
         state: {},
         scope: ['streams'],
         priority: 1,
@@ -76,8 +84,9 @@ export class TaskClient<TaskType extends string> {
     );
 
     return await this.update({
-      id,
+      ...task,
       status: 'in_progress',
+      created_at: new Date().toISOString(),
     });
   }
 
@@ -89,7 +98,7 @@ export class TaskClient<TaskType extends string> {
     await this.storageClient.index({
       id: task.id,
       document: task,
-      refresh: true, // Is this a good idea? The risk is that two tasks are scheduled simultaneously
+      refresh: true,
     });
 
     return task;

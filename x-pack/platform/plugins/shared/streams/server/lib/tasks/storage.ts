@@ -12,11 +12,14 @@ export const taskStorageSettings = {
   name: '.kibana_streams_tasks',
   schema: {
     properties: {
-      // Do I really want to index this?
       id: types.keyword(),
+      type: types.keyword(),
       status: types.keyword(),
-      payload: types.object({ enabled: false }),
-      error: types.keyword(),
+      stream: types.keyword(),
+      space: types.keyword(),
+      created_at: types.date(),
+      // Workaround for https://github.com/elastic/kibana/issues/245974
+      task: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;
