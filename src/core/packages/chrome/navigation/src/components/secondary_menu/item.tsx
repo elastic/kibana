@@ -20,8 +20,6 @@ import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 import { ITEM_HORIZONTAL_SPACING_OFFSET, NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 
-const POPOVER_ITEM_LABEL_MAX_WIDTH = 98;
-
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
   hasSubmenu?: boolean;
@@ -101,9 +99,9 @@ export const SecondaryMenuItemComponent = ({
     <div css={labelAndBadgeStyles}>
       <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
         {children}
+        {/* Always show non-new badges, only show new ones if isNew check allows it */}
+        {badgeType && (badgeType !== 'new' || isNew) && <BetaBadge type={badgeType} />}
       </span>
-      {/* Always show non-new badges, only show new ones if isNew check allows it */}
-      {badgeType && (badgeType !== 'new' || isNew) && <BetaBadge type={badgeType} />}
     </div>
   );
 
