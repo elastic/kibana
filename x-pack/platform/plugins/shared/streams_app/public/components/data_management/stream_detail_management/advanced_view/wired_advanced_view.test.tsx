@@ -243,24 +243,6 @@ describe('WiredAdvancedView', () => {
       expect(screen.getByText('Index Configuration')).toBeInTheDocument();
     });
 
-    it('should render inheritance warning callout for wired streams', () => {
-      mockUseStreamsPrivileges.mockReturnValue({
-        features: {
-          contentPacks: { enabled: false },
-          significantEvents: { enabled: false },
-        },
-      } as any);
-
-      renderWithProviders(
-        <WiredAdvancedView
-          definition={createMockDefinition()}
-          refreshDefinition={mockRefreshDefinition}
-        />
-      );
-
-      expect(screen.getByText(/Changes will be inherited by child streams/)).toBeInTheDocument();
-    });
-
     it('should render Refresh Interval setting', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {

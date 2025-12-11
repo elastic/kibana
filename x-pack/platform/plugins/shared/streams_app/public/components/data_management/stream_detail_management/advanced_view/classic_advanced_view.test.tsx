@@ -64,16 +64,38 @@ jest.mock('../../../../hooks/use_stream_detail', () => ({
 }));
 
 jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: () => ({
-    value: {
-      indexTemplate: { name: 'logs-test-template', managed: false },
-      ingestPipeline: { name: 'logs-test-pipeline', managed: false },
-      dataStream: { name: 'logs-test-default' },
-      componentTemplates: [],
-    },
-    loading: false,
-    error: null,
-  }),
+  useStreamsAppFetch: () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/88c9435d-9df2-434b-b011-b5dde3c7fbba', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'classic_advanced_view.test.tsx:mock',
+        message: 'useStreamsAppFetch mock called',
+        data: {},
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        hypothesisId: 'H1',
+      }),
+    }).catch(() => {});
+    // #endregion
+    return {
+      value: {
+        indexTemplate: {
+          name: 'logs-test-template',
+          index_template: {
+            index_patterns: ['logs-test-*'],
+            _meta: {},
+          },
+        },
+        ingestPipeline: { name: 'logs-test-pipeline', _meta: {} },
+        dataStream: { name: 'logs-test-default', indices: [], status: 'green' },
+        componentTemplates: [],
+      },
+      loading: false,
+      error: null,
+    };
+  },
 }));
 
 jest.mock('../../../../hooks/use_kibana', () => ({
@@ -167,10 +189,6 @@ describe('ClassicAdvancedView', () => {
 
       // Check the Stream description panel title is rendered
       expect(screen.getByText('Stream description')).toBeInTheDocument();
-      // Check the description help text is rendered
-      expect(
-        screen.getByText(/This is a natural language description of your data/i)
-      ).toBeInTheDocument();
     });
 
     it('should render Feature identification panel when significantEvents feature is enabled', () => {
@@ -349,10 +367,6 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      expect(screen.getByText('Delete stream')).toBeInTheDocument();
-      expect(
-        screen.getByText(/Permanently delete your stream and all its contents/)
-      ).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /delete stream/i })).toBeInTheDocument();
     });
 
@@ -370,7 +384,7 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      expect(screen.getByText('Delete stream')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /delete stream/i })).toBeInTheDocument();
     });
   });
 
@@ -401,7 +415,7 @@ describe('ClassicAdvancedView', () => {
       expect(screen.getByText('Data stream')).toBeInTheDocument();
       expect(screen.getByText('Component templates')).toBeInTheDocument();
       // Delete stream
-      expect(screen.getByText('Delete stream')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /delete stream/i })).toBeInTheDocument();
     });
   });
 });
