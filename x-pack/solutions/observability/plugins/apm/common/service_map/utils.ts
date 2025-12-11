@@ -32,7 +32,6 @@ const NONGROUPED_SPANS: Record<string, string[]> = {
   cache: ['all'],
   db: ['all'],
   external: ['graphql', 'grpc', 'websocket'],
-  messaging: ['all'],
   template: ['handlebars'],
 };
 

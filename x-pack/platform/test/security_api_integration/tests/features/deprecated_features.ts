@@ -192,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           "siem",
           "siemV2",
           "siemV3",
+          "siemV4",
           "visualize",
         ]
       `);
@@ -220,6 +221,8 @@ export default function ({ getService }: FtrProviderContext) {
         'maps',
         'siem',
         'siemV2',
+        'siemV3',
+        'siemV4',
       ]);
       for (const feature of features) {
         if (

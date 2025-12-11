@@ -7,9 +7,11 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { AlertsFilter, RuleAlertData } from '../types';
-import { DEFAULT_FLAPPING_SETTINGS, MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup } from '../types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,
@@ -19,6 +21,8 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
+  ALERT_MUTED,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
@@ -68,15 +72,16 @@ import {
   getExpectedQueryByExecutionUuid,
   getExpectedQueryByTimeRange,
   getParamsByExecutionUuid,
-  getParamsByTimeQuery,
   getParamsByMaintenanceWindowScopedQuery,
+  getParamsByTimeQuery,
   getParamsByUpdateMaintenanceWindowIds,
   mockAAD,
 } from './alerts_client_fixtures';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
-import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import {
+  maintenanceWindowsServiceMock,
+  getMockMaintenanceWindow,
+} from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
@@ -161,9 +166,11 @@ const fetchedAlert1 = {
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
+  [ALERT_MUTED]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -193,9 +200,11 @@ const fetchedAlert2 = {
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING]: false,
+  [ALERT_MUTED]: false,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_INSTANCE_ID]: '2',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -233,9 +242,11 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_CONSECUTIVE_MATCHES]: 1,
   [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
+  [ALERT_MUTED]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -270,6 +281,7 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: undefined,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
@@ -288,6 +300,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: true,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
@@ -370,6 +383,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id1',
+              title: 'test-name1',
             },
             {
               ...getMockMaintenanceWindow(),
@@ -377,6 +391,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id2',
+              title: 'test-name2',
             },
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
@@ -850,6 +865,8 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -1178,6 +1195,8 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -1232,6 +1251,8 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_SEVERITY_IMPROVING]: true,
@@ -3027,9 +3048,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3062,9 +3085,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '2',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3311,9 +3336,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3415,9 +3442,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3520,9 +3549,11 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 36000000000,
                 [ALERT_END]: date,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

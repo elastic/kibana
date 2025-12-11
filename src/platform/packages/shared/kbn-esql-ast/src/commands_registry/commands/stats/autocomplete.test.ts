@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import {
   mockContext,
   lookupIndexFields,
@@ -27,14 +28,14 @@ import {
   nullCheckOperators,
 } from '../../../definitions/all_operators';
 import type { ICommandCallbacks } from '../../types';
-import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import type { FunctionReturnType } from '../../../definitions/types';
 import {
   ESQL_NUMBER_TYPES,
   FunctionDefinitionTypes,
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
-import { parse } from '../../../parser';
+import { Parser } from '../../../parser';
 import { setTestFunctions } from '../../../definitions/utils/test_functions';
 import { getDateHistogramCompletionItem } from '../../../..';
 
@@ -74,7 +75,7 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<FieldType & FunctionReturnType> = [
+export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
   'double',
   'integer',
   'long',
@@ -126,9 +127,9 @@ describe('STATS Autocomplete', () => {
 
   const suggest = async (query: string) => {
     const correctedQuery = correctQuerySyntax(query);
-    const { ast } = parse(correctedQuery, { withFormatting: true });
+    const { root } = Parser.parse(correctedQuery, { withFormatting: true });
     const cursorPosition = query.length;
-    const { command } = findAstPosition(ast, cursorPosition);
+    const { command } = findAstPosition(root, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
@@ -816,7 +817,7 @@ describe('STATS Autocomplete', () => {
           'integer',
           'date_period',
           'time_duration',
-        ] as FieldType[]);
+        ] as EsqlFieldType[]);
         (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
           expectedFields1.map((name) => ({ label: name, text: name }))
         );
@@ -899,6 +900,21 @@ describe('STATS Autocomplete', () => {
 
         // Should NOT suggest comma because 2-param signature is complete
         expect(labels).not.toContain(',');
+      });
+
+      test('after comma in BY with assignment should suggest fields and functions', async () => {
+        const fields = getFieldNamesByType('any');
+
+        await statsExpectSuggestions(
+          'FROM a | STATS BY col = BUCKET(@timestamp, 50, ?_tstart, ?_tend), ',
+          [
+            ' = ',
+            getDateHistogramCompletionItem().text,
+            ...fields,
+            ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { scalar: true }),
+            ...allGroupingFunctions,
+          ]
+        );
       });
     });
   });

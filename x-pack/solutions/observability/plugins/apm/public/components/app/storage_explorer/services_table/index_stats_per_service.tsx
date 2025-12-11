@@ -74,6 +74,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
       }),
       render: (_, { dataStream }) =>
         (
+          // @ts-expect-error upgrade typescript v5.9.3
           <EuiLink
             data-test-subj="storageExplorerIndexManagementDataStreamLink"
             href={getIndexManagementHref(core, dataStream)}
@@ -123,7 +124,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
                 })
               : ''
           }
-          message={
+          noItemsMessage={
             loading
               ? i18n.translate('xpack.apm.storageExplorer.indicesStats.table.loading', {
                   defaultMessage: 'Loading...',

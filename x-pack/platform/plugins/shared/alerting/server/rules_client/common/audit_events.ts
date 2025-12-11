@@ -8,7 +8,10 @@
 import type { EcsEvent } from '@kbn/core/server';
 import type { AuditEvent } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+} from '../../saved_objects';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',
@@ -23,6 +26,8 @@ export enum RuleAuditAction {
   FIND = 'rule_find',
   MUTE = 'rule_mute',
   UNMUTE = 'rule_unmute',
+  BULK_MUTE_ALERTS = 'rule_alert_bulk_mute',
+  BULK_UNMUTE_ALERTS = 'rule_alert_bulk_unmute',
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
   AGGREGATE = 'rule_aggregate',
@@ -52,6 +57,21 @@ export enum AdHocRunAuditAction {
   DELETE = 'ad_hoc_run_delete',
 }
 
+export enum GapAutoFillSchedulerAuditAction {
+  CREATE = 'gap_auto_fill_scheduler_create',
+  GET = 'gap_auto_fill_scheduler_get',
+  UPDATE = 'gap_auto_fill_scheduler_update',
+  DELETE = 'gap_auto_fill_scheduler_delete',
+  GET_LOGS = 'gap_auto_fill_scheduler_get_logs',
+}
+
+export interface GapAutoFillSchedulerAuditEventParams {
+  action: GapAutoFillSchedulerAuditAction;
+  outcome?: EcsEvent['outcome'];
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
+  error?: Error;
+}
+
 type VerbsTuple = [string, string, string];
 
 const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
@@ -69,6 +89,8 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_find: ['access', 'accessing', 'accessed'],
   rule_mute: ['mute', 'muting', 'muted'],
   rule_unmute: ['unmute', 'unmuting', 'unmuted'],
+  rule_alert_bulk_mute: ['bulk mute', 'bulk muting', 'bulk muted'],
+  rule_alert_bulk_unmute: ['bulk unmute', 'bulk unmuting', 'bulk unmuted'],
   rule_alert_mute: ['mute alert of', 'muting alert of', 'muted alert of'],
   rule_alert_unmute: ['unmute alert of', 'unmuting alert of', 'unmuted alert of'],
   rule_aggregate: ['access', 'accessing', 'accessed'],
@@ -147,6 +169,8 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_find: 'access',
   rule_mute: 'change',
   rule_unmute: 'change',
+  rule_alert_bulk_mute: 'change',
+  rule_alert_bulk_unmute: 'change',
   rule_alert_mute: 'change',
   rule_alert_unmute: 'change',
   rule_aggregate: 'access',
@@ -247,6 +271,85 @@ export function adHocRunAuditEvent({
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = adHocRunEventTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: ['database'],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    kibana: {
+      saved_object: savedObject,
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+const gapAutoFillSchedulerEventVerbs: Record<GapAutoFillSchedulerAuditAction, VerbsTuple> = {
+  gap_auto_fill_scheduler_create: [
+    'create gap auto fill scheduler',
+    'creating gap auto fill scheduler',
+    'created gap auto fill scheduler',
+  ],
+  gap_auto_fill_scheduler_get: [
+    'get gap auto fill scheduler',
+    'getting gap auto fill scheduler',
+    'got gap auto fill scheduler',
+  ],
+  gap_auto_fill_scheduler_update: [
+    'update gap auto fill scheduler',
+    'updating gap auto fill scheduler',
+    'updated gap auto fill scheduler',
+  ],
+  gap_auto_fill_scheduler_delete: [
+    'delete gap auto fill scheduler',
+    'deleting gap auto fill scheduler',
+    'deleted gap auto fill scheduler',
+  ],
+  gap_auto_fill_scheduler_get_logs: [
+    'get gap auto fill scheduler logs',
+    'getting gap auto fill scheduler logs',
+    'got gap auto fill scheduler logs',
+  ],
+};
+
+const gapAutoFillSchedulerEventTypes: Record<
+  GapAutoFillSchedulerAuditAction,
+  ArrayElement<EcsEvent['type']>
+> = {
+  gap_auto_fill_scheduler_create: 'creation',
+  gap_auto_fill_scheduler_get: 'access',
+  gap_auto_fill_scheduler_update: 'change',
+  gap_auto_fill_scheduler_delete: 'deletion',
+  gap_auto_fill_scheduler_get_logs: 'access',
+};
+
+export function gapAutoFillSchedulerAuditEvent({
+  action,
+  savedObject,
+  outcome,
+  error,
+}: GapAutoFillSchedulerAuditEventParams): AuditEvent {
+  const doc = savedObject
+    ? [
+        `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE} [id=${savedObject.id}]`,
+        savedObject.name && `[name=${savedObject.name}]`,
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : 'a gap auto fill scheduler';
+  const [present, progressive, past] = gapAutoFillSchedulerEventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+  const type = gapAutoFillSchedulerEventTypes[action];
 
   return {
     message,

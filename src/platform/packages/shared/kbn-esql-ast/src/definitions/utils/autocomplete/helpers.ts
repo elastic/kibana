@@ -28,6 +28,7 @@ import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
+import { SuggestionCategory } from '../../../sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -53,6 +54,7 @@ export const buildUserDefinedColumnsDefinitions = (
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
     sortText: 'D',
+    category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
 
 export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
@@ -314,34 +316,43 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 export function getControlSuggestion(
   type: ESQLVariableType,
   triggerSource: ControlTriggerSource,
-  variables?: string[]
+  variables?: string[],
+  suggestCreation = true
 ): ISuggestionItem[] {
   return [
-    {
-      label: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlLabel', {
-        defaultMessage: 'Create control',
-      }),
-      text: '',
-      kind: 'Issue',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
-        defaultMessage: 'Click to create',
-      }),
-      sortText: '1',
-      command: {
-        id: `esql.control.${type}.create`,
-        title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
-          defaultMessage: 'Click to create',
-        }),
-        arguments: [{ triggerSource }],
-      },
-    } as ISuggestionItem,
+    ...(suggestCreation
+      ? [
+          {
+            label: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlLabel', {
+              defaultMessage: 'Create control',
+            }),
+            text: '',
+            kind: 'Issue',
+            detail: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+              defaultMessage: 'Click to create',
+            }),
+            sortText: '1',
+            category: SuggestionCategory.CUSTOM_ACTION,
+            command: {
+              id: `esql.control.${type}.create`,
+              title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+                defaultMessage: 'Click to create',
+              }),
+              arguments: [{ triggerSource }],
+            },
+          } as ISuggestionItem,
+        ]
+      : []),
     ...(variables?.length
       ? buildConstantsDefinitions(
           variables,
           i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A'
+          '1A',
+          undefined,
+          undefined,
+          SuggestionCategory.USER_DEFINED_COLUMN
         )
       : []),
   ];
@@ -359,17 +370,14 @@ export function getControlSuggestionIfSupported(
   variables?: ESQLControlVariable[],
   shouldBePrefixed = true
 ) {
-  if (!supportsControls) {
-    return [];
-  }
-
   const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
   const filteredVariables = variables?.filter((variable) => variable.type === type) ?? [];
 
   const controlSuggestion = getControlSuggestion(
     type,
     triggerSource,
-    filteredVariables?.map((v) => `${prefix}${v.key}`)
+    filteredVariables?.map((v) => `${prefix}${v.key}`),
+    supportsControls
   );
 
   return controlSuggestion;
@@ -519,6 +527,7 @@ export function createInferenceEndpointToCompletionItem(
     label: inferenceEndpoint.inference_id,
     sortText: '1',
     text: inferenceEndpoint.inference_id,
+    category: SuggestionCategory.VALUE,
   };
 }
 
@@ -526,17 +535,68 @@ export function createInferenceEndpointToCompletionItem(
  * Given a suggestion item, decorates it with editor.action.triggerSuggest
  * that triggers the autocomplete dialog again after accepting the suggestion.
  *
- * If the suggestion item already has a custom command, it will preserve it.
+ * If the suggestion item already has a custom command, it will preserve it, by attaching
+ * the triggerSuggest command as part of a multiCommands execution.
  */
 export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionItem {
+  const triggerAutoSuggestCommand = {
+    title: 'Trigger Suggestion Dialog',
+    id: 'editor.action.triggerSuggest',
+  };
+
+  return appendCommandToSuggestionItem(suggestionItem, triggerAutoSuggestCommand);
+}
+
+/**
+ * Appends a command to a suggestion item, preserving existing commands by using multiCommands if necessary.
+ * @param suggestionItem
+ * @param commandToAppend
+ * @returns
+ */
+export function appendCommandToSuggestionItem(
+  suggestionItem: ISuggestionItem,
+  commandToAppend: ISuggestionItem['command']
+): ISuggestionItem {
+  if (!commandToAppend) {
+    return suggestionItem;
+  }
+
+  // If the suggestion has multiCommands, append the new command
+  if (suggestionItem.command?.id === 'esql.multiCommands') {
+    const existingCommands: ISuggestionItem['command'][] = suggestionItem.command.arguments
+      ? JSON.parse(suggestionItem.command.arguments[0].commands)
+      : [];
+
+    return {
+      ...suggestionItem,
+      command: createMultiCommand([...existingCommands, commandToAppend]),
+    };
+  }
+
+  // If the suggestion already has a command, use multiCommands to execute the existing one
+  // and then the new command
+  const command =
+    suggestionItem.command && suggestionItem.command.id !== commandToAppend.id
+      ? createMultiCommand([suggestionItem.command, commandToAppend])
+      : commandToAppend;
+
   return {
     ...suggestionItem,
-    command: suggestionItem.command
-      ? suggestionItem.command
-      : {
-          title: 'Trigger Suggestion Dialog',
-          id: 'editor.action.triggerSuggest',
-        },
+    command,
+  };
+}
+
+function createMultiCommand(
+  commands: Array<ISuggestionItem['command']>
+): ISuggestionItem['command'] {
+  return {
+    id: 'esql.multiCommands',
+    title: 'Execute multiple commands',
+    arguments: [
+      {
+        commands: JSON.stringify(uniqBy(commands, 'id')),
+      },
+    ],
   };
 }
 
@@ -582,6 +642,8 @@ export function getLookupIndexCreateSuggestion(
     ),
 
     sortText: '0',
+
+    category: SuggestionCategory.CUSTOM_ACTION,
 
     command: {
       id: `esql.lookup_index.create`,

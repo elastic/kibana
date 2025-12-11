@@ -36,11 +36,11 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
+import { isScopedQueryError } from '@kbn/maintenance-windows-plugin/common';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import * as i18n from '../translations';
 import { SubmitButton } from './submit_button';
-import { isScopedQueryError } from '../../../../common';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
 import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
 import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
@@ -376,6 +376,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               startDate={startDate}
               endDate={endDate}
               timezone={timezone}
+              initialRecurringSchedule={initialValue?.recurringSchedule}
             />
           </EuiFlexItem>
         )}

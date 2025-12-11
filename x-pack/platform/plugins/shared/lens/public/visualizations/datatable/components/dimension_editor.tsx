@@ -127,7 +127,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   }
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -352,7 +352,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           />
         </EuiFormRow>
       )}
-    </>
+    </div>
   );
 }
 

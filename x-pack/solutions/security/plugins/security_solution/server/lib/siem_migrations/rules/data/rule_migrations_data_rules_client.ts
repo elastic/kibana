@@ -120,6 +120,9 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
     if (filters.searchTerm?.length) {
       filter.push(dsl.matchTitle(filters.searchTerm));
     }
+    if (filters.titles?.length) {
+      filter.push(dsl.matchTitles(filters.titles));
+    }
     if (filters.installed != null) {
       filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
     }

@@ -170,6 +170,8 @@ describe('BurnRateRuleExecutor', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     soClientMock = savedObjectsClientMock.create();
     loggerMock = loggingSystemMock.createLogger();
+    searchSourceClientMock = jest.fn() as any;
+    uiSettingsClientMock = jest.fn() as any;
     servicesMock = {
       savedObjectsClient: soClientMock,
       scopedClusterClient: {
@@ -190,6 +192,7 @@ describe('BurnRateRuleExecutor', () => {
       share: {} as SharePluginStart,
       getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
       getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+      getMaintenanceWindowNames: jest.fn().mockResolvedValue([]),
       getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
     };
   });

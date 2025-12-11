@@ -6,15 +6,15 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { isOtelStream } from '@kbn/streams-schema';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import {
-  determineOtelFieldNameUsage,
   callInferenceWithPrompt,
   fetchFieldMetadata,
   normalizeFieldName,
@@ -44,6 +44,7 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
+  logger: Logger;
 }
 
 export const processingGrokSuggestionsSchema = z.object({
@@ -71,9 +72,9 @@ export const handleProcessingGrokSuggestions = async ({
   streamsClient,
   fieldsMetadataClient,
   signal,
+  logger,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
-  // Determine if we should use OTEL field names
-  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
+  const stream = await streamsClient.getStream(params.path.name);
 
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
@@ -93,7 +94,7 @@ export const handleProcessingGrokSuggestions = async ({
 
   return {
     log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames),
+    fields: mapFields(reviewResult.fields, fieldMetadata, isOtelStream(stream)),
   };
 };
 

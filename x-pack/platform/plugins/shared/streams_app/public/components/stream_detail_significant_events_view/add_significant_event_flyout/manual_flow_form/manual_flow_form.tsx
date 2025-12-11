@@ -23,6 +23,7 @@ import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { NO_FEATURE } from '../utils/default_query';
+import { SeveritySelector } from '../common/severity_selector';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -30,7 +31,7 @@ interface Props {
   isSubmitting: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Feature[];
   dataViews: DataView[];
 }
 
@@ -43,13 +44,18 @@ export function ManualFlowForm({
   features,
   dataViews,
 }: Props) {
-  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
+  const [touched, setTouched] = useState({
+    title: false,
+    feature: false,
+    kql: false,
+    severity: false,
+  });
 
   const validation = validateQuery(query);
 
   useEffect(() => {
     const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql || touched.feature;
+    const isTouched = touched.title || touched.kql || touched.feature || touched.severity;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
 
@@ -105,6 +111,25 @@ export function ManualFlowForm({
             label={
               <EuiFormLabel>
                 {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSeverityLabel',
+                  { defaultMessage: 'Severity' }
+                )}
+              </EuiFormLabel>
+            }
+          >
+            <SeveritySelector
+              severityScore={query.severity_score}
+              onChange={(score) => {
+                setQuery({ ...query, severity_score: score });
+                setTouched((prev) => ({ ...prev, severity: true }));
+              }}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
                   'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldFeatureLabel',
                   { defaultMessage: 'Feature' }
                 )}
@@ -114,7 +139,11 @@ export function ManualFlowForm({
             <EuiSuperSelect
               options={options}
               valueOfSelected={
-                options.find((option) => option.value.name === query.feature?.name)?.value
+                options.find(
+                  (option) =>
+                    option.value.name === query.feature?.name &&
+                    option.value.type === query.feature?.type
+                )?.value
               }
               placeholder={i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
@@ -127,7 +156,11 @@ export function ManualFlowForm({
               onChange={(value) => {
                 setQuery({
                   ...query,
-                  feature: value,
+                  feature: {
+                    name: value.name,
+                    filter: value.filter,
+                    type: value.type,
+                  },
                 });
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}

@@ -16,17 +16,17 @@ describe('EsqlVariablesService', () => {
     esqlVariablesService = new EsqlVariablesService();
   });
 
-  describe('enableSuggestions', () => {
+  describe('enableCreateControlSuggestion', () => {
     it('should enable suggestions', () => {
-      esqlVariablesService.enableSuggestions();
-      expect(esqlVariablesService.areSuggestionsEnabled).toBe(true);
+      esqlVariablesService.enableCreateControlSuggestion();
+      expect(esqlVariablesService.isCreateControlSuggestionEnabled).toBe(true);
     });
   });
 
-  describe('disableSuggestions', () => {
+  describe('disableCreateControlSuggestion', () => {
     it('should disable suggestions', () => {
-      esqlVariablesService.disableSuggestions();
-      expect(esqlVariablesService.areSuggestionsEnabled).toBe(false);
+      esqlVariablesService.disableCreateControlSuggestion();
+      expect(esqlVariablesService.isCreateControlSuggestionEnabled).toBe(false);
     });
   });
 

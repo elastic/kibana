@@ -17,8 +17,10 @@ import type {
   KeyboardEvent,
   Ref,
 } from 'react';
-import { EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EuiPopover, EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
+import { i18n } from '@kbn/i18n';
 
 import {
   BOTTOM_POPOVER_GAP,
@@ -36,15 +38,23 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
 import { useScroll } from '../../hooks/use_scroll';
 
+export interface PopoverIds {
+  popoverNavigationInstructionsId: string;
+}
+
+export type PopoverChildren =
+  | ReactNode
+  | ((closePopover: () => void, ids?: PopoverIds) => ReactNode);
+
 export interface PopoverProps {
-  children?: ReactNode | ((closePopover: () => void) => ReactNode);
+  children?: PopoverChildren;
   container?: HTMLElement;
   hasContent: boolean;
-  isAnyPopoverOpen: boolean;
   isSidePanelOpen: boolean;
+  isAnyPopoverLocked?: boolean;
+  setIsLocked?: (isLocked: boolean) => void;
   label: string;
   persistent?: boolean;
-  setAnyPopoverOpen: (isOpen: boolean) => void;
   trigger: ReactElement<{
     ref?: Ref<HTMLElement>;
     onClick?: (e: MouseEvent) => void;
@@ -52,6 +62,7 @@ export interface PopoverProps {
     tabIndex?: number;
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
+    'aria-describedby'?: string;
   }>;
 }
 
@@ -67,15 +78,21 @@ export const Popover = ({
   children,
   container,
   hasContent,
-  isAnyPopoverOpen,
   isSidePanelOpen,
+  isAnyPopoverLocked = false,
+  setIsLocked = () => {},
   label,
   persistent = false,
-  setAnyPopoverOpen,
   trigger,
 }: PopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { setHoverTimeout, clearHoverTimeout } = useHoverTimeout();
+  const popoverEnterAndExitInstructionsId = useGeneratedHtmlId({
+    prefix: 'popover-enter-exit-instructions',
+  });
+  const popoverNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'popover-navigation-instructions',
+  });
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
@@ -84,52 +101,48 @@ export const Popover = ({
   const [isOpen, setIsOpen] = useState(false);
   const [shouldFocusOnOpen, setShouldFocusOnOpen] = useState(false);
 
+  useEffect(() => {
+    if (persistent) {
+      setIsLocked(isOpenedByClick && isOpen);
+    }
+  }, [persistent, isOpenedByClick, isOpen, setIsLocked]);
+
   const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
 
   const clearOpenedByClick = useCallback(() => setIsOpenedByClick(false), []);
 
   const open = useCallback(() => {
     setIsOpen(true);
-    setAnyPopoverOpen(true);
-  }, [setAnyPopoverOpen]);
+  }, []);
 
   const close = useCallback(() => {
     setIsOpen(false);
     clearOpenedByClick();
     clearHoverTimeout();
     setShouldFocusOnOpen(false);
-    setAnyPopoverOpen(false);
-  }, [clearOpenedByClick, clearHoverTimeout, setAnyPopoverOpen]);
+  }, [clearOpenedByClick, clearHoverTimeout]);
 
   const handleClose = useCallback(() => {
     clearHoverTimeout();
     close();
   }, [clearHoverTimeout, close]);
 
-  const tryOpen = useCallback(() => {
-    if (!isSidePanelOpen && !isAnyPopoverOpen) {
-      open();
-    }
-  }, [isAnyPopoverOpen, isSidePanelOpen, open]);
-
   const handleMouseEnter = useCallback(() => {
-    if (!persistent || !isOpenedByClick) {
+    if ((!persistent || !isOpenedByClick) && (!isAnyPopoverLocked || isOpen)) {
       clearHoverTimeout();
-      if (isAnyPopoverOpen) {
-        setHoverTimeout(tryOpen, POPOVER_HOVER_DELAY);
-      } else if (!isSidePanelOpen) {
+      if (!isSidePanelOpen) {
         setHoverTimeout(open, POPOVER_HOVER_DELAY);
       }
     }
   }, [
     persistent,
     isOpenedByClick,
-    isAnyPopoverOpen,
+    isAnyPopoverLocked,
+    isOpen,
     isSidePanelOpen,
     clearHoverTimeout,
     open,
     setHoverTimeout,
-    tryOpen,
   ]);
 
   const handleMouseLeave = useCallback(() => {
@@ -201,9 +214,8 @@ export const Popover = ({
         Boolean(
           triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused)
         );
-      const isTrappedByFlyout = (nextFocused as HTMLElement)?.classList.contains('euiFlyout');
 
-      if (isStayingInComponent === false && isTrappedByFlyout === false) {
+      if (isStayingInComponent === false) {
         handleClose();
       }
     },
@@ -218,20 +230,32 @@ export const Popover = ({
     };
   }, [clearHoverTimeout, handleClose]);
 
-  const enhancedTrigger = useMemo(
-    () =>
-      cloneElement(trigger, {
-        ref: triggerRef,
-        'aria-haspopup': hasContent,
-        'aria-expanded': hasContent ? isOpen : undefined,
-        onClick: (e: MouseEvent) => {
-          trigger.props.onClick?.(e);
-          handleTriggerClick();
-        },
-        onKeyDown: handleTriggerKeyDown,
-      }),
-    [trigger, hasContent, isOpen, handleTriggerKeyDown, handleTriggerClick]
-  );
+  const enhancedTrigger = useMemo(() => {
+    const existingDescribedBy = trigger.props['aria-describedby'];
+    const popoverDescribedBy =
+      hasContent && !isSidePanelOpen ? popoverEnterAndExitInstructionsId : undefined;
+    const finalDescribedBy = [existingDescribedBy, popoverDescribedBy].filter(Boolean).join(' ');
+
+    return cloneElement(trigger, {
+      ref: triggerRef,
+      'aria-haspopup': hasContent,
+      'aria-expanded': hasContent ? isOpen : undefined,
+      'aria-describedby': finalDescribedBy || undefined,
+      onClick: (e: MouseEvent) => {
+        trigger.props.onClick?.(e);
+        handleTriggerClick();
+      },
+      onKeyDown: handleTriggerKeyDown,
+    });
+  }, [
+    trigger,
+    hasContent,
+    isOpen,
+    handleTriggerKeyDown,
+    handleTriggerClick,
+    isSidePanelOpen,
+    popoverEnterAndExitInstructionsId,
+  ]);
 
   const wrapperStyles = css`
     width: 100%;
@@ -258,6 +282,15 @@ export const Popover = ({
       onFocus={handleMouseEnter}
       onBlur={handleBlur}
     >
+      {hasContent && !isSidePanelOpen && (
+        <EuiScreenReaderOnly>
+          <p id={popoverEnterAndExitInstructionsId}>
+            {i18n.translate('core.ui.chrome.sideNavigation.popoverInstruction', {
+              defaultMessage: 'Press Enter to go to the submenu.',
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+      )}
       <EuiPopover
         aria-label={label}
         anchorPosition="rightUp"
@@ -272,6 +305,10 @@ export const Popover = ({
         ownFocus={false}
         panelPaddingSize="none"
         repositionOnScroll
+        panelProps={{
+          ...euiIncludeSelectorInFocusTrap.prop,
+          'data-test-subj': `side-nav-popover-${label}`,
+        }}
       >
         <div
           ref={(ref) => {
@@ -290,7 +327,20 @@ export const Popover = ({
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
         >
-          {typeof children === 'function' ? children(handleClose) : children}
+          <EuiScreenReaderOnly>
+            <p id={popoverNavigationInstructionsId}>
+              {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
+                defaultMessage:
+                  'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
+                values: {
+                  label,
+                },
+              })}
+            </p>
+          </EuiScreenReaderOnly>
+          {typeof children === 'function'
+            ? children(handleClose, { popoverNavigationInstructionsId })
+            : children}
         </div>
       </EuiPopover>
       {persistent && isOpenedByClick && isOpen && (

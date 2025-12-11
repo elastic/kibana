@@ -11,18 +11,20 @@ import { css } from '@emotion/css';
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 
 import type { Streams } from '@kbn/streams-schema';
-import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { AssetImage } from '../asset_image';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { AttachmentsTable } from '../stream_detail_attachments/attachment_table';
 
-const EMPTY_DASHBOARD_LIST: Attachment[] = [];
+const EMPTY_ATTACHMENT_LIST: Attachment[] = [];
 
 export function QuickLinks({ definition }: { definition: Streams.ingest.all.GetResponse }) {
   const router = useStreamsAppRouter();
-  const dashboardsFetch = useDashboardsFetch(definition.stream.name);
+  const attachmentsFetch = useAttachmentsFetch({
+    streamName: definition.stream.name,
+  });
 
-  if (definition && !dashboardsFetch.loading && dashboardsFetch.value?.dashboards.length === 0) {
+  if (definition && !attachmentsFetch.loading && attachmentsFetch.value?.attachments.length === 0) {
     return (
       <EuiFlexItem grow>
         <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -62,8 +64,8 @@ export function QuickLinks({ definition }: { definition: Streams.ingest.all.GetR
 
   return (
     <AttachmentsTable
-      attachments={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
-      loading={dashboardsFetch.loading}
+      attachments={attachmentsFetch.value?.attachments ?? EMPTY_ATTACHMENT_LIST}
+      loading={attachmentsFetch.loading}
     />
   );
 }

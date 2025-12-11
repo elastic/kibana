@@ -30,6 +30,7 @@ export class Download extends React.PureComponent<Props> {
     const asset = parseDataUrl(content, true);
 
     if (asset && asset.data) {
+      // @ts-expect-error upgrade typescript v5.9.3
       const assetBlob = new Blob([toByteArray(asset.data)], { type: asset.mimetype });
       const ext = asset.extension ? `.${asset.extension}` : '';
       fileSaver.saveAs(assetBlob, `canvas-${fileName}${ext}`);
