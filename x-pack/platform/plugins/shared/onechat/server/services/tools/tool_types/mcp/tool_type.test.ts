@@ -7,7 +7,6 @@
 
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getMcpToolType, listMcpTools } from './tool_type';
 
@@ -26,7 +25,6 @@ describe('MCP tool_type', () => {
     get: jest.Mock;
   };
   let mockRequest: KibanaRequest;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockLogger: {
     debug: jest.Mock;
     error: jest.Mock;
@@ -71,10 +69,6 @@ describe('MCP tool_type', () => {
     } as unknown as jest.Mocked<ActionsPluginStart>;
 
     mockRequest = {} as KibanaRequest;
-
-    mockSavedObjectsClient = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>;
 
     mockLogger = {
       debug: jest.fn(),
@@ -193,7 +187,6 @@ describe('MCP tool_type', () => {
       it('should execute MCP tool successfully and return results', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -241,7 +234,6 @@ describe('MCP tool_type', () => {
       it('should return error result when connector execution returns error status', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -274,7 +266,6 @@ describe('MCP tool_type', () => {
       it('should return error result with default message when connector error has no message', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -306,7 +297,6 @@ describe('MCP tool_type', () => {
       it('should catch exceptions and return error result', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -340,7 +330,6 @@ describe('MCP tool_type', () => {
       it('should handle non-Error exceptions', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -372,7 +361,6 @@ describe('MCP tool_type', () => {
       it('should retrieve and convert input schema from listTools', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -402,7 +390,6 @@ describe('MCP tool_type', () => {
       it('should throw error when listTools fails', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -421,7 +408,6 @@ describe('MCP tool_type', () => {
       it('should throw error when tool not found in listTools response', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -443,7 +429,6 @@ describe('MCP tool_type', () => {
       it('should throw error when jsonSchemaToZod fails', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -469,7 +454,6 @@ describe('MCP tool_type', () => {
       it('should return formatted description with MCP-specific information', async () => {
         const toolType = getMcpToolType();
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -492,7 +476,6 @@ describe('MCP tool_type', () => {
           tool_name: 'custom_search_tool',
         };
         const dynamicProps = await toolType.getDynamicProps(customConfig, {
-          savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
           actions: mockActions,
@@ -521,7 +504,6 @@ describe('MCP tool_type', () => {
         request: mockRequest,
         spaceId: 'default',
         esClient: {} as any,
-        savedObjectsClient: mockSavedObjectsClient,
         actions: mockActions,
       });
 
@@ -549,7 +531,6 @@ describe('MCP tool_type', () => {
         request: mockRequest,
         spaceId: 'default',
         esClient: {} as any,
-        savedObjectsClient: mockSavedObjectsClient,
         actions: mockActions,
       });
 
@@ -568,7 +549,6 @@ describe('MCP tool_type', () => {
         request: mockRequest,
         spaceId: 'default',
         esClient: {} as any,
-        savedObjectsClient: mockSavedObjectsClient,
         actions: mockActions,
       });
 

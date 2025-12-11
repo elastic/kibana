@@ -80,13 +80,12 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
-      savedObjects,
+      actions,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
       esClient: elasticsearch.client.asInternalUser,
       toolTypes,
-      savedObjects,
       actions,
     });
 

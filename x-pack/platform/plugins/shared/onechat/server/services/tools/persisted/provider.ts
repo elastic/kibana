@@ -10,7 +10,6 @@ import type { ToolType } from '@kbn/onechat-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
@@ -27,7 +26,6 @@ export const createPersistedProviderFn =
     logger: Logger;
     esClient: ElasticsearchClient;
     toolTypes: AnyToolTypeDefinition[];
-    savedObjects: SavedObjectsServiceStart;
     actions: ActionsPluginStart;
   }): ToolProviderFn<false> =>
   ({ request, space }) => {
@@ -44,7 +42,6 @@ export const createPersistedToolClient = ({
   logger,
   esClient,
   space,
-  savedObjects,
   actions,
 }: {
   toolTypes: AnyToolTypeDefinition[];
@@ -52,7 +49,6 @@ export const createPersistedToolClient = ({
   esClient: ElasticsearchClient;
   space: string;
   request: KibanaRequest;
-  savedObjects: SavedObjectsServiceStart;
   actions: ActionsPluginStart;
 }): WritableToolProvider => {
   const toolClient = createClient({ space, esClient, logger });
@@ -61,14 +57,11 @@ export const createPersistedToolClient = ({
     return map;
   }, {} as Record<ToolType, ToolTypeDefinition>);
 
-  const savedObjectsClient = savedObjects.getScopedClient(request);
-
   const validationContext = (): ToolTypeValidatorContext => {
     return {
       esClient,
       request,
       spaceId: space,
-      savedObjectsClient,
       actions,
     };
   };
@@ -78,7 +71,6 @@ export const createPersistedToolClient = ({
       esClient,
       request,
       spaceId: space,
-      savedObjectsClient,
       actions,
     };
   };

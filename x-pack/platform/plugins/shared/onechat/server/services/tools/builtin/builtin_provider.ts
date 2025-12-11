@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/onechat-common';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import type {
@@ -24,11 +24,11 @@ export const createBuiltinProviderFn =
   ({
     registry,
     toolTypes,
-    savedObjects,
+    actions,
   }: {
     registry: BuiltinToolRegistry;
     toolTypes: AnyToolTypeDefinition[];
-    savedObjects: SavedObjectsServiceStart;
+    actions: ActionsPluginStart;
   }): ToolProviderFn<true> =>
   async ({ request, space }) => {
     return createBuiltinToolProvider({
@@ -36,7 +36,7 @@ export const createBuiltinProviderFn =
       toolTypes,
       request,
       space,
-      savedObjects,
+      actions,
     });
   };
 
@@ -45,13 +45,13 @@ export const createBuiltinToolProvider = ({
   toolTypes,
   request,
   space,
-  savedObjects,
+  actions,
 }: {
   registry: BuiltinToolRegistry;
   toolTypes: AnyToolTypeDefinition[];
   request: KibanaRequest;
   space: string;
-  savedObjects: SavedObjectsServiceStart;
+  actions: ActionsPluginStart;
 }): ReadonlyToolProvider => {
   const definitionMap = toolTypes
     .filter((def) => !isDisabledDefinition(def))
@@ -60,8 +60,7 @@ export const createBuiltinToolProvider = ({
       return map;
     }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
 
-  const savedObjectsClient = savedObjects.getScopedClient(request);
-  const context = { spaceId: space, request, savedObjectsClient };
+  const context = { spaceId: space, request, actions };
   const availabilityCache = new ToolAvailabilityCache();
 
   return {

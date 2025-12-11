@@ -63,7 +63,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       request,
       spaceId,
       runner: manager.getRunner(),
-      savedObjects,
       actions,
     }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
