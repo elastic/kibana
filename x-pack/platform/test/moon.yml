@@ -165,6 +165,8 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/es-types'
   - '@kbn/streamlang'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/automatic-import-v2-plugin'
 tags:
   - test-helper
   - package

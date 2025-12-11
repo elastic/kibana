@@ -32,7 +32,7 @@ export const useMacrosFileUploadStep = ({
   const { upsertResources, isLoading, error } = useUpsertResources(onMacrosCreated);
 
   const upsertMigrationResources = useCallback(
-    (macrosFromFile: SiemMigrationResourceData[]) => {
+    async (macrosFromFile: SiemMigrationResourceData[]) => {
       const macrosIndexed: Record<string, SiemMigrationResourceData> = Object.fromEntries(
         macrosFromFile.map((macro) => [macro.name, macro])
       );
@@ -52,14 +52,13 @@ export const useMacrosFileUploadStep = ({
         });
         macrosToUpsert.push(...macros);
 
-        missingMacrosIt = resourceIdentifier
-          .fromResources(macros)
-          .reduce<string[]>((acc, resource) => {
-            if (resource.type === 'macro') {
-              acc.push(resource.name);
-            }
-            return acc;
-          }, []);
+        const identifiedMissingMacros = await resourceIdentifier.fromResources(macros);
+        missingMacrosIt = identifiedMissingMacros.reduce<string[]>((acc, resource) => {
+          if (resource.type === 'macro') {
+            acc.push(resource.name);
+          }
+          return acc;
+        }, []);
       }
 
       if (macrosToUpsert.length === 0) {
