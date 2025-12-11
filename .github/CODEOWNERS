@@ -436,6 +436,7 @@ src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
+src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
@@ -1037,6 +1038,7 @@ x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/automatic_import_v2 @elastic/integration-experience
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
+x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_agent @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
