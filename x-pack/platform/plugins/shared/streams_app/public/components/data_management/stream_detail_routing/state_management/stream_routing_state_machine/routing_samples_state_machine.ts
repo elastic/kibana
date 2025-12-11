@@ -57,6 +57,7 @@ export type RoutingSamplesEvent =
   | {
       type: 'routingSamples.setSelectedPreview';
       preview: RoutingSamplesContext['selectedPreview'];
+      condition: Condition;
     };
 
 export interface SearchParams extends RoutingSamplesInput {
@@ -161,6 +162,10 @@ export const routingSamplesMachine = setup({
       actions: [
         {
           type: 'setSelectedPreview',
+          params: ({ event }) => event,
+        },
+        {
+          type: 'updateCondition',
           params: ({ event }) => event,
         },
       ],

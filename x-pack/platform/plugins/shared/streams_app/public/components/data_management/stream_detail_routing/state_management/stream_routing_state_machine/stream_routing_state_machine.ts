@@ -162,17 +162,17 @@ export const streamRoutingMachine = setup({
           }),
         },
         'suggestion.preview': {
-          target: '#idle',
-          actions: enqueueActions(({ enqueue, event }) => {
+          actions: enqueueActions(({ enqueue, event, context }) => {
             enqueue.sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: event.toggle
                 ? { type: 'suggestion', name: event.name, index: event.index }
                 : undefined,
-            });
-            enqueue.sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
-              condition: event.toggle ? event.condition : undefined,
+              condition: event.toggle
+                ? event.condition
+                : context.currentRuleId
+                ? selectCurrentRule(context)?.where
+                : undefined,
             });
             enqueue.sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
@@ -220,9 +220,6 @@ export const streamRoutingMachine = setup({
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: { type: 'createStream' },
-            }),
-            sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
               condition: { always: {} },
             }),
           ],
@@ -231,10 +228,6 @@ export const streamRoutingMachine = setup({
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: undefined,
-            }),
-            sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
-              condition: undefined,
             }),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
@@ -329,6 +322,10 @@ export const streamRoutingMachine = setup({
                     sendTo('routingSamplesMachine', {
                       type: 'routingSamples.setDocumentMatchFilter',
                       filter: 'matched',
+                    }),
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.updateCondition',
+                      condition: undefined,
                     }),
                   ],
                 },
