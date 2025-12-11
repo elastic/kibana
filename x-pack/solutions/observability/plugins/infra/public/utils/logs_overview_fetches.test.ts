@@ -37,6 +37,9 @@ function setup() {
   };
   const pluginDeps = { data, logsShared, share } as unknown as InfraClientStartDeps;
 
+  // Mock uiSettings.get to return empty array for excluded data tiers
+  core.uiSettings.get.mockReturnValue([]);
+
   const dataSearch = data.search.search as jest.MockedFunction<typeof data.search.search>;
   const getResolvedLogView = logsShared.logViews.client.getResolvedLogView as jest.MockedFunction<
     typeof logsShared.logViews.client.getResolvedLogView
