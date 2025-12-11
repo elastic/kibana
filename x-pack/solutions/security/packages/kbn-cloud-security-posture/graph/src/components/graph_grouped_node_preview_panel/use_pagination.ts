@@ -16,11 +16,13 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
 
 const STARTING_PAGE_INDEX = 0;
 
-export interface PaginationState {
-  pageIndex: number;
+export interface PaginationLocalState {
   pageSize: number;
 }
 
+export interface PaginationState extends PaginationLocalState {
+  pageIndex: number;
+}
 export interface Pagination {
   state: PaginationState;
   goToPage: (pageIndex: number) => void;
@@ -30,6 +32,7 @@ export interface Pagination {
 /**
  * Custom hook to manage pagination state with localStorage persistence
  * Provides a single source of truth for pagination across components
+ * Note: Only pageSize is persisted to localStorage; pageIndex always starts at 0
  *
  * @param nonFetchedDocumentsCount - Total count of documents that are already in memory (client-side pagination).
  *   - For grouped-entities mode: Pass entityItems.length (entities are in memory, pagination is client-side slicing)
@@ -38,29 +41,17 @@ export interface Pagination {
  * @returns Pagination object containing state and control functions
  */
 export const usePagination = (nonFetchedDocumentsCount: number): Pagination => {
-  // Initialize from localStorage or use defaults
-  const [storedPagination, setStoredPagination] = useLocalStorage<PaginationState>(
+  // Initialize from localStorage or use defaults (only pageSize is persisted)
+  const [storedSettings, setStoredSettings] = useLocalStorage<PaginationLocalState>(
     GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY,
-    {
-      pageIndex: STARTING_PAGE_INDEX,
-      pageSize: DEFAULT_PAGE_SIZE,
-    }
+    { pageSize: DEFAULT_PAGE_SIZE }
   );
 
   // Always start from the first page when component mounts, but preserve pageSize from localStorage
-  const [pagination, setPaginationState] = useState<PaginationState>({
+  const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: STARTING_PAGE_INDEX,
-    pageSize: storedPagination?.pageSize || DEFAULT_PAGE_SIZE,
+    pageSize: storedSettings?.pageSize || DEFAULT_PAGE_SIZE,
   });
-
-  // Persist the initial page reset to localStorage on mount
-  useEffect(() => {
-    setStoredPagination({
-      pageIndex: STARTING_PAGE_INDEX,
-      pageSize: pagination.pageSize,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Validate and reset pagination for client-side paginated documents (entities)
   // This only runs when nonFetchedDocumentsCount > 0, which means we have documents in memory.
@@ -72,35 +63,24 @@ export const usePagination = (nonFetchedDocumentsCount: number): Pagination => {
       // If current page is out of bounds (e.g., user was on page 5 but now only 2 pages exist),
       // reset to the first page to prevent showing an empty state
       if (pagination.pageIndex > maxPageIndex) {
-        const newPagination = { ...pagination, pageIndex: STARTING_PAGE_INDEX };
-        setPaginationState(newPagination);
-        setStoredPagination(newPagination);
+        setPagination({ ...pagination, pageIndex: STARTING_PAGE_INDEX });
       }
     }
-  }, [nonFetchedDocumentsCount, pagination, setStoredPagination]);
-
-  const setPagination = useCallback(
-    (newPagination: PaginationState) => {
-      setPaginationState(newPagination);
-      setStoredPagination(newPagination);
-    },
-    [setStoredPagination]
-  );
+  }, [nonFetchedDocumentsCount, pagination]);
 
   const goToPage = useCallback(
     (pageIndex: number) => {
-      const newPagination = { ...pagination, pageIndex };
-      setPagination(newPagination);
+      setPagination({ ...pagination, pageIndex });
     },
-    [pagination, setPagination]
+    [pagination]
   );
 
   const setPageSize = useCallback(
     (pageSize: number) => {
-      const newPagination = { pageSize, pageIndex: STARTING_PAGE_INDEX };
-      setPagination(newPagination);
+      setPagination({ pageSize, pageIndex: STARTING_PAGE_INDEX });
+      setStoredSettings({ pageSize });
     },
-    [setPagination]
+    [setStoredSettings]
   );
 
   return {
