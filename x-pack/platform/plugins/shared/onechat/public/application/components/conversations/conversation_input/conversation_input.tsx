@@ -32,7 +32,7 @@ const INPUT_MIN_HEIGHT = '150px';
 const useInputBorderStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
-    border: ${euiTheme.border.thick};
+    border: ${euiTheme.border.thin};
     ${borderRadiusXlStyles}
     border-color: ${euiTheme.colors.borderBaseSubdued};
     &:focus-within[aria-disabled='false'] {
