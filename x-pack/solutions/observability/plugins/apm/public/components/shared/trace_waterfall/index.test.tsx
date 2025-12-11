@@ -168,44 +168,44 @@ describe('TraceWaterfall', () => {
     );
   };
 
-  describe('WaterfallFoldButton', () => {
-    it('renders WaterfallFoldButton when showAccordion is true', () => {
+  describe('WaterfallAccordionButton', () => {
+    it('renders WaterfallAccordionButton when showAccordion is true', () => {
       renderTraceWaterfall({ showAccordion: true });
 
-      expect(screen.getByTestId('traceWaterfallFoldButton')).toBeInTheDocument();
+      expect(screen.getByTestId('traceWaterfallAccordionButton')).toBeInTheDocument();
     });
 
-    it('does not render WaterfallFoldButton when showAccordion is false', () => {
+    it('does not render WaterfallAccordionButton when showAccordion is false', () => {
       renderTraceWaterfall({ showAccordion: false });
 
-      expect(screen.queryByTestId('traceWaterfallFoldButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('traceWaterfallAccordionButton')).not.toBeInTheDocument();
     });
 
-    it('toggles accordion state when WaterfallFoldButton is clicked', () => {
+    it('toggles accordion state when WaterfallAccordionButton is clicked', () => {
       renderTraceWaterfall({ showAccordion: true });
 
-      const foldButton = screen.getByTestId('traceWaterfallFoldButton');
+      const accordionButton = screen.getByTestId('traceWaterfallAccordionButton');
 
-      expect(foldButton.querySelector('[data-euiicon-type="fold"]')).toBeInTheDocument();
-      expect(foldButton).toHaveAttribute('aria-label', 'Click to fold the waterfall');
+      expect(accordionButton.querySelector('[data-euiicon-type="fold"]')).toBeInTheDocument();
+      expect(accordionButton).toHaveAttribute('aria-label', 'Click to fold the waterfall');
 
       expect(screen.getByText('Test Transaction')).toBeInTheDocument();
       expect(screen.getByText('Test Span 1')).toBeInTheDocument();
       expect(screen.getByText('Test Span 2')).toBeInTheDocument();
 
-      fireEvent.click(foldButton);
+      fireEvent.click(accordionButton);
 
-      expect(foldButton.querySelector('[data-euiicon-type="unfold"]')).toBeInTheDocument();
-      expect(foldButton).toHaveAttribute('aria-label', 'Click to unfold the waterfall');
+      expect(accordionButton.querySelector('[data-euiicon-type="unfold"]')).toBeInTheDocument();
+      expect(accordionButton).toHaveAttribute('aria-label', 'Click to unfold the waterfall');
 
       expect(screen.getByText('Test Transaction')).toBeInTheDocument();
       expect(screen.queryByText('Test Span 1')).not.toBeInTheDocument();
       expect(screen.queryByText('Test Span 2')).not.toBeInTheDocument();
 
-      fireEvent.click(foldButton);
+      fireEvent.click(accordionButton);
 
-      expect(foldButton.querySelector('[data-euiicon-type="fold"]')).toBeInTheDocument();
-      expect(foldButton).toHaveAttribute('aria-label', 'Click to fold the waterfall');
+      expect(accordionButton.querySelector('[data-euiicon-type="fold"]')).toBeInTheDocument();
+      expect(accordionButton).toHaveAttribute('aria-label', 'Click to fold the waterfall');
 
       expect(screen.getByText('Test Transaction')).toBeInTheDocument();
       expect(screen.getByText('Test Span 1')).toBeInTheDocument();
