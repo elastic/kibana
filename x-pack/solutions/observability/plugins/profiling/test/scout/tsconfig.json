@@ -10,9 +10,6 @@
     "@kbn/scout-oblt",
     "@kbn/fleet-plugin",
     "@kbn/observability-plugin",
-    "@kbn/i18n",
-    "@kbn/licensing-types",
-    "@kbn/kibana-react-plugin",
   ],
   "exclude": [
     "target/**/*"
