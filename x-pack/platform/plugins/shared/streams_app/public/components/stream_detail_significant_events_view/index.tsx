@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } 
 import { i18n } from '@kbn/i18n';
 import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { compact, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
@@ -72,7 +72,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
-  const [dateRange, setDateRange] = useState<TimeRange | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
   const [query, setQuery] = useState<string>('');
 
   const significantEvents = useFilteredSigEvents(
@@ -271,14 +271,14 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 id={'all-events'}
                 occurrences={significantEventsFetchState.value?.all ?? []}
                 changes={
-                  significantEventsFetchState.value?.significant_events
-                    .map((item) =>
+                  compact(
+                    significantEventsFetchState.value?.significant_events.map((item) =>
                       formatChangePoint({
                         change_points: item.change_points,
                         occurrences: item.occurrences,
                       })
                     )
-                    .filter(Boolean) ?? []
+                  ) ?? []
                 }
                 xFormatter={xFormatter}
                 compressed={false}
