@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export { DataMapStepTypeId, DataSetStepTypeId } from './step_types';
+export * from './data_map_step';
+export * from './data_set_step';

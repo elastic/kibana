@@ -10,6 +10,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { ServerStepRegistry } from './step_registry';
+import type { ServerStepDefinition } from './step_registry/types';
+import { dataMapStepDefinition, dataSetStepDefinition } from './step_types';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginSetupDeps,
@@ -37,6 +39,9 @@ export class WorkflowsExtensionsServerPlugin
     _plugins: WorkflowsExtensionsServerPluginSetupDeps
   ): WorkflowsExtensionsServerPluginSetup {
     const router = core.http.createRouter();
+
+    this.stepRegistry.register(dataSetStepDefinition as ServerStepDefinition);
+    this.stepRegistry.register(dataMapStepDefinition as ServerStepDefinition);
 
     // Register HTTP route to expose step definitions for testing
     registerGetStepDefinitionsRoute(router, this.stepRegistry);

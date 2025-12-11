@@ -68,6 +68,7 @@ export class WorkflowContextManager {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
+      variables: this.workflowExecutionState.getVariables(),
     };
 
     const currentNode = this.node;
@@ -217,6 +218,13 @@ export class WorkflowContextManager {
    */
   public getCoreStart(): CoreStart {
     return this.coreStart;
+  }
+
+  /**
+   * Set variables that will be available in the context.variables namespace
+   */
+  public setVariables(variables: Record<string, unknown>): void {
+    this.workflowExecutionState.setVariables(variables);
   }
 
   /**

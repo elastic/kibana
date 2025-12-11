@@ -6,6 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable import/no-duplicates */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export { DataMapStepTypeId, DataSetStepTypeId } from './step_types';
+declare module '@elastic/eui/es/components/icon/assets/*' {
+  import type * as React from 'react';
+  import type { SVGProps } from 'react';
+  interface SVGRProps {
+    title?: string;
+    titleId?: string;
+  }
+  export const icon: ({
+    title,
+    titleId,
+    ...props
+  }: SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element;
+  export {};
+}

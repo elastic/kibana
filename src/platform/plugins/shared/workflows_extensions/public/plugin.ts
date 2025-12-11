@@ -9,6 +9,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicStepRegistry } from './step_registry';
+import { dataMapStepDefinition, dataSetStepDefinition } from './step_types';
 import type {
   WorkflowsExtensionsPublicPluginSetup,
   WorkflowsExtensionsPublicPluginSetupDeps,
@@ -35,6 +36,9 @@ export class WorkflowsExtensionsPublicPlugin
     _core: CoreSetup,
     _plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
+    this.stepRegistry.register(dataSetStepDefinition);
+    this.stepRegistry.register(dataMapStepDefinition);
+
     return {
       registerStepDefinition: (metadata) => {
         this.stepRegistry.register(metadata);
