@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/expandable-flyout'
   - '@kbn/react-query'
+  - '@kbn/fleet-plugin'
+  - '@kbn/core-http-browser'
 tags:
   - shared-browser
   - package
