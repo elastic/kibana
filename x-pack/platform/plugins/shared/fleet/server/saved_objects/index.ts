@@ -1137,8 +1137,13 @@ export const getSavedObjectTypes = (
           latest_install_failed_attempts: { type: 'object', enabled: false },
           latest_executed_state: { type: 'object', enabled: false },
           installed_kibana: {
-            dynamic: false,
-            properties: {},
+            type: 'nested',
+            properties: {
+              id: { type: 'keyword' },
+              originId: { type: 'keyword' },
+              type: { type: 'keyword' },
+              deferred: { type: 'boolean' },
+            },
           },
           installed_kibana_space_id: { type: 'keyword' },
           package_assets: {
@@ -1216,6 +1221,24 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 previous_version: { type: 'keyword' },
+              },
+            },
+          ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                installed_kibana: {
+                  type: 'nested',
+                  properties: {
+                    id: { type: 'keyword' },
+                    originId: { type: 'keyword' },
+                    type: { type: 'keyword' },
+                    deferred: { type: 'boolean' },
+                  },
+                },
               },
             },
           ],

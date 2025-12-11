@@ -87,9 +87,9 @@ export async function createAlertingRuleFromTemplate(
     const esql = ruleParams?.esqlQuery?.esql;
 
     if (esql) {
-      const isValidEsql = await isValidEsqlQuery(esClient, esql);
+      const validationResult = await validateEsqlQuery(esClient, esql);
 
-      if (!isValidEsql) {
+      if (!validationResult.isValid) {
         logger.debug(
           `Rule: ${ruleId} failed validation for package ${pkgName}, installation will be deferred`
         );
@@ -186,15 +186,18 @@ export async function stepCreateAlertingRules(
   });
 }
 
-async function isValidEsqlQuery(esClient: ElasticsearchClient, esql: string) {
+async function validateEsqlQuery(esClient: ElasticsearchClient, esql: string) {
   try {
     // We do an async request here since validation failures will fail the query quickly
     // If it is valid, we don't want to wait around for the results.
     await esClient.esql.asyncQuery({
       query: esql,
     });
-    return true;
+    return { isValid: true };
   } catch (e) {
-    return e;
+    return {
+      isValid: false,
+      error: e,
+    };
   }
 }

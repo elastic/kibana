@@ -65,6 +65,7 @@ import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+import { ensureDeferredAlertingRules } from './setup/ensure_deferred_alerting_rules';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -296,6 +297,16 @@ async function createSetupSideEffects(
   if (requestContext?.authorizationHeader) {
     logger.debug('Ensuring deferred alerting rules are installed');
     // Install alerting rules
+    ensureDeferredAlertingRules(
+      logger,
+      soClient,
+      esClient,
+      requestContext.spaceId,
+      requestContext.authorizationHeader
+    ).catch((error) => {
+      apm.captureError(error);
+      logger.error('Error installing deferred alerting rules', { error });
+    });
   }
 
   const nonFatalErrors = [
