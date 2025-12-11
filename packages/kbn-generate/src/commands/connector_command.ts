@@ -198,7 +198,7 @@ export default (props: ConnectorIconProps) => {
     // append to CODEOWNERS: insert right after the latest rule that mentions "kbn-connector-specs"
     {
       let content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
-      const line = `/src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
+      const line = `src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
       if (content.includes(line)) {
         log.info('CODEOWNERS already has rule for', connectorName);
       } else {
