@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, useEuiTheme, useCurrentEuiBreakpoint, EuiImage } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  useCurrentEuiBreakpoint,
+  EuiImage,
+} from '@elastic/eui';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
@@ -30,7 +37,7 @@ export const SearchHomepageHeader: React.FC = () => {
         style={{
           paddingLeft: euiTheme.size.xxl,
           paddingRight: euiTheme.size.xxl,
-          flexFlow: currentBreakpoint === 'xs' ? 'column-reverse' : 'initial', 
+          flexFlow: currentBreakpoint === 'xs' ? 'column-reverse' : 'initial',
         }}
       >
         <EuiFlexItem
