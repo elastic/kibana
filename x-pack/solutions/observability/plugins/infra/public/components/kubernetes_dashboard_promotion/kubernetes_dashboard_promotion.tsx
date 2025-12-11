@@ -19,10 +19,19 @@ import {
 } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { KubernetesAssetImage } from './kubernetes_asset_image';
+import {
+  INTEGRATION_DOCS_LINK,
+  KUBERNETES_SEMCONV_INTEGRATION_ID,
+  KUBERNETES_INTEGRATION_ID,
+  INTEGRATION_PAGE_PATH,
+  KUBERNETES_INTEGRATION_TAG,
+  KUBERNETES_SEMCONV_INTEGRATION_TAG,
+} from './constants';
 
 type IntegrationType = 'ecs' | 'semconv';
 
 interface IntegrationConfig {
+  integrationId: typeof KUBERNETES_INTEGRATION_ID | typeof KUBERNETES_SEMCONV_INTEGRATION_ID;
   card: {
     imageType: IntegrationType;
     title: {
@@ -33,7 +42,6 @@ interface IntegrationConfig {
       installed: (integrationLink: React.ReactNode) => React.ReactNode;
       notInstalled: (integrationLink: React.ReactNode) => React.ReactNode;
       docsLink: {
-        url: string;
         text: string;
         testSubj: string;
       };
@@ -62,7 +70,26 @@ interface IntegrationConfig {
   };
 }
 
+const VIEW_DASHBOARDS_TEXT = i18n.translate(
+  'xpack.infra.kubernetesDashboardPromotion.viewDashboardsLink',
+  {
+    defaultMessage: 'View Dashboards',
+  }
+);
+
+const VIEW_INTEGRATION_TEXT = i18n.translate(
+  'xpack.infra.kubernetesDashboardPromotion.viewIntegrationLink',
+  {
+    defaultMessage: 'View Integration',
+  }
+);
+
+const DISMISS_TEXT = i18n.translate('xpack.infra.kubernetesDashboardPromotion.dismiss', {
+  defaultMessage: 'Dismiss',
+});
+
 const ECS_CONFIG: IntegrationConfig = {
+  integrationId: KUBERNETES_INTEGRATION_ID,
   card: {
     imageType: 'ecs',
     title: {
@@ -91,7 +118,6 @@ const ECS_CONFIG: IntegrationConfig = {
         />
       ),
       docsLink: {
-        url: 'https://www.elastic.co/docs/reference/integrations/kubernetes',
         text: i18n.translate(
           'xpack.infra.kubernetesDashboardPromotion.ecs.integrationDocsLinkText',
           {
@@ -103,29 +129,23 @@ const ECS_CONFIG: IntegrationConfig = {
     },
     actionButton: {
       installed: {
-        dashboardsPath: '#/list?_g=()&s=tag:(Kubernetes)',
-        label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecs.viewDashboardsLink', {
-          defaultMessage: 'View Dashboards',
-        }),
+        dashboardsPath: `#/list?_g=()&s=tag:(${KUBERNETES_INTEGRATION_TAG})`,
+        label: VIEW_DASHBOARDS_TEXT,
         testSubj: 'infraKubernetesDashboardCardLink',
       },
       notInstalled: {
-        integrationPath: '/detail/kubernetes',
-        label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecs.viewIntegrationLink', {
-          defaultMessage: 'View Integration',
-        }),
+        integrationPath: `${INTEGRATION_PAGE_PATH}/${KUBERNETES_INTEGRATION_ID}`,
+        label: VIEW_INTEGRATION_TEXT,
         testSubj: 'infraKubernetesDashboardCardInstallLink',
       },
     },
     hideButton: {
-      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecs.dismiss', {
-        defaultMessage: 'Dismiss',
-      }),
+      label: DISMISS_TEXT,
       testSubj: 'infraKubernetesDashboardCardHideThisButton',
     },
   },
   link: {
-    dashboardsPath: '#/list?_g=()&s=tag:(Kubernetes)',
+    dashboardsPath: `#/list?_g=()&s=tag:(${KUBERNETES_INTEGRATION_TAG})`,
     label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecs.bottomDrawerLink', {
       defaultMessage: 'Kubernetes Integration',
     }),
@@ -134,6 +154,7 @@ const ECS_CONFIG: IntegrationConfig = {
 };
 
 const SEMCONV_CONFIG: IntegrationConfig = {
+  integrationId: KUBERNETES_SEMCONV_INTEGRATION_ID,
   card: {
     imageType: 'semconv',
     title: {
@@ -162,7 +183,6 @@ const SEMCONV_CONFIG: IntegrationConfig = {
         />
       ),
       docsLink: {
-        url: 'https://www.elastic.co/docs/reference/integrations/kubernetes_otel',
         text: i18n.translate(
           'xpack.infra.kubernetesDashboardPromotion.semconv.integrationDocsLinkText',
           { defaultMessage: 'OpenTelemetry' }
@@ -172,35 +192,23 @@ const SEMCONV_CONFIG: IntegrationConfig = {
     },
     actionButton: {
       installed: {
-        dashboardsPath: '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")',
-        label: i18n.translate(
-          'xpack.infra.kubernetesDashboardPromotion.semconv.viewDashboardsLink',
-          {
-            defaultMessage: 'View Dashboards',
-          }
-        ),
+        dashboardsPath: `#/list?_g=()&s=tag:(${KUBERNETES_SEMCONV_INTEGRATION_TAG})`,
+        label: VIEW_DASHBOARDS_TEXT,
         testSubj: 'infraSemconvKubernetesDashboardCardLink',
       },
       notInstalled: {
-        integrationPath: '/detail/kubernetes_otel',
-        label: i18n.translate(
-          'xpack.infra.kubernetesDashboardPromotion.semconv.viewIntegrationLink',
-          {
-            defaultMessage: 'View Integration',
-          }
-        ),
+        integrationPath: `${INTEGRATION_PAGE_PATH}/${KUBERNETES_SEMCONV_INTEGRATION_ID}`,
+        label: VIEW_INTEGRATION_TEXT,
         testSubj: 'infraSemconvKubernetesDashboardCardInstallLink',
       },
     },
     hideButton: {
-      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.semconv.dismiss', {
-        defaultMessage: 'Dismiss',
-      }),
+      label: DISMISS_TEXT,
       testSubj: 'infraSemconvKubernetesDashboardCardHideThisButton',
     },
   },
   link: {
-    dashboardsPath: '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")',
+    dashboardsPath: `#/list?_g=()&s=tag:(${KUBERNETES_SEMCONV_INTEGRATION_TAG})`,
     label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.semconv.bottomDrawerLink', {
       defaultMessage: 'Kubernetes OpenTelemetry',
     }),
@@ -214,16 +222,20 @@ const INTEGRATION_CONFIGS: Record<IntegrationType, IntegrationConfig> = {
 };
 
 const IntegrationLink = ({
-  url,
+  integrationId,
   text,
   testSubj,
 }: {
-  url: string;
+  integrationId: IntegrationConfig['integrationId'];
   text: string;
   testSubj: string;
 }) => {
   return (
-    <EuiLink data-test-subj={testSubj} href={url} target="_blank">
+    <EuiLink
+      data-test-subj={testSubj}
+      href={`${INTEGRATION_DOCS_LINK}/${integrationId}`}
+      target="_blank"
+    >
       {text}
     </EuiLink>
   );
@@ -275,14 +287,14 @@ export const KubernetesDashboardCard = ({
                 {hasIntegrationInstalled
                   ? card.description.installed(
                       <IntegrationLink
-                        url={card.description.docsLink.url}
+                        integrationId={card.integrationId}
                         text={card.description.docsLink.text}
                         testSubj={card.description.docsLink.testSubj}
                       />
                     )
                   : card.description.notInstalled(
                       <IntegrationLink
-                        url={card.description.docsLink.url}
+                        integrationId={card.integrationId}
                         text={card.description.docsLink.text}
                         testSubj={card.description.docsLink.testSubj}
                       />

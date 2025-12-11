@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -17,13 +17,12 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import type { InfraFormatter } from '../../../../common/inventory/types';
 import { Timeline } from './timeline/timeline';
-import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import { KubernetesDashboardLink } from '../../../../components/kubernetes_dashboard_promotion/kubernetes_dashboard_promotion';
-import { useInstalledIntegration } from '../../../../hooks/use_installed_integration';
+import { useKubernetesDashboardPromotion } from '../../../../hooks/use_kubernetes_dashboard_promotion';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {
   defaultMessage: 'Show history',
@@ -60,19 +59,12 @@ const RelatedDashboards = () => {
 
 export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
-  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
-  const schemas: DataSchemaFormat[] = useMemo(
-    () => timeRangeMetadata?.schemas || [],
-    [timeRangeMetadata?.schemas]
-  );
 
-  const hasElasticSchema = schemas.includes('ecs');
-  const { isInstalled: hasEcsK8sIntegration } = useInstalledIntegration('kubernetes');
-  const hasSemconvSchema = schemas.includes('semconv');
-  const { isInstalled: hasSemconvK8sIntegration } = useInstalledIntegration('kubernetes_otel');
+  const { hasEcsSchema, hasSemconvSchema, hasEcsK8sIntegration, hasSemconvK8sIntegration } =
+    useKubernetesDashboardPromotion(nodeType);
 
-  const showEcsK8sButton = hasElasticSchema && hasEcsK8sIntegration;
+  const showEcsK8sButton = hasEcsSchema && hasEcsK8sIntegration;
   const showSemconvK8sButton = hasSemconvSchema && hasSemconvK8sIntegration;
 
   useEffect(() => {

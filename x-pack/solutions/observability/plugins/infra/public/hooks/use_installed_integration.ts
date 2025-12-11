@@ -21,25 +21,32 @@ export interface IntegrationInfo {
   version?: string;
 }
 
-export const useInstalledIntegration = (packageName: string) => {
+export const useInstalledIntegration = (packageName: string, enabled: boolean = true) => {
   const {
     services: { http },
   } = useKibanaContextForPlugin();
 
-  const { data, status, error } = useFetcher(async () => {
-    const response = await http.get<GetInfoResponse>(epmRouteService.getInfoPath(packageName), {
-      version: API_VERSIONS.public.v1,
-    });
-    return {
-      name: response.item.name,
-      status: response.item.status as IntegrationInstallStatus,
-      version: response.item.version,
-    };
-  }, [packageName, http]);
+  const { data, status, error } = useFetcher(
+    async () => {
+      if (!enabled) {
+        return undefined;
+      }
+      const response = await http.get<GetInfoResponse>(epmRouteService.getInfoPath(packageName), {
+        version: API_VERSIONS.public.v1,
+      });
+      return {
+        name: response.item.name,
+        status: response.item.status as IntegrationInstallStatus,
+        version: response.item.version,
+      };
+    },
+    [packageName, http, enabled],
+    { autoFetch: enabled }
+  );
 
   return {
     data,
-    isLoading: status === 'loading',
+    isLoading: enabled && status === 'loading',
     isInstalled: data?.status === 'installed',
     error,
   };
