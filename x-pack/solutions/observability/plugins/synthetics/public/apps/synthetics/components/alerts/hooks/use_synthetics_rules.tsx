@@ -57,21 +57,10 @@ export const useSyntheticsRules = (isOpen: boolean) => {
 
   // Fetch or create default rules when popover opens
   useEffect(() => {
-    if (isOpen && hasMonitors && defaultRulesEnabled && !loading) {
-      // If rules haven't been loaded yet, fetch/create them
-      if (rulesLoaded === null || !defaultRules?.statusRule || !defaultRules?.tlsRule) {
-        getOrCreateAlerts();
-      }
+    if (isOpen && hasMonitors && defaultRulesEnabled && !loading && rulesLoaded === null) {
+      getOrCreateAlerts();
     }
-  }, [
-    isOpen,
-    hasMonitors,
-    defaultRulesEnabled,
-    loading,
-    rulesLoaded,
-    defaultRules,
-    getOrCreateAlerts,
-  ]);
+  }, [isOpen, hasMonitors, defaultRulesEnabled, loading, rulesLoaded, getOrCreateAlerts]);
 
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
