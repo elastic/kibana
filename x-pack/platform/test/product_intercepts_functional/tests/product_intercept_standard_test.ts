@@ -24,7 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Standard Product intercept', () => {
     const interceptTestId = `intercept-${TRIGGER_DEF_ID}`;
 
-    describe('on initial page load', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/245800
+    describe.skip('on initial page load', () => {
       it('presents all available navigable steps', async () => {
         await PageObjects.common.navigateToUrl('home');
 
