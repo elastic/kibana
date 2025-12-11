@@ -29,6 +29,7 @@ const _allowedExperimentalValues = {
   enableExportCSV: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
   enableAutomaticAgentUpgrades: true,
+  enableFleetPolicyRevisionsCleanupTask: true,
 };
 
 /**
