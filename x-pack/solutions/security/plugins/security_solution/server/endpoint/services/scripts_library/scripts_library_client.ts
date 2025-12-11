@@ -417,7 +417,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }
 
   public async get(scriptId: string): Promise<EndpointScript> {
-    throw new ScriptLibraryError('Not implemented', 501);
+    return this.mapSoAttributesToEndpointScript(await this.getScriptSavedObject(scriptId));
   }
 
   public async list({
