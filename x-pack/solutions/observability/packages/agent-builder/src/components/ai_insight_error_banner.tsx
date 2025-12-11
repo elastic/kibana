@@ -27,7 +27,7 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
     >
       <p>
         {i18n.translate('undefined.aiInsight.errorMessage', {
-          defaultMessage: `The AI insight could not be generated due to the error: ${error}`,
+          defaultMessage: `The AI insight could not be generated: ${error}`,
         })}
       </p>
       {onRetry && (

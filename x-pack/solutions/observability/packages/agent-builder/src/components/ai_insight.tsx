@@ -89,16 +89,15 @@ export function AiInsight({
         }}
       >
         <EuiSpacer size="m" />
-        {isLoading ? (
-          <EuiPanel color="subdued">
+        <EuiPanel color="subdued">
+          {isLoading ? (
             <EuiSkeletonText lines={3} />
-          </EuiPanel>
-        ) : error ? (
-          <AiInsightErrorBanner error={error} onRetry={onOpen} />
-        ) : (
-          <EuiMarkdownFormat textSize="s">{content ?? ''}</EuiMarkdownFormat>
-        )}
-
+          ) : error ? (
+            <AiInsightErrorBanner error={error} onRetry={onOpen} />
+          ) : (
+            <EuiMarkdownFormat textSize="s">{content ?? ''}</EuiMarkdownFormat>
+          )}
+        </EuiPanel>
         {!isLoading && onStartConversation && Boolean(content && content.trim()) ? (
           <>
             <EuiSpacer size="m" />
