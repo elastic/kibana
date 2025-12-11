@@ -5,15 +5,12 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { nodeBuilder } from '@kbn/es-query';
-import { buildNode as buildFunctionNode } from '@kbn/es-query/src/kuery/node_types/function';
 
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../constants';
-import type { Installation } from '../../types';
-import { installationStatuses } from '../../../common/constants';
+import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../../common/constants';
 import { type HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
-
+import { getInstalledPackageWithAssets, getInstallationObject } from '../epm/packages/get';
 import { stepCreateAlertingRules } from '../epm/packages/install_state_machine/steps/step_create_alerting_rules';
+import { createArchiveIteratorFromMap } from '../epm/archive/archive_iterator';
 
 export async function ensureDeferredAlertingRules(
   logger: Logger,
@@ -22,38 +19,45 @@ export async function ensureDeferredAlertingRules(
   spaceId: string,
   authorizationHeader: HTTPAuthorizationHeader
 ) {
-  // Query for installed packages that have deferred alerting rules to be installed
-  const _filter = `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_kibana:{ type: "alert" AND deferred: true }`;
-  const filter = nodeBuilder.and([
-    nodeBuilder.is(
-      `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
-      installationStatuses.Installed
-    ),
-    buildFunctionNode(
-      'nested',
-      `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_kibana`,
-      nodeBuilder.and([nodeBuilder.is('type', 'alert'), nodeBuilder.is('deferred', 'true')])
-    ),
-  ]);
-  const packageInstallations = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    filter,
-    fields: ['installed_kibana', 'name', 'version'],
-    perPage: 100,
+  const installedPkgWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName: FLEET_ELASTIC_AGENT_PACKAGE,
+    logger,
   });
 
-  console.log('Packages with deferred:', JSON.stringify(packageInstallations, null, 2));
+  if (!installedPkgWithAssets) {
+    return;
+  }
 
-  // await stepCreateAlertingRules({
-  //   logger,
-  //   savedObjectsClient,
-  //   esClient,
-  //   packageInstallContext: {
-  //     packageInfo,
-  //     paths: installedPkgWithAssets.paths,
-  //     archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
-  //   },
-  //   spaceId,
-  //   authorizationHeader,
-  // });
+  const installation = await getInstallationObject({
+    pkgName: FLEET_ELASTIC_AGENT_PACKAGE,
+    savedObjectsClient,
+  });
+
+  if (!installation) {
+    return;
+  }
+
+  const deferredRules = installation.attributes.installed_kibana.filter(
+    (asset) => asset.type === 'alert' && asset.deferred
+  );
+
+  if (deferredRules.length === 0) {
+    return;
+  }
+
+  const { packageInfo, paths, assetsMap } = installedPkgWithAssets;
+
+  await stepCreateAlertingRules({
+    logger,
+    savedObjectsClient,
+    esClient,
+    packageInstallContext: {
+      packageInfo,
+      paths,
+      archiveIterator: createArchiveIteratorFromMap(assetsMap),
+    },
+    spaceId,
+    authorizationHeader,
+  });
 }
