@@ -8,7 +8,6 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '..';
@@ -23,16 +22,11 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
-import type { UnifiedHistogramSuggestionContext } from '../types';
 
 /**
  * The current state of the container
  */
 export interface UnifiedHistogramState {
-  /**
-   * The current Lens suggestion
-   */
-  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -49,10 +43,6 @@ export interface UnifiedHistogramState {
    * Lens embeddable output observable
    */
   dataLoading$?: PublishingSubject<boolean | undefined>;
-  /**
-   * The current time interval of the chart
-   */
-  timeInterval: string;
   /**
    * The current top panel height
    */
@@ -92,25 +82,15 @@ export interface UnifiedHistogramStateService {
   /**
    * The current state of the container
    */
-  state$: Observable<UnifiedHistogramState>;
+  state$: BehaviorSubject<UnifiedHistogramState>;
   /**
    * Sets the current chart hidden state
    */
   setChartHidden: (chartHidden: boolean) => void;
   /**
-   * Sets current Lens suggestion
-   */
-  setCurrentSuggestionContext: (
-    suggestionContext: UnifiedHistogramSuggestionContext | undefined
-  ) => void;
-  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
-  /**
-   * Sets the current time interval
-   */
-  setTimeInterval: (timeInterval: string) => void;
   /**
    * Sets the current Lens request adapter
    */
@@ -144,9 +124,7 @@ export const createStateService = (
 
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     chartHidden: initialChartHidden,
-    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
-    timeInterval: 'auto',
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     ...initialState,
@@ -177,16 +155,6 @@ export const createStateService = (
       }
 
       updateState({ topPanelHeight });
-    },
-
-    setCurrentSuggestionContext: (
-      suggestionContext: UnifiedHistogramSuggestionContext | undefined
-    ) => {
-      updateState({ currentSuggestionContext: suggestionContext });
-    },
-
-    setTimeInterval: (timeInterval: string) => {
-      updateState({ timeInterval });
     },
 
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {

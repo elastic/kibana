@@ -132,6 +132,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                           isLoading={isUpdating}
                           isDisabled={areButtonsDisabled}
                           onClick={onCancelEdit}
+                          data-test-subj="stream_description_cancel_edit_button"
                         >
                           {CANCEL_LABEL}
                         </EuiButtonEmpty>
@@ -146,6 +147,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                           onClick: onGenerateDescription,
                           isDisabled: areButtonsDisabled,
                           isLoading: isGenerating,
+                          'data-test-subj': 'stream_description_generate_button',
                         }}
                       />
                     </EuiFlexItem>
@@ -164,6 +166,11 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                             onSaveDescription();
                           }
                         }}
+                        data-test-subj={
+                          isEditing
+                            ? 'stream_description_edit_button'
+                            : 'stream_description_save_button'
+                        }
                       >
                         {isEditing ? SAVE_DESCRIPTION_BUTTON_LABEL : EDIT_DESCRIPTION_BUTTON_LABEL}
                       </EuiButton>
@@ -189,6 +196,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                     isLoading={isUpdating}
                     isDisabled={areButtonsDisabled}
                     onClick={onStartEditing}
+                    data-test-subj="stream_description_manual_entry_button"
                   >
                     {MANUAL_ENTRY_BUTTON_LABEL}
                   </EuiButton>
@@ -203,6 +211,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                       onClick: onGenerateDescription,
                       isDisabled: areButtonsDisabled,
                       isLoading: isGenerating,
+                      'data-test-subj': 'stream_description_generate_button',
                     }}
                   />
                 </EuiFlexItem>

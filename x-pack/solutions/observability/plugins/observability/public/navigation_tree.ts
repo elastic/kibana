@@ -66,7 +66,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
       },
       {
         link: 'observability-overview:cases',
-        renderAs: 'panelOpener',
         children: [
           {
             link: 'observability-overview:cases_configure',

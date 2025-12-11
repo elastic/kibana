@@ -78,9 +78,9 @@ export const RetentionCard = ({
 
   const retentionTypeApplied = retentionDisabled
     ? i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.infinite',
+        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.indefinite',
         {
-          defaultMessage: 'Infinite retention',
+          defaultMessage: 'Indefinite retention',
         }
       )
     : customRetentionPeriod

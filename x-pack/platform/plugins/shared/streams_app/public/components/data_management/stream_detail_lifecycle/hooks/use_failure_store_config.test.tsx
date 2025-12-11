@@ -6,23 +6,21 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { Streams } from '@kbn/streams-schema';
+import type { EffectiveFailureStore, Streams } from '@kbn/streams-schema';
 import { useFailureStoreConfig, transformFailureStoreConfig } from './use_failure_store_config';
-import { useFailureStoreDefaultRetention } from './use_failure_store_default_retention';
 
-jest.mock('./use_failure_store_default_retention');
-
-const mockUseFailureStoreDefaultRetention = useFailureStoreDefaultRetention as jest.MockedFunction<
-  typeof useFailureStoreDefaultRetention
->;
+jest.mock('./use_failure_store_default_retention', () => ({
+  useFailureStoreDefaultRetention: jest.fn(() => ({ value: undefined })),
+}));
 
 const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetResponse> => ({
   stream: {
     name,
     description: '',
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { inherit: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       failure_store: { inherit: {} },
     } as any,
@@ -31,7 +29,7 @@ const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetRespo
 
 const createClassicDefinition = (
   name: string,
-  failureStoreConfig: any
+  failureStoreConfig: EffectiveFailureStore
 ): Streams.ClassicStream.GetResponse => ({
   ...createBaseDefinition(name),
   stream: {
@@ -62,7 +60,7 @@ const createClassicDefinition = (
 
 const createWiredDefinition = (
   name: string,
-  failureStoreConfig: any,
+  failureStoreConfig: EffectiveFailureStore,
   isRoot: boolean = false
 ): Streams.WiredStream.GetResponse => ({
   ...createBaseDefinition(name),
@@ -102,22 +100,13 @@ const createWiredDefinition = (
 });
 
 describe('useFailureStoreConfig', () => {
-  const mockRefresh = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseFailureStoreDefaultRetention.mockReturnValue({
-      value: '30d',
-      refresh: mockRefresh,
-    });
-  });
-
   describe('Classic Stream', () => {
     it('should return config for enabled failure store with custom retention', () => {
       const definition = createClassicDefinition('logs-test', {
         lifecycle: {
           enabled: {
             data_retention: '7d',
+            is_default_retention: false,
           },
         },
       });
@@ -127,21 +116,20 @@ describe('useFailureStoreConfig', () => {
       expect(result.current).toEqual({
         failureStoreEnabled: true,
         customRetentionPeriod: '7d',
-        defaultRetentionPeriod: '30d',
+        defaultRetentionPeriod: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
-        refreshDefaultRetention: mockRefresh,
       });
     });
 
     it('should return config for enabled failure store without custom retention', () => {
       const definition = createClassicDefinition('logs-test', {
         lifecycle: {
-          enabled: {},
+          enabled: { is_default_retention: true },
         },
       });
 
@@ -150,14 +138,13 @@ describe('useFailureStoreConfig', () => {
       expect(result.current).toEqual({
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
-        defaultRetentionPeriod: '30d',
+        defaultRetentionPeriod: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
-        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -171,14 +158,13 @@ describe('useFailureStoreConfig', () => {
       expect(result.current).toEqual({
         failureStoreEnabled: false,
         customRetentionPeriod: undefined,
-        defaultRetentionPeriod: '30d',
+        defaultRetentionPeriod: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
-        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -194,14 +180,13 @@ describe('useFailureStoreConfig', () => {
       expect(result.current).toEqual({
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
-        defaultRetentionPeriod: '30d',
+        defaultRetentionPeriod: undefined,
         retentionDisabled: true,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
-        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -210,6 +195,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '14d',
+            is_default_retention: false,
           },
         },
       });
@@ -221,6 +207,38 @@ describe('useFailureStoreConfig', () => {
 
       expect(result.current.inheritOptions.isCurrentlyInherited).toBe(false);
     });
+
+    it('should use cluster default retention when stream has no default retention', () => {
+      const { useFailureStoreDefaultRetention } = jest.requireMock(
+        './use_failure_store_default_retention'
+      );
+      useFailureStoreDefaultRetention.mockReturnValueOnce({
+        clusterDefaultRetention: '90d',
+      });
+
+      const definition = createClassicDefinition('logs-test', {
+        lifecycle: {
+          enabled: {
+            data_retention: '30d',
+            is_default_retention: false,
+          },
+        },
+      });
+
+      const { result } = renderHook(() => useFailureStoreConfig(definition));
+
+      expect(result.current).toEqual({
+        failureStoreEnabled: true,
+        customRetentionPeriod: '30d',
+        defaultRetentionPeriod: '90d',
+        retentionDisabled: false,
+        inheritOptions: {
+          canShowInherit: true,
+          isWired: false,
+          isCurrentlyInherited: true,
+        },
+      });
+    });
   });
 
   describe('Wired Stream (child)', () => {
@@ -229,6 +247,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '5d',
+            is_default_retention: false,
           },
         },
       });
@@ -238,14 +257,13 @@ describe('useFailureStoreConfig', () => {
       expect(result.current).toEqual({
         failureStoreEnabled: true,
         customRetentionPeriod: '5d',
-        defaultRetentionPeriod: '30d',
+        defaultRetentionPeriod: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: true,
           isCurrentlyInherited: true,
         },
-        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -254,6 +272,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '30d',
+            is_default_retention: true,
           },
         },
       });
@@ -269,6 +288,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '10d',
+            is_default_retention: false,
           },
         },
       });
@@ -291,11 +311,13 @@ describe('useFailureStoreConfig', () => {
           lifecycle: {
             enabled: {
               data_retention: '30d',
+              is_default_retention: true,
             },
           },
         },
         true
       );
+      // For root streams, failure_store should not be inherited
       definition.stream.ingest.failure_store = {
         lifecycle: { enabled: { data_retention: '30d' } },
       };
@@ -304,7 +326,7 @@ describe('useFailureStoreConfig', () => {
 
       expect(result.current).toEqual({
         failureStoreEnabled: true,
-        customRetentionPeriod: '30d',
+        customRetentionPeriod: undefined,
         defaultRetentionPeriod: '30d',
         retentionDisabled: false,
         inheritOptions: {
@@ -312,7 +334,6 @@ describe('useFailureStoreConfig', () => {
           isWired: true,
           isCurrentlyInherited: false,
         },
-        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -323,6 +344,7 @@ describe('useFailureStoreConfig', () => {
           lifecycle: {
             enabled: {
               data_retention: '60d',
+              is_default_retention: false,
             },
           },
         },
@@ -336,41 +358,6 @@ describe('useFailureStoreConfig', () => {
 
       expect(result.current.inheritOptions.canShowInherit).toBe(false);
       expect(result.current.customRetentionPeriod).toBe('60d');
-    });
-  });
-
-  describe('Default retention period', () => {
-    it('should use the default retention period from the hook', () => {
-      mockUseFailureStoreDefaultRetention.mockReturnValue({
-        value: '90d',
-        refresh: mockRefresh,
-      });
-      const definition = createClassicDefinition('logs-test', {
-        lifecycle: {
-          enabled: {},
-        },
-      });
-
-      const { result } = renderHook(() => useFailureStoreConfig(definition));
-
-      expect(result.current.defaultRetentionPeriod).toBe('90d');
-      expect(mockUseFailureStoreDefaultRetention).toHaveBeenCalledWith('logs-test');
-    });
-
-    it('should handle undefined default retention', () => {
-      mockUseFailureStoreDefaultRetention.mockReturnValue({
-        value: undefined,
-        refresh: mockRefresh,
-      });
-      const definition = createClassicDefinition('logs-test', {
-        lifecycle: {
-          enabled: {},
-        },
-      });
-
-      const { result } = renderHook(() => useFailureStoreConfig(definition));
-
-      expect(result.current.defaultRetentionPeriod).toBeUndefined();
     });
   });
 });
@@ -408,7 +395,7 @@ describe('transformFailureStoreConfig', () => {
     });
 
     expect(result).toEqual({
-      lifecycle: { enabled: { data_retention: undefined } },
+      lifecycle: { enabled: {} },
     });
   });
 
@@ -431,11 +418,5 @@ describe('transformFailureStoreConfig', () => {
     });
 
     expect(result).toEqual({ inherit: {} });
-  });
-
-  it('should default failureStoreEnabled to false', () => {
-    const result = transformFailureStoreConfig({});
-
-    expect(result).toEqual({ disabled: {} });
   });
 });

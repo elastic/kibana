@@ -303,6 +303,19 @@
           },
           {
             "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "\nId of the space associated with the request"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.AgentHandlerContext.esClient",
             "type": "Object",
             "tags": [],
@@ -2341,6 +2354,19 @@
             "signature": [
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ToolHandlerContext.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "\nId of the space associated with the request"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
             "deprecated": false,

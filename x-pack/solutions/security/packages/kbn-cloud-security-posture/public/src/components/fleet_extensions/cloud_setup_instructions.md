@@ -41,11 +41,13 @@ CloudSetup (Main Container)
 ## Core Context System
 
 ### CloudSetupProvider
+
 **Location**: `cloud_setup_context.tsx`
 
 Provides global state and configuration for all cloud setup components.
 
 **Props**:
+
 - `packagePolicy: NewPackagePolicy` - Fleet package policy configuration
 - `packageInfo: PackageInfo` - Package metadata and version info
 - `config: CloudSetupConfig` - Provider-specific configuration
@@ -54,6 +56,7 @@ Provides global state and configuration for all cloud setup components.
 - `children: React.ReactNode` - Child components
 
 **Usage**:
+
 ```tsx
 <CloudSetupProvider
   packagePolicy={policy}
@@ -67,11 +70,13 @@ Provides global state and configuration for all cloud setup components.
 ```
 
 ### useCloudSetup Hook
+
 **Location**: `hooks/use_cloud_setup_context.tsx`
 
 Hook for accessing cloud setup context throughout the component tree.
 
 **Returns**:
+
 - `awsPolicyType: string` - AWS policy type identifier
 - `gcpPolicyType: string` - GCP policy type identifier
 - `azurePolicyType: string` - Azure policy type identifier
@@ -84,11 +89,13 @@ Hook for accessing cloud setup context throughout the component tree.
 ## AWS Components
 
 ### AwsCredentialsForm
+
 **Location**: `aws_credentials_form/aws_credentials_form.tsx`
 
 Main AWS credentials configuration component.
 
 **Props**:
+
 - `newPolicy: NewPackagePolicy` - Policy being configured
 - `input: NewPackagePolicyInput` - Specific input configuration
 - `updatePolicy: UpdatePolicy` - Function to update policy state
@@ -98,12 +105,14 @@ Main AWS credentials configuration component.
 - `isValid: boolean` - Overall form validity
 
 **Key Features**:
+
 - CloudFormation vs Manual setup selection
 - Organization vs Single account support
 - Dynamic credential type selection
 - Integration with AWS hooks
 
 **Test Selectors**:
+
 - `aws-setup-info` - Setup information section
 - `aws-cloudformation-setup-option` - CloudFormation radio button
 - `aws-manual-setup-option` - Manual setup radio button
@@ -111,11 +120,13 @@ Main AWS credentials configuration component.
 - `externalLink` - Documentation links
 
 ### AwsCredentialTypeSelector
+
 **Location**: `aws_credentials_form/aws_credential_type_selector.tsx`
 
 Dropdown for selecting AWS credential types (assume role, direct keys, etc.).
 
 **Props**:
+
 - `type: string` - Currently selected credential type
 - `options: Array` - Available credential options
 - `onChange: (type: string) => void` - Change handler
@@ -123,6 +134,7 @@ Dropdown for selecting AWS credential types (assume role, direct keys, etc.).
 - `label: string` - Field label
 
 **Supported Types**:
+
 - `assume_role` - IAM role assumption
 - `direct_access_keys` - Access key/secret key
 - `temporary_keys` - Temporary security credentials
@@ -131,31 +143,37 @@ Dropdown for selecting AWS credential types (assume role, direct keys, etc.).
 - `cloud_formation` - CloudFormation deployment
 
 ### AwsAccountTypeSelector
+
 **Location**: `aws_credentials_form/aws_account_type_selector.tsx`
 
 Selector for AWS account deployment type.
 
 **Props**:
+
 - `input: NewPackagePolicyInput` - Input configuration
 - `newPolicy: NewPackagePolicy` - Policy configuration
 - `updatePolicy: UpdatePolicy` - Update function
 - `packageInfo: PackageInfo` - Package info
 
 **Account Types**:
+
 - `single-account` - Single AWS account
 - `organization-account` - AWS Organizations management account
 
 ### AwsInputVarFields
+
 **Location**: `aws_credentials_form/aws_input_var_fields.tsx`
 
 Dynamic form fields for AWS credential inputs.
 
 **Props**:
+
 - `fields: Array` - Field configuration array
 - `packageInfo: PackageInfo` - Package information
 - `onChange: (key: string, value: string) => void` - Change handler
 
 **Dynamic Fields** (based on credential type):
+
 - Access Key ID
 - Secret Access Key
 - Session Token
@@ -165,35 +183,43 @@ Dynamic form fields for AWS credential inputs.
 - Credential Profile Name
 
 ### AwsSetupInfo
+
 **Location**: `aws_credentials_form/aws_setup_info.tsx`
 
 Informational component explaining AWS setup process.
 
 **Props**:
+
 - `info: React.ReactNode` - Informational content to display
 
 ## GCP Components
 
 ### GcpCredentialsForm
+
 **Location**: `gcp_credentials_form/gcp_credential_form.tsx`
 
 Main GCP credentials configuration component.
 
 **Features**:
+
 - Cloud Shell vs Manual setup
 - Service account key management
 - Project ID configuration
 - Credentials file upload
 
 ### GcpAccountTypeSelector
+
 Similar to AWS account type selector but for GCP organizations.
 
 **Account Types**:
+
 - `single-project` - Single GCP project
 - `organization-project` - GCP organization
 
 ### GcpInputVarFields
+
 Dynamic form fields for GCP-specific inputs:
+
 - Project ID
 - Credentials JSON
 - Service Account Key File
@@ -201,20 +227,24 @@ Dynamic form fields for GCP-specific inputs:
 ## Azure Components
 
 ### AzureCredentialsForm
+
 **Location**: `azure_credentials_form/azure_credentials_form.tsx`
 
 Main Azure credentials configuration component.
 
 **Features**:
+
 - ARM Template vs Manual setup
 - Service principal configuration
 - Managed identity support
 - Subscription/tenant management
 
 ### AzureCredentialTypeSelector
+
 Azure-specific credential type selection.
 
 **Supported Types**:
+
 - `service_principal_with_client_secret`
 - `service_principal_with_client_certificate`
 - `service_principal_with_client_username_and_password`
@@ -223,23 +253,28 @@ Azure-specific credential type selection.
 - `cloud_connectors`
 
 ### AzureAccountTypeSelector
+
 Azure account deployment type selector.
 
 **Account Types**:
-- `single-subscription` - Single Azure subscription
-- `organization-subscription` - Azure organization
+
+- `single-account` - Single Azure subscription
+- `organization-account` - Azure organization (tenant root group)
 
 ## Common Components
 
 ### ReadDocumentation
+
 **Location**: `common.tsx`
 
 Reusable component for documentation links.
 
 **Props**:
+
 - `url: string` - Documentation URL
 
 **Features**:
+
 - Opens links in new tab
 - Consistent styling
 - Accessibility support
@@ -247,11 +282,13 @@ Reusable component for documentation links.
 **Test Selector**: `externalLink`
 
 ### RadioGroup
+
 **Location**: `csp_boxed_radio_group.tsx`
 
 Custom radio button group component.
 
 **Props**:
+
 - `options: CspRadioOption[]` - Radio button options
 - `idSelected: string` - Currently selected option
 - `onChange: (id: string) => void` - Change handler
@@ -262,20 +299,21 @@ Custom radio button group component.
 ## Configuration System
 
 ### CloudSetupConfig
+
 **Location**: `types.ts`
 
 Main configuration interface for cloud setup.
 
 ```typescript
 interface CloudSetupConfig {
-  policyTemplate: string;           // Policy template name
-  name: string;                    // Full integration name
-  shortName: string;               // Short name (e.g., "CSPM")
+  policyTemplate: string; // Policy template name
+  name: string; // Full integration name
+  shortName: string; // Short name (e.g., "CSPM")
   defaultProvider: CloudProviders; // Default cloud provider
   namespaceSupportEnabled?: boolean;
-  overviewPath: string;           // Overview page path
-  getStartedPath: string;         // Getting started path
-  showCloudTemplates: boolean;    // Enable cloud templates
+  overviewPath: string; // Overview page path
+  getStartedPath: string; // Getting started path
+  showCloudTemplates: boolean; // Enable cloud templates
   providers: {
     aws: AwsCloudProviderConfig;
     gcp: GcpCloudProviderConfig;
@@ -287,6 +325,7 @@ interface CloudSetupConfig {
 ### Provider-Specific Configuration
 
 #### AwsCloudProviderConfig
+
 ```typescript
 interface AwsCloudProviderConfig extends CloudProviderConfig {
   inputFieldMapping?: AwsInputFieldMapping; // Field mappings
@@ -294,12 +333,13 @@ interface AwsCloudProviderConfig extends CloudProviderConfig {
 ```
 
 #### CloudProviderConfig
+
 ```typescript
 interface CloudProviderConfig {
-  type: string;                           // Provider policy type
-  enableOrganization?: boolean;           // Organization support
-  getStartedPath: string;                // Documentation path
-  enabled?: boolean;                     // Provider enabled
+  type: string; // Provider policy type
+  enableOrganization?: boolean; // Organization support
+  getStartedPath: string; // Documentation path
+  enabled?: boolean; // Provider enabled
   cloudConnectorEnabledVersion?: string; // Min version for connectors
 }
 ```
@@ -307,27 +347,29 @@ interface CloudProviderConfig {
 ## Constants Reference
 
 ### Setup Formats
+
 ```typescript
 // AWS
 AWS_SETUP_FORMAT = {
   CLOUD_FORMATION: 'cloud_formation',
-  MANUAL: 'manual'
-}
+  MANUAL: 'manual',
+};
 
 // Azure
 AZURE_SETUP_FORMAT = {
   ARM_TEMPLATE: 'arm_template',
-  MANUAL: 'manual'
-}
+  MANUAL: 'manual',
+};
 
 // GCP
 GCP_SETUP_ACCESS = {
   CLOUD_SHELL: 'google_cloud_shell',
-  MANUAL: 'manual'
-}
+  MANUAL: 'manual',
+};
 ```
 
 ### Credential Types
+
 ```typescript
 // AWS
 AWS_CREDENTIALS_TYPE = {
@@ -336,15 +378,15 @@ AWS_CREDENTIALS_TYPE = {
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   TEMPORARY_KEYS: 'temporary_keys',
   SHARED_CREDENTIALS: 'shared_credentials',
-  CLOUD_FORMATION: 'cloud_formation'
-}
+  CLOUD_FORMATION: 'cloud_formation',
+};
 
 // GCP
 GCP_CREDENTIALS_TYPE = {
   CREDENTIALS_FILE: 'credentials-file',
   CREDENTIALS_JSON: 'credentials-json',
-  CREDENTIALS_NONE: 'credentials-none'
-}
+  CREDENTIALS_NONE: 'credentials-none',
+};
 
 // Azure
 AZURE_CREDENTIALS_TYPE = {
@@ -352,20 +394,23 @@ AZURE_CREDENTIALS_TYPE = {
   CLOUD_CONNECTORS: 'cloud_connectors',
   SERVICE_PRINCIPAL_WITH_CLIENT_SECRET: 'service_principal_with_client_secret',
   SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE: 'service_principal_with_client_certificate',
-  SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD: 'service_principal_with_client_username_and_password',
-  MANAGED_IDENTITY: 'managed_identity'
-}
+  SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD:
+    'service_principal_with_client_username_and_password',
+  MANAGED_IDENTITY: 'managed_identity',
+};
 ```
 
 ## Testing Guidelines
 
 ### Component Testing
+
 - Use `I18nProvider` wrapper for components with internationalization
 - Mock hooks using `jest.mock()` for isolated component testing
 - Use real implementations where possible for integration testing
 - Prefer `screen.getByLabelText()` and `screen.getByRole()` over test IDs
 
 ### Common Test Patterns
+
 ```typescript
 // Setup component with providers
 const renderWithProviders = (props: ComponentProps) => {
@@ -389,6 +434,7 @@ expect(mockOnSetupFormatChange).toHaveBeenCalledWith(AWS_SETUP_FORMAT.CLOUD_FORM
 ```
 
 ### Key Test Selectors
+
 - `aws-cloudformation-setup-option` - CloudFormation radio
 - `aws-manual-setup-option` - Manual setup radio
 - `aws-credentials-type-selector` - Credential type dropdown
@@ -398,28 +444,34 @@ expect(mockOnSetupFormatChange).toHaveBeenCalledWith(AWS_SETUP_FORMAT.CLOUD_FORM
 ## Utility Functions
 
 ### updatePolicyWithInputs
+
 Updates package policy with new input values.
 
 **Parameters**:
+
 - `policy: NewPackagePolicy` - Current policy
 - `policyType: string` - Provider policy type
 - `updates: Record<string, any>` - Updates to apply
 
 ### getAwsCredentialsType
+
 Extracts current AWS credentials type from input configuration.
 
 ### getCloudFormationDefaultValue
+
 Gets CloudFormation template URL from package info.
 
 ## Error Handling
 
 ### Common Error Scenarios
+
 1. **Missing CloudFormation template**: Show warning message
 2. **Invalid credentials**: Highlight validation errors
 3. **Network connectivity**: Handle cloud connector failures
 4. **Version compatibility**: Check minimum versions for features
 
 ### Validation Patterns
+
 - Required field validation
 - Format validation (JSON, URLs, etc.)
 - Cross-field validation (e.g., role ARN format)
@@ -428,16 +480,19 @@ Gets CloudFormation template URL from package info.
 ## Integration Points
 
 ### Fleet Plugin Integration
+
 - `NewPackagePolicy` and `NewPackagePolicyInput` types
 - `updatePolicy` callback for policy changes
 - `PackageInfo` for version and metadata
 
 ### Cloud Plugin Integration
+
 - Cloud connector detection
 - Multi-cloud deployment support
 - Elastic Stack ID resolution
 
 ### UI Settings Integration
+
 - Feature flag management
 - User preference storage
 - Theme and localization
@@ -445,6 +500,7 @@ Gets CloudFormation template URL from package info.
 ## Development Best Practices
 
 ### Component Development
+
 1. **Use TypeScript interfaces** for all props and state
 2. **Implement proper error boundaries** for graceful failures
 3. **Add comprehensive test coverage** including edge cases
@@ -452,6 +508,7 @@ Gets CloudFormation template URL from package info.
 5. **Use consistent naming conventions** across components
 
 ### State Management
+
 1. **Minimize local state** - prefer context for shared data
 2. **Use proper dependency arrays** in useEffect hooks
 3. **Handle async operations** with proper loading states
@@ -460,7 +517,9 @@ Gets CloudFormation template URL from package info.
 ### TypeScript Best Practices - Avoiding `any` Types
 
 #### Why Avoid `any`
+
 Using `any` defeats the purpose of TypeScript by:
+
 - Disabling type checking and losing compile-time safety
 - Eliminating IntelliSense and code completion
 - Making refactoring dangerous and error-prone
@@ -469,6 +528,7 @@ Using `any` defeats the purpose of TypeScript by:
 #### Strategies to Replace `any`
 
 ##### 1. Use Specific Interface Definitions
+
 ```typescript
 // ❌ Bad - loses all type safety
 const handleChange = (event: any) => {
@@ -495,6 +555,7 @@ const handleFormSubmit = (formData: AwsCredentialsFormData) => {
 ```
 
 ##### 2. Use Generic Types for Reusable Components
+
 ```typescript
 // ❌ Bad - any loses type information
 interface RadioGroupProps {
@@ -518,10 +579,11 @@ interface RadioGroupProps<T> {
   options={setupFormatOptions}
   idSelected={setupFormat}
   onChange={(format) => onSetupFormatChange(format)} // format is typed as AwsSetupFormat
-/>
+/>;
 ```
 
 ##### 3. Use Union Types for Known Variations
+
 ```typescript
 // ❌ Bad - any allows invalid values
 interface ComponentProps {
@@ -541,10 +603,11 @@ const AWS_SETUP_FORMATS = {
   MANUAL: 'manual',
 } as const;
 
-type AwsSetupFormat = typeof AWS_SETUP_FORMATS[keyof typeof AWS_SETUP_FORMATS];
+type AwsSetupFormat = (typeof AWS_SETUP_FORMATS)[keyof typeof AWS_SETUP_FORMATS];
 ```
 
 ##### 4. Use `unknown` Instead of `any` for Truly Unknown Data
+
 ```typescript
 // ❌ Bad - any bypasses all checks
 const parseApiResponse = (response: any) => {
@@ -571,6 +634,7 @@ const isApiResponse = (obj: unknown): obj is ApiResponse => {
 ```
 
 ##### 5. Use Utility Types for Complex Scenarios
+
 ```typescript
 // ✅ Use Pick to select specific properties
 type UpdatePolicyParams = Pick<NewPackagePolicy, 'inputs' | 'name' | 'vars'>;
@@ -586,6 +650,7 @@ type ManualCredentialTypes = Exclude<AwsCredentialsType, 'cloud_formation'>;
 ```
 
 ##### 6. Proper Event Handler Typing
+
 ```typescript
 // ❌ Bad - loses event type information
 const handleClick = (e: any) => {
@@ -606,6 +671,7 @@ const handleFormChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 ```
 
 ##### 7. Mock Types in Tests
+
 ```typescript
 // ❌ Bad - any in mocks loses type safety
 const mockUpdatePolicy = jest.fn() as any;
@@ -629,6 +695,7 @@ mockUseAwsCredentialsForm.mockReturnValue({
 ```
 
 ##### 8. Handle External Library Types
+
 ```typescript
 // ❌ Bad - any for external libraries
 const processFleetData = (fleetData: any) => {
@@ -652,6 +719,7 @@ interface EnhancedPackagePolicy extends NewPackagePolicy {
 ```
 
 #### ESLint Rules to Enforce Type Safety
+
 Add these rules to your ESLint configuration:
 
 ```json
@@ -667,6 +735,7 @@ Add these rules to your ESLint configuration:
 ```
 
 #### Migration Strategy for Existing `any` Types
+
 1. **Identify all `any` usages** with `grep -r ": any" --include="*.ts" --include="*.tsx"`
 2. **Start with function parameters and return types** - highest impact
 3. **Replace with `unknown` first** if exact type is unclear
@@ -675,6 +744,7 @@ Add these rules to your ESLint configuration:
 6. **Test thoroughly** after each replacement
 
 #### Common Cloud Setup Type Definitions
+
 ```typescript
 // Use these instead of any for common scenarios
 type CloudProvider = 'aws' | 'gcp' | 'azure';
@@ -699,6 +769,7 @@ interface ValidationResult {
 ```
 
 ### Testing Strategy
+
 1. **Unit test individual components** with mocked dependencies
 2. **Integration test component interactions** with real dependencies
 3. **Test accessibility** with screen readers and keyboard navigation

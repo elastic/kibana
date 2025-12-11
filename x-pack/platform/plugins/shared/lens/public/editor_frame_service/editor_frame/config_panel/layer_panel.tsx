@@ -445,7 +445,7 @@ export function LayerPanel(props: LayerPanelProps) {
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
-                  {supportsMultipleLayers ? (
+                  {supportsMultipleLayers && !isTextBasedLanguage ? (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={layerActions.cloneLayerAction.displayName}
@@ -483,6 +483,7 @@ export function LayerPanel(props: LayerPanelProps) {
             )}
             <ESQLEditor
               uiSettings={core.uiSettings}
+              http={core.http}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
               layerId={layerId}
@@ -882,25 +883,19 @@ export function LayerPanel(props: LayerPanelProps) {
               activeVisualization.DimensionEditorComponent &&
               openColumnGroup?.enableDimensionEditor && (
                 <>
-                  <div
-                    css={css`
-                      padding: ${euiTheme.size.base} 0;
-                    `}
-                  >
-                    <activeVisualization.DimensionEditorComponent
-                      {...{
-                        ...layerVisualizationConfigProps,
-                        groupId: openColumnGroup.groupId,
-                        accessor: openColumnId,
-                        datasource,
-                        setState: props.updateVisualization,
-                        addLayer: props.addLayer,
-                        removeLayer: props.onRemoveLayer,
-                        panelRef,
-                        isInlineEditing,
-                      }}
-                    />
-                  </div>
+                  <activeVisualization.DimensionEditorComponent
+                    {...{
+                      ...layerVisualizationConfigProps,
+                      groupId: openColumnGroup.groupId,
+                      accessor: openColumnId,
+                      datasource,
+                      setState: props.updateVisualization,
+                      addLayer: props.addLayer,
+                      removeLayer: props.onRemoveLayer,
+                      panelRef,
+                      isInlineEditing,
+                    }}
+                  />
                   {activeVisualization.DimensionEditorAdditionalSectionComponent && (
                     <activeVisualization.DimensionEditorAdditionalSectionComponent
                       {...{

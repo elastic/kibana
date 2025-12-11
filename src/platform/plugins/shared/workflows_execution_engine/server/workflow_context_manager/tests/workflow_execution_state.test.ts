@@ -162,7 +162,7 @@ describe('WorkflowExecutionState', () => {
       id: 'fake-id',
       stepId: 'test-step-execution-id',
       status: ExecutionStatus.COMPLETED,
-      completedAt: '2025-08-05T20:01:00.000Z',
+      finishedAt: '2025-08-05T20:01:00.000Z',
       executionTimeMs: 60000,
     } as EsWorkflowStepExecution);
 
@@ -170,7 +170,7 @@ describe('WorkflowExecutionState', () => {
       expect.objectContaining({
         id: 'fake-id',
         status: ExecutionStatus.COMPLETED,
-        completedAt: '2025-08-05T20:01:00.000Z',
+        finishedAt: '2025-08-05T20:01:00.000Z',
         executionTimeMs: 60000,
       })
     );
@@ -253,7 +253,7 @@ describe('WorkflowExecutionState', () => {
         id: 'fake-uuid-1',
         stepId: 'test-step-execution-id',
         status: ExecutionStatus.COMPLETED,
-        completedAt: '2025-08-05T20:01:00.000Z',
+        finishedAt: '2025-08-05T20:01:00.000Z',
         executionTimeMs: 60000,
       } as EsWorkflowStepExecution);
 
@@ -264,7 +264,7 @@ describe('WorkflowExecutionState', () => {
           id: 'fake-uuid-1',
           stepId: 'test-step-execution-id',
           status: ExecutionStatus.COMPLETED,
-          completedAt: '2025-08-05T20:01:00.000Z',
+          finishedAt: '2025-08-05T20:01:00.000Z',
           executionTimeMs: 60000,
         } as EsWorkflowStepExecution,
       ]);
@@ -285,7 +285,7 @@ describe('WorkflowExecutionState', () => {
         id: fakeUuid,
         stepId: 'test-step-execution-id',
         status: ExecutionStatus.COMPLETED,
-        completedAt: '2025-08-05T20:01:00.000Z',
+        finishedAt: '2025-08-05T20:01:00.000Z',
         executionTimeMs: 2000,
       } as EsWorkflowStepExecution);
 
@@ -296,7 +296,7 @@ describe('WorkflowExecutionState', () => {
           id: fakeUuid,
           stepId: 'test-step-execution-id',
           status: ExecutionStatus.COMPLETED,
-          completedAt: '2025-08-05T20:01:00.000Z',
+          finishedAt: '2025-08-05T20:01:00.000Z',
           startedAt: '2025-08-05T20:00:00.000Z',
           executionTimeMs: 2000,
         } as EsWorkflowStepExecution),
@@ -329,7 +329,7 @@ describe('WorkflowExecutionState', () => {
         id: fakeUuid,
         stepId: 'test-step-execution-id',
         status: ExecutionStatus.COMPLETED,
-        completedAt: '2025-08-05T20:01:00.000Z',
+        finishedAt: '2025-08-05T20:01:00.000Z',
         executionTimeMs: 60000,
       } as EsWorkflowStepExecution);
       const secondFakeUuid = 'fake-uuid-2';

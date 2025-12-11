@@ -8,8 +8,10 @@
 import type { AgentDefinition } from '@kbn/onechat-common';
 import { AgentType } from '@kbn/onechat-common';
 import type { AgentsServiceStart, AgentRegistry } from '../services/agents';
+import type { InternalAgentDefinition } from '../services/agents/agent_registry';
 
 export type MockedAgent = jest.Mocked<AgentDefinition>;
+export type MockedInternalAgent = jest.Mocked<InternalAgentDefinition>;
 export type AgentsServiceStartMock = jest.Mocked<AgentsServiceStart>;
 export type AgentRegistryMock = jest.Mocked<AgentRegistry>;
 
@@ -34,6 +36,23 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
       tools: [],
     },
     readonly: false,
+    ...parts,
+  };
+};
+
+export const createMockedInternalAgent = (
+  parts: Partial<InternalAgentDefinition> = {}
+): MockedInternalAgent => {
+  return {
+    type: AgentType.chat,
+    id: 'test_agent',
+    name: 'Test Agent',
+    description: 'My test agent',
+    configuration: {
+      tools: [],
+    },
+    readonly: false,
+    isAvailable: jest.fn() as any,
     ...parts,
   };
 };

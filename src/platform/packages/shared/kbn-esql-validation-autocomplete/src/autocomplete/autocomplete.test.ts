@@ -22,6 +22,7 @@ import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types'
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
+  attachParameterHelperCommand,
   attachTriggerCommand,
   createCustomCallbackMocks,
   fields,
@@ -34,7 +35,7 @@ import {
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
 import { editorExtensions } from '../__tests__/helpers';
-import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
+import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -797,7 +798,9 @@ describe('autocomplete', () => {
           scalar: true,
           agg: true,
           grouping: true,
-        }).map(attachAsSnippet),
+        })
+          .map(attachAsSnippet)
+          .map(attachParameterHelperCommand),
       ].map(attachTriggerCommand)
     );
 
@@ -1045,7 +1048,7 @@ describe('autocomplete', () => {
   });
 
   describe('IN operator with lists', () => {
-    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ', ' }]);
+    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
   });
 
   describe('Replacement ranges are attached when needed', () => {
