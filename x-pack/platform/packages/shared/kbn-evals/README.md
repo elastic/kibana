@@ -212,6 +212,16 @@ const ragEvaluators = createRagEvaluators({
 });
 ```
 
+#### Overriding K at Runtime
+
+The `k` parameter determines how many top results are evaluated for Precision@K, Recall@K, and F1@K metrics. To override the `k` value defined in the evaluator config at runtime, use the `RAG_EVAL_K` environment variable:
+
+```bash
+RAG_EVAL_K=5 node scripts/playwright test --config ...
+```
+
+The environment variable takes priority over the value passed to `createRagEvaluators()`.
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).

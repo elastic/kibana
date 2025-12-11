@@ -112,6 +112,8 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --co
 # Run only selected evaluators
 SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
 
+# Override RAG evaluator K value (takes priority over config)
+RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
 
 # Retrieve traces from another (monitoring) closter
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts

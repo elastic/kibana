@@ -30,6 +30,17 @@ function shouldFilterByGroundTruthIndices(config: {
   return process.env.INDEX_FOCUSED_RAG_EVAL === 'true';
 }
 
+function getEffectiveK(configK: number): number {
+  const envK = process.env.RAG_EVAL_K;
+  if (envK !== undefined) {
+    const parsed = parseInt(envK, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return configK;
+}
+
 interface RagMetrics {
   precision: number;
   recall: number;
@@ -44,7 +55,8 @@ function computeRagMetrics<TOutput, TReferenceOutput>(
   output: TOutput,
   referenceOutput: TReferenceOutput
 ): RagMetrics | null {
-  const { k, extractRetrievedDocs, extractGroundTruth } = config;
+  const { extractRetrievedDocs, extractGroundTruth } = config;
+  const k = getEffectiveK(config.k);
   const threshold = config.relevanceThreshold ?? DEFAULT_RELEVANCE_THRESHOLD;
 
   const groundTruth: GroundTruth = extractGroundTruth(referenceOutput);
