@@ -20,6 +20,12 @@ module.exports = () => ({
       },
     ],
   ],
+  plugins: [
+    [
+      require.resolve('babel-plugin-transform-barrels'),
+      { executorName: 'jest', isCacheEnabled: true },
+    ],
+  ],
   overrides: [
     {
       exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
