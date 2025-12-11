@@ -9,6 +9,7 @@
 
 export const INCLUDED_OPERATIONS = [
   'search',
+  'index',
   'update',
   'indices.exists',
   'indices.delete',

@@ -2208,6 +2208,8 @@ export const types_aggregations_minimum_interval = z.enum([
     'year'
 ]);
 
+export const types_op_type = z.enum(['index', 'create']);
+
 export const types_refresh = z.enum([
     'true',
     'false',
@@ -9412,6 +9414,112 @@ export const search_index = types_indices;
 /**
  * If `true`, the request's actions must target a data stream (existing or to be created).
  */
+export const index_require_data_stream = z.boolean().register(z.globalRegistry, {
+    description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
+});
+
+/**
+ * If `true`, the destination must be an index alias.
+ */
+export const index_require_alias = z.boolean().register(z.globalRegistry, {
+    description: 'If `true`, the destination must be an index alias.'
+});
+
+/**
+ * The number of shard copies that must be active before proceeding with the operation.
+ * You can set it to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
+ * The default value of `1` means it waits for each primary shard to be active.
+ */
+export const index_wait_for_active_shards = types_wait_for_active_shards;
+
+/**
+ * The version type.
+ */
+export const index_version_type = types_version_type;
+
+/**
+ * An explicit version number for concurrency control.
+ * It must be a non-negative long number.
+ */
+export const index_version = types_version_number;
+
+/**
+ * The period the request waits for the following operations: automatic index creation, dynamic mapping updates, waiting for active shards.
+ *
+ * This parameter is useful for situations where the primary shard assigned to perform the operation might not be available when the operation runs.
+ * Some reasons for this might be that the primary shard is currently recovering from a gateway or undergoing relocation.
+ * By default, the operation will wait on the primary shard to become available for at least 1 minute before failing and responding with an error.
+ * The actual wait time could be longer, particularly when multiple waits occur.
+ */
+export const index_timeout = types_duration;
+
+/**
+ * A custom value that is used to route operations to a specific shard.
+ */
+export const index_routing = types_routing;
+
+/**
+ * If `true`, Elasticsearch refreshes the affected shards to make this operation visible to search.
+ * If `wait_for`, it waits for a refresh to make this operation visible to search.
+ * If `false`, it does nothing with refreshes.
+ */
+export const index_refresh = types_refresh;
+
+/**
+ * The ID of the pipeline to use to preprocess incoming documents.
+ * If the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.
+ * If a final pipeline is configured it will always run, regardless of the value of this parameter.
+ */
+export const index_pipeline = z.string().register(z.globalRegistry, {
+    description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.\nIf a final pipeline is configured it will always run, regardless of the value of this parameter.'
+});
+
+/**
+ * Set to `create` to only index the document if it does not already exist (put if absent).
+ * If a document with the specified `_id` already exists, the indexing operation will fail.
+ * The behavior is the same as using the `<index>/_create` endpoint.
+ * If a document ID is specified, this paramater defaults to `index`.
+ * Otherwise, it defaults to `create`.
+ * If the request targets a data stream, an `op_type` of `create` is required.
+ */
+export const index_op_type = types_op_type;
+
+/**
+ * True or false if to include the document source in the error message in case of parsing errors.
+ */
+export const index_include_source_on_error = z.boolean().register(z.globalRegistry, {
+    description: 'True or false if to include the document source in the error message in case of parsing errors.'
+});
+
+/**
+ * Only perform the operation if the document has this sequence number.
+ */
+export const index_if_seq_no = types_sequence_number;
+
+/**
+ * Only perform the operation if the document has this primary term.
+ */
+export const index_if_primary_term = z.number().register(z.globalRegistry, {
+    description: 'Only perform the operation if the document has this primary term.'
+});
+
+/**
+ * The name of the data stream or index to target.
+ * If the target doesn't exist and matches the name or wildcard (`*`) pattern of an index template with a `data_stream` definition, this request creates the data stream.
+ * If the target doesn't exist and doesn't match a data stream template, this request creates the index.
+ * You can check for existing targets with the resolve index API.
+ */
+export const index_index = types_index_name;
+
+/**
+ * A unique identifier for the document.
+ * To automatically generate a document ID, use the `POST /<target>/_doc/` request format and omit this parameter.
+ */
+export const index_id = types_id;
+
+/**
+ * If `true`, the request's actions must target a data stream (existing or to be created).
+ */
 export const bulk_require_data_stream = z.boolean().register(z.globalRegistry, {
     description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
 });
@@ -9498,6 +9606,8 @@ export const bulk_include_source_on_error = z.boolean().register(z.globalRegistr
  */
 export const bulk_index = types_index_name;
 
+export const index = z.record(z.string(), z.unknown());
+
 export const search = z.object({
     aggregations: z.optional(z.record(z.string(), types_aggregations_aggregation_container).register(z.globalRegistry, {
         description: 'Defines the aggregations that are run as part of the search request.'
@@ -9580,6 +9690,110 @@ export const bulk = z.array(z.union([
     global_bulk_update_action,
     z.record(z.string(), z.unknown())
 ]));
+
+export const index1_request = z.object({
+    body: index,
+    path: z.object({
+        index: types_index_name,
+        id: types_id
+    }),
+    query: z.optional(z.object({
+        if_primary_term: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Only perform the operation if the document has this primary term.'
+        })),
+        if_seq_no: z.optional(types_sequence_number),
+        include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'True or false if to include the document source in the error message in case of parsing errors.'
+        })),
+        op_type: z.optional(types_op_type),
+        pipeline: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.\nIf a final pipeline is configured it will always run, regardless of the value of this parameter.'
+        })),
+        refresh: z.optional(types_refresh),
+        routing: z.optional(types_routing),
+        timeout: z.optional(types_duration),
+        version: z.optional(types_version_number),
+        version_type: z.optional(types_version_type),
+        wait_for_active_shards: z.optional(types_wait_for_active_shards),
+        require_alias: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the destination must be an index alias.'
+        })),
+        require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
+        }))
+    }))
+});
+
+export const index1_response = types_write_response_base;
+
+export const index_request = z.object({
+    body: index,
+    path: z.object({
+        index: types_index_name,
+        id: types_id
+    }),
+    query: z.optional(z.object({
+        if_primary_term: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Only perform the operation if the document has this primary term.'
+        })),
+        if_seq_no: z.optional(types_sequence_number),
+        include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'True or false if to include the document source in the error message in case of parsing errors.'
+        })),
+        op_type: z.optional(types_op_type),
+        pipeline: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.\nIf a final pipeline is configured it will always run, regardless of the value of this parameter.'
+        })),
+        refresh: z.optional(types_refresh),
+        routing: z.optional(types_routing),
+        timeout: z.optional(types_duration),
+        version: z.optional(types_version_number),
+        version_type: z.optional(types_version_type),
+        wait_for_active_shards: z.optional(types_wait_for_active_shards),
+        require_alias: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the destination must be an index alias.'
+        })),
+        require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
+        }))
+    }))
+});
+
+export const index_response = types_write_response_base;
+
+export const index2_request = z.object({
+    body: index,
+    path: z.object({
+        index: types_index_name
+    }),
+    query: z.optional(z.object({
+        if_primary_term: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Only perform the operation if the document has this primary term.'
+        })),
+        if_seq_no: z.optional(types_sequence_number),
+        include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'True or false if to include the document source in the error message in case of parsing errors.'
+        })),
+        op_type: z.optional(types_op_type),
+        pipeline: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.\nIf a final pipeline is configured it will always run, regardless of the value of this parameter.'
+        })),
+        refresh: z.optional(types_refresh),
+        routing: z.optional(types_routing),
+        timeout: z.optional(types_duration),
+        version: z.optional(types_version_number),
+        version_type: z.optional(types_version_type),
+        wait_for_active_shards: z.optional(types_wait_for_active_shards),
+        require_alias: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the destination must be an index alias.'
+        })),
+        require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
+        }))
+    }))
+});
+
+export const index2_response = types_write_response_base;
 
 export const indices_delete_request = z.object({
     body: z.optional(z.never()),

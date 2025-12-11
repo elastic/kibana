@@ -11,8 +11,8 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/6caf375).
- * Generated at: 2025-12-11T14:41:07.180Z
- * Source: elasticsearch-specification repository (7 APIs)
+ * Generated at: 2025-12-11T16:02:59.926Z
+ * Source: elasticsearch-specification repository (8 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -20,6 +20,7 @@
 // import contracts from individual files
 import { BULK_CONTRACT } from './elasticsearch.bulk.gen';
 import { ESQL_QUERY_CONTRACT } from './elasticsearch.esql_query.gen';
+import { INDEX_CONTRACT } from './elasticsearch.index.gen';
 import { INDICES_CREATE_CONTRACT } from './elasticsearch.indices_create.gen';
 import { INDICES_DELETE_CONTRACT } from './elasticsearch.indices_delete.gen';
 import { INDICES_EXISTS_CONTRACT } from './elasticsearch.indices_exists.gen';
@@ -31,6 +32,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
   BULK_CONTRACT,
   ESQL_QUERY_CONTRACT,
+  INDEX_CONTRACT,
   INDICES_CREATE_CONTRACT,
   INDICES_DELETE_CONTRACT,
   INDICES_EXISTS_CONTRACT,
