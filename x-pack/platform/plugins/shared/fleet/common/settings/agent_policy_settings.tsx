@@ -278,7 +278,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: () => (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsDescription"
-        defaultMessage="Control advanced agent internal settings and feature flags - no stability guarantee is provided for these settings."
+        defaultMessage="Control advanced agent internal settings and feature flags. No stability guarantee is provided for these settings."
       />
     ),
     api_field: {
