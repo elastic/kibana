@@ -787,7 +787,7 @@
     "@kbn/object-utils": "link:src/platform/packages/shared/kbn-object-utils",
     "@kbn/object-versioning": "link:src/platform/packages/shared/kbn-object-versioning",
     "@kbn/object-versioning-utils": "link:src/platform/packages/shared/kbn-object-versioning-utils",
-    "@kbn/observability-agent-builder": "link:x-pack/solutions/observability/packages/agent-builder",
+    "@kbn/observability-agent-builder": "link:x-pack/platform/packages/shared/observability-agent-builder",
     "@kbn/observability-agent-builder-plugin": "link:x-pack/solutions/observability/plugins/observability_agent_builder",
     "@kbn/observability-ai-assistant-app-plugin": "link:x-pack/solutions/observability/plugins/observability_ai_assistant_app",
     "@kbn/observability-ai-assistant-management-plugin": "link:x-pack/platform/plugins/private/observability_ai_assistant_management",

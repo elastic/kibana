@@ -16,15 +16,15 @@ project:
   channel: ''
   owner: '@elastic/obs-ai-team'
   metadata:
-    sourceRoot: x-pack/solutions/observability/packages/agent-builder
+    sourceRoot: x-pack/platform/packages/shared/observability-agent-builder
 dependsOn:
   - '@kbn/i18n'
 tags:
   - shared-browser
   - package
   - prod
-  - group-observability
-  - private
+  - group-platform
+  - shared
   - jest-unit-tests
 fileGroups:
   src:
