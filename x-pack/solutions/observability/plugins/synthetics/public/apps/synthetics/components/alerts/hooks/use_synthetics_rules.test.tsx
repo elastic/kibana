@@ -274,4 +274,124 @@ describe('useSyntheticsRules', () => {
     expect(result.current.NewRuleFlyout).not.toBeNull();
     expect(result.current.EditAlertFlyout).toBeNull();
   });
+
+  it('returns EditAlertFlyout as null when isNewRule is true', () => {
+    const stateWithNewRule = createState({
+      ui: {
+        ruleFlyoutVisible: SYNTHETICS_STATUS_RULE,
+        isNewRuleFlyout: true,
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithNewRule);
+
+    const { result } = renderHook(() => useSyntheticsRules(false), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.EditAlertFlyout).toBeNull();
+  });
+
+  it('returns EditAlertFlyout as null when alertFlyoutVisible is null', () => {
+    const stateWithNoFlyout = createState({
+      ui: {
+        ruleFlyoutVisible: null,
+        isNewRuleFlyout: false,
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithNoFlyout);
+
+    const { result } = renderHook(() => useSyntheticsRules(false), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.EditAlertFlyout).toBeNull();
+  });
+
+  it('returns EditAlertFlyout as null when status rule does not exist', () => {
+    const stateWithoutStatusRule = createState({
+      defaultAlerting: {
+        data: {
+          statusRule: null,
+          tlsRule: { id: 'tls-rule-1', name: 'TLS Rule' },
+        },
+        loading: false,
+        success: true,
+      },
+      ui: {
+        ruleFlyoutVisible: SYNTHETICS_STATUS_RULE,
+        isNewRuleFlyout: false,
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithoutStatusRule);
+
+    const { result } = renderHook(() => useSyntheticsRules(false), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.EditAlertFlyout).toBeNull();
+  });
+
+  it('returns EditAlertFlyout as null when TLS rule does not exist', () => {
+    const stateWithoutTlsRule = createState({
+      defaultAlerting: {
+        data: {
+          statusRule: { id: 'status-rule-1', name: 'Status Rule' },
+          tlsRule: null,
+        },
+        loading: false,
+        success: true,
+      },
+      ui: {
+        ruleFlyoutVisible: SYNTHETICS_TLS_RULE,
+        isNewRuleFlyout: false,
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithoutTlsRule);
+
+    const { result } = renderHook(() => useSyntheticsRules(false), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.EditAlertFlyout).toBeNull();
+  });
+
+  it('returns EditAlertFlyout component when status rule exists and isNewRule is false', () => {
+    const stateWithStatusRule = createState({
+      ui: {
+        ruleFlyoutVisible: SYNTHETICS_STATUS_RULE,
+        isNewRuleFlyout: false,
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithStatusRule);
+
+    const { result } = renderHook(() => useSyntheticsRules(false), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.EditAlertFlyout).not.toBeNull();
+    expect(result.current.NewRuleFlyout).toBeNull();
+  });
+
+  it('returns EditAlertFlyout component when TLS rule exists and isNewRule is false', () => {
+    const stateWithTlsRule = createState({
+      ui: {
+        ruleFlyoutVisible: SYNTHETICS_TLS_RULE,
+        isNewRuleFlyout: false,
+      },
+    }) as any;
+
+    setupMockSelectors(stateWithTlsRule);
+
+    const { result } = renderHook(() => useSyntheticsRules(false), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.EditAlertFlyout).not.toBeNull();
+    expect(result.current.NewRuleFlyout).toBeNull();
+  });
 });
