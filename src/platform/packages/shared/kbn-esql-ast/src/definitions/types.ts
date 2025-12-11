@@ -102,6 +102,7 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 export interface FunctionParameter {
   name: string;
   type: FunctionParameterType;
+  description?: string;
   optional?: boolean;
   supportsWildcard?: boolean;
 
@@ -158,6 +159,7 @@ export interface Signature {
   minParams?: number;
   returnType: FunctionReturnType;
   license?: LicenseType;
+  isSignatureRepeating?: boolean;
 }
 
 export interface FunctionDefinition {
