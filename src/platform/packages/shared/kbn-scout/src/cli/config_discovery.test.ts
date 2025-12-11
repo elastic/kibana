@@ -1028,7 +1028,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue([
         {
           name: 'pluginMultiMode',
-          group: 'test',
+          group: 'platform',
           type: 'plugin',
           visibility: 'private',
           configs: [
@@ -1052,7 +1052,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       const statefulGroup = savedData.find(
         (g: any) =>
           g.mode === 'stateful' &&
-          g.group === 'test' &&
+          g.group === 'platform' &&
           g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
       );
       // For stateful (ECH), deploymentType should be based on group: 'test' => 'general' (unknown group defaults to general)
@@ -1063,7 +1063,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       const serverlessEsGroup = savedData.find(
         (g: any) =>
           g.mode === 'serverless' &&
-          g.group === 'test' &&
+          g.group === 'platform' &&
           g.scoutCommand === 'node scripts/scout run-tests --serverless=es --testTarget=cloud'
       );
       // For serverless (MKI), deploymentType should be based on serverRunFlag: '--serverless=es' => 'elasticsearch'
@@ -1074,7 +1074,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       const serverlessObltGroup = savedData.find(
         (g: any) =>
           g.mode === 'serverless' &&
-          g.group === 'test' &&
+          g.group === 'platform' &&
           g.scoutCommand === 'node scripts/scout run-tests --serverless=oblt --testTarget=cloud'
       );
       // For serverless (MKI), deploymentType should be based on serverRunFlag: '--serverless=oblt' => 'observability'
