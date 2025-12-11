@@ -20,12 +20,10 @@ import {
   dslOnlyPanelInfoSchema,
   axisTitleSchemaProps,
 } from '../shared';
-import {
-  mergeAllBucketsWithChartDimensionSchema,
-  mergeAllMetricsWithChartDimensionSchema,
-} from './shared';
+import { mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
 import { positionSchema } from '../alignments';
 import { builderEnums } from '../enums';
+import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
   truncate_after_lines: schema.maybe(
@@ -106,42 +104,35 @@ const heatmapSharedStateSchema = {
   ),
 };
 
-const heatmapAxesStateSchema = {
-  xAxis: mergeAllBucketsWithChartDimensionSchema(schema.object({})),
-  yAxis: schema.maybe(mergeAllBucketsWithChartDimensionSchema(schema.object({}))),
+const heatmapAxesStateSchemaProps = {
+  xAxis: bucketOperationDefinitionSchema,
+  yAxis: schema.maybe(bucketOperationDefinitionSchema),
 };
 
-const heatmapAxesStateESQLSchema = {
+const heatmapAxesStateESQLSchemaProps = {
   xAxis: esqlColumnSchema,
   yAxis: schema.maybe(esqlColumnSchema),
 };
 
-const heatmapStateMetricOptionsSchema = {
+const heatmapStateMetricOptionsSchemaProps = {
   color: schema.maybe(colorByValueSchema),
 };
 
 export const heatmapStateSchemaNoESQL = schema.object({
   ...heatmapSharedStateSchema,
-  ...heatmapAxesStateSchema,
+  ...heatmapAxesStateSchemaProps,
   ...dslOnlyPanelInfoSchema,
   ...datasetSchema,
-  metric: mergeAllMetricsWithChartDimensionSchema(
-    schema.object({
-      ...heatmapStateMetricOptionsSchema,
-    })
+  metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+    schema.object(heatmapStateMetricOptionsSchemaProps)
   ),
 });
 
 export const heatmapStateSchemaESQL = schema.object({
   ...heatmapSharedStateSchema,
-  ...heatmapAxesStateESQLSchema,
+  ...heatmapAxesStateESQLSchemaProps,
   ...datasetEsqlTableSchema,
-  metric: schema.allOf([
-    schema.object({
-      ...heatmapStateMetricOptionsSchema,
-    }),
-    esqlColumnSchema,
-  ]),
+  metric: schema.allOf([schema.object(heatmapStateMetricOptionsSchemaProps), esqlColumnSchema]),
 });
 
 export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL]);
