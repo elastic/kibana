@@ -389,7 +389,6 @@ export async function loadInitial(
     lens,
     initialInput,
     isLinkedToOriginatingApp,
-    inlineEditing,
   });
 
   const loaderSharedArgs: LoaderSharedArgs = {
