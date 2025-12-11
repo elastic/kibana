@@ -74,29 +74,23 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     params: t.type({
       body: t.type({
-        fields: t.record(t.string, t.any),
-        connectorId: t.union([t.string, t.undefined]),
+        index: t.array(t.string),
+        id: t.array(t.string),
       }),
     }),
     handler: async (args) => {
       const { request, core, plugins, dataRegistry, params, logger } = args;
-      const { fields, connectorId: lastUsedConnectorId } = params.body;
+      const { index, id } = params.body;
 
       const [_, pluginsStart] = await core.getStartServices();
 
-      let connectorId = lastUsedConnectorId;
-      if (!connectorId) {
-        const defaultConnector = await pluginsStart.inference.getDefaultConnector(request);
-        connectorId = defaultConnector?.connectorId;
-      }
+      const defaultConnector = await pluginsStart.inference.getDefaultConnector(request);
 
-      if (!connectorId) {
+      if (!defaultConnector) {
         throw new Error('No default connector found');
       }
 
       const inferenceClient = pluginsStart.inference.getClient({ request });
-      const index = fields.find((field) => field.field === '_index')?.value;
-      const id = fields.find((field) => field.field === '_id')?.value;
 
       const logEntry = await dataRegistry.getData('getLogDocumentById', {
         request,
@@ -124,7 +118,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         fields: logEntry.fields,
         serviceSummary,
         inferenceClient,
-        connectorId,
+        connectorId: defaultConnector?.connectorId,
       });
 
       return { context, summary };

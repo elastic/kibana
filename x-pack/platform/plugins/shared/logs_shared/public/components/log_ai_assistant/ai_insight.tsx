@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/server/attachments/ai_insight';
+import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/common/constants';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LogAIAssistantDocument } from './log_ai_assistant';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
@@ -30,17 +29,17 @@ export function LogEntryAgentBuilderAiInsight({
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
 
-  const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
-
   const fetchAiInsights = async () => {
     setIsLoading(true);
     try {
+      const index = doc?.fields.find((field) => field.field === '_index')?.value;
+      const id = doc?.fields.find((field) => field.field === '_id')?.value;
       const response = await http.post<{ summary: string; context: string }>(
         '/internal/observability_agent_builder/ai_insights/log',
         {
           body: JSON.stringify({
-            fields: doc?.fields,
-            connectorId: lastUsedConnectorId,
+            index,
+            id,
           }),
         }
       );
@@ -61,20 +60,19 @@ export function LogEntryAgentBuilderAiInsight({
 
     return [
       {
-        id: 'log_entry_details_screen_context',
         type: 'screen_context',
-        getContent: () => ({
+        data: {
           app: 'discover',
           url: window.location.href,
-        }),
+        },
+        hidden: true,
       },
       {
-        id: 'log_entry_ai_insight',
         type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-        getContent: () => ({
+        data: {
           summary,
           context,
-        }),
+        },
       },
     ];
   }, [summary, context]);
@@ -90,7 +88,6 @@ export function LogEntryAgentBuilderAiInsight({
         onStartConversation={() => {
           onechat?.openConversationFlyout({
             attachments,
-            sessionTag: 'log-entry-ai-insight',
             newConversation: true,
           });
         }}

@@ -26,17 +26,14 @@ export async function getLogAiInsights({
   inferenceClient,
   connectorId,
 }: GetLogAiInsightsParams): Promise<{ context: string; summary: string }> {
-  const instructions = [
-    `You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
+  const systemPrompt = dedent`
+    You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.
-     - Only call tools if the attachments do not contain the necessary data to analyze the log message.`,
-  ]
-    .filter(Boolean)
-    .join('\n\n');
+     - Only call tools if the attachments do not contain the necessary data to analyze the log message.`;
 
   const response = await inferenceClient.chatComplete({
     connectorId,
-    system: instructions,
+    system: systemPrompt,
     messages: [
       {
         role: MessageRole.User,
@@ -48,7 +45,6 @@ export async function getLogAiInsights({
         - Service Summary: ${safeJsonStringify(serviceSummary)}`,
       },
     ],
-    functionCalling: 'auto',
   });
 
   let content = '';
