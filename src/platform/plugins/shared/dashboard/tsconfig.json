@@ -91,7 +91,8 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/managed-content-badge"
   ],
   "exclude": ["target/**/*"]
 }
