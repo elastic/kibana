@@ -263,7 +263,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             pagination={pagination}
             sorting={sorting}
             data-test-subj="inferenceEndpointTable"
-            tableCaption={kbnI18n.translate('tabularPage.tableCaption', {
+            tableCaption={kbnI18n.translate('xpack.searchInferenceEndpoints.tabularPage.tableCaption', {
               defaultMessage: 'Inference endpoints list',
             })}
           />
