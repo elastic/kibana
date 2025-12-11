@@ -122,10 +122,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableEsqlRiskScoring': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:defaultAnomalyScore': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -698,6 +694,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable significant events in streams.',
+    },
+  },
+  'observability:streamsEnableSignificantEventsDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Significant events discovery in Streams.',
     },
   },
   'observability:streamsEnableGroupStreams': {

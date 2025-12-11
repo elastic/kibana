@@ -165,7 +165,7 @@ describe('buildDatasourceStates', () => {
         "layers": Object {
           "textBased": Object {
             "layers": Object {
-              "metric_0": Object {
+              "layer_0": Object {
                 "columns": Array [
                   Object {
                     "columnId": "test",
@@ -182,7 +182,7 @@ describe('buildDatasourceStates', () => {
           },
         },
         "usedDataviews": Object {
-          "metric_0": Object {
+          "layer_0": Object {
             "index": "test",
             "timeFieldName": "@timestamp",
             "type": "adHocDataView",

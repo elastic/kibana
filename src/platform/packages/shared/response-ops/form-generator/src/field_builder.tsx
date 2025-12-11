@@ -140,6 +140,7 @@ export const renderField = ({ field }: RenderFieldProps) => {
         schema={schema}
         formConfig={formConfig}
         fieldConfig={{
+          label,
           defaultValue,
           validations: [
             {
@@ -148,10 +149,8 @@ export const renderField = ({ field }: RenderFieldProps) => {
           ],
         }}
         fieldProps={{
-          label,
           helpText,
           fullWidth: true,
-
           labelAppend: isOptional ? (
             <EuiText size="xs" color="subdued">
               {OPTIONAL_LABEL}

@@ -223,8 +223,7 @@ export function buildDatasetStateNoESQL(
 /**
  * Builds dataset state from the layer configuration
  *
- * @param layer Lens State Layer
- * @returns Lens API Dataset configuration
+ * @deprecated use `buildDatasetStateESQL` or `buildDatasetStateNoESQL` instead
  */
 export function buildDatasetState(
   layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
@@ -377,10 +376,12 @@ export const buildDatasourceStates = (
     | { type: 'adHocDataView'; index: string; timeFieldName: string }
   > = {};
   // a few charts types support multiple layers
-  const configLayers = 'layers' in config ? config.layers : [config];
+  const hasMultipleLayers = 'layers' in config;
+  const configLayers = hasMultipleLayers ? config.layers : [config];
+
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
-    const layerId = `${layer.type ?? 'layer'}_${i}`;
+    const layerId = hasMultipleLayers && 'type' in layer ? `${layer.type}_${i}` : `layer_${i}`;
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {

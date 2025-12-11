@@ -32,6 +32,8 @@ import {
   operationFromColumn,
 } from '../utils';
 import {
+  getDatasourceLayers,
+  getLensStateLayer,
   getMetricAccessor,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
@@ -80,7 +82,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
 
 function reverseBuildVisualizationState(
   visualization: GaugeVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -260,13 +262,8 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'gauge' }> {
   const { state } = config;
   const visualization = state.visualization as GaugeVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-  const [layerId, layer] = Object.entries(layers)[0];
+  const layers = getDatasourceLayers(state);
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),

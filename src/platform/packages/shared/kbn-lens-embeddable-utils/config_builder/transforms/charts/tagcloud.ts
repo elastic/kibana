@@ -42,7 +42,12 @@ import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
-import { getSharedChartAPIToLensState, getSharedChartLensStateToAPI } from './utils';
+import {
+  getDatasourceLayers,
+  getLensStateLayer,
+  getSharedChartAPIToLensState,
+  getSharedChartLensStateToAPI,
+} from './utils';
 
 const ACCESSOR = 'tagcloud_accessor';
 function getAccessorName(type: 'metric' | 'tag') {
@@ -73,7 +78,7 @@ function buildVisualizationState(config: TagcloudState): LensTagCloudState {
 }
 
 function getTagcloudDataset(
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
@@ -89,10 +94,12 @@ function getTagcloudDataset(
 }
 
 function getTagcloudMetric(
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
-): TagcloudState['metric'] | undefined {
-  if (!visualization.valueAccessor) return undefined;
+): TagcloudState['metric'] {
+  if (visualization.valueAccessor == null) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
 
   return {
     ...(isTextBasedLayer(layer)
@@ -106,10 +113,12 @@ function getTagcloudMetric(
 }
 
 function getTagcloudTagBy(
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
-): TagcloudState['tag_by'] | undefined {
-  if (!visualization.tagAccessor) return undefined;
+): TagcloudState['tag_by'] {
+  if (visualization.tagAccessor == null) {
+    throw new Error('Tag accessor is missing in the visualization state');
+  }
 
   const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
 
@@ -123,7 +132,7 @@ function getTagcloudTagBy(
 
 function reverseBuildVisualizationState(
   visualization: LensTagCloudState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -137,8 +146,8 @@ function reverseBuildVisualizationState(
     type: 'tagcloud',
     dataset,
     ...generateApiLayer(layer),
-    ...(metric ? { metric } : {}),
-    ...(tagBy ? { tag_by: tagBy } : {}),
+    metric,
+    tag_by: tagBy,
     orientation:
       visualization.orientation === TAGCLOUD_ORIENTATION.SINGLE
         ? 'horizontal'
@@ -211,16 +220,8 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'tagcloud' }> {
   const { state } = config;
   const visualization = state.visualization as LensTagCloudState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  // Necessary for ESQL panels to find the correct layer, since the old layers are not removed from the state
-  const visLayerId = Object.entries(layers).find(([id]) => id === visualization.layerId);
-  const [layerId, layer] = visLayerId ?? Object.entries(layers)[0];
+  const layers = getDatasourceLayers(state);
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),

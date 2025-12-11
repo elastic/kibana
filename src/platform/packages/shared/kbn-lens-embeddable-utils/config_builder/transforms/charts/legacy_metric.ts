@@ -36,11 +36,16 @@ import type {
   LegacyMetricStateESQL,
   LegacyMetricStateNoESQL,
 } from '../../schema/charts/legacy_metric';
-import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+import {
+  getSharedChartLensStateToAPI,
+  getSharedChartAPIToLensState,
+  getLensStateLayer,
+  getDatasourceLayers,
+} from './utils';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import { isEsqlTableTypeDataset } from '../../utils';
 
-const ACCESSOR = 'metric_formula_accessor';
+const ACCESSOR = 'legacy_metric_accessor';
 
 function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisualizationState {
   const layer = config;
@@ -63,7 +68,7 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
 
 function reverseBuildVisualizationState(
   visualization: LegacyMetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -176,14 +181,8 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'legacy_metric' }> {
   const { state } = config;
   const visualization = state.visualization as LegacyMetricVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  const [layerId, layer] = Object.entries(layers)[0];
+  const layers = getDatasourceLayers(state);
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),

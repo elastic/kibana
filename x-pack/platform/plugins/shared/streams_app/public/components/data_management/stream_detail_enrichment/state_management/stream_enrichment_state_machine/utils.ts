@@ -18,6 +18,7 @@ import type {
   KqlSamplesDataSource,
   LatestSamplesDataSource,
 } from '../../../../../../common/url_schema';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
 import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
 import { dataSourceConverter } from '../../utils';
@@ -164,7 +165,7 @@ export const spawnStep = <
 >(
   step: StreamlangStepWithUIAttributes,
   assignArgs: TAssignArgs,
-  options?: { isNew: boolean }
+  options?: { isNew: boolean; isUpdated?: boolean }
 ) => {
   const { spawn, self } = assignArgs;
 
@@ -174,6 +175,7 @@ export const spawnStep = <
       parentRef: self,
       step,
       isNew: options?.isNew ?? false,
+      isUpdated: options?.isUpdated ?? false,
     },
   });
 };
@@ -192,6 +194,7 @@ export const spawnDataSource = <
     input: {
       parentRef: self,
       streamName: context.definition.stream.name,
+      streamType: getStreamTypeFromDefinition(context.definition.stream),
       dataSource: dataSourceWithUIAttributes,
     },
   });
@@ -373,3 +376,15 @@ export function selectDataSource(
     }
   });
 }
+
+export const canDataSourceTypeBeOutdated = (
+  dataSourceType: EnrichmentDataSource['type']
+): boolean => {
+  switch (dataSourceType) {
+    case 'latest-samples':
+    case 'kql-samples':
+      return true;
+    default:
+      return false;
+  }
+};
