@@ -39,4 +39,5 @@ retry 5 15 run_check
 .buildkite/scripts/steps/openapi_bundling/final_merge.sh
 
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
-check_for_changed_files "$cmd" true
+
+check_for_changed_files "capture_oas_snapshot.sh" true
