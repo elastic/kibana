@@ -20,7 +20,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../connector_spec';
+import type { ConnectorSpec } from '../../connector_spec';
 
 export const AlienVaultOTXConnector: ConnectorSpec = {
   metadata: {

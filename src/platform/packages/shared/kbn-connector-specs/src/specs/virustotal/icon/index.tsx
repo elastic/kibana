@@ -10,10 +10,9 @@
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
-import type { ConnectorIconProps } from '../../types';
-
-import icon from './alienvault.jpg';
+import type { ConnectorIconProps } from '../../../types';
+import virusTotalIcon from './virustotal.png';
 
 export default (props: ConnectorIconProps) => {
-  return <EuiIcon type={icon} {...props} />;
+  return <EuiIcon type={virusTotalIcon} {...props} />;
 };
