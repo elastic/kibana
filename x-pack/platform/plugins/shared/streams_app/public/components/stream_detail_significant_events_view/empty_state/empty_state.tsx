@@ -5,9 +5,9 @@
  * 2.0.
  */
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AssetImage } from '../../asset_image';
 import { FeaturesSelector, type FeatureSelectorProps } from '../feature_selector';
-import { useAIFeatures } from '../add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 
 export function NoSignificantEventsEmptyState({
   onGenerateSuggestionsClick,
@@ -28,8 +28,6 @@ export function NoSignificantEventsEmptyState({
   onGenerateSuggestionsClick: () => void;
   onManualEntryClick: () => void;
 } & FeatureSelectorProps) {
-  const aiFeatures = useAIFeatures();
-
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiSpacer size="m" />
@@ -52,32 +50,32 @@ export function NoSignificantEventsEmptyState({
         selectedFeatures={selectedFeatures}
         onFeaturesChange={onFeaturesChange}
       />
-      <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiButton
-          iconType="sparkles"
-          fill
-          disabled={
-            selectedFeatures.length === 0 || !aiFeatures?.genAiConnectors?.selectedConnector
-          }
-          onClick={() => onGenerateSuggestionsClick()}
-          data-test-subj="significant_events_generate_suggestions_button"
-        >
-          {i18n.translate(
-            'xpack.streams.significantEvents.emptyState.generateSuggestionsButtonLabel',
-            {
-              defaultMessage: 'Generate suggestions',
-            }
-          )}
-        </EuiButton>
-        <EuiButtonEmpty
-          onClick={onManualEntryClick}
-          data-test-subj="significant_events_manual_entry_button"
-        >
-          {i18n.translate('xpack.streams.significantEvents.emptyState.manualEntryButtonLabel', {
-            defaultMessage: 'Manual entry',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <ConnectorListButton
+            buttonProps={{
+              iconType: 'sparkles',
+              isDisabled: selectedFeatures.length === 0,
+              onClick: () => onGenerateSuggestionsClick(),
+              'data-test-subj': 'significant_events_generate_suggestions_button',
+              children: i18n.translate(
+                'xpack.streams.significantEvents.emptyState.generateSuggestionsButtonLabel',
+                {
+                  defaultMessage: 'Generate suggestions',
+                }
+              ),
+            }}
+          />
+          <EuiButtonEmpty
+            onClick={onManualEntryClick}
+            data-test-subj="significant_events_manual_entry_button"
+          >
+            {i18n.translate('xpack.streams.significantEvents.emptyState.manualEntryButtonLabel', {
+              defaultMessage: 'Manual entry',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

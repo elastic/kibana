@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import { RoundFlyout } from './round_flyout';
 import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
-import { roundedBorderRadiusStyles } from '../../conversation.styles';
+import { roundedBorderRadiusStyles } from '../../../../../common.styles';
 
 const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
   defaultMessage: 'View JSON',
