@@ -555,6 +555,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
           go_max_procs: schema.maybe(schema.number()),
         })
       ),
+      internal: schema.maybe(schema.any()),
     })
   ),
   secret_references: schema.maybe(

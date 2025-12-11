@@ -17,12 +17,25 @@ import type { GaugeState } from './charts/gauge';
 import { gaugeStateSchema } from './charts/gauge';
 import type { TagcloudState } from './charts/tagcloud';
 import { tagcloudStateSchema } from './charts/tagcloud';
+import { mosaicStateSchema } from './charts/mosaic';
+import { pieStateSchema } from './charts/pie';
+import { treemapStateSchema } from './charts/treemap';
+import { waffleStateSchema } from './charts/waffle';
+import type { RegionMapState } from './charts/region_map';
+import { regionMapStateSchema } from './charts/region_map';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 import { xyStateSchema } from './charts/xy';
+
+export const partitionStateSchema = schema.oneOf([
+  mosaicStateSchema,
+  pieStateSchema,
+  treemapStateSchema,
+  waffleStateSchema,
+]);
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -38,9 +51,18 @@ export const _lensApiStateSchema: any = schema.oneOf([
   xyStateSchema,
   gaugeStateSchema,
   tagcloudStateSchema,
+  // disable for now to avoid type issues at the config builder root level
+  // TODO: enabled once transformations are available
+  // partitionStateSchema,
+  regionMapStateSchema,
 ]);
 
-export type LensApiState = MetricState | LegacyMetricState | GaugeState | TagcloudState;
+export type LensApiState =
+  | MetricState
+  | LegacyMetricState
+  | GaugeState
+  | TagcloudState
+  | RegionMapState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
@@ -49,7 +71,9 @@ export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/
 export type { XYState } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
+export type { RegionMapState, RegionMapStateNoESQL, RegionMapStateESQL } from './charts/region_map';
 export { tagcloudStateSchema } from './charts/tagcloud';
+export { regionMapStateSchema } from './charts/region_map';
 
 export type {
   LensApiFieldMetricOrFormulaOperation,
