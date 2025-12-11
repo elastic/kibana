@@ -11,6 +11,14 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KubernetesDashboardCard, KubernetesDashboardLink } from './kubernetes_dashboard_promotion';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import {
+  INTEGRATION_DOCS_LINK,
+  INTEGRATION_PAGE_PATH,
+  KUBERNETES_INTEGRATION_ID,
+  KUBERNETES_SEMCONV_INTEGRATION_ID,
+  KUBERNETES_INTEGRATION_TAG,
+  KUBERNETES_SEMCONV_INTEGRATION_TAG,
+} from './constants';
 
 jest.mock('../../hooks/use_kibana');
 jest.mock('./kubernetes_asset_image', () => ({
@@ -106,7 +114,7 @@ describe('KubernetesDashboardCard', () => {
       );
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith('dashboards', {
-        path: '#/list?_g=()&s=tag:(Kubernetes)',
+        path: `#/list?_g=()&s=tag:(${KUBERNETES_INTEGRATION_TAG})`,
       });
     });
 
@@ -121,7 +129,7 @@ describe('KubernetesDashboardCard', () => {
       );
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith('integrations', {
-        path: '/detail/kubernetes',
+        path: `${INTEGRATION_PAGE_PATH}/${KUBERNETES_INTEGRATION_ID}`,
       });
     });
 
@@ -138,7 +146,7 @@ describe('KubernetesDashboardCard', () => {
       const docsLink = screen.getByTestId('infraKubernetesDashboardCardIntegrationDocsLink');
       expect(docsLink).toHaveAttribute(
         'href',
-        'https://www.elastic.co/docs/reference/integrations/kubernetes'
+        `${INTEGRATION_DOCS_LINK}/${KUBERNETES_INTEGRATION_ID}`
       );
       expect(docsLink).toHaveTextContent('Kubernetes Integration');
     });
@@ -189,7 +197,7 @@ describe('KubernetesDashboardCard', () => {
       );
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith('dashboards', {
-        path: '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")',
+        path: `#/list?_g=()&s=tag:(${KUBERNETES_SEMCONV_INTEGRATION_TAG})`,
       });
     });
 
@@ -204,7 +212,7 @@ describe('KubernetesDashboardCard', () => {
       );
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith('integrations', {
-        path: '/detail/kubernetes_otel',
+        path: `${INTEGRATION_PAGE_PATH}/${KUBERNETES_SEMCONV_INTEGRATION_ID}`,
       });
     });
 
@@ -221,7 +229,7 @@ describe('KubernetesDashboardCard', () => {
       const docsLink = screen.getByTestId('infraSemconvKubernetesDashboardCardIntegrationDocsLink');
       expect(docsLink).toHaveAttribute(
         'href',
-        'https://www.elastic.co/docs/reference/integrations/kubernetes_otel'
+        `${INTEGRATION_DOCS_LINK}/${KUBERNETES_SEMCONV_INTEGRATION_ID}`
       );
       expect(docsLink).toHaveTextContent('OpenTelemetry');
     });
@@ -247,7 +255,7 @@ describe('KubernetesDashboardLink', () => {
       renderWithIntl(<KubernetesDashboardLink integrationType="ecs" />);
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith('dashboards', {
-        path: '#/list?_g=()&s=tag:(Kubernetes)',
+        path: `#/list?_g=()&s=tag:(${KUBERNETES_INTEGRATION_TAG})`,
       });
     });
   });
@@ -265,7 +273,7 @@ describe('KubernetesDashboardLink', () => {
       renderWithIntl(<KubernetesDashboardLink integrationType="semconv" />);
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith('dashboards', {
-        path: '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")',
+        path: `#/list?_g=()&s=tag:(${KUBERNETES_SEMCONV_INTEGRATION_TAG})`,
       });
     });
   });

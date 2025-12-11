@@ -250,7 +250,7 @@ export const KubernetesDashboardCard = ({
   onClose: () => void;
   hasIntegrationInstalled: boolean;
 }) => {
-  const { card } = INTEGRATION_CONFIGS[integrationType];
+  const { card, integrationId } = INTEGRATION_CONFIGS[integrationType];
   const { services } = useKibanaContextForPlugin();
   const { getUrlForApp } = services.application;
 
@@ -287,14 +287,14 @@ export const KubernetesDashboardCard = ({
                 {hasIntegrationInstalled
                   ? card.description.installed(
                       <IntegrationLink
-                        integrationId={card.integrationId}
+                        integrationId={integrationId}
                         text={card.description.docsLink.text}
                         testSubj={card.description.docsLink.testSubj}
                       />
                     )
                   : card.description.notInstalled(
                       <IntegrationLink
-                        integrationId={card.integrationId}
+                        integrationId={integrationId}
                         text={card.description.docsLink.text}
                         testSubj={card.description.docsLink.testSubj}
                       />
