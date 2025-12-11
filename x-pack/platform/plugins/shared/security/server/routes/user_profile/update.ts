@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
@@ -112,6 +114,21 @@ export function defineUpdateUserProfileDataRoute({
           return response.customError({
             body: 'Unsupported media type',
             statusCode: 415,
+          });
+        }
+      }
+
+      const avatarColor = userProfileData.avatar?.color;
+      if (avatarColor) {
+        const isValidColor =
+          avatarColor != null &&
+          avatarColor !== '' &&
+          /^#/.test(avatarColor) &&
+          chroma.valid(avatarColor);
+        if (!isValidColor) {
+          return response.customError({
+            body: 'Invalid hex color',
+            statusCode: 400,
           });
         }
       }

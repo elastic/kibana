@@ -8,6 +8,7 @@
  */
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+import chroma from 'chroma-js';
 
 import type { UserProfileAvatarData, UserProfileData } from './types';
 
@@ -78,11 +79,16 @@ export function getUserAvatarColor(
   user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
   avatar?: UserProfileAvatarData
 ) {
-  if (avatar && avatar.color) {
-    return avatar.color;
-  }
-
   const firstCodePoint = getUserDisplayName(user).codePointAt(0) || USER_AVATAR_FALLBACK_CODE_POINT;
+  const avatarColor = avatar?.color;
+  const isValidColor =
+    avatarColor != null &&
+    avatarColor !== '' &&
+    /^#/.test(avatarColor) &&
+    chroma.valid(avatarColor);
+  if (isValidColor) {
+    return avatarColor;
+  }
 
   return VISUALIZATION_COLORS[firstCodePoint % VISUALIZATION_COLORS.length];
 }
