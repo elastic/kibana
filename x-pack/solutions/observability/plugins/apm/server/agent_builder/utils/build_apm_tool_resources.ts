@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { firstValueFrom } from 'rxjs';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
@@ -23,6 +28,7 @@ export interface ApmToolResources {
   mlClient: Awaited<ReturnType<typeof getMlClient>>;
   apmAlertsClient: ApmAlertsClient;
   esClient: IScopedClusterClient;
+  soClient: SavedObjectsClientContract;
 }
 
 export async function buildApmToolResources({
@@ -108,5 +114,5 @@ export async function buildApmToolResources({
     apmAlertsClientPromise,
   ]);
 
-  return { apmEventClient, randomSampler, mlClient, apmAlertsClient, esClient: esScoped };
+  return { apmEventClient, randomSampler, mlClient, apmAlertsClient, esClient: esScoped, soClient };
 }

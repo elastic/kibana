@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { isLiteral } from '../../../ast/is';
 import { getExpressionType } from '..';
 import type { ESQLColumnData } from '../../../commands_registry/types';
@@ -15,10 +16,42 @@ import type { FunctionDefinition } from '../../types';
 import { getMatchingSignatures } from '../expressions';
 
 /**
+ * Formats a list of types with optional limiting and overflow indicator.
+ * Examples:
+ * - "boolean | date | double"
+ * - "boolean | date | double|…+2 more" (when remainingCount > 1)
+ */
+function formatTypesList(types: Set<string>, maxTypesToShow?: number): string {
+  const typeSeparator = '|';
+  const sortedTypes = Array.from(types).sort();
+
+  if (maxTypesToShow !== undefined && sortedTypes.length > maxTypesToShow) {
+    const remainingCount = sortedTypes.length - maxTypesToShow;
+
+    // If only one type is remaining, show it instead of "+1 more"
+    if (remainingCount === 1) {
+      return sortedTypes.join(typeSeparator);
+    }
+
+    const displayedTypes = sortedTypes.slice(0, maxTypesToShow);
+    return `${displayedTypes.join(typeSeparator)}${i18n.translate(
+      'kbn-esql-ast.esql.hover.functions.moreTypes',
+      {
+        defaultMessage: `{typeSeparator}…+{remainingCount} more`,
+        values: { remainingCount, typeSeparator },
+      }
+    )}`;
+  }
+
+  return sortedTypes.join(typeSeparator);
+}
+
+/**
  * Helper function to format a function signature in a readable format.
  * @param functionDef The function definition to format
  * @param fnNode ESQLFunction node to help determine the best matching signature
  * @param columns map of column data to help determine argument types
+ * @param maxParamTypesToShow Maximum number of parameter types to show per parameter
  * @returns A formatted signature string
  *
  * @example output:
@@ -32,7 +65,8 @@ import { getMatchingSignatures } from '../expressions';
 export function getFormattedFunctionSignature(
   functionDef: FunctionDefinition,
   fnNode?: ESQLFunction,
-  columns?: Map<string, ESQLColumnData>
+  columns?: Map<string, ESQLColumnData>,
+  maxTypesToShow?: number
 ): string {
   if (!functionDef.signatures || functionDef.signatures.length === 0) {
     return `${functionDef.name}()`;
@@ -78,7 +112,7 @@ export function getFormattedFunctionSignature(
   // Build parameter strings with combined types
   const formattedParams = bestSignature.params.map((param) => {
     const types = parameterTypeMap.get(param.name)!;
-    const typesList = Array.from(types).sort().join(' | ');
+    const typesList = formatTypesList(types, maxTypesToShow);
 
     // A parameter is optional if:
     // 1. ANY signature explicitly marks it as optional, OR
@@ -88,18 +122,18 @@ export function getFormattedFunctionSignature(
     const isOptional = isExplicitlyOptional || !appearsInAllSignatures;
 
     const optionalMarker = isOptional ? '?' : '';
-    return `${param.name}${optionalMarker}: ${typesList}`;
+    return `${param.name}${optionalMarker}:${typesList}`;
   });
 
-  const returnTypesList = Array.from(returnTypes).sort().join(' | ');
-
+  // Format return types with the same limiting logic
+  const returnTypesList = formatTypesList(returnTypes, maxTypesToShow);
   if (formattedParams.length > 0) {
     const paramsString = formattedParams.join(',  \n  ');
-    return `${functionDef.name} (
+    return `${functionDef.name.toUpperCase()}(
   ${paramsString}
 ): ${returnTypesList}`;
   } else {
-    return `${functionDef.name}(): ${returnTypesList}`;
+    return `${functionDef.name.toUpperCase()}(): ${returnTypesList}`;
   }
 }
 
@@ -127,6 +161,20 @@ function getFilteredSignatures(
     );
     if (matchingSignatures.length > 0) {
       signatures = matchingSignatures;
+    } else {
+      // Try again without the last argument (in case user is typing it and it's incomplete)
+      const argTypesWithoutLast = argTypes.slice(0, -1);
+      const literalMaskWithoutLast = literalMask.slice(0, -1);
+      const partialMatchingSignatures = getMatchingSignatures(
+        functionDef.signatures,
+        argTypesWithoutLast,
+        literalMaskWithoutLast,
+        false,
+        true
+      );
+      if (partialMatchingSignatures.length > 0) {
+        signatures = partialMatchingSignatures;
+      }
     }
   }
 

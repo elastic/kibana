@@ -37,6 +37,10 @@ import {
   fromAPItoLensState as fromTagcloudAPItoLensState,
   fromLensStateToAPI as fromTagcloudLensStateToAPI,
 } from './transforms/charts/tagcloud';
+import {
+  fromAPItoLensState as fromRegionMapAPItoLensState,
+  fromLensStateToAPI as fromRegionMapLensStateToAPI,
+} from './transforms/charts/region_map';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -47,6 +51,7 @@ const compatibilityMap: Record<string, string> = {
   lnsXY: 'xy',
   lnsGauge: 'gauge',
   lnsTagcloud: 'tagcloud',
+  lnsChoropleth: 'region_map',
 };
 
 /**
@@ -76,6 +81,10 @@ const apiConvertersByChart = {
   tagcloud: {
     fromAPItoLensState: fromTagcloudAPItoLensState,
     fromLensStateToAPI: fromTagcloudLensStateToAPI,
+  },
+  region_map: {
+    fromAPItoLensState: fromRegionMapAPItoLensState,
+    fromLensStateToAPI: fromRegionMapLensStateToAPI,
   },
 } as const;
 

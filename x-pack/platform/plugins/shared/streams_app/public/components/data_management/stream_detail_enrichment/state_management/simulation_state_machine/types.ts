@@ -51,6 +51,7 @@ export type SimulationEvent =
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
   | { type: 'simulation.receive_steps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.reset' }
   | { type: 'step.change'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] };

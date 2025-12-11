@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
-import { useFileUploadContext } from '../../../..';
+import { useFileUploadContext } from '../../../use_file_upload';
 import { FileClashIcon, FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
@@ -50,15 +50,21 @@ enum TAB {
 interface Props {
   index: number;
   showFileContentPreview?: boolean;
+  showFileContents?: boolean;
   lite: boolean;
   showOverrideButton?: boolean;
+  showExplanationButton?: boolean;
+  showSettingsButton?: boolean;
 }
 
 export const FileStatus: FC<Props> = ({
   lite,
   index,
-  showFileContentPreview,
+  showFileContentPreview = true,
+  showFileContents = false,
   showOverrideButton = false,
+  showExplanationButton = true,
+  showSettingsButton = true,
 }) => {
   const {
     deleteFile,
@@ -153,29 +159,33 @@ export const FileStatus: FC<Props> = ({
                   <EuiFlexGroup gutterSize="xs">
                     {fileStatus.results !== null ? (
                       <>
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip
-                            position="top"
-                            content={
-                              <FormattedMessage
-                                id="xpack.fileUpload.fileStatus.analysisExplanationTooltip"
-                                defaultMessage="Analysis explanation"
-                              />
-                            }
-                          >
-                            <AnalysisExplanation fileStatus={fileStatus} index={index} />
-                          </EuiToolTip>
-                        </EuiFlexItem>
+                        {showExplanationButton ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiToolTip
+                              position="top"
+                              content={
+                                <FormattedMessage
+                                  id="xpack.fileUpload.fileStatus.analysisExplanationTooltip"
+                                  defaultMessage="Analysis explanation"
+                                />
+                              }
+                            >
+                              <AnalysisExplanation fileStatus={fileStatus} index={index} />
+                            </EuiToolTip>
+                          </EuiFlexItem>
+                        ) : null}
 
-                        <EuiFlexItem grow={false}>
-                          <AnalysisOverrides
-                            fileStatus={fileStatus}
-                            analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
-                              index
-                            )}
-                            index={index}
-                          />
-                        </EuiFlexItem>
+                        {showSettingsButton ? (
+                          <EuiFlexItem grow={false}>
+                            <AnalysisOverrides
+                              fileStatus={fileStatus}
+                              analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
+                                index
+                              )}
+                              index={index}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
                       </>
                     ) : null}
 
@@ -220,6 +230,19 @@ export const FileStatus: FC<Props> = ({
                         <FormattedMessage
                           id="xpack.fileUpload.fileStatus.previewTabTitle"
                           defaultMessage="Preview"
+                        />
+                      </EuiTab>
+                    ) : null}
+
+                    {showFileContents ? (
+                      <EuiTab
+                        isSelected={selectedTab === TAB.CONTENT}
+                        onClick={() => setSelectedTab(TAB.CONTENT)}
+                        data-test-subj={`mlFileUploadFileStatusContentsTab-${index}`}
+                      >
+                        <FormattedMessage
+                          id="xpack.fileUpload.fileStatus.contentsTabTitle"
+                          defaultMessage="File contents"
                         />
                       </EuiTab>
                     ) : null}
@@ -281,6 +304,15 @@ export const FileStatus: FC<Props> = ({
                         />
                       )}
                     </>
+                  ) : null}
+
+                  {selectedTab === TAB.CONTENT ? (
+                    <FileContents
+                      fileContents={fileStatus.fileContents}
+                      results={fileStatus.results!}
+                      showTitle={false}
+                      index={index}
+                    />
                   ) : null}
 
                   {selectedTab === TAB.STATS ? (

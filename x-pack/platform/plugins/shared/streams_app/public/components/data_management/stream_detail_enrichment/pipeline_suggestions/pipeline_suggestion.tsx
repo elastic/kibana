@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
-import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
+import { useInteractiveModeSelector } from '../state_management/stream_enrichment_state_machine';
 import { RootSteps } from '../steps/root_steps';
 
 export interface PipelineSuggestionProps {
@@ -34,7 +34,7 @@ export function PipelineSuggestion({
   onDismiss,
   onRegenerate,
 }: PipelineSuggestionProps) {
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+  const stepRefs = useInteractiveModeSelector((state) => state.context.stepRefs);
 
   return (
     <EuiCallOut

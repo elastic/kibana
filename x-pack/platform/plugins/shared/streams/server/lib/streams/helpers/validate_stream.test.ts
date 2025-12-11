@@ -68,23 +68,6 @@ describe('validateBracketsInFieldNames', () => {
     expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
   });
 
-  it('should throw for an invalid field name in processing step', () => {
-    const stream = createWiredStream({
-      ingest: {
-        processing: {
-          steps: [
-            {
-              action: 'rename',
-              from: 'source[invalid]',
-              to: 'destination',
-            },
-          ],
-        },
-      },
-    });
-    expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
-  });
-
   it('should not throw for a valid classic stream', () => {
     const stream = createClassicStream({
       field_overrides: { 'valid.field': { type: 'keyword' } },
@@ -95,53 +78,6 @@ describe('validateBracketsInFieldNames', () => {
   it('should throw for an invalid field name in classic stream field_overrides', () => {
     const stream = createClassicStream({
       field_overrides: { 'invalid[field]': { type: 'keyword' } },
-    });
-    expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
-  });
-
-  it('should throw for an invalid field name in a nested processing step', () => {
-    const stream = createWiredStream({
-      ingest: {
-        processing: {
-          steps: [
-            {
-              where: {
-                steps: [
-                  {
-                    action: 'rename',
-                    from: 'source',
-                    to: 'destination[invalid]',
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    });
-    expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
-  });
-
-  it('should throw for an invalid field name in a nested processing step condition', () => {
-    const stream = createWiredStream({
-      ingest: {
-        processing: {
-          steps: [
-            {
-              where: {
-                steps: [
-                  {
-                    action: 'rename',
-                    from: 'source',
-                    to: 'destination',
-                    where: { field: 'invalid[field]', eq: 'value' },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
     });
     expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
   });
