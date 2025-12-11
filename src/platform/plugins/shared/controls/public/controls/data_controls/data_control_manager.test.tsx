@@ -100,7 +100,7 @@ describe('initializeDataControlManager', () => {
     });
 
     describe('field does not exist', () => {
-      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
+      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
       beforeAll(() => {
         dataControlManager = initializeDataControlManager({
           controlId: 'myControlId',
