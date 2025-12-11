@@ -37,7 +37,11 @@ export const useFetchSignificantEvents = ({
   } = useKibana();
 
   const result = useStreamsAppFetch(
-    async ({ signal }): Promise<undefined | SignificantEventItem[]> => {
+    async ({
+      signal,
+    }): Promise<
+      undefined | { significant_events: SignificantEventItem[]; all: { x: number; y: number }[] }
+    > => {
       const isoFrom = new Date(start).toISOString();
       const isoTo = new Date(end).toISOString();
 
@@ -69,19 +73,25 @@ export const useFetchSignificantEvents = ({
           },
           signal,
         })
-        .then((res) => {
-          return res.map((series) => {
-            const { occurrences, change_points: changePoints, ...query } = series;
-            return {
-              title: query.title,
-              query,
-              change_points: changePoints,
-              occurrences: occurrences.map((occurrence) => ({
-                x: new Date(occurrence.date).getTime(),
-                y: occurrence.count,
-              })),
-            };
-          });
+        .then(({ significant_events, all }) => {
+          return {
+            significant_events: significant_events.map((series) => {
+              const { occurrences, change_points: changePoints, ...query } = series;
+              return {
+                title: query.title,
+                query,
+                change_points: changePoints,
+                occurrences: occurrences.map((occurrence) => ({
+                  x: new Date(occurrence.date).getTime(),
+                  y: occurrence.count,
+                })),
+              };
+            }),
+            all: all.map((occurrence) => ({
+              x: new Date(occurrence.date).getTime(),
+              y: occurrence.count,
+            })),
+          };
         });
 
       return response;

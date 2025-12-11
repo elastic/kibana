@@ -8,9 +8,12 @@
 import { useMemo } from 'react';
 import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 
-export const useFilteredSigEvents = (response: SignificantEventItem[], queryString: string) => {
+export const useFilteredSigEvents = (
+  response: { significant_events: SignificantEventItem[] },
+  queryString: string
+) => {
   const significantEvents = useMemo(() => {
-    const values = response ?? [];
+    const values = response.significant_events ?? [];
     if (queryString) {
       const lowerCaseQuery = queryString.toLowerCase();
       return values.filter(
@@ -21,16 +24,8 @@ export const useFilteredSigEvents = (response: SignificantEventItem[], queryStri
           item.query.kql.query.toLowerCase().includes(lowerCaseQuery)
       );
     }
-    return response ?? [];
-  }, [response, queryString]);
-  // calculate a combined query for all items
-  const combinedQuery = useMemo(() => {
-    if (significantEvents.length === 0) {
-      return null;
-    }
-    const queries = significantEvents.map((item) => `(${item.query.kql.query})`);
-    return queries.join(' OR ');
-  }, [significantEvents]);
+    return response.significant_events ?? [];
+  }, [response.significant_events, queryString]);
 
-  return { significantEvents, combinedQuery };
+  return significantEvents;
 };

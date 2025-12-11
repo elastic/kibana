@@ -19,9 +19,20 @@ interface Props {
   occurrences: Array<{ x: number; y: number }>;
   change?: FormattedChangePoint;
   xFormatter: TickFormatter;
+  hideAxis?: boolean;
+  height?: number;
+  compressed?: boolean;
 }
 
-export function SignificantEventsHistogramChart({ id, occurrences, change, xFormatter }: Props) {
+export function SignificantEventsHistogramChart({
+  id,
+  occurrences,
+  change,
+  xFormatter,
+  hideAxis = true,
+  compressed = true,
+  height,
+}: Props) {
   const theme = useEuiTheme().euiTheme;
 
   const annotations = useMemo((): SparkPlotAnnotation[] => {
@@ -48,7 +59,8 @@ export function SignificantEventsHistogramChart({ id, occurrences, change, xForm
       type="bar"
       annotations={annotations}
       xFormatter={xFormatter}
-      compressed
+      compressed={compressed}
+      height={height}
     />
   );
 }

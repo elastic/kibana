@@ -38,7 +38,10 @@ type SignificantEventsResponse = StreamQueryKql & {
   };
 };
 
-type SignificantEventsGetResponse = SignificantEventsResponse[];
+type SignificantEventsGetResponse = {
+  significant_events: SignificantEventsResponse[];
+  all: Array<{ date: string; count: number }>;
+};
 
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,

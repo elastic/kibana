@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { niceTimeFormatter } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
@@ -16,7 +16,6 @@ import { useStreamFeatures } from '../stream_detail_features/stream_features/hoo
 import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
-import { PreviewDataSparkPlot } from './add_significant_event_flyout/common/preview_data_spark_plot';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
@@ -32,6 +31,7 @@ import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
 } from '../../constants';
+import { SignificantEventsHistogramChart } from './significant_events_histogram';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -40,6 +40,7 @@ interface Props {
 export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
   const { unifiedSearch } = useKibana().dependencies.start;
+  const { euiTheme } = useEuiTheme();
 
   const aiFeatures = useAIFeatures();
 
@@ -73,8 +74,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [dateRange, setDateRange] = useState<TimeRange | undefined>(undefined);
   const [query, setQuery] = useState<string>('');
 
-  const { significantEvents, combinedQuery } = useFilteredSigEvents(
-    significantEventsFetchState.value ?? [],
+  const significantEvents = useFilteredSigEvents(
+    significantEventsFetchState.value ?? { significant_events: [], all: [] },
     query
   );
 
@@ -139,7 +140,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const noFeatures = features.length === 0;
   const noSignificantEvents =
-    significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
+    significantEventsFetchState.value &&
+    significantEventsFetchState.value.significant_events.length === 0;
 
   if (noFeatures && noSignificantEvents) {
     return (
@@ -244,14 +246,37 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <PreviewDataSparkPlot
-            definition={definition.stream}
-            query={{ kql: { query: combinedQuery ?? '' }, id: 'preview_all', title: 'All events' }}
-            isQueryValid={true}
-            noOfBuckets={50}
-          />
-        </EuiFlexItem>
+        <EuiPanel grow={false} hasShadow={false} hasBorder={true}>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
+                  {
+                    defaultMessage: 'Detected event occurrences ({count})',
+                    values: {
+                      count: (significantEventsFetchState.value?.all ?? []).reduce(
+                        (acc, point) => acc + point.y,
+                        0
+                      ),
+                    },
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <SignificantEventsHistogramChart
+                id={'all-events'}
+                occurrences={significantEventsFetchState.value?.all ?? []}
+                change={undefined}
+                xFormatter={xFormatter}
+                compressed={false}
+                hideAxis={false}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable

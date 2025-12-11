@@ -31,7 +31,7 @@ export async function readSignificantEventsFromAlertsIndices(
 
   const { [name]: queryLinks } = await assetClient.getAssetLinks([name], ['query']);
   if (isEmpty(queryLinks)) {
-    return [];
+    return { significant_events: [], all: [] };
   }
 
   const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
@@ -41,6 +41,11 @@ export async function readSignificantEventsFromAlertsIndices(
     .search<
       unknown,
       {
+        occurrences: AggregationsMultiBucketAggregateBase<{
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+        }>;
         by_rule: AggregationsTermsAggregateBase<{
           key: string;
           doc_count: number;
@@ -78,6 +83,16 @@ export async function readSignificantEventsFromAlertsIndices(
         },
       },
       aggs: {
+        occurrences: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: bucketSize,
+            extended_bounds: {
+              min: from.toISOString(),
+              max: to.toISOString(),
+            },
+          },
+        },
         by_rule: {
           terms: {
             field: 'kibana.alert.rule.uuid',
@@ -116,16 +131,27 @@ export async function readSignificantEventsFromAlertsIndices(
     });
 
   if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
-    return queryLinks.map((queryLink) => ({
-      ...toStreamQueryKql(queryLink),
-      occurrences: [],
-      change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
+    return {
+      significant_events: queryLinks.map((queryLink) => ({
+        ...toStreamQueryKql(queryLink),
+        occurrences: [],
+        change_points: {
+          type: {
+            stationary: { p_value: 0, change_point: 0 },
+          },
         },
-      },
-    }));
+      })),
+      all: [],
+    };
   }
+
+  const allBuckets = response.aggregations.occurrences.buckets;
+  const allOccurrences = isArray(allBuckets)
+    ? allBuckets.map((bucket) => ({
+        date: bucket.key_as_string,
+        count: bucket.doc_count,
+      }))
+    : [];
 
   const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
     const ruleId = bucket.key;
@@ -158,7 +184,10 @@ export async function readSignificantEventsFromAlertsIndices(
       },
     }));
 
-  return [...significantEvents, ...notFoundSignificantEvents];
+  return {
+    significant_events: [...significantEvents, ...notFoundSignificantEvents],
+    all: allOccurrences,
+  };
 }
 
 const toStreamQueryKql = (queryLink: QueryLink): StreamQueryKql => {
