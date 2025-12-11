@@ -19,7 +19,6 @@
 // } as Record<string, Set<string>>;
 
 export const INCLUDED_OPERATIONS = [
-  'request',
   'search',
   'update',
   'indices.exists',
