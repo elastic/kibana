@@ -73,5 +73,8 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
         return `Data Connector[${attrs.name}]`;
       },
     },
+    modelVersions: {
+      '1': { changes: [] },
+    },
   });
 }
