@@ -7,30 +7,34 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
-import { errorHandler } from '../error_handler';
-import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
-import { withEndpointAuthz } from '../with_endpoint_authz';
+import type {
+  PatchUpdateRequestBody,
+  PatchUpdateRequestParams,
+} from '../../../../common/api/endpoint/scripts_library';
+import { PatchUpdateRequestSchema } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-import type { EndpointAppContext } from '../../types';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import { CreateScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+import type { EndpointAppContext } from '../../types';
+import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
+import { withEndpointAuthz } from '../with_endpoint_authz';
+import { stringify } from '../../utils/stringify';
+import { errorHandler } from '../error_handler';
 
-export const getCreateScriptRequestHandler = (
+export const getPatchUpdateScriptRequestHandler = (
   endpointAppServices: EndpointAppContextService
 ): RequestHandler<
-  unknown,
-  unknown,
-  CreateScriptRequestBody,
+  PatchUpdateRequestParams,
+  undefined,
+  PatchUpdateRequestBody,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointAppServices.createLogger('createScriptRouteHandler');
+  const logger = endpointAppServices.createLogger('patchUpdateScriptRouteHandler');
 
   return async (context, req, res) => {
-    logger.debug(`creating new script [${req.body.name}]`);
+    logger.debug(() => `Patch update script: ${stringify(req.params.script_id)}`);
 
     try {
       const spaceId = (await context.securitySolution).getSpaceId();
@@ -39,7 +43,9 @@ export const getCreateScriptRequestHandler = (
         spaceId,
         user?.username || 'unknown'
       );
-      const response: EndpointScriptApiResponse = { data: await scriptsClient.create(req.body) };
+      const response: EndpointScriptApiResponse = {
+        data: await scriptsClient.update({ ...req.body, id: req.params.script_id }),
+      };
 
       return res.ok({ body: response });
     } catch (err) {
@@ -48,14 +54,14 @@ export const getCreateScriptRequestHandler = (
   };
 };
 
-export const registerCreateScriptRoute = (
+export const registerPatchUpdateScriptRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) => {
   router.versioned
-    .post({
+    .patch({
       access: 'public',
-      path: SCRIPTS_LIBRARY_ROUTE,
+      path: SCRIPTS_LIBRARY_ROUTE_ITEM,
       security: {
         authz: { requiredPrivileges: ['securitySolution'] },
         authc: { enabled: true },
@@ -66,23 +72,19 @@ export const registerCreateScriptRoute = (
           output: 'stream',
           maxBytes: endpointContext.serverConfig.maxEndpointScriptFileSize,
         },
-        availability: {
-          since: '9.4.0',
-          stability: 'stable',
-        },
       },
     })
     .addVersion(
       {
         version: '2023-10-31',
         validate: {
-          request: CreateScriptRequestSchema,
+          request: PatchUpdateRequestSchema,
         },
       },
       withEndpointAuthz(
         { all: ['canWriteScriptsLibrary'] },
-        endpointContext.logFactory.get('createScriptRoute'),
-        getCreateScriptRequestHandler(endpointContext.service)
+        endpointContext.logFactory.get('patchUpdateScriptRoute'),
+        getPatchUpdateScriptRequestHandler(endpointContext.service)
       )
     );
 };

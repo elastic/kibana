@@ -486,16 +486,11 @@ export class EndpointAppContextService {
     return this.startDependencies.config[key];
   }
 
-  getScriptsLibraryClient(
-    spaceId: string,
-    username: string,
-    esClient: ElasticsearchClient
-  ): ScriptsLibraryClient {
+  getScriptsLibraryClient(spaceId: string, username: string): ScriptsLibraryClient {
     return new ScriptsLibraryClient({
       spaceId,
       username,
       endpointService: this,
-      esClient,
     });
   }
 }
