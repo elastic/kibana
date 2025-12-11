@@ -16,6 +16,7 @@ import { ESLint } from 'eslint';
 
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
+import { CONNECTOR_TEMPLATE_DIR } from '../paths';
 
 const CONNECTORS_ROOT = Path.resolve(
   REPO_ROOT,
@@ -58,7 +59,7 @@ export const ConnectorCommand: GenerateCommand = {
       --owner   GitHub team/handle to own the connector folder in CODEOWNERS (e.g., "@elastic/response-ops")
     `,
   },
-  async run({ log, flags }) {
+  async run({ log, flags, render }) {
     const connectorName =
       (flags._[0] as string | undefined) ||
       ((await ask({
@@ -112,45 +113,25 @@ export const ConnectorCommand: GenerateCommand = {
     // create folder structure
     await Fsp.mkdir(iconDir, { recursive: true });
 
-    // write spec index.ts
+    // write spec index.ts via template
     const specIndexPath = Path.resolve(connectorDir, 'index.ts');
-    const specIndexContent = `
-import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
-
-export const ${connectorName
-      .replace(/[-_](\w)/g, (_, c) => (c ? c.toUpperCase() : ''))
-      .replace(/^\w/, (c) => c.toUpperCase())}: ConnectorSpec = {
-  metadata: {
-    id: '${connectorId}',
-    displayName: '${connectorName.replace(/[-_]/g, ' ').replace(/^\w/, (c) => c.toUpperCase())}',
-    description: '',
-    minimumLicense: 'basic',
-    supportedFeatureIds: ['workflows'],
-  },
-  schema: z.object({}),
-  actions: {},
-  test: {
-    handler: async () => ({ ok: true }),
-  },
-};
-`;
-    await Fsp.writeFile(specIndexPath, specIndexContent);
+    await render.toFile(Path.resolve(CONNECTOR_TEMPLATE_DIR, 'index.ts.ejs'), specIndexPath, {
+      connector: {
+        name: connectorName,
+        id: connectorId,
+        displayName: connectorName.replace(/[-_]/g, ' ').replace(/^\w/, (c) => c.toUpperCase()),
+        className: connectorName
+          .replace(/[-_](\w)/g, (_, c) => (c ? c.toUpperCase() : ''))
+          .replace(/^\w/, (c) => c.toUpperCase()),
+      },
+    });
     log.info('Wrote', Path.relative(REPO_ROOT, specIndexPath));
 
-    // write icon component placeholder
+    // write icon component placeholder via template
     const iconIndexPath = Path.resolve(iconDir, 'index.tsx');
-    const iconIndexContent = `
-import React from 'react';
-import { EuiIcon } from '@elastic/eui';
-import type { ConnectorIconProps } from '../../../types';
-
-export default (props: ConnectorIconProps) => {
-  // Placeholder icon: use built-in EUI icon until a custom one is added
-  return <EuiIcon type="globe" {...props} />;
-};
-`;
-    await Fsp.writeFile(iconIndexPath, iconIndexContent);
+    await render.toFile(Path.resolve(CONNECTOR_TEMPLATE_DIR, 'icon/index.tsx.ejs'), iconIndexPath, {
+      connector: { name: connectorName },
+    });
     log.info('Wrote', Path.relative(REPO_ROOT, iconIndexPath));
 
     // update connector_icons_map.ts
