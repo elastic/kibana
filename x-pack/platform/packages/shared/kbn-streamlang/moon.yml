@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/i18n'
   - '@kbn/esql-ast'
+  - '@kbn/tinymath'
 tags:
   - shared-common
   - package
