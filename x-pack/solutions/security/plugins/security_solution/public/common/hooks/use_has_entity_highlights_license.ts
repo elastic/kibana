@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { useLicense } from './use_license';
-import { useProductFeatureKeys } from './use_product_feature_keys';
+import { useHasSecurityCapability } from '../../helper_hooks';
 
 /**
  * Hook to determine if the user has the required license for entity highlights (GenAI) feature.
@@ -16,11 +15,8 @@ import { useProductFeatureKeys } from './use_product_feature_keys';
  * In Serverless: Requires Security Analytics Complete tier (not Essentials)
  */
 export const useHasEntityHighlightsLicense = (): boolean => {
-  const productFeatureKeys = useProductFeatureKeys();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const licenseService = useLicense();
 
-  return (
-    productFeatureKeys.has(ProductFeatureSecurityKey.advancedInsights) &&
-    licenseService.isEnterprise()
-  );
+  return hasEntityAnalyticsCapability && licenseService.isEnterprise();
 };

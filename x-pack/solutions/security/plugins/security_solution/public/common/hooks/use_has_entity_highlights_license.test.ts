@@ -7,25 +7,22 @@
 
 import { renderHook } from '@testing-library/react';
 import { useHasEntityHighlightsLicense } from './use_has_entity_highlights_license';
-import { useProductFeatureKeys } from './use_product_feature_keys';
+import { useHasSecurityCapability } from '../../helper_hooks';
 import { useLicense } from './use_license';
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 
-jest.mock('./use_product_feature_keys');
+jest.mock('../../helper_hooks');
 jest.mock('./use_license');
 
 describe('useHasEntityHighlightsLicense', () => {
-  const mockUseProductFeatureKeys = useProductFeatureKeys as jest.Mock;
+  const mockUseHasSecurityCapability = useHasSecurityCapability as jest.Mock;
   const mockUseLicense = useLicense as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return true when both PLI feature is enabled and user has Enterprise-level feature', () => {
-    mockUseProductFeatureKeys.mockReturnValue(
-      new Set<string>([ProductFeatureSecurityKey.advancedInsights])
-    );
+  it('should return true when both entity-analytics capability is enabled and user has Enterprise license', () => {
+    mockUseHasSecurityCapability.mockReturnValue(true);
 
     mockUseLicense.mockReturnValue({
       isEnterprise: jest.fn(() => true),
@@ -34,12 +31,11 @@ describe('useHasEntityHighlightsLicense', () => {
     const { result } = renderHook(() => useHasEntityHighlightsLicense());
 
     expect(result.current).toBe(true);
+    expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('entity-analytics');
   });
 
-  it('should return false when user has advancedInsights feature but NOT Enterprise license', () => {
-    mockUseProductFeatureKeys.mockReturnValue(
-      new Set<string>([ProductFeatureSecurityKey.advancedInsights])
-    );
+  it('should return false when user has entity-analytics capability but NOT Enterprise license', () => {
+    mockUseHasSecurityCapability.mockReturnValue(true);
 
     mockUseLicense.mockReturnValue({
       isEnterprise: jest.fn(() => false),
@@ -48,10 +44,11 @@ describe('useHasEntityHighlightsLicense', () => {
     const { result } = renderHook(() => useHasEntityHighlightsLicense());
 
     expect(result.current).toBe(false);
+    expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('entity-analytics');
   });
 
-  it('should return false when user has Enterprise license but NOT advancedInsights feature', () => {
-    mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
+  it('should return false when user has Enterprise license but NOT entity-analytics capability', () => {
+    mockUseHasSecurityCapability.mockReturnValue(false);
 
     mockUseLicense.mockReturnValue({
       isEnterprise: jest.fn(() => true),
@@ -60,10 +57,11 @@ describe('useHasEntityHighlightsLicense', () => {
     const { result } = renderHook(() => useHasEntityHighlightsLicense());
 
     expect(result.current).toBe(false);
+    expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('entity-analytics');
   });
 
-  it('should return false when user has neither advancedInsights feature nor Enterprise license', () => {
-    mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
+  it('should return false when user has neither entity-analytics capability nor Enterprise license', () => {
+    mockUseHasSecurityCapability.mockReturnValue(false);
 
     mockUseLicense.mockReturnValue({
       isEnterprise: jest.fn(() => false),
@@ -72,5 +70,6 @@ describe('useHasEntityHighlightsLicense', () => {
     const { result } = renderHook(() => useHasEntityHighlightsLicense());
 
     expect(result.current).toBe(false);
+    expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('entity-analytics');
   });
 });
