@@ -466,11 +466,11 @@ function createNavTree({
               ...(isCloudEnabled
                 ? []
                 : [
-                  {
-                    id: 'cloud_connect',
-                    link: 'cloud_connect',
-                  },
-                ]),
+                    {
+                      id: 'cloud_connect',
+                      link: 'cloud_connect',
+                    },
+                  ]),
               { link: 'monitoring' },
             ],
           },
