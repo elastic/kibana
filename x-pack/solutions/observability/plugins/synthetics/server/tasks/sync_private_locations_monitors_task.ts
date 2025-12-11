@@ -165,7 +165,6 @@ export class SyncPrivateLocationMonitorsTask {
         await this.deployPackagePolicies.syncPackagePoliciesForMws({
           allPrivateLocations,
           soClient,
-          encryptedSavedObjects,
           updatedMWs,
           missingMWIds,
           // this is passed so we don't have to fetch them again in the method
