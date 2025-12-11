@@ -123,6 +123,7 @@ export const initializeFiltersManager = (
       filters$,
       publishedChildFilters$,
       unpublishedChildFilters$,
+      childFiltersLoading$,
       publishFilters,
     },
     cleanup: () => {

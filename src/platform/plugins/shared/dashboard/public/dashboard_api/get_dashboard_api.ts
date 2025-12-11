@@ -36,6 +36,7 @@ import { initializeProjectRoutingManager } from './project_routing_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
+import { initializePauseFetchManager } from './pause_fetch_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -139,11 +140,9 @@ export function getDashboardApi({
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
-  const isFetchPaused$ = new BehaviorSubject<boolean>(false); // TODO: Make this work and probably move it to another file
+  const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
   const dashboardApi = {
-    isFetchPaused$,
-    setFetchPaused: (paused) => isFetchPaused$.next(paused),
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -158,6 +157,7 @@ export function getDashboardApi({
     ...trackOverlayApi,
     ...esqlVariablesManager.api,
     ...timesliceManager.api,
+    ...pauseFetchManager.api,
     ...initializeTrackContentfulRender(),
     executionContext: {
       type: 'dashboard',
@@ -282,6 +282,7 @@ export function getDashboardApi({
       esqlVariablesManager.cleanup();
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
+      pauseFetchManager.cleanup();
     },
   };
 }
