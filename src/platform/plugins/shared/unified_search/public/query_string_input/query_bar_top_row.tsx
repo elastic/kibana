@@ -14,7 +14,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { EMPTY, delay, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
-import { throttle } from 'lodash';
+import { throttle, debounce } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
@@ -37,7 +37,9 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  EuiIconTip,
   useEuiTheme,
+  type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
@@ -546,9 +548,14 @@ export const QueryBarTopRow = React.memo(
       ]
     );
 
+    const onDraftChangeDebounced = useMemo(
+      () => (onDraftChange ? debounce(onDraftChange, 300) : undefined),
+      [onDraftChange]
+    );
+
     useEffect(() => {
-      onDraftChange?.(draft);
-    }, [onDraftChange, draft]);
+      onDraftChangeDebounced?.(draft);
+    }, [onDraftChangeDebounced, draft]);
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
@@ -602,6 +609,20 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
+      const timeZoneName = uiSettings.get('dateFormat:tz');
+      const timeZoneSettingTip = i18n.translate(
+        'unifiedSearch.queryBarTopRow.datePicker.timeZoneSettingTip',
+        {
+          defaultMessage: 'Time zone is set in space settings by administrators',
+        }
+      );
+      const timeZoneCustomRender: EuiTimeZoneDisplayProps['customRender'] = ({ nameDisplay }) => (
+        <>
+          {nameDisplay}
+          <EuiIconTip content={timeZoneSettingTip} color="subdued" />
+        </>
+      );
+
       const datePicker = (
         <SuperDatePicker
           isDisabled={isDisabled}
@@ -623,6 +644,11 @@ export const QueryBarTopRow = React.memo(
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
           compressed
+          showTimeWindowButtons
+          timeZoneDisplayProps={{
+            timeZone: timeZoneName,
+            customRender: timeZoneCustomRender,
+          }}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);

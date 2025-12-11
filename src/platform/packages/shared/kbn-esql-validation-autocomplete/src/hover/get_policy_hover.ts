@@ -12,7 +12,7 @@ import {
   ENRICH_MODES,
   modeDescription,
 } from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { fromCache, setToCache } from './hover_cache';
 import { getPolicyHelper } from '../shared/resources_helpers';
 

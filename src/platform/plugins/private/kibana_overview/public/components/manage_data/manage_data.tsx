@@ -87,6 +87,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
 };
 
 ManageData.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   features: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

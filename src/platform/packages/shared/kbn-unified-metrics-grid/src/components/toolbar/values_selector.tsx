@@ -18,11 +18,11 @@ import {
   EuiNotificationBadge,
   EuiText,
 } from '@elastic/eui';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
@@ -36,8 +36,10 @@ export interface ValuesFilterProps {
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
-  timeRange: TimeRange;
   fullWidth?: boolean;
+  timeRange?: TimeRange;
+
+  isLoading?: boolean;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -48,6 +50,7 @@ export const ValuesSelector = ({
   timeRange,
   fullWidth = false,
   disabled = false,
+  isLoading: isFieldsLoading = false,
   indices = [],
   onClear,
 }: ValuesFilterProps) => {
@@ -58,13 +61,13 @@ export const ValuesSelector = ({
 
   const {
     data: values = [],
-    isLoading,
+    isLoading: isValuesLoading,
     error,
   } = useDimensionsQuery({
     dimensions: selectedDimensionNames,
     indices,
-    from: timeRange.from,
-    to: timeRange.to,
+    from: timeRange?.from,
+    to: timeRange?.to,
   });
 
   const groupedValues = useMemo(() => {
@@ -114,6 +117,8 @@ export const ValuesSelector = ({
     [onChange]
   );
 
+  const isLoading = isValuesLoading || isFieldsLoading;
+
   const buttonLabel = useMemo(() => {
     const count = selectedValues.length;
 
@@ -138,17 +143,24 @@ export const ValuesSelector = ({
           )}
         </EuiFlexItem>
 
-        {count > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge>{count}</EuiNotificationBadge>
-          </EuiFlexItem>
-        )}
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+        >
+          {count > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge>{count}</EuiNotificationBadge>
+            </EuiFlexItem>
+          )}
 
-        {isLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        )}
+          {isLoading && (
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexGroup>
     );
   }, [isLoading, selectedValues.length]);

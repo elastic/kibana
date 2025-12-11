@@ -15,7 +15,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import type { UrlObject } from 'url';
 import { format } from 'url';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { ObservabilityOnboardingFtrConfigName } from '../configs';
 import type {
   FtrProviderContext,

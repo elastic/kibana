@@ -293,7 +293,11 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       defaultMessage="To sync integrations from this cluster, the remote Elasticsearch output needs additional configuration. {documentationLink}."
                       values={{
                         documentationLink: (
-                          <EuiLink external={true} href={docLinks.links.fleet.remoteESOoutput}>
+                          <EuiLink
+                            external={true}
+                            target="_blank"
+                            href={docLinks.links.fleet.remoteESOoutput}
+                          >
                             <FormattedMessage
                               id="xpack.fleet.settings.remoteClusterConfiguration.documentationLink"
                               defaultMessage="Learn more"

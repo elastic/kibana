@@ -884,6 +884,23 @@
     "dynamic": false,
     "properties": {}
   },
+  "cloud-connect-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      },
+      "clusterId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
@@ -1866,6 +1883,9 @@
   "fleet-cloud-connector": {
     "dynamic": false,
     "properties": {
+      "accountType": {
+        "type": "keyword"
+      },
       "cloudProvider": {
         "type": "keyword"
       },
@@ -2669,6 +2689,9 @@
       "secret_storage_requirements_met": {
         "type": "boolean"
       },
+      "ssl_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "use_space_awareness_migration_started_at": {
         "index": false,
         "type": "date"
@@ -3290,6 +3313,9 @@
     "properties": {
       "createdBy": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
