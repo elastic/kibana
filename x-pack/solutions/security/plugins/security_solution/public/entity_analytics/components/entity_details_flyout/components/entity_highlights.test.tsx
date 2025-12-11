@@ -19,6 +19,7 @@ const mockUseSpaceId = jest.fn();
 const mockUseStoredAssistantConnectorId = jest.fn();
 const mockUseAssistantAvailability = jest.fn();
 const mockUseFetchEntityDetailsHighlights = jest.fn();
+const mockUseHasEntityHighlightsLicense = jest.fn();
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: () => mockUseAssistantContext(),
@@ -51,6 +52,10 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
 
 jest.mock('../hooks/use_fetch_entity_details_highlights', () => ({
   useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
+}));
+
+jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
+  useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
 }));
 
 jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
@@ -127,6 +132,7 @@ describe('EntityHighlights', () => {
     mockUseStoredAssistantConnectorId.mockReturnValue(defaultStoredAssistantConnectorId);
     mockUseAssistantAvailability.mockReturnValue(defaultAssistantAvailability);
     mockUseFetchEntityDetailsHighlights.mockReturnValue(defaultFetchEntityDetailsHighlights);
+    mockUseHasEntityHighlightsLicense.mockReturnValue(true);
   });
 
   it('renders EntityHighlights with title and icon', () => {
@@ -294,5 +300,15 @@ describe('EntityHighlights', () => {
 
     // Component should still render without errors
     expect(screen.getByText('Entity summary')).toBeInTheDocument();
+  });
+
+  it('returns null when entity highlights license is not available', () => {
+    mockUseHasEntityHighlightsLicense.mockReturnValue(false);
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 });
