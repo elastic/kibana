@@ -217,6 +217,7 @@ export class AIAssistantManagementPlugin
       coreStart.application.capabilities.observabilityAIAssistant?.show === true;
     const isSecurityAIAssistantEnabled =
       coreStart.application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+    const isAiAgentsEnabled = coreStart.application.capabilities.agentBuilder?.show === true;
 
     const isUntouchedUiSetting = coreStart.settings.client.isDefault(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
@@ -225,7 +226,7 @@ export class AIAssistantManagementPlugin
     if (
       !this.isServerless &&
       isUntouchedUiSetting &&
-      (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled)
+      (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled || isAiAgentsEnabled)
     ) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {

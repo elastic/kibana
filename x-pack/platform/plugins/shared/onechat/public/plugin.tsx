@@ -14,7 +14,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
@@ -200,14 +199,6 @@ export class OnechatPlugin
         },
         // right before the user profile
         order: 1001,
-      });
-
-      // open AI Agent flyout when chosen in modal
-      startDependencies.aiAssistantManagementSelection.openChat$.subscribe((selection) => {
-        if (selection === AIChatExperience.Agent) {
-          onechatService.openConversationFlyout();
-          startDependencies.aiAssistantManagementSelection.completeOpenChat();
-        }
       });
     }
 

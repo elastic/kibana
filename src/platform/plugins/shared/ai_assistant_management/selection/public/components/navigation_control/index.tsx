@@ -70,9 +70,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   }, []);
   const modalTitleId = useGeneratedHtmlId({ prefix: 'aiAssistantModalTitle' });
 
-  const handleOpenModal = useCallback(() => setModalOpen(true), []);
-  const handleSelect = useCallback((type: AIExperienceSelection) => setSelectedType(type), []);
-
   const applySelection = useCallback(async () => {
     const chatExperience =
       selectedType === AIChatExperience.Agent ? AIChatExperience.Agent : AIChatExperience.Classic;
@@ -102,10 +99,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     await applySelection();
   }, [applySelection]);
 
-  const handleCancelAgent = useCallback(() => {
-    setConfirmModalOpen(false);
-  }, []);
-
   const onApply = useCallback(async () => {
     if (selectedType === AIChatExperience.Agent) {
       setConfirmModalOpen(true);
@@ -119,7 +112,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     <>
       <EuiButton
         iconType={AssistantIcon}
-        onClick={handleOpenModal}
+        onClick={() => setModalOpen(true)}
         data-test-subj="aiAssistantHeaderButton"
         aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
           defaultMessage: 'Open the AI Assistant selector',
@@ -190,7 +183,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     hasBorder
                     selectable={{
                       isSelected: selectedType === AIAssistantType.Observability,
-                      onClick: () => handleSelect(AIAssistantType.Observability),
+                      onClick: () => setSelectedType(AIAssistantType.Observability),
                     }}
                     title={i18n.translate(
                       'aiAssistantManagementSelection.headerButton.observabilityLabel',
@@ -225,7 +218,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     hasBorder
                     selectable={{
                       isSelected: selectedType === AIAssistantType.Security,
-                      onClick: () => handleSelect(AIAssistantType.Security),
+                      onClick: () => setSelectedType(AIAssistantType.Security),
                     }}
                     title={i18n.translate(
                       'aiAssistantManagementSelection.headerButton.securityLabel',
@@ -254,7 +247,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }}
                       selectable={{
                         isSelected: selectedType === AIChatExperience.Agent,
-                        onClick: () => handleSelect(AIChatExperience.Agent),
+                        onClick: () => setSelectedType(AIChatExperience.Agent),
                       }}
                       title={i18n.translate(
                         'aiAssistantManagementSelection.headerButton.aiAgentLabel',
@@ -303,7 +296,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       )}
 
       {isConfirmModalOpen && (
-        <AIAgentConfirmationModal onConfirm={handleConfirmAgent} onCancel={handleCancelAgent} />
+        <AIAgentConfirmationModal
+          onConfirm={handleConfirmAgent}
+          onCancel={() => setConfirmModalOpen(false)}
+        />
       )}
     </>
   );
