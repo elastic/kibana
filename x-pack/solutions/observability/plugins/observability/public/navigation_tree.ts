@@ -263,14 +263,14 @@ function createNavTree({
                 defaultMessage: 'AI Assistant',
               }),
               icon: 'sparkles',
-              link: 'observabilityAIAssistant',
+              link: 'observabilityAIAssistant' as const,
             },
           ]
         : [
             {
-              link: 'agent_builder',
+              link: 'agent_builder' as const,
               icon: LazyAgentBuilderIcon,
-              badgeType: 'techPreview',
+              badgeType: 'techPreview' as const,
             },
           ]),
       {
