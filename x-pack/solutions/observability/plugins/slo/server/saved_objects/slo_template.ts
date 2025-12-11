@@ -21,7 +21,11 @@ export const sloTemplate: SavedObjectsType = {
   name: SO_SLO_TEMPLATE_TYPE,
   hidden: true,
   namespaceType: 'multiple-isolated',
-  modelVersions: {},
+  modelVersions: {
+    '1': {
+      changes: [],
+    },
+  },
   mappings: {
     dynamic: false,
     properties: {
