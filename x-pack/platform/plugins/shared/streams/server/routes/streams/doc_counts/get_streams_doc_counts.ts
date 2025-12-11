@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { IndicesStatsIndicesStats, SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesStatsIndicesStats,
+  SearchRequest,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
