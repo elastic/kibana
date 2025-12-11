@@ -16,9 +16,14 @@
 import type { KbnClient, RoleApiCredentials, ScoutLogger } from '@kbn/scout';
 import { expect, tags } from '@kbn/scout';
 
-import { ATTRIBUTE_TITLE_KEY, ATTRIBUTE_TITLE_VALUE, COMMON_HEADERS, SPACES } from './constants';
-import { prepareImportFormData } from './helpers';
+import {
+  ATTRIBUTE_TITLE_KEY,
+  ATTRIBUTE_TITLE_VALUE,
+  COMMON_HEADERS,
+  SPACES,
+} from '../../constants';
 import { apiTest } from '../../fixtures';
+import { prepareImportFormData } from '../../helpers';
 
 apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () => {
   // Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs

@@ -15,9 +15,9 @@ import {
   DASHBOARD_SAVED_OBJECT,
   SPACES,
   TEST_SPACES,
-} from './constants';
-import { prepareImportFormData } from './helpers';
+} from '../../constants';
 import { apiTest } from '../../fixtures';
+import { prepareImportFormData } from '../../helpers';
 
 /**
  * Tests for the Saved Objects Import API (_import) within individual spaces (default space and a "space_1" space).
