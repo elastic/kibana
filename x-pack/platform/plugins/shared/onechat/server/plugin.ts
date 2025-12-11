@@ -19,8 +19,7 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
-import { registerStepDefinitions } from './step_types';
-import { onechatStepServices } from './step_types/step_services';
+import { getRunAgentStepDefinition } from './step_types';
 import type { OnechatHandlerContext } from './request_handler_context';
 import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
@@ -76,8 +75,9 @@ export class OnechatPlugin
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     if (setupDeps.workflowsExtensions) {
-      registerStepDefinitions(setupDeps.workflowsExtensions);
-      this.logger.info('Onechat workflow step definitions registered');
+      setupDeps.workflowsExtensions.registerStepDefinition(
+        getRunAgentStepDefinition(this.serviceManager)
+      );
     }
 
     registerOnechatHandlerContext({ coreSetup });
@@ -128,8 +128,6 @@ export class OnechatPlugin
 
     const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
-
-    onechatStepServices.setRunner(runner);
 
     return {
       agents: {

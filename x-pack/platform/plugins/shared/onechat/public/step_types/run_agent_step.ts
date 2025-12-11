@@ -28,7 +28,7 @@ export const runAgentStepDefinition: PublicStepDefinition = {
 - name: run_agent
   type: ${RunAgentStepTypeId}
   with:
-    input: "Analyze the following data and provide insights"
+    message: "Analyze the following data and provide insights"
 \`\`\``,
 
       `## Use a specific agent
@@ -37,7 +37,7 @@ export const runAgentStepDefinition: PublicStepDefinition = {
   type: ${RunAgentStepTypeId}
   with:
     agent_id: "my-custom-agent"
-    input: "{{ workflow.input.message }}"
+    message: "{{ workflow.input.message }}"
 \`\`\``,
     ],
   },

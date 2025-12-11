@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { runAgentStepDefinition } from './run_agent_step';
+import { getRunAgentStepDefinition } from './run_agent_step';
 
-/**
- * Register all onechat step definitions with the workflows extensions plugin.
- */
-export function registerStepDefinitions(
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
-): void {
-  workflowsExtensions.registerStepDefinition(runAgentStepDefinition);
-}
+export { getRunAgentStepDefinition };
