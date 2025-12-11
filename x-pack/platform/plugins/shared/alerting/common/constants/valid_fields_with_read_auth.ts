@@ -6,10 +6,11 @@
  */
 
 /**
- * used by the security solution
+ * Used by the security solution
  */
 export const validFields = {
   EXCEPTIONS_LIST: 'exceptionsList',
+  RULE_SOURCE: 'ruleSource',
 } as const;
 
 export type ValidReadAuthEditFields = (typeof validFields)[keyof typeof validFields];

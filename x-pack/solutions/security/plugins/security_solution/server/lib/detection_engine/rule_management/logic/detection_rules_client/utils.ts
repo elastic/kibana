@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { camelCase, isEmpty } from 'lodash';
@@ -18,7 +18,10 @@ import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/co
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import type {
+  RuleSignatureId,
+  RuleSource,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import type { RulePatchProps, RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../rule_schema';
@@ -104,30 +107,29 @@ export const mergeExceptionLists = (
   }
 };
 
+// TODO: move this to a higher level
+export type ReadAuthRulePatchProps = Pick<RulePatchProps, 'exceptions_list'>;
+export type ReadAuthRulePatchWithRuleSource = ReadAuthRulePatchProps & { rule_source: RuleSource };
+
 /**
  * Typeguard to determine if given key is one of
  * valid string literals for editable rule fields
  * with read authz
- * @param someKey unknown
+ * @param key string
  * @returns boolean
  */
-export const isEveryReadKeyValid = (someKey: unknown): someKey is ValidReadAuthEditFields =>
-  someKey != null &&
-  typeof someKey === 'string' &&
-  Object.values(validFields).includes(camelCase(someKey) as ValidReadAuthEditFields);
+export const isKeyUpdateableWithReadPermission = (key: string): boolean =>
+  Object.values(validFields).includes(camelCase(key) as ValidReadAuthEditFields);
 
 /**
- * utility for throwing errors found in bulk patch response
- * @param appliedPatchesWithReadPrivs Array<BulkEditResult<RuleParams>>
+ * Utility for formatting and throwing errors found in bulk patch response
+ * @param appliedPatchWithReadPrivs BulkEditResult<RuleParams>
  */
-export const gatherErrors = (appliedPatchesWithReadPrivs: Array<BulkEditResult<RuleParams>>) => {
-  if (appliedPatchesWithReadPrivs.some((patchResp) => !isEmpty(patchResp.errors))) {
-    // gather errors
-    const errors = appliedPatchesWithReadPrivs.reduce((acc, patches) => {
-      const theErrors = patches.errors;
-      return patches.errors != null ? acc.concat(theErrors) : acc;
-    }, [] as BulkOperationError[]);
-    throw new Error(errors.reduce((acc, error) => `${acc}\n${error.message}`, ''));
+export const formatAndThrowErrors = (appliedPatchWithReadPrivs: BulkEditResult<RuleParams>) => {
+  if (!isEmpty(appliedPatchWithReadPrivs.errors)) {
+    throw new Error(
+      appliedPatchWithReadPrivs.errors.reduce((acc, error) => `${acc}\n${error.message}`, '')
+    );
   }
 };
 
@@ -136,58 +138,60 @@ export const gatherErrors = (appliedPatchesWithReadPrivs: Array<BulkEditResult<R
  * with read authz
  * @param field
  * @param rulePatch
- * @param existingRule
  * @returns
  */
 export const getReadAuthFieldValue = (
   field: string,
-  rulePatch: RulePatchProps,
-  existingRule: RuleResponse
+  rulePatch: ReadAuthRulePatchWithRuleSource
 ) => {
-  if (
-    camelCase(field) === validFields.EXCEPTIONS_LIST &&
-    !isEmpty(rulePatch.exceptions_list) &&
-    rulePatch.exceptions_list != null
-  ) {
-    return [
-      ...rulePatch.exceptions_list.map((exceptionList) => ({
-        id: exceptionList.id,
-        list_id: exceptionList.list_id,
-        type: exceptionList.type,
-        namespace_type: exceptionList.namespace_type,
-      })),
-    ];
+  switch (camelCase(field)) {
+    case validFields.EXCEPTIONS_LIST:
+      if (rulePatch.exceptions_list != null) {
+        return rulePatch.exceptions_list;
+      }
+
+    case validFields.RULE_SOURCE:
+      return rulePatch.rule_source;
   }
 };
 
 /**
- * Applies the `bulkEditRUleParamsWithReadAuth` function
+ * Applies the `bulkEditRuleParamsWithReadAuth` function
  * to patch rule field values
  * @param rulesClient
  * @param rulePatch
  * @param existingRule
+ * @param prebuiltRuleAssetClient
  * @returns
  */
 export const applyPatchRuleWithReadPrivileges = async (
   rulesClient: RulesClient,
-  rulePatch: RulePatchProps, // make this a type
-  existingRule: RuleResponse
-): Promise<Array<BulkEditResult<RuleParams>>> => {
-  const validFieldValues = Object.values(validFields);
-  return Promise.all(
-    validFieldValues.map(async (field) =>
-      rulesClient.bulkEditRuleParamsWithReadAuth<RuleParams>({
-        ids: [existingRule.id],
-        operations: [
-          {
-            field,
-            operation: 'set',
-            value: getReadAuthFieldValue(field, rulePatch, existingRule),
-          },
-        ],
-      })
-    )
-  );
+  rulePatch: ReadAuthRulePatchProps,
+  existingRule: RuleResponse,
+  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient
+): Promise<BulkEditResult<RuleParams>> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { rule_source } = await applyRulePatch({
+    prebuiltRuleAssetClient,
+    existingRule,
+    rulePatch,
+  });
+
+  const nextRule = { ...rulePatch, rule_source };
+
+  const operations = Object.keys(nextRule).map((field) => {
+    const camelCasedField = camelCase(field) as ValidReadAuthEditFields;
+    return {
+      field: camelCasedField,
+      operation: 'set' as const,
+      value: getReadAuthFieldValue(field, nextRule),
+    };
+  });
+
+  return rulesClient.bulkEditRuleParamsWithReadAuth<RuleParams>({
+    ids: [existingRule.id],
+    operations,
+  });
 };
 
 /**
@@ -212,13 +216,17 @@ export const patchApplicator = async (
   existingRule: RuleResponse,
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient
 ) => {
-  if (Object.keys(rulePatch).every((key) => isEveryReadKeyValid(key))) {
-    const appliedPatchesWithReadPrivs: Array<BulkEditResult<RuleParams>> =
-      await applyPatchRuleWithReadPrivileges(rulesClient, rulePatch, existingRule);
+  if (Object.keys(rulePatch).every((key) => isKeyUpdateableWithReadPermission(key))) {
+    const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> =
+      await applyPatchRuleWithReadPrivileges(
+        rulesClient,
+        rulePatch,
+        existingRule,
+        prebuiltRuleAssetClient
+      );
 
-    // gather and throw errors from bulk operation
-    gatherErrors(appliedPatchesWithReadPrivs);
-    return appliedPatchesWithReadPrivs[0].rules[0];
+    formatAndThrowErrors(appliedPatchWithReadPrivs);
+    return appliedPatchWithReadPrivs.rules[0];
   } else {
     const patchedRule = await applyRulePatch({
       prebuiltRuleAssetClient,

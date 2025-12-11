@@ -6,7 +6,7 @@
  */
 
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
-import { mergeExceptionLists, isEveryReadKeyValid } from './utils';
+import { mergeExceptionLists, isKeyUpdateableWithReadPermission } from './utils';
 
 describe('utils', () => {
   describe('mergeExceptionLists', () => {
@@ -118,7 +118,7 @@ describe('utils', () => {
   describe('validReadAuthzFields', () => {
     it('should accept valid fields', () => {
       expect(
-        Object.keys({ exceptions_list: 'test value' }).every((key) => isEveryReadKeyValid(key))
+        Object.keys({ exceptions_list: 'test value' }).every((key) => isKeyUpdateableWithReadPermission(key))
       ).toBe(true);
     });
   });
