@@ -469,3 +469,21 @@ export const attachTriggerCommand = (
         text: s,
       } as ISuggestionItem)
     : withAutoSuggest(s as ISuggestionItem);
+
+export const attachParameterHelperCommand = (
+  s: string | PartialSuggestionWithText
+): PartialSuggestionWithText => {
+  const command = {
+    id: 'editor.action.triggerParameterHints',
+    title: '',
+  };
+  return typeof s === 'string'
+    ? {
+        text: s,
+        command,
+      }
+    : {
+        ...s,
+        command,
+      };
+};
