@@ -8,31 +8,20 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiImage,
-  EuiPanel,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { ApplicationStart } from '@kbn/core/public';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
-
-interface MetricPanelProps {
-  title: string;
-  onClick?: () => void;
-  metric: {
-    value: number;
-    detail: string;
-  };
-  addButtonAriaLabel: string;
-  dataTestSubj: string;
-}
+import { useKibana } from '../../hooks/use_kibana';
 
 const PANEL_TYPES = [
   'discover',
@@ -50,6 +39,13 @@ export interface ComplexMetricPanel {
   metricDescription: string;
   metricTitle: string;
   type: MetricPanelType;
+  onPanelClick?: ({
+    share,
+    application,
+  }: {
+    share: SharePublicStart;
+    application: ApplicationStart;
+  }) => void;
 }
 
 const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
@@ -64,6 +60,9 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
       defaultMessage: 'Discover',
     }),
     type: 'discover',
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('discover');
+    },
   },
   {
     getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_data_vis.svg`,
@@ -76,6 +75,9 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
       defaultMessage: 'Dashboards',
     }),
     type: 'dashboards',
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('dashboards');
+    },
   },
   {
     getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_agents.svg`,
@@ -88,6 +90,9 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
       defaultMessage: 'Agent Builder',
     }),
     type: 'agentBuilder',
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('agent_builder');
+    },
   },
 
   {
@@ -100,6 +105,9 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.workflow.title', {
       defaultMessage: 'Workflows',
     }),
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('workflows');
+    },
   },
   {
     type: 'machineLearning',
@@ -115,6 +123,9 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.machineLearning.title', {
       defaultMessage: 'Machine Learning',
     }),
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('ml');
+    },
   },
   {
     type: 'dataManagement',
@@ -130,6 +141,11 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataManagement.title', {
       defaultMessage: 'Data Management',
     }),
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('management', {
+        path: 'data/index_management',
+      });
+    },
   },
 ];
 
@@ -138,19 +154,32 @@ interface MetricPanelEmptyProps {
 }
 
 const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
+  const {
+    services: { share, application },
+  } = useKibana();
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
 
-  const { getImageUrl, metricTitle, metricDescription } = panel;
+  const { getImageUrl, metricTitle, metricDescription, onPanelClick } = panel;
   return (
-    <EuiSplitPanel.Outer hasBorder>
+    <EuiSplitPanel.Outer
+      hasBorder
+      onClick={() => onPanelClick && onPanelClick({ share, application })}
+    >
       <EuiSplitPanel.Inner
+        grow
         css={css({
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           minHeight: `${euiTheme.base * 7}px`,
         })}
       >
-        <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          gutterSize="s"
+          css={css({ height: '100%' })}
+        >
           <EuiFlexItem grow={false}>
             <div>
               <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
@@ -178,66 +207,6 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
-  );
-};
-
-export const MetricPanel = ({
-  title,
-  onClick,
-  metric,
-  addButtonAriaLabel,
-  dataTestSubj,
-}: MetricPanelProps) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiPanel hasBorder paddingSize="m">
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>{title}</h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="info" size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {onClick && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="plusInCircle"
-                  aria-label={addButtonAriaLabel}
-                  data-test-subj={dataTestSubj}
-                  onClick={onClick}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="xs"
-            css={css({ padding: `${euiTheme.size.base} 0` })}
-          >
-            <EuiFlexItem>
-              <EuiTitle size="l">
-                <h1>{metric.value}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                {metric.detail}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
   );
 };
 

@@ -13,8 +13,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { MetricPanels } from './metric_panels';
 import { CloudResources } from './cloud_resources';
 import { BodyLinks } from './body_links';
+import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const SearchHomepageBody = () => {
+  const {
+    services: { cloud },
+  } = useKibana();
+  const { isAdmin } = useAuthenticatedUser();
   return (
     <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow paddingSize="none">
       <EuiFlexGroup gutterSize="l" direction="column">
@@ -22,10 +28,13 @@ export const SearchHomepageBody = () => {
           <EuiSpacer size="l" />
           <MetricPanels />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSpacer size="l" />
-          <CloudResources />
-        </EuiFlexItem>
+        {cloud?.isServerlessEnabled && !isAdmin ? null : (
+          <EuiFlexItem>
+            <EuiSpacer size="l" />
+            <CloudResources />
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem>
           <EuiHorizontalRule margin="xxl" />
         </EuiFlexItem>
