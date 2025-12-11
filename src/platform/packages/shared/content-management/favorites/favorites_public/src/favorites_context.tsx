@@ -11,18 +11,22 @@ import React from 'react';
 
 import type { FavoritesClientPublic } from './favorites_client';
 
-interface FavoritesContextValue {
+export interface FavoritesServices {
   favoritesClient?: FavoritesClientPublic;
   notifyError?: (title: JSX.Element, text?: string) => void;
 }
 
-const FavoritesContext = React.createContext<FavoritesContextValue | null>(null);
+const FavoritesContext = React.createContext<FavoritesServices | null>(null);
 
-export const FavoritesContextProvider: React.FC<React.PropsWithChildren<FavoritesContextValue>> = ({
+export interface FavoritesContextProviderProps extends FavoritesServices {
+  children: React.ReactNode;
+}
+
+export const FavoritesContextProvider = ({
   favoritesClient,
   notifyError,
   children,
-}) => {
+}: FavoritesContextProviderProps) => {
   return (
     <FavoritesContext.Provider value={{ favoritesClient, notifyError }}>
       {children}

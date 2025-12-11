@@ -18,59 +18,67 @@ const fallbackEntityNamePlural = i18n.translate(
   { defaultMessage: 'objects' }
 );
 
-export const NoCreatorTip = (props: {
+export const NoCreatorTip = ({
+  iconType,
+  includeVersionTip,
+  entityNamePlural,
+}: {
   iconType?: IconType;
   includeVersionTip?: boolean;
   entityNamePlural?: string;
 }) => (
   <NoUsersTip
+    iconType={iconType}
     content={
-      props.includeVersionTip ? (
+      includeVersionTip ? (
         <FormattedMessage
           id="contentManagement.userProfiles.noCreatorTipWithVersion"
           defaultMessage="Created by is set when {entityNamePlural} are created by users (not by API) starting from version {version}"
           values={{
             version: '8.14',
-            entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural,
+            entityNamePlural: entityNamePlural ?? fallbackEntityNamePlural,
           }}
         />
       ) : (
         <FormattedMessage
           id="contentManagement.userProfiles.noCreatorTip"
           defaultMessage="Created by is set when {entityNamePlural} are created by users (not by API)"
-          values={{ entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural }}
+          values={{ entityNamePlural: entityNamePlural ?? fallbackEntityNamePlural }}
         />
       )
     }
-    {...props}
   />
 );
 
-export const NoUpdaterTip = (props: {
-  iconType?: string;
+export const NoUpdaterTip = ({
+  iconType,
+  includeVersionTip,
+  entityNamePlural,
+}: {
+  iconType?: IconType;
   includeVersionTip?: boolean;
   entityNamePlural?: string;
 }) => (
   <NoUsersTip
+    iconType={iconType}
     content={
-      props.includeVersionTip ? (
+      includeVersionTip ? (
         <FormattedMessage
           id="contentManagement.userProfiles.noUpdaterTipWithVersion"
           defaultMessage="Updated by is set when {entityNamePlural} are updated by users (not by API) starting from version {version}"
           values={{
             version: '8.15',
-            entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural,
+            entityNamePlural: entityNamePlural ?? fallbackEntityNamePlural,
           }}
         />
       ) : (
         <FormattedMessage
           id="contentManagement.userProfiles.noUpdaterTip"
           defaultMessage="Updated by is set when {entityNamePlural} are created by users (not by API)"
-          values={{ entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural }}
+          values={{ entityNamePlural: entityNamePlural ?? fallbackEntityNamePlural }}
         />
       )
     }
-    {...props}
   />
 );
 

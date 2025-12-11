@@ -16,24 +16,34 @@ export const userProfileKeys = {
 };
 
 export const useUserProfile = (uid: string) => {
-  const { getUserProfile } = useUserProfilesServices();
+  const services = useUserProfilesServices({ strict: false });
   const query = useQuery(
     userProfileKeys.get(uid),
     async () => {
-      return getUserProfile(uid);
+      return services?.getUserProfile(uid);
     },
-    { staleTime: Infinity }
+    {
+      staleTime: Infinity,
+      // Disable query if services are not available.
+      enabled: !!services,
+    }
   );
   return query;
 };
 
 export const useUserProfiles = (uids: string[], opts?: { enabled?: boolean }) => {
-  const { bulkGetUserProfiles } = useUserProfilesServices();
+  const services = useUserProfilesServices({ strict: false });
   const query = useQuery({
     queryKey: userProfileKeys.bulkGet(uids),
-    queryFn: () => bulkGetUserProfiles(uids),
+    queryFn: () => {
+      if (!services?.bulkGetUserProfiles) {
+        return [];
+      }
+      return services.bulkGetUserProfiles(uids);
+    },
     staleTime: Infinity,
-    enabled: opts?.enabled ?? true,
+    // Disable query if services are not available.
+    enabled: (opts?.enabled ?? true) && !!services,
   });
   return query;
 };

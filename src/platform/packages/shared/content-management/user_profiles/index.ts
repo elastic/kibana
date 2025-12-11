@@ -18,3 +18,5 @@ export {
   type UserProfilesServices,
   useUserProfilesServices,
 } from './src/services';
+
+export { createBatcher } from './src/utils/batcher';

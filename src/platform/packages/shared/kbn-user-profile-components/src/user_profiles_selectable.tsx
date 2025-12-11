@@ -96,6 +96,12 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
   searchInputId?: string;
 
   /**
+   * Whether the search field should be compressed.
+   * @default false
+   */
+  searchCompressed?: boolean;
+
+  /**
    * Returns message for number of selected users.
    * @param selectedCount Number of selected users
    */
@@ -147,6 +153,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   errorMessage,
   searchPlaceholder,
   searchInputId,
+  searchCompressed = false,
   selectedStatusMessage,
   limitReachedMessage,
   nullOptionLabel,
@@ -321,6 +328,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         isLoading,
         isClearable: !isLoading,
         id: searchInputId,
+        compressed: searchCompressed,
       }}
       isPreFiltered
       listProps={{ onFocusBadge: false, rowHeight: 48 }}
