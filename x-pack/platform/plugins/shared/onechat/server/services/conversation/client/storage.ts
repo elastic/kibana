@@ -9,6 +9,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/onechat-server';
+import type { VersionedAttachment } from '@kbn/onechat-common/attachments';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -25,6 +26,7 @@ const storageSettings = {
       created_at: types.date({}),
       updated_at: types.date({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
+      attachments: types.object({ dynamic: false, properties: {} }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -40,6 +42,7 @@ export interface ConversationProperties {
   conversation_rounds: PersistentConversationRound[];
   // legacy field
   rounds?: PersistentConversationRound[];
+  attachments?: VersionedAttachment[];
 }
 
 export type ConversationStorageSettings = typeof storageSettings;

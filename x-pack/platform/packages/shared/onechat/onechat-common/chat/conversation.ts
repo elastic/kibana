@@ -7,7 +7,12 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
-import type { Attachment, AttachmentInput } from '../attachments';
+import type {
+  Attachment,
+  AttachmentInput,
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '../attachments';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -19,8 +24,14 @@ export interface RoundInput {
   message: string;
   /**
    * Optional attachments to provide to the agent.
+   * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: Attachment[];
+  /**
+   * References to versioned conversation-level attachments.
+   * NEW: Preferred way to reference attachments.
+   */
+  attachment_refs?: AttachmentVersionRef[];
 }
 
 /**
@@ -33,8 +44,14 @@ export interface RawRoundInput {
   message: string;
   /**
    * Optional attachments to provide to the agent.
+   * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
+  /**
+   * References to versioned conversation-level attachments.
+   * NEW: Preferred way to reference attachments.
+   */
+  attachment_refs?: AttachmentVersionRef[];
 }
 
 /**
@@ -201,6 +218,12 @@ export interface Conversation {
   updated_at: string;
   /** list of round for this conversation */
   rounds: ConversationRound[];
+  /**
+   * Conversation-level versioned attachments.
+   * NEW: Optional for backward compatibility during migration.
+   * These attachments are shared across all rounds and can be referenced via attachment_refs.
+   */
+  attachments?: VersionedAttachment[];
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
