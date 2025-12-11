@@ -35,7 +35,7 @@ export const EndpointsTable: React.FC<EndpointsTableProps> = ({
       onChange={onChange}
       pagination={pagination}
       sorting={sorting}
-      tableCaption={i18n.translate('endpointsTable.tableCaption', {
+      tableCaption={i18n.translate('xpack.searchInferenceEndpoints.endpointsTable.tableCaption', {
         defaultMessage: 'Inference endpoints',
       })}
     />
