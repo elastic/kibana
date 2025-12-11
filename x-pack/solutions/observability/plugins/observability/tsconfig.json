@@ -140,9 +140,9 @@
     "@kbn/react-query",
     "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
     "@kbn/onechat-plugin",
-    "@kbn/observability-agent-builder",
+    "@kbn/observability-agent-builder"
   ],
   "exclude": ["target/**/*"]
 }
