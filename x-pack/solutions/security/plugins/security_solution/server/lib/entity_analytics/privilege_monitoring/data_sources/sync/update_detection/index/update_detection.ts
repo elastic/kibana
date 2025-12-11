@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { uniq } from 'lodash';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { PrivMonBulkUser } from '../../../../types';
@@ -26,7 +27,8 @@ export const createIndexUpdateDetectionService = (
     const users: PrivMonBulkUser[] = await patternMatcherService.findPrivilegedUsersFromMatchers(
       source
     );
-    await statusUpdateService.updatePrivilegedStatus(users, source);
+
+    await statusUpdateService.updatePrivilegedStatus(uniq(users), source); // ensure users are unique before updating
     dataClient.log(
       'info',
       `Index Update Detection: Found ${users.length} users from index source ${source.id}`
