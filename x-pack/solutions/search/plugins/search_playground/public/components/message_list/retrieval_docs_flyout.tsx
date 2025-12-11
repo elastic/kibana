@@ -142,7 +142,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                   tableCaption={i18n.translate(
                     'xpack.searchPlayground.chat.message.assistant.retrievalDoc.tableCaption',
                     {
-                      defaultMessage: 'Fields and values for document {id}',
+                      defaultMessage: 'Fields for document {id}',
                       values: { id: doc.metadata._id },
                     }
                   )}
