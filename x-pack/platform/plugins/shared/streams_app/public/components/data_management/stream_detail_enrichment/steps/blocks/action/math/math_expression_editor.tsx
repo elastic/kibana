@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,14 +23,18 @@ import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
 import { LanguageDocumentationPopover } from '@kbn/language-documentation';
 import { Markdown } from '@kbn/shared-ux-markdown';
+import { monaco } from '@kbn/monaco';
 import { validateMathExpression, getMathExpressionLanguageDocSections } from '@kbn/streamlang';
 import type { ProcessorFormState } from '../../../../types';
+// Import to register the math language with Monaco
+import { MATH_LANGUAGE_ID } from './math_expression_tokenization';
 
 export const MathExpressionEditor: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const [isWordWrapped, setIsWordWrapped] = useState(true);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const editorRef = useRef<{ updateOptions: (opts: Record<string, unknown>) => void } | null>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const modelRef = useRef<monaco.editor.ITextModel | null>(null);
 
   const { field } = useController<ProcessorFormState, 'expression'>({
     name: 'expression',
@@ -57,9 +61,32 @@ export const MathExpressionEditor: React.FC = () => {
 
   const hasInlineError = validationResult && !validationResult.valid;
 
+  // Set error markers on the Monaco model for squiggly underlines
+  useEffect(() => {
+    const model = modelRef.current;
+    if (!model) return;
+
+    if (hasInlineError && validationResult) {
+      // Create markers for each error
+      // Since we don't have precise position info, mark the entire content
+      const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => ({
+        severity: monaco.MarkerSeverity.Error,
+        message: error,
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: model.getLineCount(),
+        endColumn: model.getLineMaxColumn(model.getLineCount()),
+      }));
+      monaco.editor.setModelMarkers(model, 'math-validation', markers);
+    } else {
+      // Clear markers when valid
+      monaco.editor.setModelMarkers(model, 'math-validation', []);
+    }
+  }, [hasInlineError, validationResult]);
+
   const handleWordWrapToggle = useCallback(() => {
     const newValue = !isWordWrapped;
-    editorRef.current?.updateOptions({ wordWrap: newValue ? 'on' : 'off' });
+    editorRef.current?.updateOptions?.({ wordWrap: newValue ? 'on' : 'off' });
     setIsWordWrapped(newValue);
   }, [isWordWrapped]);
 
@@ -141,7 +168,7 @@ export const MathExpressionEditor: React.FC = () => {
 
         {/* Code Editor */}
         <CodeEditor
-          languageId="text"
+          languageId={MATH_LANGUAGE_ID}
           value={field.value ?? ''}
           onChange={field.onChange}
           height="100px"
@@ -153,9 +180,12 @@ export const MathExpressionEditor: React.FC = () => {
             wordWrap: isWordWrapped ? 'on' : 'off',
             scrollBeyondLastLine: false,
             renderLineHighlight: 'none',
+            overviewRulerLanes: 0,
+            overviewRulerBorder: false,
           }}
           editorDidMount={(editor) => {
             editorRef.current = editor;
+            modelRef.current = editor.getModel();
           }}
           placeholder={i18n.translate('xpack.streams.math.editorPlaceholder', {
             defaultMessage:
