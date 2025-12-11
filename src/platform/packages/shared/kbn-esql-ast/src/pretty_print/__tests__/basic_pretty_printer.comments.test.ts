@@ -271,6 +271,10 @@ describe('commands', () => {
     test('with AS alias and comments around source', () => {
       assertPrint('FROM a | LOOKUP JOIN /*1*/ b AS bb /*2*/ ON c');
     });
+
+    test('with comments before and after AS', () => {
+      assertPrint('FROM a | LOOKUP JOIN b /* before */ AS /* after */ bb ON c');
+    });
   });
 
   describe('DISSECT', () => {

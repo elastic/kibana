@@ -182,7 +182,20 @@ export type FromSourcesAndMetadataQueryStarter = (
   metadataFields?: ComposerColumnShorthand[]
 ) => ComposerQuery;
 
-export type ComposerSourceShorthand = string | ESQLSource;
+/**
+ * A shorthand for specifying a source with an optional alias.
+ *
+ * ```
+ * { index: 'my_index', alias: 'i' }
+ * // Result: my_index AS i
+ * ```
+ */
+export interface ComposerSourceWithAlias {
+  index: string;
+  alias: string;
+}
+
+export type ComposerSourceShorthand = string | ESQLSource | ComposerSourceWithAlias;
 
 /**
  * A shorthand for specifying a column in the query.

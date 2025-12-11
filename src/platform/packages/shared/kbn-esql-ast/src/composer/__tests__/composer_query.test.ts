@@ -409,6 +409,14 @@ describe('high-level helpers', () => {
         query.lookup_join('lookup_index');
       }).toThrow();
     });
+
+    test('can specify source with alias', () => {
+      const query = esql`FROM index`;
+
+      query.lookup_join({ index: 'lookup_index', alias: 'li' }, 'field1');
+
+      expect(query.print('basic')).toBe('FROM index | LOOKUP JOIN lookup_index AS li ON field1');
+    });
   });
 
   describe('.mv_expand()', () => {
