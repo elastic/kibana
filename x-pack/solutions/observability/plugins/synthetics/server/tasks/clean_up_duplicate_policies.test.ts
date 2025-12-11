@@ -98,7 +98,6 @@ describe('deleteDuplicatePackagePolicies', () => {
 
     expect(deleteMock).toHaveBeenNthCalledWith(1, soClient, esClient, firstBatch, {
       force: true,
-      spaceIds: ['*'],
     });
     expect(deleteMock).toHaveBeenNthCalledWith(2, soClient, esClient, secondBatch, {
       force: true,
