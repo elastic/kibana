@@ -196,7 +196,7 @@ export const datatableStateSchemaNoESQL = schema.object({
   ...datasetSchema,
   ...datatableStateSharedOptionsSchema,
   /**
-   * Metric columnsconfiguration, must define operation.
+   * Metric columns configuration, must define operation.
    */
   columns: schema.arrayOf(
     mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateColumnsOptionsSchema),
@@ -227,7 +227,7 @@ export const datatableStateSchemaESQL = schema.object({
   ...datasetEsqlTableSchema,
   ...datatableStateSharedOptionsSchema,
   /**
-   * Metric columnsconfiguration, must define operation.
+   * Metric columns configuration, must define operation.
    */
   columns: schema.arrayOf(
     schema.allOf([
