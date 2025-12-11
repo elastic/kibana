@@ -72,7 +72,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
         setIntegrationKnowledgeSetting(!integrationKnowledgeEnabled);
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.integrationKnowledgeFlyout.errorUpdatingSettings', {
-            defaultMessage: 'Error updating intergration knowledge setting',
+            defaultMessage: 'Error updating integration knowledge setting',
           }),
         });
       }
