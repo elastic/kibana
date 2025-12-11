@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-// Feature flag is defined here to avoid cross-plugin dependency cycles
-export const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-export const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
+export { FileUploadLiteLookUpView } from './file_upload_lite_lookup_view';
