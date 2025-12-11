@@ -9,13 +9,8 @@
 
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
-import {
-  pipeCompleteItem,
-  type ESQLSingleAstItem,
-  commaCompleteItem,
-  isColumn,
-  isFunctionExpression,
-} from '../../../..';
+import { type ESQLSingleAstItem, isColumn, isFunctionExpression } from '../../../..';
+import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import type { ESQLAstAllCommands } from '../../../types';
 import { within } from '../../../ast/location';
 import type { ISuggestionItem } from '../types';

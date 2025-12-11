@@ -28,7 +28,7 @@ import {
   allStarConstant,
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
-} from '../../../../../../..';
+} from '../../../../../registry/complete_items';
 
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 

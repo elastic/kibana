@@ -10,14 +10,13 @@ import { handleFragment } from '../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands } from '../../../types';
 import { getSettingsCompletionItems } from '../../definitions/utils/settings';
 import {
-  assignCompletionItem,
   isBinaryExpression,
   isIdentifier,
   isStringLiteral,
   isUnknownNode,
-  semiColonCompleteItem,
   within,
 } from '../../../..';
+import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { COMPLETIONS_BY_SETTING_NAME } from './utils';

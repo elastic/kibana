@@ -11,13 +11,13 @@ import type { MapParameters } from '../../definitions/utils/autocomplete/map_exp
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
   commaCompleteItem,
-  withAutoSuggest,
   pipeCompleteItem,
   withCompleteItem,
-  EDITOR_MARKER,
   minMaxValueCompleteItem,
   noneValueCompleteItem,
-} from '../../../..';
+} from '../complete_items';
+import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
+import { EDITOR_MARKER } from '../../definitions/constants';
 import { isColumn } from '../../../ast/is';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { columnExists, handleFragment } from '../../definitions/utils/autocomplete/helpers';

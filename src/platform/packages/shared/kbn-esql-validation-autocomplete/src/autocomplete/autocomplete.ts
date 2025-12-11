@@ -9,17 +9,17 @@
 
 import type { ESQLColumn } from '@kbn/esql-ast';
 import {
-  ESQL_VARIABLES_PREFIX,
   EsqlQuery,
   Walker,
   esqlCommandRegistry,
-  getCommandAutocompleteDefinitions,
   parse,
   type ESQLAstItem,
   type ESQLCommandOption,
   type ESQLFunction,
   SuggestionOrderingEngine,
 } from '@kbn/esql-ast';
+import { getCommandAutocompleteDefinitions } from '@kbn/esql-ast/src/commands/registry/complete_items';
+import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast/src/commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands/registry/options/recommended_queries';
 import type {
   ESQLColumnData,
