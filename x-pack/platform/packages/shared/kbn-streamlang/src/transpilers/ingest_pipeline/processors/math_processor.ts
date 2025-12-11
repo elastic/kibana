@@ -128,24 +128,34 @@ export function processMathProcessor(
 ): IngestProcessorContainer {
   // Validate the expression
   const validation = validateMathExpression(processor.expression);
+
+  let source: string;
+
   if (!validation.valid) {
-    throw new Error(`Invalid math expression: ${validation.errors.join('; ')}`);
-  }
+    // Generate a script that throws at runtime instead of failing transpilation.
+    // This allows simulation to run and capture the error like other processor errors.
+    // Use double quotes for Painless string and escape special characters properly.
+    const errorMessage = validation.errors
+      .join('; ')
+      .replace(/\\/g, '\\\\') // Escape backslashes first
+      .replace(/"/g, '\\"'); // Escape double quotes
+    source = `throw new IllegalArgumentException("${errorMessage}");`;
+  } else {
+    // Parse and convert to Painless
+    const ast = parse(processor.expression);
+    const painlessExpression = convertTinymathToPainless(ast);
 
-  // Parse and convert to Painless
-  const ast = parse(processor.expression);
-  const painlessExpression = convertTinymathToPainless(ast);
+    // Build the assignment statement using flat key notation
+    const targetField = painlessFieldAssignment(processor.to);
+    source = `${targetField} = ${painlessExpression};`;
 
-  // Build the assignment statement using flat key notation
-  const targetField = painlessFieldAssignment(processor.to);
-  let source = `${targetField} = ${painlessExpression};`;
-
-  // Handle ignore_missing: wrap in null checks
-  if (processor.ignore_missing === true) {
-    const fields = extractFieldsFromMathExpression(processor.expression);
-    const nullChecks = buildNullChecks(fields);
-    if (nullChecks) {
-      source = `if (${nullChecks}) { ${source} }`;
+    // Handle ignore_missing: wrap in null checks
+    if (processor.ignore_missing === true) {
+      const fields = extractFieldsFromMathExpression(processor.expression);
+      const nullChecks = buildNullChecks(fields);
+      if (nullChecks) {
+        source = `if (${nullChecks}) { ${source} }`;
+      }
     }
   }
 

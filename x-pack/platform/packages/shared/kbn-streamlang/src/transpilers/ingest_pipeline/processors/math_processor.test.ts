@@ -608,31 +608,44 @@ describe('processMathProcessor', () => {
   });
 
   describe('validation errors', () => {
-    it('should throw error for rejected functions', () => {
+    // Invalid expressions generate a Painless script that throws at runtime,
+    // allowing simulation to run and capture errors like other processor errors.
+    it('should generate error-throwing script for rejected functions', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'mean(a, b, c)',
         to: 'average',
       };
-      expect(() => processMathProcessor(processor)).toThrow(/Function 'mean' is not supported/);
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('mean');
+      expect(source).toContain('is not supported');
     });
 
-    it('should throw error for unknown functions', () => {
+    it('should generate error-throwing script for unknown functions', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'unknownFunc(a)',
         to: 'result',
       };
-      expect(() => processMathProcessor(processor)).toThrow(/Unknown function 'unknownFunc'/);
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('unknownFunc');
+      expect(source).toContain('Unknown function');
     });
 
-    it('should throw error for invalid syntax', () => {
+    it('should generate error-throwing script for invalid syntax', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'price * * quantity',
         to: 'result',
       };
-      expect(() => processMathProcessor(processor)).toThrow(/Failed to parse expression/);
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('Failed to parse expression');
     });
   });
 });
