@@ -67,19 +67,17 @@ export const SearchHomepageBody = () => {
           </EuiTitle>
           <EuiSpacer size="xl" />
 
-          <EuiFlexItem>
-            {!isCloudEnabled && (
-              <>
-                <CloudServerlessPromo />
-                <EuiSpacer size="xl" />
-                <EuiSpacer size="xl" />
-              </>
-            )}
-            <AlternateSolutions />
-            <EuiSpacer size="xl" />
-            <EuiHorizontalRule margin="xxl" />
-            <DiveDeeperWithElasticsearch />
-          </EuiFlexItem>
+          {!isCloudEnabled && (
+            <>
+              <CloudServerlessPromo />
+              <EuiSpacer size="xl" />
+              <EuiSpacer size="xl" />
+            </>
+          )}
+          <AlternateSolutions />
+          <EuiSpacer size="xl" />
+          <EuiHorizontalRule margin="xxl" />
+          <DiveDeeperWithElasticsearch />
         </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>

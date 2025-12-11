@@ -37,10 +37,6 @@ export const Observability: React.FC = () => {
     return http.basePath.prepend('/app/management/kibana/spaces/create');
   }, [http]);
 
-  // const analyzeLogsIntegration = useMemo(() => {
-  //   return http.basePath.prepend('/app/integrations/browse/observability');
-  // }, [http]);
-
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="l" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
