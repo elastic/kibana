@@ -25,7 +25,7 @@ import { StartConversationButton } from './start_conversation_button';
 export interface AiInsightProps {
   title: string;
   description: string;
-  license: ILicense | undefined;
+  license: ILicense | undefined | null;
   content?: string;
   onStartConversation?: () => void;
   onOpen?: () => void;

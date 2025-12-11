@@ -21,11 +21,7 @@ const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
 
 export function AlertAiInsight({ alert }: { alert: AlertData }) {
   const {
-    services: {
-      onechat,
-      http,
-      application: { capabilities },
-    },
+    services: { onechat, http },
   } = useKibana();
 
   const [chatExperience] = useUiSetting$<AIChatExperience>(
@@ -36,7 +32,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
 
   const { getLicense } = useLicense();
   const license = getLicense();
-  const hasAgentBuilderAccess = capabilities?.agentBuilder?.show === true;
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
