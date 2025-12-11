@@ -66,7 +66,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('severity', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/242130
+      describe.skip('severity', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
