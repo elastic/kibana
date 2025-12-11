@@ -41,7 +41,7 @@ export const registerSolutionNavigation = async (
     switchMap(async (chatExperience) => {
       return shouldUseAINavigation
         ? createAiNavigationTree(chatExperience)
-        : await createNavigationTree(services, chatExperience);
+        : createNavigationTree(services, chatExperience);
     })
   );
 
