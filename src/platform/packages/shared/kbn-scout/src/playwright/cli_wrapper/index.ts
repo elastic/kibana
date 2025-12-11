@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Configuration options for the Scout Playwright reporter
- */
-export interface ScoutPlaywrightReporterOptions {
-  name?: string;
-  runId?: string;
-  outputPath?: string;
-  captureSteps?: boolean;
-}
+import { runPlaywrightTestCLI } from './run_tests';
+import { runPlaywrightCLI } from './common';
+
+export const playwrightCLI = {
+  run: runPlaywrightCLI,
+  test: runPlaywrightTestCLI,
+};
