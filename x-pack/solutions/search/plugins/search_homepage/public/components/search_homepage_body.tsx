@@ -60,7 +60,7 @@ export const SearchHomepageBody = () => {
         <EuiFlexItem css={itemPadding}>
           <EuiTitle size="s">
             <h3>
-              {i18n.translate('xpack.searchHomepage.getStarted.title', {
+              {i18n.translate('xpack.searchHomepage.additionalSolutions.title', {
                 defaultMessage: 'Explore additional solutions',
               })}
             </h3>
