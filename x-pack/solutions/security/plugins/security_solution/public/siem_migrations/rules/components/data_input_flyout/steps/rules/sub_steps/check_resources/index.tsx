@@ -48,7 +48,7 @@ export const useCheckResourcesStep = ({
     status: uploadStepStatus,
     children: (
       <EuiText size="s" data-test-subj="checkResourcesDescription">
-        {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}
+        {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION}
       </EuiText>
     ),
   };

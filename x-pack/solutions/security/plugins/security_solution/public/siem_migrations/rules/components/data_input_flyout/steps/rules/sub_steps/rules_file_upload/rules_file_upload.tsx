@@ -23,7 +23,7 @@ import type { CreateMigration } from '../../../../../../service/hooks/use_create
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
+import { RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION } from '../check_resources/translations';
 import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
 import { MigrationSource } from '../../../../../../../common/types';
 
@@ -84,7 +84,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>
+          <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow isInvalid={error != null} fullWidth error={error}>

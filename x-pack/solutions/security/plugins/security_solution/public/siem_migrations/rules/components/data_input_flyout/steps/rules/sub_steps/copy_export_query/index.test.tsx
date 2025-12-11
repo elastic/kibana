@@ -19,7 +19,7 @@ const renderCopyExportQueryStep = (props: CopyExportQueryStepProps) => {
 };
 
 describe('useCopyExportQueryStep', () => {
-  const title = 'Copy rule query';
+  const title = 'Export rules';
   it('returns step props with "incomplete" status', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,

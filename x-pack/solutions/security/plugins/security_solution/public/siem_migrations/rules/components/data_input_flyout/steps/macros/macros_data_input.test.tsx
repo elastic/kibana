@@ -13,7 +13,6 @@ import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrat
 import { TestProviders } from '../../../../../../common/mock';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
-import { useMissingResources } from '../hooks/use_missing_resources';
 import type { MigrationStepProps } from '../../../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
@@ -57,24 +56,18 @@ describe('MacrosDataInput', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   const defaultProps: MigrationStepProps = {
-    onMissingResourcesFetched: jest.fn(),
     dataInputStep: SplunkDataInputStep.Macros,
-    migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     migrationSource: MigrationSource.SPLUNK,
-    setDataInputStep: jest.fn(),
+    migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+    missingResourcesIndexed: { macros: ['macro1', 'macro2'], lookups: [] },
     onMigrationCreated: jest.fn(),
+    onMissingResourcesFetched: jest.fn(),
+    setDataInputStep: jest.fn(),
   };
 
   beforeEach(() => {
     appToastsMock = useAppToastsMock.create();
     jest.mocked(useAppToasts).mockReturnValue(appToastsMock);
-    jest.mocked(useMissingResources).mockReturnValue({
-      missingResourcesIndexed: {
-        macros: ['macro1', 'macro2'],
-        lookups: [],
-      },
-      onMissingResourcesFetched: jest.fn(),
-    });
   });
 
   afterEach(() => {
@@ -104,7 +97,7 @@ describe('MacrosDataInput', () => {
   it('does not render sub-steps when dataInputStep is not MacrosUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Macros} />
+        <MacrosDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();
@@ -120,13 +113,9 @@ describe('MacrosDataInput', () => {
   });
 
   it('does not render sub-steps when missingMacros is missing', () => {
-    jest.mocked(useMissingResources).mockReturnValue({
-      missingResourcesIndexed: undefined,
-      onMissingResourcesFetched: jest.fn(),
-    });
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} />
+        <MacrosDataInput {...defaultProps} missingResourcesIndexed={undefined} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();

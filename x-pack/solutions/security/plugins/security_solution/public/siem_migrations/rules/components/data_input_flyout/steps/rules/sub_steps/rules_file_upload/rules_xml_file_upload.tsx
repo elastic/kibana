@@ -14,7 +14,7 @@ import type {
 import { UploadFileButton } from '../../../../../../../common/components';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
-import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
+import { RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION } from '../check_resources/translations';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 import { MigrationSource } from '../../../../../../../common/types';
 
@@ -72,7 +72,7 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>
+          <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow isInvalid={validationError != null} fullWidth error={validationError}>

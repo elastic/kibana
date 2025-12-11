@@ -11,7 +11,6 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
 import type { RuleMigrationStats } from '../../types';
 import type { CreateRuleMigrationParams } from '../rule_migrations_service';
-import { MigrationSource } from '../../../common/types';
 
 export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title',
@@ -39,24 +38,11 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const createMigration = useCallback<CreateMigration>(
-    ({ migrationName, migrationSource, rules }) => {
+    (args) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          let migrationId: string;
-          if (migrationSource === MigrationSource.QRADAR) {
-            migrationId = await siemMigrations.rules.createRuleMigration({
-              migrationName,
-              migrationSource: MigrationSource.QRADAR,
-              rules,
-            });
-          } else {
-            migrationId = await siemMigrations.rules.createRuleMigration({
-              migrationName,
-              migrationSource: MigrationSource.SPLUNK,
-              rules,
-            });
-          }
+          const migrationId = await siemMigrations.rules.createRuleMigration(args);
           const stats = await siemMigrations.rules.api.getRuleMigrationStats({
             migrationId,
           });
