@@ -8,7 +8,7 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { i18n } from '@kbn/i18n';
-import type { EsqlToolFieldTypes } from '@kbn/onechat-common/tools';
+import type { EsqlToolFieldTypes, EsqlToolParamValue } from '@kbn/onechat-common/tools';
 import { EsqlToolFieldType, ToolType } from '@kbn/onechat-common/tools';
 import { z } from '@kbn/zod';
 import { sharedValidationSchemas } from './shared_tool_validation';
@@ -49,7 +49,68 @@ const esqlI18nMessages = {
         defaultMessage: 'Duplicate parameter: "{name}".',
         values: { name },
       }),
+    defaultValueRequiredError: i18n.translate(
+      'xpack.onechat.tools.newTool.validation.params.defaultValueRequiredError',
+      {
+        defaultMessage: 'Default value is required for optional parameters.',
+      }
+    ),
+    defaultValueTypeError: (type: string) =>
+      i18n.translate('xpack.onechat.tools.newTool.validation.params.defaultValueTypeError', {
+        defaultMessage: 'Default value must be a valid {type}.',
+        values: { type },
+      }),
   },
+};
+
+// Helper function to validate default value type
+const validateDefaultValueType = (value: EsqlToolParamValue, type: EsqlToolFieldTypes): boolean => {
+  if (value == null) return false;
+
+  switch (type) {
+    case EsqlToolFieldType.INTEGER:
+    case EsqlToolFieldType.LONG:
+      if (typeof value === 'number') {
+        return Number.isInteger(value);
+      }
+      if (typeof value === 'string') {
+        return /^-?\d+$/.test(value.trim());
+      }
+      return false;
+    case EsqlToolFieldType.DOUBLE:
+    case EsqlToolFieldType.FLOAT:
+      if (typeof value === 'number') {
+        return isFinite(value);
+      }
+      if (typeof value === 'string') {
+        return !isNaN(Number(value.trim())) && isFinite(Number(value.trim()));
+      }
+      return false;
+    case EsqlToolFieldType.BOOLEAN:
+      if (typeof value === 'boolean') {
+        return true;
+      }
+      if (typeof value === 'string') {
+        return value.trim().toLowerCase() === 'true' || value.trim().toLowerCase() === 'false';
+      }
+      return false;
+    case EsqlToolFieldType.DATE:
+      if (typeof value === 'string') {
+        return !isNaN(Date.parse(value.trim()));
+      }
+      return false;
+    case EsqlToolFieldType.TEXT:
+    case EsqlToolFieldType.KEYWORD:
+      return true; // String types accept any value
+    case EsqlToolFieldType.OBJECT:
+      return typeof value === 'object' && !Array.isArray(value);
+    case EsqlToolFieldType.NESTED:
+      return (
+        Array.isArray(value) && value.every((item) => typeof item === 'object' && item !== null)
+      );
+    default:
+      return true;
+  }
 };
 
 export const esqlFormValidationSchema = z
@@ -87,10 +148,19 @@ export const esqlFormValidationSchema = z
           ),
           source: z.nativeEnum(EsqlParamSource),
           optional: z.boolean(),
+          defaultValue: z
+            .union([
+              z.string(),
+              z.number(),
+              z.boolean(),
+              z.record(z.unknown()),
+              z.array(z.record(z.unknown())),
+            ])
+            .optional(),
         })
       )
       .superRefine((params, ctx) => {
-        params.forEach(({ name }, index) => {
+        params.forEach(({ name, optional, defaultValue, type }, index) => {
           const otherParamNames = new Set(
             params.filter((_, i) => i !== index).map((param) => param.name)
           );
@@ -101,6 +171,30 @@ export const esqlFormValidationSchema = z
               message: esqlI18nMessages.params.duplicateError(name),
               path: [index, 'name'],
             });
+          }
+
+          // Validate default value for optional parameters
+          if (optional) {
+            if (
+              defaultValue == null ||
+              (typeof defaultValue === 'string' && defaultValue.trim() === '')
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: esqlI18nMessages.params.defaultValueRequiredError,
+                path: [index, 'defaultValue'],
+              });
+            } else {
+              // Type validation for default value
+              const isValidType = validateDefaultValueType(defaultValue, type);
+              if (!isValidType) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: esqlI18nMessages.params.defaultValueTypeError(type),
+                  path: [index, 'defaultValue'],
+                });
+              }
+            }
           }
         });
       }),

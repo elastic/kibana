@@ -6,7 +6,12 @@
  */
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/onechat-common';
+import type {
+  EsqlToolDefinition,
+  EsqlToolParam,
+  EsqlToolFieldTypes,
+  EsqlToolParamValue,
+} from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
@@ -14,6 +19,77 @@ import {
   EsqlParamSource,
   type EsqlToolFormData,
 } from '../components/tools/form/types/tool_form_types';
+
+/**
+ * Converts a defaultValue to the appropriate type based on the parameter type
+ */
+export const convertDefaultValueToType = (
+  value: EsqlToolParamValue,
+  type: EsqlToolFieldTypes
+): EsqlToolParamValue => {
+  if (value == null) {
+    return value;
+  }
+
+  // If value is already the correct type, return it as-is
+  switch (type) {
+    case 'integer':
+    case 'long':
+      if (typeof value === 'number' && Number.isInteger(value)) {
+        return value;
+      }
+      if (typeof value === 'string') {
+        const intValue = parseInt(value.trim(), 10);
+        if (isNaN(intValue)) {
+          throw new Error(`Invalid integer value: ${value}`);
+        }
+        return intValue;
+      }
+      throw new Error(`Invalid integer value: ${value}`);
+
+    case 'double':
+    case 'float':
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (typeof value === 'string') {
+        const floatValue = parseFloat(value.trim());
+        if (isNaN(floatValue)) {
+          throw new Error(`Invalid number value: ${value}`);
+        }
+        return floatValue;
+      }
+      throw new Error(`Invalid number value: ${value}`);
+
+    case 'boolean':
+      if (typeof value === 'boolean') {
+        return value;
+      }
+      if (typeof value === 'string') {
+        const lowerValue = value.trim().toLowerCase();
+        if (lowerValue === 'true') {
+          return true;
+        } else if (lowerValue === 'false') {
+          return false;
+        } else {
+          throw new Error(`Invalid boolean value: ${value}. Must be 'true' or 'false'`);
+        }
+      }
+      throw new Error(`Invalid boolean value: ${value}`);
+
+    case 'text':
+    case 'keyword':
+    case 'date':
+      if (typeof value === 'string') {
+        return value;
+      }
+      // Convert other types to string
+      return String(value);
+
+    default:
+      return value;
+  }
+};
 
 /**
  * Transforms an ES|QL tool into its UI form representation.
@@ -27,12 +103,13 @@ export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): EsqlToolF
     esql: tool.configuration.query,
     labels: tool.tags,
     params: Object.entries(tool.configuration.params).map(
-      ([name, { type, description, optional }]) => ({
+      ([name, { type, description, optional, defaultValue }]) => ({
         name,
         type,
         description,
         source: EsqlParamSource.Custom,
         optional: optional ?? false,
+        defaultValue,
       })
     ),
     type: ToolType.esql,
@@ -55,11 +132,19 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
       params: data.params
         .filter((param) => esqlParams.has(param.name))
         .reduce((paramsMap, param) => {
-          paramsMap[param.name] = {
+          const paramConfig: EsqlToolParam = {
             type: param.type,
             description: param.description,
             optional: param.optional,
           };
+
+          // Add defaultValue if provided and parameter is optional
+          if (param.optional && param.defaultValue) {
+            // Convert string defaultValue to appropriate type based on parameter type
+            paramConfig.defaultValue = convertDefaultValueToType(param.defaultValue, param.type);
+          }
+
+          paramsMap[param.name] = paramConfig;
           return paramsMap;
         }, {} as Record<string, EsqlToolParam>),
     },
