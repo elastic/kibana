@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { WaterfallFlyout } from '..';
 import type { OverviewApi } from '../../../../doc_viewer_overview/overview';
 import { Overview, type TraceOverviewSections } from '../../../../doc_viewer_overview/overview';
-import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
+import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
 import { isSpanHit } from '../../helpers/is_span';
 import { useFetchSpan } from '../../hooks/use_fetch_span';
 

@@ -18,6 +18,7 @@ export * from './get_ignored_reason';
 export * from './get_log_document_overview';
 export * from './get_trace_document_overview';
 export * from './get_message_field_with_fallbacks';
+export * from './get_log_exception_type_field_with_fallback';
 export * from './get_log_level_field_with_fallback';
 export * from './get_log_event_type_field_with_fallback';
 export * from './get_should_show_field_handler';

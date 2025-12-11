@@ -884,6 +884,23 @@
     "dynamic": false,
     "properties": {}
   },
+  "cloud-connect-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      },
+      "clusterId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
@@ -1088,7 +1105,7 @@
       "features": {
         "type": "keyword"
       },
-      "kscId": {
+      "kscIds": {
         "type": "keyword"
       },
       "name": {
@@ -1903,6 +1920,9 @@
   "fleet-cloud-connector": {
     "dynamic": false,
     "properties": {
+      "accountType": {
+        "type": "keyword"
+      },
       "cloudProvider": {
         "type": "keyword"
       },
