@@ -35,6 +35,11 @@ describe('Stack Connectors Plugin', () => {
 
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
+      const actionsConfigurationUtilities = actionsSetup.getActionsConfigurationUtilities();
+      (actionsConfigurationUtilities.getWebhookSettings as jest.Mock).mockReturnValue({
+        ssl: { pfx: { enabled: true } },
+      });
+
       plugin.setup(coreSetup, { actions: actionsSetup });
 
       const specConnectorTypes = Object.values(connectorsSpecs);
