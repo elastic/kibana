@@ -6,12 +6,17 @@
  */
 
 import { lazy } from 'react';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getIcon } from './get_icon';
+import {
+  createConnectorFormSerializer,
+  createConnectorFormDeserializer,
+} from './connector_form_serializers';
 
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
@@ -64,6 +69,7 @@ const createConnectorTypeFromSpec = (
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
+    source: ACTION_TYPE_SOURCES.spec,
     selectMessage: spec.metadata.description,
     iconClass: getIcon(spec),
     // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
@@ -89,5 +95,9 @@ const createConnectorTypeFromSpec = (
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
+    connectorForm: {
+      serializer: createConnectorFormSerializer(),
+      deserializer: createConnectorFormDeserializer(schema),
+    },
   };
 };

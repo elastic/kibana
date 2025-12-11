@@ -265,7 +265,7 @@ describe('IdentifierControlForm', () => {
       const fieldsOptionsDropdownSearchInput = within(fieldsOptionsDropdown).getByRole('combobox');
       fireEvent.click(fieldsOptionsDropdownSearchInput);
       expect(await findByTitle('avg')).toBeDefined();
-      expect(await findByTitle('median')).toBeDefined();
+      expect(await findByTitle('last')).toBeDefined();
     });
   });
 });

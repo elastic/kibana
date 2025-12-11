@@ -7,30 +7,28 @@
 
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import type { AssignArgs } from 'xstate5';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { v4 as uuidv4 } from 'uuid';
+import type { AssignArgs } from 'xstate5';
+import type {
+  CustomSamplesDataSource,
+  EnrichmentDataSource,
+  EnrichmentUrlState,
+  KqlSamplesDataSource,
+  LatestSamplesDataSource,
+} from '../../../../../../common/url_schema';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
-import type { StreamEnrichmentContextType } from './types';
+import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
+import { dataSourceConverter } from '../../utils';
+import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
-import type {
-  EnrichmentUrlState,
-  KqlSamplesDataSource,
-  LatestSamplesDataSource,
-  CustomSamplesDataSource,
-  EnrichmentDataSource,
-} from '../../../../../../common/url_schema';
-import { dataSourceConverter } from '../../utils';
 import type { StepActorRef } from '../steps_state_machine';
-import { isStepUnderEdit } from '../steps_state_machine';
-import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
-import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
+import type { StreamEnrichmentContextType } from './types';
 
 export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
   type: 'latest-samples',
@@ -96,43 +94,6 @@ export function getActiveDataSourceSamples(
   }));
 }
 
-/**
- * Gets processors for simulation based on current editing state.
- * - If no processor is being edited: returns all new processors
- * - If a processor is being edited: returns new processors up to and including the one being edited
- */
-export function getStepsForSimulation({
-  stepRefs,
-  isPartialSimulation,
-}: Pick<StreamEnrichmentContextType, 'stepRefs'> & { isPartialSimulation: boolean }) {
-  let newStepSnapshots = stepRefs
-    .map((procRef) => procRef.getSnapshot())
-    .filter(
-      (snapshot) =>
-        isWhereBlock(snapshot.context.step) || (isPartialSimulation ? snapshot.context.isNew : true)
-    );
-
-  // Find if any processor is currently being edited
-  const editingProcessorIndex = newStepSnapshots.findIndex(
-    (snapshot) => isActionBlock(snapshot.context.step) && isStepUnderEdit(snapshot)
-  );
-
-  // If a processor is being edited, set new processors up to and including the one being edited
-  if (editingProcessorIndex !== -1) {
-    newStepSnapshots = newStepSnapshots.slice(0, editingProcessorIndex + 1);
-  }
-
-  // Return processors
-  return newStepSnapshots.map((snapshot) => snapshot.context.step);
-}
-
-export function getConfiguredSteps(context: StreamEnrichmentContextType) {
-  return context.stepRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.matches('configured'))
-    .map((proc) => proc.context.step);
-}
-
 export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefinition | undefined {
   if (!context.simulatorRef) {
     return undefined;
@@ -159,25 +120,6 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
 
-export const spawnStep = <
-  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
->(
-  step: StreamlangStepWithUIAttributes,
-  assignArgs: TAssignArgs,
-  options?: { isNew: boolean }
-) => {
-  const { spawn, self } = assignArgs;
-
-  return spawn('stepMachine', {
-    id: step.customIdentifier,
-    input: {
-      parentRef: self,
-      step,
-      isNew: options?.isNew ?? false,
-    },
-  });
-};
-
 export const spawnDataSource = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
@@ -192,6 +134,7 @@ export const spawnDataSource = <
     input: {
       parentRef: self,
       streamName: context.definition.stream.name,
+      streamType: getStreamTypeFromDefinition(context.definition.stream),
       dataSource: dataSourceWithUIAttributes,
     },
   });
@@ -373,3 +316,15 @@ export function selectDataSource(
     }
   });
 }
+
+export const canDataSourceTypeBeOutdated = (
+  dataSourceType: EnrichmentDataSource['type']
+): boolean => {
+  switch (dataSourceType) {
+    case 'latest-samples':
+    case 'kql-samples':
+      return true;
+    default:
+      return false;
+  }
+};

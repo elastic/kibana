@@ -17,22 +17,21 @@ import {
   EuiToolTip,
   EuiBetaBadge,
   EuiSkeletonText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
+import { FileUploadContext, FileUploadManager, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy } from 'react';
+import React, { lazy, useCallback, useState, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { FileUploadResults } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
-import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
@@ -46,36 +45,64 @@ const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
 
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const { coreStart, ...restDeps } = deps;
+  const { euiTheme } = useEuiTheme();
 
   const dataView = useObservable(deps.indexUpdateService.dataView$);
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
 
   const totalHits = useObservable(deps.indexUpdateService.totalHits$);
+  const searchQuery = useObservable(deps.indexUpdateService.qstr$, '');
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
   const isLoading = useObservable(deps.indexUpdateService.isFetching$, false);
 
+  const createFileUploadManager = useCallback(
+    (existingIndex?: string | null) => {
+      return new FileUploadManager(
+        {
+          analytics: coreStart.analytics,
+          data: deps.data,
+          fileUpload: deps.fileUpload,
+          http: coreStart.http,
+          notifications: coreStart.notifications,
+        },
+        null,
+        false,
+        true,
+        existingIndex,
+        { index: { mode: 'lookup' } },
+        'lookup-index-editor'
+      );
+    },
+    [coreStart.analytics, coreStart.http, coreStart.notifications, deps.data, deps.fileUpload]
+  );
+
+  const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>
+    createFileUploadManager(deps.existingIndexName)
+  );
+
+  const reset = useCallback(
+    (existingIndex?: string) => {
+      setFileUploadManager(createFileUploadManager(existingIndex));
+    },
+    [createFileUploadManager]
+  );
+
   const fileUploadContextValue = useFileUpload(
-    deps.fileManager,
+    fileUploadManager,
     deps.data,
     coreStart.application,
     coreStart.http,
     coreStart.notifications,
     undefined,
-    // onUploadComplete
-    (results: FileUploadResults | null) => {
-      if (results) {
-        fileUploadContextValue.setExistingIndexName(results.index);
-        results.files.forEach((_, index) => {
-          deps.fileManager.removeFile(index);
-        });
-      }
-    }
+    undefined,
+    reset
   );
 
-  const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
-
-  const noResults = !isLoading && !rowsWithValues;
+  const noResults = useMemo(() => {
+    const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
+    return !isLoading && !rowsWithValues && searchQuery.length === 0;
+  }, [isLoading, rows, searchQuery.length]);
 
   return (
     <KibanaContextProvider
@@ -129,28 +156,30 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             css={css`
               .euiFlyoutBody__overflowContent {
                 height: 100%;
+                padding-top: ${euiTheme.size.base};
               }
             `}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              // This prevents the flyout from closing when hitting escape in the rows checkboxes.
+              if (
+                e.key === 'Escape' &&
+                e.target instanceof HTMLElement &&
+                e.target.nodeName === 'INPUT'
+              ) {
+                e.stopPropagation();
+              }
+            }}
           >
             <FileDropzone noResults={noResults}>
-              {dataView ? (
-                <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
-                  <EuiFlexItem grow={false}>
-                    <QueryBar onOpenIndexInDiscover={props.onOpenIndexInDiscover} />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
-                    {dataViewColumns ? (
-                      <DataGridLazy
-                        {...props}
-                        dataView={dataView}
-                        columns={dataViewColumns}
-                        rows={rows}
-                        totalHits={totalHits}
-                      />
-                    ) : null}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              {dataView && dataViewColumns ? (
+                <DataGridLazy
+                  {...props}
+                  dataView={dataView}
+                  columns={dataViewColumns}
+                  rows={rows}
+                  totalHits={totalHits}
+                  onOpenIndexInDiscover={props.onOpenIndexInDiscover}
+                />
               ) : (
                 <EuiSkeletonText />
               )}

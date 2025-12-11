@@ -16,9 +16,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useSelector } from '@xstate5/react';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
+import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
 import {
+  useInteractiveModeSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
@@ -32,6 +33,7 @@ import {
   REMOVE_DESCRIPTION_MENU_LABEL,
 } from './action/translations';
 import type { StepConfigurationProps } from '../steps_list';
+import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
 
 const moveUpItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.moveUpItemButtonText',
@@ -80,24 +82,26 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   isLastStepInLevel,
 }) => {
   const { reorderStep, duplicateProcessor } = useStreamEnrichmentEvents();
-  const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
-  const canDuplicate = useStreamEnrichmentSelector((snapshot) =>
+  const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const canDuplicate = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
   );
-  const canReorder = useStreamEnrichmentSelector(
+  const canReorder = useInteractiveModeSelector(
     (snapshot) =>
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'up' }) ||
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'down' })
   );
-  const canDelete = useStreamEnrichmentSelector((snapshot) =>
+  const canDelete = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.delete', id: stepRef.id })
   );
 
-  const stepRefs = useStreamEnrichmentSelector((snapshot) => snapshot.context.stepRefs);
+  const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
-  const isWhere = isWhereBlock(step);
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
+  const isWhere = isConditionBlock(step);
   const hasCustomDescription =
     isActionBlock(step) &&
     typeof step.description === 'string' &&
@@ -210,6 +214,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
+      data-stream-type={streamType}
       key="editItem"
       icon="pencil"
       disabled={!canEdit}
@@ -224,6 +229,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       ? [
           <EuiContextMenuItem
             data-test-subj="stepContextMenuDuplicateItem"
+            data-stream-type={streamType}
             key="duplicateStep"
             icon="copy"
             disabled={!canDuplicate}
@@ -238,6 +244,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuDeleteItem"
+      data-stream-type={streamType}
       key="deleteStep"
       icon="trash"
       disabled={!canDelete}
@@ -259,6 +266,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
         }
       )}
       data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
+      data-stream-type={streamType}
       disabled={!!stepUnderEdit}
       size="xs"
       iconType="boxesVertical"
