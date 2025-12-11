@@ -7,6 +7,7 @@
 
 import { processMathProcessor } from './math_processor';
 import type { MathProcessor } from '../../../../types/processors';
+import { conditionToPainless } from '../../../conditions/condition_to_painless';
 
 describe('processMathProcessor', () => {
   describe('basic arithmetic', () => {
@@ -553,16 +554,21 @@ describe('processMathProcessor', () => {
     });
   });
 
-  describe('where condition handling', () => {
-    it('should add if parameter for where condition', () => {
-      const processor: MathProcessor = {
+  describe('if condition handling', () => {
+    it('should add if parameter when provided (compiled from where condition)', () => {
+      // Simulate how conversions.ts compiles 'where' to 'if' before calling processMathProcessor
+      const whereCondition = { field: 'active', eq: true };
+      const compiledIf = conditionToPainless(whereCondition);
+
+      const processor: Parameters<typeof processMathProcessor>[0] = {
         action: 'math',
         expression: 'price * quantity',
         to: 'total',
-        where: { field: 'active', eq: true },
+        if: compiledIf,
       };
       const result = processMathProcessor(processor);
       expect(result.script).toHaveProperty('if');
+      expect((result.script as Record<string, unknown>).if).toBe(compiledIf);
       expect((result.script as Record<string, unknown>).if).toContain('active');
     });
   });

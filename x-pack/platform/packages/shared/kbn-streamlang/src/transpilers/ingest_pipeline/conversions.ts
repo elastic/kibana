@@ -8,7 +8,7 @@
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestPipelineProcessor } from '../../../types/processors/ingest_pipeline_processors';
 
-import type { MathProcessor, StreamlangProcessorDefinition } from '../../../types/processors';
+import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
 import { processManualIngestPipelineProcessors } from './processors/manual_pipeline_processor';
 import { processMathProcessor } from './processors/math_processor';
@@ -71,14 +71,12 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
     }
 
     if (action === 'math') {
-      // Math processor outputs a script processor, not a native processor
-      // We pass the original actionStep (with 'where' not renamed to 'if') because
-      // processMathProcessor handles the where->if conversion internally
-      const mathProcessor = actionStep as MathProcessor;
-      const mathWithTag = transpilationOptions?.traceCustomIdentifiers
-        ? { ...mathProcessor, tag: mathProcessor.customIdentifier }
-        : mathProcessor;
-      return [processMathProcessor(mathWithTag)];
+      // Math processor outputs a script processor
+      return [
+        processMathProcessor(
+          processorWithCompiledConditions as Parameters<typeof processMathProcessor>[0]
+        ),
+      ];
     }
 
     return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);

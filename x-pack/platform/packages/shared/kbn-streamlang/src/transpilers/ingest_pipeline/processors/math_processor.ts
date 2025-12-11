@@ -10,7 +10,6 @@ import { parse } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
 import type { MathProcessor } from '../../../../types/processors';
 import { painlessFieldAccessor, painlessFieldAssignment } from '../../../../types/utils';
-import { conditionToPainless } from '../../../conditions/condition_to_painless';
 import {
   FUNCTION_REGISTRY,
   BINARY_ARITHMETIC_OPERATORS,
@@ -125,7 +124,7 @@ function buildNullChecks(fields: string[]): string | null {
  *   { script: { lang: 'painless', source: "ctx['total'] = ctx['price'] * ctx['quantity']" } }
  */
 export function processMathProcessor(
-  processor: MathProcessor & { tag?: string }
+  processor: Omit<MathProcessor, 'where'> & { if?: string; tag?: string }
 ): IngestProcessorContainer {
   // Validate the expression
   const validation = validateMathExpression(processor.expression);
@@ -170,9 +169,9 @@ export function processMathProcessor(
     (scriptProcessor.script as Record<string, unknown>).tag = processor.tag;
   }
 
-  // Handle where condition using script processor's if parameter
-  if (processor.where && scriptProcessor.script) {
-    (scriptProcessor.script as Record<string, unknown>).if = conditionToPainless(processor.where);
+  // Handle if condition (already compiled to Painless by conversions.ts)
+  if (processor.if && scriptProcessor.script) {
+    (scriptProcessor.script as Record<string, unknown>).if = processor.if;
   }
 
   // Handle ignore_failure
