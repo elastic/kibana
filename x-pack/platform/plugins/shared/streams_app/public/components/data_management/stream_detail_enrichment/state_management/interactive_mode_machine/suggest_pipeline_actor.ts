@@ -18,6 +18,7 @@ import {
 } from '@kbn/grok-heuristics';
 
 import { i18n } from '@kbn/i18n';
+import { getFormattedError } from '../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
@@ -160,11 +161,11 @@ export const createNotifySuggestionFailureNotifier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as { error: Error };
-    toasts.addError(event.error, {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.suggestionError',
         { defaultMessage: 'Failed to generate pipeline suggestion' }
       ),
-      toastMessage: event.error.message,
     });
   };
