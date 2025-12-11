@@ -10,13 +10,17 @@ import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common';
 import type { CoreSetup } from '@kbn/core/server';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
 const productDocumentationSchema = z.object({
-  query: z.string().describe('Search query to retrieve documentation about Elastic products'),
+  query: z
+    .string()
+    .describe(
+      'Search query to retrieve documentation about Elastic products. Rewritten in English to best match the documentation content.'
+    ),
   product: z
     .enum(['kibana', 'elasticsearch', 'observability', 'security'])
     .optional()
@@ -127,7 +131,7 @@ export const productDocumentationTool = (
         // Return documentation results
         return {
           results: result.documents.map((doc: RetrieveDocumentationResultDoc) => ({
-            type: ToolResultType.resource,
+            type: ToolResultType.other,
             data: {
               reference: {
                 url: doc.url,
@@ -157,7 +161,7 @@ export const productDocumentationTool = (
     tags: [],
     // Tool is always available - handler will check if docs are installed and provide guidance
     availability: {
-      cacheMode: 'space',
+      cacheMode: 'global',
       handler: async () => {
         return { status: 'available' };
       },
