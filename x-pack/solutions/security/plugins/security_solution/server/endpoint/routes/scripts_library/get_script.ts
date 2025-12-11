@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import type { DownloadScriptRequestParams } from '../../../../common/api/endpoint/scripts_library';
 import { GetOneScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
 import { errorHandler } from '../error_handler';
@@ -40,7 +41,9 @@ export const getOneScriptRequestHandler = (
         user?.username || 'unknown'
       );
 
-      return res.ok({ body: { data: await scriptsClient.get(scriptId) } });
+      const response: EndpointScriptApiResponse = { data: await scriptsClient.get(scriptId) };
+
+      return res.ok({ body: response });
     } catch (err) {
       return errorHandler(logger, res, err);
     }
