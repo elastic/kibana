@@ -201,7 +201,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             rangeFilter.meta.params = params;
             rangeFilter.meta.controlledBy = uuid;
           }
-          console.log({ rangeFilter });
           dataControlManager.internalApi.setOutputFilter(rangeFilter);
         });
 
