@@ -110,6 +110,65 @@ x-pack/solutions/observability/plugins/kubernetes-poc/
 yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc --no-watchman
 ```
 
+### Exploring Metrics with Local Kibana MCP Server
+
+The Local Kibana MCP (Model Context Protocol) server provides tools for exploring available metrics and testing ES|QL queries directly from an AI assistant like Cursor.
+
+#### Available MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `platform_core_execute_esql` | Execute ES|QL queries and get results |
+| `platform_core_list_indices` | List available indices, aliases, and datastreams |
+| `platform_core_get_index_mapping` | Get field mappings for an index |
+| `platform_core_index_explorer` | Find relevant indices by natural language query |
+| `platform_core_generate_esql` | Generate ES|QL from natural language |
+
+#### Example: Discovering Available Fields
+
+To explore what fields are available in the metrics data, run a simple query and examine the columns:
+
+```esql
+FROM remote_cluster:metrics-* 
+| WHERE k8s.node.name IS NOT NULL 
+| LIMIT 1
+```
+
+This returns all available columns/fields for documents matching the filter.
+
+#### Example: Finding Specific Metric Fields
+
+To check if a specific metric exists (e.g., allocatable CPU):
+
+```esql
+FROM remote_cluster:metrics-* 
+| WHERE k8s.node.name IS NOT NULL AND k8s.node.allocatable_cpu IS NOT NULL
+| STATS avg_value = AVG(k8s.node.allocatable_cpu) BY k8s.cluster.name
+| LIMIT 10
+```
+
+If the field doesn't exist, you'll get an "Unknown column" error.
+
+#### Example: Exploring Metric Values
+
+To understand what values a metric contains:
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.pod.phase IS NOT NULL
+| STATS count = COUNT(*) BY k8s.pod.phase
+```
+
+#### Tips for Metric Exploration
+
+1. **Remote cluster prefix**: Kubernetes metrics are on a remote cluster, so use `remote_cluster:metrics-*` as the source
+2. **Filter by resource type**: Use `WHERE k8s.node.name IS NOT NULL` or similar to filter to specific resource types
+3. **Check data sources**: Different metrics come from different receivers:
+   - `k8sclusterreceiver.otel` - Cluster-level metrics (allocatable resources, conditions, workload counts)
+   - `kubeletstatsreceiver.otel` - Runtime metrics (CPU/memory usage, filesystem, network)
+4. **Use STATS to aggregate**: When exploring, aggregate by cluster/node/pod to see representative values
+5. **Counter vs Gauge metrics**: Some metrics like `k8s.node.cpu.time` are counters and can't be averaged directly
+
 ## API Endpoints
 
 ### Hello World
@@ -124,6 +183,127 @@ yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc --no-watchm
     "timestamp": "2025-12-10T..."
   }
   ```
+
+## ES|QL Query Catalog
+
+This section catalogs the ES|QL queries used for each visual element in the UI. Queries are developed and validated here before implementation.
+
+> **Note**: Queries use `?_tstart` and `?_tend` as named parameters for time range filtering, which should be passed from the UI's time picker.
+
+### Cluster Listing Page
+
+#### CPU Usage Trend by Cluster
+Shows average CPU usage over time for each cluster (used in the sparkline/trend chart).
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL
+| STATS avg_cpu = AVG(k8s.node.cpu.usage) BY k8s.cluster.name, bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+```
+
+**Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver)
+**Dimensions**: `k8s.cluster.name`, `@timestamp` (bucketed)
+
+---
+
+#### Cluster Count
+Total number of monitored clusters.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL
+| STATS cluster_count = COUNT_DISTINCT(k8s.cluster.name)
+```
+
+**Metrics Used**: None (count of distinct attribute values)
+**Dimensions**: `k8s.cluster.name`
+
+---
+
+#### Healthy vs Unhealthy Cluster Counts
+Counts clusters by health status. A cluster is considered "unhealthy" if any node has `condition_ready` <= 0.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL AND k8s.node.condition_ready IS NOT NULL
+| STATS 
+    total_nodes = COUNT_DISTINCT(k8s.node.name),
+    ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0
+  BY k8s.cluster.name
+| EVAL health_status = CASE(ready_nodes < total_nodes, "unhealthy", "healthy")
+| STATS cluster_count = COUNT(*) BY health_status
+```
+
+**Metrics Used**: `k8s.node.condition_ready` (from k8sclusterreceiver)
+**Dimensions**: `k8s.cluster.name`, `k8s.node.name`
+**Output**: `health_status` ("healthy" | "unhealthy"), `cluster_count`
+
+---
+
+#### Cluster Listing Table
+Main data for the cluster listing table view with CPU/memory utilization percentages.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL
+| STATS 
+    total_nodes = COUNT_DISTINCT(k8s.node.name),
+    ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,
+    total_pods = COUNT_DISTINCT(k8s.pod.uid),
+    running_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 1,
+    pending_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 2,
+    failed_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 3,
+    sum_cpu_usage = SUM(k8s.node.cpu.usage),
+    sum_memory_usage = SUM(k8s.node.memory.usage),
+    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu),
+    sum_allocatable_memory = SUM(k8s.node.allocatable_memory)
+  BY k8s.cluster.name, cloud.provider
+| EVAL health_status = CASE(ready_nodes < total_nodes, "unhealthy", "healthy")
+| EVAL cpu_utilization = ROUND(sum_cpu_usage / sum_allocatable_cpu * 100, 2)
+| EVAL memory_utilization = ROUND(sum_memory_usage / TO_DOUBLE(sum_allocatable_memory) * 100, 2)
+| KEEP k8s.cluster.name, health_status, cloud.provider, total_nodes, 
+       failed_pods, pending_pods, running_pods, 
+       cpu_utilization, memory_utilization
+```
+
+**Metrics Used**: 
+- `k8s.node.condition_ready` (from k8sclusterreceiver)
+- `k8s.pod.phase` (from k8sclusterreceiver) - values: 1=Running, 2=Pending, 3=Failed
+- `k8s.node.cpu.usage`, `k8s.node.memory.usage` (from kubeletstatsreceiver)
+- `k8s.node.allocatable_cpu`, `k8s.node.allocatable_memory` (from k8sclusterreceiver)
+
+**Dimensions**: `k8s.cluster.name`, `cloud.provider`, `k8s.node.name`, `k8s.pod.uid`
+
+**Output Columns**:
+| Column | Description |
+|--------|-------------|
+| `k8s.cluster.name` | Cluster name |
+| `health_status` | "healthy" or "unhealthy" based on node readiness |
+| `cloud.provider` | Cloud provider (gcp, aws, azure, etc.) |
+| `total_nodes` | Total node count |
+| `failed_pods` | Count of pods in Failed phase |
+| `pending_pods` | Count of pods in Pending phase |
+| `running_pods` | Count of pods in Running phase |
+| `cpu_utilization` | CPU usage as % of allocatable (e.g., 25.56) |
+| `memory_utilization` | Memory usage as % of allocatable (e.g., 29.08) |
+
+**Known Gaps**:
+- Kubernetes version (`k8s.cluster.version`) not available in OTel data
+- Pod usage percentage not calculated (`k8s.node.allocatable_pods` not available)
+
+---
+
+### Cluster Detail Flyout
+
+<!-- TODO: Add queries for cluster detail metrics -->
+
+---
+
+### Overview Page
+
+<!-- TODO: Add queries for overview dashboard elements -->
+
+---
 
 ## Known Issues / Gotchas
 
