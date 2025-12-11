@@ -83,7 +83,11 @@ export const getWebhookSecretHeadersKeyRoute = (
 
         if (!allowedConnectorTypes.includes(connector.actionTypeId)) {
           return res.badRequest({
-            body: { message: `Connector must be a ${allowedConnectorTypes.join(', ')}` },
+            body: {
+              message: `Connector must be one of the following types: ${allowedConnectorTypes.join(
+                ', '
+              )}.`,
+            },
           });
         }
         const encryptedClient = encryptedSavedObjects.getClient({
