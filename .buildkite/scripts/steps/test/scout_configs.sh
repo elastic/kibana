@@ -50,8 +50,8 @@ fi
 
 
 module_data=""
-# Download module_data if SCOUT_CONFIG_GROUP_KEY is set (needed for runModes)
-# This is required even when retrying, as we need module_data to get runModes for each config
+# Download module_data if SCOUT_CONFIG_GROUP_KEY is set (needed for serverRunFlags)
+# This is required even when retrying, as we need module_data to get serverRunFlags for each config
 if [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- Downloading Scout Test Configuration"
   download_artifact scout_playwright_configs.json .
@@ -66,7 +66,7 @@ if [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
 
   # Extract config paths only if configs is not already set (e.g., from retry logic)
   if [ -z "$configs" ]; then
-    # Extract config paths: process configs with their runModes directly
+    # Extract config paths: process configs with their serverRunFlags directly
     configs=$(echo "$module_data" | jq -r '.configs[].path')
   fi
 fi
@@ -80,11 +80,11 @@ fi
 # These are the serverless modes that can be run (excluding --stateful)
 RUN_MODES_SERVERLESS_ONLY="--serverless=es --serverless=security --serverless=oblt --serverless=oblt-logs-essentials --serverless=security-essentials --serverless=security-ease"
 
-# If we have module_data, we can process configs with their runModes directly
+# If we have module_data, we can process configs with their serverRunFlags directly
 # Otherwise, we need to handle the case where SCOUT_CONFIG is set directly
 if [[ -z "${module_data:-}" && -n "$SCOUT_CONFIG" ]]; then
-  echo "⚠️ Warning: SCOUT_CONFIG is set but module_data is not available. Run modes cannot be determined from tags."
-  echo "   Consider using SCOUT_CONFIG_GROUP_KEY instead to get runModes from the JSON file."
+  echo "⚠️ Warning: SCOUT_CONFIG is set but module_data is not available. Server run flags cannot be determined from tags."
+  echo "   Consider using SCOUT_CONFIG_GROUP_KEY instead to get serverRunFlags from the JSON file."
 fi
 
 results=()
@@ -138,18 +138,18 @@ while read -r config_path; do
     continue
   fi
 
-  # Get run modes for this config from the module data
+  # Get server run flags for this config from the module data
   if [[ -z "${module_data:-}" ]]; then
     echo "⚠️ Warning: No module_data available for config: $config_path"
-    echo "   Skipping config (runModes cannot be determined)"
+    echo "   Skipping config (serverRunFlags cannot be determined)"
     continue
   fi
 
-  # Extract runModes array for this config
-  config_run_modes=$(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .runModes[]?")
+  # Extract serverRunFlags array for this config
+  config_run_modes=$(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .serverRunFlags[]?")
 
   if [[ -z "$config_run_modes" ]]; then
-    echo "⚠️ No runModes found for config: $config_path"
+    echo "⚠️ No serverRunFlags found for config: $config_path"
     continue
   fi
 

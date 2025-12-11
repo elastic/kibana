@@ -8,9 +8,9 @@
  */
 
 import Fs from 'fs';
+import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
-import { expandAgentQueue } from '../agent_images';
 import { getRequiredEnv } from '#pipeline-utils';
 
 export interface ModuleDiscoveryInfo {
@@ -21,7 +21,7 @@ export interface ModuleDiscoveryInfo {
     path: string;
     hasTests: boolean;
     tags: string[];
-    runModes: string[];
+    serverRunFlags: string[];
     usesParallelWorkers: boolean;
   }[];
 }

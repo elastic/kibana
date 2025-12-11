@@ -15,10 +15,13 @@ import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_dis
 import { filterModulesByScoutCiConfig } from '../tests_discovery/search_configs';
 import {
   collectUniqueTags,
-  getRunModesFromTags,
+  getServerRunFlagsFromTags,
   getTestTagsForTarget,
 } from '../tests_discovery/tag_utils';
-import { countModulesByType, flattenModulesByRunMode } from '../tests_discovery/transform_utils';
+import {
+  countModulesByType,
+  flattenModulesByServerRunFlag,
+} from '../tests_discovery/transform_utils';
 import type {
   FlattenedConfigGroup,
   ModuleDiscoveryInfo,
@@ -48,14 +51,14 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
         path: config.path,
         hasTests: !!runnableTest,
         tags: allTags,
-        runModes: [], // Will be computed from tags after cross-tag filtering
+        serverRunFlags: [], // Will be computed from tags after cross-tag filtering
         usesParallelWorkers,
       };
     }),
   }));
 };
 
-// Filters modules by target tags and computes run modes
+// Filters modules by target tags and computes server run flags
 const filterModulesByTargetTags = (
   modules: ModuleDiscoveryInfo[],
   targetTags: string[]
@@ -72,7 +75,7 @@ const filterModulesByTargetTags = (
           return {
             ...config,
             tags: filteredTags,
-            runModes: getRunModesFromTags(filteredTags),
+            serverRunFlags: getServerRunFlagsFromTags(filteredTags),
           };
         }),
     }))
@@ -104,7 +107,7 @@ const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: Tool
   log.info(`Found ${flattenedConfigs.length} flattened config group(s):`);
   flattenedConfigs.forEach((group) => {
     log.info(
-      `- ${group.mode} / ${group.group} / ${group.runMode}: ${group.configs.length} config(s)`
+      `- ${group.mode} / ${group.group} / ${group.scoutCommand}: ${group.configs.length} config(s)`
     );
   });
 };
@@ -119,7 +122,7 @@ const handleFlattenedOutput = (
     ? filterModulesByScoutCiConfig(log, filteredModules)
     : filteredModules;
 
-  const flattenedConfigs = flattenModulesByRunMode(modulesToFlatten);
+  const flattenedConfigs = flattenModulesByServerRunFlag(modulesToFlatten);
 
   if (flagsReader.boolean('save')) {
     saveFlattenedConfigGroups(flattenedConfigs, log);
@@ -163,7 +166,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
-  // Filter modules by target tags and compute run modes
+  // Filter modules by target tags and compute server run flags
   const filteredModules = filterModulesByTargetTags(modulesWithTests, targetTags);
   // Handle output based on flatten flag
   if (flatten) {
@@ -205,7 +208,7 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                        - 'ech': stateful-only tags
     --validate         Validate that all discovered modules are registered in Scout CI config
     --save             Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
-    --flatten          Output configs in flattened format grouped by mode, group, and runMode
+    --flatten          Output configs in flattened format grouped by mode, group, and scout command
                        (useful for Cloud test execution)
 
   Examples:

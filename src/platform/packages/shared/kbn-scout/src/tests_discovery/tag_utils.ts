@@ -42,35 +42,35 @@ export const collectUniqueTags = (
   return Array.from(tagSet);
 };
 
-// Converts tags to run modes (e.g., --stateful, --serverless=es)
-export const getRunModesFromTags = (testTags: string[]): string[] => {
-  const modes: string[] = [];
+// Converts tags to server run flags (e.g., --stateful, --serverless=es)
+export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
+  const flags: string[] = [];
   const tagSet = new Set(testTags);
 
-  // Map tags to run modes
+  // Map tags to server run flags
   if (tagSet.has('@ess')) {
-    modes.push('--stateful');
+    flags.push('--stateful');
   }
   if (tagSet.has('@svlSearch')) {
-    modes.push('--serverless=es');
+    flags.push('--serverless=es');
   }
   if (tagSet.has('@svlSecurity')) {
-    modes.push('--serverless=security');
+    flags.push('--serverless=security');
   }
   if (tagSet.has('@svlOblt')) {
-    modes.push('--serverless=oblt');
+    flags.push('--serverless=oblt');
   }
   // TODO: Uncomment to run tests for these targets in CI
   //
   // if (tagSet.has('@svlLogsEssentials')) {
-  //   modes.push('--serverless=oblt-logs-essentials');
+  //   flags.push('--serverless=oblt-logs-essentials');
   // }
   // if (tagSet.has('@svlSecurityEssentials')) {
-  //   modes.push('--serverless=security-essentials');
+  //   flags.push('--serverless=security-essentials');
   // }
   // if (tagSet.has('@svlSecurityEase')) {
-  //   modes.push('--serverless=security-ease');
+  //   flags.push('--serverless=security-ease');
   // }
 
-  return modes;
+  return flags;
 };

@@ -82,7 +82,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
           path: 'pluginA/config1.playwright.config.ts',
           hasTests: true,
           tags: ['@ess', '@svlOblt'],
-          runModes: ['--stateful', '--serverless=oblt'],
+          serverRunFlags: ['--stateful', '--serverless=oblt'],
           usesParallelWorkers: false,
         },
       ],
@@ -399,7 +399,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(log.info).toHaveBeenCalledWith('No Playwright config files found');
   });
 
-  it('validates and saves filtered modules when --save is set', () => {
+  it('validates and saves filtered modules when "--save" is set', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockImplementation((flag) => {
       if (flag === 'save') return true;
@@ -595,11 +595,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(parallelConfigLog).toBeDefined();
   });
 
-  it('computes runModes correctly from tags', () => {
+  it('computes "serverRunFlags" correctly from tags', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
-    // Set up a module with various tags to test runModes computation
+    // Set up a module with various tags to test serverRunFlags computation
     mockTestableModulesStore.modules = [
       {
         name: 'pluginTestModes',
@@ -654,8 +654,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // Verify that runModes are computed and included in the output
-    // The function should compute runModes from tags automatically
+    // Verify that serverRunFlags are computed and included in the output
+    // The function should compute serverRunFlags from tags automatically
     const infoCalls = log.info.mock.calls;
     const config1Log = infoCalls.find((call) => call[0].includes('config1.playwright.config.ts'));
     const config2Log = infoCalls.find((call) => call[0].includes('config2.playwright.config.ts'));
@@ -664,12 +664,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(config2Log).toBeDefined();
     // config1 should have @ess, @svlSearch, @svlSecurity tags
     // config2 should have @svlOblt tag
-    // The actual runModes computation happens in the function, so we just verify the configs are processed
+    // The actual serverRunFlags computation happens in the function, so we just verify the configs are processed
   });
 
-  describe('--flatten flag', () => {
+  describe('"--flatten" flag', () => {
     beforeEach(() => {
-      // Set up modules with different groups and runModes for flatten testing
+      // Set up modules with different groups and serverRunFlags for flatten testing
       mockTestableModulesStore.modules = [
         {
           name: 'pluginSearch',
@@ -781,7 +781,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       ];
     });
 
-    it('logs flattened structure when --flatten is set without --save', () => {
+    it('logs flattened structure when "--flatten" is set without "--save"', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
@@ -802,7 +802,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(groupLogs.length).toBeGreaterThan(0);
     });
 
-    it('saves flattened format when --flatten and --save are set', () => {
+    it('saves flattened format when "--flatten" and "--save" are set', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
@@ -810,8 +810,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
         return false;
       });
 
-      // Helper to compute runModes from tags (matching the actual function logic)
-      const getRunModesFromTags = (tags: string[]): string[] => {
+      // Helper to compute serverRunFlags from tags (matching the actual function logic)
+      const getServerRunFlagsFromTags = (tags: string[]): string[] => {
         const modes: string[] = [];
         const tagSet = new Set(tags);
         if (tagSet.has('@ess')) {
@@ -841,7 +841,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: c.path,
               hasTests: true,
               tags,
-              runModes: getRunModesFromTags(tags),
+              serverRunFlags: getServerRunFlagsFromTags(tags),
               usesParallelWorkers: false,
             };
           }),
@@ -865,11 +865,14 @@ describe('runDiscoverPlaywrightConfigs', () => {
       savedData.forEach((group: any) => {
         expect(group).toHaveProperty('mode');
         expect(group).toHaveProperty('group');
-        expect(group).toHaveProperty('runMode');
+        expect(group).toHaveProperty('deploymentType');
+        expect(group).toHaveProperty('scoutCommand');
         expect(group).toHaveProperty('configs');
         expect(Array.isArray(group.configs)).toBe(true);
         expect(['serverless', 'stateful']).toContain(group.mode);
-        expect(group.runMode).toMatch(/^--(stateful|serverless=.*)$/);
+        expect(group.scoutCommand).toMatch(
+          /^node scripts\/scout run-tests --(stateful|serverless=.*) --testTarget=cloud$/
+        );
       });
 
       // Verify log message
@@ -878,7 +881,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
     });
 
-    it('groups configs correctly by mode, group, and runMode', () => {
+    it('groups configs correctly by mode, group, and scout command', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
@@ -886,8 +889,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
         return false;
       });
 
-      // Helper to compute runModes from tags (matching the actual function logic)
-      const getRunModesFromTags = (tags: string[]): string[] => {
+      // Helper to compute serverRunFlags from tags (matching the actual function logic)
+      const getServerRunFlagsFromTags = (tags: string[]): string[] => {
         const modes: string[] = [];
         const tagSet = new Set(tags);
         if (tagSet.has('@ess')) {
@@ -917,7 +920,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: c.path,
               hasTests: true,
               tags,
-              runModes: getRunModesFromTags(tags),
+              serverRunFlags: getServerRunFlagsFromTags(tags),
               usesParallelWorkers: false,
             };
           }),
@@ -930,33 +933,58 @@ describe('runDiscoverPlaywrightConfigs', () => {
       const savedData = JSON.parse(writeCall[1]);
 
       // Find stateful group for 'search'
+      // For stateful (ECH), deploymentType should be based on group: 'search' => 'elasticsearch'
       const statefulSearchGroup = savedData.find(
-        (g: any) => g.mode === 'stateful' && g.group === 'search' && g.runMode === '--stateful'
+        (g: any) =>
+          g.mode === 'stateful' &&
+          g.group === 'search' &&
+          g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
       );
       expect(statefulSearchGroup).toBeDefined();
+      expect(statefulSearchGroup.deploymentType).toBe('elasticsearch');
       expect(statefulSearchGroup.configs).toContain('pluginSearch/config1.playwright.config.ts');
 
+      // Find stateful group for 'platform'
+      // For stateful (ECH), deploymentType should be based on group: 'platform' => 'general'
+      const statefulPlatformGroup = savedData.find(
+        (g: any) =>
+          g.mode === 'stateful' &&
+          g.group === 'platform' &&
+          g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
+      );
+      expect(statefulPlatformGroup).toBeDefined();
+      expect(statefulPlatformGroup.deploymentType).toBe('general');
+      expect(statefulPlatformGroup.configs).toContain(
+        'pluginPlatform/config1.playwright.config.ts'
+      );
+
       // Find serverless group for 'search'
+      // For serverless (MKI), deploymentType should be based on serverRunFlag: '--serverless=es' => 'elasticsearch'
       const serverlessSearchGroup = savedData.find(
         (g: any) =>
-          g.mode === 'serverless' && g.group === 'search' && g.runMode === '--serverless=es'
+          g.mode === 'serverless' &&
+          g.group === 'search' &&
+          g.scoutCommand === 'node scripts/scout run-tests --serverless=es --testTarget=cloud'
       );
       expect(serverlessSearchGroup).toBeDefined();
+      expect(serverlessSearchGroup.deploymentType).toBe('elasticsearch');
       expect(serverlessSearchGroup.configs).toContain('pluginSearch/config1.playwright.config.ts');
       expect(serverlessSearchGroup.configs).toContain('pluginSearch/config2.playwright.config.ts');
 
       // Find serverless group for 'observability'
+      // For serverless (MKI), deploymentType should be based on serverRunFlag: '--serverless=oblt' => 'observability'
       const serverlessObltGroup = savedData.find(
         (g: any) =>
           g.mode === 'serverless' &&
           g.group === 'observability' &&
-          g.runMode === '--serverless=oblt'
+          g.scoutCommand === 'node scripts/scout run-tests --serverless=oblt --testTarget=cloud'
       );
       expect(serverlessObltGroup).toBeDefined();
+      expect(serverlessObltGroup.deploymentType).toBe('observability');
       expect(serverlessObltGroup.configs).toContain('pluginOblt/config1.playwright.config.ts');
     });
 
-    it('handles configs with multiple runModes correctly', () => {
+    it('handles configs with multiple "serverRunFlags" correctly', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
@@ -964,7 +992,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
         return false;
       });
 
-      // Set up a module with a config that has multiple runModes
+      // Set up a module with a config that has multiple serverRunFlags
       mockTestableModulesStore.modules = [
         {
           name: 'pluginMultiMode',
@@ -1008,7 +1036,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'pluginMultiMode/config1.playwright.config.ts',
               hasTests: true,
               tags: ['@ess', '@svlSearch', '@svlOblt'],
-              runModes: ['--stateful', '--serverless=es', '--serverless=oblt'],
+              serverRunFlags: ['--stateful', '--serverless=es', '--serverless=oblt'],
               usesParallelWorkers: false,
             },
           ],
@@ -1022,23 +1050,36 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
       // The same config should appear in multiple groups
       const statefulGroup = savedData.find(
-        (g: any) => g.mode === 'stateful' && g.group === 'test' && g.runMode === '--stateful'
-      );
-      const serverlessEsGroup = savedData.find(
-        (g: any) => g.mode === 'serverless' && g.group === 'test' && g.runMode === '--serverless=es'
-      );
-      const serverlessObltGroup = savedData.find(
         (g: any) =>
-          g.mode === 'serverless' && g.group === 'test' && g.runMode === '--serverless=oblt'
+          g.mode === 'stateful' &&
+          g.group === 'test' &&
+          g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
       );
-
+      // For stateful (ECH), deploymentType should be based on group: 'test' => 'general' (unknown group defaults to general)
       expect(statefulGroup).toBeDefined();
+      expect(statefulGroup.deploymentType).toBe('general');
       expect(statefulGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
 
+      const serverlessEsGroup = savedData.find(
+        (g: any) =>
+          g.mode === 'serverless' &&
+          g.group === 'test' &&
+          g.scoutCommand === 'node scripts/scout run-tests --serverless=es --testTarget=cloud'
+      );
+      // For serverless (MKI), deploymentType should be based on serverRunFlag: '--serverless=es' => 'elasticsearch'
       expect(serverlessEsGroup).toBeDefined();
+      expect(serverlessEsGroup.deploymentType).toBe('elasticsearch');
       expect(serverlessEsGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
 
+      const serverlessObltGroup = savedData.find(
+        (g: any) =>
+          g.mode === 'serverless' &&
+          g.group === 'test' &&
+          g.scoutCommand === 'node scripts/scout run-tests --serverless=oblt --testTarget=cloud'
+      );
+      // For serverless (MKI), deploymentType should be based on serverRunFlag: '--serverless=oblt' => 'observability'
       expect(serverlessObltGroup).toBeDefined();
+      expect(serverlessObltGroup.deploymentType).toBe('observability');
       expect(serverlessObltGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
     });
   });

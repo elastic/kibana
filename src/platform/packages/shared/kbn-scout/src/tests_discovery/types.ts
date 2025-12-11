@@ -13,6 +13,15 @@ export type TargetType = 'all' | 'mki' | 'ech';
 // Valid target types
 export const TARGET_TYPES: TargetType[] = ['all', 'mki', 'ech'];
 
+export type DeploymentType =
+  | 'general'
+  | 'elasticsearch'
+  | 'security'
+  | 'observability'
+  | 'observability logs-esssentials'
+  | 'security essentials'
+  | 'security ease';
+
 // Module discovery information used in regular CI pipelines with locally run servers
 export interface ModuleDiscoveryInfo {
   name: string;
@@ -22,7 +31,7 @@ export interface ModuleDiscoveryInfo {
     path: string;
     hasTests: boolean;
     tags: string[];
-    runModes: string[];
+    serverRunFlags: string[];
     usesParallelWorkers: boolean;
   }[];
 }
@@ -31,6 +40,7 @@ export interface ModuleDiscoveryInfo {
 export interface FlattenedConfigGroup {
   mode: 'serverless' | 'stateful';
   group: string;
-  runMode: string;
+  deploymentType: DeploymentType;
+  scoutCommand: string; // Full scout command (e.g., "node scripts/scout run-tests --serverless=es --testTarget=cloud")
   configs: string[];
 }
