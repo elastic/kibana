@@ -26,10 +26,10 @@ export async function getLogAiInsights({
   inferenceClient,
   connectorId,
 }: GetLogAiInsightsParams): Promise<{ context: string; summary: string }> {
-  const systemPrompt = dedent`
+  const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.
-     - Only call tools if the attachments do not contain the necessary data to analyze the log message.`;
+     - Only call tools if the attachments do not contain the necessary data to analyze the log message.`);
 
   const response = await inferenceClient.chatComplete({
     connectorId,
@@ -37,20 +37,24 @@ export async function getLogAiInsights({
     messages: [
       {
         role: MessageRole.User,
-        content: dedent`Explain this log message: what it means, where it is from, whether it is expected, and if it is an issue.
-        The log entry:
-        - Index: ${index}
-        - ID: ${id}
-        - Fields: ${safeJsonStringify(fields)}
-        - Service Summary: ${safeJsonStringify(serviceSummary)}`,
+        content:
+          dedent(`Explain this log message: what it means, where it is from, whether it is expected, and if it is an issue.
+          <LogEntryIndex>
+          ${index}
+          </LogEntryIndex>
+          <LogEntryId>
+          ${id}
+          </LogEntryId>
+          <LogEntryFields>
+          ${safeJsonStringify(fields)}
+          </LogEntryFields>
+          <ServiceSummary>
+          ${safeJsonStringify(serviceSummary)}
+          </ServiceSummary>
+          `),
       },
     ],
   });
 
-  let content = '';
-  if (response && typeof (response as any).content === 'string') {
-    content = (response as any).content;
-  }
-
-  return { context: safeJsonStringify(fields) ?? '', summary: content };
+  return response.content;
 }
