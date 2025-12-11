@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
-  'observability.get_downstream_dependencies';
-export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
+export { MappingEditor } from './mapping_editor';
