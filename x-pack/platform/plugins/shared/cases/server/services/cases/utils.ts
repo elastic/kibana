@@ -24,8 +24,6 @@ export const DEFAULT_ATTACHMENT_SEARCH_FIELDS = [
   `${CASE_COMMENT_SAVED_OBJECT}.alertId`,
   `${CASE_COMMENT_SAVED_OBJECT}.eventId`,
   `${CASE_COMMENT_SAVED_OBJECT}.comment`,
-  `${CASE_COMMENT_SAVED_OBJECT}.rule.name`,
-  `${CASE_COMMENT_SAVED_OBJECT}.externalReferenceMetadata.files.name`,
 ];
 
 export const mergeSearchQuery = (

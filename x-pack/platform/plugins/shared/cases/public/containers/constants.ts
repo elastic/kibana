@@ -85,8 +85,6 @@ const DEFAULT_SEARCH_FIELDS = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
-  'cases-comments.rule.name',
-  'cases-comments.filename',
 ];
 
 export const DEFAULT_FROM_DATE = 'now-30d';

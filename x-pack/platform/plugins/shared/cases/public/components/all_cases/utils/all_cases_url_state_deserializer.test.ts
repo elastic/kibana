@@ -38,8 +38,6 @@ describe('allCasesUrlStateDeserializer', () => {
             "cases-comments.comment",
             "cases-comments.alertId",
             "cases-comments.eventId",
-            "cases-comments.rule.name",
-            "cases-comments.filename",
           ],
           "severity": Array [],
           "status": Array [],

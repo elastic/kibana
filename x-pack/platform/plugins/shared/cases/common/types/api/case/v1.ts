@@ -407,8 +407,6 @@ export const CasesSearchRequestSearchFieldsRt = rt.keyof({
   'cases-comments.comment': null,
   'cases-comments.alertId': null,
   'cases-comments.eventId': null,
-  'cases-comments.rule.name': null,
-  'cases-comments.filename': null,
 });
 
 export const CasesSearchRequestRt = rt.intersection([
