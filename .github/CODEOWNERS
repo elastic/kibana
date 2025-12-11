@@ -2546,6 +2546,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 
 x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/contextual-security-apps
 
 ## Security Solution sub teams - Security Entity Store
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/core-analysis
