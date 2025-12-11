@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/chart-icons'
   - '@kbn/alerts-ui-shared'
+  - '@kbn/cps'
 tags:
   - shared-common
   - package
