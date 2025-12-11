@@ -59,7 +59,8 @@ export class CsvESQLGenerator {
     private clients: Clients,
     private cancellationToken: CancellationToken,
     private logger: Logger,
-    private stream: Writable
+    private stream: Writable,
+    private jobId: string
   ) {}
 
   public async generateData(): Promise<TaskRunResult> {
@@ -145,7 +146,7 @@ export class CsvESQLGenerator {
 
       await this.generateRows(visibleColumns, rows, builder, settings);
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error(err, { tags: [this.jobId] });
       if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
           reportingError = new AuthenticationExpiredError();
@@ -179,7 +180,7 @@ export class CsvESQLGenerator {
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
-    this.logger.debug(`Building ${rows.length} CSV data rows`);
+    this.logger.debug(`Building ${rows.length} CSV data rows`, { tags: [this.jobId] });
     for (const dataTableRow of rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
@@ -219,7 +220,9 @@ export class CsvESQLGenerator {
       }
 
       if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
-        this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
+        this.logger.warn(`ES|QL CSV report: Max Size Reached after ${this.csvRowCount} rows.`, {
+          tags: [this.jobId],
+        });
         this.maxSizeReached = true;
         if (this.cancellationToken) {
           this.cancellationToken.cancel();
