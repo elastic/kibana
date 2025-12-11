@@ -64,11 +64,7 @@ export type {
 export { getMathExpressionLanguageDocSections } from './language_docs';
 export type { MathLanguageDocumentationSections } from './language_docs';
 
-// TinyMath utilities - type guards and re-exports
-export {
-  parseMathExpression,
-  isTinymathVariable,
-  isTinymathFunction,
-  isTinymathLiteral,
-} from './tinymath_utils';
-export type { TinymathAST, TinymathFunction, TinymathVariable } from './tinymath_utils';
+// Note: tinymath_utils.ts is intentionally NOT exported from the barrel file.
+// Importing @kbn/tinymath causes the .peggy grammar file to load, which breaks
+// Playwright tests that don't have the peggy loader configured. Internal consumers
+// (ast_validator, field_extractor, math transpilers) import directly from tinymath_utils.

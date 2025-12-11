@@ -13,11 +13,13 @@ import {
   BINARY_ARITHMETIC_OPERATORS,
   validateMathExpression,
   extractFieldsFromMathExpression,
+} from '../../shared/math';
+import {
   parseMathExpression,
   isTinymathVariable,
   isTinymathFunction,
   type TinymathAST,
-} from '../../shared/math';
+} from '../../shared/math/tinymath_utils';
 
 /**
  * Converts a TinyMath AST node to Painless expression string.
