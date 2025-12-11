@@ -18,7 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import type { ConnectorSpec } from '../connector_spec';
+import type { ConnectorSpec } from '../../connector_spec';
 
 const DEFAULT_COUNT = 10;
 const DEFAULT_OFFSET = 0;

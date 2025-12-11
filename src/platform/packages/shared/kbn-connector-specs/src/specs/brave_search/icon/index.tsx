@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
-import type { ConnectorIconProps } from '../../types';
+import type { ConnectorIconProps } from '../../../types';
 
 import braveSearchIcon from './brave_search.png';
 

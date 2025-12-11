@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../connector_spec';
-import { BraveSearchConnector } from './brave_search';
+import type { ActionContext } from '../../connector_spec';
+import { BraveSearchConnector } from '.';
 
 describe('BraveSearchConnector', () => {
   const mockClient = {
