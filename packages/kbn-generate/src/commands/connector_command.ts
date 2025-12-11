@@ -195,46 +195,40 @@ export default (props: ConnectorIconProps) => {
       }
     }
 
-    // append to CODEOWNERS: insert right after the latest rule that mentions "kbn-connector-specs"
+    // append to CODEOWNERS: insert within the overrides section (below GENERATED_END)
+    // Prefer placing after the last "kbn-connector-specs" rule in the overrides section
     {
       let content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
       const line = `src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
       if (content.includes(line)) {
         log.info('CODEOWNERS already has rule for', connectorName);
       } else {
-        // Try to insert after the last rule that contains "kbn-connector-specs" in the path
-        const lines = content.split('\n');
-        let lastIdx = -1;
-        for (let i = lines.length - 1; i >= 0; i--) {
-          const l = lines[i];
-          // check if this is a rule line (not a comment) and mentions kbn-connector-specs
+        const genEndIdx = content.indexOf(GENERATED_END);
+        const ultIdx = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
+        const prefix = genEndIdx !== -1 ? content.slice(0, genEndIdx + GENERATED_END.length) : '';
+        const middle =
+          genEndIdx !== -1
+            ? content.slice(genEndIdx + GENERATED_END.length, ultIdx === -1 ? undefined : ultIdx)
+            : content.slice(0, ultIdx === -1 ? undefined : ultIdx);
+        const suffix = ultIdx === -1 ? '' : content.slice(ultIdx);
+
+        const middleLines = middle.split('\n');
+        let insertAt = -1;
+        for (let i = middleLines.length - 1; i >= 0; i--) {
+          const l = middleLines[i];
           if (l && !l.trim().startsWith('#') && l.includes('kbn-connector-specs')) {
-            lastIdx = i;
+            insertAt = i + 1;
             break;
           }
         }
 
-        if (lastIdx !== -1) {
-          // insert directly below the last matching rule
-          lines.splice(lastIdx + 1, 0, line);
-          content = lines.join('\n');
+        if (insertAt === -1) {
+          // no existing kbn-connector-specs rule in overrides; add to top of overrides
+          const updatedMiddle = (middle.endsWith('\n') ? middle : middle + '\n') + line + '\n';
+          content = prefix + updatedMiddle + suffix;
         } else {
-          // fallback: after GENERATED_END marker, but before ultimate priority comment if present
-          const genEndIdx = content.indexOf(GENERATED_END);
-          const ultIdx = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
-          if (genEndIdx !== -1) {
-            const prefix = content.slice(0, genEndIdx + GENERATED_END.length);
-            const middle = content.slice(
-              genEndIdx + GENERATED_END.length,
-              ultIdx === -1 ? undefined : ultIdx
-            );
-            const suffix = ultIdx === -1 ? '' : content.slice(ultIdx);
-            const middleUpdated = (middle.endsWith('\n') ? middle : middle + '\n') + line + '\n';
-            content = prefix + middleUpdated + suffix;
-          } else {
-            // final fallback: append at end
-            content = content.trimEnd() + '\n' + line + '\n';
-          }
+          middleLines.splice(insertAt, 0, line);
+          content = prefix + middleLines.join('\n') + (middle.endsWith('\n') ? '' : '\n') + suffix;
         }
 
         await Fsp.writeFile(CODEOWNERS_FILE, content);
