@@ -36,6 +36,8 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
   const betaBadgeStyles = css`
     vertical-align: ${alignment === 'text-bottom' ? 'text-bottom' : 'bottom'};
   `;
+
+  // TODO: use a proper EuiBetaBadge color variant once available https://github.com/elastic/eui/issues/9268
   const newBetaBadgeStyles = css`
     background-color: ${euiTheme.colors.backgroundFilledPrimary};
     color: ${euiTheme.colors.textInverse};
