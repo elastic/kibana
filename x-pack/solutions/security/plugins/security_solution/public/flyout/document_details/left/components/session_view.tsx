@@ -40,6 +40,13 @@ export const SESSION_VIEWER_BANNER = {
   textColor: 'warning',
 };
 
+const EUI_HEADER_HEIGHT = 96;
+const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = 72;
+const VISUALIZE_WRAPPER_PADDING = 16;
+const VISUALIZE_BUTTON_GROUP_HEIGHT = 32;
+const EUI_SPACER_HEIGHT = 16;
+const SESSION_VIEW_SEARCH_BAR_HEIGHT = 64;
+
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
@@ -146,10 +153,20 @@ export const SessionView: FC = memo(() => {
 
   const closeDetailsInPreview = useCallback(() => closePreviewPanel(), [closePreviewPanel]);
 
+  const height =
+    window.innerHeight -
+    EUI_HEADER_HEIGHT -
+    EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT -
+    2 * VISUALIZE_WRAPPER_PADDING -
+    VISUALIZE_BUTTON_GROUP_HEIGHT -
+    EUI_SPACER_HEIGHT -
+    SESSION_VIEW_SEARCH_BAR_HEIGHT;
+
   return isEnabled ? (
     <div data-test-subj={SESSION_VIEW_TEST_ID}>
       {sessionView.getSessionView({
         ...sessionViewConfig,
+        height,
         isFullScreen: true,
         loadAlertDetails: openAlertDetailsPreview,
         openDetails: (selectedProcess: Process | null) => openDetailsInPreview(selectedProcess),

@@ -12,12 +12,12 @@ import type { LicenseType } from '@kbn/licensing-types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SSLSettings } from '@kbn/actions-utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
   RenderParameterTemplates,
   Services,
-  SSLSettings,
   ValidatorType as ValidationSchema,
 } from '../types';
 import type { SubFeature } from '../../common';
