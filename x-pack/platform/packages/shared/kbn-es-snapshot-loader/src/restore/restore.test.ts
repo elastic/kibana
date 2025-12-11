@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filterIndicesToRestore, parseRestoreStatus } from './restore';
+import { filterIndicesToRestore } from './restore';
 import { extractDataStreamName } from '../utils';
 
 describe('filterIndicesToRestore', () => {
@@ -70,38 +70,5 @@ describe('extractDataStreamName', () => {
   it('returns null for non-backing index formats', () => {
     expect(extractDataStreamName('.ds-incomplete')).toBeNull();
     expect(extractDataStreamName('logs-nginx-default')).toBeNull();
-  });
-});
-
-describe('parseRestoreStatus', () => {
-  it('returns completed when all shards are DONE', () => {
-    const response = {
-      'index-1': { shards: [{ stage: 'DONE' }, { stage: 'DONE' }] },
-      'index-2': { shards: [{ stage: 'DONE' }] },
-    };
-    const status = parseRestoreStatus(response);
-    expect(status.completed).toBe(true);
-    expect(status.failed).toBe(false);
-  });
-
-  it('returns not completed when some shards are in progress', () => {
-    const status = parseRestoreStatus({
-      'index-1': { shards: [{ stage: 'DONE' }, { stage: 'INDEX' }] },
-    });
-    expect(status.completed).toBe(false);
-    expect(status.failed).toBe(false);
-  });
-
-  it('returns failed when any shard has failed', () => {
-    const status = parseRestoreStatus({
-      'index-1': { shards: [{ stage: 'DONE' }, { stage: 'FAILURE' }] },
-    });
-    expect(status.failed).toBe(true);
-  });
-
-  it('handles empty response', () => {
-    const status = parseRestoreStatus({});
-    expect(status.completed).toBe(false);
-    expect(status.failed).toBe(false);
   });
 });

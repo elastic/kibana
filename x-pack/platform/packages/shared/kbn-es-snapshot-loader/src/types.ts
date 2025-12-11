@@ -19,13 +19,6 @@ export interface SnapshotInfo {
   state: string;
 }
 
-// Restore status tracking
-export interface RestoreStatus {
-  completed: boolean;
-  failed: boolean;
-  indices: Record<string, { completed: boolean; failed: boolean }>;
-}
-
 // Base configuration shared by both operations
 interface BaseConfig {
   esClient: Client;

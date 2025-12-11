@@ -7,8 +7,6 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import pRetry from 'p-retry';
-import type { RestoreStatus } from '../types';
 import { extractDataStreamName } from '../utils';
 
 export function filterIndicesToRestore(snapshotIndices: string[], patterns: string[]): string[] {
@@ -50,7 +48,7 @@ export async function restoreIndices({
   await esClient.snapshot.restore({
     repository: repoName,
     snapshot: snapshotName,
-    wait_for_completion: false,
+    wait_for_completion: true,
     indices: indices.join(','),
     include_global_state: false,
     ...(hasRename && { rename_pattern: renamePattern, rename_replacement: renameReplacement }),
@@ -62,61 +60,4 @@ export async function restoreIndices({
 
   logger.info(`Restore initiated for ${restoredNames.length} indices`);
   return restoredNames;
-}
-
-export async function waitForRestore({
-  esClient,
-  logger,
-  restoredIndices,
-}: {
-  esClient: Client;
-  logger: Logger;
-  restoredIndices: string[];
-}): Promise<void> {
-  logger.debug(`Waiting for restore to complete`);
-
-  await pRetry(
-    async () => {
-      const recoveryResponse = await esClient.indices.recovery({
-        index: restoredIndices.join(','),
-      });
-      const status = parseRestoreStatus(recoveryResponse);
-
-      if (status.failed) {
-        const failedIndices = Object.entries(status.indices)
-          .filter(([, s]) => s.failed)
-          .map(([name]) => name);
-        throw new pRetry.AbortError(`Restore failed for indices: ${failedIndices.join(', ')}`);
-      }
-
-      if (!status.completed) {
-        const pending = Object.keys(status.indices).filter(
-          (k) => !status.indices[k].completed
-        ).length;
-        logger.debug(`Restore in progress (${pending} indices remaining)...`);
-        throw new Error('Restore not completed');
-      }
-
-      logger.info('Restore completed successfully');
-    },
-    { retries: 60, minTimeout: 1000, maxTimeout: 30000, factor: 1.5 }
-  );
-}
-
-export function parseRestoreStatus(recoveryResponse: Record<string, unknown>): RestoreStatus {
-  const indices: RestoreStatus['indices'] = {};
-  let allCompleted = true;
-  let anyFailed = false;
-
-  for (const [indexName, indexData] of Object.entries(recoveryResponse)) {
-    const shards = (indexData as { shards?: Array<{ stage?: string }> })?.shards ?? [];
-    const completed = shards.every((shard) => shard.stage === 'DONE');
-    const failed = shards.some((shard) => shard.stage === 'FAILURE' || shard.stage === 'FAILED');
-
-    indices[indexName] = { completed, failed };
-    if (!completed) allCompleted = false;
-    if (failed) anyFailed = true;
-  }
-
-  return { completed: allCompleted && Object.keys(indices).length > 0, failed: anyFailed, indices };
 }

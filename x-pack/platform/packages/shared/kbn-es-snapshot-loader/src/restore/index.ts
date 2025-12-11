@@ -13,7 +13,7 @@ import {
   deleteRepository,
   generateRepoName,
 } from './repository';
-import { filterIndicesToRestore, restoreIndices, waitForRestore } from './restore';
+import { filterIndicesToRestore, restoreIndices } from './restore';
 
 export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
   const { esClient, logger, snapshotUrl, indices } = config;
@@ -59,8 +59,6 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
       indices: indicesToRestore,
     });
     result.restoredIndices = restoredIndices;
-
-    await waitForRestore({ esClient, logger, restoredIndices });
 
     result.success = true;
     logger.info(`Restore completed: ${restoredIndices.length} indices restored successfully`);

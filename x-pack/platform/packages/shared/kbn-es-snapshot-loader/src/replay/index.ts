@@ -17,7 +17,7 @@ import {
   deleteRepository,
   generateRepoName,
 } from '../restore/repository';
-import { filterIndicesToRestore, restoreIndices, waitForRestore } from '../restore/restore';
+import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
 import { reindexAllIndices } from './reindex';
 import { verifyIndexTemplates } from './templates';
@@ -73,11 +73,6 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       renameReplacement: `${TEMP_INDEX_PREFIX}$1`,
     });
     result.restoredIndices = restoredIndices;
-
-    await waitForRestore({ esClient, logger, restoredIndices });
-
-    logger.debug('Waiting for indices to be ready...');
-    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     await createTimestampPipeline({
       esClient,
