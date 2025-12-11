@@ -262,7 +262,7 @@ export class APMPlugin
         this.logger?.debug(e);
       });
 
-      this.logger?.debug('Successfully registered observability agent APM tools');
+      this.logger?.debug('Successfully registered agent builder APM tools');
     }
 
     registerDataProviders({

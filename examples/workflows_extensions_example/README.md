@@ -30,7 +30,7 @@ The public configuration includes:
 - `outputSchema` - Must match server-side schema
 - `label` - User-facing label
 - `description` - User-facing description
-- `icon` - EUI icon type
+- `icon` - icon image (preferably lazy loaded)
 - `documentation` - Documentation with summary, details, and examples
 
 ## Usage Example
