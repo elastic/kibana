@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
+import { useAttachmentsSubTabClickedEBT } from '../../../analytics/use_attachments_tab_ebt';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
@@ -63,6 +64,7 @@ export const CaseViewAttachments = ({
 }>) => {
   const { tabs: caseViewTabs } = useCaseAttachmentTabs({ caseData, activeTab });
   const { navigateToCaseView } = useCaseViewNavigation();
+  const trackSubTabClick = useAttachmentsSubTabClickedEBT();
 
   const tabAsSelectableOptions = useMemo(() => {
     return caseViewTabs.map(
@@ -76,10 +78,11 @@ export const CaseViewAttachments = ({
           showIcons: false,
           onClick: () => {
             navigateToCaseView({ detailName: caseData.id, tabId: tab.id });
+            trackSubTabClick(tab.id);
           },
         } as EuiSelectableOption)
     );
-  }, [caseViewTabs, activeTab, navigateToCaseView, caseData.id]);
+  }, [caseViewTabs, activeTab, navigateToCaseView, caseData.id, trackSubTabClick]);
 
   return (
     <>
