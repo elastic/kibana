@@ -19,8 +19,6 @@ import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_st
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const POPOVER_ITEM_LABEL_MAX_WIDTH = 98;
-
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
   hasSubmenu?: boolean;
@@ -89,17 +87,9 @@ export const SecondaryMenuItemComponent = ({
     gap: ${euiTheme.size.xs};
   `;
 
-  const truncatedLabelStyles = css`
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    max-width: ${POPOVER_ITEM_LABEL_MAX_WIDTH}px;
-  `;
-
-  const shouldTruncate = isNew && hasSubmenu;
   const content = (
     <div css={labelAndBadgeStyles}>
-      {shouldTruncate ? <span css={truncatedLabelStyles}>{children}</span> : children}
+      {children}
       {/* Always show non-new badges, only show new ones if isNew check allows it */}
       {badgeType && (badgeType !== 'new' || isNew) && <BetaBadge type={badgeType} />}
     </div>
