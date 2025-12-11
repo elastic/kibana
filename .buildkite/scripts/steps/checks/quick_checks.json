@@ -65,7 +65,6 @@
     "mayChangeFiles": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/check_scout_config.sh",
-    "mayChangeFiles": true
+    "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
   }
 ]
