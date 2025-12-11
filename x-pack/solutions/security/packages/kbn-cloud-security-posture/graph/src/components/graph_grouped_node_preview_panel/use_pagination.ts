@@ -16,11 +16,11 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
 
 const STARTING_PAGE_INDEX = 0;
 
-export interface PaginationLocalState {
+export interface PaginationLocalStorageState {
   pageSize: number;
 }
 
-export interface PaginationState extends PaginationLocalState {
+export interface PaginationState extends PaginationLocalStorageState {
   pageIndex: number;
 }
 export interface Pagination {
@@ -42,7 +42,7 @@ export interface Pagination {
  */
 export const usePagination = (nonFetchedDocumentsCount: number): Pagination => {
   // Initialize from localStorage or use defaults (only pageSize is persisted)
-  const [storedSettings, setStoredSettings] = useLocalStorage<PaginationLocalState>(
+  const [storedSettings, setStoredSettings] = useLocalStorage<PaginationLocalStorageState>(
     GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY,
     { pageSize: DEFAULT_PAGE_SIZE }
   );
