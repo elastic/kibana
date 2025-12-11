@@ -24,6 +24,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
+import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
@@ -98,12 +99,19 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   });
 
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
-
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.entity,
-    attachmentData: { identifierType: entityType, identifier: entityIdentifier },
-    attachmentPrompt: `Investigate the entity and suggest next steps.`,
-  });
+  const entityAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.entity,
+      attachmentData: {
+        identifierType: entityType,
+        identifier: entityIdentifier,
+        attachmentLabel: entityIdentifier,
+      },
+      attachmentPrompt: ENTITY_PROMPT,
+    }),
+    [entityIdentifier, entityType]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
   const onAgentBuildAttachmentClick = useCallback(() => {
     openAgentBuilderFlyout();
     closePopover();

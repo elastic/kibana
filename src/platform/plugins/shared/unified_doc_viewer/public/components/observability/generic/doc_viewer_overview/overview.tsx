@@ -8,13 +8,13 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
-import { DataSourcesProvider } from '../../traces/hooks/use_data_sources';
+import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
@@ -27,7 +27,7 @@ import { TraceContextLogEvents } from '../../traces/components/trace_context_log
 import { isTransaction } from '../../traces/helpers';
 
 export type OverviewProps = DocViewRenderProps & {
-  indexes: TraceIndexes;
+  indexes: ObservabilityIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
