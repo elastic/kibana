@@ -2614,17 +2614,7 @@ export class CstToAstConverter {
   }
 
   private fromQualifiedName(ctx: cst.QualifiedNameContext): ast.ESQLColumn {
-    const node = this.toColumn(ctx);
-    const qualifierToken = ctx._qualifier;
-
-    if (qualifierToken) {
-      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
-
-      node.qualifier = qualifierNode;
-      node.args = [qualifierNode, ...node.args];
-    }
-
-    return node;
+    return this.toColumn(ctx);
   }
 
   private fromQualifiedNamePattern(
