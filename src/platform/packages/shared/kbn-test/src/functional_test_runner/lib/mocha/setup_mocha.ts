@@ -82,7 +82,7 @@ export async function setupMocha({
       testFileFilter.some((pattern: string) => file.includes(pattern))
     );
     log.info(`Filtered to ${paths.length}/${testFiles.length} test files`);
-    
+
     if (paths.length === 0) {
       log.warning('Test file filter matched no files! All test files will be skipped.');
     }
