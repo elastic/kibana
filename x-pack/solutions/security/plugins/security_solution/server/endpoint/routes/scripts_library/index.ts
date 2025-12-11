@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerDownloadScriptRoute } from './download_script';
 import { registerPatchUpdateScriptRoute } from './update_script';
 import { registerListScriptsRoute } from './list_scripts';
 import { registerCreateScriptRoute } from './create_script';
@@ -21,5 +22,6 @@ export const registerScriptsLibraryRoutes = (
     registerCreateScriptRoute(router, endpointContext);
     registerListScriptsRoute(router, endpointContext);
     registerPatchUpdateScriptRoute(router, endpointContext);
+    registerDownloadScriptRoute(router, endpointContext);
   }
 };
