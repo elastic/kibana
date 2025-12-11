@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
-import { backfillInitiator, type BackfillInitiator } from '@kbn/alerting-plugin/common/constants';
+import { backfillInitiator, type BackfillInitiator } from '@kbn/alerting-plugin/common';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
 import { BackfillStatusInfo } from './backfill_status';
