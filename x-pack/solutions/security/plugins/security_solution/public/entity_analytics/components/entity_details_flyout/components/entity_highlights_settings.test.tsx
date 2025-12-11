@@ -45,7 +45,7 @@ describe('EntityHighlightsSettings', () => {
     assistantResult: {
       aiResponse: 'Test AI response',
       replacements: { anonymized_user: 'test-user' },
-      formattedEntitySummary: '{"user": "test-user"}',
+      summaryAsText: '{"user": "test-user"}',
     },
     closePopover: mockClosePopover,
     openPopover: mockOpenPopover,
@@ -99,7 +99,7 @@ describe('EntityHighlightsSettings', () => {
       assistantResult: {
         aiResponse: 'Test AI response',
         replacements: {},
-        formattedEntitySummary: '{"user": "test-user"}',
+        summaryAsText: '{"user": "test-user"}',
       },
     };
 

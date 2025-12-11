@@ -41,7 +41,7 @@ interface EntityHighlightsSettingsProps {
   entityIdentifier: string;
   assistantResult: {
     replacements?: Record<string, string>;
-    formattedEntitySummary?: string;
+    summaryAsText?: string;
     generatedAt?: number;
   } | null;
   closePopover: () => void;
@@ -79,9 +79,9 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   const getPromptContext = useCallback(
     async () =>
       `### The following entity is under investigation:\nType: ${entityType}\nIdentifier: ${`\`${anonymizedEntityIdentifier}\``}\n#### Context:\n\`\`\`json\n${
-        assistantResult?.formattedEntitySummary
+        assistantResult?.summaryAsText
       }`,
-    [anonymizedEntityIdentifier, assistantResult?.formattedEntitySummary, entityType]
+    [anonymizedEntityIdentifier, assistantResult?.summaryAsText, entityType]
   );
 
   const { showAssistantOverlay } = useAskAiAssistant({
@@ -152,7 +152,10 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
             key={'ask-ai-assistant'}
             disabled={isLoading || !assistantResult}
           >
-            <NewAgentBuilderAttachment onClick={onAgentBuildAttachmentClick} size="s" />
+            <NewAgentBuilderAttachment
+              onClick={isLoading || !assistantResult ? noop : onAgentBuildAttachmentClick}
+              size="s"
+            />
           </EuiContextMenuItem>
         ) : (
           <EuiContextMenuItem

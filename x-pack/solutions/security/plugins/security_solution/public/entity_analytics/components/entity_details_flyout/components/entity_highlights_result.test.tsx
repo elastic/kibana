@@ -14,7 +14,7 @@ describe('EntityHighlightsResult', () => {
   const mockOnRefresh = jest.fn();
 
   const defaultAssistantResult = {
-    structuredResponse: {
+    response: {
       highlights: [
         {
           title: 'Risk Score',
@@ -71,7 +71,7 @@ describe('EntityHighlightsResult', () => {
 
   it('handles empty highlights array (shows empty state message)', () => {
     const emptyResult = {
-      structuredResponse: {
+      response: {
         highlights: [],
         recommendedActions: null,
       },
@@ -95,7 +95,7 @@ describe('EntityHighlightsResult', () => {
 
   it('shows anonymized values when showAnonymizedValues is true', () => {
     const resultWithAnonymized = {
-      structuredResponse: {
+      response: {
         highlights: [
           {
             title: 'Key Insights',
@@ -122,7 +122,7 @@ describe('EntityHighlightsResult', () => {
 
   it('shows original values when showAnonymizedValues is false', () => {
     const resultWithAnonymized = {
-      structuredResponse: {
+      response: {
         highlights: [
           {
             title: 'Key Insights',
@@ -212,9 +212,9 @@ describe('EntityHighlightsResult', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('returns null when structuredResponse is null', () => {
+  it('returns null when response is null', () => {
     const resultWithNullResponse = {
-      structuredResponse: null,
+      response: null,
       replacements: {},
     };
 
@@ -247,7 +247,7 @@ describe('EntityHighlightsResult', () => {
 
   it('does not render copy button when there are no highlights', () => {
     const emptyResult = {
-      structuredResponse: {
+      response: {
         highlights: [],
         recommendedActions: null,
       },
@@ -269,7 +269,7 @@ describe('EntityHighlightsResult', () => {
 
   it('handles recommended actions with anonymized values', () => {
     const resultWithAnonymizedActions = {
-      structuredResponse: {
+      response: {
         highlights: [
           {
             title: 'Key Insights',
@@ -299,7 +299,7 @@ describe('EntityHighlightsResult', () => {
 
   it('handles recommended actions with anonymized values when showAnonymizedValues is true', () => {
     const resultWithAnonymizedActions = {
-      structuredResponse: {
+      response: {
         highlights: [
           {
             title: 'Key Insights',
@@ -328,7 +328,7 @@ describe('EntityHighlightsResult', () => {
 
   it('does not render recommended actions section when recommendedActions is null', () => {
     const resultWithoutActions = {
-      structuredResponse: {
+      response: {
         highlights: [
           {
             title: 'Key Insights',
@@ -355,7 +355,7 @@ describe('EntityHighlightsResult', () => {
 
   it('does not render recommended actions section when recommendedActions is empty array', () => {
     const resultWithEmptyActions = {
-      structuredResponse: {
+      response: {
         highlights: [
           {
             title: 'Key Insights',

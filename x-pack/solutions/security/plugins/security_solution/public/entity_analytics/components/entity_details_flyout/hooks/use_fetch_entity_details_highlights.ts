@@ -7,13 +7,14 @@
 import { useCallback, useState } from 'react';
 import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
 import type { ToolSchema } from '@kbn/inference-common';
+import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { getAnonymizedEntityIdentifier } from '../utils/helpers';
-import type { EntityHighlightsStructuredResponse } from '../types';
+import type { EntityHighlightsResponse } from '../types';
 
 const entityHighlightsSchema = {
   type: 'object',
@@ -67,10 +68,9 @@ export const useFetchEntityDetailsHighlights = ({
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [assistantResult, setAssistantResult] = useState<{
-    structuredResponse: EntityHighlightsStructuredResponse | null;
-    rawResponse: string;
+    response: EntityHighlightsResponse | null;
     replacements: Replacements;
-    formattedEntitySummary: string;
+    summaryAsText: string;
     generatedAt: number;
   } | null>(null);
 
@@ -118,18 +118,16 @@ export const useFetchEntityDetailsHighlights = ({
           ${summaryFormatted}`,
         abortSignal: controller.signal,
       });
-      const typedOutput = outputResponse.output as EntityHighlightsStructuredResponse;
+      const typedOutput = outputResponse.output as EntityHighlightsResponse;
 
       setAssistantResult({
-        formattedEntitySummary: summaryFormatted,
-        structuredResponse: typedOutput,
-        rawResponse: outputResponse.content || JSON.stringify(typedOutput),
+        summaryAsText: summaryFormatted,
+        response: typedOutput,
         replacements,
         generatedAt: Date.now(),
       });
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        // Request was aborted, don't show error
+      if (isInferenceRequestAbortedError(error)) {
         return;
       }
       addError(error instanceof Error ? error : new Error(String(error)), {

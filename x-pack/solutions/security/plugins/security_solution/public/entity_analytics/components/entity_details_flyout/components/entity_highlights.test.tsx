@@ -207,7 +207,7 @@ describe('EntityHighlights', () => {
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
   });
 
-  it('disables generate button when no connector ID is available', () => {
+  it('does not render generate button when no connector ID is available', () => {
     mockUseLoadConnectors.mockReturnValue({ data: [] });
     mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
 
@@ -215,8 +215,12 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    const generateButton = screen.getByRole('button', { name: 'Generate' });
-    expect(generateButton).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No AI connector is configured. Please configure an AI connector to generate a summary.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows loading state with skeleton text and loading message', () => {
@@ -237,7 +241,7 @@ describe('EntityHighlights', () => {
 
   it('shows AI response when assistant result is available and not loading', () => {
     const mockAssistantResult = {
-      structuredResponse: {
+      response: {
         highlights: [
           {
             title: 'Key Insights',
@@ -247,7 +251,7 @@ describe('EntityHighlights', () => {
         recommendedActions: null,
       },
       replacements: { anonymized_user: 'test-user' },
-      formattedEntitySummary: '{"user": "test-user"}',
+      summaryAsText: '{"user": "test-user"}',
       generatedAt: Date.now(),
     };
 

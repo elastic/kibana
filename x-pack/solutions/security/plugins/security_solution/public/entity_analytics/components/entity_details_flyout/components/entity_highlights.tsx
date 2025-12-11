@@ -162,25 +162,34 @@ export const EntityHighlightsAccordion: React.FC<{
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiText size="xs" textAlign="left">
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription"
-                defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
-              />
+              {!connectorId ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
+                  defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
+                  defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
+                />
+              )}
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiButton
-              iconType="sparkles"
-              color="primary"
-              onClick={fetchEntityHighlights}
-              isDisabled={!connectorId}
-              fill
-              css={buttonGradientStyle}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
-                defaultMessage="Generate"
-              />
-            </EuiButton>
+            {connectorId && (
+              <EuiButton
+                iconType="sparkles"
+                color="primary"
+                onClick={fetchEntityHighlights}
+                isDisabled={!connectorId}
+                fill
+                css={buttonGradientStyle}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
+                  defaultMessage="Generate"
+                />
+              </EuiButton>
+            )}
           </div>
         )}
       </EuiAccordion>

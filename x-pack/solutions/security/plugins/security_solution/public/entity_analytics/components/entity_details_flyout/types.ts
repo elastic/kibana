@@ -13,7 +13,7 @@ export interface EntityHighlightItem {
   text: string;
 }
 
-export interface EntityHighlightsStructuredResponse {
+export interface EntityHighlightsResponse {
   highlights: EntityHighlightItem[];
   recommendedActions: string[] | null;
 }

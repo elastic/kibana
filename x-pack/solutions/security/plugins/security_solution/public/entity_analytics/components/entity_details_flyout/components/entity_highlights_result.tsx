@@ -15,10 +15,8 @@ import {
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
@@ -26,12 +24,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { EntityHighlightsStructuredResponse } from '../types';
+import type { EntityHighlightsResponse } from '../types';
 import { useGradientStyles } from './entity_highlights_gradients';
 
 interface EntityHighlightsResultProps {
   assistantResult: {
-    structuredResponse: EntityHighlightsStructuredResponse | null;
+    response: EntityHighlightsResponse | null;
     replacements: Replacements;
   } | null;
   showAnonymizedValues: boolean;
@@ -45,7 +43,6 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   generatedAt,
   onRefresh,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { gradientPanelStyle } = useGradientStyles();
 
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
@@ -64,12 +61,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
               <strong>{highlight.title}</strong>
             </EuiText>
             <EuiSpacer size="xs" />
-            <EuiMarkdownFormat
-              textSize="xs"
-              css={css`
-                color: ${euiTheme.colors.textSubdued};
-              `}
-            >
+            <EuiMarkdownFormat textSize="xs" color="subdued">
               {highlight.text}
             </EuiMarkdownFormat>
             {index < anonymizedResult.highlights.length - 1 && <EuiSpacer size="m" />}
@@ -102,12 +94,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiMarkdownFormat
-            textSize="xs"
-            css={css`
-              color: ${euiTheme.colors.textSubdued};
-            `}
-          >
+          <EuiMarkdownFormat textSize="xs" color="subdued">
             {anonymizedResult.recommendedActions.map((action) => `- ${action}`).join('\n')}
           </EuiMarkdownFormat>
         </>
@@ -170,14 +157,14 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
 
 const useAnonymizedResponse = (
   assistantResult: {
-    structuredResponse: EntityHighlightsStructuredResponse | null;
+    response: EntityHighlightsResponse | null;
     replacements: Replacements;
   } | null,
   showAnonymizedValues: boolean
-): EntityHighlightsStructuredResponse | null => {
+): EntityHighlightsResponse | null => {
   return useMemo(() => {
-    if (!assistantResult?.structuredResponse) return null;
-    const response = assistantResult.structuredResponse;
+    if (!assistantResult?.response) return null;
+    const response = assistantResult.response;
 
     if (!showAnonymizedValues) {
       return {
@@ -203,16 +190,14 @@ const useAnonymizedResponse = (
   }, [assistantResult, showAnonymizedValues]);
 };
 
-const formatTextToCopy = (
-  structuredResponse: EntityHighlightsStructuredResponse | null
-): string => {
-  if (!structuredResponse) return '';
-  return structuredResponse.highlights
+const formatTextToCopy = (response: EntityHighlightsResponse | null): string => {
+  if (!response) return '';
+  return response.highlights
     .map((highlight) => `- ${highlight.title}\n${highlight.text}\n`)
     .join('\n')
     .concat(
-      structuredResponse.recommendedActions
-        ? `\nRecommended actions:\n${structuredResponse.recommendedActions
+      response.recommendedActions
+        ? `\nRecommended actions:\n${response.recommendedActions
             .map((action) => `- ${action} \n`)
             .join('\n')}`
         : ''

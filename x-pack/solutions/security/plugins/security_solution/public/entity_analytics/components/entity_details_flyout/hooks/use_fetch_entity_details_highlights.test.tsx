@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
 import { useFetchEntityDetailsHighlights } from './use_fetch_entity_details_highlights';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { EntityHighlightsStructuredResponse } from '../types';
+import type { EntityHighlightsResponse } from '../types';
 
 const mockFetchEntityDetailsHighlights = jest.fn();
 const mockAddError = jest.fn();
@@ -61,7 +61,7 @@ const mockEntityDetailsResponse = {
 };
 
 const mockSuccessfulInferenceOutput: {
-  output: EntityHighlightsStructuredResponse;
+  output: EntityHighlightsResponse;
   content: string;
 } = {
   output: {
@@ -126,9 +126,8 @@ describe('useFetchEntityDetailsHighlights', () => {
 
     // Verify the result state is updated
     expect(result.current.result).toEqual({
-      formattedEntitySummary: JSON.stringify(mockEntityDetailsResponse.summary),
-      structuredResponse: mockSuccessfulInferenceOutput.output,
-      rawResponse: mockSuccessfulInferenceOutput.content,
+      summaryAsText: JSON.stringify(mockEntityDetailsResponse.summary),
+      response: mockSuccessfulInferenceOutput.output,
       replacements: mockEntityDetailsResponse.replacements,
       generatedAt: expect.any(Number),
     });
