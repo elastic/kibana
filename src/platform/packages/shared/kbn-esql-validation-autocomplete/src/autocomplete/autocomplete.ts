@@ -20,14 +20,14 @@ import {
   type ESQLFunction,
   SuggestionOrderingEngine,
 } from '@kbn/esql-ast';
-import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands/registry/options/recommended_queries';
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
   ISuggestionItem,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
-import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
+} from '@kbn/esql-ast/src/commands/registry/types';
+import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { correctQuerySyntax } from '@kbn/esql-ast/src/commands/definitions/utils/ast';
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
