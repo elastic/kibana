@@ -1118,6 +1118,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.accountType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accountType",
+            "description": [],
+            "signature": [
+              "AccountType",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.CloudConnector.vars",
             "type": "CompoundType",
             "tags": [],
@@ -1355,6 +1370,21 @@
             "description": [],
             "signature": [
               "\"aws\" | \"azure\" | \"gcp\""
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CreateCloudConnectorRequest.accountType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accountType",
+            "description": [],
+            "signature": [
+              "AccountType",
+              " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
@@ -30320,6 +30350,36 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.AWS_ACCOUNT_TYPE_VAR_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_ACCOUNT_TYPE_VAR_NAME",
+        "description": [],
+        "signature": [
+          "\"aws.account_type\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.AZURE_ACCOUNT_TYPE_VAR_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_ACCOUNT_TYPE_VAR_NAME",
+        "description": [],
+        "signature": [
+          "\"azure.account_type\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.BulkGetAgentPoliciesResponse",
         "type": "Type",
         "tags": [],
@@ -30879,6 +30939,21 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.GCP_ACCOUNT_TYPE_VAR_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_ACCOUNT_TYPE_VAR_NAME",
+        "description": [],
+        "signature": [
+          "\"gcp.account_type\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.GetAgentPoliciesResponse",
         "type": "Type",
         "tags": [],
@@ -31364,6 +31439,21 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.ORGANIZATION_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "ORGANIZATION_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"organization-account\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.Output",
         "type": "Type",
         "tags": [],
@@ -31805,6 +31895,21 @@
         "label": "SETUP_API_ROUTE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.SINGLE_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "SINGLE_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"single-account\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
