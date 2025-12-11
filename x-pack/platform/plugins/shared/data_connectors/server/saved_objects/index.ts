@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const DATA_CONNECTOR_SAVED_OBJECT_TYPE = 'data_connector';
@@ -19,6 +20,18 @@ export interface DataConnectorAttributes {
   toolIds: string[];
   kscIds: string[];
 }
+
+export const dataConnectorSchemaV1 = schema.object({
+  name: schema.string(),
+  type: schema.string(),
+  config: schema.object({}),
+  createdAt: schema.string(),
+  updatedAt: schema.string(),
+  features: schema.maybe(schema.arrayOf(schema.string())),
+  workflowIds: schema.arrayOf(schema.string()),
+  toolIds: schema.arrayOf(schema.string()),
+  kscIds: schema.arrayOf(schema.string()),
+});
 
 export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
   properties: {
@@ -74,7 +87,13 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       },
     },
     modelVersions: {
-      '1': { changes: [] },
+      1: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: dataConnectorSchemaV1.extends({}, { unknowns: 'ignore' }),
+          create: dataConnectorSchemaV1,
+        },
+      },
     },
   });
 }
