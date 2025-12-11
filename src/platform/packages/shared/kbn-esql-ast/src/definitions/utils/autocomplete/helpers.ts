@@ -535,17 +535,68 @@ export function createInferenceEndpointToCompletionItem(
  * Given a suggestion item, decorates it with editor.action.triggerSuggest
  * that triggers the autocomplete dialog again after accepting the suggestion.
  *
- * If the suggestion item already has a custom command, it will preserve it.
+ * If the suggestion item already has a custom command, it will preserve it, by attaching
+ * the triggerSuggest command as part of a multiCommands execution.
  */
 export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionItem {
+  const triggerAutoSuggestCommand = {
+    title: 'Trigger Suggestion Dialog',
+    id: 'editor.action.triggerSuggest',
+  };
+
+  return appendCommandToSuggestionItem(suggestionItem, triggerAutoSuggestCommand);
+}
+
+/**
+ * Appends a command to a suggestion item, preserving existing commands by using multiCommands if necessary.
+ * @param suggestionItem
+ * @param commandToAppend
+ * @returns
+ */
+export function appendCommandToSuggestionItem(
+  suggestionItem: ISuggestionItem,
+  commandToAppend: ISuggestionItem['command']
+): ISuggestionItem {
+  if (!commandToAppend) {
+    return suggestionItem;
+  }
+
+  // If the suggestion has multiCommands, append the new command
+  if (suggestionItem.command?.id === 'esql.multiCommands') {
+    const existingCommands: ISuggestionItem['command'][] = suggestionItem.command.arguments
+      ? JSON.parse(suggestionItem.command.arguments[0].commands)
+      : [];
+
+    return {
+      ...suggestionItem,
+      command: createMultiCommand([...existingCommands, commandToAppend]),
+    };
+  }
+
+  // If the suggestion already has a command, use multiCommands to execute the existing one
+  // and then the new command
+  const command =
+    suggestionItem.command && suggestionItem.command.id !== commandToAppend.id
+      ? createMultiCommand([suggestionItem.command, commandToAppend])
+      : commandToAppend;
+
   return {
     ...suggestionItem,
-    command: suggestionItem.command
-      ? suggestionItem.command
-      : {
-          title: 'Trigger Suggestion Dialog',
-          id: 'editor.action.triggerSuggest',
-        },
+    command,
+  };
+}
+
+function createMultiCommand(
+  commands: Array<ISuggestionItem['command']>
+): ISuggestionItem['command'] {
+  return {
+    id: 'esql.multiCommands',
+    title: 'Execute multiple commands',
+    arguments: [
+      {
+        commands: JSON.stringify(uniqBy(commands, 'id')),
+      },
+    ],
   };
 }
 

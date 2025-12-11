@@ -9113,6 +9113,27 @@
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.onechat",
+            "type": "Object",
+            "tags": [],
+            "label": "onechat",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "onechat",
+                "scope": "public",
+                "docId": "kibOnechatPluginApi",
+                "section": "def-public.OnechatPluginStart",
+                "text": "OnechatPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

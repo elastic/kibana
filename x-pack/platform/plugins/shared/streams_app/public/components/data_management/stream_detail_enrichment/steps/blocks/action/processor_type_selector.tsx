@@ -18,7 +18,10 @@ import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
 import { configDrivenProcessors } from './config_driven';
-import { useGetStreamEnrichmentState } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useGetStreamEnrichmentState,
+  useInteractiveModeSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { isStepUnderEdit } from '../../../state_management/steps_state_machine';
@@ -46,7 +49,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     Streams.WiredStream.GetResponse.is(snapshot.context.definition)
   );
 
-  const isWithinWhereBlock = useStreamEnrichmentSelector((state) => {
+  const isWithinWhereBlock = useInteractiveModeSelector((state) => {
     const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
       isStepUnderEdit(stepRef.getSnapshot())
     );

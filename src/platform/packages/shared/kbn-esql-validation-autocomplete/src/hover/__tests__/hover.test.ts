@@ -72,38 +72,38 @@ describe('getHoverItem()', () => {
       await assertGetHoverItem(`from a | eval round(numberField)`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval round(numberField,)`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval round(numberField, )`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
       await assertGetHoverItem(`from a | eval round(numberField)`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
@@ -113,10 +113,10 @@ round (
       await assertGetHoverItem(`from a | stats avg(round(numberField))`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(

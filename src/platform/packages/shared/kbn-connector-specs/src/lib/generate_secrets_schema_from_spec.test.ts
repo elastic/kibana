@@ -32,6 +32,18 @@ describe('generateSecretsSchemaFromSpec', () => {
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
   });
 
+  // Uncomment when PFX support is added back
+  // test('correctly generates schemas when pfx is disabled', () => {
+  //   const schema1 = generateSecretsSchemaFromSpec(['basic', 'bearer', 'pfx_certificate'], {
+  //     isPfxEnabled: false,
+  //   });
+  //   expect(z.toJSONSchema(schema1)).toMatchSnapshot();
+  //   const schema2 = generateSecretsSchemaFromSpec(['pfx_certificate'], {
+  //     isPfxEnabled: false,
+  //   });
+  //   expect(z.toJSONSchema(schema2)).toMatchSnapshot();
+  // });
+
   test('returns empty object schema when no auth types are provided', () => {
     const schema = generateSecretsSchemaFromSpec({ types: [] });
     expect(z.toJSONSchema(schema)).toMatchSnapshot();

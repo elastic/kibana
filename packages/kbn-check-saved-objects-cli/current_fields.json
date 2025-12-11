@@ -260,6 +260,12 @@
     "type"
   ],
   "cloud": [],
+  "cloud-connect-api-key": [
+    "apiKey",
+    "clusterId",
+    "createdAt",
+    "updatedAt"
+  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"

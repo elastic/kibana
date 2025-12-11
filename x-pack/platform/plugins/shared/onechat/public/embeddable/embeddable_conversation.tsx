@@ -17,6 +17,7 @@ import {
   headerHeight,
 } from '../application/components/conversations/conversation.styles';
 import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
+import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -63,13 +64,15 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   return (
     <div css={wrapperStyles}>
       <EmbeddableConversationsProvider {...props}>
-        <EuiFlyoutHeader css={headerStyles}>
-          <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
-        </EuiFlyoutHeader>
-        <EmbeddableWelcomeMessage />
-        <EuiFlyoutBody css={bodyStyles}>
-          <Conversation />
-        </EuiFlyoutBody>
+        <EmbeddableAccessBoundary onClose={onClose}>
+          <EuiFlyoutHeader css={headerStyles}>
+            <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+          </EuiFlyoutHeader>
+          <EmbeddableWelcomeMessage />
+          <EuiFlyoutBody css={bodyStyles}>
+            <Conversation />
+          </EuiFlyoutBody>
+        </EmbeddableAccessBoundary>
       </EmbeddableConversationsProvider>
     </div>
   );

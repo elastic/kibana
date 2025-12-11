@@ -75,6 +75,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -177,6 +178,7 @@ export interface ObservabilityPublicPluginsStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
+  onechat?: OnechatPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

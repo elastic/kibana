@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/storybook'
   - '@kbn/index-management-plugin'
+  - '@kbn/index-lifecycle-management-common-shared'
 tags:
   - shared-common
   - package

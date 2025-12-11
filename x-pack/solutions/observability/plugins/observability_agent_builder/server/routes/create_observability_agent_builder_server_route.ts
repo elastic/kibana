@@ -10,6 +10,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-
 import type { CoreSetup } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
@@ -20,6 +21,7 @@ export interface ObservabilityAgentBuilderRouteHandlerResources
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
