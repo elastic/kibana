@@ -1850,7 +1850,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/packages/shared/kbn-connector-specs/src/icons/**/*.{ts,tsx}'],
+      files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',
       },
@@ -2701,6 +2701,7 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
