@@ -229,14 +229,14 @@ describe('filterByAgent', () => {
     it('opentelemetry/php/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/php/elastic')).toEqual(
         expect.arrayContaining([
-            'deactivate_all_instrumentations',
-            'deactivate_instrumentations',
-            'infer_spans',
-            'logging_level',
-            'sampling_rate',
-            'send_logs',
-            'send_metrics',
-            'send_traces',
+          'deactivate_all_instrumentations',
+          'deactivate_instrumentations',
+          'infer_spans',
+          'logging_level',
+          'sampling_rate',
+          'send_logs',
+          'send_metrics',
+          'send_traces',
         ])
       );
     });
