@@ -429,6 +429,7 @@ export const WorkflowInputSchema = z.union([
 // structured data models.
 export const JsonModelSchema = z
   .object({
+    type: z.literal('object').optional(),
     properties: z.record(z.string(), z.any()).optional(),
     required: z.array(z.string()).optional(),
     additionalProperties: z.union([z.boolean(), z.any()]).optional(),
