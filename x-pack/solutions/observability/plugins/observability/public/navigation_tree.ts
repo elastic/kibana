@@ -30,6 +30,11 @@ const LazyIconProductCloudInfra = lazy(() =>
     default: iconProductCloudInfra,
   }))
 );
+const LazyAgentBuilderIcon = lazy(() =>
+  import('@kbn/ai-insights/src/icons/robot_icon').then(({ RobotIcon }) => ({
+    default: RobotIcon,
+  }))
+);
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -259,9 +264,15 @@ function createNavTree({
               }),
               icon: 'sparkles',
               link: 'observabilityAIAssistant',
-            } as const,
+            },
           ]
-        : []),
+        : [
+            {
+              link: 'agent_builder',
+              icon: LazyAgentBuilderIcon,
+              badgeType: 'techPreview',
+            },
+          ]),
       {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
