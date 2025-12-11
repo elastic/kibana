@@ -54,10 +54,7 @@ export const runAgentStepDefinition = createServerStepDefinition({
         ? result.round.response.structured_output
         : result.round.response.message ?? '';
 
-      return {
-        output: {
-          output: outputMessage,
-        },
+      return { output: outputMessage },
       };
     } catch (error) {
       context.logger.error(
