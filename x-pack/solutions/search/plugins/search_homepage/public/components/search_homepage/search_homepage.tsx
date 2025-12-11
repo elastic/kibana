@@ -7,33 +7,37 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
+import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
-import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
-import { MetricPanels } from './metric_panels';
+import { LicenseBadge } from './license_badge';
+import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
+import { BasicMetricBadges } from './basic_metric_badges';
 
 export const SearchHomepagePage = () => {
+  const { euiTheme } = useEuiTheme();
   const {
-    services: { console: consolePlugin, history, searchNavigation, security },
+    services: { console: consolePlugin, history, searchNavigation, security, cloud },
   } = useKibana();
   const [username, setUsername] = useState<string>('');
+  const { isTrial } = useGetLicenseInfo();
 
   useEffect(() => {
     const getUser = async () => {
       const user = await security?.authc.getCurrentUser();
-      setUsername(user?.username || '');
+      setUsername(user?.full_name || '');
     };
     getUser();
   }, [security]);
@@ -51,7 +55,6 @@ export const SearchHomepagePage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  const { isTrial } = useGetLicenseInfo();
   return (
     <KibanaPageTemplate
       offset={0}
@@ -63,10 +66,10 @@ export const SearchHomepagePage = () => {
       <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
-            <EuiFlexGroup responsive={false} alignItems="center">
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>
+                <EuiTitle size="m">
+                  <h3>
                     {username
                       ? i18n.translate('xpack.searchHomepage.welcome.title', {
                           defaultMessage: 'Welcome, {username}',
@@ -75,16 +78,12 @@ export const SearchHomepagePage = () => {
                       : i18n.translate('xpack.searchHomepage.welcome.title.default', {
                           defaultMessage: 'Welcome',
                         })}
-                  </h1>
+                  </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {isTrial && (
+              {(isTrial || (!cloud?.isServerlessEnabled && !cloud?.isCloudEnabled)) && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="accent">
-                    {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
-                      defaultMessage: 'Trial',
-                    })}
-                  </EuiBadge>
+                  <LicenseBadge />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
@@ -93,6 +92,9 @@ export const SearchHomepagePage = () => {
                   external
                   href="#"
                   color="text"
+                  css={css({
+                    padding: euiTheme.size.s,
+                  })}
                 >
                   {i18n.translate(
                     'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
@@ -131,7 +133,7 @@ export const SearchHomepagePage = () => {
 
         <EuiHorizontalRule margin="s" />
 
-        <MetricPanels />
+        <BasicMetricBadges />
       </KibanaPageTemplate.Section>
       <SearchHomepageBody />
       {embeddableConsole}

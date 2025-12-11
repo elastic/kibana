@@ -13,12 +13,22 @@ export const useAgentCount = () => {
     services: { onechat },
   } = useKibana();
   const [toolCount, setToolCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
-    onechat?.tools.list().then((tools) => {
-      setToolCount(tools.length);
-    });
+    onechat?.tools
+      .list()
+      .then((tools) => {
+        setToolCount(tools.length);
+      })
+      .catch(() => {
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [onechat]);
 
-  return { tools: toolCount, agents: 0 };
+  return { tools: toolCount, agents: 0, isLoading, isError };
 };

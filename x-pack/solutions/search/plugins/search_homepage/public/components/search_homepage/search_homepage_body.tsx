@@ -8,24 +8,19 @@
 import React from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import { MetricPanels } from './metric_panels';
-import { Footer } from '../footer/footer';
 import { CloudResources } from './cloud_resources';
 import { BodyLinks } from './body_links';
 
 export const SearchHomepageBody = () => {
-  const { euiTheme } = useEuiTheme();
-  const itemPadding = css({ padding: `${euiTheme.size.xxl}` });
-
   return (
     <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow paddingSize="none">
       <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem>
           <EuiSpacer size="l" />
-          <MetricPanels panelType="complex" />
+          <MetricPanels />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="l" />
@@ -39,9 +34,6 @@ export const SearchHomepageBody = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <Footer />
         </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>
