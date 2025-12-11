@@ -172,7 +172,7 @@ const getPreviewDataObservable = (
           }
 
           return {
-            status: getPreviewStatus(fetchStatus),
+            status: tabState.forceFetchOnSelect ? TabStatus.DEFAULT : getPreviewStatus(fetchStatus),
             query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
             title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
           };

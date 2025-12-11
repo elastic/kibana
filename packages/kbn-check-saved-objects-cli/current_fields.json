@@ -260,6 +260,12 @@
     "type"
   ],
   "cloud": [],
+  "cloud-connect-api-key": [
+    "apiKey",
+    "clusterId",
+    "createdAt",
+    "updatedAt"
+  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -570,6 +576,7 @@
     "updated_by"
   ],
   "fleet-cloud-connector": [
+    "accountType",
     "cloudProvider",
     "created_at",
     "name",
