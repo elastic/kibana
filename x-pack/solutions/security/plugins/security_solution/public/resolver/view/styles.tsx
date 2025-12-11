@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { NodeSubMenuComponents } from './submenu';
 
@@ -76,11 +76,17 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   }
 `;
 
+const EUI_HEADER_HEIGHT = '96px';
+const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = '72px';
+const VISUALIZE_WRAPPER_PADDING = '16px';
+const VISUALIZE_BUTTON_GROUP_HEIGHT = '32px';
+const EUI_SPACER_HEIGHT = '16px';
+
 /**
  * The top level DOM element for Resolver
  * NB: `styled-components` may be used to wrap this.
  */
-export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
+export const StyledMapContainer = styled.div<{ backgroundColor: string; windowHeight: number }>`
   /**
    * Take up all availble space
    */
@@ -99,7 +105,11 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
   * Set to force base-height necessary for resolver to show up in timeline.
   * Was previously set in events_viewer.tsx, but more appropriate here
    */
-  min-height: 652px;
+  min-height: calc(
+    ${(props) => props.windowHeight}px - ${EUI_HEADER_HEIGHT} -
+      ${EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT} - 2 * ${VISUALIZE_WRAPPER_PADDING} -
+      ${VISUALIZE_BUTTON_GROUP_HEIGHT} - ${EUI_SPACER_HEIGHT}
+  );
   /**
    * The placeholder components use absolute positioning.
    */
