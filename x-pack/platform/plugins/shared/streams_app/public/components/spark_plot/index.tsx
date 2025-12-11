@@ -43,7 +43,7 @@ export function SparkPlot({
   xFormatter: givenXFormatter,
   hideAxis = false,
   height,
-  maxYValue,
+  maxYValue = NaN,
 }: {
   id: string;
   name?: string;
