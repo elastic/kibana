@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { Class } from 'utility-types';
-
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
-import type { LensFeatureFlags } from '../common';
 import { getLensFeatureFlags } from './get_feature_flags';
+import type { LensFeatureFlags } from '../common';
 
 const [getBuilder, setBuilder] = createGetterSetter<LensConfigBuilder>('LensBuilder', false);
 
@@ -30,27 +28,15 @@ export function getLensBuilder(): LensConfigBuilder | null {
   return builder;
 }
 
-let resultPromise: Promise<{
-  LensConfigBuilder: Class<LensConfigBuilder>;
-}> | null = null;
-
 export async function setLensBuilder(
   useApiFormat: LensFeatureFlags['apiFormat']
 ): Promise<LensConfigBuilder | null> {
   if (useApiFormat) {
-    resultPromise = import('@kbn/lens-embeddable-utils');
-    const { LensConfigBuilder } = await resultPromise;
+    const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
     const builder = new LensConfigBuilder(undefined, useApiFormat);
     setBuilder(builder);
-    resultPromise = null;
     return builder;
   }
 
   return null;
-}
-
-export async function ensureBuilderIsInitialized(): Promise<void> {
-  if (resultPromise) {
-    await resultPromise;
-  }
 }

@@ -138,7 +138,7 @@ import { setLensFeatureFlags } from './get_feature_flags';
 import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
-import { ensureBuilderIsInitialized, setLensBuilder } from './lazy_builder';
+import { setLensBuilder } from './lazy_builder';
 
 export type { SaveProps } from './app_plugin';
 
@@ -393,7 +393,7 @@ export class LensPlugin {
         const flags = await setLensFeatureFlags(featureFlags);
 
         // This loads the builder async to allow synchronous access to builder via getLensBuilder
-        void setLensBuilder(flags.apiFormat);
+        await setLensBuilder(flags.apiFormat);
 
         embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
           const { getLensTransforms } = await import('./async_services');
@@ -518,8 +518,6 @@ export class LensPlugin {
         initMemoizedErrorNotification(coreStart);
 
         const frameStart = this.editorFrameService!.start(coreStart, deps);
-        // ensure builder is loaded before mounting
-        await ensureBuilderIsInitialized();
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart.http),
