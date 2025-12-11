@@ -209,9 +209,10 @@ describe('StreamDetailSchemaEditor', () => {
         stream: {
           name: 'logs', // root stream
           description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
             lifecycle: { dsl: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
             settings: {},
             failure_store: { inherit: {} },
             wired: {
@@ -249,9 +250,10 @@ describe('StreamDetailSchemaEditor', () => {
         stream: {
           name: 'logs.child', // child stream
           description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
             settings: {},
             failure_store: { inherit: {} },
             wired: {
@@ -490,9 +492,10 @@ describe('StreamDetailSchemaEditor', () => {
         stream: {
           name: 'logs.child',
           description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
             settings: {},
             failure_store: { inherit: {} },
             classic: {
@@ -535,9 +538,10 @@ describe('StreamDetailSchemaEditor', () => {
         stream: {
           name: 'logs', // root stream
           description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
             lifecycle: { dsl: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
             settings: {},
             failure_store: { inherit: {} },
             wired: {

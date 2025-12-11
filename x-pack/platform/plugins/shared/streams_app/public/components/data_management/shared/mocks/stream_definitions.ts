@@ -15,9 +15,10 @@ export const createMockClassicStreamDefinition = (
   stream: {
     name: 'logs.classic-test',
     description: '',
+    updated_at: '2024-01-01T00:00:00.000Z',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
       settings: {},
       failure_store: { inherit: {} },
       classic: {
@@ -55,9 +56,10 @@ export const createMockWiredStreamDefinition = (
   stream: {
     name: 'logs.wired-test',
     description: '',
+    updated_at: '2024-01-01T00:00:00.000Z',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
       settings: {},
       failure_store: { inherit: {} },
       wired: {
