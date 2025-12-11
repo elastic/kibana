@@ -55,6 +55,12 @@ export const getConnectorsDict = (): Record<string, ConnectorClientSideDefinitio
     externalDocsUrl: '',
     platinumOnly: true,
   },
+  gitlab: {
+    docsUrl: docLinks.connectorsGitlab,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    platinumOnly: true,
+  },
   gmail: {
     docsUrl: docLinks.connectorsGmail,
     externalAuthDocsUrl: '',
@@ -320,6 +326,21 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'GitHub & GitHub Enterprise Server',
     }),
     serviceType: 'github',
+  },
+  {
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
+    description: i18n.translate('searchConnectors.content.nativeConnectors.gitlab.description', {
+      defaultMessage: 'Search over your projects and repos on GitLab.',
+    }),
+    iconPath: 'gitlab.svg',
+    isBeta: false,
+    isNative: true,
+    isTechPreview: true,
+    keywords: ['gitlab', 'cloud', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.gitlab.name', {
+      defaultMessage: 'GitLab',
+    }),
+    serviceType: 'gitlab',
   },
   {
     categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
