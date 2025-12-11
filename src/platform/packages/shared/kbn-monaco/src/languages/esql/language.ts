@@ -14,6 +14,7 @@ import {
   suggest,
   validateQuery,
   getHoverItem,
+  getSignatureHelp,
   inlineSuggest,
 } from '@kbn/esql-validation-autocomplete';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
@@ -197,6 +198,44 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         }
 
         return item;
+      },
+    };
+  },
+  getSignatureProvider: (deps?: ESQLDependencies): monaco.languages.SignatureHelpProvider => {
+    return {
+      signatureHelpTriggerCharacters: ['(', ','],
+      signatureHelpRetriggerCharacters: ['(', ','],
+      async provideSignatureHelp(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        token: monaco.CancellationToken,
+        context: monaco.languages.SignatureHelpContext
+      ): Promise<monaco.languages.SignatureHelpResult | null> {
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        const signatureHelp = await getSignatureHelp(fullText, offset, deps);
+
+        if (!signatureHelp) {
+          return null;
+        }
+
+        const { signatures, activeSignature, activeParameter } = signatureHelp;
+
+        return {
+          value: {
+            signatures: signatures.map(({ label, documentation, parameters }) => ({
+              label,
+              documentation: documentation ? { value: documentation } : undefined,
+              parameters: parameters.map(({ label: paramLabel, documentation: paramDoc }) => ({
+                label: paramLabel,
+                documentation: paramDoc ? { value: paramDoc } : undefined,
+              })),
+            })),
+            activeSignature,
+            activeParameter,
+          },
+          dispose: () => {},
+        };
       },
     };
   },

@@ -21,4 +21,6 @@ export {
   createOpenFileUploadLiteTrigger,
 } from './src/file_upload_component/new/file_upload_lite_action';
 
+export { FileUploadLiteLookUpView } from './src/file_upload_component/new/file_upload_lite_lookup_view';
+
 export type { FileUploadStartDependencies } from './src/file_upload_component/kibana_context';
