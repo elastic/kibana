@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/public';
 import {
   OBSERVABILITY_AGENT_FEATURE_FLAG,
   OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
 } from '@kbn/observability-agent-builder-plugin/common';
-import type { APMPluginStartDependencies } from '../../types';
 
-export async function getIsObservabilityAgentEnabled(
-  core: CoreSetup<APMPluginStartDependencies>
-): Promise<boolean> {
-  const [coreStart] = await core.getStartServices();
-
+export function getIsObservabilityAgentEnabled(coreStart: CoreStart): boolean {
   return coreStart.featureFlags.getBooleanValue(
     OBSERVABILITY_AGENT_FEATURE_FLAG,
     OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
