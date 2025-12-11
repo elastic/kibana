@@ -176,3 +176,6 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 .dependency-graph-log.json
 
 .moon/cache
+
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker

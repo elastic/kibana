@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-11T10:19:24.838Z",
-  "sha1": "c00251da300c2224a40813ed0c213db64b446a4c",
+  "lastModified": "2025-12-11T12:03:35.338Z",
+  "sha1": "c37509b7c77fcf8e6690753c5954b1f5df51db15",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -462,6 +462,48 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
         "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-025e43f8799c8ae",
+      "title": "Transaction details Renders the page with expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-32f26083c909a43",
+      "title": "Transaction details Trace samples navigation persists across page reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-a7c84b743868348",
+      "title": "Transaction details Trace samples waterfall should not become stuck on loading state after page reload with empty data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 70,
         "column": 7
       }
     }
