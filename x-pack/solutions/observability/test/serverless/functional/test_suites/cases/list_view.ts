@@ -77,7 +77,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('tags', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/245961
+      describe.skip('tags', () => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
