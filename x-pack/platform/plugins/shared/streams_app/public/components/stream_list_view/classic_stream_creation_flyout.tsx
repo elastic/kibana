@@ -78,9 +78,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
                 lifecycle: { inherit: {} },
                 settings: {},
                 failure_store: { inherit: {} },
-                classic: {
-                  field_overrides: {},
-                },
+                classic: {},
               },
             },
           },
