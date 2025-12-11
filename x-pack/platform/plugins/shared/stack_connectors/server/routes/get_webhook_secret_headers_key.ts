@@ -75,9 +75,15 @@ export const getWebhookSecretHeadersKeyRoute = (
         const connector = await actionsClient.get({ id });
         const spaceId = spaces.spacesService.getSpaceId(req);
 
-        if (!['.webhook', '.cases-webhook', '.mcp'].includes(connector.actionTypeId)) {
+        const allowedConnectorTypes = ['.webhook', '.cases-webhook'];
+
+        if (experimentalFeatures.agentBuilderExternalMcpOn) {
+          allowedConnectorTypes.push('.mcp');
+        }
+
+        if (!allowedConnectorTypes.includes(connector.actionTypeId)) {
           return res.badRequest({
-            body: { message: 'Connector must be a webhook, cases webhook, or MCP' },
+            body: { message: `Connector must be a ${allowedConnectorTypes.join(', ')}` },
           });
         }
         const encryptedClient = encryptedSavedObjects.getClient({

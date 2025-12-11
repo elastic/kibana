@@ -182,7 +182,6 @@ describe('McpConnector', () => {
       // safeDisconnect should be called in finally block
       expect(mockMcpClient.disconnect).not.toHaveBeenCalled(); // Not connected, so disconnect not called
     });
-
   });
 
   describe('listTools', () => {
