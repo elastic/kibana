@@ -9,8 +9,6 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { css } from '@emotion/react';
-import { logicalSizeCSS, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
@@ -37,7 +35,6 @@ export const DashboardListing = ({
   });
 
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
-  const { euiTheme } = useEuiTheme();
 
   const tabs = useMemo(
     () =>
@@ -72,30 +69,15 @@ export const DashboardListing = ({
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
         {children}
-        <div
-          css={css`
-            .visListingTable__typeImage,
-            .visListingTable__typeIcon {
-              margin-right: ${euiTheme.size.s};
-              position: relative;
-              top: -1px;
-            }
-
-            .visListingTable__typeImage {
-              ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
-            }
-          `}
-        >
-          <TabbedTableListView
-            headingId="dashboardListingHeading"
-            title={i18n.translate('dashboardListing.title', {
-              defaultMessage: 'Dashboards',
-            })}
-            tabs={tabs}
-            activeTabId={activeTabId}
-            changeActiveTab={changeActiveTab}
-          />
-        </div>
+        <TabbedTableListView
+          headingId="dashboardListingHeading"
+          title={i18n.translate('dashboardListing.title', {
+            defaultMessage: 'Dashboards',
+          })}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          changeActiveTab={changeActiveTab}
+        />
       </QueryClientProvider>
     </I18nProvider>
   );

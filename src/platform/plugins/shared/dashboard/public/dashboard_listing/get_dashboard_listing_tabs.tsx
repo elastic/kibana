@@ -8,6 +8,8 @@
  */
 
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { logicalSizeCSS, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   TableListTab,
@@ -106,6 +108,7 @@ const VisualizationsTabContent = ({
   initialFilter,
   parentProps,
 }: TabContentProps) => {
+  const { euiTheme } = useEuiTheme();
   const { tableListViewTableProps } = useDashboardListingTable({
     goToDashboard,
     getDashboardUrl,
@@ -116,11 +119,26 @@ const VisualizationsTabContent = ({
 
   return (
     <TableListViewKibanaProvider {...getBaseKibanaProviderProps()}>
-      <TableListViewTable<DashboardListingUserContent>
-        tableCaption={tableListViewTableProps.title}
-        {...tableListViewTableProps}
-        {...parentProps}
-      />
+      <div
+        css={css`
+          .visListingTable__typeImage,
+          .visListingTable__typeIcon {
+            margin-right: ${euiTheme.size.s};
+            position: relative;
+            top: -1px;
+          }
+
+          .visListingTable__typeImage {
+            ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
+          }
+        `}
+      >
+        <TableListViewTable<DashboardListingUserContent>
+          tableCaption={tableListViewTableProps.title}
+          {...tableListViewTableProps}
+          {...parentProps}
+        />
+      </div>
     </TableListViewKibanaProvider>
   );
 };
