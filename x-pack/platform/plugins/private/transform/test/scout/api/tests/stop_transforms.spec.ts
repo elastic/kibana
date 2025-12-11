@@ -26,6 +26,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
   });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
+    // to test stopping transforms we create a slow continuous transform so it doesn't stop automatically
     const config = {
       ...generateTransformConfig(transformId),
       settings: {

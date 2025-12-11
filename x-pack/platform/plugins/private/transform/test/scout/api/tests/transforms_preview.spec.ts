@@ -13,7 +13,9 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from './constants';
 
 function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
-  // Generate config without dest field for preview
+  // passing in an empty string for transform id since we will not use
+  // it as part of the config request schema. Destructuring will
+  // remove the `dest` part of the config.
   const { dest, ...config } = generateTransformConfig('');
   return config as PostTransformsPreviewRequestSchema;
 }

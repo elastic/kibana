@@ -78,6 +78,7 @@ apiTest.describe(
       expect(originalConfig.description).toBeUndefined();
       expect(originalConfig.settings).toMatchObject({});
 
+      // update the transform and assert the response
       const updateResponse = await apiClient.post(
         `internal/transform/transforms/${TRANSFORM_ID}/_update`,
         {

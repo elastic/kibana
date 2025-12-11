@@ -72,6 +72,9 @@ apiTest.describe(
 
       expect(statusCode).toBe(200);
 
+      // The data view id will be returned as a non-deterministic uuid
+      // so we cannot assert the actual id returned. We'll just assert
+      // that a data view has been created a no errors were returned.
       expect(body.dataViewsCreated).toHaveLength(1);
       expect(body.dataViewsErrors).toHaveLength(0);
       expect(body.errors).toHaveLength(0);
