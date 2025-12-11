@@ -6,19 +6,20 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  HEATMAP_GRID_NAME,
-  LENS_HEATMAP_ID,
-  type FormBasedPersistedState,
-  type HeatmapPalette,
-  type HeatmapVisualizationState,
-  type PersistedIndexPatternLayer,
+
+import type {
+  FormBasedPersistedState,
+  HeatmapPalette,
+  HeatmapVisualizationState,
+  PersistedIndexPatternLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
+import { HEATMAP_GRID_NAME, LENS_HEATMAP_ID } from '@kbn/lens-common';
 import type { LegendSize } from '@kbn/chart-expressions-common';
+
 import { getSharedChartAPIToLensState } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueAPIToLensState } from '../../coloring';
-import type { LensAttributes } from '../../../types';
 import { DEFAULT_LAYER_ID } from '../../../types';
 import {
   addLayerColumn,
@@ -124,7 +125,16 @@ function getValueColumns(layer: HeatmapStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: HeatmapState): LensAttributes {
+type HeatmapAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsHeatmap' }
+>;
+
+type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> & {
+  state: Omit<HeatmapAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as HeatmapStateNoESQL);
 
@@ -147,8 +157,6 @@ export function fromAPItoLensState(config: HeatmapState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
