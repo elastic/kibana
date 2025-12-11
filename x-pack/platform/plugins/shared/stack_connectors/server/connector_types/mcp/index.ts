@@ -25,7 +25,6 @@ import {
   type MCPConnectorConfig,
   type MCPConnectorSecrets,
 } from '@kbn/connector-schemas/mcp';
-import type { PostDeleteConnectorHookParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { McpConnector } from './mcp';
 
 export const getMcpConnectorType = (): SubActionConnectorType<
@@ -50,15 +49,6 @@ export const getMcpConnectorType = (): SubActionConnectorType<
     WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
-  postDeleteHook: async ({
-    config,
-    logger,
-  }: PostDeleteConnectorHookParams<MCPConnectorConfig, MCPConnectorSecrets>) => {
-    // Note: The connector instance is short-lived (created per execution),
-    // so we don't need to clean up a persistent connection here.
-    // However, if there were any persistent resources, they would be cleaned up here.
-    logger.debug('MCP connector deleted - no persistent resources to clean up');
-  },
 });
 
 const configValidator = (config: MCPConnectorConfig, validatorServices: ValidatorServices) => {

@@ -7,6 +7,7 @@
 
 import type { MCPConnectorSecrets, MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 
 /**
  * Builds HTTP headers from MCP connector config and secrets based on the authentication type.
@@ -22,7 +23,7 @@ export function buildHeadersFromSecrets(
   const headers: Record<string, string> = {};
 
   // If no authentication is configured, return empty headers
-  if (!config.hasAuth || config.authType === MCPAuthType.None) {
+  if (!config.hasAuth) {
     return headers;
   }
 
@@ -44,8 +45,10 @@ export function buildHeadersFromSecrets(
 
     case MCPAuthType.Basic:
       if (secrets.user && secrets.password) {
-        const credentials = Buffer.from(`${secrets.user}:${secrets.password}`).toString('base64');
-        headers.Authorization = `Basic ${credentials}`;
+        Object.assign(
+          headers,
+          getBasicAuthHeader({ username: secrets.user, password: secrets.password })
+        );
       }
       break;
 

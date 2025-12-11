@@ -12,6 +12,8 @@ import type {
   MCPConnectorConfigSchema,
   MCPConnectorSecretsSchema,
   CallToolRequestSchema,
+  ListToolsRequestSchema,
+  TestConnectorRequestSchema,
 } from '../schemas/v1';
 
 // Connector config and secrets types
@@ -24,3 +26,5 @@ export type Secrets = MCPConnectorSecrets;
 
 // Sub-action parameter types
 export type CallToolParams = z.infer<typeof CallToolRequestSchema>;
+export type ListToolsParams = z.infer<typeof ListToolsRequestSchema>;
+export type TestConnectorParams = z.infer<typeof TestConnectorRequestSchema>;

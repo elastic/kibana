@@ -12,6 +12,7 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from '@kbn/connector-schemas/mcp/schemas/v1';
+import { SUB_ACTION } from '@kbn/connector-schemas/mcp';
 import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { AxiosError } from 'axios';
 import type { z } from '@kbn/zod';
@@ -79,19 +80,19 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
   private registerSubActions() {
     this.registerSubAction({
-      name: 'test',
+      name: SUB_ACTION.INITIALIZE,
       method: 'testConnector',
       schema: TestConnectorRequestSchema,
     });
 
     this.registerSubAction({
-      name: 'listTools',
+      name: SUB_ACTION.LIST_TOOLS,
       method: 'listTools',
       schema: ListToolsRequestSchema,
     });
 
     this.registerSubAction({
-      name: 'callTool',
+      name: SUB_ACTION.CALL_TOOL,
       method: 'callTool',
       schema: CallToolRequestSchema,
     });
@@ -157,7 +158,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   /**
    * Checks if an error is a connection-related error that should trigger retry or cleanup.
    */
-  private isConnectionError(error: unknown): boolean {
+  private isConnectionError(error: unknown): error is Error {
     return (
       error instanceof StreamableHTTPError ||
       error instanceof UnauthorizedError ||
