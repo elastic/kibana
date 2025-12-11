@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AiInsight } from '@kbn/observability-agent-builder';
+import { AiInsight } from '@kbn/ai-insights';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
