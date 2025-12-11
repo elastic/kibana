@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
@@ -43,9 +43,6 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
   const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
-
-  const isSmall = useIsWithinBreakpoints(['xs', 's']);
-  if (isSmall) return null;
 
   return (
     <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
