@@ -107,6 +107,9 @@ export interface AlertsTableComponentProps {
     aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
     groupingLevel?: number
   ) => void;
+
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -404,6 +407,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           signalIndexName={dataViewTitle}
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
           onAggregationsChange={props.onAggregationsChange}
+          additionalToolbarControls={props.additionalToolbarControls}
         />
       );
     },
