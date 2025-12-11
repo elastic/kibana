@@ -7,8 +7,16 @@
 
 import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
 import { createInternalError } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type {
+  Attachment,
+  AttachmentInput,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentFormatContext,
+  AttachmentStateManager,
+} from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -42,6 +50,7 @@ export interface ProcessedConversation {
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
   attachments: ProcessedAttachment[];
+  attachmentStateManager: AttachmentStateManager;
 }
 
 const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
@@ -55,13 +64,18 @@ export const prepareConversation = async ({
   previousRounds,
   nextInput,
   context,
+  conversationAttachments,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
+  conversationAttachments?: VersionedAttachment[];
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService } = context;
   const formatContext = createFormatContext(context);
+
+  const attachmentStateManager = createAttachmentStateManager(conversationAttachments ?? []);
+
   const processedNextInput = await prepareRoundInput({
     input: nextInput,
     attachmentsService,
@@ -98,6 +112,7 @@ export const prepareConversation = async ({
     previousRounds: processedRounds,
     attachmentTypes,
     attachments: allAttachments,
+    attachmentStateManager,
   };
 };
 
