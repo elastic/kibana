@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -25,22 +25,17 @@ import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { LicenseBadge } from './license_badge';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { BasicMetricBadges } from './basic_metric_badges';
+import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 
 export const SearchHomepagePage = () => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { console: consolePlugin, history, searchNavigation, security, cloud },
+    services: { console: consolePlugin, history, searchNavigation, cloud },
   } = useKibana();
-  const [username, setUsername] = useState<string>('');
-  const { isTrial } = useGetLicenseInfo();
 
-  useEffect(() => {
-    const getUser = async () => {
-      const user = await security?.authc.getCurrentUser();
-      setUsername(user?.full_name || '');
-    };
-    getUser();
-  }, [security]);
+  const { isTrial } = useGetLicenseInfo();
+  const { user, isAdmin } = useAuthenticatedUser();
+
   useEffect(() => {
     if (searchNavigation) {
       searchNavigation.breadcrumbs.setSearchBreadCrumbs([
@@ -55,6 +50,16 @@ export const SearchHomepagePage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+
+  const projectManagementUrl = useMemo(() => {
+    if (cloud && cloud.isServerlessEnabled) {
+      const baseUrl = cloud.projectsUrl ?? 'https://cloud.elastic.co/projects/';
+      const dirPath = cloud.serverless.projectId
+        ? `elasticsearch/${cloud.serverless.projectId}`
+        : '';
+      return `${baseUrl}${dirPath}`;
+    }
+  }, [cloud]);
   return (
     <KibanaPageTemplate
       offset={0}
@@ -70,10 +75,10 @@ export const SearchHomepagePage = () => {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="m">
                   <h3>
-                    {username
+                    {user?.full_name
                       ? i18n.translate('xpack.searchHomepage.welcome.title', {
                           defaultMessage: 'Welcome, {username}',
-                          values: { username },
+                          values: { username: user.full_name },
                         })
                       : i18n.translate('xpack.searchHomepage.welcome.title.default', {
                           defaultMessage: 'Welcome',
@@ -86,22 +91,24 @@ export const SearchHomepagePage = () => {
                   <LicenseBadge />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
-                  external
-                  href="#"
-                  color="text"
-                  css={css({
-                    padding: euiTheme.size.s,
-                  })}
-                >
-                  {i18n.translate(
-                    'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
-                    { defaultMessage: 'Manage' }
-                  )}
-                </EuiLink>
-              </EuiFlexItem>
+              {isAdmin && (
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
+                    external
+                    href={projectManagementUrl}
+                    color="text"
+                    css={css({
+                      padding: euiTheme.size.s,
+                    })}
+                  >
+                    {i18n.translate(
+                      'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
+                      { defaultMessage: 'Manage' }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>

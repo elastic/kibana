@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface ResourceCardProps {
   title: string;
@@ -40,10 +41,10 @@ const CLOUD_RESOURCE_CARDS = [
       defaultMessage:
         'Get a detailed breakdown of your organization’s cloud resource usage across your deployments.',
     }),
-    actionHref: 'http://cloud.elastic.co',
     actionText: i18n.translate('xpack.searchHomepage.cloudResources.billing.actionText', {
       defaultMessage: 'Go to Billing',
     }),
+    type: 'billing' as const,
   },
   {
     icon: (assetBasePath: string) => `${assetBasePath}/search_analytics.svg`,
@@ -54,10 +55,10 @@ const CLOUD_RESOURCE_CARDS = [
       defaultMessage:
         'Enable AutoOps for performance recommendations, resource utilization, and cost insights.',
     }),
-    actionHref: 'http://cloud.elastic.co',
     actionText: i18n.translate('xpack.searchHomepage.cloudResources.autoops.actionText', {
       defaultMessage: 'AutoOps',
     }),
+    type: 'autoops' as const,
   },
 ];
 
@@ -116,6 +117,17 @@ const ResourceCard = ({ title, icon, description, actionHref, actionText }: Reso
 };
 
 export const CloudResources = () => {
+  const {
+    services: { cloud },
+  } = useKibana();
+  const [billingUrl, setBillingUrl] = useState<string>('');
+  useEffect(() => {
+    cloud?.getPrivilegedUrls().then((urls) => {
+      if (urls.billingUrl) {
+        setBillingUrl(urls.billingUrl);
+      }
+    });
+  }, [cloud]);
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -135,7 +147,7 @@ export const CloudResources = () => {
                 title={card.title}
                 icon={card.icon}
                 description={card.description}
-                actionHref={card.actionHref}
+                actionHref={card.type === 'billing' ? billingUrl : ''}
                 actionText={card.actionText}
               />
             </EuiFlexItem>
