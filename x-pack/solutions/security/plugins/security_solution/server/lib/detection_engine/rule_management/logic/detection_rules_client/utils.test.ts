@@ -118,7 +118,9 @@ describe('utils', () => {
   describe('validReadAuthzFields', () => {
     it('should accept valid fields', () => {
       expect(
-        Object.keys({ exceptions_list: 'test value' }).every((key) => isKeyUpdateableWithReadPermission(key))
+        Object.keys({ exceptions_list: 'test value' }).every((key) =>
+          isKeyUpdateableWithReadPermission(key)
+        )
       ).toBe(true);
     });
   });

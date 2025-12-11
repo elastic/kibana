@@ -49,23 +49,6 @@ export default function ({ getService }: FtrProviderContext) {
         const features = Object.fromEntries(
           Object.entries(body.features).filter(([key]) => compositeFeatureIds.includes(key))
         );
-        /**
-         * if the following snapshot needs updating, you can
-         * pass the -u command AFTER modifying
-         * node_modules/jest-snapshot/build/InlineSnapshots.js
-         * and adding the following code to the beginning of
-         * the function `saveSnapshotsForFile`
-         * // HACK: Fix broken inline snapshot path for 'authorization.ts'
-         if (sourceFilePath === 'authorization.ts') {
-           const path = require('path');
-           sourceFilePath = path.resolve(
-             __dirname,
-             '../../../x-pack/solutions/security/test/serverless/api_integration/test_suites/platform_security/authorization.ts'
-           );
-           console.warn(':warning: HACK: Overriding snapshot path to:', sourceFilePath);
-         }
-           ref: search "authorization.ts snapshot" in slack
-         */
         expectSnapshot(features).toMatchInline(`
           Object {
             "reporting": Object {

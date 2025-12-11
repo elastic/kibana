@@ -180,7 +180,7 @@ export const applyPatchRuleWithReadPrivileges = async (
   const nextRule = { ...rulePatch, rule_source };
 
   const operations = Object.keys(nextRule).map((field) => {
-    const camelCasedField = camelCase(field) as ValidReadAuthEditFields;
+    const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
     return {
       field: camelCasedField,
       operation: 'set' as const,
