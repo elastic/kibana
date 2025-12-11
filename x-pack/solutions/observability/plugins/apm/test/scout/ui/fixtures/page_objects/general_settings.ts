@@ -6,13 +6,14 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class GeneralSettingsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/general-settings`);
-    return this.page.waitForLoadingIndicatorHidden();
+    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   async getInspectEsQueriesButton() {

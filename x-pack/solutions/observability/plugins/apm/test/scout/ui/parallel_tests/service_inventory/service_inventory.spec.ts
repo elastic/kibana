@@ -32,7 +32,7 @@ test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('shows a list of environments', async () => {
       const environmentEntrySelector = page.locator('td:has-text("production")');
-      await expect(environmentEntrySelector).toHaveCount(3);
+      await expect(environmentEntrySelector).toHaveCount(5);
     });
   });
 

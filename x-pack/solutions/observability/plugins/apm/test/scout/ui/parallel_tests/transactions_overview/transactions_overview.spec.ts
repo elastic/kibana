@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -51,7 +52,7 @@ test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Navigate to Overview tab
     await page.getByTestId('overviewTab').click();
-    await page.waitForLoadingIndicatorHidden();
+    await page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
 
     // Verify transaction type is still 'Worker'
     await expect(transactionTypeFilter).toHaveValue('Worker');

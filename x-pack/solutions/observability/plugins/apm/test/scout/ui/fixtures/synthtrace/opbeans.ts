@@ -62,6 +62,14 @@ export function opbeans({
     })
     .instance('service-go-prod-1');
 
+  const serviceNode = apm
+    .service({
+      name: 'service-node',
+      environment: 'production',
+      agentName: 'nodejs',
+    })
+    .instance('service-node-prod-1');
+
   return range
     .interval('1s')
     .rate(1)
@@ -110,7 +118,7 @@ export function opbeans({
           .duration(500)
           .success()
       ),
-      opbeansNode
+      serviceNode
         .transaction({
           transactionName: 'GET /api/users',
           transactionType: 'request',
@@ -118,7 +126,7 @@ export function opbeans({
         .timestamp(timestamp)
         .duration(500)
         .success(),
-      opbeansNode
+      serviceNode
         .transaction({
           transactionName: 'Background job',
           transactionType: 'Worker',

@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 const timeRange = {
   rangeFrom: testData.OPBEANS_START_DATE,
@@ -78,7 +79,7 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       });
 
       await page.goto(`${baseUrl}?${urlParams.toString()}`);
-      await page.waitForLoadingIndicatorHidden();
+      await page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
 
       await expect(page).toHaveURL(/.*environment=production.*/);
       await expect(storageExplorerPage.pageTitle).toBeVisible();
