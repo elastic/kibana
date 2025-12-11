@@ -301,7 +301,7 @@ function getRelatedOperations(
         if (operation && operation.operationId) {
           operations.push({
             path: url.path,
-            method,
+            method: method.toUpperCase(),
             operation,
           });
         }
