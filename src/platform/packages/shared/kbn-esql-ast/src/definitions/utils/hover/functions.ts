@@ -21,11 +21,8 @@ import { getMatchingSignatures } from '../expressions';
  * - "boolean | date | double"
  * - "boolean | date | double|…+2 more" (when remainingCount > 1)
  */
-function formatTypesList(
-  types: Set<string>,
-  maxTypesToShow?: number,
-  separator: string = '|'
-): string {
+function formatTypesList(types: Set<string>, maxTypesToShow?: number): string {
+  const typeSeparator = '|';
   const sortedTypes = Array.from(types).sort();
 
   if (maxTypesToShow !== undefined && sortedTypes.length > maxTypesToShow) {
@@ -33,20 +30,20 @@ function formatTypesList(
 
     // If only one type is remaining, show it instead of "+1 more"
     if (remainingCount === 1) {
-      return sortedTypes.join(separator);
+      return sortedTypes.join(typeSeparator);
     }
 
     const displayedTypes = sortedTypes.slice(0, maxTypesToShow);
-    return `${displayedTypes.join(separator)}${i18n.translate(
+    return `${displayedTypes.join(typeSeparator)}${i18n.translate(
       'kbn-esql-ast.esql.hover.functions.moreTypes',
       {
-        defaultMessage: `{separator}…+{remainingCount} more`,
-        values: { remainingCount, separator },
+        defaultMessage: `{typeSeparator}…+{remainingCount} more`,
+        values: { remainingCount, typeSeparator },
       }
     )}`;
   }
 
-  return sortedTypes.join(separator);
+  return sortedTypes.join(typeSeparator);
 }
 
 /**
@@ -69,7 +66,6 @@ export function getFormattedFunctionSignature(
   functionDef: FunctionDefinition,
   fnNode?: ESQLFunction,
   columns?: Map<string, ESQLColumnData>,
-  typeSeparator: string = ' | ',
   maxTypesToShow?: number
 ): string {
   if (!functionDef.signatures || functionDef.signatures.length === 0) {
@@ -116,7 +112,7 @@ export function getFormattedFunctionSignature(
   // Build parameter strings with combined types
   const formattedParams = bestSignature.params.map((param) => {
     const types = parameterTypeMap.get(param.name)!;
-    const typesList = formatTypesList(types, maxTypesToShow, typeSeparator);
+    const typesList = formatTypesList(types, maxTypesToShow);
 
     // A parameter is optional if:
     // 1. ANY signature explicitly marks it as optional, OR
@@ -130,7 +126,7 @@ export function getFormattedFunctionSignature(
   });
 
   // Format return types with the same limiting logic
-  const returnTypesList = formatTypesList(returnTypes, maxTypesToShow, typeSeparator);
+  const returnTypesList = formatTypesList(returnTypes, maxTypesToShow);
   if (formattedParams.length > 0) {
     const paramsString = formattedParams.join(',  \n  ');
     return `${functionDef.name.toUpperCase()}(

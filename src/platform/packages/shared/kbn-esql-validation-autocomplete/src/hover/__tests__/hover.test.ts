@@ -73,27 +73,27 @@ describe('getHoverItem()', () => {
         getFunctionDefinition('round')!.description,
         `\`\`\`none
 ROUND(
-  number:double | integer | long | unsigned_long,  
-  decimals?:integer | long
-): double | integer | long | unsigned_long
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval round(numberField,)`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
 ROUND(
-  number:double | integer | long | unsigned_long,  
-  decimals?:integer | long
-): double | integer | long | unsigned_long
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval round(numberField, )`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
 ROUND(
-  number:double | integer | long | unsigned_long,  
-  decimals?:integer | long
-): double | integer | long | unsigned_long
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
@@ -101,9 +101,9 @@ ROUND(
         getFunctionDefinition('round')!.description,
         `\`\`\`none
 ROUND(
-  number:double | integer | long | unsigned_long,  
-  decimals?:integer | long
-): double | integer | long | unsigned_long
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
@@ -114,9 +114,9 @@ ROUND(
         getFunctionDefinition('round')!.description,
         `\`\`\`none
 ROUND(
-  number:double | integer | long | unsigned_long,  
-  decimals?:integer | long
-): double | integer | long | unsigned_long
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(

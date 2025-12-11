@@ -93,7 +93,6 @@ export async function getSignatureHelp(
     fnDefinition,
     fnNode,
     columnsMap,
-    '|',
     MAX_PARAM_TYPES_TO_SHOW
   );
   const parameters: string[] = getParameterList(formattedSignature);
