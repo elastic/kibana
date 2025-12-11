@@ -25,11 +25,18 @@ export const SecondaryMenuSectionComponent = ({
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
-  const wrapperStyles = css`
+  const secondaryMenuWrapperStyles = css`
     padding: ${euiTheme.size.m};
+    position: relative;
 
-    &:not(:last-child) {
-      border-bottom: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: ${euiTheme.size.m};
+      right: ${euiTheme.size.m};
+      height: ${euiTheme.border.width.thin};
+      background-color: ${euiTheme.colors.borderBaseSubdued};
     }
   `;
 
@@ -52,7 +59,7 @@ export const SecondaryMenuSectionComponent = ({
   `;
 
   return (
-    <div css={wrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
+    <div css={secondaryMenuWrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
       {label && (
         <EuiText id={sectionId} css={labelStyles} component="span">
           {label}
