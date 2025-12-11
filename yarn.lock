@@ -4554,6 +4554,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-agent-confirmation-modal@link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -7735,6 +7739,10 @@
   uid ""
 
 "@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
+  version "0.0.0"
+  uid ""
+
+"@kbn/otel-demo@link:src/platform/packages/shared/kbn-otel-demo":
   version "0.0.0"
   uid ""
 

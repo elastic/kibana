@@ -14,7 +14,7 @@ import * as i18n from './translations';
 interface CopyExportQueryProps {
   onCopied: () => void;
 }
-export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) => {
+export const CopyExportedSplunkQuery = React.memo<CopyExportQueryProps>(({ onCopied }) => {
   const onClick: React.MouseEventHandler = useCallback(
     (ev) => {
       // The only button inside the element is the "copy" button.
@@ -40,7 +40,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        {/* The click event is also dispatched when using the keyboard actions (space or enter) for "copy" button. 
+        {/* The click event is also dispatched when using the keyboard actions (space or enter) for "copy" button.
         No need to use keyboard specific events, disabling the a11y lint rule:*/}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div onClick={onClick}>
@@ -62,4 +62,4 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
     </EuiFlexGroup>
   );
 });
-CopyExportQuery.displayName = 'CopyExportQuery';
+CopyExportedSplunkQuery.displayName = 'CopyExportedSplunkQuery';
