@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { useState } from 'react';
 import {
   EuiAccordion,
-  EuiButtonIcon,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
-  useGeneratedHtmlId,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { ToolCallStep } from '@kbn/onechat-common';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { ToolCallStep } from '@kbn/onechat-common';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { codeblockStyles } from './codeblock.styles';
 
 const labels = {
@@ -39,28 +38,20 @@ const labels = {
 interface AccordionProps {
   children: ReactNode;
   accordionContent: ToolCallStep['params'];
+  textColor?: string;
 }
-const Accordion = ({ children, accordionContent }: AccordionProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+const Accordion = ({ children, accordionContent, textColor }: AccordionProps) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionId',
   });
   return (
     <EuiAccordion
+      css={css`
+        color: ${textColor};
+      `}
       id={accordionId}
-      arrowDisplay="none"
+      arrowDisplay="right"
       buttonContent={children}
-      extraAction={
-        <EuiButtonIcon
-          iconType={isOpen ? 'eyeClosed' : 'eye'}
-          aria-label={isOpen ? labels.close : labels.open}
-          onClick={() => setIsOpen(!isOpen)}
-          color="text"
-        />
-      }
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={(open) => setIsOpen(open)}
     >
       <>
         <EuiSpacer size="m" />
@@ -84,11 +75,13 @@ interface ThinkingItemLayoutProps {
   children: ReactNode;
   icon?: ReactNode;
   accordionContent?: ToolCallStep['params']; // potentially to be extended in the future to accomodate other types of content
+  textColor?: string;
 }
 export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
   children,
   icon,
   accordionContent,
+  textColor,
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -110,9 +103,18 @@ export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
       )}
       <EuiFlexItem>
         {accordionContent ? (
-          <Accordion accordionContent={accordionContent}>{children}</Accordion>
+          <Accordion textColor={textColor} accordionContent={accordionContent}>
+            {children}
+          </Accordion>
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+          <EuiFlexGroup
+            css={css`
+              color: ${textColor};
+            `}
+            direction="column"
+            gutterSize="l"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>{children}</EuiFlexItem>
           </EuiFlexGroup>
         )}
