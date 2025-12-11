@@ -34,6 +34,10 @@ const ALL_SPECS_FILE = Path.resolve(
 );
 
 const CODEOWNERS_FILE = Path.resolve(REPO_ROOT, '.github/CODEOWNERS');
+const DOCS_DIR = Path.resolve(REPO_ROOT, 'docs/reference/connectors-kibana');
+const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/elastic-connectors-list.md');
+const TOC_FILE = Path.resolve(REPO_ROOT, 'docs/reference/toc.yml');
+
 const ULTIMATE_PRIORITY_RULES_COMMENT = `
 ####
 ## These rules are always last so they take ultimate priority over everything else
@@ -49,7 +53,8 @@ const GENERATED_END = `
 
 export const ConnectorCommand: GenerateCommand = {
   name: 'connector',
-  description: 'Scaffold a new connector spec folder and update exports, icons map, and CODEOWNERS',
+  description:
+    'Scaffold a new connector spec folder with tests, docs, and update exports, icons map, snippets, TOC, and CODEOWNERS',
   usage:
     'node scripts/generate connector [connectorName] --id ".connector_id" --owner "@elastic/team-handle"',
   flags: {
@@ -121,7 +126,13 @@ export const ConnectorCommand: GenerateCommand = {
     }
 
     const connectorDir = Path.resolve(CONNECTORS_ROOT, connectorName);
+    const kebabName = connectorName.replace(/_/g, '-');
     const iconDir = Path.resolve(connectorDir, 'icon');
+
+    const displayName = connectorName.replace(/[-_]/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+    const className = connectorName
+      .replace(/[-_](\w)/g, (_, c) => (c ? c.toUpperCase() : ''))
+      .replace(/^\w/, (c) => c.toUpperCase());
 
     // create folder structure
     await Fsp.mkdir(iconDir, { recursive: true });
@@ -132,13 +143,25 @@ export const ConnectorCommand: GenerateCommand = {
       connector: {
         name: connectorName,
         id: connectorId,
-        displayName: connectorName.replace(/[-_]/g, ' ').replace(/^\w/, (c) => c.toUpperCase()),
-        className: connectorName
-          .replace(/[-_](\w)/g, (_, c) => (c ? c.toUpperCase() : ''))
-          .replace(/^\w/, (c) => c.toUpperCase()),
+        displayName,
+        className,
       },
     });
     log.info('Wrote', Path.relative(REPO_ROOT, specIndexPath));
+
+    // write a test file via template
+    const testFilePath = Path.resolve(connectorDir, `${connectorName}.test.ts`);
+    await render.toFile(
+      Path.resolve(CONNECTOR_TEMPLATE_DIR, 'connector.test.ts.ejs'),
+      testFilePath,
+      {
+        connector: {
+          name: connectorName,
+          className,
+        },
+      }
+    );
+    log.info('Wrote', Path.relative(REPO_ROOT, testFilePath));
 
     // write icon component placeholder via template
     const iconIndexPath = Path.resolve(iconDir, 'index.tsx');
@@ -146,6 +169,17 @@ export const ConnectorCommand: GenerateCommand = {
       connector: { name: connectorName },
     });
     log.info('Wrote', Path.relative(REPO_ROOT, iconIndexPath));
+
+    // write documentation file via template
+    const docsFilePath = Path.resolve(DOCS_DIR, `${kebabName}-action-type.md`);
+    await render.toFile(Path.resolve(CONNECTOR_TEMPLATE_DIR, 'docs.md.ejs'), docsFilePath, {
+      connector: {
+        name: connectorName,
+        displayName,
+        kebabName,
+      },
+    });
+    log.info('Wrote', Path.relative(REPO_ROOT, docsFilePath));
 
     // update connector_icons_map.ts
     {
@@ -190,7 +224,7 @@ export const ConnectorCommand: GenerateCommand = {
     }
 
     // append to CODEOWNERS: insert within the overrides section (below GENERATED_END)
-    // Prefer placing after the last "kbn-connector-specs" rule in the overrides section
+    // Each connector gets its own line to allow different team ownership
     {
       let content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
       const line = `src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
@@ -230,6 +264,80 @@ export const ConnectorCommand: GenerateCommand = {
       }
     }
 
+    // update snippet file (elastic-connectors-list.md)
+    {
+      const content = await Fsp.readFile(SNIPPET_FILE, 'utf8');
+      const newEntry = `* [${displayName}](/reference/connectors-kibana/${kebabName}-action-type.md): TODO: Add brief description.`;
+
+      if (content.includes(`${kebabName}-action-type.md`)) {
+        log.info('Snippet file already references', kebabName);
+      } else {
+        // Insert in alphabetical order
+        const lines = content.split('\n').filter((l) => l.trim());
+        let inserted = false;
+        const newLines = [];
+
+        for (const line of lines) {
+          if (!inserted && line.startsWith('*')) {
+            const match = line.match(/\[([^\]]+)\]/);
+            if (match && match[1] > displayName) {
+              newLines.push(newEntry);
+              inserted = true;
+            }
+          }
+          newLines.push(line);
+        }
+
+        if (!inserted) {
+          newLines.push(newEntry);
+        }
+
+        await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + '\n');
+        log.info('Updated', Path.relative(REPO_ROOT, SNIPPET_FILE));
+      }
+    }
+
+    // update toc.yml (add to elastic-connectors section)
+    {
+      const content = await Fsp.readFile(TOC_FILE, 'utf8');
+      const docEntry = `connectors-kibana/${kebabName}-action-type.md`;
+
+      if (content.includes(docEntry)) {
+        log.info('TOC already references', kebabName);
+      } else {
+        const lines = content.split('\n');
+        let insertAt = -1;
+
+        // Find the elastic-connectors section and its children
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].includes('file: connectors-kibana/elastic-connectors.md')) {
+            // Found the section, now find the last child
+            for (let j = i + 1; j < lines.length; j++) {
+              if (lines[j].trim().startsWith('- file: connectors-kibana/')) {
+                insertAt = j;
+              } else if (
+                lines[j].trim().startsWith('- file:') &&
+                !lines[j].includes('connectors-kibana/')
+              ) {
+                // We've left the connectors section
+                break;
+              }
+            }
+            break;
+          }
+        }
+
+        if (insertAt !== -1) {
+          const indentation = lines[insertAt].match(/^(\s*)/)?.[1] || '          ';
+          lines.splice(insertAt + 1, 0, `${indentation}- file: ${docEntry}`);
+          await Fsp.writeFile(TOC_FILE, lines.join('\n'));
+          log.info('Updated', Path.relative(REPO_ROOT, TOC_FILE));
+        } else {
+          log.warning('Could not find appropriate location in TOC to insert connector doc');
+        }
+      }
+    }
+
     // run eslint --fix on the generated connector folder and updated spec/icon maps
     {
       log.info('Linting generated connector files');
@@ -245,5 +353,12 @@ export const ConnectorCommand: GenerateCommand = {
     }
 
     log.success(`Connector scaffolded at ${Path.relative(REPO_ROOT, connectorDir)}`);
+    log.success(`Documentation created at ${Path.relative(REPO_ROOT, docsFilePath)}`);
+    log.info(`Remember to:`);
+    log.info(`  - Update the connector description in ${Path.relative(REPO_ROOT, SNIPPET_FILE)}`);
+    log.info(`  - Implement actions in ${Path.relative(REPO_ROOT, specIndexPath)}`);
+    log.info(`  - Add tests for each action in ${Path.relative(REPO_ROOT, testFilePath)}`);
+    log.info(`  - Complete the documentation in ${Path.relative(REPO_ROOT, docsFilePath)}`);
+    log.info(`  - Add a custom icon in ${Path.relative(REPO_ROOT, iconDir)}`);
   },
 };
