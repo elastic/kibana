@@ -507,9 +507,15 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await expect(savedObjectService.getIntegration(integrationId)).rejects.toThrow();
 
-        await expect(savedObjectService.getDataStream('test-cascade-ds-1')).rejects.toThrow();
-        await expect(savedObjectService.getDataStream('test-cascade-ds-2')).rejects.toThrow();
-        await expect(savedObjectService.getDataStream('test-cascade-ds-3')).rejects.toThrow();
+        await expect(
+          savedObjectService.getDataStream('test-cascade-ds-1', integrationId)
+        ).rejects.toThrow();
+        await expect(
+          savedObjectService.getDataStream('test-cascade-ds-2', integrationId)
+        ).rejects.toThrow();
+        await expect(
+          savedObjectService.getDataStream('test-cascade-ds-3', integrationId)
+        ).rejects.toThrow();
       });
 
       it('should throw error when deleting non-existent integration', async () => {
@@ -554,14 +560,17 @@ describe('AutomaticImportSavedObjectService', () => {
           authenticatedUser
         );
 
-        expect(result.id).toBe('test-data-stream-1');
+        expect(result.id).toBe('test-ds-integration-1-test-data-stream-1');
         expect(result.attributes.data_stream_id).toBe('test-data-stream-1');
         expect(result.attributes.integration_id).toBe('test-ds-integration-1');
         expect(result.attributes.created_by).toBe('test-user');
         expect(result.attributes.metadata?.created_at).toBeDefined();
         expect(result.attributes.metadata?.version).toBe('0.0.0');
 
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-data-stream-1');
+        await savedObjectsClient.delete(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          'test-ds-integration-1-test-data-stream-1'
+        );
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-ds-integration-1');
       });
 
@@ -616,7 +625,10 @@ describe('AutomaticImportSavedObjectService', () => {
         ).rejects.toThrow('Data stream duplicate-data-stream already exists');
 
         // Cleanup
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'duplicate-data-stream');
+        await savedObjectsClient.delete(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          'duplicate-ds-integration-duplicate-data-stream'
+        );
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'duplicate-ds-integration');
       });
     });
@@ -643,24 +655,30 @@ describe('AutomaticImportSavedObjectService', () => {
         };
         await savedObjectService.insertDataStream(dataStreamParams, authenticatedUser);
 
-        const result = await savedObjectService.getDataStream('test-get-data-stream');
+        const result = await savedObjectService.getDataStream(
+          'test-get-data-stream',
+          'get-ds-integration'
+        );
 
-        expect(result.id).toBe('test-get-data-stream');
+        expect(result.id).toBe('get-ds-integration-test-get-data-stream');
         expect(result.attributes.data_stream_id).toBe('test-get-data-stream');
         expect(result.attributes.integration_id).toBe('get-ds-integration');
         expect(result.attributes.metadata?.sample_count).toBe(200);
 
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-get-data-stream');
+        await savedObjectsClient.delete(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          'get-ds-integration-test-get-data-stream'
+        );
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'get-ds-integration');
       });
 
       it('should throw error when data stream does not exist', async () => {
         await expect(
-          savedObjectService.getDataStream('non-existent-data-stream')
+          savedObjectService.getDataStream('non-existent-data-stream', 'non-existent-integration')
         ).rejects.toThrow();
       });
 
-      it('should prevent data streams with same ID in different integrations', async () => {
+      it('should handle data streams with same ID in different integrations', async () => {
         const sharedDataStreamId = 'logs';
 
         // Create two different integrations
@@ -678,7 +696,7 @@ describe('AutomaticImportSavedObjectService', () => {
         await savedObjectService.insertIntegration(integration1Params, authenticatedUser);
         await savedObjectService.insertIntegration(integration2Params, authenticatedUser);
 
-        // Create data stream with ID in integration-1
+        // Create data stream with same ID in integration-1
         const dataStream1Params: DataStreamParams = {
           ...mockDataStreamParams,
           integrationId: 'integration-1',
@@ -692,7 +710,7 @@ describe('AutomaticImportSavedObjectService', () => {
           metadata: { sampleCount: 100, createdAt: new Date().toISOString() },
         };
 
-        // Create data stream with same ID in integration-2 - should fail
+        // Create data stream with same ID in integration-2
         const dataStream2Params: DataStreamParams = {
           ...mockDataStreamParams,
           integrationId: 'integration-2',
@@ -707,28 +725,38 @@ describe('AutomaticImportSavedObjectService', () => {
         };
 
         await savedObjectService.insertDataStream(dataStream1Params, authenticatedUser);
+        await savedObjectService.insertDataStream(dataStream2Params, authenticatedUser);
 
-        // Second creation with same ID should fail
-        await expect(
-          savedObjectService.insertDataStream(dataStream2Params, authenticatedUser)
-        ).rejects.toThrow('Data stream logs already exists');
-
-        // Verify only one data stream exists
-        const result1 = await savedObjectService.getDataStream(sharedDataStreamId);
-        expect(result1.id).toBe(sharedDataStreamId);
-        expect(result1.attributes.data_stream_id).toBe(sharedDataStreamId);
+        // Retrieve both data streams and verify they're different
+        const result1 = await savedObjectService.getDataStream(sharedDataStreamId, 'integration-1');
+        expect(result1.id).toBe('integration-1-logs');
         expect(result1.attributes.integration_id).toBe('integration-1');
+        expect(result1.attributes.data_stream_id).toBe(sharedDataStreamId);
+        expect(result1.attributes.title).toBe('Logs from Integration 1');
+        expect(result1.attributes.metadata?.sample_count).toBe(100);
+        expect(result1.attributes.job_info?.status).toBe(TASK_STATUSES.pending);
 
-        // Get all data streams for each integration
+        const result2 = await savedObjectService.getDataStream(sharedDataStreamId, 'integration-2');
+        expect(result2.id).toBe('integration-2-logs');
+        expect(result2.attributes.integration_id).toBe('integration-2');
+        expect(result2.attributes.data_stream_id).toBe(sharedDataStreamId);
+        expect(result2.attributes.title).toBe('Logs from Integration 2');
+
+        // Get all data streams for each integration to verify isolation
         const int1DataStreams = await savedObjectService.getAllDataStreams('integration-1');
         const int2DataStreams = await savedObjectService.getAllDataStreams('integration-2');
 
         expect(int1DataStreams).toHaveLength(1);
         expect(int1DataStreams[0].data_stream_id).toBe(sharedDataStreamId);
-        expect(int2DataStreams).toHaveLength(0);
+        expect(int1DataStreams[0].title).toBe('Logs from Integration 1');
+
+        expect(int2DataStreams).toHaveLength(1);
+        expect(int2DataStreams[0].data_stream_id).toBe(sharedDataStreamId);
+        expect(int2DataStreams[0].title).toBe('Logs from Integration 2');
 
         // Cleanup
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, sharedDataStreamId);
+        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'integration-1-logs');
+        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'integration-2-logs');
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'integration-1');
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'integration-2');
       });
@@ -774,10 +802,10 @@ describe('AutomaticImportSavedObjectService', () => {
           expect(ids).toContain('test-getall-ds-2');
         } finally {
           await savedObjectsClient
-            .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-1')
+            .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'getall-ds-integration-test-getall-ds-1')
             .catch(() => {});
           await savedObjectsClient
-            .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-2')
+            .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'getall-ds-integration-test-getall-ds-2')
             .catch(() => {});
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'getall-ds-integration')
@@ -833,12 +861,18 @@ describe('AutomaticImportSavedObjectService', () => {
           expect(obj.attributes.integration_id).toBe(integrationId);
         });
         const ids = result.saved_objects.map((obj) => obj.id);
-        expect(ids).toContain('test-find-ds-1');
-        expect(ids).toContain('test-find-ds-2');
+        expect(ids).toContain(`${integrationId}-test-find-ds-1`);
+        expect(ids).toContain(`${integrationId}-test-find-ds-2`);
 
         // Cleanup
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-find-ds-1');
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-find-ds-2');
+        await savedObjectsClient.delete(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          `${integrationId}-test-find-ds-1`
+        );
+        await savedObjectsClient.delete(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          `${integrationId}-test-find-ds-2`
+        );
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
       });
 
@@ -875,8 +909,10 @@ describe('AutomaticImportSavedObjectService', () => {
         };
         await savedObjectService.insertDataStream(dataStreamParams, authenticatedUser);
 
-        await savedObjectService.deleteDataStream('test-delete-data-stream');
-        await expect(savedObjectService.getDataStream('test-delete-data-stream')).rejects.toThrow();
+        await savedObjectService.deleteDataStream(integrationId, 'test-delete-data-stream');
+        await expect(
+          savedObjectService.getDataStream('test-delete-data-stream', integrationId)
+        ).rejects.toThrow();
 
         // Cleanup
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
@@ -920,19 +956,25 @@ describe('AutomaticImportSavedObjectService', () => {
         );
 
         // Delete one data stream
-        await savedObjectService.deleteDataStream('test-delete-ds-2');
+        await savedObjectService.deleteDataStream(integrationId, 'test-delete-ds-2');
 
         // Delete another data stream
-        await savedObjectService.deleteDataStream('test-delete-ds-1');
+        await savedObjectService.deleteDataStream(integrationId, 'test-delete-ds-1');
 
         // Cleanup
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-delete-ds-3');
+        await savedObjectsClient.delete(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          `${integrationId}-test-delete-ds-3`
+        );
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
       });
 
       it('should throw error when deleting non-existent data stream', async () => {
         await expect(
-          savedObjectService.deleteDataStream('non-existent-data-stream')
+          savedObjectService.deleteDataStream(
+            'non-existent-integration',
+            'non-existent-data-stream'
+          )
         ).rejects.toThrow();
       });
     });
@@ -999,7 +1041,7 @@ describe('AutomaticImportSavedObjectService', () => {
         authenticatedUser
       );
 
-      const dataStream1 = await savedObjectService.getDataStream('workflow-ds-1');
+      const dataStream1 = await savedObjectService.getDataStream('workflow-ds-1', integrationId);
       expect(dataStream1.attributes.data_stream_id).toBe('workflow-ds-1');
 
       const dataStreams = await savedObjectService.findAllDataStreamsByIntegrationId(integrationId);

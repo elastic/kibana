@@ -16,7 +16,6 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import {
@@ -29,6 +28,7 @@ import {
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 import { useInvalidateFetchRuleByIdQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_rule_by_id_query';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../use_endpoint_exceptions_capability';
 
 interface ReferenceModalState {
@@ -54,13 +54,13 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
+  const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges;
 
-  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
     exceptionListId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
       ? canWriteEndpointExceptions
-      : canUserCRUD;
+      : canEditRules;
 
   const [isLoading, setIsLoading] = useState<boolean>();
   const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
@@ -112,11 +112,11 @@ export const useListDetailsView = (exceptionListId: string) => {
   const initializeListRules = useCallback(
     async (result: Awaited<ReturnType<typeof getListById>>) => {
       if (result) {
-        const listRules = await getListRules(result.list_id);
+        const listRules = canReadRules ? await getListRules(result.list_id) : [];
         setLinkedRules(listRules);
       }
     },
-    []
+    [canReadRules]
   );
 
   const initializeList = useCallback(async () => {
@@ -409,7 +409,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   // #endregion
 
   return {
-    isLoading: isLoading || userInfoLoading,
+    isLoading,
     invalidListId,
     isReadOnly: !canUserWriteCurrentList,
     list,

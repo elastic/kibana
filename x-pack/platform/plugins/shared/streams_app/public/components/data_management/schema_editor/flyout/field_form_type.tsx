@@ -15,17 +15,21 @@ import type { FieldTypeOption } from '../constants';
 import { EMPTY_CONTENT, FIELD_TYPE_MAP } from '../constants';
 import type { MappedSchemaField, SchemaField } from '../types';
 
+interface FieldFormTypeProps {
+  field: SchemaField;
+  isEditing: boolean;
+  onTypeChange: FieldTypeSelectorProps['onChange'];
+  streamType: 'classic' | 'wired';
+  enableGeoPointSuggestions?: boolean;
+}
+
 export const FieldFormType = ({
   field,
   isEditing,
   onTypeChange,
   streamType,
-}: {
-  field: SchemaField;
-  isEditing: boolean;
-  onTypeChange: FieldTypeSelectorProps['onChange'];
-  streamType: 'classic' | 'wired';
-}) => {
+  enableGeoPointSuggestions,
+}: FieldFormTypeProps) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
   const ecsFieldName = getRegularEcsField(field.name);
@@ -44,11 +48,12 @@ export const FieldFormType = ({
       recommendation !== undefined &&
       // Supported type
       recommendation in FIELD_TYPE_MAP &&
+      !(enableGeoPointSuggestions === false && recommendation === 'geo_point') &&
       !field.type
     ) {
       onTypeChange(recommendation as MappedSchemaField['type']);
     }
-  }, [field, loading, recommendation, onTypeChange]);
+  }, [enableGeoPointSuggestions, field, loading, recommendation, onTypeChange]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -59,6 +64,7 @@ export const FieldFormType = ({
             onChange={onTypeChange}
             isLoading={loading}
             streamType={streamType}
+            enableGeoPointSuggestions={enableGeoPointSuggestions}
           />
         ) : field.type ? (
           <FieldType type={field.type} />
@@ -78,6 +84,7 @@ interface FieldTypeSelectorProps {
   onChange: (value: FieldTypeOption) => void;
   value?: FieldTypeOption;
   streamType: 'classic' | 'wired';
+  enableGeoPointSuggestions?: boolean;
 }
 
 export const FieldTypeSelector = ({
@@ -85,12 +92,16 @@ export const FieldTypeSelector = ({
   onChange,
   isLoading = false,
   streamType,
+  enableGeoPointSuggestions,
 }: FieldTypeSelectorProps) => {
   const typeSelectorOptions = useMemo(() => {
     return (Object.keys(FIELD_TYPE_MAP) as FieldTypeOption[])
       .filter((optionKey) => {
         if (FIELD_TYPE_MAP[optionKey].readonly) return false;
-        if (optionKey === 'geo_point' && streamType !== 'classic') return false;
+        if (optionKey === 'geo_point') {
+          if (streamType !== 'classic') return false;
+          if (enableGeoPointSuggestions === false) return false;
+        }
         return true;
       })
       .map((optionKey) => ({
@@ -98,7 +109,7 @@ export const FieldTypeSelector = ({
         inputDisplay: <FieldType type={optionKey} />,
         'data-test-subj': `option-type-${optionKey}`,
       }));
-  }, [streamType]);
+  }, [enableGeoPointSuggestions, streamType]);
 
   return (
     <EuiSuperSelect
