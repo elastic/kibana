@@ -19,6 +19,7 @@ import {
 } from '@kbn/mock-idp-utils';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
 import type { ScoutServerConfig } from '../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../constants';
