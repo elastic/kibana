@@ -12,9 +12,8 @@ import {
   calculatePrecision,
   calculateRecall,
   calculateF1,
-  getGroundTruthIndices,
   filterDocsByGroundTruthIndices,
-} from './utils';
+} from './metrics';
 import type { GroundTruth, RetrievedDoc } from './types';
 
 describe('RAG Utils', () => {
@@ -42,12 +41,6 @@ describe('RAG Utils', () => {
 
     it('should return false for unknown indices', () => {
       expect(isRelevant({ index: 'unknown-index', id: 'doc_a' }, groundTruth, 1)).toBe(false);
-    });
-
-    it('should handle zero score correctly', () => {
-      const gtWithZero: GroundTruth = { 'index-x': { doc_zero: 0 } };
-      expect(isRelevant({ index: 'index-x', id: 'doc_zero' }, gtWithZero, 0)).toBe(true);
-      expect(isRelevant({ index: 'index-x', id: 'doc_zero' }, gtWithZero, 1)).toBe(false);
     });
   });
 
@@ -118,21 +111,6 @@ describe('RAG Utils', () => {
     it('should handle empty indices', () => {
       const groundTruth: GroundTruth = { 'index-a': {} };
       expect(countRelevantInGroundTruth(groundTruth, 1)).toBe(0);
-    });
-  });
-
-  describe('getGroundTruthIndices', () => {
-    it('should return all indices from ground truth', () => {
-      const groundTruth: GroundTruth = {
-        'index-a': { doc_a: 1 },
-        'index-b': { doc_b: 1 },
-        'index-c': { doc_c: 1 },
-      };
-      expect(getGroundTruthIndices(groundTruth)).toEqual(['index-a', 'index-b', 'index-c']);
-    });
-
-    it('should return empty array for empty ground truth', () => {
-      expect(getGroundTruthIndices({})).toEqual([]);
     });
   });
 

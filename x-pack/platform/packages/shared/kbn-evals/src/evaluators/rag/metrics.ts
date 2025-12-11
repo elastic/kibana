@@ -38,15 +38,11 @@ export function countRelevantInGroundTruth(groundTruth: GroundTruth, threshold: 
   return count;
 }
 
-export function getGroundTruthIndices(groundTruth: GroundTruth): string[] {
-  return Object.keys(groundTruth);
-}
-
 export function filterDocsByGroundTruthIndices(
   docs: RetrievedDoc[],
   groundTruth: GroundTruth
 ): RetrievedDoc[] {
-  const indices = new Set(getGroundTruthIndices(groundTruth));
+  const indices = new Set(Object.keys(groundTruth));
   return docs.filter((doc) => indices.has(doc.index));
 }
 

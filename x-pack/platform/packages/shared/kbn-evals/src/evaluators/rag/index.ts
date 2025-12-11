@@ -15,7 +15,7 @@ import {
   calculateRecall,
   calculateF1,
   filterDocsByGroundTruthIndices,
-} from './utils';
+} from './metrics';
 
 const PRECISION_EVALUATOR_NAME = 'Precision@K';
 const RECALL_EVALUATOR_NAME = 'Recall@K';

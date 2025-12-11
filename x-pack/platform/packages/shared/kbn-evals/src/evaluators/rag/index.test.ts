@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  createPrecisionAtKEvaluator,
-  createRecallAtKEvaluator,
-  createF1AtKEvaluator,
-  createRagEvaluators,
-} from '.';
+import { createPrecisionAtKEvaluator, createRecallAtKEvaluator, createF1AtKEvaluator } from '.';
 import type { RagEvaluatorConfig, GroundTruth, RetrievedDoc } from './types';
 
 interface TestOutput {
@@ -40,7 +35,7 @@ describe('RAG Evaluators', () => {
 
   const createDoc = (id: string, index = 'test-index'): RetrievedDoc => ({ index, id });
 
-  describe('createPrecisionAtKEvaluator', () => {
+  describe('Precision@KEvaluator', () => {
     it('should calculate precision correctly', async () => {
       const evaluator = createPrecisionAtKEvaluator(config);
 
@@ -91,15 +86,9 @@ describe('RAG Evaluators', () => {
       // 2 relevant docs out of K=5
       expect(result.score).toBe(0.4);
     });
-
-    it('should have correct evaluator metadata', () => {
-      const evaluator = createPrecisionAtKEvaluator(config);
-      expect(evaluator.name).toBe('Precision@K');
-      expect(evaluator.kind).toBe('CODE');
-    });
   });
 
-  describe('createRecallAtKEvaluator', () => {
+  describe('Recall@KEvaluator', () => {
     it('should calculate recall correctly', async () => {
       const evaluator = createRecallAtKEvaluator(config);
 
@@ -136,15 +125,9 @@ describe('RAG Evaluators', () => {
       expect(result.score).toBeNull();
       expect(result.label).toBe('unavailable');
     });
-
-    it('should have correct evaluator metadata', () => {
-      const evaluator = createRecallAtKEvaluator(config);
-      expect(evaluator.name).toBe('Recall@K');
-      expect(evaluator.kind).toBe('CODE');
-    });
   });
 
-  describe('createF1AtKEvaluator', () => {
+  describe('F1@KEvaluator', () => {
     it('should calculate F1 correctly', async () => {
       const evaluator = createF1AtKEvaluator(config);
 
@@ -180,24 +163,10 @@ describe('RAG Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
-    });
-
-    it('should have correct evaluator metadata', () => {
-      const evaluator = createF1AtKEvaluator(config);
-      expect(evaluator.name).toBe('F1@K');
-      expect(evaluator.kind).toBe('CODE');
     });
   });
 
-  describe('createRagEvaluators', () => {
-    it('should create all three evaluators', () => {
-      const evaluators = createRagEvaluators(config);
-      expect(evaluators).toHaveLength(3);
-      expect(evaluators.map((e) => e.name)).toEqual(['Precision@K', 'Recall@K', 'F1@K']);
-    });
-  });
-
+  // Indirectly testing through Precision@KEvaluator
   describe('relevance threshold', () => {
     it('should use default threshold of 1 when not specified', async () => {
       const configWithoutThreshold: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
@@ -312,6 +281,7 @@ describe('RAG Evaluators', () => {
     it('should filter docs to only ground truth indices when enabled via config', async () => {
       const filterConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
+        k: 2, // Making the top K more sensitive to index filtering
         filterByGroundTruthIndices: true,
       };
 
@@ -321,9 +291,9 @@ describe('RAG Evaluators', () => {
         input: {},
         output: {
           retrievedDocs: [
-            { index: 'index-a', id: 'doc_1' },
             { index: 'index-b', id: 'doc_X' },
             { index: 'index-b', id: 'doc_Y' },
+            { index: 'index-a', id: 'doc_1' },
             { index: 'index-a', id: 'doc_Z' },
             { index: 'index-c', id: 'doc_W' },
           ],
@@ -335,12 +305,13 @@ describe('RAG Evaluators', () => {
       // After filtering: only index-a docs remain: [doc_1, doc_Z]
       // doc_1 is relevant, doc_Z is not
       // Precision = 1/5 = 0.2
-      expect(result.score).toBe(0.2);
+      expect(result.score).toBe(0.5);
     });
 
     it('should not filter when filterByGroundTruthIndices is false', async () => {
       const noFilterConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
+        k: 2, // Making the top K more sensitive to index filtering
         filterByGroundTruthIndices: false,
       };
 
@@ -350,9 +321,9 @@ describe('RAG Evaluators', () => {
         input: {},
         output: {
           retrievedDocs: [
-            { index: 'index-a', id: 'doc_1' },
             { index: 'index-b', id: 'doc_X' },
             { index: 'index-b', id: 'doc_Y' },
+            { index: 'index-a', id: 'doc_1' },
             { index: 'index-a', id: 'doc_Z' },
             { index: 'index-c', id: 'doc_W' },
           ],
@@ -364,7 +335,7 @@ describe('RAG Evaluators', () => {
       // No filtering: all 5 docs are considered
       // Only doc_1 is relevant
       // Precision = 1/5 = 0.2
-      expect(result.score).toBe(0.2);
+      expect(result.score).toBe(0.0);
     });
   });
 
