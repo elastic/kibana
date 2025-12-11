@@ -113,19 +113,31 @@ export const waffleStateSchemaNoESQL = schema.object(
         [
           schema.oneOf(
             [
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
-              schema.allOf([
-                partitionStatePrimaryMetricOptionsSchema,
-                uniqueCountMetricOperationSchema,
-              ]),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, metricOperationSchema]),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, sumMetricOperationSchema]),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
-              schema.allOf([
-                partitionStatePrimaryMetricOptionsSchema,
-                percentileRanksOperationSchema,
-              ]),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, countMetricOperationSchema], {
+                meta: { description: 'Count metric with primary options' },
+              }),
+              schema.allOf(
+                [partitionStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema],
+                { meta: { description: 'Unique count metric with primary options' } }
+              ),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, metricOperationSchema], {
+                meta: {
+                  description: 'Standard metric (avg, min, max, median) with primary options',
+                },
+              }),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, sumMetricOperationSchema], {
+                meta: { description: 'Sum metric with primary options' },
+              }),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, lastValueOperationSchema], {
+                meta: { description: 'Last value metric with primary options' },
+              }),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileOperationSchema], {
+                meta: { description: 'Percentile metric with primary options' },
+              }),
+              schema.allOf(
+                [partitionStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema],
+                { meta: { description: 'Percentile rank metric with primary options' } }
+              ),
             ],
             {
               meta: {
@@ -136,16 +148,20 @@ export const waffleStateSchemaNoESQL = schema.object(
           ),
           schema.oneOf(
             [
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
-              schema.allOf([
-                partitionStatePrimaryMetricOptionsSchema,
-                movingAverageOperationSchema,
-              ]),
-              schema.allOf([
-                partitionStatePrimaryMetricOptionsSchema,
-                cumulativeSumOperationSchema,
-              ]),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, differencesOperationSchema], {
+                meta: { description: 'Differences metric with primary options' },
+              }),
+              schema.allOf(
+                [partitionStatePrimaryMetricOptionsSchema, movingAverageOperationSchema],
+                { meta: { description: 'Moving average metric with primary options' } }
+              ),
+              schema.allOf(
+                [partitionStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema],
+                { meta: { description: 'Cumulative sum metric with primary options' } }
+              ),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, counterRateOperationSchema], {
+                meta: { description: 'Counter rate metric with primary options' },
+              }),
             ],
             {
               meta: {
@@ -156,14 +172,14 @@ export const waffleStateSchemaNoESQL = schema.object(
           ),
           schema.oneOf(
             [
-              schema.allOf([
-                partitionStatePrimaryMetricOptionsSchema,
-                staticOperationDefinitionSchema,
-              ]),
-              schema.allOf([
-                partitionStatePrimaryMetricOptionsSchema,
-                formulaOperationDefinitionSchema,
-              ]),
+              schema.allOf(
+                [partitionStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema],
+                { meta: { description: 'Static value metric with primary options' } }
+              ),
+              schema.allOf(
+                [partitionStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema],
+                { meta: { description: 'Formula metric with primary options' } }
+              ),
             ],
             { meta: { description: 'Calculated metrics: static_value, formula' } }
           ),
@@ -177,17 +193,23 @@ export const waffleStateSchemaNoESQL = schema.object(
         schema.maybe(
           schema.oneOf(
             [
-              schema.allOf([
-                partitionStateBreakdownByOptionsSchema,
-                bucketDateHistogramOperationSchema,
-              ]),
-              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
-              schema.allOf([
-                partitionStateBreakdownByOptionsSchema,
-                bucketHistogramOperationSchema,
-              ]),
-              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
-              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
+              schema.allOf(
+                [partitionStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema],
+                { meta: { description: 'Date histogram breakdown with partition options' } }
+              ),
+              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketTermsOperationSchema], {
+                meta: { description: 'Terms breakdown with partition options' },
+              }),
+              schema.allOf(
+                [partitionStateBreakdownByOptionsSchema, bucketHistogramOperationSchema],
+                { meta: { description: 'Histogram breakdown with partition options' } }
+              ),
+              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketRangesOperationSchema], {
+                meta: { description: 'Range breakdown with partition options' },
+              }),
+              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema], {
+                meta: { description: 'Filters breakdown with partition options' },
+              }),
             ],
             {
               meta: {
