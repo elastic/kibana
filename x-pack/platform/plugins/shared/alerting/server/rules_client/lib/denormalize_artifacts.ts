@@ -15,6 +15,7 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
   const references: SavedObjectReference[] = [];
   const artifacts: Required<DenormalizedArtifacts> = {
     dashboards: [],
+    rules: [],
     investigation_guide: { blob: '' },
   };
 
@@ -38,6 +39,25 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
       });
     });
   }
+
+  if (ruleArtifacts && ruleArtifacts.rules) {
+    ruleArtifacts.rules.forEach((rule, i) => {
+      const refName = `rule_${i}`;
+      const ruleRef = {
+        id: rule.id,
+        name: refName,
+        type: 'alert',
+      };
+      references.push(ruleRef);
+
+      artifacts.rules.push({
+        refId: refName,
+      });
+    });
+  }
+
+  console.log('artifacts:', artifacts);
+  console.log('references:', references);
 
   return {
     artifacts,

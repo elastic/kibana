@@ -488,6 +488,7 @@ export const investigationGuideSchema = schema.object({
 export const artifactsSchema = schema.object({
   dashboards: schema.maybe(dashboardsSchema),
   investigation_guide: schema.maybe(investigationGuideSchema),
+  rules: schema.maybe(schema.arrayOf(schema.object({ id: schema.string() }))),
 });
 
 export const ruleResponseSchema = schema.object({

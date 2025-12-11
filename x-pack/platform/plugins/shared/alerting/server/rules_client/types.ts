@@ -192,6 +192,10 @@ interface DashboardItem {
   refId: string;
 }
 
+interface RuleArtifact {
+  refId: string;
+}
+
 interface InvestigationGuide {
   blob: string;
 }
@@ -199,4 +203,5 @@ interface InvestigationGuide {
 export interface DenormalizedArtifacts {
   dashboards?: DashboardItem[];
   investigation_guide?: InvestigationGuide;
+  rules?: RuleArtifact[];
 }

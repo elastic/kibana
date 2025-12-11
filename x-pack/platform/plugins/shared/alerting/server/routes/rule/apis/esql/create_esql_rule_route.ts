@@ -6,6 +6,7 @@
  */
 
 import type { RouteOptions } from '../../..';
+import { schema } from '@kbn/config-schema';
 import type { CreateRuleResponseV1 } from '../../../../../common/routes/rule/apis/create';
 import {
   createParamsSchemaV1,
@@ -78,6 +79,7 @@ export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
             timeWindowUnit,
             timeField: originalRuleData.timeField,
             group_key: originalRuleData.group_key,
+            role: 'parent',
           };
 
           if (originalRuleData.parentId) {
@@ -99,7 +101,7 @@ export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
 
             const actions = allActions.filter((action) => !actionsClient.isSystemAction(action.id));
 
-            const createdRule = await rulesClient.createESQLRule(
+            const createdRules = await rulesClient.createESQLRule(
               {
                 name: originalRuleData.name,
                 tags: originalRuleData.tags,
@@ -109,12 +111,13 @@ export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
                 consumer: 'alerts',
                 alertTypeId: '.esql',
                 params: paramsForCreate,
+                artifacts: originalRuleData.artifacts,
               },
               originalRuleData.track
             );
 
             const response: CreateRuleResponseV1<RuleParamsV1> = {
-              body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule),
+              body: createdRules[0],
             };
 
             return res.ok(response);

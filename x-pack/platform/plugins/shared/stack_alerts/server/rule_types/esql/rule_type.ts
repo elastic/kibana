@@ -134,6 +134,32 @@ export function getRuleType(
     executor: async (options: ExecutorOptions<ESQLParams>) => {
       return await executor(core, options, sourceFields);
     },
+    useSavedObjectReferences: {
+      extractReferences: (params: ESQLParams) => {
+        const references = [];
+        if (params.parentId) {
+          references.push({
+            name: 'parent',
+            type: 'alert',
+            id: params.parentId,
+          });
+        }
+        return {
+          params,
+          references,
+        };
+      },
+      injectReferences: (params: ESQLParams, references: any[]) => {
+        const parentReference = references.find((ref) => ref.name === 'parent');
+        if (parentReference) {
+          return {
+            ...params,
+            parentId: parentReference.id,
+          };
+        }
+        return params;
+      },
+    },
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     solution: 'stack',

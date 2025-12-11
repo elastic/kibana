@@ -63,6 +63,7 @@ export async function createRule<Params extends RuleParams = never>(
     allowMissingConnectorSecrets,
     isFlappingEnabled = false,
   } = createParams;
+  console.log('creating rule with data:', JSON.stringify(initialData, null, 2));
 
   const actionsClient = await context.getActionsClient();
 

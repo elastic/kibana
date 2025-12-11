@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiFieldSearch,
+  EuiSwitch,
 } from '@elastic/eui';
 import type { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -48,6 +49,8 @@ interface RulesListFiltersBarProps {
   onToggleRuleErrors: () => void;
   setInputText: (text: string) => void;
   updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
+  showInternalRules: boolean;
+  onToggleInternalRules: () => void;
 }
 
 const ENTER_KEY = 13;
@@ -69,6 +72,8 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     canLoadRules,
     refresh,
     updateFilters,
+    showInternalRules,
+    onToggleInternalRules,
   } = props;
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
@@ -222,30 +227,43 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
             <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={onRefreshRules} />
           </EuiFlexGroup>
         </EuiFlexItem>
-        {rulesStatusesTotal.error > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="expandRulesError" color="primary" onClick={onToggleRuleErrors}>
-              {!showErrors && (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
-                  defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              )}
-              {showErrors && (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
-                  defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              )}
-            </EuiLink>
+        <EuiFlexGroup>
+          {rulesStatusesTotal.error > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj="expandRulesError"
+                color="primary"
+                onClick={onToggleRuleErrors}
+              >
+                {!showErrors && (
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
+                    defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
+                    values={{
+                      totalStatusesError: rulesStatusesTotal.error,
+                    }}
+                  />
+                )}
+                {showErrors && (
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
+                    defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
+                    values={{
+                      totalStatusesError: rulesStatusesTotal.error,
+                    }}
+                  />
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <EuiSwitch
+              label="Show internal rules"
+              checked={showInternalRules}
+              onChange={onToggleInternalRules}
+            />
           </EuiFlexItem>
-        )}
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </>
   );

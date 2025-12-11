@@ -7,7 +7,7 @@
 
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { ALERT_RULE_UUID, ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type {
   AlertInstanceContext,
@@ -67,7 +67,6 @@ export const buildAlert = <
       cleanedPayload,
       {
         [ALERT_RULE_UUID]: rule[ALERT_RULE_UUID],
-        'rule.parent_id': rule[ALERT_RULE_PARAMETERS].parentId,
         'run.id': ruleRunCount,
       },
       {

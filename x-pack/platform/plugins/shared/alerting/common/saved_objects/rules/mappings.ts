@@ -10,6 +10,9 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
+    internal: {
+      type: 'boolean',
+    },
     artifacts: {
       properties: {
         investigation_guide: {

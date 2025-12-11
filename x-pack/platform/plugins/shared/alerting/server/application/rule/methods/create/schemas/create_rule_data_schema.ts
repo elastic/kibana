@@ -40,6 +40,7 @@ export const createRuleDataSchema = schema.object(
     notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
     alertDelay: schema.maybe(alertDelaySchema),
     flapping: schema.maybe(schema.nullable(flappingSchema)),
+    internal: schema.maybe(schema.boolean()),
     artifacts: schema.maybe(artifactsSchema),
   },
   { unknowns: 'allow' }

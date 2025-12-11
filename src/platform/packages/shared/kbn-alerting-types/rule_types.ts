@@ -219,8 +219,13 @@ export interface Dashboard {
   id: string;
 }
 
+export interface RuleArtifact {
+  id: string;
+}
+
 export interface Artifacts {
   dashboards?: Dashboard[];
+  rules?: RuleArtifact[];
   investigation_guide?: {
     blob: string;
   };

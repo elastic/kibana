@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EsqlQuery, Builder } from '@kbn/esql-ast';
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
@@ -101,6 +100,7 @@ import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
 import type { RuleParamsV1 } from '../../common/routes/rule/response';
+import { createESQLRule } from '../application/rule/methods/create_esql_rule';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -270,189 +270,7 @@ export class RulesClient {
         recoveryQuery?: string;
       };
     }
-  ): Promise<SanitizedRule<RuleParamsV1>> {
-    const createdRule = (await this.create<RuleParamsV1>({
-      data: ruleData,
-    })) as SanitizedRule<RuleParamsV1>;
-
-    if (track?.recovery?.enabled) {
-      await createRecoveryRule(this.context, createdRule, ruleData, track);
-    }
-
-    return createdRule;
-  }
-}
-
-// The createRecoveryRule logic needs to be a method on the RulesClient class
-// to have the correct 'this' context.
-async function createRecoveryRule(
-  context: RulesClientContext,
-  parentRule: SanitizedRule<RuleParamsV1>,
-  ruleData: CreateRuleData<RuleParamsV1>,
-  track: {
-    recovery?: {
-      enabled?: boolean;
-      schedule?: string;
-      lookbackWindow?: string;
-      recoveryQuery?: string;
-    };
-  }
-) {
-  if (!track?.recovery?.enabled) {
-    return;
-  }
-
-  try {
-    let recoveryEsql: string;
-
-    if (track.recovery.recoveryQuery) {
-      const groupKeys = ruleData.params.group_key ?? [];
-      const groupKeyFields = groupKeys.map((key) => `attrs.${key}`).join(', ');
-      const groupKeyConditions = groupKeys.map((key) => `attrs.${key} IS NOT NULL`).join(' AND ');
-
-      recoveryEsql = track.recovery.recoveryQuery
-        .replace(/\?rule_id/g, `"${parentRule.id}"`)
-        .replace(/\?group_key_fields/g, groupKeyFields)
-        .replace(/\?group_key_conditions/g, groupKeyConditions);
-    } else {
-      const groupKeys = ruleData.params.group_key ?? [];
-      if (groupKeys.length === 0) {
-        context.logger.error(
-          `Cannot create recovery rule for parent rule "${ruleData.name}" (${parentRule.id}) because 'group_key' is not defined.`
-        );
-        return;
-      }
-
-      const groupKeyColumns = groupKeys.map((key) =>
-        Builder.expression.column(['attrs', ...key.split('.')])
-      );
-
-      const fromCommand = Builder.command({
-        name: 'from',
-        args: [Builder.expression.literal.string('.internal.alerts-stack.alerts-default-*')],
-      });
-
-      const initialWhereCommand = Builder.command({
-        name: 'where',
-        args: [
-          Builder.expression.func.binary('==', [
-            Builder.expression.column(['rule', 'id']),
-            Builder.expression.literal.string(parentRule.id),
-          ]),
-        ],
-      });
-
-      const statsCommand = Builder.command({
-        name: 'stats',
-        args: [
-          Builder.expression.func.binary('=', [
-            Builder.identifier('last_seen_run_id'),
-            Builder.expression.func.call('MAX', [Builder.expression.column(['run', 'id'])]),
-          ]),
-          Builder.option({
-            name: 'by',
-            args: [Builder.expression.column(['rule', 'id']), ...groupKeyColumns],
-          }),
-        ],
-      });
-
-      const inlineStatsCommand = Builder.command({
-        name: 'INLINE STATS',
-        args: [
-          Builder.expression.func.binary('=', [
-            Builder.identifier('max_run_id'),
-            Builder.expression.func.call('MAX', [Builder.expression.column('last_seen_run_id')]),
-          ]),
-        ],
-      });
-
-      const notNullConditions = groupKeyColumns.map((col) =>
-        Builder.expression.func.postfix('IS NOT NULL', col)
-      );
-      const combinedNotNullCondition = notNullConditions.reduce((acc, condition) =>
-        Builder.expression.func.binary('AND', [acc, condition])
-      );
-
-      const secondaryWhereCondition = Builder.expression.func.binary('AND', [
-        Builder.expression.func.binary('<', [
-          Builder.expression.column('last_seen_run_id'),
-          Builder.expression.column('max_run_id'),
-        ]),
-        combinedNotNullCondition,
-      ]);
-
-      const secondaryWhereCommand = Builder.command({
-        name: 'where',
-        args: [secondaryWhereCondition],
-      });
-
-      const evalCommand = Builder.command({
-        name: 'eval',
-        args: [
-          Builder.expression.func.binary('=', [
-            Builder.identifier('status'),
-            Builder.expression.literal.string('recovered'),
-          ]),
-        ],
-      });
-
-      const keepCommand = Builder.command({
-        name: 'keep',
-        args: [
-          Builder.expression.column(['rule', 'id']),
-          ...groupKeyColumns,
-          Builder.expression.column('status'),
-          Builder.expression.column('last_seen_run_id'),
-          Builder.expression.column('max_run_id'),
-        ],
-      });
-
-      const recoveryAst = Builder.expression.query([
-        fromCommand,
-        initialWhereCommand,
-        statsCommand,
-        inlineStatsCommand,
-        secondaryWhereCommand,
-        evalCommand,
-        keepCommand,
-      ]);
-
-      const recoveryEsqlQuery = new EsqlQuery(recoveryAst);
-      recoveryEsql = recoveryEsqlQuery.print();
-    }
-
-    const recoveryLookbackWindow =
-      track.recovery.lookbackWindow ||
-      `${ruleData.params.timeWindowSize}${ruleData.params.timeWindowUnit}`;
-    const durationMatch = recoveryLookbackWindow.match(/^(\d+)([smhd])$/);
-    const timeWindowSize = durationMatch
-      ? parseInt(durationMatch[1], 10)
-      : ruleData.params.timeWindowSize;
-    const timeWindowUnit = durationMatch ? durationMatch[2] : ruleData.params.timeWindowUnit;
-
-    const recoveryRuleData: CreateRuleData<RuleParamsV1> = {
-      ...ruleData,
-      name: `${ruleData.name} - RECOVERY`,
-      tags: [...(ruleData.tags || []), 'internal'],
-      schedule: {
-        interval: track.recovery.schedule || ruleData.schedule.interval,
-      },
-      params: {
-        ...ruleData.params,
-        parentId: parentRule.id,
-        role: 'recovery',
-        esqlQuery: {
-          esql: recoveryEsql,
-        },
-        timeWindowSize,
-        timeWindowUnit,
-      },
-    };
-
-    await createRule(context, { data: recoveryRuleData });
-  } catch (e) {
-    context.logger.error(`Failed to create recovery rule for parent rule ${parentRule.id}.`, e);
-    // Re-throw the error to ensure the API call fails
-    throw e;
+  ): Promise<Array<SanitizedRule<RuleParamsV1>>> {
+    return createESQLRule(this.context, ruleData, track);
   }
 }
