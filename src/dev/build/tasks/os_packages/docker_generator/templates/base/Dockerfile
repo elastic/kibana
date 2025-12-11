@@ -146,6 +146,9 @@ RUN groupadd --gid 1000 kibana && \
     useradd --uid 1000 --gid 1000 \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
+{{^cloud}}
+RUN usermod -a -G 0 kibana
+{{/cloud}}
 
 LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.label-schema.license="{{license}}" \
