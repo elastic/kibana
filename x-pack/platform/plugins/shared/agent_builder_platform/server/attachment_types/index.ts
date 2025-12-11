@@ -9,7 +9,8 @@ import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
-import { createScreenContextAttachmentType } from './screen_context';
+import { createApplicationContextAttachmentType } from './app_context';
+import { createTimerangeAttachmentType } from './timerange';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -27,8 +28,9 @@ export const registerAttachmentTypes = ({
 
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
-    createScreenContextAttachmentType(),
+    createApplicationContextAttachmentType(),
     createEsqlAttachmentType(),
+    createTimerangeAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

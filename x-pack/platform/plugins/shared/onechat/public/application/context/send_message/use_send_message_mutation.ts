@@ -25,7 +25,7 @@ interface UseSendMessageMutationProps {
 }
 
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
-  const { chatService } = useOnechatServices();
+  const { chatService, contextService } = useOnechatServices();
   const { services } = useKibana();
   const { reportConverseError } = useReportConverseError();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
@@ -86,7 +86,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
-      attachments: attachments ?? [],
+      attachments: [...(attachments ?? []), ...contextService.getContextualAttachments()],
       browserApiTools: browserApiToolsMetadata,
     });
 

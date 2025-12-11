@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { AttachmentType, screenContextAttachmentDataSchema } from '@kbn/onechat-common/attachments';
-import type { ScreenContextAttachmentData } from '@kbn/onechat-common/attachments';
+import {
+  AttachmentType,
+  applicationContextAttachmentDataSchema,
+} from '@kbn/onechat-common/attachments/attachment_types';
+import type { ApplicationContextAttachmentData } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 
 /**
  * Creates the definition for the `screen_context` attachment type.
  */
-export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.screenContext,
-  ScreenContextAttachmentData
+export const createApplicationContextAttachmentType = (): AttachmentTypeDefinition<
+  AttachmentType.applicationContext,
+  ApplicationContextAttachmentData
 > => {
   return {
-    id: AttachmentType.screenContext,
+    id: AttachmentType.applicationContext,
     validate: (input) => {
-      const parseResult = screenContextAttachmentDataSchema.safeParse(input);
+      const parseResult = applicationContextAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
         return { valid: true, data: parseResult.data };
       } else {
@@ -37,20 +40,17 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
   };
 };
 
-const formatScreenContext = (data: ScreenContextAttachmentData): string => {
+const formatScreenContext = (data: ApplicationContextAttachmentData): string => {
   const parts: string[] = [];
 
-  if (data.app) {
-    parts.push(`App: ${data.app}`);
+  if (data.app_id) {
+    parts.push(`App: ${data.app_id}`);
   }
-  if (data.url) {
-    parts.push(`Url: ${data.url}`);
+  if (data.location) {
+    parts.push(`Path: ${data.location}`);
   }
   if (data.description) {
     parts.push(`Description: ${data.description}`);
-  }
-  if (data.additional_data) {
-    parts.push(`Additional data: ${JSON.stringify(data.additional_data)}`);
   }
 
   return parts.join('\n');

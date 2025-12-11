@@ -13,6 +13,7 @@ import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
 import type { NavigationService } from './navigation';
+import type { ContextService } from './context';
 
 export interface OnechatInternalService {
   agentService: AgentService;
@@ -23,4 +24,5 @@ export interface OnechatInternalService {
   toolsService: ToolsService;
   startDependencies: OnechatStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
+  contextService: ContextService;
 }

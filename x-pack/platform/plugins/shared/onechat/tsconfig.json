@@ -93,5 +93,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/ui-theme",
+    "@kbn/data-plugin",
   ]
 }

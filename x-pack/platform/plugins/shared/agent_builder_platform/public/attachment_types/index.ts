@@ -10,7 +10,7 @@ import type { AttachmentServiceStartContract } from '@kbn/onechat-browser';
 import {
   AttachmentType,
   type TextAttachment,
-  type ScreenContextAttachment,
+  type ApplicationContextAttachment,
   type EsqlAttachment,
 } from '@kbn/onechat-common/attachments';
 
@@ -27,7 +27,7 @@ export const registerAttachmentUiDefinitions = ({
     getIcon: () => 'document',
   });
 
-  attachments.addAttachmentType<ScreenContextAttachment>(AttachmentType.screenContext, {
+  attachments.addAttachmentType<ApplicationContextAttachment>(AttachmentType.applicationContext, {
     getLabel: () =>
       i18n.translate('xpack.agentBuilderPlatform.attachments.screenContext.label', {
         defaultMessage: 'Screen context',

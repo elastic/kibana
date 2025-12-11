@@ -12,4 +12,5 @@ export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { NavigationService } from './navigation';
 export { ToolsService } from './tools';
+export { ContextService } from './context';
 export type { OnechatInternalService } from './types';

@@ -6,7 +6,10 @@
  */
 
 import type { TextAttachmentData } from '@kbn/onechat-common/attachments';
-import { AttachmentType, textAttachmentDataSchema } from '@kbn/onechat-common/attachments';
+import {
+  AttachmentType,
+  textAttachmentDataSchema,
+} from '@kbn/onechat-common/attachments/attachment_types';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 
 /**

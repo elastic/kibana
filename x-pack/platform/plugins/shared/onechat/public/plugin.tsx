@@ -31,6 +31,7 @@ import {
   ConversationsService,
   NavigationService,
   ToolsService,
+  ContextService,
   type OnechatInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
@@ -115,8 +116,8 @@ export class OnechatPlugin
   }
 
   start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
-    const { http } = core;
-    const { licensing, inference } = startDependencies;
+    const { http, application } = core;
+    const { licensing, inference, data } = startDependencies;
     docLinks.setDocLinks(core.docLinks.links);
 
     const agentService = new AgentService({ http });
@@ -125,6 +126,7 @@ export class OnechatPlugin
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
+    const contextService = new ContextService({ data, application });
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
@@ -141,6 +143,7 @@ export class OnechatPlugin
       toolsService,
       startDependencies,
       accessChecker,
+      contextService,
     };
 
     this.internalServices = internalServices;

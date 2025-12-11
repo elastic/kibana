@@ -12,7 +12,7 @@ import type { AttachmentType, AttachmentDataOf } from './attachment_types';
  */
 export interface Attachment<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : object
 > {
   /** Unique identifier for the attachment */
   id: string;
@@ -32,13 +32,14 @@ export type UnknownAttachment = Attachment<string, unknown>;
 // Strongly typed sub-types for known attachment types
 
 export type TextAttachment = Attachment<AttachmentType.text>;
-export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
+export type ApplicationContextAttachment = Attachment<AttachmentType.applicationContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
+export type TimerangeAttachment = Attachment<AttachmentType.timeRange>;
 
 /**
  * Input version of an attachment, where the id is optional
  */
 export type AttachmentInput<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : object
 > = Omit<Attachment<Type, DataType>, 'id'> & Partial<Pick<Attachment<Type, DataType>, 'id'>>;

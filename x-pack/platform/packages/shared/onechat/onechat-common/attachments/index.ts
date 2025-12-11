@@ -10,15 +10,14 @@ export type {
   UnknownAttachment,
   AttachmentInput,
   TextAttachment,
-  ScreenContextAttachment,
+  ApplicationContextAttachment,
   EsqlAttachment,
+  TimerangeAttachment,
 } from './attachments';
 export {
   AttachmentType,
-  textAttachmentDataSchema,
-  esqlAttachmentDataSchema,
-  screenContextAttachmentDataSchema,
   type TextAttachmentData,
-  type ScreenContextAttachmentData,
+  type ApplicationContextAttachmentData,
   type EsqlAttachmentData,
+  type TimerangeAttachmentData,
 } from './attachment_types';
