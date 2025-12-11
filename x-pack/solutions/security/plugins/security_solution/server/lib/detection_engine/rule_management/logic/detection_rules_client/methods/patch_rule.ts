@@ -35,7 +35,7 @@ export const patchRule = async ({
   rulePatch,
   mlAuthz,
 }: PatchRuleOptions): Promise<RuleResponse> => {
-  const { rule_id: ruleId, id } = rulePatch;
+  const { rule_id: ruleId, id, ...rulePatchObj } = rulePatch;
 
   const existingRule = await getRuleByIdOrRuleId({
     rulesClient,
@@ -55,7 +55,7 @@ export const patchRule = async ({
   const appliedInternalPatches = await patchApplicator(
     rulesClient,
     actionsClient,
-    rulePatch,
+    rulePatchObj,
     existingRule,
     prebuiltRuleAssetClient
   );

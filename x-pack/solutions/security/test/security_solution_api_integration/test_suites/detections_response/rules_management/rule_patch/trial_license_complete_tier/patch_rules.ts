@@ -18,7 +18,7 @@ import type {
   RuleActionThrottle,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   createAlertsIndex,
   deleteAllRules,
@@ -40,10 +40,13 @@ import {
   getSomeActionsWithFrequencies,
   updateUsername,
 } from '../../../utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -266,6 +269,57 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.exceptions_list).to.eql([
           { id: '2', list_id: '123', namespace_type: 'single', type: 'detection' },
         ]);
+      });
+      describe('@skipInServerless rules_read_exceptions_all', () => {
+        const role = ROLES.rules_read_exceptions_all;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+        it('should overwrite exception list value on patch with a user role of read-rules and exceptions-all', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                exceptions_list: [
+                  {
+                    id: '1',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            })
+            .expect(200);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                exceptions_list: [
+                  {
+                    id: '2',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.DETECTION,
+                  },
+                ],
+              },
+            })
+            .expect(200);
+
+          expect(body.exceptions_list).to.eql([
+            { id: '2', list_id: '123', namespace_type: 'single', type: 'detection' },
+          ]);
+        });
       });
 
       it('should throw error if trying to add more than one default exception list', async () => {

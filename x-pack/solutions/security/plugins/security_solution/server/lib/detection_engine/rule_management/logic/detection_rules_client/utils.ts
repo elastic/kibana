@@ -149,9 +149,7 @@ export const getReadAuthFieldValue = (
     !isEmpty(rulePatch.exceptions_list) &&
     rulePatch.exceptions_list != null
   ) {
-    const ruleExceptionLists = existingRule.exceptions_list;
     return [
-      ...ruleExceptionLists,
       ...rulePatch.exceptions_list.map((exceptionList) => ({
         id: exceptionList.id,
         list_id: exceptionList.list_id,
