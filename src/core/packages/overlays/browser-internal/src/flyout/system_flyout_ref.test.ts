@@ -63,7 +63,7 @@ describe('SystemFlyoutRef', () => {
 
       const result1 = await ref.close();
       const result2 = await ref.close();
-      
+
       // Both should return the same promise
       expect(result1).toBe(result2);
       // Unmount should only happen once

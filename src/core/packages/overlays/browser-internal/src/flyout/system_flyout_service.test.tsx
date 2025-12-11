@@ -166,10 +166,10 @@ describe('SystemFlyoutService', () => {
     it('can be called multiple times on the same FlyoutRef', async () => {
       const ref = systemFlyouts.open(<div>System flyout content</div>);
       expect(mockReactDomUnmount).not.toHaveBeenCalled();
-      
+
       const firstClose = await ref.close();
       const secondClose = await ref.close();
-      
+
       // Both should return the same promise
       expect(firstClose).toBe(secondClose);
       // Unmount should only be called once total
@@ -192,7 +192,7 @@ describe('SystemFlyoutService', () => {
 
       await ref.close();
       expect(targetElement.children.length).toBe(0);
-      
+
       testService.stop();
     });
   });
@@ -214,7 +214,7 @@ describe('SystemFlyoutService', () => {
       flyouts.open(<div>Flyout 2</div>);
 
       expect(testTarget.children.length).toBe(2);
-      
+
       // Clear mocks to count only unmounts from this service
       mockReactDomUnmount.mockClear();
 
@@ -248,7 +248,7 @@ describe('SystemFlyoutService', () => {
           targetDomElement: targetElement,
         });
       }).not.toThrow();
-      
+
       testService.stop();
     });
   });
