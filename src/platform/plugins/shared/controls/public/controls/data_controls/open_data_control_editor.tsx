@@ -19,22 +19,22 @@ import { coreServices } from '../../services/kibana_services';
 export const openDataControlEditor = <State extends DataControlState = DataControlState>({
   initialState,
   parentApi,
+  setLastUsedDataViewId,
+  isPinned,
   controlId,
   controlType,
   initialDefaultPanelTitle,
   onUpdate,
-  isPinned,
-  setLastUsedDataViewId,
 }: {
   initialState: Partial<State>;
   parentApi: unknown;
+  setLastUsedDataViewId?: (dataViewId: string) => void;
+  isPinned?: boolean;
   // these props are only provided when the control already exists and is being edited
   controlId?: string;
   controlType?: string;
   initialDefaultPanelTitle?: string;
   onUpdate?: (newState: Partial<State & SerializedTitles>) => void;
-  isPinned?: boolean;
-  setLastUsedDataViewId?: (dataViewId: string) => void;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
