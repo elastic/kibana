@@ -27,4 +27,3 @@ export async function writeFile(filePath: string, content: string): Promise<void
 
   await Fs.writeFile(filePath, content, 'utf8');
 }
-

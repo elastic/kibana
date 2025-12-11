@@ -8,4 +8,3 @@
  */
 
 export { ensureOtelDemo } from './src/ensure_otel_demo';
-
