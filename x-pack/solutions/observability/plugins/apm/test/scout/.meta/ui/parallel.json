@@ -1,33 +1,16 @@
 {
-  "lastModified": "2025-12-11T10:19:24.838Z",
-  "sha1": "c00251da300c2224a40813ed0c213db64b446a4c",
+  "lastModified": "2025-12-11T11:22:36.668Z",
+  "sha1": "61f0b9eedf9b129cf5a9f279767efc25b40a0937",
   "tests": [
     {
-      "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
+      "id": "78d42dfeebef544-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
       "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
+      "tags": [],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 14,
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global_setup.ts",
+        "line": 13,
         "column": 16
-      }
-    },
-    {
-      "id": "4918e092a0b8903-d077d1deb960c5c",
-      "title": "Service Groups When navigating to service groups",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_groups/service_groups.spec.ts",
-        "line": 19,
-        "column": 7
       }
     },
     {
@@ -257,7 +240,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 60,
+        "line": 53,
         "column": 7
       }
     },
@@ -271,7 +254,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 78,
+        "line": 71,
         "column": 7
       }
     },
@@ -435,33 +418,6 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
         "line": 44,
-        "column": 7
-      }
-    },
-    {
-      "id": "b823835fc8ed203-c0d7ecffab644e9",
-      "title": "Storage Explorer - Admin User user navigates and explores storage explorer functionality",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
-        "line": 22,
-        "column": 7
-      }
-    },
-    {
-      "id": "c3f1c3da077a5f2-53f098b0f4c049f",
-      "title": "Storage Explorer - Viewer (No Permissions) displays permission denied message",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
-        "line": 16,
         "column": 7
       }
     }

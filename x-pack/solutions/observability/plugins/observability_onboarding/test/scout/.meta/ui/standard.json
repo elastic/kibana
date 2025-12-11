@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:03:52.851Z",
-  "sha1": "177cf203c38bada6044e3cafaac912f2988d1228",
+  "lastModified": "2025-12-11T11:22:47.446Z",
+  "sha1": "4da8831b56dfe9d125701c04bdfef3eacbe43607",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
@@ -63,8 +63,8 @@
       }
     },
     {
-      "id": "bd77233fbb28a70-b3ddfca777e40b8",
-      "title": "Onboarding UI Validation completes Kubernetes onboarding flow with the keyboard only",
+      "id": "bd77233fbb28a70-9f3cdcd52e2e897",
+      "title": "Onboarding UI Validation completes Cloud onboarding flow",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -78,21 +78,6 @@
       }
     },
     {
-      "id": "bd77233fbb28a70-9f3cdcd52e2e897",
-      "title": "Onboarding UI Validation completes Cloud onboarding flow",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 157,
-        "column": 7
-      }
-    },
-    {
       "id": "bd77233fbb28a70-2293012f3ea6874",
       "title": "Onboarding UI Validation completes Application onboarding flow in complete tier",
       "expectedStatus": "passed",
@@ -102,7 +87,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 180,
+        "line": 147,
         "column": 7
       }
     },
@@ -115,7 +100,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 202,
+        "line": 169,
         "column": 7
       }
     }

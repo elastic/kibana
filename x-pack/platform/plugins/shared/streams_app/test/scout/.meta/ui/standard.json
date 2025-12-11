@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-11T10:19:20.201Z",
-  "sha1": "a92fb513bf08dbc38812c820341ef6565d61f809",
+  "lastModified": "2025-12-11T11:22:31.949Z",
+  "sha1": "1c0c4c5c592af4a5ca4a057948f7957ca10f687a",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -14,49 +14,7 @@
       }
     },
     {
-      "id": "facb589480c8306-56341b35415c7bd",
-      "title": "Stream data mapping - schema editor - Classic Streams read-only user cannot add/edit fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
-        "line": 38,
-        "column": 9
-      }
-    },
-    {
-      "id": "facb589480c8306-6c0fa76d26f4840",
-      "title": "Stream data mapping - schema editor - Classic Streams copy_to advanced parameter works",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
-        "line": 49,
-        "column": 9
-      }
-    },
-    {
-      "id": "facb589480c8306-dd5db3aa2061b62",
-      "title": "Stream data mapping - schema editor - Classic Streams allows mapping a field as geo_point",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
-        "line": 131,
-        "column": 9
-      }
-    },
-    {
-      "id": "79cdee9afb4efe9-44ed3bb5d07afc9",
+      "id": "58d9a87c4ea35f6-44ed3bb5d07afc9",
       "title": "Stream data mapping - schema editor should display a list of stream mappings",
       "expectedStatus": "passed",
       "tags": [
@@ -64,13 +22,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping.spec.ts",
         "line": 40,
         "column": 7
       }
     },
     {
-      "id": "79cdee9afb4efe9-01d6d0b9fd4e284",
+      "id": "58d9a87c4ea35f6-01d6d0b9fd4e284",
       "title": "Stream data mapping - schema editor should allow searching by field name",
       "expectedStatus": "passed",
       "tags": [
@@ -78,13 +36,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 58,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping.spec.ts",
+        "line": 56,
         "column": 7
       }
     },
     {
-      "id": "79cdee9afb4efe9-35a0efa77620063",
+      "id": "58d9a87c4ea35f6-35a0efa77620063",
       "title": "Stream data mapping - schema editor should allow filtering by field type and status",
       "expectedStatus": "passed",
       "tags": [
@@ -92,13 +50,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 95,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping.spec.ts",
+        "line": 93,
         "column": 7
       }
     },
     {
-      "id": "79cdee9afb4efe9-2375016ad4b94bd",
+      "id": "58d9a87c4ea35f6-2375016ad4b94bd",
       "title": "Stream data mapping - schema editor should allow mapping a field",
       "expectedStatus": "passed",
       "tags": [
@@ -106,13 +64,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 130,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping.spec.ts",
+        "line": 128,
         "column": 7
       }
     },
     {
-      "id": "79cdee9afb4efe9-2974d45367725fa",
+      "id": "58d9a87c4ea35f6-2974d45367725fa",
       "title": "Stream data mapping - schema editor should allow unmapping a field",
       "expectedStatus": "passed",
       "tags": [
@@ -120,13 +78,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 172,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping.spec.ts",
+        "line": 170,
         "column": 7
       }
     },
     {
-      "id": "79cdee9afb4efe9-fc62d688b507d95",
+      "id": "58d9a87c4ea35f6-fc62d688b507d95",
       "title": "Stream data mapping - schema editor should allow manually adding a new field",
       "expectedStatus": "passed",
       "tags": [
@@ -134,51 +92,9 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 233,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping.spec.ts",
+        "line": 231,
         "column": 7
-      }
-    },
-    {
-      "id": "f86f3e79121acd3-cda4d2c8654359b",
-      "title": "Stream data mapping - schema editor - Wired Streams inherited fields display with parent links",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 48,
-        "column": 9
-      }
-    },
-    {
-      "id": "f86f3e79121acd3-7e8867ed1b7384f",
-      "title": "Stream data mapping - schema editor - Wired Streams ECS/Otel type pre-selection for known fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 93,
-        "column": 9
-      }
-    },
-    {
-      "id": "f86f3e79121acd3-d2dd8bcdf8af73c",
-      "title": "Stream data mapping - schema editor - Wired Streams shows alias relationship in table",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 138,
-        "column": 9
       }
     },
     {
@@ -247,7 +163,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 86,
+        "line": 88,
         "column": 7
       }
     },
@@ -261,7 +177,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 108,
+        "line": 110,
         "column": 7
       }
     },
@@ -275,7 +191,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 123,
+        "line": 125,
         "column": 7
       }
     },
@@ -289,41 +205,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 142,
+        "line": 144,
         "column": 7
       }
     },
     {
-      "id": "f13bd8d34bc433f-7936c6c181e0ef7",
-      "title": "Stream data processing - creating steps should duplicate a processor",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 156,
-        "column": 7
-      }
-    },
-    {
-      "id": "f13bd8d34bc433f-ccfaa69349d0567",
-      "title": "Stream data processing - creating steps should duplicate a processor under a condition",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 170,
-        "column": 7
-      }
-    },
-    {
-      "id": "48bbe91f63b048a-858c64b8e9a75ef",
-      "title": "Stream data processing - data sources management should load by default a latest samples data source",
+      "id": "48bbe91f63b048a-2792ade859539b3",
+      "title": "Stream data processing - data sources management should load by default a random samples data source",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -331,7 +219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 35,
+        "line": 37,
         "column": 9
       }
     },
@@ -345,7 +233,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 41,
+        "line": 47,
         "column": 9
       }
     },
@@ -359,13 +247,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 62,
+        "line": 70,
         "column": 9
       }
     },
     {
-      "id": "48bbe91f63b048a-bf7900f66dae66c",
-      "title": "Stream data processing - data sources management should persist existing data sources on page reload",
+      "id": "48bbe91f63b048a-d63548e5e671e7d",
+      "title": "Stream data processing - data sources management should persist existing data sources on page reload, except for custom samples",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -373,7 +261,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 76,
+        "line": 87,
         "column": 9
       }
     },
@@ -504,342 +392,6 @@
       }
     },
     {
-      "id": "05b81aec1f98f3d-dd598a15fe81173",
-      "title": "Stream data processing - outdated documents with outdated documents - should display warning tip for latest samples datasource",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 97,
-        "column": 7
-      }
-    },
-    {
-      "id": "05b81aec1f98f3d-323ec71ba169a53",
-      "title": "Stream data processing - outdated documents with outdated documents - should display warning tip for kql samples datasource",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 105,
-        "column": 7
-      }
-    },
-    {
-      "id": "05b81aec1f98f3d-bc1e52d3cb3934c",
-      "title": "Stream data processing - outdated documents with up to date documents - should not display warning tip for latest samples datasource",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 120,
-        "column": 7
-      }
-    },
-    {
-      "id": "05b81aec1f98f3d-5006ed16bffd22d",
-      "title": "Stream data processing - outdated documents with up to date documents - should not display warning tip for kql samples datasource",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 128,
-        "column": 7
-      }
-    },
-    {
-      "id": "05b81aec1f98f3d-7df840cbf9f1acf",
-      "title": "Stream data processing - outdated documents with empty samples - should not display warning tip for latest samples datasource",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 143,
-        "column": 7
-      }
-    },
-    {
-      "id": "05b81aec1f98f3d-b1d187bdc22846e",
-      "title": "Stream data processing - outdated documents with empty samples - should not display warning tip for kql samples datasource",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 151,
-        "column": 7
-      }
-    },
-    {
-      "id": "05b81aec1f98f3d-c7ab9991a959935",
-      "title": "Stream data processing - outdated documents should never display warning tip for custom samples datasource",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 165,
-        "column": 7
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-f8d44b650682af6",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 42,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-2315daf2c42d27d",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to edit existing processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 50,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-6dfdbbced407ed7",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to duplicate processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 61,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-984b17bddf52f58",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to delete processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 72,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-92513d001d973b8",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add conditions (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 89,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-54177f2f2b1d75a",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT show save changes button for viewer (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 97,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-782eccbcbedcd18",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to add processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 142,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-6dc5ca4973457c5",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to edit existing processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 150,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-fe6cd89dee5117d",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to duplicate processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-f898866e7c6a1f5",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to delete processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 172,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-074bc7b5d0a9019",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT show save changes button for editor (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 189,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-10300c4c52ff3ef",
-      "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to edit existing conditions (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 237,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-c67b471c8eff15f",
-      "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to delete conditions (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 248,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-89774db8a07beae",
-      "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to add nested steps to conditions (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 264,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-5a4e6cd12593697",
-      "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to edit existing conditions (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 315,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-94be4ccd82b589f",
-      "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to delete conditions (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 326,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-9dd357f4eba4f70",
-      "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to add nested steps to conditions (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 342,
-        "column": 9
-      }
-    },
-    {
       "id": "8431b9ecd24de8b-5410dfb47f53d9f",
       "title": "Stream data processing - simulation preview should display default samples when no processors are configured",
       "expectedStatus": "passed",
@@ -849,7 +401,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 37,
+        "line": 36,
         "column": 7
       }
     },
@@ -863,7 +415,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 51,
+        "line": 50,
         "column": 7
       }
     },
@@ -877,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 72,
+        "line": 71,
         "column": 7
       }
     },
@@ -891,7 +443,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 105,
+        "line": 104,
         "column": 7
       }
     },
@@ -905,35 +457,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 140,
-        "column": 7
-      }
-    },
-    {
-      "id": "8431b9ecd24de8b-3346718a174e09f",
-      "title": "Stream data processing - simulation preview should update the simulation preview with processed dates from another locale/timezone",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 192,
-        "column": 7
-      }
-    },
-    {
-      "id": "8431b9ecd24de8b-d4e223d8a2dab6e",
-      "title": "Stream data processing - simulation preview should show dropped documents in the simulation preview",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 235,
+        "line": 139,
         "column": 7
       }
     },
@@ -947,7 +471,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 79,
+        "line": 28,
         "column": 7
       }
     },
@@ -961,7 +485,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 96,
+        "line": 45,
         "column": 7
       }
     },
@@ -975,111 +499,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 112,
-        "column": 7
-      }
-    },
-    {
-      "id": "3fffa783271190b-4775d23430ce410",
-      "title": "Stream data quality should toggle between degraded and failed docs quality issues charts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 127,
-        "column": 7
-      }
-    },
-    {
-      "id": "3fffa783271190b-d433732b148e845",
-      "title": "Stream data quality should show degraded fields table with data",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 135,
-        "column": 7
-      }
-    },
-    {
-      "id": "3fffa783271190b-dd8fbacadb48e67",
-      "title": "Stream data quality should open and close degraded field flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 158,
-        "column": 7
-      }
-    },
-    {
-      "id": "3fffa783271190b-20b23641495bf7b",
-      "title": "Stream data quality should navigate to Discover from degraded field flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 185,
-        "column": 7
-      }
-    },
-    {
-      "id": "3fffa783271190b-27ee667d7063050",
-      "title": "Stream data quality should edit failure store for wired streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 208,
-        "column": 7
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-6b8296211e38431",
-      "title": "Stream data retention - custom retention periods should set and reset retention policy",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 46,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-7bb84541041f0d9",
-      "title": "Stream data retention - custom retention periods should set retention with days unit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
         "line": 61,
-        "column": 9
+        "column": 7
       }
     },
     {
-      "id": "1590b4af49c6b0b-3a1a9539d24c6dc",
-      "title": "Stream data retention - custom retention periods should set retention with hours unit",
+      "id": "1590b4af49c6b0b-a7c13584ad9a83e",
+      "title": "Stream data retention - updating data retention should update a stream data retention policy successfully",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -1087,13 +513,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 69,
+        "line": 33,
         "column": 9
       }
     },
     {
-      "id": "1590b4af49c6b0b-2619b2671b2823d",
-      "title": "Stream data retention - custom retention periods should set retention with minutes unit",
+      "id": "1590b4af49c6b0b-75967e9556a6716",
+      "title": "Stream data retention - updating data retention should reset a stream data retention policy successfully",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -1101,49 +527,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 77,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-2f8254aa46beb47",
-      "title": "Stream data retention - custom retention periods should set retention with seconds unit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 85,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-814b247f30e495c",
-      "title": "Stream data retention - custom retention periods should persist retention value across page refresh",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 93,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-37ff27f069ce66d",
-      "title": "Stream data retention - custom retention periods should set retention on classic stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 107,
+        "line": 47,
         "column": 9
       }
     },
@@ -1157,8 +541,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 47,
+        "column": 9
       }
     },
     {
@@ -1171,8 +555,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 75,
-        "column": 7
+        "line": 69,
+        "column": 9
       }
     },
     {
@@ -1185,26 +569,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 88,
-        "column": 7
+        "line": 81,
+        "column": 9
       }
     },
     {
-      "id": "fdca40135eb0f87-1e0b24aaf005b82",
-      "title": "Stream data retention - updating failure store should be able to disable lifecycle for classic if is not serverless",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 104,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-eb9876f48853485",
-      "title": "Stream data retention - updating failure store should inherit failure store for classic streams",
+      "id": "fdca40135eb0f87-f6f4d1f1deb3c7b",
+      "title": "Stream data retention - updating failure store should not allow edit failure store for wired streams",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -1212,700 +583,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 127,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-62f745668288e26",
-      "title": "Stream data retention - updating failure store should edit failure store successfully for wired streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 148,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-88fc42e9ab1cf7f",
-      "title": "Stream data retention - updating failure store should disable failure store for wired streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 164,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-0a9a4ab8715dfb6",
-      "title": "Stream data retention - updating failure store should enable failure store for wired streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 180,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-70ccfeaea8d42d9",
-      "title": "Stream data retention - updating failure store should be able to disable lifecycle for wired streams on ESS",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 201,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-b7373a0624e307a",
-      "title": "Stream data retention - updating failure store should inherit failure store for child wired streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 224,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-b153942a7c6716b",
-      "title": "Stream data retention - updating failure store should not inherit failure store for root wired streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 243,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-47ea8018ad86f69",
-      "title": "Stream data retention - updating failure store should set failure store retention to different value than main retention",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 255,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-4c350e9a6f29374",
-      "title": "Stream data retention - updating failure store should persist failure store retention across page reload",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 277,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-32738bf14fc677a",
-      "title": "Stream data retention - updating failure store should cancel failure store retention edit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 293,
-        "column": 7
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-6a00929c70c16fe",
-      "title": "Stream data retention - updating failure store should show failure store disabled state",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 316,
-        "column": 7
-      }
-    },
-    {
-      "id": "6ff035a70002742-8526805a8b3a237",
-      "title": "Stream data retention - ILM policy should show ILM policy button",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 50,
-        "column": 7
-      }
-    },
-    {
-      "id": "6ff035a70002742-1ad0be072cb4802",
-      "title": "Stream data retention - ILM policy should select and save ILM policy",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 56,
-        "column": 7
-      }
-    },
-    {
-      "id": "6ff035a70002742-4ea166585fe5924",
-      "title": "Stream data retention - ILM policy should display selected ILM policy name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 74,
-        "column": 7
-      }
-    },
-    {
-      "id": "6ff035a70002742-86cc39213ea2a61",
-      "title": "Stream data retention - ILM policy should persist ILM policy selection across page reload",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 90,
-        "column": 7
-      }
-    },
-    {
-      "id": "0ed00376f219437-265885593f64678",
-      "title": "Stream data retention - display values should display singular and plural time units correctly",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 56,
-        "column": 7
-      }
-    },
-    {
-      "id": "0ed00376f219437-9d0d861d1c08fb8",
-      "title": "Stream data retention - display values should display indefinite as infinity symbol",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 71,
-        "column": 7
-      }
-    },
-    {
-      "id": "0ed00376f219437-792ee8fdbf8c56d",
-      "title": "Stream data retention - display values should show custom period badge when custom retention is set",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 79,
-        "column": 7
-      }
-    },
-    {
-      "id": "0ed00376f219437-87aeb565459b7a2",
-      "title": "Stream data retention - display values should display all time units consistently",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 87,
-        "column": 7
-      }
-    },
-    {
-      "id": "0ed00376f219437-bc04bd4267a6a8a",
-      "title": "Stream data retention - display values should display retention metric prominently",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 96,
-        "column": 7
-      }
-    },
-    {
-      "id": "e2be9a73b184a96-2e15a2858773682",
-      "title": "Stream data retention - inheritance should show inherit toggle and inherit by default",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 48,
-        "column": 7
-      }
-    },
-    {
-      "id": "e2be9a73b184a96-201847ff03b1cf2",
-      "title": "Stream data retention - inheritance should toggle inherit mode on and off",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 69,
-        "column": 7
-      }
-    },
-    {
-      "id": "e2be9a73b184a96-ded761a5a78160c",
-      "title": "Stream data retention - inheritance should handle inherit for nested child streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 90,
-        "column": 7
-      }
-    },
-    {
-      "id": "e2be9a73b184a96-c171d6ecff0d273",
-      "title": "Stream data retention - inheritance should allow override on nested child stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 115,
-        "column": 7
-      }
-    },
-    {
-      "id": "e2be9a73b184a96-875b4d30ce1cdc6",
-      "title": "Stream data retention - inheritance should handle multiple child streams inheriting from same parent",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 139,
-        "column": 7
-      }
-    },
-    {
-      "id": "e2be9a73b184a96-ad9a9e20f2d1c27",
-      "title": "Stream data retention - inheritance should reflect parent retention changes in child when inheriting",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 161,
-        "column": 7
-      }
-    },
-    {
-      "id": "bfaa6b699422ff5-4558427c86af828",
-      "title": "Stream data retention - modal interactions should open and close modal",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_modal_interactions.spec.ts",
-        "line": 54,
-        "column": 7
-      }
-    },
-    {
-      "id": "bfaa6b699422ff5-0ebc6e2fb77c302",
-      "title": "Stream data retention - modal interactions should preserve values on cancel and update on save",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_modal_interactions.spec.ts",
-        "line": 63,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-00a2ba9f8f006e3",
-      "title": "Stream data retention - mode switching should switch between custom and indefinite modes",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 53,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-59e67e6f1ccb9a3",
-      "title": "Stream data retention - mode switching should switch between different custom time units",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 73,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-ca62a176717e665",
-      "title": "Stream data retention - mode switching should cancel mode change without saving",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
         "line": 98,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-25fe1e374a04cba",
-      "title": "Stream data retention - mode switching should maintain mode selection when reopening modal",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 110,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-a7237a156dc9d03",
-      "title": "Stream data retention - mode switching should persist indefinite retention after page refresh",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 122,
-        "column": 7
-      }
-    },
-    {
-      "id": "7b9f1bc0367bdf5-60ee9f9e1af5c8c",
-      "title": "Stream data retention - storage metrics integration should update retention without affecting storage display",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
-        "line": 55,
         "column": 9
       }
     },
     {
-      "id": "7b9f1bc0367bdf5-e3d1efa7ce953e7",
-      "title": "Stream data retention - storage metrics integration should maintain retention display after page navigation",
+      "id": "fdca40135eb0f87-11b2607df26996e",
+      "title": "Stream data retention - updating failure store should not allow enabling failure store for wired streams",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
-        "line": 68,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 120,
         "column": 9
-      }
-    },
-    {
-      "id": "9349667e5bca40e-4c30a41802efe9b",
-      "title": "Stream data routing - AI suggestions button should show button when AI features are enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 41,
-        "column": 7
-      }
-    },
-    {
-      "id": "9349667e5bca40e-2cd846c5324c829",
-      "title": "Stream data routing - AI suggestions button should disable button when no connector is selected",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 47,
-        "column": 7
-      }
-    },
-    {
-      "id": "9349667e5bca40e-8238485c9b8c08f",
-      "title": "Stream data routing - AI suggestions button should show connector dropdown when multiple connectors exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 61,
-        "column": 7
-      }
-    },
-    {
-      "id": "954b6fa16b3e83e-098e105b5880d71",
-      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with empty name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 58,
-        "column": 7
-      }
-    },
-    {
-      "id": "954b6fa16b3e83e-c9fb9d27893c2ba",
-      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name containing dots",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 70,
-        "column": 7
-      }
-    },
-    {
-      "id": "954b6fa16b3e83e-fe89c36564d8512",
-      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name exceeding max length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 86,
-        "column": 7
-      }
-    },
-    {
-      "id": "954b6fa16b3e83e-c0db288e902915d",
-      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with duplicate name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 103,
-        "column": 7
-      }
-    },
-    {
-      "id": "954b6fa16b3e83e-255ea6600fc8ce1",
-      "title": "Stream data routing - AI suggestions editing validation should allow editing suggestion with valid condition",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 139,
-        "column": 7
-      }
-    },
-    {
-      "id": "41f986dc7d507af-177423f5f28279b",
-      "title": "Stream data routing - AI suggestions generation should successfully generate and display suggestions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
-        "line": 45,
-        "column": 7
-      }
-    },
-    {
-      "id": "41f986dc7d507af-6a6bd738cf29b44",
-      "title": "Stream data routing - AI suggestions generation should handle empty suggestions response",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
-        "line": 55,
-        "column": 7
-      }
-    },
-    {
-      "id": "bc6ace18083cf6a-0033ff890a80016",
-      "title": "Stream data routing - AI suggestions interactions should preview suggestion",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 50,
-        "column": 7
-      }
-    },
-    {
-      "id": "bc6ace18083cf6a-59031b3e126feaa",
-      "title": "Stream data routing - AI suggestions interactions should edit suggestion",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 57,
-        "column": 7
-      }
-    },
-    {
-      "id": "bc6ace18083cf6a-481f21a0ac903d1",
-      "title": "Stream data routing - AI suggestions interactions should reject suggestion",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 66,
-        "column": 7
-      }
-    },
-    {
-      "id": "bc6ace18083cf6a-25b391c252a342c",
-      "title": "Stream data routing - AI suggestions interactions should regenerate suggestions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 75,
-        "column": 7
-      }
-    },
-    {
-      "id": "bc6ace18083cf6a-599c1773006248e",
-      "title": "Stream data routing - AI suggestions interactions should update suggestion name when editing and accepting",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 95,
-        "column": 7
-      }
-    },
-    {
-      "id": "bc6ace18083cf6a-8a8b94aca37cb16",
-      "title": "Stream data routing - AI suggestions interactions should update suggestion condition when editing and accepting",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 125,
-        "column": 7
-      }
-    },
-    {
-      "id": "bc6ace18083cf6a-b1112374737687d",
-      "title": "Stream data routing - AI suggestions interactions should cancel editing and revert to original suggestion",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 159,
-        "column": 7
       }
     },
     {
@@ -1918,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 24,
+        "line": 22,
         "column": 7
       }
     },
@@ -1932,7 +625,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 59,
+        "line": 54,
         "column": 7
       }
     },
@@ -1946,13 +639,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 72,
+        "line": 67,
         "column": 7
       }
     },
     {
-      "id": "92d7bc6cddf5121-d8dbc074e0c1e71",
-      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names verified on the client",
+      "id": "92d7bc6cddf5121-316753192558f23",
+      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -1960,21 +653,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 90,
-        "column": 7
-      }
-    },
-    {
-      "id": "92d7bc6cddf5121-615e268c0f49a9b",
-      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names verified on the server",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 118,
+        "line": 82,
         "column": 7
       }
     },
@@ -1988,7 +667,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 140,
+        "line": 100,
         "column": 7
       }
     },
@@ -2002,49 +681,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 154,
-        "column": 7
-      }
-    },
-    {
-      "id": "92d7bc6cddf5121-3e6f87ceb325a39",
-      "title": "Stream data routing - creating routing rules should navigate to child stream when clicking on stream name link",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 167,
-        "column": 7
-      }
-    },
-    {
-      "id": "92d7bc6cddf5121-b9aa65a4bbda14a",
-      "title": "Stream data routing - creating routing rules should show \"Open stream in new tab\" button in success toast",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 192,
-        "column": 7
-      }
-    },
-    {
-      "id": "92d7bc6cddf5121-e8a7dfb80f49956",
-      "title": "Stream data routing - creating routing rules should attempt to create stream with duplicate name and fail",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 217,
+        "line": 114,
         "column": 7
       }
     },
@@ -2072,7 +709,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 54,
+        "line": 49,
         "column": 7
       }
     },
@@ -2086,7 +723,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 75,
+        "line": 65,
         "column": 7
       }
     },
@@ -2100,7 +737,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 96,
+        "line": 86,
         "column": 7
       }
     },
@@ -2114,7 +751,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 108,
+        "line": 98,
         "column": 7
       }
     },
@@ -2156,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 9
       }
     },
@@ -2170,7 +807,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 50,
+        "line": 49,
         "column": 9
       }
     },
@@ -2184,49 +821,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 60,
-        "column": 9
-      }
-    },
-    {
-      "id": "3a7b6b834964a95-2669d197625bc9c",
-      "title": "Stream data routing - reordering routing rules should not allow editing while reordering is in progress",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 76,
-        "column": 9
-      }
-    },
-    {
-      "id": "3a7b6b834964a95-2d74d9fca7b147f",
-      "title": "Stream data routing - reordering routing rules should persist order after page refresh",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 94,
-        "column": 9
-      }
-    },
-    {
-      "id": "3a7b6b834964a95-db6790c00519821",
-      "title": "Stream data routing - reordering routing rules should allow reordering only when multiple rules exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 107,
+        "line": 59,
         "column": 9
       }
     },
@@ -2240,7 +835,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 34,
+        "line": 33,
         "column": 7
       }
     },
@@ -2254,7 +849,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 57,
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-f2ac6d88c5c68d0",
+      "title": "Stream data routing - previewing data should allow updating the condition manually by syntax editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 97,
         "column": 7
       }
     },
@@ -2268,7 +877,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 98,
+        "line": 158,
         "column": 7
       }
     },
@@ -2282,7 +891,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 113,
+        "line": 173,
         "column": 7
       }
     },
@@ -2296,8 +905,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 123,
+        "line": 183,
         "column": 7
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-8e3a968806f9c62",
+      "title": "Stream data routing - previewing data should switch between matched and unmatched documents",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 216,
+        "column": 8
       }
     },
     {
@@ -2310,13 +933,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 154,
+        "line": 266,
         "column": 7
       }
     },
     {
-      "id": "643cc1fa64531d4-f1f288a666d7e38",
-      "title": "Stream data routing - previewing data should handle \"no data\" when date range has no documents",
+      "id": "643cc1fa64531d4-b12f8559105ec78",
+      "title": "Stream data routing - previewing data should handle filter controls with complex conditions",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -2324,13 +947,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 191,
+        "line": 303,
         "column": 7
       }
     },
     {
-      "id": "643cc1fa64531d4-88492370b51e126",
-      "title": "Stream data routing - previewing data should display child stream count badge for nested routing rules",
+      "id": "643cc1fa64531d4-e0243f3d08782e8",
+      "title": "Stream data routing - previewing data should disable filter controls when no condition is set",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -2338,7 +961,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 214,
+        "line": 332,
+        "column": 7
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-e2c1e46fb9c4d3a",
+      "title": "Stream data routing - previewing data should show filter tooltip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 340,
+        "column": 7
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-311752f8725cc47",
+      "title": "Stream data routing - previewing data should handle error states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 347,
         "column": 7
       }
     },
