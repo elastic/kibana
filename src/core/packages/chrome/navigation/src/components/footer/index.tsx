@@ -39,8 +39,10 @@ const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boo
       content: '';
       position: absolute;
       top: 0;
-      left: ${theme.size.s};
-      right: ${theme.size.s};
+      left: 0;
+      right: 0;
+      width: ${theme.size.xl};
+      margin: 0 auto;
       height: ${theme.border.width.thin};
       background-color: ${theme.colors.borderBaseSubdued};
     }
@@ -53,8 +55,10 @@ const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boo
       content: '';
       position: absolute;
       top: 0;
-      left: ${theme.size.s};
-      right: ${theme.size.s};
+      left: 0;
+      right: 0;
+      width: ${theme.size.xl};
+      margin: 0 auto;
       height: ${theme.border.width.thin};
       background-color: ${theme.colors.borderBaseSubdued};
     }

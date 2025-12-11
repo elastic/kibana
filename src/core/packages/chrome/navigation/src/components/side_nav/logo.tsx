@@ -56,8 +56,10 @@ export const Logo = ({
       content: '';
       position: absolute;
       bottom: 0;
-      left: ${euiTheme.size.s};
-      right: ${euiTheme.size.s};
+      left: 0;
+      right: 0;
+      width: ${euiTheme.size.xl};
+      margin: 0 auto;
       height: ${euiTheme.border.width.thin};
       background-color: ${euiTheme.colors.borderBaseSubdued};
     }
