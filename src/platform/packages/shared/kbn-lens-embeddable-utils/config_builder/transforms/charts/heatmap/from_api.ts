@@ -34,7 +34,7 @@ import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
 
-export const ACCESSOR = 'heatmap_value_accessor';
+const ACCESSOR = 'heatmap_value_accessor';
 
 function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
