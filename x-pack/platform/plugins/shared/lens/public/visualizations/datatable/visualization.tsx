@@ -60,7 +60,7 @@ import { DatatableInspectorTables } from '../../../common/expressions/defs/datat
 import { convertToRuntimeState } from './runtime_state';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 import {
-  DatatableAppearanceSettings,
+  TableSettings,
   getSimpleColumnType,
   TableDimensionDataExtraEditor,
   TableDimensionEditor,
@@ -460,6 +460,14 @@ export const getDatatableVisualization = ({
   },
 
   setDimension({ prevState, columnId, groupId, previousColumn }) {
+    // Helper to calculate the next transpose level for a given dimension
+    const getNextTransposeLevel = (state: DatatableVisualizationState, dimension: 'rows' | 'columns') => {
+      const existingLevels = state.columns
+        .filter((c) => c.transposeDimension === dimension && c.columnId !== previousColumn)
+        .map((c) => c.transposeLevel ?? 0);
+      return existingLevels.length > 0 ? Math.max(...existingLevels) + 1 : 0;
+    };
+
     if (
       prevState.columns.some(
         (column) =>
@@ -470,22 +478,41 @@ export const getDatatableVisualization = ({
         ...prevState,
         columns: prevState.columns.map((column) => {
           if (column.columnId === columnId || column.columnId === previousColumn) {
+            const isTransposed = groupId === 'columns';
+            const transposeDimension = groupId === 'columns' ? 'columns' : groupId === 'rows' ? 'rows' : undefined;
+            const transposeLevel = groupId === 'columns'
+              ? (column.transposeLevel ?? getNextTransposeLevel(prevState, 'columns'))
+              : undefined;
+
             return {
               ...column,
               columnId,
-              isTransposed: groupId === 'columns',
+              isTransposed,
               isMetric: groupId === 'metrics',
+              transposeDimension,
+              transposeLevel,
             };
           }
           return column;
         }),
       };
     }
+
+    const isTransposed = groupId === 'columns';
+    const transposeDimension = groupId === 'columns' ? 'columns' : groupId === 'rows' ? 'rows' : undefined;
+    const transposeLevel = groupId === 'columns' ? getNextTransposeLevel(prevState, 'columns') : undefined;
+
     return {
       ...prevState,
       columns: [
         ...prevState.columns,
-        { columnId, isTransposed: groupId === 'columns', isMetric: groupId === 'metrics' },
+        {
+          columnId,
+          isTransposed,
+          isMetric: groupId === 'metrics',
+          transposeDimension,
+          transposeLevel,
+        },
       ],
     };
   },
@@ -656,6 +683,9 @@ export const getDatatableVisualization = ({
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
       density: state.density ?? LENS_DATAGRID_DENSITY.NORMAL,
+      emptyCellValue: state.pivotSettings?.emptyCells,
+      maxTransposeColumns: state.pivotSettings?.maxColumns,
+      grandTotals: state.grandTotals ? JSON.stringify(state.grandTotals) : undefined,
     }).toAst();
 
     return {
@@ -697,7 +727,7 @@ export const getDatatableVisualization = ({
   },
 
   FlyoutToolbarComponent(props) {
-    return <FlyoutToolbar {...props} contentMap={{ style: DatatableAppearanceSettings }} />;
+    return <FlyoutToolbar {...props} contentMap={{ style: TableSettings }} />;
   },
 
   onEditAction(state, event) {

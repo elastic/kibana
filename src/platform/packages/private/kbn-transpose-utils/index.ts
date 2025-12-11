@@ -19,8 +19,39 @@ export const TRANSPOSE_SEPARATOR = '---';
  */
 export const TRANSPOSE_VISUAL_SEPARATOR = '›';
 
-export function getTransposeId(value: string, columnId: string) {
-  return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
+/**
+ * Create a transposed column ID with optional dimension prefix
+ * For backward compatibility, dimension defaults to 'columns'
+ */
+export function getTransposeId(value: string, columnId: string, dimension?: 'rows' | 'columns') {
+  // For backward compatibility, don't add dimension prefix if not specified or if it's 'columns'
+  if (!dimension || dimension === 'columns') {
+    return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
+  }
+  return `${dimension}:${value}${TRANSPOSE_SEPARATOR}${columnId}`;
+}
+
+/**
+ * Parse a transpose ID to extract dimension, value, and column ID
+ */
+export function parseTransposeId(id: string): {
+  dimension: 'rows' | 'columns';
+  values: string[];
+  columnId: string;
+} {
+  // Check if ID has dimension prefix
+  const dimensionMatch = id.match(/^(rows|columns):/);
+  const dimension = (dimensionMatch?.[1] as 'rows' | 'columns') || 'columns';
+
+  // Remove dimension prefix if present
+  const idWithoutDimension = dimensionMatch ? id.slice(dimensionMatch[0].length) : id;
+
+  // Split by separator
+  const parts = idWithoutDimension.split(TRANSPOSE_SEPARATOR);
+  const columnId = parts.pop() || '';
+  const values = parts;
+
+  return { dimension, values, columnId };
 }
 
 export function isTransposeId(id: string): boolean {

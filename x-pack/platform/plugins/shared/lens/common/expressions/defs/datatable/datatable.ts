@@ -12,6 +12,20 @@ import type { FormatFactory } from '../../../types';
 import type { DatatableColumnResult } from '../../impl/datatable/datatable_column';
 import type { DatatableExpressionFunction } from './types';
 
+export interface SubtotalConfig {
+  enabled: boolean;
+  position: 'before' | 'after';
+  functions: Array<'sum' | 'avg' | 'count' | 'min' | 'max'>;
+  levels: number[];
+}
+
+export interface GrandTotalConfig {
+  rows: boolean;
+  columns: boolean;
+  position: 'top' | 'bottom';
+  functions: Array<'sum' | 'avg' | 'count' | 'min' | 'max'>;
+}
+
 export interface DatatableArgs {
   title: string;
   description?: string;
@@ -24,6 +38,11 @@ export interface DatatableArgs {
   headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
   density?: DataGridDensity;
+  rowSubtotals?: SubtotalConfig;
+  columnSubtotals?: SubtotalConfig;
+  grandTotals?: GrandTotalConfig;
+  emptyCellValue?: 'empty' | 'zero' | 'dash' | 'na';
+  maxTransposeColumns?: number;
 }
 
 /**
@@ -90,6 +109,36 @@ export const getDatatable = (
     density: {
       types: ['string'],
       help: '',
+    },
+    rowSubtotals: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.datatable.rowSubtotalsLabel', {
+        defaultMessage: 'Row subtotals configuration',
+      }),
+    },
+    columnSubtotals: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.datatable.columnSubtotalsLabel', {
+        defaultMessage: 'Column subtotals configuration',
+      }),
+    },
+    grandTotals: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.datatable.grandTotalsLabel', {
+        defaultMessage: 'Grand totals configuration',
+      }),
+    },
+    emptyCellValue: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.datatable.emptyCellValueLabel', {
+        defaultMessage: 'How to display empty cells in pivot tables',
+      }),
+    },
+    maxTransposeColumns: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.datatable.maxTransposeColumnsLabel', {
+        defaultMessage: 'Maximum number of columns to create when transposing',
+      }),
     },
   },
   async fn(...args) {

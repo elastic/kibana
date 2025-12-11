@@ -7,7 +7,14 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiButtonGroup,
+  htmlIdGenerator,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
@@ -84,7 +91,8 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   );
 
   if (!column) return null;
-  if (column.isTransposed) return null;
+
+  const isTransposed = column.isTransposed || column.transposeDimension === 'columns';
 
   const currentData =
     frame.activeData?.[localState.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
@@ -128,6 +136,24 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
+      {isTransposed && (
+        <>
+          <EuiCallOut
+            size="s"
+            title={i18n.translate('xpack.lens.table.pivotDimension.title', {
+              defaultMessage: 'Pivot dimension',
+            })}
+            iconType="pivot"
+          >
+            <p>
+              {i18n.translate('xpack.lens.table.pivotDimension.description', {
+                defaultMessage: 'This field creates column groups in the pivot table',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -365,11 +391,12 @@ export function TableDimensionDataExtraEditor(
   const column = state.columns.find(({ columnId }) => accessor === columnId);
 
   if (!column) return null;
-  if (column.isTransposed) return null;
+
+  const isTransposed = column.isTransposed || column.transposeDimension === 'columns';
 
   return (
     <>
-      {props.groupId === 'rows' && (
+      {props.groupId === 'rows' && !isTransposed && (
         <CollapseSetting
           value={column.collapseFn || ''}
           onChange={(collapseFn) => {

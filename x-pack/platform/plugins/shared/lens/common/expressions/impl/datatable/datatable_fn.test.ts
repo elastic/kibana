@@ -146,4 +146,331 @@ describe('datatableFn', () => {
       'unknown',
     ]);
   });
+
+  describe('subtotals', () => {
+    it('should add subtotal rows when rowSubtotals is enabled', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        rowSubtotals: {
+          enabled: true,
+          position: 'after',
+          functions: ['sum'],
+          levels: [1], // Subtotal by bucket1
+        },
+      };
+      // Mark columns as metrics or not
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // Should have original 27 rows + 3 subtotal rows (one for each unique bucket1 value: A, B, C)
+      expect(result.value.data.rows.length).toBe(30);
+
+      // Find subtotal rows
+      const subtotalRows = result.value.data.rows.filter((row: any) => row.__isSubtotal);
+      expect(subtotalRows.length).toBe(3);
+
+      // Check first subtotal (for bucket1 = 'A')
+      const firstSubtotal = subtotalRows[0];
+      expect(firstSubtotal.bucket1).toBe('A');
+      // Sum of metric1 for bucket1='A': 1+3+5+7+9+11+13+15+17 = 81
+      expect(firstSubtotal.metric1).toBe(81);
+      // Sum of metric2 for bucket1='A': 2+4+6+8+10+12+14+16+18 = 90
+      expect(firstSubtotal.metric2).toBe(90);
+    });
+
+    it('should add subtotal rows before groups when position is "before"', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        rowSubtotals: {
+          enabled: true,
+          position: 'before',
+          functions: ['sum'],
+          levels: [1],
+        },
+      };
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // First row should be a subtotal for bucket1='A'
+      expect((result.value.data.rows[0] as any).__isSubtotal).toBe(true);
+      expect(result.value.data.rows[0].bucket1).toBe('A');
+    });
+
+    it('should calculate average when function is "avg"', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        rowSubtotals: {
+          enabled: true,
+          position: 'after',
+          functions: ['avg'],
+          levels: [1],
+        },
+      };
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      const subtotalRows = result.value.data.rows.filter((row: any) => row.__isSubtotal);
+      const firstSubtotal = subtotalRows[0];
+
+      // Average of metric1 for bucket1='A': (1+3+5+7+9+11+13+15+17) / 9 = 9
+      expect(firstSubtotal.metric1).toBe(9);
+    });
+
+    it('should support multiple subtotal levels', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        rowSubtotals: {
+          enabled: true,
+          position: 'after',
+          functions: ['sum'],
+          levels: [1, 2], // Subtotal by bucket1 and bucket1+bucket2
+        },
+      };
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      const subtotalRows = result.value.data.rows.filter((row: any) => row.__isSubtotal);
+      // 3 level-1 subtotals (A, B, C) + 9 level-2 subtotals (A-D, A-E, A-F, B-D, B-E, B-F, C-D, C-E, C-F)
+      expect(subtotalRows.length).toBe(12);
+    });
+  });
+
+  describe('grand totals', () => {
+    it('should add grand total row when grandTotals.rows is enabled', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        grandTotals: {
+          rows: true,
+          columns: false,
+          position: 'bottom',
+          functions: ['sum'],
+        },
+      };
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // Should have original 27 rows + 1 grand total row
+      expect(result.value.data.rows.length).toBe(28);
+
+      // Last row should be grand total
+      const lastRow = result.value.data.rows[result.value.data.rows.length - 1];
+      expect((lastRow as any).__isGrandTotal).toBe(true);
+
+      // Sum of all metric1 values: sum from 1 to 53 (odd numbers) = 729
+      expect(lastRow.metric1).toBe(729);
+      // Sum of all metric2 values: sum from 2 to 54 (even numbers) = 756
+      expect(lastRow.metric2).toBe(756);
+    });
+
+    it('should add grand total row at top when position is "top"', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        grandTotals: {
+          rows: true,
+          columns: false,
+          position: 'top',
+          functions: ['sum'],
+        },
+      };
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // First row should be grand total
+      expect((result.value.data.rows[0] as any).__isGrandTotal).toBe(true);
+    });
+
+    it('should label grand total row with "Grand Total" in first column', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        grandTotals: {
+          rows: true,
+          columns: false,
+          position: 'bottom',
+          functions: ['sum'],
+        },
+      };
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // Last row should be grand total
+      const lastRow = result.value.data.rows[result.value.data.rows.length - 1];
+      expect((lastRow as any).__isGrandTotal).toBe(true);
+
+      // First bucket column should be labeled "Grand Total"
+      expect(lastRow.bucket1).toBe('Grand Total');
+    });
+
+    it('should work with both subtotals and grand totals enabled', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        rowSubtotals: {
+          enabled: true,
+          position: 'after',
+          functions: ['sum'],
+          levels: [1],
+        },
+        grandTotals: {
+          rows: true,
+          columns: false,
+          position: 'bottom',
+          functions: ['sum'],
+        },
+      };
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // Should have original 27 rows + 3 subtotal rows + 1 grand total row = 31
+      expect(result.value.data.rows.length).toBe(31);
+
+      const subtotalRows = result.value.data.rows.filter((row: any) => row.__isSubtotal);
+      expect(subtotalRows.length).toBe(3);
+
+      const grandTotalRows = result.value.data.rows.filter((row: any) => row.__isGrandTotal);
+      expect(grandTotalRows.length).toBe(1);
+    });
+
+    it('should add grand total columns when grandTotals.columns is enabled with transpose', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        grandTotals: {
+          rows: false,
+          columns: true,
+          position: 'bottom',
+          functions: ['sum'],
+        },
+      };
+
+      // Transpose bucket3 to create columns
+      args.columns[2].isTransposed = true;
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // After transpose, we should have:
+      // - bucket1, bucket2 (non-transposed buckets)
+      // - X---metric1, X---metric2, Y---metric1, Y---metric2, Z---metric1, Z---metric2 (transposed)
+      // - metric1___grand_total, metric2___grand_total (grand total columns)
+      const columnIds = result.value.data.columns.map((c: any) => c.id);
+
+      expect(columnIds).toContain('metric1___grand_total');
+      expect(columnIds).toContain('metric2___grand_total');
+
+      // Verify grand total column names
+      const metric1GrandTotalCol = result.value.data.columns.find(
+        (c: any) => c.id === 'metric1___grand_total'
+      );
+      expect(metric1GrandTotalCol?.name).toContain('Grand Total');
+
+      // Check that grand total values are calculated correctly
+      // For the first row (A, D), bucket3 values are X, Y, Z with metric1 = 1, 3, 5
+      // Sum should be 1 + 3 + 5 = 9
+      const firstRow = result.value.data.rows[0];
+      expect(firstRow.metric1___grand_total).toBe(9);
+
+      // For metric2, values are 2, 4, 6, sum = 12
+      expect(firstRow.metric2___grand_total).toBe(12);
+    });
+
+    it('should calculate grand total columns with avg function', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        grandTotals: {
+          rows: false,
+          columns: true,
+          position: 'bottom',
+          functions: ['avg'],
+        },
+      };
+
+      // Transpose bucket3 to create columns
+      args.columns[2].isTransposed = true;
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // For the first row (A, D), bucket3 values are X, Y, Z with metric1 = 1, 3, 5
+      // Average should be (1 + 3 + 5) / 3 = 3
+      const firstRow = result.value.data.rows[0];
+      expect(firstRow.metric1___grand_total).toBe(3);
+
+      // For metric2, values are 2, 4, 6, avg = 4
+      expect(firstRow.metric2___grand_total).toBe(4);
+    });
+
+    it('should work with both row and column grand totals', async () => {
+      const table = buildTable();
+      const args: DatatableArgs = {
+        ...buildArgs(),
+        grandTotals: {
+          rows: true,
+          columns: true,
+          position: 'bottom',
+          functions: ['sum'],
+        },
+      };
+
+      // Transpose bucket3 to create columns
+      args.columns[2].isTransposed = true;
+      args.columns = args.columns.map((col) => ({
+        ...col,
+        isMetric: col.columnId.startsWith('metric'),
+      }));
+
+      const result = await datatableFn(() => mockFormatFactory)(table, args, context);
+
+      // Should have grand total columns
+      const columnIds = result.value.data.columns.map((c: any) => c.id);
+      expect(columnIds).toContain('metric1___grand_total');
+      expect(columnIds).toContain('metric2___grand_total');
+
+      // Should have grand total row
+      const lastRow = result.value.data.rows[result.value.data.rows.length - 1];
+      expect((lastRow as any).__isGrandTotal).toBe(true);
+
+      // The grand total row should also have values for the grand total columns
+      // The grand total column in the grand total row should be the sum of all grand totals
+      expect(lastRow.metric1___grand_total).toBeDefined();
+      expect(lastRow.metric2___grand_total).toBeDefined();
+    });
+  });
 });
