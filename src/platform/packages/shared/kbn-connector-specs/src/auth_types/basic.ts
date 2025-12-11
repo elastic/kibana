@@ -34,6 +34,16 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
   schema: authSchema,
+  buildSecret: (secret: AuthSchemaType) => {
+    const secretObj = { username: secret.username, password: secret.password };
+    try {
+      authSchema.parse(secretObj);
+      return secretObj;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      return null;
+    }
+  },
   configure: async (
     _: AuthContext,
     axiosInstance: AxiosInstance,

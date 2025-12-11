@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { connectorsSpecs } from '@kbn/connector-specs';
+import { generateSecrets } from '@kbn/connector-specs/src/lib';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
@@ -38,29 +39,10 @@ export function buildSecretsFromConnectorSpec(
     throw new Error(`Stack connector spec not found for type "${connectorType}"`);
   }
 
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
-  });
+  const secrets = generateSecrets(connectorSpec.auth, { token, apiKey: token });
 
-  const secrets: Record<string, string> = {};
-  if (hasBearerAuth) {
-    secrets.authType = 'bearer';
-    secrets.token = token;
-  } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
-
-    const headerField =
-      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
-        ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'ApiKey'; // default fallback
-
-    secrets.authType = 'api_key_header';
-    secrets.apiKey = token;
-    secrets.headerField = headerField;
+  if (!secrets) {
+    throw new Error(`Failed to generate secrets for connector type "${connectorType}"`);
   }
 
   return secrets;

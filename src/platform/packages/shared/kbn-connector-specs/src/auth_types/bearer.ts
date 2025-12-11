@@ -12,6 +12,7 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
+const authTypeId = 'bearer';
 const authSchema = z
   .object({
     token: z
@@ -28,8 +29,18 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
  */
 export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
-  id: 'bearer',
+  id: authTypeId,
   schema: authSchema,
+  buildSecret: (secret: AuthSchemaType) => {
+    const secretObj = { token: secret.token };
+    try {
+      authSchema.parse(secretObj);
+      return secretObj;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      return null;
+    }
+  },
   configure: async (
     _: AuthContext,
     axiosInstance: AxiosInstance,

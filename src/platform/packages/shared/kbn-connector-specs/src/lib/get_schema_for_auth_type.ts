@@ -8,41 +8,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { isString } from 'lodash';
-import { authTypeSpecs } from '../..';
-import type { AuthTypeDef, NormalizedAuthType } from '../connector_spec';
+import type { AuthTypeDef } from '../connector_spec';
+import { getAuthType } from './get_auth_type';
 
 export const AUTH_TYPE_DISCRIMINATOR = 'authType';
 
-const getAuthType = (id: string): NormalizedAuthType => {
-  for (const s of Object.values(authTypeSpecs)) {
-    if (s.id === id) {
-      return s as NormalizedAuthType;
-    }
-  }
-
-  throw new Error(`Auth type with id ${id} not found.`);
-};
-
 export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
-  let authTypeId: string | undefined;
-  let defaults: Record<string, unknown> | undefined;
-  let meta: Record<string, Record<string, unknown>> | undefined;
-
-  if (isString(authTypeDef)) {
-    authTypeId = authTypeDef as string;
-  } else {
-    const def = authTypeDef as AuthTypeDef;
-    authTypeId = def.type;
-    defaults = def.defaults;
-    meta = def?.overrides?.meta;
-  }
-
-  if (!authTypeId) {
-    throw new Error('Auth type ID must be provided.');
-  }
-
-  const authType = getAuthType(authTypeId);
+  const { authType, defaults, meta } = getAuthType(authTypeDef);
 
   const existingMeta = authType.schema.meta() ?? {};
   let schemaToUse = z.object({
@@ -74,10 +46,10 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
 
   // add the authType discriminator key
   return {
-    id: authTypeId,
+    id: authType.id,
     schema: schemaToUse
       .extend({
-        [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
+        [AUTH_TYPE_DISCRIMINATOR]: z.literal(authType.id),
       })
       .meta(existingMeta),
   };

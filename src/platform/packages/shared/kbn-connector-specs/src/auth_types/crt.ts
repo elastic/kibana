@@ -39,6 +39,22 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const CRT: AuthTypeSpec<AuthSchemaType> = {
   id: 'crt_certificate',
   schema: authSchema,
+  buildSecret: (secret: AuthSchemaType) => {
+    const secretObj = {
+      crt: secret.crt,
+      key: secret.key,
+      passphrase: secret.passphrase,
+      ca: secret.ca,
+      verificationMode: secret.verificationMode,
+    };
+    try {
+      authSchema.parse(secretObj);
+      return secretObj;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      return null;
+    }
+  },
   configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,

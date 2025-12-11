@@ -7,55 +7,59 @@
 
 import { buildSecretsFromConnectorSpec } from '.';
 
-jest.mock('@kbn/connector-specs', () => ({
-  connectorsSpecs: {
-    customConnectorWithBearerType: {
-      metadata: { id: '.bearer_connector' },
-      auth: {
-        types: [
-          {
-            type: 'bearer',
-          },
-        ],
-      },
-    },
-    customConnectorWithBearerString: {
-      metadata: { id: '.bearer_string_connector' },
-      auth: {
-        types: ['bearer'],
-      },
-    },
-    customConnectorWithApiKeyHeaderTypeAndCustomHeader: {
-      metadata: { id: '.apikey_custom_header_connector' },
-      auth: {
-        types: [
-          {
-            type: 'api_key_header',
-            defaults: {
-              headerField: 'Key',
+jest.mock('@kbn/connector-specs', () => {
+  const original = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...original,
+    connectorsSpecs: {
+      customConnectorWithBearerType: {
+        metadata: { id: '.bearer_connector' },
+        auth: {
+          types: [
+            {
+              type: 'bearer',
             },
-          },
-        ],
+          ],
+        },
+      },
+      customConnectorWithBearerString: {
+        metadata: { id: '.bearer_string_connector' },
+        auth: {
+          types: ['bearer'],
+        },
+      },
+      customConnectorWithApiKeyHeaderTypeAndCustomHeader: {
+        metadata: { id: '.apikey_custom_header_connector' },
+        auth: {
+          types: [
+            {
+              type: 'api_key_header',
+              defaults: {
+                headerField: 'Key',
+              },
+            },
+          ],
+        },
+      },
+      customConnectorWithApiKeyHeaderType: {
+        metadata: { id: '.apikey_header_connector' },
+        auth: {
+          types: [
+            {
+              type: 'api_key_header',
+            },
+          ],
+        },
+      },
+      customConnectorWithApiKeyHeaderString: {
+        metadata: { id: '.apikey_header_string_connector' },
+        auth: {
+          types: ['api_key_header'],
+        },
       },
     },
-    customConnectorWithApiKeyHeaderType: {
-      metadata: { id: '.apikey_header_connector' },
-      auth: {
-        types: [
-          {
-            type: 'api_key_header',
-          },
-        ],
-      },
-    },
-    customConnectorWithApiKeyHeaderString: {
-      metadata: { id: '.apikey_header_string_connector' },
-      auth: {
-        types: ['api_key_header'],
-      },
-    },
-  },
-}));
+  };
+});
 
 describe('buildSecretsFromConnectorSpec', () => {
   describe('bearer auth', () => {
@@ -87,16 +91,14 @@ describe('buildSecretsFromConnectorSpec', () => {
 
       expect(actual).toEqual({
         authType: 'api_key_header',
-        apiKey: 'api-key-456',
-        headerField: 'Key',
+        Key: 'api-key-456',
       });
     });
 
     it('should use default fallback headerField when not specified in connector spec', () => {
       const expectedSecret = {
         authType: 'api_key_header',
-        apiKey: 'test-key',
-        headerField: 'ApiKey',
+        'Api-Key': 'test-key',
       };
       const actualFromType = buildSecretsFromConnectorSpec('.apikey_header_connector', 'test-key');
       const actualFromString = buildSecretsFromConnectorSpec(
