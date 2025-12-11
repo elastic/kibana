@@ -4,22 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { OnechatPluginStart } from '../../types';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import type { OnechatPluginStart, OnechatStartDependencies } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
 
 interface OnechatNavControlServices {
   onechat: OnechatPluginStart;
+  aiAssistantManagementSelection: OnechatStartDependencies['aiAssistantManagementSelection'];
 }
 
 export function OnechatNavControl() {
   const {
-    services: { onechat },
+    services: { onechat, aiAssistantManagementSelection },
   } = useKibana<OnechatNavControlServices>();
+
+  useEffect(() => {
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIChatExperience.Agent) {
+        onechat.openConversationFlyout();
+        aiAssistantManagementSelection.completeOpenChat();
+      }
+    });
+
+    return () => {
+      openChatSubscription.unsubscribe();
+    };
+  }, [onechat, aiAssistantManagementSelection]);
 
   return (
     <EuiToolTip content={buttonLabel}>
