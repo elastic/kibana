@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilderPlatform: 64202
-  aiAssistantManagementSelection: 10000
+  aiAssistantManagementSelection: 13590
   aiops: 15359
   alerting: 26932
   apm: 38573
@@ -75,7 +75,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 187942
-  genAiSettings: 5003
+  genAiSettings: 5507
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -206,6 +206,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 2554
+  workflowsExtensions: 61264
   workflowsManagement: 8497
   workplaceAIApp: 6135
