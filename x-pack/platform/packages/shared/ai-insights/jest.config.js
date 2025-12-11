@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/packages/agent-builder'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ai-insights'],
 };
