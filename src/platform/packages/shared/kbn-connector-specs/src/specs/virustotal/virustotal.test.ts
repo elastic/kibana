@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../connector_spec';
-import { VirusTotalConnector } from './virustotal';
+import type { ActionContext } from '../../connector_spec';
+import { VirusTotalConnector } from '.';
 
 describe('VirusTotalConnector', () => {
   const mockClient = {

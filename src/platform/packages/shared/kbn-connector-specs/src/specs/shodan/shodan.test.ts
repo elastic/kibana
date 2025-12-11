@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../connector_spec';
-import { ShodanConnector } from './shodan';
+import type { ActionContext } from '../../connector_spec';
+import { ShodanConnector } from '.';
 
 describe('ShodanConnector', () => {
   const mockClient = {
