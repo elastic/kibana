@@ -28,6 +28,7 @@ export const NBANotification: React.FC<NBANotificationProps> = ({
       announceOnMount
       iconType="cheer"
       onDismiss={onSeenBanner}
+      data-test-subj="trial-companion-callout"
       title={
         <FormattedMessage
           id="xpack.securitySolution.trialNotifications.trialNotification.title"
@@ -43,7 +44,13 @@ export const NBANotification: React.FC<NBANotificationProps> = ({
       />
       <EuiSpacer size="s" />
       {onViewButton && viewButtonText && (
-        <EuiButton size="s" onClick={onViewButton} color="success" style={{ marginRight: '8px' }}>
+        <EuiButton
+          size="s"
+          onClick={onViewButton}
+          color="success"
+          style={{ marginRight: '8px' }}
+          data-test-subj="trial-companion-view-button"
+        >
           <FormattedMessage
             id="xpack.securitySolution.trialNotifications.trialNotification.viewButton"
             defaultMessage="{viewButtonText}"
