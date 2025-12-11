@@ -14,19 +14,18 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { colorByValueSchema } from '../color';
 import { esqlColumnSchema } from '../metric_ops';
-import { sharedPanelInfoSchema, layerSettingsSchema, dslOnlyPanelInfoSchema } from '../shared';
+import {
+  sharedPanelInfoSchema,
+  layerSettingsSchema,
+  dslOnlyPanelInfoSchema,
+  axisTitleSchemaProps,
+} from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchema,
 } from './shared';
 import { positionSchema } from '../alignments';
-
-export const axisTitleSchemaProps = {
-  value: schema.maybe(
-    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
-  ),
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
-};
+import { builderEnums } from '../enums';
 
 const legendSchemaProps = {
   truncate_after_lines: schema.maybe(
@@ -53,10 +52,10 @@ const labelsSchemaProps = {
     schema.boolean({ defaultValue: true, meta: { description: 'Whether to show axis labels' } })
   ),
   orientation: schema.maybe(
-    schema.oneOf(
-      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('angled')],
-      { defaultValue: 'horizontal', meta: { description: 'Orientation of the axis labels' } }
-    )
+    builderEnums.orientation({
+      defaultValue: 'horizontal',
+      meta: { description: 'Orientation of the axis labels' },
+    })
   ),
 };
 
