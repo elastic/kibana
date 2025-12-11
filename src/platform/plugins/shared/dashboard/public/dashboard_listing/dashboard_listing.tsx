@@ -71,7 +71,7 @@ export const DashboardListing = ({
         {children}
         <TabbedTableListView
           headingId="dashboardListingHeading"
-          title={i18n.translate('dashboardListing.title', {
+          title={i18n.translate('dashboard.listing.title', {
             defaultMessage: 'Dashboards',
           })}
           tabs={tabs}

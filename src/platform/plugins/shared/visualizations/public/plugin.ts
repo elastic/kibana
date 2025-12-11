@@ -554,13 +554,10 @@ export class VisualizationsPlugin
 
     if (spaces) {
       setSpaces(spaces);
-      // Subscribe to active space to hide Visualize in solution views
-      // In solution views, users access visualizations via Dashboard's Visualizations tab
       spaces.getActiveSpace$().subscribe((space) => {
         if (!space) return;
-        const isSolutionView = Boolean(space.solution && space.solution !== 'classic');
         this.appStateUpdater.next(() => ({
-          visibleIn: isSolutionView ? [] : ['globalSearch'],
+          visibleIn: space.solution && space.solution !== 'classic' ? [] : ['globalSearch'],
         }));
       });
     }
