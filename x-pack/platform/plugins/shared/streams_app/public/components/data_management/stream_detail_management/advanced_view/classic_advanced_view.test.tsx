@@ -64,38 +64,22 @@ jest.mock('../../../../hooks/use_stream_detail', () => ({
 }));
 
 jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: () => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/88c9435d-9df2-434b-b011-b5dde3c7fbba', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'classic_advanced_view.test.tsx:mock',
-        message: 'useStreamsAppFetch mock called',
-        data: {},
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        hypothesisId: 'H1',
-      }),
-    }).catch(() => {});
-    // #endregion
-    return {
-      value: {
-        indexTemplate: {
-          name: 'logs-test-template',
-          index_template: {
-            index_patterns: ['logs-test-*'],
-            _meta: {},
-          },
+  useStreamsAppFetch: () => ({
+    value: {
+      indexTemplate: {
+        name: 'logs-test-template',
+        index_template: {
+          index_patterns: ['logs-test-*'],
+          _meta: {},
         },
-        ingestPipeline: { name: 'logs-test-pipeline', _meta: {} },
-        dataStream: { name: 'logs-test-default', indices: [], status: 'green' },
-        componentTemplates: [],
       },
-      loading: false,
-      error: null,
-    };
-  },
+      ingestPipeline: { name: 'logs-test-pipeline', _meta: {} },
+      dataStream: { name: 'logs-test-default', indices: [], status: 'green' },
+      componentTemplates: [],
+    },
+    loading: false,
+    error: null,
+  }),
 }));
 
 jest.mock('../../../../hooks/use_kibana', () => ({
