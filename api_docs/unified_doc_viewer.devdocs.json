@@ -206,7 +206,7 @@
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
           ") => JSX.Element) | undefined; indexes: ",
-          "TraceIndexes",
+          "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
@@ -308,7 +308,7 @@
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
           " & { indexes: ",
-          "TraceIndexes",
+          "ObservabilityIndexes",
           "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview.tsx",
@@ -344,7 +344,7 @@
           "React.ForwardRefExoticComponent<Omit<Omit<",
           "DocViewRenderProps",
           " & { indexes: ",
-          "TraceIndexes",
+          "ObservabilityIndexes",
           "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<",
           "OverviewApi",
           ">, \"ref\"> & { ref?: ((instance: ",
@@ -513,7 +513,7 @@
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
           ") => JSX.Element) | undefined; indexes: ",
-          "TraceIndexes",
+          "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
