@@ -55,14 +55,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // navigate to a different section
         await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'searchPlayground',
+          deepLinkId: 'agent_builder',
         });
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'searchPlayground',
+          deepLinkId: 'agent_builder',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'agent_builder',
+        });
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
 

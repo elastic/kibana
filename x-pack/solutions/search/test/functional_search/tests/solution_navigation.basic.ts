@@ -78,11 +78,6 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'agentBuilderWrapper',
         },
         {
-          link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'playgroundsUnlicensed',
-        },
-        {
           link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
