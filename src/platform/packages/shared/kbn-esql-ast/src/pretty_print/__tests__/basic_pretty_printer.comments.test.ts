@@ -61,6 +61,18 @@ describe('source column expression', () => {
   });
 });
 
+describe('qualified column names', () => {
+  test('can print simple qualified column names', () => {
+    assertPrint('FROM a | KEEP [a].[b]');
+  });
+
+  test('can print composed qualified column names', () => {
+    assertPrint('FROM a | KEEP [a].[`geoip/city_name`]');
+    assertPrint('FROM a | KEEP [a].[`geoip.city_name`]');
+    assertPrint('FROM a | KEEP [a].[`geoip.city_name.txt`]');
+  });
+});
+
 describe('literal expression', () => {
   test('can print source left comment', () => {
     assertPrint('FROM a | STATS /* cmt */ 1');
