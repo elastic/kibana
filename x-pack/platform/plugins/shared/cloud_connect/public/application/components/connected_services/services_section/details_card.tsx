@@ -235,7 +235,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
-                onClick={(e) => {
+                onClick={() => {
                   // Track telemetry for opening service
                   if (serviceKey) {
                     telemetryService.trackLinkClicked({
