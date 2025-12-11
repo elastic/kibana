@@ -13,18 +13,13 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiAvatar,
-  useEuiTheme,
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 
 export const Security: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-
-  const logoContainerStyle = css({
+  const LogoContainerStyle = ({ euiTheme }: UseEuiTheme) => ({
     borderRadius: euiTheme.border.radius.medium,
     padding: euiTheme.size.base,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -35,10 +30,10 @@ export const Security: React.FC = () => {
   });
 
   return (
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="l" data-test-subj="securitySection" >
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="l" data-test-subj="securitySection">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center" alignItems="flexStart">
-          <EuiFlexItem css={logoContainerStyle} grow={false}>
+          <EuiFlexItem css={LogoContainerStyle} grow={false}>
             <EuiIcon size="xxl" type="logoSecurity" name="Security" />
           </EuiFlexItem>
         </EuiFlexGroup>

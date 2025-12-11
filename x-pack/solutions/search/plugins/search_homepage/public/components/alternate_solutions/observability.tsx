@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -14,17 +13,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { docLinks } from '../../../common/doc_links';
 
 export const Observability: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const { http, cloud } = useKibana().services;
 
   const isServerless: boolean = cloud?.isServerlessEnabled ?? false;
@@ -41,11 +36,11 @@ export const Observability: React.FC = () => {
     return http.basePath.prepend('/app/management/kibana/spaces/create');
   }, [http]);
 
-  const analyzeLogsIntegration = useMemo(() => {
-    return http.basePath.prepend('/app/integrations/browse/observability');
-  }, [http]);
+  // const analyzeLogsIntegration = useMemo(() => {
+  //   return http.basePath.prepend('/app/integrations/browse/observability');
+  // }, [http]);
 
-  const logoContainerStyle = css({
+  const LogoContainerStyle = ({ euiTheme }: UseEuiTheme) => ({
     borderRadius: euiTheme.border.radius.medium,
     padding: euiTheme.size.base,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -59,7 +54,7 @@ export const Observability: React.FC = () => {
     <EuiFlexGroup justifyContent="flexStart" gutterSize="l" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center" alignItems="flexStart">
-          <EuiFlexItem css={logoContainerStyle} grow={false}>
+          <EuiFlexItem css={LogoContainerStyle} grow={false}>
             <EuiIcon size="xxl" type="logoObservability" name="Observability" />
           </EuiFlexItem>
         </EuiFlexGroup>
