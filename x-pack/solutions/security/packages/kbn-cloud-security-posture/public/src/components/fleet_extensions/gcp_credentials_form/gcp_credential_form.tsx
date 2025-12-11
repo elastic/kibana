@@ -15,8 +15,8 @@ import { i18n } from '@kbn/i18n';
 import {
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
-  GCP_ORGANIZATION_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import {
@@ -87,7 +87,7 @@ const GoogleCloudShellSetup = ({
               defaultMessage="Log into your Google Cloud Console"
             />
           </li>
-          {accountType === GCP_ORGANIZATION_ACCOUNT ? (
+          {accountType === ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
                 id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationCloudShellSetupStep.save"
@@ -113,7 +113,7 @@ const GoogleCloudShellSetup = ({
       </EuiText>
       <EuiSpacer size="l" />
       <EuiForm component="form">
-        {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
+        {organizationIdFields && accountType === ORGANIZATION_ACCOUNT && (
           <EuiFormRow
             fullWidth
             label={gcpField.fields['gcp.organization_id'].label}
