@@ -8,16 +8,16 @@
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import {
+import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
+import type {
   SyntheticsParamRequest,
   SyntheticsParams,
   SyntheticsParamSOAttributes,
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const ParamsObjectSchema = schema.object({
   key: schema.string({
@@ -57,8 +57,16 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         savedObjectsData
       );
 
-      await runSynPrivateLocationMonitorsTaskSoon({
+      await asyncGlobalParamsPropagation({
         server,
+        paramsSpacesToSync: Array.from(
+          new Set(
+            savedObjectsData.reduce(
+              (spacesToSync, obj) => spacesToSync.concat(obj.initialNamespaces || []),
+              [] as string[]
+            )
+          )
+        ),
       });
 
       if (savedObjectsData.length > 1) {
