@@ -34,6 +34,7 @@ import {
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
+import { getFormattedError } from '../../../../../util/errors';
 import type {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
@@ -837,12 +838,12 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
     notifySuggestionFailure: (params: { event: unknown }) => {
       const event = params.event as { error: Error };
-      core.notifications.toasts.addError(event.error, {
+      const formattedError = getFormattedError(event.error);
+      core.notifications.toasts.addError(formattedError, {
         title: i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.suggestionError',
           { defaultMessage: 'Failed to generate pipeline suggestion' }
         ),
-        toastMessage: event.error.message,
       });
     },
   },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-// Feature flag is defined here to avoid cross-plugin dependency cycles
-export const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-export const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
+import datemath from '@kbn/datemath';
+
+export function parseDatemath(value: string, options?: Parameters<typeof datemath.parse>[1]) {
+  return datemath.parse(value, options)?.valueOf() ?? 0;
+}
