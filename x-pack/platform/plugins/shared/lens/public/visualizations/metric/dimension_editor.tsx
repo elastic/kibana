@@ -683,8 +683,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
     <div
       className="lnsIndexPatternDimensionEditor--padded"
       css={css`
-        padding-top: 0 !important;
-        marging-bottom: -24px;
+        margin-bottom: -8px;
       `}
     >
       {showStaticColorControl ? (
