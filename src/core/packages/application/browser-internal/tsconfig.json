@@ -37,6 +37,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/app-menu",
   ],
   "exclude": [
     "target/**/*",

@@ -27,11 +27,11 @@ const VerticalRule = () => {
 
   return (
     <span
-      css={css`
-        width: ${euiTheme.border.width.thin};
-        height: 28px;
-        background-color: ${euiTheme.colors.borderBasePlain};
-      `}
+      style={{
+        width: euiTheme.border.width.thin,
+        height: '28px',
+        backgroundColor: euiTheme.colors.borderBasePlain,
+      }}
     />
   );
 };
