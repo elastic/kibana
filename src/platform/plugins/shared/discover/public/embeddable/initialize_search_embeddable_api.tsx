@@ -98,7 +98,7 @@ export const initializeSearchEmbeddableApi = async (
 ): Promise<{
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
-    Partial<PublishesWritableUnifiedSearch> & 
+    Partial<PublishesWritableUnifiedSearch> &
     PublishesProjectRoutingOverrides;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
