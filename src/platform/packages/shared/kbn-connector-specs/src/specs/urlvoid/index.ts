@@ -138,5 +138,3 @@ export const URLVoidConnector: ConnectorSpec = {
     description: 'Verifies URLVoid API key',
   },
 };
-
-
