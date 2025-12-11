@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, type Observable } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { ProductLine, ProductTier } from '../../common/product';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { registerSolutionNavigation } from './navigation';
@@ -37,11 +38,11 @@ describe('Security Side Nav', () => {
         ...mockServices.settings,
         client: {
           ...mockServices.settings.client,
-          get$: jest.fn((key: string) => {
+          get$: jest.fn(<T = unknown>(key: string, defaultOverride?: T): Observable<T> => {
             if (key === AI_CHAT_EXPERIENCE_TYPE) {
-              return chatExperienceSubject.asObservable();
+              return chatExperienceSubject.asObservable() as unknown as Observable<T>;
             }
-            return of(null);
+            return of(defaultOverride ?? null) as Observable<T>;
           }),
         },
       },
@@ -65,9 +66,9 @@ describe('Security Side Nav', () => {
     expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
-    const values: unknown[] = [];
+    const values: NavigationTreeDefinition[] = [];
     const subscription = navigationTree$.subscribe({
-      next: (value) => {
+      next: (value: NavigationTreeDefinition) => {
         values.push(value);
       },
     });
@@ -93,9 +94,9 @@ describe('Security Side Nav', () => {
     expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
-    const values: unknown[] = [];
+    const values: NavigationTreeDefinition[] = [];
     const subscription = navigationTree$.subscribe({
-      next: (value) => {
+      next: (value: NavigationTreeDefinition) => {
         values.push(value);
       },
     });
@@ -110,9 +111,9 @@ describe('Security Side Nav', () => {
     await registerSolutionNavigation(services, []);
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
-    const values: unknown[] = [];
+    const values: NavigationTreeDefinition[] = [];
     const subscription = navigationTree$.subscribe({
-      next: (value) => {
+      next: (value: NavigationTreeDefinition) => {
         values.push(value);
       },
     });
@@ -139,7 +140,9 @@ describe('Security Side Nav', () => {
     ]);
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
-    const subscription = navigationTree$.subscribe({ next: () => {} });
+    const subscription = navigationTree$.subscribe({
+      next: (_value: NavigationTreeDefinition) => {},
+    });
 
     // Wait for initial value
     await new Promise((resolve) => setTimeout(resolve, 10));
