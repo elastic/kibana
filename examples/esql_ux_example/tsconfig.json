@@ -16,10 +16,8 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/esql-editor",
     "@kbn/es-query",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/esql"
   ]
 }
