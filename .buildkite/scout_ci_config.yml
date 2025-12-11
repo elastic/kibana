@@ -2,7 +2,6 @@
 plugins:
   enabled:
     - apm
-    - profiling
     - console
     - discover_enhanced
     - index_management
