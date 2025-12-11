@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/connector-schemas'
   - '@kbn/management-settings-ids'
+  - '@kbn/ai-assistant-common'
 tags:
   - plugin
   - prod
