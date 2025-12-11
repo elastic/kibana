@@ -90,4 +90,6 @@ if [ $code -ne 0 ]; then
   exitCode=10
 fi
 
+echo "--- Jest configs complete (combined)"
+
 exit $exitCode
