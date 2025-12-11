@@ -22,7 +22,7 @@ describe('useLayoutWidth', () => {
 
     renderHook(() => useLayoutWidth({ isCollapsed: true, isSidePanelOpen: false, setWidth }));
 
-    expect(setWidth).toHaveBeenCalledWith(COLLAPSED_WIDTH, { isSidePanelOpen: false });
+    expect(setWidth).toHaveBeenCalledWith(COLLAPSED_WIDTH);
   });
 
   it('adds the side panel width when the side panel is open', () => {
