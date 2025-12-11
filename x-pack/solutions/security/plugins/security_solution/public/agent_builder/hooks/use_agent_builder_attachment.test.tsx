@@ -93,6 +93,7 @@ describe('useAgentBuilderAttachment', () => {
         },
       ],
       sessionTag: 'security',
+      agentId: 'elastic-ai-agent',
     });
   });
 

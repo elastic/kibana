@@ -64,6 +64,8 @@ export const useAgentBuilderAttachment = ({
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
+      // always launch attachments with default agent
+      agentId: 'elastic-ai-agent',
     });
   }, [attachmentType, attachmentData, attachmentPrompt, onechat]);
 
