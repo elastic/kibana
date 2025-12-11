@@ -30,7 +30,6 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -258,14 +257,6 @@ export const getSearchEmbeddableFactory = ({
               maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
-
-          const viewMode = useMemo(() => {
-            if (!savedSearch.searchSource) return;
-            return getValidViewMode({
-              viewMode: savedSearch.viewMode,
-              isEsqlMode: isEsqlMode(savedSearch),
-            });
-          }, [savedSearch]);
 
           const dataView = useMemo(() => {
             const hasDataView = (dataViews ?? []).length > 0;
