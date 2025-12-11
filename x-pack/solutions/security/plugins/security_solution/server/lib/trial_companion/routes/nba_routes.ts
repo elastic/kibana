@@ -108,7 +108,7 @@ const postNBAUserSeen =
     const siemResponse = buildSiemResponse(response);
     const { milestoneId } = request.body;
     try {
-      logger.info(
+      logger.debug(
         `POST Trial Companion NBA seen route called. milestoneId: ${milestoneId}, body: ${JSON.stringify(
           request.body
         )}`

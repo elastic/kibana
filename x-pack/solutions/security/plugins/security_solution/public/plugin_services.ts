@@ -65,8 +65,6 @@ export class PluginServices {
     coreSetup: CoreSetup<StartPluginsDependencies, PluginStart>,
     pluginsSetup: SetupPlugins
   ) {
-    // pluginsSetup.cloud?.isInTrial()
-    // experimentalFeatures.trialCompanionEnabled
     initTelemetry({ usageCollection: pluginsSetup.usageCollection }, APP_UI_ID);
     this.telemetry.setup(
       { analytics: coreSetup.analytics },

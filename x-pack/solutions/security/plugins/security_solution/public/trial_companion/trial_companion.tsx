@@ -30,6 +30,8 @@ export const TrialCompanion: React.FC<Props> = () => {
   return <TrialCompanionImpl />;
 };
 
+const defaultTimeout = 30000;
+
 const TrialCompanionImpl: React.FC<Props> = () => {
   const { overlays, ...startServices } = useKibana().services;
   const bannerId = useRef<string | undefined>();
@@ -41,9 +43,7 @@ const TrialCompanionImpl: React.FC<Props> = () => {
 
   useInterval(() => {
     setCount((c) => c + 1);
-  }, 30000); // TODO: constant
-
-  // TODO: if error - do not show anything?
+  }, defaultTimeout);
 
   useEffect(() => {
     const removeBanner = () => {

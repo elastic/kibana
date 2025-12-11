@@ -6,5 +6,3 @@
  */
 
 export const TRIAL_COMPANION_NBA_URL = '/internal/security_solution/trial_companion/nba';
-export const TRIAL_COMPANION_NBA_ACTION_URL =
-  '/internal/security_solution/trial_companion/nba/action';
