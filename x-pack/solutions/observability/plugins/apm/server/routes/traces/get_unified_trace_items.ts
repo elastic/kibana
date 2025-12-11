@@ -70,13 +70,13 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
 
   unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
-    if (errorDoc.spanId) {
-      (groupedErrorsByDocId[errorDoc.spanId] ??= []).push({ errorDocId: errorDoc.id });
+    if (errorDoc.span?.id) {
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
     }
   });
   unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
-    if (errorDoc.spanId) {
-      (groupedErrorsByDocId[errorDoc.spanId] ??= []).push({ errorDocId: errorDoc.id });
+    if (errorDoc.span?.id) {
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
     }
   });
 
@@ -107,14 +107,6 @@ export async function getUnifiedTraceItems({
 }): Promise<{ traceItems: TraceItem[]; unifiedTraceErrors: UnifiedTraceErrors }> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
-
-  const unifiedTraceErrorsPromise = getUnifiedTraceErrors({
-    apmEventClient,
-    logsClient,
-    traceId,
-    start,
-    end,
-  });
 
   const unifiedTracePromise = apmEventClient.search(
     'get_unified_trace_items',
@@ -167,7 +159,13 @@ export async function getUnifiedTraceItems({
   );
 
   const [unifiedTraceErrors, unifiedTraceItems, incomingSpanLinksCountById] = await Promise.all([
-    unifiedTraceErrorsPromise,
+    getUnifiedTraceErrors({
+      apmEventClient,
+      logsClient,
+      traceId,
+      start,
+      end,
+    }),
     unifiedTracePromise,
     getSpanLinksCountById({
       traceId,
