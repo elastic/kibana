@@ -14,7 +14,6 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { McpClient } from '@kbn/mcp-client';
 import type { CallToolResponse, ListToolsResponse } from '@kbn/mcp-client';
-import { MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 
 // Type for accessing private methods in tests
@@ -23,7 +22,6 @@ import { CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 interface McpConnectorPrivate {
   safeDisconnect: (operationName?: string) => Promise<void>;
   handleConnectionError: (error: unknown, operation: string) => Promise<void>;
-  saveTools: (toolsResult: ListToolsResponse) => Promise<void>;
 }
 
 // Helper function to safely cast connector to access private methods in tests
@@ -139,23 +137,8 @@ describe('McpConnector', () => {
         connected: true,
         capabilities: { tools: {} },
       };
-      const mockToolsResult: ListToolsResponse = {
-        tools: [
-          {
-            name: 'tool1',
-            description: 'Test tool 1',
-            inputSchema: { type: 'object' },
-          },
-          {
-            name: 'tool2',
-            description: 'Test tool 2',
-            inputSchema: { type: 'object' },
-          },
-        ],
-      };
 
       mockMcpClient.connect.mockResolvedValue(mockConnectResult);
-      mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.disconnect.mockResolvedValue(undefined);
 
@@ -163,20 +146,7 @@ describe('McpConnector', () => {
 
       expect(result).toEqual(mockConnectResult);
       expect(mockMcpClient.connect).toHaveBeenCalledTimes(1);
-      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
-      expect(services.savedObjectsClient.create).toHaveBeenCalledWith(
-        MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          connectorId: 'test-connector-1',
-          tools: mockToolsResult.tools,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-        expect.objectContaining({
-          id: 'test-connector-1',
-        })
-      );
     });
 
     it('should handle test when connection fails', async () => {
@@ -213,53 +183,6 @@ describe('McpConnector', () => {
       expect(mockMcpClient.disconnect).not.toHaveBeenCalled(); // Not connected, so disconnect not called
     });
 
-    it('should disconnect even if listTools fails during test', async () => {
-      const mockConnectResult = {
-        connected: true,
-        capabilities: {},
-      };
-      const listToolsError = new Error('Failed to list tools');
-
-      mockMcpClient.connect.mockResolvedValue(mockConnectResult);
-      mockMcpClient.listTools.mockRejectedValue(listToolsError);
-      mockMcpClient.isConnected.mockReturnValue(true);
-      mockMcpClient.disconnect.mockResolvedValue(undefined);
-
-      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow(
-        'Failed to list tools'
-      );
-
-      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle saveTools failure gracefully during test', async () => {
-      const mockConnectResult = {
-        connected: true,
-        capabilities: {},
-      };
-      const mockToolsResult: ListToolsResponse = {
-        tools: [
-          {
-            name: 'tool1',
-            description: 'Test tool',
-            inputSchema: {},
-          },
-        ],
-      };
-
-      mockMcpClient.connect.mockResolvedValue(mockConnectResult);
-      mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
-      mockMcpClient.isConnected.mockReturnValue(true);
-      mockMcpClient.disconnect.mockResolvedValue(undefined);
-
-      // Mock saved objects client to throw an error
-      services.savedObjectsClient.create.mockRejectedValue(new Error('Save failed'));
-
-      const result = await connector.testConnector({}, connectorUsageCollector);
-
-      expect(result).toEqual(mockConnectResult);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to save tools'));
-    });
   });
 
   describe('listTools', () => {
@@ -284,16 +207,6 @@ describe('McpConnector', () => {
       expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
       expect(mockMcpClient.connect).not.toHaveBeenCalled(); // Already connected
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
-      expect(services.savedObjectsClient.create).toHaveBeenCalledWith(
-        MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          connectorId: 'test-connector-1',
-          tools: mockToolsResult.tools,
-        }),
-        expect.objectContaining({
-          id: 'test-connector-1',
-        })
-      );
     });
 
     it('should connect automatically when not connected', async () => {
@@ -692,62 +605,6 @@ describe('McpConnector', () => {
       await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('saveTools', () => {
-    it('should save tools to saved objects', async () => {
-      const mockToolsResult: ListToolsResponse = {
-        tools: [
-          {
-            name: 'tool1',
-            description: 'Test tool',
-            inputSchema: {},
-          },
-        ],
-      };
-
-      services.savedObjectsClient.create.mockResolvedValue({
-        id: 'test-connector-1',
-        type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        attributes: {
-          connectorId: 'test-connector-1',
-          tools: mockToolsResult.tools,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        references: [],
-      });
-
-      await getPrivateMethods(connector).saveTools(mockToolsResult);
-
-      expect(services.savedObjectsClient.create).toHaveBeenCalledWith(
-        MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          connectorId: 'test-connector-1',
-          tools: mockToolsResult.tools,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
-        expect.objectContaining({
-          id: 'test-connector-1',
-        })
-      );
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Saved 1 tools for MCP connector')
-      );
-    });
-
-    it('should handle save errors gracefully', async () => {
-      const mockToolsResult: ListToolsResponse = {
-        tools: [],
-      };
-
-      services.savedObjectsClient.create.mockRejectedValue(new Error('Save failed'));
-
-      await getPrivateMethods(connector).saveTools(mockToolsResult);
-
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to save tools'));
     });
   });
 });
