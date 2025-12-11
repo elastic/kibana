@@ -28,7 +28,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram/types';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getEsqlDataView } from './utils/get_esql_data_view';
@@ -82,7 +81,6 @@ export interface DataTotalHitsMsg extends DataMsg {
 
 export interface DiscoverLatestFetchDetails {
   abortController?: AbortController;
-  visContext?: UnifiedHistogramVisContext;
 }
 
 export interface DiscoverDataStateContainer {

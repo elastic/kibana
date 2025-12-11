@@ -172,13 +172,6 @@ oas_docs/output/kibana.tmp*.yaml
 oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
 
-# Security Solution Playwright
-x-pack/solutions/security/test/security_solution_playwright/test-results/
-x-pack/solutions/security/test/security_solution_playwright/playwright-report/
-x-pack/solutions/security/test/security_solution_playwright/blob-report/
-x-pack/solutions/security/test/security_solution_playwright/playwright/.cache/
-x-pack/solutions/security/test/security_solution_playwright/.auth/
-x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
 
@@ -186,3 +179,6 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
+
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker

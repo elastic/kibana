@@ -8,13 +8,17 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PromptLayout } from './prompt_layout';
+import { PromptLayout, type PromptLayoutVariant } from './prompt_layout';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
-export const UpgradeLicensePrompt: React.FC<{}> = () => {
+export interface UpgradeLicensePromptProps {
+  variant?: PromptLayoutVariant;
+}
+
+export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ variant }) => {
   const assetBasePath = useAssetBasePath();
   const { colorMode } = useEuiTheme();
   const { navigationService } = useOnechatServices();
@@ -43,6 +47,7 @@ export const UpgradeLicensePrompt: React.FC<{}> = () => {
 
   return (
     <PromptLayout
+      variant={variant}
       imageSrc={
         colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`
       }
