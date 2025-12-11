@@ -152,8 +152,6 @@ function initProjectRoutingState({
   }
 }
 
-
-
 async function loadFromLocatorState(
   store: MiddlewareAPI,
   initialState: NonNullable<LensStoreDeps['initialStateFromLocator']>,
