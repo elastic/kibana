@@ -31,6 +31,9 @@
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
     "@kbn/spaces-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/logging",
+    "@kbn/inference-common",
     "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]

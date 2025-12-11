@@ -147,7 +147,7 @@ export function createGetLogCategoriesTool({
   return toolDefinition;
 }
 
-async function getFilteredLogCategories({
+export async function getFilteredLogCategories({
   esClient,
   logsIndices,
   boolQuery,
