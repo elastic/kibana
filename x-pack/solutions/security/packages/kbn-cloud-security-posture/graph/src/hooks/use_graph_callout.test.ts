@@ -453,8 +453,9 @@ describe('useGraphCallout', () => {
         expect(result.current.onDismiss).toBeDefined();
 
         // Dismiss the callout
+        const { onDismiss } = result.current;
         act(() => {
-          result.current.onDismiss();
+          onDismiss();
         });
       }
 
@@ -484,8 +485,9 @@ describe('useGraphCallout', () => {
 
       // Dismiss the callout
       if (result.current.shouldShowCallout) {
+        const { onDismiss } = result.current;
         act(() => {
-          result.current.onDismiss();
+          onDismiss();
         });
       }
 
