@@ -50,7 +50,7 @@ If a record already exists for the specified entity, that record is overwritten 
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['id_field', 'id_value', 'criticality_level', 'refresh'],
   },
   paramsSchema: z.object({
     ...getShapeAt(create_asset_criticality_record_request, 'body'),

@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
-import { roundedBorderRadiusStyles } from '../../conversation.styles';
+import { roundedBorderRadiusStyles } from '../../../../../common.styles';
 
 const labels = {
   reasoningError: i18n.translate('xpack.onechat.round.error.reasoningError', {

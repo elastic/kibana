@@ -682,10 +682,10 @@ export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
   }
 );
 
-export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+export const LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaRulesFeaturePrivileges',
   {
-    defaultMessage: 'You do not have Kibana Security privileges',
+    defaultMessage: 'You do not have Kibana Rules privileges',
   }
 );
 
@@ -967,6 +967,34 @@ export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
     defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
+export const GAP_FILL_STATUS_FILTER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label',
+  {
+    defaultMessage: 'Gap fill status',
+  }
+);
+
+export const GAP_FILL_STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+
+export const GAP_FILL_STATUS_UNFILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.unfilled',
+  {
+    defaultMessage: 'Unfilled',
+  }
+);
+
+export const GAP_FILL_STATUS_FILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
+  {
+    defaultMessage: 'Filled',
   }
 );
 
@@ -1629,9 +1657,9 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   }
 );
 
-export const CHAT_IN_AGENT_BUILDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
+export const RULE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
   {
-    defaultMessage: 'Chat in Agent Builder',
+    defaultMessage: 'Settings',
   }
 );

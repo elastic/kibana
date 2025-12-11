@@ -43,7 +43,7 @@ Creates or updates a stream definition. Classic streams can not be created throu
     headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['stream', 'dashboards', 'queries', 'rules'],
   },
   paramsSchema: z.object({
     ...getShapeAt(put_streams_name_request, 'body'),

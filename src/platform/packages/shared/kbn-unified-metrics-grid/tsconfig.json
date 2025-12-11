@@ -32,6 +32,7 @@
     "@kbn/field-utils",
     "@kbn/react-query",
     "@kbn/restorable-state",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/presentation-panel-plugin"
   ]
 }

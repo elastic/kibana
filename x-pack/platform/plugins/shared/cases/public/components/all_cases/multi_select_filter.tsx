@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { css } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopoverTitle,
@@ -18,7 +18,6 @@ import {
   EuiTextColor,
   EuiSpacer,
   useEuiTheme,
-  EuiFilterGroup,
   EuiText,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
@@ -75,8 +74,8 @@ interface UseFilterParams<T extends string, K extends string = string> {
   options: Array<FilterOption<T, K>>;
   renderOption?: (option: FilterOption<T, K>) => React.ReactNode;
   selectedOptionKeys?: string[];
-  transparentBackground?: boolean;
   isLoading: boolean;
+  buttonCss?: SerializedStyles;
 }
 export const MultiSelectFilter = <T extends string, K extends string = string>({
   buttonLabel,
@@ -89,8 +88,8 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   options: rawOptions,
   selectedOptionKeys = [],
   renderOption,
-  transparentBackground,
   isLoading,
+  buttonCss,
 }: UseFilterParams<T, K>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -125,89 +124,84 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   };
 
   return (
-    <EuiFilterGroup
-      css={css`
-        ${transparentBackground && 'background-color: transparent;'};
-      `}
-    >
-      <EuiPopover
-        ownFocus
-        button={
-          <EuiFilterButton
-            css={css`
-              max-width: 186px;
-            `}
-            data-test-subj={`options-filter-popover-button-${id}`}
-            iconType={buttonIconType || 'arrowDown'}
-            onClick={toggleIsPopoverOpen}
-            isSelected={isPopoverOpen}
-            numFilters={showActiveOptionsNumber ? options.length : undefined}
-            hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
-            numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
-          >
-            <EuiText size="s" className="eui-textTruncate">
-              {buttonLabel}
-            </EuiText>
-          </EuiFilterButton>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
-        repositionOnScroll
-        panelProps={{
-          'data-test-subj': `options-filter-popover-panel-${id}`,
-        }}
-        data-test-subj={`options-filter-popover-${id}`}
-      >
-        {isInvalid && (
-          <>
-            <EuiHorizontalRule margin="none" />
-            <EuiCallOut
-              announceOnMount
-              title={limitReachedMessage}
-              color="warning"
-              size="s"
-              data-test-subj="maximum-length-warning"
-            />
-            <EuiHorizontalRule margin="none" />
-          </>
-        )}
-        <EuiSelectable<FilterOption<T, K>>
-          options={options}
-          searchable
-          searchProps={{
-            placeholder: buttonLabel,
-            compressed: false,
-            'data-test-subj': `${id}-search-input`,
-          }}
-          emptyMessage={i18n.EMPTY_FILTER_MESSAGE}
-          onChange={_onChange}
-          singleSelection={false}
-          renderOption={renderOption}
+    <EuiPopover
+      ownFocus
+      button={
+        <EuiFilterButton
+          css={css`
+            max-width: 186px;
+            ${buttonCss}
+          `}
+          data-test-subj={`options-filter-popover-button-${id}`}
+          iconType={buttonIconType || 'arrowDown'}
+          onClick={toggleIsPopoverOpen}
+          isSelected={isPopoverOpen}
+          numFilters={showActiveOptionsNumber ? options.length : undefined}
+          hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
+          numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
         >
-          {(list, search) => (
+          <EuiText size="s" className="eui-textTruncate">
+            {buttonLabel}
+          </EuiText>
+        </EuiFilterButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="none"
+      repositionOnScroll
+      panelProps={{
+        'data-test-subj': `options-filter-popover-panel-${id}`,
+      }}
+      data-test-subj={`options-filter-popover-${id}`}
+    >
+      {isInvalid && (
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiCallOut
+            announceOnMount
+            title={limitReachedMessage}
+            color="warning"
+            size="s"
+            data-test-subj="maximum-length-warning"
+          />
+          <EuiHorizontalRule margin="none" />
+        </>
+      )}
+      <EuiSelectable<FilterOption<T, K>>
+        options={options}
+        searchable
+        searchProps={{
+          placeholder: buttonLabel,
+          compressed: false,
+          'data-test-subj': `${id}-search-input`,
+        }}
+        emptyMessage={i18n.EMPTY_FILTER_MESSAGE}
+        onChange={_onChange}
+        singleSelection={false}
+        renderOption={renderOption}
+      >
+        {(list, search) => (
+          <div
+            css={css`
+              width: 400px;
+            `}
+          >
+            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
             <div
               css={css`
-                width: 400px;
+                line-height: ${euiTheme.size.xl};
+                padding-left: ${euiTheme.size.m};
+                border-bottom: ${euiTheme.border.thin};
               `}
             >
-              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-              <div
-                css={css`
-                  line-height: ${euiTheme.size.xl};
-                  padding-left: ${euiTheme.size.m};
-                  border-bottom: ${euiTheme.border.thin};
-                `}
-              >
-                <EuiTextColor color="subdued">{i18n.OPTIONS(options.length)}</EuiTextColor>
-              </div>
-              <EuiSpacer size="xs" />
-              {list}
+              <EuiTextColor color="subdued">{i18n.OPTIONS(options.length)}</EuiTextColor>
             </div>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </EuiFilterGroup>
+            <EuiSpacer size="xs" />
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };
 

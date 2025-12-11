@@ -8,13 +8,8 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHighlight,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelectable,
   EuiText,
   useEuiTheme,
@@ -23,24 +18,17 @@ import { css } from '@emotion/react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useNavigation } from '../../../../../hooks/use_navigation';
-import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
+import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
+import { InputPopoverButton } from '../input_popover_button';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
   {
     defaultMessage: 'Select a connector',
-  }
-);
-const manageConnectorsAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.manageConnectorAriaLabel',
-  {
-    defaultMessage: 'Manage connectors',
   }
 );
 const defaultConnectorLabel = i18n.translate(
@@ -49,56 +37,30 @@ const defaultConnectorLabel = i18n.translate(
     defaultMessage: 'Default',
   }
 );
-const connectorSearchPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.search.placeholder',
-  { defaultMessage: 'Search LLMs' }
-);
 
 const connectorSelectId = 'agentBuilderConnectorSelect';
 const connectorListId = `${connectorSelectId}_listbox`;
+const CONNECTOR_OPTION_ROW_HEIGHT = 32;
 
 const ConnectorPopoverButton: React.FC<{
   isPopoverOpen: boolean;
   onClick: () => void;
   disabled: boolean;
 }> = ({ isPopoverOpen, onClick, disabled }) => {
-  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
   return (
-    <EuiButton
-      css={popoverButtonStyles}
-      color="text"
-      iconType="sparkles"
-      iconSide="left"
-      onClick={onClick}
+    <InputPopoverButton
+      open={isPopoverOpen}
       disabled={disabled}
-      data-test-subj="agentBuilderConnectorSelectorButton"
-      aria-haspopup="menu"
+      iconType="compute"
+      onClick={onClick}
       aria-labelledby={connectorSelectId}
+      data-test-subj="agentBuilderConnectorSelectorButton"
     >
       <FormattedMessage
         id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
         defaultMessage="LLM"
       />
-    </EuiButton>
-  );
-};
-
-const ConnectorPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
-  const { navigateToManageConnectors } = useNavigation();
-  return (
-    <EuiPopoverTitle paddingSize="s">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={true}>{search}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="gear"
-            color="text"
-            aria-label={manageConnectorsAriaLabel}
-            onClick={navigateToManageConnectors}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPopoverTitle>
+    </InputPopoverButton>
   );
 };
 
@@ -111,7 +73,7 @@ const ConnectorOption: React.FC<{
     return null;
   }
   return (
-    <EuiText size="s" color="subdued">
+    <EuiText size="s">
       <h4>
         <EuiHighlight search={searchValue}>{connectorName}</EuiHighlight>
       </h4>
@@ -196,6 +158,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
     }
   }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
 
+  const selectorListStyles = useSelectorListStyles({ listId: connectorListId });
+  const listItemsHeight = connectorOptions.length * CONNECTOR_OPTION_ROW_HEIGHT;
+  // Calculate height based on item count, capped at max rows
+  const listHeight = Math.min(listItemsHeight, getMaxListHeight({ withHeader: false }));
+
   return (
     <EuiPopover
       panelProps={{ css: panelStyles }}
@@ -216,8 +183,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
         data-test-subj="agentBuilderConnectorSelector"
         aria-label={selectableAriaLabel}
         singleSelection
-        searchable
-        searchProps={{ placeholder: connectorSearchPlaceholder }}
         options={connectorOptions}
         onChange={(_options, _event, changedOption) => {
           const { checked, key: connectorId } = changedOption;
@@ -238,14 +203,14 @@ export const ConnectorSelector: React.FC<{}> = () => {
             />
           );
         }}
-        listProps={{ id: connectorListId, css: selectorListStyles({ listId: connectorListId }) }}
+        height={listHeight}
+        listProps={{
+          id: connectorListId,
+          css: selectorListStyles,
+          rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
+        }}
       >
-        {(list, search) => (
-          <>
-            <ConnectorPopoverTitle search={search} />
-            {list}
-          </>
-        )}
+        {(list) => <div>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
   );

@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { keys } from '@elastic/eui';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -21,6 +20,7 @@ import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
 import { useMetricFieldsQuery } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -28,12 +28,13 @@ export const MetricsExperienceGrid = ({
   histogramCss,
   onBrushEnd,
   onFilter,
+  actions,
   services,
   fetch$: discoverFetch$,
   fetchParams,
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
-}: ChartSectionProps) => {
+}: UnifiedMetricsGridProps) => {
   const { dataView, timeRange } = fetchParams;
   const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
     useMetricsExperienceState();
@@ -97,6 +98,7 @@ export const MetricsExperienceGrid = ({
         fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
+        actions={actions}
         histogramCss={histogramCss}
         isFieldsLoading={isFetchingAllFields}
         isDiscoverLoading={isDiscoverLoading}

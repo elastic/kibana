@@ -51,6 +51,10 @@ export interface AgentHandlerContext {
    */
   request: KibanaRequest;
   /**
+   * Id of the space associated with the request
+   */
+  spaceId: string;
+  /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
    */

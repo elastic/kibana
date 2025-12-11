@@ -11,6 +11,7 @@ export * from './components/code_box';
 export * from './components/github_link';
 export * from './components/eis_promotional_tour';
 export * from './components/eis_promotional_callout';
+export * from './components/eis_token_cost_tour';
 
 export * from './types';
 export * from './utils';

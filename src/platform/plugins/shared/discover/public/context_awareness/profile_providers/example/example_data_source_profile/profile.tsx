@@ -24,6 +24,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { capitalize } from 'lodash';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
+import { ChartWithCustomButtons } from './components';
 import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
@@ -325,8 +326,6 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
      * @param prev
      */
     getRecommendedFields: (prev) => () => {
-      const prevValue = prev ? prev() : {};
-
       // Define example recommended field names for the example logs data source
       const exampleRecommendedFieldNames: Array<DataViewField['name']> = [
         'log.level',
@@ -336,14 +335,18 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ];
 
       return {
-        ...prevValue,
+        ...prev(),
         recommendedFields: exampleRecommendedFieldNames,
       };
     },
     getChartSectionConfiguration: (prev) => (params) => {
-      const prevConfig = prev(params);
       return {
-        ...prevConfig,
+        ...prev(params),
+        renderChartSection: (props) => (
+          <ChartWithCustomButtons {...props} actions={params.actions} />
+        ),
+        localStorageKeyPrefix: 'discover:exampleDataSource',
+        replaceDefaultChart: true,
       };
     },
   },

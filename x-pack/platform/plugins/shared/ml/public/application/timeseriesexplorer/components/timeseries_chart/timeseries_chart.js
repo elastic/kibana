@@ -63,6 +63,8 @@ import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_u
 
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
+import { MlAnomalyAlertFlyout } from '../../../../alerting/ml_alerting_flyout';
+import { buildAlertParamsFromAnomaly } from '../../../components/anomalies_table/build_alert_params_from_anomaly';
 
 const percentFocusChartHeight = 0.634;
 const minSvgHeight = 350;
@@ -159,7 +161,13 @@ class TimeseriesChartIntl extends Component {
 
   constructor(props, constructorContext) {
     super(props);
-    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+    this.state = {
+      popoverData: null,
+      popoverCoords: [0, 0],
+      showRuleEditorFlyout: () => {},
+      alertFlyoutVisible: false,
+      alertFlyoutParams: undefined,
+    };
 
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       constructorContext.services.uiSettings,
@@ -1990,6 +1998,14 @@ class TimeseriesChartIntl extends Component {
     });
   };
 
+  handleShowAnomalyAlertFlyout = (anomaly) => {
+    const initialParams = buildAlertParamsFromAnomaly(anomaly);
+    this.setState({
+      alertFlyoutParams: initialParams,
+      alertFlyoutVisible: true,
+    });
+  };
+
   render() {
     return (
       <>
@@ -1998,6 +2014,12 @@ class TimeseriesChartIntl extends Component {
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
+        {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
+          <MlAnomalyAlertFlyout
+            onCloseFlyout={() => this.setState({ alertFlyoutVisible: false })}
+            initialParams={this.state.alertFlyoutParams}
+          />
+        )}
         {this.state.popoverData !== null && (
           <div
             style={{
@@ -2021,6 +2043,7 @@ class TimeseriesChartIntl extends Component {
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
                 showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                showAnomalyAlertFlyout={this.handleShowAnomalyAlertFlyout}
                 onItemClick={() => this.closePopover()}
                 sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />

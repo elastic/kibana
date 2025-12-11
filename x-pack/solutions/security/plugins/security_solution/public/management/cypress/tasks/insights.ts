@@ -19,9 +19,9 @@ import {
 const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 const INTERNAL_INFERENCE_CONNECTORS = [
   'Elastic-Managed-LLM',
-  'General-Purpose-LLM-v1',
-  'General-Purpose-LLM-v2',
-  'General-Purpose-LLM-v3',
+  'Anthropic-Claude-Sonnet-3-7',
+  'Anthropic-Claude-Sonnet-4-5',
+  'OpenAI-GPT-OSS-120B',
 ];
 const INTERNAL_CONNECTORS = [...INTERNAL_CLOUD_CONNECTORS, ...INTERNAL_INFERENCE_CONNECTORS];
 

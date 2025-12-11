@@ -223,16 +223,16 @@ export const useDashboardListingTable = ({
                 ({
                   type: 'dashboard',
                   id,
-                  updatedAt: meta.updatedAt!,
-                  createdAt: meta.createdAt,
-                  createdBy: meta.createdBy,
-                  updatedBy: meta.updatedBy,
+                  updatedAt: meta.updated_at!,
+                  createdAt: meta.created_at,
+                  createdBy: meta.created_by,
+                  updatedBy: meta.updated_by,
                   references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
                   managed: meta.managed,
                   attributes: {
                     title: data.title,
                     description: data.description,
-                    timeRestore: Boolean(data.timeRange),
+                    timeRestore: Boolean(data.time_range),
                   },
                 } as DashboardSavedObjectUserContent)
             ),

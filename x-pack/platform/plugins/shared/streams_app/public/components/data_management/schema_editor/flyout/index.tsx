@@ -38,6 +38,7 @@ export interface SchemaEditorFlyoutProps {
   stream: Streams.ingest.all.Definition;
   withFieldSimulation?: boolean;
   fields?: SchemaField[];
+  enableGeoPointSuggestions?: boolean;
 }
 
 export const SchemaEditorFlyout = ({
@@ -49,6 +50,7 @@ export const SchemaEditorFlyout = ({
   applyGeoPointSuggestion: applyGeoPointSuggestionProp = false,
   withFieldSimulation = false,
   fields,
+  enableGeoPointSuggestions = true,
 }: SchemaEditorFlyoutProps) => {
   const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
@@ -62,12 +64,15 @@ export const SchemaEditorFlyout = ({
   const flyoutId = useGeneratedHtmlId({ prefix: 'streams-edit-field' });
 
   const geoPointSuggestion = useMemo(() => {
+    if (!enableGeoPointSuggestions) {
+      return null;
+    }
     return getGeoPointSuggestion({
       fieldName: field.name,
       fields,
       streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
     });
-  }, [field.name, fields, stream]);
+  }, [enableGeoPointSuggestions, field.name, fields, stream]);
 
   const initialField = useMemo(() => {
     if (applyGeoPointSuggestionProp && geoPointSuggestion) {
@@ -177,6 +182,7 @@ export const SchemaEditorFlyout = ({
             toggleEditMode={toggleEditMode}
             onChange={setNextField}
             stream={stream}
+            enableGeoPointSuggestions={enableGeoPointSuggestions}
           />
           <AdvancedFieldMappingOptions
             value={nextField.additionalParameters}

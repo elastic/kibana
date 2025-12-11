@@ -14,12 +14,15 @@ import type {
   ESQLSingleAstItem,
 } from '../../../../../../types';
 import type { PartialOperatorDetection } from '../../types';
-import { endsWithInOrNotInToken, endsWithIsOrIsNotToken, endsWithLikeOrRlikeToken } from '../utils';
+import {
+  endsWithInOrNotInToken,
+  endsWithIsOrIsNotToken,
+  endsWithLikeOrRlikeToken,
+  LIKE_OPERATOR_REGEX,
+  NOT_IN_REGEX,
+  IS_NOT_REGEX,
+} from '../utils';
 import { Builder } from '../../../../../../builder';
-
-const NOT_LIKE_REGEX = /\bnot\s+like\s*$/i;
-const NOT_IN_REGEX = /\bnot\s+in\s*$/i;
-const IS_NOT_REGEX = /\bis\s+not\b/i;
 
 // Regex to extract field name before operator: match[1] = fieldName
 // Matches with or without opening parenthesis
@@ -126,18 +129,25 @@ export function detectNullCheck(innerText: string): PartialOperatorDetection | n
 }
 
 /**
- * Detects partial LIKE / NOT LIKE operators.
- * Examples: "field LIKE ", "field NOT LIKE "
+ * Detects partial LIKE / RLIKE / NOT LIKE / NOT RLIKE operators.
+ * Examples: "field LIKE ", "field RLIKE ", "field NOT LIKE ", "field NOT RLIKE "
  */
 export function detectLike(innerText: string): PartialOperatorDetection | null {
   if (!endsWithLikeOrRlikeToken(innerText)) {
     return null;
   }
 
-  const isNotLike = NOT_LIKE_REGEX.test(innerText);
+  const match = innerText.match(LIKE_OPERATOR_REGEX);
+
+  if (!match) {
+    return null;
+  }
+
+  // Normalize: lowercase, trim, collapse multiple spaces
+  const operatorName = match[0].toLowerCase().trim().replace(/\s+/g, ' ');
 
   return {
-    operatorName: isNotLike ? 'not like' : 'like',
+    operatorName,
     textBeforeCursor: innerText,
   };
 }

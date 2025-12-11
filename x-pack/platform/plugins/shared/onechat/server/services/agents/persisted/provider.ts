@@ -90,5 +90,8 @@ export const toInternalDefinition = ({
   return {
     ...definition,
     readonly: false,
+    isAvailable: () => {
+      return { status: 'available' };
+    },
   };
 };

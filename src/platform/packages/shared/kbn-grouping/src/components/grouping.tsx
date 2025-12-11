@@ -45,7 +45,8 @@ export interface GroupingProps<T> {
   getGroupStats?: GetGroupStats<T>;
   groupingId: string;
   groupingLevel?: number;
-  inspectButton?: JSX.Element;
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
   isLoading: boolean;
   itemsPerPage: number;
   onChangeGroupsItemsPerPage?: (size: number) => void;
@@ -83,7 +84,7 @@ const GroupingComponent = <T,>({
   groupSelector,
   groupingId,
   groupingLevel = 0,
-  inspectButton,
+  additionalToolbarControls,
   isLoading,
   itemsPerPage,
   onChangeGroupsItemsPerPage,
@@ -246,8 +247,13 @@ const GroupingComponent = <T,>({
             ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              {additionalToolbarControls &&
+                additionalToolbarControls.map((control, index) => (
+                  <EuiFlexItem key={`additional-control-${index}`} grow={false}>
+                    {control}
+                  </EuiFlexItem>
+                ))}
               <EuiFlexItem>{groupSelector}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

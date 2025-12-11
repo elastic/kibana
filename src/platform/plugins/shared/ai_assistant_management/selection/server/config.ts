@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAssistantType } from '../common/ai_assistant_type';
 
 const configSchema = schema.object({
@@ -23,6 +24,10 @@ const configSchema = schema.object({
     ],
     { defaultValue: AIAssistantType.Default }
   ),
+  preferredChatExperience: schema.oneOf(
+    [schema.literal(AIChatExperience.Classic), schema.literal(AIChatExperience.Agent)],
+    { defaultValue: AIChatExperience.Classic }
+  ),
 });
 
 export type AIAssistantManagementSelectionConfig = TypeOf<typeof configSchema>;
@@ -31,5 +36,6 @@ export const config: PluginConfigDescriptor<AIAssistantManagementSelectionConfig
   schema: configSchema,
   exposeToBrowser: {
     preferredAIAssistantType: true,
+    preferredChatExperience: true,
   },
 };

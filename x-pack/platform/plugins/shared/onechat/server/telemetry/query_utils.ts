@@ -14,15 +14,34 @@ import {
 } from '@kbn/inference-common';
 
 export const isIndexNotFoundError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
   const castError = error as {
     attributes?: {
       caused_by?: { type?: string };
       error?: { caused_by?: { type?: string } };
     };
+    message?: string;
+    meta?: {
+      body?: {
+        error?: {
+          type?: string;
+          caused_by?: { type?: string };
+        };
+      };
+    };
   };
+
+  // Check various error structure formats from Elasticsearch client
   return (
     castError.attributes?.caused_by?.type === 'index_not_found_exception' ||
-    castError.attributes?.error?.caused_by?.type === 'index_not_found_exception'
+    castError.attributes?.error?.caused_by?.type === 'index_not_found_exception' ||
+    castError.meta?.body?.error?.type === 'index_not_found_exception' ||
+    castError.meta?.body?.error?.caused_by?.type === 'index_not_found_exception' ||
+    (typeof castError.message === 'string' &&
+      castError.message.includes('index_not_found_exception'))
   );
 };
 
@@ -144,7 +163,10 @@ export class QueryUtils {
         by_type: byType,
       };
     } catch (error) {
-      this.logger.warn(`Failed to fetch custom tools counts: ${error.message}`);
+      // Suppress warning for missing index - expected when no tools have been created yet
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch custom tools counts: ${error.message}`);
+      }
       return {
         total: 0,
         by_type: [],
@@ -164,7 +186,10 @@ export class QueryUtils {
 
       return response.count || 0;
     } catch (error) {
-      this.logger.warn(`Failed to fetch custom agents count: ${error.message}`);
+      // Suppress warning for missing index - expected when no agents have been created yet
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch custom agents count: ${error.message}`);
+      }
       return 0;
     }
   }
@@ -681,7 +706,10 @@ export class QueryUtils {
    * @param buckets - Map of bucket name → count
    * @returns Calculated percentiles (p50, p75, p90, p95, p99, mean)
    */
-  calculatePercentilesFromBuckets(buckets: Map<string, number>): {
+  calculatePercentilesFromBuckets(
+    buckets: Map<string, number>,
+    domainPrefix: string = 'onechat'
+  ): {
     p50: number;
     p75: number;
     p90: number;
@@ -689,22 +717,22 @@ export class QueryUtils {
     p99: number;
     mean: number;
   } {
-    // Bucket boundaries (in milliseconds)
+    // Bucket boundaries (in milliseconds) - keys include domain prefix
     const bucketRanges: Record<string, { min: number; max: number; mid: number }> = {
-      'query_to_result_time_<1s': { min: 0, max: 1000, mid: 500 },
-      'query_to_result_time_1-5s': { min: 1000, max: 5000, mid: 3000 },
-      'query_to_result_time_5-10s': { min: 5000, max: 10000, mid: 7500 },
-      'query_to_result_time_10-30s': { min: 10000, max: 30000, mid: 20000 },
-      'query_to_result_time_30s+': { min: 30000, max: 120000, mid: 60000 },
+      [`${domainPrefix}_query_to_result_time_<1s`]: { min: 0, max: 1000, mid: 500 },
+      [`${domainPrefix}_query_to_result_time_1-5s`]: { min: 1000, max: 5000, mid: 3000 },
+      [`${domainPrefix}_query_to_result_time_5-10s`]: { min: 5000, max: 10000, mid: 7500 },
+      [`${domainPrefix}_query_to_result_time_10-30s`]: { min: 10000, max: 30000, mid: 20000 },
+      [`${domainPrefix}_query_to_result_time_30s+`]: { min: 30000, max: 120000, mid: 60000 },
     };
 
     // Build cumulative distribution
     const sortedBuckets = [
-      'query_to_result_time_<1s',
-      'query_to_result_time_1-5s',
-      'query_to_result_time_5-10s',
-      'query_to_result_time_10-30s',
-      'query_to_result_time_30s+',
+      `${domainPrefix}_query_to_result_time_<1s`,
+      `${domainPrefix}_query_to_result_time_1-5s`,
+      `${domainPrefix}_query_to_result_time_5-10s`,
+      `${domainPrefix}_query_to_result_time_10-30s`,
+      `${domainPrefix}_query_to_result_time_30s+`,
     ];
 
     let totalCount = 0;

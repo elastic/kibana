@@ -27,6 +27,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionsClient } from '../../../../actions_client/actions_client';
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
 import { getConnectorType } from '../../../../fixtures';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
@@ -68,6 +69,9 @@ describe('listTypes()', () => {
       authorization: actionsAuthorizationMock.create() as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient: jest.fn(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+      isESOCanEncrypt: true,
+      getAxiosInstanceWithAuth: jest.fn(),
     });
   });
 
@@ -95,6 +99,7 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });
@@ -132,6 +137,7 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
       {
         id: 'my-connector-type-2',
@@ -143,6 +149,7 @@ describe('listTypes()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });
@@ -173,6 +180,7 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
       {
         id: '.cases',
@@ -184,6 +192,7 @@ describe('listTypes()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });

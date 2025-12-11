@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import {
   mockContext,
   lookupIndexFields,
@@ -27,7 +28,7 @@ import {
   nullCheckOperators,
 } from '../../../definitions/all_operators';
 import type { ICommandCallbacks } from '../../types';
-import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import type { FunctionReturnType } from '../../../definitions/types';
 import {
   ESQL_NUMBER_TYPES,
   FunctionDefinitionTypes,
@@ -74,7 +75,7 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<FieldType & FunctionReturnType> = [
+export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
   'double',
   'integer',
   'long',
@@ -816,7 +817,7 @@ describe('STATS Autocomplete', () => {
           'integer',
           'date_period',
           'time_duration',
-        ] as FieldType[]);
+        ] as EsqlFieldType[]);
         (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
           expectedFields1.map((name) => ({ label: name, text: name }))
         );

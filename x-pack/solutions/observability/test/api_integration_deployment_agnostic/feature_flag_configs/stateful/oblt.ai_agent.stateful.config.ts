@@ -24,7 +24,7 @@ export default createStatefulFeatureFlagTestConfig<typeof services>({
     serverArgs: [
       `--logging.loggers=${JSON.stringify([
         {
-          name: 'plugins.observabilityAgent',
+          name: 'plugins.observabilityAgentBuilder',
           level: 'all',
           appenders: ['default'],
         },

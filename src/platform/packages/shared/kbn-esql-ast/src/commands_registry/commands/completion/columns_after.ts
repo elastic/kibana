@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import { type ESQLAstCompletionCommand, type ESQLCommand } from '../../../types';
-import type { ESQLColumnData, ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLColumnData, ESQLUserDefinedColumn } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,

@@ -40,7 +40,8 @@ export async function search(
 
   return {
     dashboards: soResponse.saved_objects.map((so) => {
-      const { description, tags, timeRange, title } = transformDashboardOut(
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { description, tags, time_range, title } = transformDashboardOut(
         so.attributes,
         so.references
       );
@@ -50,7 +51,7 @@ export async function search(
         data: {
           ...(description && { description }),
           ...(tags && { tags }),
-          ...(timeRange && { timeRange }),
+          ...(time_range && { time_range }),
           title: title ?? '',
         },
         meta: getDashboardMeta(so, 'search'),

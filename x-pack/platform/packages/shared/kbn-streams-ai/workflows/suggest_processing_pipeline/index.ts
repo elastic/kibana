@@ -89,8 +89,11 @@ export async function suggestProcessingPipeline({
           };
         }
 
-        // 2. Simulate the pipeline and collect metrics
-        const simulateResult = await simulatePipeline(pipeline.data as StreamlangDSL);
+        // 2. Add customIdentifiers to steps for proper tracking in simulation results
+        const pipelineWithIdentifiers = addCustomIdentifiersToSteps(pipeline.data as StreamlangDSL);
+
+        // 3. Simulate the pipeline and collect metrics
+        const simulateResult = await simulatePipeline(pipelineWithIdentifiers);
         const metrics = await getSimulationMetrics(
           simulateResult,
           fieldsMetadataClient,
@@ -220,7 +223,7 @@ function validateProcessorFailureRates(simulationResult: ProcessingSimulationRes
   return errors;
 }
 
-function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
+export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
   if (!simulationResult.documents || simulationResult.documents.length === 0) {
     return [];
   }
@@ -247,9 +250,32 @@ function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse)
 
   // Format errors with counts and example context
   const uniqueErrors: string[] = [];
+  const maxErrors = 5;
+  const maxErrorLength = 250;
+  let errorIndex = 0;
+
   for (const [errorKey, errorInfo] of errorMap.entries()) {
+    if (errorIndex >= maxErrors) {
+      break;
+    }
+
     const countStr = errorInfo.count > 1 ? ` (occurred in ${errorInfo.count} documents)` : '';
-    uniqueErrors.push(`${errorKey}${countStr}`);
+    const fullError = `${errorKey}${countStr}`;
+
+    // Truncate error message if it exceeds max length
+    const truncatedError =
+      fullError.length > maxErrorLength
+        ? `${fullError.substring(0, maxErrorLength)}...`
+        : fullError;
+
+    uniqueErrors.push(truncatedError);
+    errorIndex++;
+  }
+
+  // Add message if there are more errors
+  const remainingErrors = errorMap.size - maxErrors;
+  if (remainingErrors > 0) {
+    uniqueErrors.push(`... and ${remainingErrors} more error(s)`);
   }
 
   return uniqueErrors;

@@ -24,6 +24,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -44,6 +45,7 @@ import {
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
   streamsProcessingSimulationSamplesFetchLatencySchema,
+  streamsTabVisitedSchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -136,6 +138,11 @@ const streamsProcessingSimulationSamplesFetchLatencyEventType = {
   schema: streamsProcessingSimulationSamplesFetchLatencySchema,
 };
 
+const streamsTabVisitedEventType = {
+  eventType: STREAMS_TAB_VISITED_EVENT_TYPE,
+  schema: streamsTabVisitedSchema,
+};
+
 export {
   streamsAttachmentCountEventType,
   streamsAttachmentClickEventType,
@@ -155,4 +162,5 @@ export {
   streamsFeatureIdentificationDeletedEventType,
   streamsDescriptionGeneratedEventType,
   streamsProcessingSimulationSamplesFetchLatencyEventType,
+  streamsTabVisitedEventType,
 };

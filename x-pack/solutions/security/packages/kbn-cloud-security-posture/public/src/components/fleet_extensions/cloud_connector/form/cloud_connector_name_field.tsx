@@ -8,45 +8,29 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getCloudConnectorNameError } from '../utils';
 
 interface CloudConnectorNameFieldProps {
   value: string;
   onChange: (name: string, isValid: boolean, validationError?: string) => void;
   disabled?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = ({
   value,
   onChange,
   disabled = false,
+  'data-test-subj': dataTestSubj,
 }) => {
-  // Format validation only
-  const validateFormat = (name: string): string | undefined => {
-    if (!name || !name.trim())
-      return i18n.translate(
-        'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.requiredError',
-        {
-          defaultMessage: 'Cloud Connector Name is required',
-        }
-      );
-    if (name.length > 255)
-      return i18n.translate(
-        'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.tooLongError',
-        {
-          defaultMessage: 'Cloud Connector Name must be 255 characters or less',
-        }
-      );
-    return undefined;
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    const formatError = validateFormat(newValue);
+    const formatError = getCloudConnectorNameError(newValue);
 
     onChange(newValue, !formatError, formatError);
   };
 
-  const error = validateFormat(value);
+  const error = getCloudConnectorNameError(value);
 
   return (
     <EuiFormRow
@@ -66,6 +50,7 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
         isInvalid={!!error}
         disabled={disabled}
         fullWidth
+        data-test-subj={dataTestSubj}
       />
     </EuiFormRow>
   );

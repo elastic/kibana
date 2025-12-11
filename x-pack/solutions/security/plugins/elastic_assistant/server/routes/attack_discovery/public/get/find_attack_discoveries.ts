@@ -17,7 +17,6 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { hasReadAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
@@ -78,8 +77,6 @@ export const findAttackDiscoveriesRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const { query } = request;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 

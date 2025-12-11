@@ -28,7 +28,10 @@ const TIME_SYSTEM_DESCRIPTIONS = {
 };
 
 // Find the argument that contains the cursor offset
-const findArgumentAtOffset = (args: ESQLAstItem[], targetOffset: number): ESQLAstItem | null => {
+export const findArgumentAtOffset = (
+  args: ESQLAstItem[],
+  targetOffset: number
+): ESQLAstItem | null => {
   for (const arg of args) {
     if (Array.isArray(arg)) {
       const found = findArgumentAtOffset(arg, targetOffset);

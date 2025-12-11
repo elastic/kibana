@@ -8,7 +8,9 @@
 import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-common';
 import { createInternalError } from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { AttachmentFormatContext } from '@kbn/onechat-server/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
+import type { AgentHandlerContext } from '@kbn/onechat-server/agents';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import type {
   AttachmentRepresentation,
@@ -42,19 +44,32 @@ export interface ProcessedConversation {
   attachments: ProcessedAttachment[];
 }
 
+const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
+  return {
+    request: agentContext.request,
+    spaceId: agentContext.spaceId,
+  };
+};
+
 export const prepareConversation = async ({
   previousRounds,
   nextInput,
-  attachmentsService,
+  context,
 }: {
   previousRounds: ConversationRound[];
   nextInput: RawRoundInput;
-  attachmentsService: AttachmentsService;
+  context: AgentHandlerContext;
 }): Promise<ProcessedConversation> => {
-  const processedNextInput = await prepareRoundInput({ input: nextInput, attachmentsService });
+  const { attachments: attachmentsService } = context;
+  const formatContext = createFormatContext(context);
+  const processedNextInput = await prepareRoundInput({
+    input: nextInput,
+    attachmentsService,
+    formatContext,
+  });
   const processedRounds = await Promise.all(
     previousRounds.map((round) => {
-      return prepareRound({ round, attachmentsService });
+      return prepareRound({ round, attachmentsService, formatContext });
     })
   );
 
@@ -89,28 +104,32 @@ export const prepareConversation = async ({
 const prepareRound = async ({
   round,
   attachmentsService,
+  formatContext,
 }: {
   round: ConversationRound;
   attachmentsService: AttachmentsService;
+  formatContext: AttachmentFormatContext;
 }): Promise<ProcessedConversationRound> => {
   return {
     ...round,
-    input: await prepareRoundInput({ input: round.input, attachmentsService }),
+    input: await prepareRoundInput({ input: round.input, attachmentsService, formatContext }),
   };
 };
 
 const prepareRoundInput = async ({
   input,
   attachmentsService,
+  formatContext,
 }: {
   input: RoundInput | RawRoundInput;
   attachmentsService: AttachmentsService;
+  formatContext: AttachmentFormatContext;
 }): Promise<ProcessedRoundInput> => {
   let attachments: ProcessedAttachment[] = [];
   if (input.attachments?.length) {
     attachments = await Promise.all(
       input.attachments.map((attachment) => {
-        return prepareAttachment({ attachment, attachmentsService });
+        return prepareAttachment({ attachment, attachmentsService, formatContext });
       })
     );
   }
@@ -123,9 +142,11 @@ const prepareRoundInput = async ({
 const prepareAttachment = async ({
   attachment: input,
   attachmentsService,
+  formatContext,
 }: {
   attachment: AttachmentInput;
   attachmentsService: AttachmentsService;
+  formatContext: AttachmentFormatContext;
 }): Promise<ProcessedAttachment> => {
   const definition = attachmentsService.getTypeDefinition(input.type);
   if (!definition) {
@@ -133,14 +154,23 @@ const prepareAttachment = async ({
   }
 
   const attachment = inputToFinal(input);
-  const formatted = await definition.format(attachment);
-  const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
 
-  return {
-    attachment,
-    representation: await formatted.getRepresentation(),
-    tools,
-  };
+  try {
+    const formatted = await definition.format(attachment, formatContext);
+    const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
+
+    return {
+      attachment,
+      representation: await formatted.getRepresentation(),
+      tools,
+    };
+  } catch (e) {
+    return {
+      attachment,
+      representation: { type: 'text', value: JSON.stringify(attachment.data) },
+      tools: [],
+    };
+  }
 };
 
 const inputToFinal = (input: AttachmentInput): Attachment => {

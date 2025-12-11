@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCallbacks } from './types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 
 export function getPolicyHelper(resourceRetriever?: ESQLCallbacks) {
   const getPolicies = async () => {

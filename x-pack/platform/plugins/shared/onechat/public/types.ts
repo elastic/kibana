@@ -13,7 +13,9 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+
 import type {
+  AgentsServiceStartContract,
   AttachmentServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/onechat-browser';
@@ -22,6 +24,7 @@ import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
@@ -47,6 +50,7 @@ export interface OnechatSetupDependencies {
 }
 
 export interface OnechatStartDependencies {
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -63,6 +67,10 @@ export interface OnechatPluginSetup {}
  * Public start contract for the browser-side onechat plugin.
  */
 export interface OnechatPluginStart {
+  /**
+   * Agent service contract, can be used to list agents.
+   */
+  agents: AgentsServiceStartContract;
   /**
    * Attachment service contract, can be used to register and retrieve attachment UI definitions.
    */

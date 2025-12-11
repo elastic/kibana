@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export enum DashboardUploadSteps {
-  DashboardsUpload = 1,
-  MacrosUpload = 2,
-  LookupsUpload = 3,
-  End = 10,
+export enum SplunkDashboardDataInputStepId {
+  Rules = 'splunk_dashboard_rules',
+  Macros = 'splunk_dashboard_macros',
+  Lookups = 'splunk_dashboard_lookups',
 }

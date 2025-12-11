@@ -12,10 +12,18 @@ import type {
   Logger,
   SavedObjectsClientContract,
   SavedObject,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
-import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import type { KueryNode } from '@kbn/es-query';
+import * as esKuery from '@kbn/es-query';
+import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
+import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import {
+  ENDPOINT_DEFAULT_PAGE_SIZE,
+  SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
+} from '../../../../common/endpoint/constants';
 import type { HapiReadableStream } from '../../../types';
 import {
   SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME,
@@ -25,13 +33,16 @@ import {
 import { ScriptLibraryError } from './common';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import type { EndpointScript } from '../../../../common/endpoint/types';
+import type {
+  EndpointScript,
+  EndpointScriptListApiResponse,
+} from '../../../../common/endpoint/types';
 import type {
   ScriptDownloadResponse,
   ScriptsLibraryClientInterface,
   ScriptsLibrarySavedObjectAttributes,
 } from './types';
-import { wrapErrorIfNeeded } from '../../utils';
+import { catchAndWrapError, wrapErrorIfNeeded } from '../../utils';
 import { stringify } from '../../utils/stringify';
 
 export interface ScriptsLibraryClientOptions {
@@ -75,24 +86,29 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     requiresInput,
     pathToExecutable,
   }: Omit<CreateScriptRequestBody, 'file'>): ScriptsLibrarySavedObjectAttributes {
+    const now = new Date().toISOString();
+
     return {
-      id: '',
-      hash: '',
       name,
       platform,
-      requires_input: requiresInput,
       description,
       instructions,
       example,
-      pathToExecutable,
+      id: '',
+      file_id: '',
+      file_size: 0,
+      file_name: '',
+      file_hash_sha256: '',
+      requires_input: requiresInput,
+      path_to_executable: pathToExecutable,
       created_by: '',
+      created_at: now,
       updated_by: '',
+      updated_at: now,
     };
   }
 
   protected mapSoAttributesToEndpointScript({
-    created_at: createdAt = '',
-    updated_at: updatedAt = '',
     version = '',
     attributes: {
       id,
@@ -102,9 +118,14 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       requires_input: requiresInput = false,
-      pathToExecutable,
+      path_to_executable: pathToExecutable = undefined,
+      file_name: fileName,
+      file_size: fileSize,
+      file_hash_sha256: fileHash,
       created_by: createdBy,
       updated_by: updatedBy,
+      created_at: createdAt,
+      updated_at: updatedAt,
     },
   }: SavedObject<ScriptsLibrarySavedObjectAttributes>): EndpointScript {
     const downloadUri = SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', id);
@@ -113,6 +134,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       id,
       name,
       platform: platform as EndpointScript['platform'],
+      fileName,
+      fileSize,
+      fileHash,
       downloadUri,
       requiresInput,
       description,
@@ -127,6 +151,56 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     };
   }
 
+  protected getKueryWithPrefixedSoType(kueryString: string): KueryNode {
+    const prefix = `${SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE}.attributes`;
+    const kueryAst = esKuery.fromKueryExpression(kueryString);
+    const kueryAstList = [kueryAst];
+
+    this.logger.debug(
+      () => `Kuery AST BEFORE prefixing with [${prefix}]: ${stringify(kueryAstList)}`
+    );
+
+    while (kueryAstList.length > 0) {
+      const kueryAstNode = kueryAstList.shift();
+
+      if (kueryAstNode) {
+        switch (kueryAstNode.type) {
+          case 'function':
+            {
+              const functionName = kueryAstNode.function;
+
+              if (['and', 'or', 'not'].includes(functionName)) {
+                kueryAstList.push(...kueryAstNode.arguments);
+                break;
+              }
+
+              if (kueryAstNode.arguments && kueryAstNode.arguments.length > 0) {
+                const firstArg = kueryAstNode.arguments[0];
+
+                if (firstArg.type === 'literal' && !String(firstArg.value).startsWith(prefix)) {
+                  firstArg.value = `${prefix}.${
+                    KUERY_FIELD_TO_SO_FIELD_MAP[
+                      firstArg.value as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP
+                    ] ?? firstArg.value
+                  }`;
+                }
+                break;
+              }
+            }
+
+            break;
+
+          // NOTE: this code may not support nested fields. Because the SO type we use for scripts
+          // does not have nested fields, this should not be an issue.
+        }
+      }
+    }
+
+    this.logger.debug(() => `Kuery AST AFTER adding SO type: ${stringify(kueryAst)}`);
+
+    return kueryAst;
+  }
+
   public async create({
     file: _file,
     ...scriptDefinition
@@ -137,10 +211,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
     const fileStorage = await this.filesClient
       .create({
-        id: scriptId,
         metadata: {
           name: fileStream.hapi.filename ?? scriptDefinition.name.replace(/\D\W/g, '_'),
           mime: fileStream.hapi.headers['content-type'] ?? 'application/octet-stream',
+          meta: { scriptId },
         },
       })
       .catch((error) => {
@@ -181,7 +255,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
     Object.assign(soAttributes, {
       id: scriptId,
-      hash: fileStorage.data.hash.sha256,
+      file_id: fileStorage.id,
+      file_name: fileStorage.data.name,
+      file_size: fileStorage.data.size ?? 0,
+      file_hash_sha256: fileStorage.data.hash.sha256,
       created_by: this.username,
       updated_by: this.username,
     });
@@ -224,8 +301,49 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 
-  public async list(): Promise<void> {
-    throw new ScriptLibraryError('Not implemented', 501);
+  public async list({
+    page = 1,
+    pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
+    sortField = 'name',
+    sortDirection = 'asc',
+    kuery,
+  }: ListScriptsRequestQuery = {}): Promise<EndpointScriptListApiResponse> {
+    const filter: SavedObjectsFindOptions['filter'] = kuery
+      ? this.getKueryWithPrefixedSoType(kuery)
+      : undefined;
+
+    const soFindResults = await this.soClient
+      .find<ScriptsLibrarySavedObjectAttributes>({
+        type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        perPage: pageSize,
+        page,
+        filter,
+        sortField:
+          KUERY_FIELD_TO_SO_FIELD_MAP[sortField as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP],
+        sortOrder: sortDirection,
+      })
+      .catch((error) => {
+        // Check if the error is due to result window is too large. We currently only support up to 10k results.
+        if (error.message.toLowerCase().includes('result window is too large')) {
+          throw new ScriptLibraryError(
+            'Result window is too large, pageSize + page must be less than or equal to: [10000]',
+            400,
+            error
+          );
+        }
+
+        throw error;
+      })
+      .catch(catchAndWrapError.withMessage('Failed to search for scripts'));
+
+    return {
+      data: soFindResults.saved_objects.map(this.mapSoAttributesToEndpointScript),
+      page,
+      pageSize,
+      sortDirection,
+      sortField,
+      total: soFindResults.total ?? 0,
+    };
   }
 
   public async delete(scriptId: string): Promise<void> {

@@ -74,8 +74,8 @@ const parseCSV = (fileContent: string): object[] => {
     skipEmptyLines: true,
   };
   const { data, errors } = Papa.parse(fileContent, config);
-  if (errors.length > 0) {
-    throw new Error('Invalid CSV');
+  if (!data && errors.length > 0) {
+    throw new Error('Invalid CSV ');
   }
   return data as object[];
 };

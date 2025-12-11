@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
   - '@kbn/react-query'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -81,6 +82,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

@@ -15,11 +15,12 @@ import type {
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
-import type { ActionTypeExecutorResult, SubFeature } from '../common';
+import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsClient } from './actions_client';
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -88,6 +89,7 @@ export interface ActionTypeExecutorOptions<
   secrets: Secrets;
   params: Params;
   logger: Logger;
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
@@ -198,6 +200,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
+  source?: ActionTypeSource;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -222,6 +225,8 @@ export interface ActionType<
     params?: Params;
     source?: ActionExecutionSourceType;
   }) => string[];
+  // Headers that should be added to every Axios request made by this action type
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
@@ -255,26 +260,9 @@ export interface ActionTaskExecutorParams {
   actionTaskParamsId: string;
 }
 
-export interface ProxySettings {
-  proxyUrl: string;
-  proxyBypassHosts: Set<string> | undefined;
-  proxyOnlyHosts: Set<string> | undefined;
-  proxyHeaders?: Record<string, string>;
-  proxySSLSettings: SSLSettings;
-}
-
 export interface ResponseSettings {
   maxContentLength: number;
   timeout: number;
-}
-
-export interface SSLSettings {
-  verificationMode?: 'none' | 'certificate' | 'full';
-  pfx?: Buffer;
-  cert?: Buffer;
-  key?: Buffer;
-  passphrase?: string;
-  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

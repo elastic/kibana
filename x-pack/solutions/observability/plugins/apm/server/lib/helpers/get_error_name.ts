@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { Exception } from '@kbn/apm-types';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
+import type { ProxiedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/access_known_fields';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import type { Maybe } from '../../../typings/common';
-import type { APMError } from '../../../typings/es_schemas/ui/apm_error';
+import { ERROR_LOG_MESSAGE } from '../../../common/es_fields/apm';
 
-export function getErrorName({
-  error,
-}: {
-  error: Maybe<Pick<APMError['error'], 'exception'>> & { log?: { message?: string } };
-}): string {
-  return error?.log?.message || error?.exception?.[0]?.message || NOT_AVAILABLE_LABEL;
+export function getErrorName<T extends ProxiedApmEvent<Partial<FlattenedApmEvent>>>(
+  event: T,
+  exception: Exception
+): string {
+  return event[ERROR_LOG_MESSAGE] || exception.message || NOT_AVAILABLE_LABEL;
 }

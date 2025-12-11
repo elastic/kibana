@@ -23,13 +23,13 @@ describe('flattenSteps', () => {
   it('should flatten nested where blocks', () => {
     const steps = [
       {
-        where: {
+        condition: {
           field: 'foo',
           eq: 'bar',
           steps: [
             { action: 'set', to: 'baz', value: 'qux' },
             {
-              where: {
+              condition: {
                 field: 'baz',
                 eq: 'qux',
                 steps: [{ action: 'rename', from: 'baz', to: 'final' }],
@@ -65,5 +65,56 @@ describe('flattenSteps', () => {
   it('should handle steps with no nesting', () => {
     const steps = [{ action: 'set', to: 'foo', value: 'bar' }] as StreamlangStep[];
     expect(flattenSteps(steps)).toEqual([{ action: 'set', to: 'foo', value: 'bar' }]);
+  });
+
+  it('should handle where blocks with customIdentifier and nested where conditions', () => {
+    const steps = [
+      {
+        action: 'grok',
+        from: 'message',
+        patterns: ['%{WORD:abc}'],
+        customIdentifier: 'i31b51cb0-d1c9-11f0-a523-ed186b43cf76',
+      },
+      {
+        condition: {
+          field: 'sdfds',
+          eq: 'dsfsdf',
+          steps: [
+            {
+              action: 'grok',
+              from: '',
+              patterns: [''],
+              ignore_failure: true,
+              ignore_missing: true,
+              where: {
+                always: {},
+              },
+              customIdentifier: 'i3b6100d0-d1c9-11f0-a523-ed186b43cf76',
+            },
+          ],
+        },
+        customIdentifier: 'i342ea830-d1c9-11f0-a523-ed186b43cf76',
+      },
+    ] as StreamlangStep[];
+
+    expect(flattenSteps(steps)).toEqual([
+      {
+        action: 'grok',
+        from: 'message',
+        patterns: ['%{WORD:abc}'],
+        customIdentifier: 'i31b51cb0-d1c9-11f0-a523-ed186b43cf76',
+      },
+      {
+        action: 'grok',
+        from: '',
+        patterns: [''],
+        ignore_failure: true,
+        ignore_missing: true,
+        where: {
+          and: [{ field: 'sdfds', eq: 'dsfsdf' }, { always: {} }],
+        },
+        customIdentifier: 'i3b6100d0-d1c9-11f0-a523-ed186b43cf76',
+      },
+    ]);
   });
 });

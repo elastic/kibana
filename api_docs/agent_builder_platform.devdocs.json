@@ -1,0 +1,55 @@
+{
+  "id": "agentBuilderPlatform",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "agentBuilderPlatform",
+      "id": "def-public.AgentBuilderPlatformPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderPlatformPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/agent_builder_platform/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "agentBuilderPlatform",
+      "id": "def-public.AgentBuilderPlatformPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderPlatformPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/agent_builder_platform/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

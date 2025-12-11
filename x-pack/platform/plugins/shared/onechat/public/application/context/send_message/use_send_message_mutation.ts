@@ -6,10 +6,11 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useAgentId } from '../../hooks/use_conversation';
+import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
+import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
@@ -32,9 +33,25 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
+  const { conversation } = useConversation();
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
+
+  const [error, setError] = useState<unknown | null>(null);
+  const [errorSteps, setErrorSteps] = useState<ConversationRoundStep[]>([]);
+
+  const removeError = useCallback(() => {
+    setError(null);
+    setErrorSteps([]);
+  }, []);
+
+  useEffect(() => {
+    // Clear errors any time conversation id changes - we do not persist it.
+    if (conversationId) {
+      removeError();
+    }
+  }, [conversationId, removeError]);
 
   const browserApiToolsMetadata = useMemo(() => {
     if (!browserApiTools) return undefined;
@@ -46,11 +63,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   }, [services.notifications?.toasts]);
 
   const {
-    pendingMessageState: { error, pendingMessage },
+    pendingMessageState: { pendingMessage },
     setPendingMessage,
     removePendingMessage,
-    setError,
-    removeError,
   } = usePendingMessageState({ conversationId });
   const subscribeToChatEvents = useSubscribeToChatEvents({
     setAgentReasoning,
@@ -115,6 +130,10 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       setIsResponseLoading(false);
       reportConverseError(err, { connectorId });
       setError(err);
+      const steps = conversation?.rounds?.at(-1)?.steps;
+      if (steps) {
+        setErrorSteps(steps);
+      }
       // When we error, we should immediately remove the round rather than waiting for a refetch after invalidation
       // Otherwise, the error round and the optimistic round will be visible together.
       conversationActions.removeOptimisticRound();
@@ -134,6 +153,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     sendMessage: mutate,
     isResponseLoading,
     error,
+    errorSteps,
     pendingMessage,
     agentReasoning,
     retry: () => {

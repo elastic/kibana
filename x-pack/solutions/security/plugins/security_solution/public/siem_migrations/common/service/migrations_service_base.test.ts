@@ -59,6 +59,11 @@ class TestMigrationsService extends SiemMigrationsServiceBase<MigrationTaskStats
   protected fetchMigrationStats = mockFetchMigrationStats;
   protected fetchMigrationsStatsAll = mockFetchMigrationsStatsAll;
   protected sendFinishedMigrationNotification = mockSendFinishedMigrationNotification;
+  public isAvailable(): boolean {
+    return true;
+  }
+
+  public getMissingCapabilities = mockGetMissingCapabilitiesChecker;
 }
 
 // --- End of mocks ---

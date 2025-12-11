@@ -12,28 +12,26 @@ import { SubSteps } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { OnResourcesCreated, OnMissingResourcesFetched } from '../../types';
+import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
-import { DashboardUploadSteps } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from '../common/check_resources';
+import type { MigrationStepProps, OnMissingResourcesFetched } from '../../../../../common/types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: DashboardMigrationTaskStats;
   missingMacros: string[];
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
-interface MacrosDataInputProps
-  extends Omit<MacrosDataInputSubStepsProps, 'migrationStats' | 'missingMacros'> {
-  dataInputStep: DashboardUploadSteps;
-  migrationStats?: DashboardMigrationTaskStats;
-  missingMacros?: string[];
-}
-export const MacrosDataInput = React.memo<MacrosDataInputProps>(
-  ({ dataInputStep, migrationStats, missingMacros, onMissingResourcesFetched }) => {
+
+export const MacrosDataInput = React.memo<MigrationStepProps>(
+  ({ dataInputStep, migrationStats, missingResourcesIndexed, onMissingResourcesFetched }) => {
+    const missingMacros = useMemo(() => missingResourcesIndexed?.macros, [missingResourcesIndexed]);
+
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(DashboardUploadSteps.MacrosUpload, dataInputStep),
+      () => getEuiStepStatus(SplunkDataInputStep.Macros, dataInputStep),
       [dataInputStep]
     );
 
@@ -46,7 +44,7 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
                 <EuiStepNumber
                   data-test-subj="macrosUploadStepNumber"
                   titleSize="xs"
-                  number={DashboardUploadSteps.MacrosUpload}
+                  number={SplunkDataInputStep.Macros}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>

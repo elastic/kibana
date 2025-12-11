@@ -72,7 +72,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/safer-lodash-set",
     "@kbn/connector-specs",
-    "@kbn/workflows-extensions"
+    "@kbn/workflows-extensions",
+    "@kbn/alerts-ui-shared"
   ],
   "exclude": ["target/**/*"]
 }

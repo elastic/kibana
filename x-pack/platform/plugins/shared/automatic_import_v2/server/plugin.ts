@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreStart,
-  Plugin,
-  Logger,
-  ElasticsearchClient,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
@@ -25,6 +20,11 @@ import type {
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
 import { AUTOMATIC_IMPORT_FEATURE } from './feature';
+import { registerRoutes } from './routes/register_routes';
+import {
+  INTEGRATION_SAVED_OBJECT_TYPE,
+  DATA_STREAM_SAVED_OBJECT_TYPE,
+} from './services/saved_objects/constants';
 
 export class AutomaticImportV2Plugin
   implements
@@ -60,14 +60,8 @@ export class AutomaticImportV2Plugin
 
     plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
 
-    const coreStartServices = core.getStartServices().then(([coreStart]) => ({
-      esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
-    }));
-    const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
-
     this.automaticImportService = new AutomaticImportService(
       this.logger,
-      esClientPromise,
       core.savedObjects,
       plugins.taskManager
     );
@@ -84,6 +78,10 @@ export class AutomaticImportV2Plugin
       AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
+
+    const router = core.http.createRouter<AutomaticImportV2PluginRequestHandlerContext>();
+    registerRoutes(router, this.logger);
+
     return {
       actions: plugins.actions,
     };
@@ -101,24 +99,17 @@ export class AutomaticImportV2Plugin
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
 
-    if (!plugins.security) {
-      throw new Error('Security service not initialized.');
-    }
-
-    if (!core.savedObjects) {
-      throw new Error('SavedObjects service not initialized.');
-    }
-
-    if (!plugins.taskManager) {
-      throw new Error('TaskManager service not initialized.');
-    }
-
     if (!this.automaticImportService) {
       throw new Error('AutomaticImportService not initialized during setup');
     }
 
+    const savedObjectsClient = core.savedObjects.createInternalRepository([
+      INTEGRATION_SAVED_OBJECT_TYPE,
+      DATA_STREAM_SAVED_OBJECT_TYPE,
+    ]);
+
     this.automaticImportService
-      .initialize(core.security, core.savedObjects, plugins.taskManager)
+      .initialize(new SavedObjectsClient(savedObjectsClient), plugins.taskManager)
       .then(() => {
         this.logger.debug('AutomaticImportService initialized successfully');
       })
@@ -126,14 +117,7 @@ export class AutomaticImportV2Plugin
         this.logger.error('Failed to initialize AutomaticImportService', error);
       });
 
-    this.logger.info('TaskManagerService initialized successfully');
-
-    return {
-      actions: plugins.actions,
-      inference: plugins.inference,
-      licensing: plugins.licensing,
-      security: plugins.security,
-    };
+    return {};
   }
 
   /**

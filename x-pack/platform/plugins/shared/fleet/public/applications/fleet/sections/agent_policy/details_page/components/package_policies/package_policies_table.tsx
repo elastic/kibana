@@ -51,7 +51,7 @@ interface Props {
   agentPolicy: AgentPolicy;
   // Pass through props to InMemoryTable
   loading?: EuiInMemoryTableProps<InMemoryPackagePolicy>['loading'];
-  message?: EuiInMemoryTableProps<InMemoryPackagePolicy>['message'];
+  noItemsMessage?: EuiInMemoryTableProps<InMemoryPackagePolicy>['noItemsMessage'];
   refreshAgentPolicy: () => void;
 }
 

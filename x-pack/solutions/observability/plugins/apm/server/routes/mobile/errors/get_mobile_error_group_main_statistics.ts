@@ -24,7 +24,7 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { getErrorName } from '../../../lib/helpers/get_error_name';
 
 export type MobileErrorGroupMainStatisticsResponse = Array<{
   groupId: string;
@@ -144,7 +144,7 @@ export async function getMobileErrorGroupMainStatistics({
         type: event[ERROR_EXC_TYPE],
       };
 
-      const errorName = event[ERROR_LOG_MESSAGE] || exception.message || NOT_AVAILABLE_LABEL;
+      const errorName = getErrorName(event, exception);
 
       return {
         groupId: event[ERROR_GROUP_ID],

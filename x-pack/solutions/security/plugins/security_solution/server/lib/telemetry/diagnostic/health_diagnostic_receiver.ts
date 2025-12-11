@@ -33,7 +33,7 @@ import {
 } from './health_diagnostic_circuit_breakers.types';
 import { type HealthDiagnosticQuery, QueryType } from './health_diagnostic_service.types';
 import type { TelemetryLogger } from '../telemetry_logger';
-import { newTelemetryLogger } from '../helpers';
+import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
 export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExecutor {
   private readonly logger: TelemetryLogger;
@@ -160,7 +160,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
       finalize(() => {
         this.client.closePointInTime({ id: pitId }).catch((error) => {
-          this.logger.warn('>> closePointInTime error', { error });
+          this.logger.warn('>> closePointInTime error', withErrorMessage(error));
         });
       })
     );
@@ -252,7 +252,10 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         return indices.filter((indexName) => indexName !== '');
       })
       .catch((error) => {
-        this.logger.info('Error while checking ILM status, assuming serverless', { error });
+        this.logger.info(
+          'Error while checking ILM status, assuming serverless',
+          withErrorMessage(error)
+        );
         return [query.index];
       });
   }

@@ -452,7 +452,15 @@ export const generateEnqueueFunctionInput = ({
 };
 
 export const generateAlertInstance = (
-  { id, duration, start, flappingHistory, actions, maintenanceWindowIds }: GeneratorParams = {
+  {
+    id,
+    duration,
+    start,
+    flappingHistory,
+    actions,
+    maintenanceWindowIds,
+    maintenanceWindowNames,
+  }: GeneratorParams = {
     id: 1,
     flappingHistory: [false],
   }
@@ -468,6 +476,7 @@ export const generateAlertInstance = (
       flappingHistory,
       flapping: false,
       maintenanceWindowIds: maintenanceWindowIds || [],
+      maintenanceWindowNames: maintenanceWindowNames || [],
       pendingRecoveredCount: 0,
       activeCount: 1,
     },

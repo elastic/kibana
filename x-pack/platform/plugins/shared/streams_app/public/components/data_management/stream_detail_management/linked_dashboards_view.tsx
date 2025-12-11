@@ -24,11 +24,15 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAttachmentsFetch } from '../../../hooks/use_attachments_fetch';
 
+const DASHBOARD_FILTERS = {
+  attachmentTypes: ['dashboard' as const],
+};
+
 export function LinkedDashboardsView({ definition }: { definition: Streams.all.GetResponse }) {
   const context = useKibana();
   const attachmentsFetch = useAttachmentsFetch({
-    name: definition.stream.name,
-    attachmentType: 'dashboard',
+    streamName: definition.stream.name,
+    filters: DASHBOARD_FILTERS,
   });
   const dashboardsLocator =
     context.dependencies.start.share.url.locators.get(DASHBOARD_APP_LOCATOR);

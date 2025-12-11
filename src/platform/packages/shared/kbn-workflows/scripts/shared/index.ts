@@ -21,3 +21,4 @@ export { formatDuration } from './format_duration';
 export { getLicenseHeader } from './get_license_header';
 export { eslintFixGeneratedCode } from './eslint_fix_generated_code';
 export { getEslintrcForGeneratedCode } from './get_eslintrc_for_generated_code';
+export { createRemoveServerDefaults } from './oas_remove_server_defaults';

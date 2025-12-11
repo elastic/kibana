@@ -5801,7 +5801,7 @@
         "label": "ExecutionStatusUnion",
         "description": [],
         "signature": [
-          "\"running\" | \"pending\" | \"failed\" | \"timed_out\" | \"completed\" | \"skipped\" | \"waiting\" | \"waiting_for_input\" | \"cancelled\""
+          "\"running\" | \"skipped\" | \"pending\" | \"failed\" | \"timed_out\" | \"completed\" | \"cancelled\" | \"waiting\" | \"waiting_for_input\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,

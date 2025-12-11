@@ -97,6 +97,7 @@ export async function getLensServices(
     unifiedSearch,
     serverless,
     contentManagement,
+    cps,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -133,6 +134,7 @@ export async function getLensServices(
     unifiedSearch,
     locator,
     serverless,
+    cps,
     ...coreStart,
   };
 }

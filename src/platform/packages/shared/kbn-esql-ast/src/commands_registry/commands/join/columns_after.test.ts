@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('JOIN columnsAfter', () => {

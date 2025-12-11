@@ -19,23 +19,23 @@ export function extractOptions(state: { [key: string]: unknown }): Partial<Dashb
   const options: Partial<Writable<DashboardOptions>> = {};
 
   if (typeof state.hidePanelTitles === 'boolean') {
-    options.hidePanelTitles = state.hidePanelTitles;
+    options.hide_panel_titles = state.hidePanelTitles;
   }
 
   if (typeof state.useMargins === 'boolean') {
-    options.useMargins = state.useMargins;
+    options.use_margins = state.useMargins;
   }
 
   if (typeof state.syncColors === 'boolean') {
-    options.syncColors = state.syncColors;
+    options.sync_colors = state.syncColors;
   }
 
   if (typeof state.syncTooltips === 'boolean') {
-    options.syncTooltips = state.syncTooltips;
+    options.sync_tooltips = state.syncTooltips;
   }
 
   if (typeof state.syncCursor === 'boolean') {
-    options.syncCursor = state.syncCursor;
+    options.sync_cursor = state.syncCursor;
   }
 
   return options;

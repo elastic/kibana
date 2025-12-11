@@ -89,7 +89,7 @@ describe('transformDashboardOut', () => {
       },
       description: 'my description',
       options: {
-        hidePanelTitles: false,
+        hide_panel_titles: false,
       },
       panels: [
         {
@@ -185,11 +185,11 @@ describe('transformDashboardOut', () => {
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
       },
       panels: [
         {
@@ -209,12 +209,12 @@ describe('transformDashboardOut', () => {
           version: '2',
         },
       ],
-      refreshInterval: {
+      refresh_interval: {
         pause: true,
         value: 1000,
       },
       tags: ['tag1', 'tag2'],
-      timeRange: {
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },

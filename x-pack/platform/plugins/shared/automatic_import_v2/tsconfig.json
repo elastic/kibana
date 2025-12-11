@@ -37,6 +37,7 @@
     "@kbn/core-application-common",
     "@kbn/i18n",
     "@kbn/features-plugin",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/logging"
   ]
 }

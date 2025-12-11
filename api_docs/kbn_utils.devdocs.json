@@ -27,7 +27,9 @@
           "Readable",
           ")[], options: ",
           "TransformOptions",
-          " | undefined) => ",
+          "<",
+          "Transform",
+          "> | undefined) => ",
           "PassThrough"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
@@ -62,7 +64,9 @@
             ],
             "signature": [
               "TransformOptions",
-              " | undefined"
+              "<",
+              "Transform",
+              "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,

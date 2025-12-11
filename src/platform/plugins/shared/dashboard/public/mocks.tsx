@@ -109,11 +109,11 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
   return {
     // options
     options: {
-      useMargins: true,
-      syncColors: false,
-      syncCursor: true,
-      syncTooltips: false,
-      hidePanelTitles: false,
+      use_margins: true,
+      sync_colors: false,
+      sync_cursor: true,
+      sync_tooltips: false,
+      hide_panel_titles: false,
     },
 
     tags: [],
@@ -123,7 +123,7 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       language: 'kuery',
       query: 'hi',
     },
-    timeRange: {
+    time_range: {
       to: 'now',
       from: 'now-15m',
     },

@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import {
   mockContext,
   lookupIndexFields,
@@ -22,7 +23,7 @@ import {
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
-import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import type { FunctionReturnType } from '../../../definitions/types';
 import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { Parser } from '../../../parser';
@@ -75,7 +76,7 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = ['double', 'integer', 'long'];
 
 export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
   'BY ',

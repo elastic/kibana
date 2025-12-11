@@ -14,12 +14,12 @@ export const AWS_PROVIDER = 'aws';
 export const GCP_PROVIDER = 'gcp';
 export const AZURE_PROVIDER = 'azure';
 
-export const AWS_SINGLE_ACCOUNT = 'single-account';
-export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
-export const AZURE_SINGLE_ACCOUNT = 'single-account';
-
-export const AWS_ACCOUNT_TYPE_INPUT_VAR_NAME = 'aws.account_type';
-export const AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME = 'azure.account_type';
+export {
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+  AWS_ACCOUNT_TYPE_VAR_NAME as AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  AZURE_ACCOUNT_TYPE_VAR_NAME as AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
+} from '@kbn/fleet-plugin/common';
 
 export const AWS_CREDENTIALS_TYPE = {
   CLOUD_CONNECTORS: 'cloud_connectors',

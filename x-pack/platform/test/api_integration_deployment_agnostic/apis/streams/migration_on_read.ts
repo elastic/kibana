@@ -353,7 +353,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: { streamName: TEST_STREAM_NAME },
-            query: { attachmentType: 'dashboard' },
+            query: { attachmentTypes: ['dashboard'] },
           },
         }
       );
@@ -384,7 +384,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: { streamName: TEST_STREAM_NAME },
-            query: { attachmentType: 'dashboard' },
+            query: { attachmentTypes: ['dashboard'] },
           },
         }
       );
@@ -397,7 +397,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: { streamName: TEST_STREAM_NAME },
-            query: { attachmentType: 'dashboard' },
+            query: { attachmentTypes: ['dashboard'] },
           },
         }
       );

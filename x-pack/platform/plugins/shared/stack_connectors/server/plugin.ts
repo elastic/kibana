@@ -56,7 +56,7 @@ export class StackConnectorsPlugin
 
     getWellKnownEmailServiceRoute(router, awsSesConfig);
     validSlackApiChannelsRoute(router, actions.getActionsConfigurationUtilities(), this.logger);
-    getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
+    getWebhookSecretHeadersKeyRoute(router, core.getStartServices, this.experimentalFeatures);
 
     registerConnectorTypes({
       actions,

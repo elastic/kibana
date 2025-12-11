@@ -190,17 +190,22 @@ export function getDashboardApi({
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 
-      const { description, tags, timeRestore, projectRoutingRestore, title } =
-        settingsManager.api.getSettings();
+      const {
+        description,
+        tags,
+        time_restore: timeRestore,
+        project_routing_restore: projectRoutingRestore,
+        title,
+      } = settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
         serializeState: getState,
         setTimeRestore: (newTimeRestore: boolean) =>
-          settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+          settingsManager.api.setSettings({ time_restore: newTimeRestore }),
         setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
-          settingsManager.api.setSettings({ projectRoutingRestore: newProjectRoutingRestore }),
+          settingsManager.api.setSettings({ project_routing_restore: newProjectRoutingRestore }),
         tags,
         timeRestore,
         projectRoutingRestore,
@@ -218,7 +223,7 @@ export function getDashboardApi({
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
-          hidePanelTitles: settings.hidePanelTitles ?? false,
+          hide_panel_titles: settings.hide_panel_titles ?? false,
           description: saveResult.savedState.description,
           tags: saveResult.savedState.tags,
           title: saveResult.savedState.title,

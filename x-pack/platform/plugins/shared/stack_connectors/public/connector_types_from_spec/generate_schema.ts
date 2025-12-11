@@ -12,6 +12,6 @@ import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 export const generateSchema = (spec: ConnectorSpec) => {
   return z.object({
     config: spec.schema ?? z.object({}),
-    secrets: generateSecretsSchemaFromSpec(spec.authTypes),
+    secrets: generateSecretsSchemaFromSpec(spec.auth),
   });
 };

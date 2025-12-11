@@ -208,6 +208,8 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
           .expect(200);
 
         expect(response.body.data.key).to.eql(key);
+        expect(response.body.data['x-test-header']).to.eql('i-am-a-test-header-value');
+        expect(response.body.data['kbn-xsrf']).to.eql('foo');
       });
     });
   });

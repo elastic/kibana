@@ -318,7 +318,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
       })}
-      message={
+      noItemsMessage={
         isLoading ? (
           <EuiEmptyPrompt
             iconType="search"

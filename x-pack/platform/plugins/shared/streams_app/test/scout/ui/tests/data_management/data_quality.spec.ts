@@ -7,22 +7,73 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
+import { generateLogsData } from '../../fixtures/generators';
+
+const TEST_STREAM = 'logs-nginx-default';
 
 test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    const currentTime = Date.now();
+    const generateLogs = generateLogsData(logsSynthtraceEsClient);
+
     // Create a test stream with routing rules first
     await apiServices.streams.forkStream('logs', 'logs.nginx', {
       field: 'service.name',
       eq: 'nginx',
     });
 
-    await pageObjects.streams.gotoDataQualityTab('logs.nginx');
+    // Generate some normal logs
+    await generateLogs({
+      index: TEST_STREAM,
+      startTime: new Date(currentTime - 5 * 60 * 1000).toISOString(),
+      endTime: new Date(currentTime).toISOString(),
+      docsPerMinute: 10,
+      isMalformed: false,
+    });
+
+    // Generate some malformed logs to create degraded fields
+    await generateLogs({
+      index: TEST_STREAM,
+      startTime: new Date(currentTime - 60 * 1000).toISOString(),
+      endTime: new Date(currentTime).toISOString(),
+      docsPerMinute: 1,
+      isMalformed: true,
+    });
+
+    // Add a processor that always fails to create failed docs
+    await apiServices.streams.updateStreamProcessors(TEST_STREAM, {
+      steps: [
+        {
+          action: 'rename',
+          from: 'non_existent_field',
+          to: 'renamed_field',
+          ignore_missing: false,
+          override: false,
+        },
+      ],
+    });
+
+    // Add 1 failed doc
+    await generateLogs({
+      index: TEST_STREAM,
+      startTime: new Date(currentTime - 60 * 1000).toISOString(),
+      endTime: new Date(currentTime).toISOString(),
+      docsPerMinute: 1,
+    });
   });
 
-  test.afterEach(async ({ apiServices }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.streams.gotoDataQualityTab(TEST_STREAM);
+  });
+
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     // Clear existing rules
     await apiServices.streams.clearStreamChildren('logs');
+    // Clean up the test stream
+    await apiServices.streams.deleteStream(TEST_STREAM);
+    // Clean up synthetic logs
+    await logsSynthtraceEsClient.clean();
   });
 
   test('should show data quality metrics', async ({ page }) => {
@@ -62,8 +113,8 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects,
   }) => {
     const dataQualityTimeRange = {
-      from: 'Sep 20, 2025 @ 00:00:00.000',
-      to: 'Sep 20, 2025 @ 00:30:00.000',
+      from: 'Sep 20, 2023 @ 00:00:00.000',
+      to: 'Sep 20, 2023 @ 00:30:00.000',
     };
     // Change date picker
     await pageObjects.datePicker.setAbsoluteRange(dataQualityTimeRange);
@@ -73,8 +124,89 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
   });
 
-  test('should edit failure store for wired stream from data quality tab', async ({ page }) => {
-    // Click on the Failed documents card to expand it
+  test('should toggle between degraded and failed docs quality issues charts', async ({ page }) => {
+    // Default chart should be for degraded docs
+    await expect(page.getByTestId('datasetQualityDetailsLinkToDiscover')).toBeVisible();
+
+    // Click to show failed docs chart
+    await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
+  });
+
+  test('should show degraded fields table with data', async ({ page }) => {
+    // Quality issues table should be visible
+    const degradedFieldTable = page.getByTestId('datasetQualityDetailsDegradedFieldTable');
+    await expect(degradedFieldTable).toBeVisible();
+
+    // Should show table headers (scope to the table to avoid ambiguity)
+    await expect(degradedFieldTable.getByRole('columnheader', { name: 'Field' })).toBeVisible();
+    await expect(degradedFieldTable.getByRole('columnheader', { name: 'Documents' })).toBeVisible();
+    await expect(degradedFieldTable.getByRole('columnheader', { name: 'Issue' })).toBeVisible();
+    await expect(
+      degradedFieldTable.getByRole('columnheader', { name: 'Last occurred' })
+    ).toBeVisible();
+
+    // Verify there is at least one degraded field row
+    const degradedFieldRows = degradedFieldTable.locator('tbody tr');
+    expect(await degradedFieldRows.count()).toBeGreaterThan(0);
+
+    // Verify the log.level field is present (from malformed data)
+    await expect(
+      degradedFieldTable.getByRole('row').filter({ hasText: 'log.level' })
+    ).toBeVisible();
+  });
+
+  test('should open and close degraded field flyout', async ({ page, pageObjects }) => {
+    // Wait for degraded fields table to be visible
+    const degradedFieldTable = page.getByTestId('datasetQualityDetailsDegradedFieldTable');
+    await expect(degradedFieldTable).toBeVisible();
+
+    // Get the row for log.level field (which we created as malformed)
+    const logLevelRow = degradedFieldTable.getByRole('row').filter({ hasText: 'log.level' });
+    await expect(logLevelRow).toBeVisible();
+
+    // Click on the expand button for log.level
+    await logLevelRow.locator('button[aria-label="Expand"]').click();
+
+    // Flyout should be visible
+    await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeVisible();
+
+    // Verify flyout shows the field name
+    await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toContainText(
+      'log.level'
+    );
+
+    // Close the flyout
+    await pageObjects.streams.closeFlyout();
+
+    // Flyout should be hidden
+    await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeHidden();
+  });
+
+  test('should navigate to Discover from degraded field flyout', async ({ page }) => {
+    // Wait for degraded fields table to be visible
+    const degradedFieldTable = page.getByTestId('datasetQualityDetailsDegradedFieldTable');
+    await expect(degradedFieldTable).toBeVisible();
+
+    // Get the row for log.level field (which we created as malformed)
+    const logLevelRow = degradedFieldTable.getByRole('row').filter({ hasText: 'log.level' });
+    await expect(logLevelRow).toBeVisible();
+
+    // Click on the expand button for log.level
+    await logLevelRow.locator('button[aria-label="Expand"]').click();
+
+    // Flyout should be visible
+    await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeVisible();
+
+    // Click the link to Discover in the flyout
+    await page.getByTestId('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover').click();
+
+    // Should navigate to Discover with _ignored filter for log.level
+    await expect(page).toHaveURL(/.*\/app\/discover/);
+    await expect(page).toHaveURL(/.*_ignored.*log\.level/);
+  });
+
+  test('should edit failure store for wired streams', async ({ page }) => {
+    // Open failed documents panel
     await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
 
     // Click the edit button to open the failure store modal

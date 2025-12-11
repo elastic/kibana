@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/streams-program-team'
+  defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/streams-plugin'
   description: Moon project for @kbn/streams-plugin
   channel: ''
-  owner: '@elastic/streams-program-team'
+  owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:

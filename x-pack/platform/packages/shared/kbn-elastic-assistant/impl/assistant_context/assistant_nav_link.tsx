@@ -11,6 +11,7 @@ import { EuiToolTip, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useAssistantContext } from '../..';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -49,8 +50,8 @@ export const AssistantNavLink: FC = () => {
 
   useEffect(() => {
     if (!openChatTrigger$) return;
-    const sub = openChatTrigger$.subscribe((event) => {
-      if (event.assistant === 'security') {
+    const sub = openChatTrigger$.subscribe((selection) => {
+      if (selection === AIAssistantType.Security) {
         showOverlay();
         completeOpenChat?.();
       }

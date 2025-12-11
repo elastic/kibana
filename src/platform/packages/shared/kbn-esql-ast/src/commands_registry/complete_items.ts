@@ -69,6 +69,26 @@ export const allStarConstant: ISuggestionItem = {
   sortText: '1',
 };
 
+function buildValuePlaceholder(placeholderType: 'value' | 'default' = 'value'): ISuggestionItem {
+  return withAutoSuggest({
+    label: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderLabel', {
+      defaultMessage: 'Insert {placeholderType} placeholder',
+      values: { placeholderType },
+    }),
+    text: `"\${0:${placeholderType}}"`,
+    asSnippet: true,
+    kind: 'Constant',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderDetail', {
+      defaultMessage: 'Insert a {placeholderType} to describe the condition',
+      values: { placeholderType },
+    }),
+    category: SuggestionCategory.CONSTANT_VALUE,
+  });
+}
+
+export const valuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('value');
+export const defaultValuePlaceholderConstant: ISuggestionItem = buildValuePlaceholder('default');
+
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
   i18n.translate('kbn-esql-ast.esql.autocomplete.commaDoc', {
@@ -214,6 +234,72 @@ export const listCompleteItem: ISuggestionItem = withAutoSuggest({
   }),
   sortText: 'A',
 });
+
+export const likePatternItems: ISuggestionItem[] = [
+  {
+    label: '%',
+    text: '"${0:%}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.likePercentDoc', {
+      defaultMessage: 'Matches any sequence of zero or more characters',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '_',
+    text: '"${0:_}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.likeUnderscoreDoc', {
+      defaultMessage: 'Matches any single character',
+    }),
+    sortText: '1',
+  },
+];
+
+export const rlikePatternItems: ISuggestionItem[] = [
+  {
+    label: '.*',
+    text: '"${0:.*}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeAnyStringDoc', {
+      defaultMessage: 'Matches any sequence of zero or more characters',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '.',
+    text: '"${0:.}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeAnySingleCharDoc', {
+      defaultMessage: 'Matches any single character',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '^',
+    text: '"${0:^}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeStartAnchorDoc', {
+      defaultMessage: 'Match to the start of the string',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '$',
+    text: '"${0:$}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeEndAnchorDoc', {
+      defaultMessage: 'Match to the end of the string',
+    }),
+    sortText: '1',
+  },
+];
 
 export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggestionItem[] => {
   const suggestions: ISuggestionItem[] = [];
