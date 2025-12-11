@@ -13,6 +13,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
+import { createClassicStreamRoute } from './create_classic_stream_route';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name} 2023-10-31',
@@ -169,4 +170,5 @@ export const crudRoutes = {
   ...listStreamsRoute,
   ...editStreamRoute,
   ...deleteStreamRoute,
+  ...createClassicStreamRoute,
 };

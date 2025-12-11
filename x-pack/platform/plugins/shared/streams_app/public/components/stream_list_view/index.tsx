@@ -35,6 +35,7 @@ import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
 import { WelcomeTourCallout } from '../streams_tour';
+import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -79,6 +80,8 @@ export function StreamListView() {
   const overlayRef = React.useRef<OverlayRef | null>(null);
 
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
+  const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
+    React.useState(false);
 
   function openGroupStreamModificationFlyout() {
     overlayRef.current?.close();
@@ -132,6 +135,13 @@ export function StreamListView() {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}>
+                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
+                  defaultMessage: 'Create classic stream',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="gear"
                 size="s"
@@ -145,7 +155,7 @@ export function StreamListView() {
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <FeedbackButton />
+            <FeedbackButton iconButton />
           </EuiFlexGroup>
         }
       />
@@ -188,6 +198,9 @@ export function StreamListView() {
           onClose={() => setIsSettingsFlyoutOpen(false)}
           refreshStreams={streamsListFetch.refresh}
         />
+      )}
+      {isClassicStreamCreationFlyoutOpen && (
+        <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
       )}
     </>
   );
