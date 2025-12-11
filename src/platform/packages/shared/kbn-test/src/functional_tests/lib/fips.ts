@@ -46,3 +46,7 @@ export function applyFipsOverrides(vars: any) {
 
   return vars;
 }
+
+export function fipsIsEnabled() {
+  return process.env.TEST_ENABLE_FIPS_VERSION?.match(/(140-2|140-3)/);
+}
