@@ -28,6 +28,8 @@ import { useAssistantContext } from '../../../..';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
 import * as i18n from './translations';
+import { AgentBuilderTourStep } from '../../../tour/agent_builder';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../tour/const';
 
 interface Params {
   isDisabled?: boolean;
@@ -196,28 +198,34 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     return (
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                aria-label={i18n.AI_ASSISTANT_MENU}
-                isDisabled={isDisabled}
-                iconType="controls"
-                onClick={onButtonClick}
-                data-test-subj="chat-context-menu"
-              />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="leftUp"
+          <AgentBuilderTourStep
+            isDisabled={isDisabled}
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
+            onContinue={handleOpenAIAgentModal}
           >
-            <EuiContextMenuPanel
-              items={items}
-              css={css`
-                width: 280px;
-              `}
-            />
-          </EuiPopover>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  aria-label={i18n.AI_ASSISTANT_MENU}
+                  isDisabled={isDisabled}
+                  iconType="controls"
+                  onClick={onButtonClick}
+                  data-test-subj="chat-context-menu"
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="leftUp"
+            >
+              <EuiContextMenuPanel
+                items={items}
+                css={css`
+                  width: 280px;
+                `}
+              />
+            </EuiPopover>
+          </AgentBuilderTourStep>
         </EuiToolTip>
         {isAlertsSettingsModalVisible && <AlertsSettingsModal onClose={closeAlertSettingsModal} />}
         {isAnonymizationModalVisible && (
