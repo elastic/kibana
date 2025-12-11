@@ -23,7 +23,7 @@ const MOCKED_AI_SUMMARY = 'This is a mocked AI insight summary for the payment t
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const observabilityAgentBuilderApi = getService('observabilityAgentBuilderApi');
 
   describe('AI Insights: Error', function () {
     // LLM Proxy is not yet supported in cloud environments
@@ -54,22 +54,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           response: MOCKED_AI_SUMMARY,
         });
 
-        const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
+        const { body } = await observabilityAgentBuilderApi.editor({
+          endpoint: 'POST /internal/observability_agent_builder/ai_insights/error',
+          params: {
+            body: {
+              serviceName: traceData.serviceName,
+              errorId: traceData.errorId,
+              start: 'now-24h',
+              end: 'now',
+              environment: 'production',
+            },
+          },
+        });
 
-        const response = await scoped
-          .post('/internal/observability_agent_builder/ai_insights/error')
-          .set('kbn-xsrf', 'true')
-          .set('x-elastic-internal-origin', 'kibana')
-          .send({
-            serviceName: traceData.serviceName,
-            errorId: traceData.errorId,
-            start: 'now-24h',
-            end: 'now',
-            environment: 'production',
-          })
-          .expect(200);
-
-        apiResponse = response.body;
+        apiResponse = body;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
