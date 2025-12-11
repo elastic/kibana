@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: elasticsearch-specification repository, operations: search, search-1, search-2, search-3
+ * Source: elasticsearch-specification repository, operations: search-1, search-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -20,12 +20,8 @@ import { z } from '@kbn/zod/v4';
 import {
   search1_request,
   search1_response,
-  search2_request,
-  search2_response,
   search3_request,
   search3_response,
-  search_request,
-  search_response,
 } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -58,7 +54,7 @@ If different PIT IDs are used, slices can overlap and miss documents.
 This situation can occur because the splitting criterion is based on Lucene document IDs, which are not stable across changes to the index.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search`,
-  methods: ['GET', 'POST'],
+  methods: ['POST'],
   patterns: ['_search', '{index}/_search'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search',
   parameterTypes: {
@@ -149,19 +145,9 @@ This situation can occur because the splitting criterion is based on Lucene docu
   },
   paramsSchema: z.union([
     z.object({
-      ...getShapeAt(search_request, 'body'),
-      ...getShapeAt(search_request, 'path'),
-      ...getShapeAt(search_request, 'query'),
-    }),
-    z.object({
       ...getShapeAt(search1_request, 'body'),
       ...getShapeAt(search1_request, 'path'),
       ...getShapeAt(search1_request, 'query'),
-    }),
-    z.object({
-      ...getShapeAt(search2_request, 'body'),
-      ...getShapeAt(search2_request, 'path'),
-      ...getShapeAt(search2_request, 'query'),
     }),
     z.object({
       ...getShapeAt(search3_request, 'body'),
@@ -169,5 +155,5 @@ This situation can occur because the splitting criterion is based on Lucene docu
       ...getShapeAt(search3_request, 'query'),
     }),
   ]),
-  outputSchema: z.union([search_response, search1_response, search2_response, search3_response]),
+  outputSchema: z.union([search1_response, search3_response]),
 };

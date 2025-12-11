@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: elasticsearch-specification repository, operations: count, count-1, count-2, count-3
+ * Source: elasticsearch-specification repository, operations: count, count-2
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -18,12 +18,8 @@
 import { z } from '@kbn/zod/v4';
 
 import {
-  count1_request,
-  count1_response,
   count2_request,
   count2_response,
-  count3_request,
-  count3_response,
   count_request,
   count_response,
 } from './schemas/es_openapi_zod.gen';
@@ -50,7 +46,7 @@ For each shard ID group, a replica is chosen and the search is run against it.
 This means that replicas increase the scalability of the count.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count`,
-  methods: ['POST', 'GET'],
+  methods: ['POST'],
   patterns: ['_count', '{index}/_count'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count',
   parameterTypes: {
@@ -81,20 +77,10 @@ This means that replicas increase the scalability of the count.
       ...getShapeAt(count_request, 'query'),
     }),
     z.object({
-      ...getShapeAt(count1_request, 'body'),
-      ...getShapeAt(count1_request, 'path'),
-      ...getShapeAt(count1_request, 'query'),
-    }),
-    z.object({
       ...getShapeAt(count2_request, 'body'),
       ...getShapeAt(count2_request, 'path'),
       ...getShapeAt(count2_request, 'query'),
     }),
-    z.object({
-      ...getShapeAt(count3_request, 'body'),
-      ...getShapeAt(count3_request, 'path'),
-      ...getShapeAt(count3_request, 'query'),
-    }),
   ]),
-  outputSchema: z.union([count_response, count1_response, count2_response, count3_response]),
+  outputSchema: z.union([count_response, count2_response]),
 };

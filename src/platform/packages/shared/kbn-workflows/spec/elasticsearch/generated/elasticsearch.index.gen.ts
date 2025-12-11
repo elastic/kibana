@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: elasticsearch-specification repository, operations: index, index-1, index-2
+ * Source: elasticsearch-specification repository, operations: index, index-2
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -18,8 +18,6 @@
 import { z } from '@kbn/zod/v4';
 
 import {
-  index1_request,
-  index1_response,
   index2_request,
   index2_response,
   index_request,
@@ -186,15 +184,10 @@ Even the simple case of updating the Elasticsearch index using data from a datab
       ...getShapeAt(index_request, 'query'),
     }),
     z.object({
-      ...getShapeAt(index1_request, 'body'),
-      ...getShapeAt(index1_request, 'path'),
-      ...getShapeAt(index1_request, 'query'),
-    }),
-    z.object({
       ...getShapeAt(index2_request, 'body'),
       ...getShapeAt(index2_request, 'path'),
       ...getShapeAt(index2_request, 'query'),
     }),
   ]),
-  outputSchema: z.union([index_response, index1_response, index2_response]),
+  outputSchema: z.union([index_response, index2_response]),
 };
