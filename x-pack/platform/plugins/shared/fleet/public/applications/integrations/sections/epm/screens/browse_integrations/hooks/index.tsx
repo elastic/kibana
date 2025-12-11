@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+
+import { searchIdField, useLocalSearch } from '../../../../../hooks';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { ExtendedIntegrationCategory } from '../../home/category_facets';
-import { useLocalSearch } from '@kbn/fleet-plugin/public/applications/integrations/hooks';
+import { IntegrationCardItem } from '../../home';
 
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
@@ -33,13 +35,25 @@ export function useBrowseIntegrationHook({
     setSearchTerm,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
-    filteredCards,
+    filteredCards: originalFilteredCards,
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
-  const localSearch = useLocalSearch(filteredCards, !!isLoading);
+  const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
+
+  const filteredCards = useMemo(() => {
+    const searchResults = searchTerm
+      ? (localSearch?.search(searchTerm) as IntegrationCardItem[]).map(
+          (match) => match[searchIdField]
+        ) ?? []
+      : [];
+
+    return searchTerm
+      ? originalFilteredCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
+      : originalFilteredCards;
+  }, [localSearch, searchTerm, originalFilteredCards]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {

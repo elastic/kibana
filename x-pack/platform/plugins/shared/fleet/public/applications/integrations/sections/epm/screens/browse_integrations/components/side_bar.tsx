@@ -79,6 +79,9 @@ const StickySidebar = styled(EuiFlexItem)`
   position: sticky;
   top: var(--kbn-application--sticky-headers-offset, 96px);
   padding-top: ${(props) => props.theme.euiTheme.size.m /* 24px */};
+  max-height: calc(100vh - 120px);
+  overflow: scroll;
+  padding-right: ${(props) => props.theme.euiTheme.size.l /* 32px */};
 `;
 
 export const Sidebar: React.FC<Props> = ({

@@ -146,7 +146,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     <EuiFlexGroup
       justifyContent="flexEnd"
       alignItems="flexStart"
-      gutterSize="l"
+      gutterSize="none"
       data-test-subj="epmList.integrationCards"
     >
       <Sidebar
@@ -164,7 +164,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             style={{
               position: 'relative',
               backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
-              alignSelf: 'stretch',
             }}
           >
             <PackageGrid
