@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import React, { useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import type { Query, TimeRange } from '@kbn/es-query';
+import { KubernetesPageTemplate } from '../../components/kubernetes_page_template';
+import { KubernetesOverviewTabs, KubernetesPage } from '../../components/kubernetes_overview_tabs';
 
 export const ClusterListingPage: React.FC = () => {
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const handleQuerySubmit = useCallback((payload: { query?: Query; dateRange: TimeRange }) => {
+    // TODO: Implement search functionality
+    // eslint-disable-next-line no-console
+    console.log('Search submitted:', payload);
+  }, []);
+
+  const handleRefresh = useCallback((dateRange: TimeRange) => {
+    // TODO: Implement refresh functionality
+    // eslint-disable-next-line no-console
+    console.log('Refresh clicked:', dateRange);
+  }, []);
 
   return (
-    <ObservabilityPageTemplate
+    <KubernetesPageTemplate
       data-test-subj="kubernetesClustersPage"
-      pageHeader={{
-        pageTitle: (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <EuiIcon type="logoKubernetes" size="xl" />
-            {i18n.translate('xpack.kubernetesPoc.clusterListing.pageTitle', {
-              defaultMessage: 'Kubernetes Clusters',
-            })}
-          </span>
-        ),
-      }}
+      onQuerySubmit={handleQuerySubmit}
+      onRefresh={handleRefresh}
     >
+      <KubernetesOverviewTabs activePage={KubernetesPage.Clusters} />
+      <EuiSpacer size="l" />
       {/* Cluster listing content will go here */}
-    </ObservabilityPageTemplate>
+    </KubernetesPageTemplate>
   );
 };

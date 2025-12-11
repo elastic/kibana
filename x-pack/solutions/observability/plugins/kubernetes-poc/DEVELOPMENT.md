@@ -42,7 +42,7 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 
 ## Current Status
 
-**Last Updated:** 2025-12-10
+**Last Updated:** 2025-12-11
 
 ### ✅ Completed
 - [x] Plugin scaffolded with basic structure
@@ -53,14 +53,21 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 - [x] Security configuration (authz) for routes
 - [x] Plugin manifest configured with required dependencies
 - [x] Removed unused `kibanaReact` bundle
+- [x] Kubernetes Overview placeholder page with ObservabilityPageTemplate
+- [x] Kubernetes Cluster Listing placeholder page with ObservabilityPageTemplate
+- [x] Plugin context and `usePluginContext` hook for sharing ObservabilityPageTemplate
+- [x] React Router routing for `/clusters` and `/overview` routes
+- [x] Deep links for navigation system integration (overview, clusters)
+- [x] Kubernetes entry added to Infrastructure section in Observability navigation tree
+- [x] Plugin registered in i18nrc.json for translations
 
 ### 🚧 In Progress
 - None currently
 
 ### 📋 Next Steps / TODO
-- [ ] Add Kubernetes Cluster Listing Page (establishes patterns for data fetching and display)
+- [ ] Implement Kubernetes Cluster Listing Page (data fetching and display)
 - [ ] Add Kubernetes Cluster Detail Flyout (builds on listing page patterns)
-- [ ] Add Kubernetes Overview Page (most complex, builds on established patterns) 
+- [ ] Implement Kubernetes Overview Page features (most complex, builds on established patterns) 
 
 ## Architecture
 
@@ -70,6 +77,12 @@ x-pack/solutions/observability/plugins/kubernetes-poc/
 ├── common/              # Shared code (client & server)
 ├── public/              # Client-side code
 │   ├── application/     # React components
+│   │   ├── app.tsx      # Main app with React Router
+│   │   └── pages/       # Page components
+│   │       ├── cluster_listing/  # Cluster listing page
+│   │       └── overview/         # Overview page
+│   ├── context/         # React context providers
+│   ├── hooks/           # Custom React hooks
 │   └── services/        # API clients
 └── server/              # Server-side code
     └── routes/          # API route handlers
@@ -158,49 +171,52 @@ Verify **only the files you changed in this commit**:
 ## References
 
 ### Data Format
-- **Elastic Common Schema (ECS)**: [ECS Field Reference](https://www.elastic.co/guide/server/current/exported-fields-ecs.html)
-  - All data consumed by this plugin follows the ECS (Elastic Common Schema) format
-  - ECS provides a common set of fields for storing event data in Elasticsearch
-  - **Cluster Information Location**: Kubernetes cluster information is located in the `orchestrator.*` namespace
-  - Key ECS fields relevant to Kubernetes data:
-    - `@timestamp`: Date/time when the event originated (required for all events)
-    - `orchestrator.*`: **Kubernetes cluster information** (clusters, nodes, namespaces, pods, deployments, etc.)
-    - `cloud.*`: **Cloud provider annotations** (provider, region, availability zone, account ID, instance ID, etc.) - data is annotated with cloud metadata
-    - `kubernetes.*`: Kubernetes-specific fields (pods, nodes, namespaces, etc.)
-    - `host.*`: Host system information
-    - `agent.*`: Agent information (Elastic Agent details)
-    - `labels`: Custom key/value pairs (e.g., Kubernetes labels)
-    - `tags`: List of keywords used to tag events
-    - `message`: Log message content
-  - When querying Elasticsearch, use ECS field names for consistency and compatibility
-  - **Important**: 
-    - Query `orchestrator.*` fields for cluster-level information (clusters, nodes, namespaces, workloads)
-    - Use `cloud.*` fields for cloud provider metadata (useful for filtering and grouping by cloud provider, region, etc.)
-- **Kubernetes Metricbeat Exported Fields**: [Kubernetes Metricbeat Field Reference](https://www.elastic.co/docs/reference/beats/metricbeat/exported-fields-kubernetes)
-  - Reference for the specific field structure of Kubernetes metrics data collected by Metricbeat/Elastic Agent
-  - Includes detailed field definitions for:
-    - Node metrics (CPU, memory, pod capacity, status conditions)
-    - Pod metrics (status, phase, ready state, resource usage)
-    - Container metrics (CPU, memory, filesystem usage)
-    - Deployment, StatefulSet, DaemonSet, ReplicaSet metrics
-    - Service, Job, CronJob metrics
-    - PersistentVolume and PersistentVolumeClaim metrics
-    - ResourceQuota metrics
-    - Volume filesystem metrics
-  - Use this reference when querying `metrics-kubernetes.*` data streams
+- **OpenTelemetry (OTel) Data**: This plugin consumes Kubernetes metrics data in OpenTelemetry format
+  - Data is collected via OpenTelemetry Collector receivers deployed on Kubernetes clusters
+  - **Data Sources**:
+    - `k8sclusterreceiver.otel` - Cluster-level metrics from kube-state-metrics
+    - `kubeletstatsreceiver.otel` - Node and pod-level metrics from Kubelet stats API
+
+- **k8sclusterreceiver**: [Documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md)
+  - Collects cluster-level metrics from the Kubernetes API server
+  - Key metrics include:
+    - Container resource limits/requests (`k8s.container.cpu_limit`, `k8s.container.cpu_request`, `k8s.container.memory_limit`, `k8s.container.memory_request`)
+    - Container status (`k8s.container.ready`, `k8s.container.restarts`)
+    - CronJob metrics (`k8s.cronjob.active_jobs`)
+    - DaemonSet metrics (`k8s.daemonset.current_scheduled_nodes`, `k8s.daemonset.desired_scheduled_nodes`, `k8s.daemonset.misscheduled_nodes`, `k8s.daemonset.ready_nodes`)
+    - Deployment metrics (`k8s.deployment.available`, `k8s.deployment.desired`)
+    - HPA metrics (`k8s.hpa.current_replicas`, `k8s.hpa.desired_replicas`, `k8s.hpa.max_replicas`, `k8s.hpa.min_replicas`)
+    - Job metrics (`k8s.job.active_pods`, `k8s.job.desired_successful_pods`, `k8s.job.failed_pods`, `k8s.job.max_parallel_pods`, `k8s.job.successful_pods`)
+    - Namespace phase (`k8s.namespace.phase`)
+    - Node conditions (`k8s.node.condition_*`)
+    - Pod phase (`k8s.pod.phase`)
+    - ReplicaSet metrics (`k8s.replicaset.available`, `k8s.replicaset.desired`)
+    - ResourceQuota metrics (`k8s.resource_quota.hard_limit`, `k8s.resource_quota.used`)
+    - StatefulSet metrics (`k8s.statefulset.current_pods`, `k8s.statefulset.desired_pods`, `k8s.statefulset.ready_pods`, `k8s.statefulset.updated_pods`)
+  - Resource attributes: `k8s.cluster.name`, `k8s.namespace.name`, `k8s.node.name`, `k8s.pod.name`, `k8s.pod.uid`, `k8s.container.name`, `k8s.deployment.name`, `k8s.daemonset.name`, `k8s.statefulset.name`, `k8s.replicaset.name`, `k8s.job.name`, `k8s.cronjob.name`, `k8s.hpa.name`
+
+- **kubeletstatsreceiver**: [Documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md)
+  - Collects node, pod, and container metrics from the Kubelet stats API
+  - Key metrics include:
+    - **Container metrics**: `container.cpu.time`, `container.cpu.usage`, `container.filesystem.available/capacity/usage`, `container.memory.available/rss/usage/working_set`, `container.memory.page_faults/major_page_faults`
+    - **Node metrics**: `k8s.node.cpu.time`, `k8s.node.cpu.usage`, `k8s.node.filesystem.available/capacity/usage`, `k8s.node.memory.available/rss/usage/working_set`, `k8s.node.network.errors`, `k8s.node.network.io`
+    - **Pod metrics**: `k8s.pod.cpu.time`, `k8s.pod.cpu.usage`, `k8s.pod.filesystem.available/capacity/usage`, `k8s.pod.memory.available/rss/usage/working_set`, `k8s.pod.network.errors`, `k8s.pod.network.io`
+    - **Volume metrics**: `k8s.volume.available`, `k8s.volume.capacity`, `k8s.volume.inodes`, `k8s.volume.inodes.free`, `k8s.volume.inodes.used`
+  - Optional utilization metrics: `k8s.container.cpu_limit_utilization`, `k8s.container.cpu_request_utilization`, `k8s.container.memory_limit_utilization`, `k8s.container.memory_request_utilization`, `k8s.pod.cpu_limit_utilization`, `k8s.pod.memory_limit_utilization`
+  - Resource attributes: `k8s.cluster.name`, `k8s.namespace.name`, `k8s.node.name`, `k8s.pod.name`, `k8s.pod.uid`, `k8s.container.name`, `k8s.volume.name`, `k8s.volume.type`, `k8s.persistentvolumeclaim.name`
 
 ### Data Source & Setup
-- **Elastic Kubernetes Monitoring Quickstart**: [Monitor your Kubernetes cluster with Elastic Agent](https://www.elastic.co/docs/solutions/observability/get-started/quickstart-monitor-kubernetes-cluster-with-elastic-agent)
-  - This plugin consumes data collected via Elastic Agent deployed on Kubernetes clusters
-  - The setup includes kube-state-metrics (KSM) for cluster-level metrics collection
-  - Data streams: `logs-kubernetes.*` and `metrics-kubernetes.*`
-  - All data is stored in ECS format
+- **OpenTelemetry Collector on Kubernetes**: 
+  - This plugin consumes data collected via OpenTelemetry Collector deployed on Kubernetes clusters
+  - The collector should be configured with both `k8sclusterreceiver` and `kubeletstatsreceiver`
+  - Data is exported to Elasticsearch in OTel format
+  - **kube-state-metrics (KSM)**: Required for `k8sclusterreceiver` to collect cluster-level metrics
 
 ### Related Documentation
-- **Kubernetes Integration**: Elastic's Kubernetes integration collects logs, metrics, and events from Kubernetes clusters
-- **Kubernetes Metricbeat Fields**: [Exported Fields Reference](https://www.elastic.co/docs/reference/beats/metricbeat/exported-fields-kubernetes) - Detailed field structure for Kubernetes metrics
-- **kube-state-metrics**: Required component for collecting cluster-level metrics (pods, nodes, deployments, etc.)
-- **Elastic Agent on Kubernetes**: Installation and configuration via Helm charts
+- **OpenTelemetry Collector Contrib**: [GitHub Repository](https://github.com/open-telemetry/opentelemetry-collector-contrib) - Contains the Kubernetes receivers
+- **k8sclusterreceiver**: Collects cluster-level metrics (deployments, pods, nodes, etc.) from the Kubernetes API
+- **kubeletstatsreceiver**: Collects resource utilization metrics (CPU, memory, filesystem, network) from the Kubelet stats API
+- **kube-state-metrics**: Required component for `k8sclusterreceiver` to collect cluster-level metrics
 
 ## Notes
 
@@ -208,6 +224,6 @@ Verify **only the files you changed in this commit**:
 - Uses the same patterns as `observability_onboarding` plugin for consistency
 - Route handler resources are defined in `server/routes/types.ts`
 - Client-side API calls use the type-safe repository client pattern
-- Data is sourced from Elasticsearch indices populated by Elastic Agent's Kubernetes integration
-- All data follows ECS (Elastic Common Schema) format - use ECS field names when querying Elasticsearch
+- Data is sourced from Elasticsearch indices populated by OpenTelemetry Collector's Kubernetes receivers
+- All data follows OpenTelemetry format - use OTel metric and attribute names when querying Elasticsearch
 

@@ -15,18 +15,7 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  ObservabilitySharedPluginSetup,
-  ObservabilitySharedPluginStart,
-} from '@kbn/observability-shared-plugin/public';
-
-interface KubernetesPocPluginSetupDeps {
-  observabilityShared: ObservabilitySharedPluginSetup;
-}
-
-interface KubernetesPocPluginStartDeps {
-  observabilityShared: ObservabilitySharedPluginStart;
-}
+import type { KubernetesPocPluginSetupDeps, KubernetesPocPluginStartDeps } from './types';
 
 const kubernetesOverviewTitle = i18n.translate(
   'xpack.kubernetesPoc.navigation.kubernetesOverviewTitle',
@@ -59,7 +48,7 @@ const deepLinks: AppDeepLink[] = [
 export class KubernetesPocPlugin
   implements Plugin<void, void, KubernetesPocPluginSetupDeps, KubernetesPocPluginStartDeps>
 {
-  constructor(private readonly ctx: PluginInitializerContext) {}
+  constructor(_ctx: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<KubernetesPocPluginStartDeps>,
@@ -84,6 +73,7 @@ export class KubernetesPocPlugin
 
         return renderApp({
           core: coreStart,
+          plugins: pluginsStart,
           appMountParameters,
           ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         });

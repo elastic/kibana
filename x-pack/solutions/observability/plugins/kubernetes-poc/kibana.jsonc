@@ -11,8 +11,10 @@
     "configPath": ["xpack", "kubernetes_poc"],
     "requiredPlugins": [
       "data",
+      "dataViews",
       "observability",
-      "observabilityShared"
+      "observabilityShared",
+      "unifiedSearch"
     ],
     "optionalPlugins": []
   }

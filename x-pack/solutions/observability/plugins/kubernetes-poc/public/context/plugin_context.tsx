@@ -6,9 +6,13 @@
  */
 
 import { createContext } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import type { KubernetesPocPluginStartDeps } from '../types';
 
 export interface PluginContextValue {
+  core: CoreStart;
+  plugins: KubernetesPocPluginStartDeps;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }
 

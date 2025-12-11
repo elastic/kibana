@@ -37,6 +37,7 @@ export class KubernetesPocPlugin implements Plugin {
       logger: this.logger,
       repository: getKubernetesPocServerRouteRepository(),
       dependencies,
+      runDevModeChecks: this.initContext.env.mode.dev,
     });
 
     return {};

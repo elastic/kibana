@@ -12,11 +12,13 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { PluginContext } from '../context/plugin_context';
+import type { KubernetesPocPluginStartDeps } from '../types';
 import { ClusterListingPage } from './pages/cluster_listing';
 import { OverviewPage } from './pages/overview';
 
 interface RenderAppProps {
   core: CoreStart;
+  plugins: KubernetesPocPluginStartDeps;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }
@@ -35,6 +37,7 @@ const KubernetesPocApp: React.FC<{ history: AppMountParameters['history'] }> = (
 
 export const renderApp = ({
   core,
+  plugins,
   appMountParameters,
   ObservabilityPageTemplate,
 }: RenderAppProps) => {
@@ -42,7 +45,7 @@ export const renderApp = ({
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <PluginContext.Provider value={{ ObservabilityPageTemplate }}>
+      <PluginContext.Provider value={{ core, plugins, ObservabilityPageTemplate }}>
         <KubernetesPocApp history={history} />
       </PluginContext.Provider>
     </KibanaRenderContextProvider>,
