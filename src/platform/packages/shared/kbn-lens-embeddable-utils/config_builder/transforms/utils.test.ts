@@ -320,6 +320,7 @@ describe('buildDatasetState', () => {
       {
         'my-adhoc-dataview-id': {
           index: 'test-id',
+          title: 'my-adhoc-dataview-id',
           timeFieldName: '@timestamp',
         },
       } as Record<string, unknown>,
