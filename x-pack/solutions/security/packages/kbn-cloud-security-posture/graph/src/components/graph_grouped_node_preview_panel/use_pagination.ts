@@ -80,7 +80,7 @@ export const usePagination = (nonFetchedDocumentsCount: number): Pagination => {
       setPagination({ pageSize, pageIndex: STARTING_PAGE_INDEX });
       setStoredSettings({ pageSize });
     },
-    [setStoredSettings]
+    [setPagination, setStoredSettings]
   );
 
   return {
