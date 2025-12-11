@@ -15,27 +15,24 @@ export interface AiInsightErrorBannerProps {
 }
 
 export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerProps) {
-  const title = i18n.translate('observabilityAgentBuilder.aiInsight.errorTitle', {
-    defaultMessage: 'Failed to generate AI insight',
-  });
-  const message = i18n.translate('observabilityAgentBuilder.aiInsight.errorMessage', {
-    defaultMessage: `The AI insight could not be generated due to the error: ${error}`,
-  });
-
   return (
     <EuiCallOut
       announceOnMount
       color="danger"
       iconType="alert"
-      title={i18n.translate('observabilityAgentBuilder.aiInsight.errorTitle', {
-    defaultMessage: 'Failed to generate AI insight',
-  })}
+      title={i18n.translate('undefined.aiInsight.errorTitle', {
+        defaultMessage: 'Failed to generate AI insight',
+      })}
       data-test-subj={`AiInsightErrorBanner`}
     >
-      <p>{message}</p>
+      <p>
+        {i18n.translate('undefined.aiInsight.errorMessage', {
+          defaultMessage: `The AI insight could not be generated due to the error: ${error}`,
+        })}
+      </p>
       {onRetry && (
         <EuiButton size="s" onClick={onRetry} data-test-subj={`AiInsightErrorBannerRetryButton`}>
-          {i18n.translate('observabilityAgentBuilder.aiInsight.retryButton', {
+          {i18n.translate('undefined.aiInsight.retryButton', {
             defaultMessage: 'Try again',
           })}
         </EuiButton>
