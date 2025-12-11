@@ -11,6 +11,7 @@ import type { PutTransformsRequestSchema } from '../../../../server/routes/api_s
 
 export interface TransformApiService {
   createTransform: (transformId: string, config: PutTransformsRequestSchema) => Promise<void>;
+  waitForTransformToExist: (transformId: string) => Promise<void>;
   createTransformWithSecondaryAuth: (
     transformId: string,
     config: PutTransformsRequestSchema,
@@ -22,7 +23,6 @@ export interface TransformApiService {
   deleteDataViewByTitle: (title: string) => Promise<void>;
   getTransform: (transformId: string) => Promise<any>;
   getTransformStats: (transformId: string) => Promise<any>;
-  waitForTransformState: (transformId: string, expectedState: string) => Promise<void>;
   deleteIndices: (index: string) => Promise<void>;
 }
 
@@ -31,31 +31,28 @@ export function getTransformApiService(
   esClient: Client
 ): TransformApiService {
   return {
+    async waitForTransformToExist(transformId: string) {
+      let retries = 10;
+      while (retries > 0) {
+        try {
+          await esClient.transform.getTransform({ transform_id: transformId });
+          return; // Transform exists, we're done
+        } catch {
+          retries--;
+          if (retries === 0) {
+            throw new Error(`Transform ${transformId} was not created after waiting.`);
+          }
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
+    },
     async createTransform(transformId: string, config: PutTransformsRequestSchema) {
       try {
-        const response = await esClient.transform.putTransform({
+        await esClient.transform.putTransform({
           transform_id: transformId,
           ...config,
         } as any);
-
-        // Wait for transform to exist
-        let retries = 10;
-        while (retries > 0) {
-          try {
-            await esClient.transform.getTransform({ transform_id: transformId });
-            return; // Transform exists, we're done
-          } catch {
-            retries--;
-            if (retries === 0) {
-              throw new Error(
-                `Transform ${transformId} was not created after waiting. Response: ${JSON.stringify(
-                  response
-                )}`
-              );
-            }
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          }
-        }
+        await this.waitForTransformToExist(transformId);
       } catch (error) {
         throw new Error(`Failed to create transform ${transformId}: ${error}`);
       }
@@ -68,7 +65,7 @@ export function getTransformApiService(
       deferValidation = false
     ) {
       try {
-        const response = await esClient.transform.putTransform(
+        await esClient.transform.putTransform(
           {
             transform_id: transformId,
             defer_validation: deferValidation,
@@ -81,24 +78,7 @@ export function getTransformApiService(
           }
         );
 
-        // Wait for transform to exist
-        let retries = 10;
-        while (retries > 0) {
-          try {
-            await esClient.transform.getTransform({ transform_id: transformId });
-            return; // Transform exists, we're done
-          } catch {
-            retries--;
-            if (retries === 0) {
-              throw new Error(
-                `Transform ${transformId} was not created after waiting. Response: ${JSON.stringify(
-                  response
-                )}`
-              );
-            }
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          }
-        }
+        await this.waitForTransformToExist(transformId);
       } catch (error) {
         throw new Error(`Failed to create transform ${transformId}: ${error}`);
       }
@@ -202,29 +182,6 @@ export function getTransformApiService(
       } catch (error) {
         throw new Error(`Failed to get transform stats for ${transformId}: ${error}`);
       }
-    },
-
-    async waitForTransformState(transformId: string, expectedState: string) {
-      const maxRetries = 30;
-      let retries = 0;
-
-      while (retries < maxRetries) {
-        try {
-          const stats = await this.getTransformStats(transformId);
-          if (stats.state === expectedState) {
-            return;
-          }
-        } catch (error) {
-          // Continue retrying even if there's an error
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        retries++;
-      }
-
-      throw new Error(
-        `Transform ${transformId} did not reach expected state ${expectedState} after ${maxRetries} retries`
-      );
     },
 
     async deleteIndices(index: string) {

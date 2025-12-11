@@ -70,6 +70,8 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
       transformViewerUserApiCredentials.apiKey.encoded,
       true // deferValidation
     );
+
+    console.log('before each done-----');
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
@@ -93,6 +95,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
           responseType: 'json',
         }
       );
+      console.log('body', body);
 
       expect(statusCode).toBe(200);
       expect(body[transformCreatedByViewerId].success).toBe(false);
