@@ -104,14 +104,17 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   const attachmentData = useMemo(() => {
     const queryField = getFields().queryBar;
     const { query } = (queryField.value as DefineStepRule['queryBar']).query;
-    return { text: JSON.stringify({ query: query ?? '', queryLanguage: language }) };
-  }, [getFields, language]);
+    return {
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text: JSON.stringify({ query: query ?? '', queryLanguage: language }),
+        attachmentLabel: languageName,
+      },
+      attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
+    };
+  }, [getFields, language, languageName]);
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.rule,
-    attachmentData,
-    attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(attachmentData);
 
   if (!hasAssistantPrivilege) {
     return null;
