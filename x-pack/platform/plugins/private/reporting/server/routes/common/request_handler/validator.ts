@@ -85,14 +85,15 @@ const locatorObjectSchema = z.object({
 const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObjectSchema);
 
 const jobParamsSchema = z.object({
-  browserTimezone: timezoneSchema,
-  objectType: objectTypeSchema,
+  browserTimezone: timezoneSchema.optional(),
+  objectType: objectTypeSchema.optional(),
   title: titleSchema,
-  version: versionSchema,
+  version: versionSchema.optional(),
   layout: layoutSchema.optional(),
   forceNow: forceNowSchema.optional(),
-  pagingStrategySchema: pagingStrategySchema.optional(),
-  locatorParams: locatorParamsSchema.nullable().optional(),
+  pagingStrategy: pagingStrategySchema.optional(), // for CSV reports
+  locatorParams: locatorParamsSchema.nullable().optional(), // this is for CSV v2 compatibility
+  searchSource: z.object({}).optional(), // this is for CSV v1 compatibility
 });
 
 export function validateJobParams(jobParams: BaseParams) {
