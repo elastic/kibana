@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
-import { useFileUploadContext } from '../../../..';
+import { useFileUploadContext } from '../../../use_file_upload';
 import { FileClashIcon, FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';

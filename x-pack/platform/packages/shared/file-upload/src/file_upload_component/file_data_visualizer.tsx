@@ -16,10 +16,10 @@ import type {
   ResultLinks,
 } from '@kbn/file-upload-common';
 
-import { FileUploadManager, useFileUpload, FileUploadContext } from '../..';
-
 import { FileUploadView } from './new/file_upload_view';
 import type { FileUploadStartDependencies } from './kibana_context';
+import { FileUploadManager } from '../../file_upload_manager';
+import { useFileUpload, FileUploadContext } from '../use_file_upload';
 
 export interface Props {
   dependencies: FileUploadStartDependencies;

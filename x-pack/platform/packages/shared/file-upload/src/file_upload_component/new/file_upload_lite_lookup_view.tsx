@@ -13,10 +13,11 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import type { GetAdditionalLinks, ResultLinks } from '@kbn/file-upload-common';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { STATUS, useFileUploadContext } from '../../..';
+import { STATUS } from '../../../file_upload_manager';
 import { FileClashWarning } from './file_clash_warning';
 import { FileStatus } from './file_status';
 import { MappingEditor } from './mapping_editor';
+import { useFileUploadContext } from '../../use_file_upload';
 
 interface Props {
   resultLinks?: ResultLinks;
