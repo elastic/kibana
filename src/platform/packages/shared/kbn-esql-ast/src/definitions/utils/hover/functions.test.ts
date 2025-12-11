@@ -591,7 +591,7 @@ describe('getFormattedFunctionSignature', () => {
         ],
       };
 
-      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, ' | ', 3);
+      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, 3);
       // Should show all types without "+more" indicator
       expect(result).toContain('boolean|date|double');
       expect(result).not.toContain('more');
