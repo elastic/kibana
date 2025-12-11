@@ -12,6 +12,7 @@
       "onechat",
       "apmDataAccess",
       "logsDataAccess",
+      "inference",
       "security",
       "ruleRegistry",
       "dataViews",

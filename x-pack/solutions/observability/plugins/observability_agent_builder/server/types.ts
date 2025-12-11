@@ -38,7 +38,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   security: SecurityPluginSetup;
   ml?: MlPluginSetup;
-  inference?: InferenceServerSetup;
+  inference: InferenceServerSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
@@ -50,5 +50,5 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   ml?: MlPluginStart;
-  inference?: InferenceServerStart;
+  inference: InferenceServerStart;
 }
