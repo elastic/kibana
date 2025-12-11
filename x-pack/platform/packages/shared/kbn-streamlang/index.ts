@@ -22,5 +22,13 @@ export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
 export * from './src/validation/validate_streamlang';
 export { validateMathExpression } from './src/transpilers/shared/math/ast_validator';
-export { getMathExpressionLanguageDocSections } from './src/transpilers/shared/math/docs';
+export { getMathExpressionLanguageDocSections } from './src/transpilers/shared/math/language_docs';
 export { extractFieldsFromMathExpression } from './src/transpilers/shared/math/field_extractor';
+// Math expression language
+export {
+  ALL_MATH_FUNCTIONS,
+  BOOLEAN_RETURNING_MATH_FUNCTIONS,
+  getMathFunctionDefinition,
+  getMathParameterNames,
+} from './src/transpilers/shared/math/language_definition';
+export type { MathFunctionDefinition } from './src/transpilers/shared/math/language_definition';

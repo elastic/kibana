@@ -49,11 +49,7 @@ function extractFieldsFromNode(node: TinymathAST, fields: Set<string>): void {
   }
 }
 
-/**
- * Functions that return boolean values (comparison operators).
- * These are the root functions that determine if an expression returns boolean.
- */
-const BOOLEAN_RETURNING_FUNCTIONS = new Set(['eq', 'neq', 'lt', 'lte', 'gt', 'gte']);
+import { BOOLEAN_RETURNING_MATH_FUNCTIONS } from './language_definition';
 
 /**
  * Infers the return type of a math expression based on its root operation.
@@ -81,7 +77,7 @@ export function inferMathExpressionReturnType(expression: string): 'number' | 'b
   }
 
   // If root node is a comparison function, it returns boolean
-  if (isTinymathFunction(ast) && BOOLEAN_RETURNING_FUNCTIONS.has(ast.name)) {
+  if (isTinymathFunction(ast) && BOOLEAN_RETURNING_MATH_FUNCTIONS.has(ast.name)) {
     return 'boolean';
   }
 

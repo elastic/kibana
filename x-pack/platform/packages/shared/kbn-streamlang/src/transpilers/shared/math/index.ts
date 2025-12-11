@@ -24,3 +24,37 @@ export type { ValidationResult } from './ast_validator';
 
 // Field extractor and type inference
 export { extractFieldsFromMathExpression, inferMathExpressionReturnType } from './field_extractor';
+
+// Language definition - single source of truth for the math expression language
+export {
+  // Category groups
+  ARITHMETIC_FUNCTIONS,
+  ROUNDING_FUNCTIONS,
+  TRIGONOMETRY_FUNCTIONS,
+  LOGARITHMIC_FUNCTIONS,
+  COMPARISON_FUNCTIONS,
+  CONSTANT_FUNCTIONS,
+  ARITHMETIC_OPERATORS,
+  COMPARISON_OPERATORS,
+  // Combined lists
+  ALL_MATH_FUNCTIONS,
+  ALL_OPERATORS,
+  // Derived sets for validation/type inference
+  BOOLEAN_RETURNING_MATH_FUNCTIONS,
+  ALL_FUNCTION_NAMES,
+  CONSTANT_FUNCTION_NAMES,
+  // Helpers
+  getMathFunctionDefinition,
+  getMathFunctionsByCategory,
+  doesFunctionReturnBoolean,
+  getMathParameterNames,
+} from './language_definition';
+export type {
+  MathFunctionDefinition,
+  OperatorDefinition,
+  FunctionCategory,
+} from './language_definition';
+
+// Documentation - generated from language_definition
+export { getMathExpressionLanguageDocSections } from './language_docs';
+export type { MathLanguageDocumentationSections } from './language_docs';

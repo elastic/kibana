@@ -28,6 +28,10 @@ import { validateMathExpression, getMathExpressionLanguageDocSections } from '@k
 import type { ProcessorFormState } from '../../../../types';
 // Import to register the math language with Monaco
 import { MATH_LANGUAGE_ID } from './math_expression_tokenization';
+import {
+  registerMathCompletionProvider,
+  registerMathSignatureHelpProvider,
+} from './math_expression_completion';
 
 export const MathExpressionEditor: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -83,6 +87,16 @@ export const MathExpressionEditor: React.FC = () => {
       monaco.editor.setModelMarkers(model, 'math-validation', []);
     }
   }, [hasInlineError, validationResult]);
+
+  // Register completion and signature help providers for autocomplete
+  useEffect(() => {
+    const completionDisposable = registerMathCompletionProvider();
+    const signatureDisposable = registerMathSignatureHelpProvider();
+    return () => {
+      completionDisposable.dispose();
+      signatureDisposable.dispose();
+    };
+  }, []);
 
   const handleWordWrapToggle = useCallback(() => {
     const newValue = !isWordWrapped;
