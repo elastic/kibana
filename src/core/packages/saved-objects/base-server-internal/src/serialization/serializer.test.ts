@@ -28,7 +28,6 @@ const createMockedTypeRegistry = ({
     isNamespaceAgnostic: jest.fn().mockReturnValue(isNamespaceAgnostic),
     isSingleNamespace: jest.fn().mockReturnValue(isSingleNamespace),
     isMultiNamespace: jest.fn().mockReturnValue(isMultiNamespace),
-    isAccessControlEnabled: jest.fn().mockReturnValue(accessControlEnabled),
   };
   return typeRegistry as ISavedObjectTypeRegistry;
 };
