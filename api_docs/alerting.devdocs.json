@@ -3720,6 +3720,22 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.getMaintenanceWindowNames",
+            "type": "Function",
+            "tags": [],
+            "label": "getMaintenanceWindowNames",
+            "description": [],
+            "signature": [
+              "() => Promise<string[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorServices.getSearchSourceClient",
             "type": "Function",
             "tags": [],
@@ -4195,7 +4211,7 @@
             "label": "solution",
             "description": [],
             "signature": [
-              "\"security\" | \"observability\" | \"stack\""
+              "\"stack\" | \"security\" | \"observability\""
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,
@@ -5005,7 +5021,7 @@
           },
           "<Params>>; getAlertState: (params: ",
           "GetAlertStateParams",
-          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>>; getAlertSummary: (params: ",
+          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; maintenanceWindowNames?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; maintenanceWindowNames?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>>; getAlertSummary: (params: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -5103,7 +5119,7 @@
           },
           "<never>>; unsnooze: (options: ",
           "UnsnoozeParams",
-          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: { params: Readonly<{} & { alertId: string; alertInstanceId: string; }>; query: Readonly<{ validateAlertsExistence?: boolean | undefined; } & {}>; }) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: Readonly<{ force?: boolean | undefined; } & { id: string; }>) => Promise<string | undefined>; listRuleTypes: () => Promise<",
+          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: { params: Readonly<{} & { alertId: string; alertInstanceId: string; }>; query: Readonly<{ validateAlertsExistence?: boolean | undefined; } & {}>; }) => Promise<void>; bulkMuteInstances: (options: Readonly<{} & { rules: Readonly<{} & { id: string; alertInstanceIds: string[]; }>[]; }>) => Promise<void>; bulkUnmuteInstances: (options: Readonly<{} & { rules: Readonly<{} & { id: string; alertInstanceIds: string[]; }>[]; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: Readonly<{ force?: boolean | undefined; } & { id: string; }>) => Promise<string | undefined>; listRuleTypes: () => Promise<",
           "RegistryAlertTypeWithAuth",
           "[]>; scheduleBackfill: (params: Readonly<{ runActions?: boolean | undefined; initiatorId?: string | undefined; } & { ruleId: string; ranges: Readonly<{} & { start: string; end: string; }>[]; initiator: \"user\" | \"system\"; }>[]) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
@@ -5159,7 +5175,13 @@
           "CreateGapAutoFillSchedulerParams",
           ") => Promise<",
           "GapAutoFillSchedulerResponse",
-          ">; getContext: () => ",
+          ">; getGapAutoFillScheduler: (params: Readonly<{} & { id: string; }>) => Promise<",
+          "GapAutoFillSchedulerResponse",
+          ">; updateGapAutoFillScheduler: (params: ",
+          "UpdateGapAutoFillSchedulerParams",
+          ") => Promise<",
+          "GapAutoFillSchedulerResponse",
+          ">; deleteGapAutoFillScheduler: (params: Readonly<{} & { id: string; }>) => Promise<void>; findGapAutoFillSchedulerLogs: (params: Readonly<{ statuses?: (\"error\" | \"success\" | \"skipped\" | \"no_gaps\")[] | undefined; } & { id: string; page: number; start: string; end: string; perPage: number; sortField: string; sortDirection: \"asc\" | \"desc\"; }>) => Promise<Readonly<{} & { page: number; data: Readonly<{ message?: string | undefined; timestamp?: string | undefined; results?: Readonly<{ error?: string | undefined; ruleId?: string | undefined; status?: string | undefined; processedGaps?: number | undefined; } & {}>[] | undefined; status?: string | undefined; } & { id: string; }>[]; perPage: number; total: number; }>>; getContext: () => ",
           "RulesClientContext",
           "; }"
         ],
@@ -10231,6 +10253,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.GapAutoFillStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "GapAutoFillStatus",
+        "description": [],
+        "signature": [
+          "\"error\" | \"success\" | \"skipped\" | \"no_gaps\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_auto_fill_scheduler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.GapFillStatus",
         "type": "Type",
         "tags": [],
@@ -10492,7 +10529,7 @@
         "label": "LatestAlertInstanceMetaSchema",
         "description": [],
         "signature": [
-          "{ readonly flapping?: boolean | undefined; readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; readonly activeCount?: number | undefined; }"
+          "{ readonly flapping?: boolean | undefined; readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly maintenanceWindowNames?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; readonly activeCount?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -10537,7 +10574,7 @@
         "label": "LatestRawAlertInstanceSchema",
         "description": [],
         "signature": [
-          "{ readonly meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
+          "{ readonly meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; maintenanceWindowNames?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -10552,7 +10589,7 @@
         "label": "LatestTaskStateSchema",
         "description": [],
         "signature": [
-          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
+          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; maintenanceWindowNames?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; maintenanceWindowNames?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -13949,6 +13986,21 @@
           "readonly [\"timestamp\", \"execution_duration\", \"total_search_duration\", \"es_search_duration\", \"schedule_delay\", \"num_triggered_actions\", \"num_generated_actions\", \"num_active_alerts\", \"num_recovered_alerts\", \"num_new_alerts\"]"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.GAP_AUTO_FILL_STATUS",
+        "type": "Object",
+        "tags": [],
+        "label": "GAP_AUTO_FILL_STATUS",
+        "description": [],
+        "signature": [
+          "{ readonly SUCCESS: \"success\"; readonly ERROR: \"error\"; readonly SKIPPED: \"skipped\"; readonly NO_GAPS: \"no_gaps\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_auto_fill_scheduler.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
