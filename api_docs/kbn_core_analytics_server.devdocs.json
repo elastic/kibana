@@ -816,6 +816,26 @@
                 "path": "x-pack/platform/plugins/shared/onechat/public/application/hooks/use_report_error.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
               },
