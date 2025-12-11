@@ -228,8 +228,8 @@ export const getNavigationTreeDefinition = ({
                       ? []
                       : [
                           {
-                            id: 'cloud_connect',
-                            link: 'cloud_connect',
+                            id: 'cloud_connect' as const,
+                            link: 'cloud_connect' as const,
                           },
                         ]),
                     {
