@@ -133,10 +133,15 @@ export async function createAlertingRuleFromTemplate(
 export async function stepCreateAlertingRules(
   context: Pick<
     InstallContext,
-    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'authorizationHeader'
+    | 'logger'
+    | 'savedObjectsClient'
+    | 'esClient'
+    | 'packageInstallContext'
+    | 'spaceId'
+    | 'authorizationHeader'
   >
 ) {
-  const { logger, savedObjectsClient, packageInstallContext, spaceId } = context;
+  const { logger, savedObjectsClient, esClient, packageInstallContext, spaceId } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -150,7 +155,6 @@ export async function stepCreateAlertingRules(
           .getAlertingStart()
           ?.getRulesClientWithRequest(createKibanaRequestFromAuth(context.authorizationHeader))
       : undefined;
-    const esClient = appContextService.getInternalUserESClient();
     const alertTemplateAssets: ArchiveAsset[] = [];
     await packageInstallContext.archiveIterator.traverseEntries(
       async (entry) => {
