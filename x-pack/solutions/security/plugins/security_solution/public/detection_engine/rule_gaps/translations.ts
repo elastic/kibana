@@ -193,7 +193,7 @@ export const BACKFILL_TABLE_SUBTITLE = i18n.translate(
 export const BACKFILLS_TABLE_COLUMN_INITIATOR = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillsTable.column.initiator',
   {
-    defaultMessage: 'Initiated by',
+    defaultMessage: 'Run type',
   }
 );
 
