@@ -119,7 +119,11 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
                   onClick={() => handleCopy(copy)}
                   iconType={isCopied ? 'check' : 'copy'}
                   color={isCopied ? 'success' : 'text'}
-                  data-test-subj={copyValueDataTestSubj}
+                  data-test-subj={
+                    isCopied && copyValueDataTestSubj
+                      ? `${copyValueDataTestSubj}-copied`
+                      : copyValueDataTestSubj
+                  }
                   aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
                     defaultMessage: 'Copy to clipboard',
                   })}
