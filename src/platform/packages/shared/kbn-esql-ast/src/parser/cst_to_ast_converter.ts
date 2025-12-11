@@ -1245,6 +1245,7 @@ export class CstToAstConverter {
         return Builder.expression.func.binary('as', [source, alias], undefined, {
           location: getPosition(ctx.start, ctx.stop),
           text: ctx.getText(),
+          incomplete: Boolean(ctx.exception),
         });
       }
 
