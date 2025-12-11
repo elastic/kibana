@@ -49,7 +49,6 @@ import {
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
-import { cloudDefendLink } from '../cloud_defend/links';
 import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
@@ -268,7 +267,6 @@ export const links: LinkItem = {
       experimentalKey: 'responseActionsScriptLibraryManagement',
       licenseType: 'enterprise',
     },
-    cloudDefendLink,
     notesLink,
   ],
 };
@@ -284,9 +282,6 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
-
-  // Check if we're in serverless environment using cloud service
-  const isServerless: boolean = plugins.cloud?.isServerlessEnabled ?? false;
 
   const {
     canReadActionsLogManagement,
@@ -320,10 +315,6 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
-    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
-  }
-
-  if (isServerless) {
     linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
