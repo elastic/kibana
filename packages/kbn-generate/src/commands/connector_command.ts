@@ -75,20 +75,33 @@ export const ConnectorCommand: GenerateCommand = {
       throw createFlagError(`expected connectorName without spaces`);
     }
 
+    const idPattern = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
+    const MAX_ID_LENGTH = 64;
     const connectorId =
       (flags.id as string | undefined) ||
       ((await ask({
-        question: `Connector id (must start with ".")`,
+        question: `Connector id (must start with ".", allowed: A-Z a-z 0-9 . _ -, max 64 chars)`,
         async validate(input) {
-          if (typeof input === 'string' && input.startsWith('.')) {
+          if (typeof input === 'string' && input.length <= MAX_ID_LENGTH && idPattern.test(input)) {
             return input;
           }
-          return { err: 'id must start with a dot' };
+          return {
+            err: 'Invalid id. Must start with ".", contain only letters (A-Z/a-z), digits, dot, underscore, or hyphen, and be ≤ 64 chars.',
+          };
         },
       })) as string) ||
       `.${connectorName}`;
-    if (typeof connectorId !== 'string' || !connectorId.startsWith('.')) {
-      throw createFlagError(`expected --id to start with "." (e.g. ".${connectorName}")`);
+    if (
+      typeof connectorId !== 'string' ||
+      !idPattern.test(connectorId) ||
+      connectorId.length > MAX_ID_LENGTH
+    ) {
+      throw createFlagError(
+        `expected --id like ".${connectorName.replace(
+          /[^A-Za-z0-9._-]/g,
+          ''
+        )}" (start with ".", allowed: A-Z a-z 0-9 . _ -, max length 64)`
+      );
     }
 
     const owner =
