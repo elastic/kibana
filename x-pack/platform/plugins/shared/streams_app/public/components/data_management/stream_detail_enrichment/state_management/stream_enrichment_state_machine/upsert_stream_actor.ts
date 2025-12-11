@@ -8,8 +8,8 @@
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { isActionBlock } from '@kbn/streamlang';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { getProcessorsCount } from '@kbn/streamlang';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import type { ErrorActorEvent } from 'xstate5';
@@ -23,7 +23,7 @@ export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_inges
 
 export interface UpsertStreamInput {
   definition: Streams.ingest.all.GetResponse;
-  steps: StreamlangStepWithUIAttributes[];
+  streamlangDSL: StreamlangDSL;
   fields?: FieldDefinition;
 }
 
@@ -32,7 +32,11 @@ export function createUpsertStreamActor({
   telemetryClient,
 }: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient' | 'telemetryClient'>) {
   return fromPromise<UpsertStreamResponse, UpsertStreamInput>(async ({ input, signal }) => {
-    const body = buildUpsertStreamRequestPayload(input.definition, input.steps, input.fields);
+    const body = buildUpsertStreamRequestPayload(
+      input.definition,
+      input.streamlangDSL,
+      input.fields
+    );
 
     const response = await streamsRepositoryClient.fetch(
       `PUT /api/streams/{name}/_ingest 2023-10-31`,
@@ -47,7 +51,7 @@ export function createUpsertStreamActor({
       }
     );
 
-    const processorsCount = input.steps.filter((step) => isActionBlock(step)).length;
+    const processorsCount = getProcessorsCount(input.streamlangDSL);
 
     telemetryClient.trackProcessingSaved({
       processors_count: processorsCount,

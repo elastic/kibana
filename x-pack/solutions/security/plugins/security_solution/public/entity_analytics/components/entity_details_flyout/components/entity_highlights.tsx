@@ -23,7 +23,7 @@ import {
   useFetchAnonymizationFields,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -83,8 +83,15 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled = !hasAssistantPrivilege || !isAssistantVisible || !isAssistantEnabled;
-  const isLoading = isChatLoading || isAnonymizationFieldsLoading;
+  const disabled = useMemo(
+    () => !hasAssistantPrivilege || !isAssistantEnabled,
+    [hasAssistantPrivilege, isAssistantEnabled]
+  );
+
+  const isLoading = useMemo(
+    () => isChatLoading || isAnonymizationFieldsLoading,
+    [isAnonymizationFieldsLoading, isChatLoading]
+  );
 
   if (disabled) {
     return null;
@@ -119,6 +126,7 @@ export const EntityHighlightsAccordion: React.FC<{
             openPopover={onButtonClick}
             isLoading={isLoading}
             isPopoverOpen={isPopoverOpen}
+            isAssistantVisible={isAssistantVisible}
             entityType={entityType}
             entityIdentifier={entityIdentifier}
           />

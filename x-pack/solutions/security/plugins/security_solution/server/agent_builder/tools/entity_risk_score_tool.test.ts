@@ -23,7 +23,7 @@ const mockCreateGetRiskScores = createGetRiskScores as jest.Mock;
 
 describe('entityRiskScoreTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = entityRiskScoreTool(mockCore);
+  const tool = entityRiskScoreTool(mockCore, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();

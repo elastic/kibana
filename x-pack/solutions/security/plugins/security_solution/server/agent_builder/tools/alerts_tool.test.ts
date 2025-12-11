@@ -30,7 +30,7 @@ describe('alertsTool', () => {
   const mockEvents = {
     reportProgress: jest.fn(),
   };
-  const tool = alertsTool();
+  const tool = alertsTool(mockCore, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();

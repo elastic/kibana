@@ -32,7 +32,8 @@ const SOLUTION_NAME = i18n.translate(
 );
 
 export const createNavigationTree = async (
-  services: Services
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
 ): Promise<NavigationTreeDefinition> => ({
   body: [
     {
@@ -145,6 +146,6 @@ export const createNavigationTree = async (
       title: i18nStrings.devTools,
       icon: 'editorCodeBlock',
     },
-    createManagementFooterItemsTree(),
+    createManagementFooterItemsTree(chatExperience),
   ],
 });

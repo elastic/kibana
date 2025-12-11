@@ -17,7 +17,6 @@ import {
 } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
-import { type Services } from '../../common/services';
 import { AiNavigationIcon } from './icon';
 
 const SOLUTION_NAME = i18n.translate(
@@ -25,7 +24,9 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (services: Services): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'ease_home',
@@ -75,11 +76,7 @@ export const createAiNavigationTree = (services: Services): NavigationTreeDefini
         {
           link: 'discover',
         },
-        ...(services.application.capabilities.agentBuilder?.show === true &&
-        services.uiSettings.get<AIChatExperience>(
-          AI_CHAT_EXPERIENCE_TYPE,
-          AIChatExperience.Classic
-        ) === AIChatExperience.Agent
+        ...(chatExperience === AIChatExperience.Agent
           ? [
               {
                 // TODO: update icon to 'robot' once it's available in EUI
@@ -180,10 +177,13 @@ export const createAiNavigationTree = (services: Services): NavigationTreeDefini
         {
           title: i18nStrings.stackManagement.ai.title,
           breadcrumbStatus: 'hidden',
-          children: [
-            { link: 'management:genAiSettings' },
-            { link: 'management:securityAiAssistantManagement' },
-          ],
+          children:
+            chatExperience !== AIChatExperience.Agent
+              ? [
+                  { link: 'management:genAiSettings' },
+                  { link: 'management:securityAiAssistantManagement' },
+                ]
+              : [{ link: 'management:genAiSettings' }],
         },
         {
           title: i18nStrings.stackManagementV2.data.title,

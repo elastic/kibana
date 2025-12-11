@@ -18,7 +18,13 @@ import { useAssistant } from './hooks/use_assistant';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
-
+jest.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn().mockReturnValue({
+    isAgentBuilderEnabled: true,
+    hasAgentBuilderPrivilege: true,
+    isAgentChatExperienceEnabled: true,
+  }),
+}));
 jest.mock('../../../common/lib/kibana');
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
