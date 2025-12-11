@@ -11,21 +11,26 @@ import {
   getMathFunctionDefinition,
   getMathParameterNames,
 } from '@kbn/streamlang';
+import type { Suggestion } from '../../../../../shared/autocomplete_selector';
 import { MATH_LANGUAGE_ID } from './math_expression_tokenization';
 
+// ============================================
+// Completion items creation
+// ============================================
+
 /**
- * Creates completion items from the shared function definitions
+ * Creates completion items for math functions
  */
-function createCompletionItems(range: monaco.IRange): monaco.languages.CompletionItem[] {
+function createFunctionCompletionItems(range: monaco.IRange): monaco.languages.CompletionItem[] {
   return ALL_MATH_FUNCTIONS.map((func, index) => {
     const params = getMathParameterNames(func);
+
     return {
-      // Show signature as the label (like Lens does)
       label: {
         label: func.name,
         detail:
           params.length > 0 ? `(${params.map((p) => `[${p.replace('?', '')}]`).join(', ')})` : '()',
-        description: func.isConstant ? 'constant' : '',
+        description: func.category,
       },
       kind: func.isConstant
         ? monaco.languages.CompletionItemKind.Constant
@@ -35,27 +40,56 @@ function createCompletionItems(range: monaco.IRange): monaco.languages.Completio
       detail: func.signature,
       documentation: func.description,
       range,
-      sortText: String(index).padStart(3, '0'), // Maintain order
+      // Functions sorted after fields (1xx)
+      sortText: `1${String(index).padStart(3, '0')}`,
     };
   });
 }
 
 /**
- * Registers the completion provider for the math expression language.
- * Returns a disposable that should be called on component unmount.
+ * Creates completion items for field names
  */
-export function registerMathCompletionProvider(): monaco.IDisposable {
+function createFieldCompletionItems(
+  range: monaco.IRange,
+  fieldSuggestions: Suggestion[]
+): monaco.languages.CompletionItem[] {
+  return fieldSuggestions.map((field, index) => ({
+    label: {
+      label: field.name,
+      detail: field.type ? ` : ${field.type}` : '',
+      description: 'field',
+    },
+    kind: monaco.languages.CompletionItemKind.Field,
+    insertText: field.name,
+    detail: field.type ? `Field (${field.type})` : 'Field',
+    documentation: `Reference to document field "${field.name}"`,
+    range,
+    // Fields sorted first (0xx)
+    sortText: `0${String(index).padStart(3, '0')}`,
+  }));
+}
+
+// ============================================
+// Completion provider
+// ============================================
+
+/**
+ * Registers the completion provider for the math expression language.
+ * Field suggestions are captured in a closure, so re-register when they change.
+ * Returns a disposable that should be called on component unmount or before re-registering.
+ */
+export function registerMathCompletionProvider(
+  fieldSuggestions: Suggestion[] = []
+): monaco.IDisposable {
   return monaco.languages.registerCompletionItemProvider(MATH_LANGUAGE_ID, {
-    triggerCharacters: ['(', ' '],
+    triggerCharacters: ['(', ' ', '.'],
 
     provideCompletionItems(
       model: monaco.editor.ITextModel,
       position: monaco.Position
     ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
-      // Get the word at the current position
       const wordInfo = model.getWordUntilPosition(position);
 
-      // Create the range for the completion
       const range: monaco.IRange = {
         startLineNumber: position.lineNumber,
         startColumn: wordInfo.startColumn,
@@ -63,15 +97,21 @@ export function registerMathCompletionProvider(): monaco.IDisposable {
         endColumn: wordInfo.endColumn,
       };
 
-      // Filter suggestions based on what the user has typed
+      // Combine field and function suggestions (fields first)
+      const allSuggestions = [
+        ...createFieldCompletionItems(range, fieldSuggestions),
+        ...createFunctionCompletionItems(range),
+      ];
+
+      // Filter based on prefix
       const prefix = wordInfo.word.toLowerCase();
-      let suggestions = createCompletionItems(range);
+      let suggestions = allSuggestions;
 
       if (prefix) {
-        suggestions = suggestions.filter((item) => {
+        suggestions = allSuggestions.filter((item) => {
           const label =
             typeof item.label === 'string' ? item.label : (item.label as { label: string }).label;
-          return label.toLowerCase().startsWith(prefix);
+          return label.toLowerCase().includes(prefix);
         });
       }
 
@@ -83,6 +123,10 @@ export function registerMathCompletionProvider(): monaco.IDisposable {
   });
 }
 
+// ============================================
+// Signature help provider
+// ============================================
+
 /**
  * Finds the function name at or before the given position in the text.
  * Returns the function name and the current parameter index.
@@ -91,7 +135,6 @@ function findFunctionContext(
   text: string,
   offset: number
 ): { functionName: string; parameterIndex: number } | null {
-  // Work backwards from cursor to find the function name
   let parenDepth = 0;
   let parameterIndex = 0;
   let functionStart = -1;
@@ -104,9 +147,7 @@ function findFunctionContext(
       parenDepth++;
     } else if (char === '(') {
       if (parenDepth === 0) {
-        // Found our opening paren, now find the function name
         functionEnd = i;
-        // Go back to find the start of the function name
         let j = i - 1;
         while (j >= 0 && /[a-zA-Z_]/.test(text[j])) {
           j--;

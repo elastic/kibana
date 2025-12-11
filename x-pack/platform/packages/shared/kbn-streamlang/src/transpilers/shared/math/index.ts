@@ -52,7 +52,7 @@ export {
 export type {
   MathFunctionDefinition,
   OperatorDefinition,
-  FunctionCategory,
+  MathFunctionCategory,
 } from './language_definition';
 
 // Documentation - generated from language_definition

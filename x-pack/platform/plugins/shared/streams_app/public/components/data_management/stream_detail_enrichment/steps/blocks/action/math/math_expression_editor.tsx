@@ -26,6 +26,7 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 import { monaco } from '@kbn/monaco';
 import { validateMathExpression, getMathExpressionLanguageDocSections } from '@kbn/streamlang';
 import type { ProcessorFormState } from '../../../../types';
+import { useEnrichmentFieldSuggestions } from '../../../../../../../hooks/use_field_suggestions';
 // Import to register the math language with Monaco
 import { MATH_LANGUAGE_ID } from './math_expression_tokenization';
 import {
@@ -39,6 +40,9 @@ export const MathExpressionEditor: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const modelRef = useRef<monaco.editor.ITextModel | null>(null);
+
+  // Get field suggestions for autocompletion
+  const fieldSuggestions = useEnrichmentFieldSuggestions();
 
   const { field } = useController<ProcessorFormState, 'expression'>({
     name: 'expression',
@@ -88,12 +92,18 @@ export const MathExpressionEditor: React.FC = () => {
     }
   }, [hasInlineError, validationResult]);
 
-  // Register completion and signature help providers for autocomplete
+  // Register completion provider with field suggestions (re-register when suggestions change)
   useEffect(() => {
-    const completionDisposable = registerMathCompletionProvider();
-    const signatureDisposable = registerMathSignatureHelpProvider();
+    const completionDisposable = registerMathCompletionProvider(fieldSuggestions);
     return () => {
       completionDisposable.dispose();
+    };
+  }, [fieldSuggestions]);
+
+  // Register signature help provider (static, only needs to be registered once)
+  useEffect(() => {
+    const signatureDisposable = registerMathSignatureHelpProvider();
+    return () => {
       signatureDisposable.dispose();
     };
   }, []);

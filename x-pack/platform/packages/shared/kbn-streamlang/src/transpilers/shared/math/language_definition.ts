@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 // Types
 // ============================================
 
-export type FunctionCategory =
+export type MathFunctionCategory =
   | 'arithmetic'
   | 'rounding'
   | 'trigonometry'
@@ -31,7 +31,7 @@ export type FunctionCategory =
   | 'comparison'
   | 'constant';
 
-export interface FunctionArg {
+export interface MathFunctionArg {
   name: string;
   type: string;
   optional?: boolean;
@@ -46,9 +46,9 @@ export interface MathFunctionDefinition {
   /** i18n description for documentation and autocomplete */
   description: string;
   /** Typed arguments - used for docs and to derive parameter names for signature help */
-  args: FunctionArg[];
+  args: MathFunctionArg[];
   /** Category for grouping */
-  category: FunctionCategory;
+  category: MathFunctionCategory;
   /** Whether this is a constant (0-arity function) */
   isConstant?: boolean;
   /** Whether this function returns a boolean */
@@ -569,7 +569,9 @@ export function getMathFunctionDefinition(name: string): MathFunctionDefinition 
 /**
  * Get functions by category
  */
-export function getMathFunctionsByCategory(category: FunctionCategory): MathFunctionDefinition[] {
+export function getMathFunctionsByCategory(
+  category: MathFunctionCategory
+): MathFunctionDefinition[] {
   return ALL_MATH_FUNCTIONS.filter((f) => f.category === category);
 }
 
@@ -584,7 +586,7 @@ export function doesFunctionReturnBoolean(name: string): boolean {
 // Category to doc section mapping
 // ============================================
 
-export const CATEGORY_TO_DOC_SECTION: Record<FunctionCategory, string> = {
+export const CATEGORY_TO_DOC_SECTION: Record<MathFunctionCategory, string> = {
   arithmetic: 'math',
   rounding: 'math',
   trigonometry: 'trigonometry',
