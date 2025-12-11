@@ -134,7 +134,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
             columns={columns}
             tableCaption={i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.fieldsTableCaption',
-              { defaultMessage: 'Document fields and values' }
+              { defaultMessage: 'Document fields' }
             )}
           />
           {hiddenFields > 0 && (
