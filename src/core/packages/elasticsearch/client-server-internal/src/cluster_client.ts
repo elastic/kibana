@@ -9,7 +9,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import type { Headers, IAuthHeadersStorage } from '@kbn/core-http-server';
+import type { Headers, IAuthHeadersStorage, KibanaRequest } from '@kbn/core-http-server';
 import {
   ensureRawRequest,
   filterHeaders,
@@ -43,6 +43,10 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private isClosed = false;
+  private readonly getCrossProjectExpression: {
+    asScoped: (request: KibanaRequest) => Promise<string>;
+    asInternal: () => string;
+  };
 
   public readonly asInternalUser: Client;
 
@@ -55,6 +59,7 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler = noop,
     agentFactoryProvider,
     kibanaVersion,
+    getCrossProjectExpression,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
@@ -64,12 +69,17 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
+    getCrossProjectExpression: {
+      asScoped: (request: KibanaRequest) => Promise<string>;
+      asInternal: () => string;
+    };
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
     this.kibanaVersion = kibanaVersion;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
+    this.getCrossProjectExpression = getCrossProjectExpression;
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -77,6 +87,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      getCrossProjectExpression: () => Promise.resolve(this.getCrossProjectExpression.asInternal()),
     });
     this.rootScopedClient = configureClient(config, {
       scoped: true,
@@ -85,6 +96,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      getCrossProjectExpression: () => Promise.resolve(getCrossProjectExpression.asInternal()),
     });
   }
 
@@ -95,6 +107,8 @@ export class ClusterClient implements ICustomClusterClient {
       const transportClass = createTransport({
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
+        getCrossProjectExpression: () =>
+          this.getCrossProjectExpression.asScoped(request as KibanaRequest),
       });
 
       return this.rootScopedClient.child({

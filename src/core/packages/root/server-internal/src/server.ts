@@ -603,7 +603,8 @@ export class Server {
   private fetchCrossProjectExpression(request: KibanaRequest) {
     const soClient = this.coreStart!.savedObjects.getScopedClient(request);
     const uiSettingsClient = this.coreStart!.uiSettings.asScopedToClient(soClient);
-    return uiSettingsClient.get('elasticsearch:cross_project_expression');
+    // return uiSettingsClient.get('elasticsearch:cross_project_expression');
+    return '';
   }
 
   public setupCoreConfig() {

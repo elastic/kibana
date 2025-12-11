@@ -26,9 +26,11 @@ export type ErrorHandlerAccessor = () => InternalUnauthorizedErrorHandler;
 const noop = () => undefined;
 
 export const createTransport = ({
+  getCrossProjectExpression,
   getExecutionContext = noop,
   getUnauthorizedErrorHandler,
 }: {
+  getCrossProjectExpression: () => Promise<string>;
   getExecutionContext?: () => string | undefined;
   getUnauthorizedErrorHandler?: ErrorHandlerAccessor;
 }): TransportClass => {
@@ -44,6 +46,21 @@ export const createTransport = ({
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
       const opts: TransportRequestOptions = options ? { ...options } : {};
       // sync override of maxResponseSize and maxCompressedResponseSize
+      if (
+        typeof params.querystring === 'string' &&
+        !params.querystring.includes('project_routing')
+      ) {
+        params.querystring =
+          params.querystring + '&project_routing=' + (await getCrossProjectExpression());
+      } else if (
+        (typeof params.querystring === 'object' && !params?.querystring?.project_routing) ||
+        params.querystring === undefined
+      ) {
+        params.querystring = {
+          ...params.querystring,
+          project_routing: await getCrossProjectExpression(),
+        };
+      }
       if (options) {
         if (
           options.maxResponseSize !== undefined &&

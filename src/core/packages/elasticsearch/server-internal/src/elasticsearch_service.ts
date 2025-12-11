@@ -104,8 +104,8 @@ export class ElasticsearchService
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
-    this.client = this.createClusterClient('data', config);
     this.crossProjectExpression = new CrossProjectExpression(deps.fetchCrossProjectExpression);
+    this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       kibanaVersion: this.kibanaVersion,
@@ -230,7 +230,6 @@ export class ElasticsearchService
     clientConfig: Partial<ElasticsearchClientConfig> = {}
   ) {
     const config = mergeConfig(baseConfig, clientConfig);
-
     return new ClusterClient({
       config,
       logger: this.coreContext.logger.get('elasticsearch'),
@@ -240,6 +239,10 @@ export class ElasticsearchService
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
+      getCrossProjectExpression: {
+        asInternal: this.crossProjectExpression!.asInternal.bind(this.crossProjectExpression),
+        asScoped: this.crossProjectExpression!.asScoped.bind(this.crossProjectExpression),
+      },
     });
   }
 

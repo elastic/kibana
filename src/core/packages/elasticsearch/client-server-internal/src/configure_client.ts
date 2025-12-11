@@ -30,6 +30,7 @@ export const configureClient = (
     getExecutionContext = noop,
     agentFactoryProvider,
     kibanaVersion,
+    getCrossProjectExpression,
   }: {
     logger: Logger;
     type: string;
@@ -37,10 +38,11 @@ export const configureClient = (
     getExecutionContext?: () => string | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
+    getCrossProjectExpression: () => Promise<string>;
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
-  const KibanaTransport = createTransport({ getExecutionContext });
+  const KibanaTransport = createTransport({ getExecutionContext, getCrossProjectExpression });
   const client = new Client({
     ...clientOptions,
     agent: agentFactoryProvider.getAgentFactory(clientOptions.agent),
