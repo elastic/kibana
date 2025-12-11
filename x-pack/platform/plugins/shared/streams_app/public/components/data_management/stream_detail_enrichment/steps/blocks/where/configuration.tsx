@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Condition, StreamlangWhereBlockWithUIAttributes, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
+import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
 import {
   isCondition,
   isFilterConditionObject,
