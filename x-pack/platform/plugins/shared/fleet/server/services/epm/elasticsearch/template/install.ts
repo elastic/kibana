@@ -9,10 +9,7 @@ import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type {
-  IndicesCreateRequest,
-  ClusterPutComponentTemplateRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import {
@@ -502,39 +499,6 @@ export async function ensureComponentTemplate(
   }
 
   return { isCreated: !existingTemplate };
-}
-
-export async function ensureAliasHasWriteIndex(opts: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  aliasName: string;
-  writeIndexName: string;
-  body: Omit<IndicesCreateRequest, 'index'>;
-}): Promise<void> {
-  const { esClient, logger, aliasName, writeIndexName, body } = opts;
-  const existingIndex = await retryTransientEsErrors(
-    () =>
-      esClient.indices.exists(
-        {
-          index: [aliasName],
-        },
-        {
-          ignore: [404],
-        }
-      ),
-    { logger }
-  );
-
-  if (!existingIndex) {
-    logger.info(`Creating write index [${writeIndexName}], alias [${aliasName}]`);
-
-    await retryTransientEsErrors(
-      () => esClient.indices.create({ index: writeIndexName, ...body }, { ignore: [404] }),
-      {
-        logger,
-      }
-    );
-  }
 }
 
 function countFields(fields: Fields): number {
