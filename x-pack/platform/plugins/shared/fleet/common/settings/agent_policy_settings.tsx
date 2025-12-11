@@ -28,7 +28,7 @@ export const zodStringWithDurationValidation = z
 export const zodStringWithYamlValidation = z.string().refine(
   (val) => {
     try {
-      const parsed = load(val);
+      load(val);
       return true;
     } catch (error) {
       return false;
