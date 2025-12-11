@@ -347,6 +347,22 @@ describe('scripts library client', () => {
       ).rejects.toThrow('Script with id non-existent not found');
     });
 
+    it('should throw error when uploading new file with `version` that is no longer valid', async () => {
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          file: createHapiReadableStreamMock(),
+          version: 'foo',
+        })
+      ).rejects.toThrow(
+        'Script with id 1-2-3 has a different version than the one provided in the request. Current version: WzgsMV0=, provided version: foo'
+      );
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).not.toHaveBeenCalled();
+      expect(fileMock.uploadContent).not.toHaveBeenCalled();
+    });
+
     it('should not update script entry if file upload fails', async () => {
       fileMock.uploadContent.mockRejectedValue(new Error('upload failed'));
 

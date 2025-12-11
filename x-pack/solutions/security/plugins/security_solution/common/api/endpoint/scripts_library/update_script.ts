@@ -35,7 +35,7 @@ export const PatchUpdateRequestSchema = {
     {
       validate: ({ version, ...updates }) => {
         if (Object.keys(updates).length === 0) {
-          return 'At least one field must defined for update';
+          return 'At least one field must be defined for update';
         }
       },
     }

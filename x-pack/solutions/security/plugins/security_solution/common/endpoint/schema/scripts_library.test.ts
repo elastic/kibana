@@ -291,13 +291,13 @@ describe('Scripts library schemas', () => {
 
     it('should error if no updates are provided', () => {
       expect(() => PatchUpdateRequestSchema.body.validate({})).toThrow(
-        'At least one field must defined for update'
+        'At least one field must be defined for update'
       );
     });
 
     it('should error is only `version` is provided', () => {
       expect(() => PatchUpdateRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
-        'At least one field must defined for update'
+        'At least one field must be defined for update'
       );
     });
   });

@@ -7,7 +7,6 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
-import {} from '../../../../common/endpoint/types';
 import type {
   PatchUpdateRequestBody,
   PatchUpdateRequestParams,

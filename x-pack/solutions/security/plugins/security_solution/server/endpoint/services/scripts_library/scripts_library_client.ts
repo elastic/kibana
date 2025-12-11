@@ -334,6 +334,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     const currentScriptSoItem = await this.getScriptSavedObject(id);
     let newFileStorage: File | undefined;
 
+    // Although this check would be automatically done by the saved objects functionality, we are
+    // doing it manually here so that if a `file` upload was provided, we don't spend time
+    // uploading it just to then turn around and have to delete it when the SO update fails.
     if (version && currentScriptSoItem.version !== version) {
       throw new ScriptLibraryError(
         `Script with id ${id} has a different version than the one provided in the request. Current version: ${currentScriptSoItem.version}, provided version: ${version}`,
@@ -403,7 +406,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         .delete({ id: currentScriptSoItem.attributes.file_id })
         .catch((deleteError) => {
           this.logger.error(
-            `Error encountered while attempting to delete old file [${newFileStorage.id}] for script [${id}]: ${deleteError.message}. File is now orphaned!`,
+            `Error encountered while attempting to delete old file [${currentScriptSoItem.attributes.file_id}] for script [${id}]: ${deleteError.message}. File is now orphaned!`,
             { error: deleteError }
           );
         });
