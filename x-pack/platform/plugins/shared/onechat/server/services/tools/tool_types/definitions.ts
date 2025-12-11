@@ -9,7 +9,11 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/onechat-common';
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
-import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/onechat-server';
+import type {
+  LlmDescriptionHandler,
+  ToolHandlerFn,
+  ToolAvailabilityResult,
+} from '@kbn/onechat-server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -31,19 +35,34 @@ export interface ToolTypeDefinition<
   validateForUpdate: ToolTypeUpdateValidator<TConfig>;
 
 /**
- * Optional hook to auto-populate the tool description at creation time.
- *
- * If implemented, this hook is called when the user doesn't provide a description,
- * allowing the tool type to fetch one from an external source (e.g., MCP tools
- * fetch from the MCP server's tool definition).
- *
- * Tool types without an external description source should not implement this hook.
- * In that case, tools created without a description will have an empty description.
- */
+* Optional hook to auto-populate the tool description at creation time.
+*
+* If implemented, this hook is called when the user doesn't provide a description,
+* allowing the tool type to fetch one from an external source (e.g., MCP tools
+* fetch from the MCP server's tool definition).
+*
+* Tool types without an external description source should not implement this hook.
+* In that case, tools created without a description will have an empty description.
+*/
   getAutoDescription?: (
     config: TConfig,
     context: ToolTypeValidatorContext
   ) => MaybePromise<string | undefined>;
+
+  /**
+   * Optional hook to check if a tool of this type is available.
+   *
+   * If implemented, this hook is called when listing or retrieving tools to verify
+   * they're still usable. For example, MCP tools use this to check if the underlying
+   * connector still exists.
+   *
+   * Tool types without external dependencies should not implement this hook.
+   * In that case, tools will always be considered available.
+   */
+  isAvailable?: (
+    config: TConfig,
+    context: ToolDynamicPropsContext
+  ) => MaybePromise<ToolAvailabilityResult>;
 }
 
 /**
