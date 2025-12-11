@@ -17,6 +17,7 @@ export { CONNECTOR_ID as GeminiConnectorTypeId } from './gemini';
 export { CONNECTOR_ID as InferenceConnectorTypeId } from './inference';
 export { CONNECTOR_ID as JiraConnectorTypeId } from './jira';
 export { CONNECTOR_ID as JiraServiceManagementConnectorTypeId } from './jira-service-management';
+export { CONNECTOR_ID as McpConnectorTypeId } from './mcp';
 export { CONNECTOR_ID as MsDefenderEndpointConnectorTypeId } from './microsoft_defender_endpoint';
 export { CONNECTOR_ID as OpenAIConnectorTypeId } from './openai';
 export { CONNECTOR_ID as OpsgenieConnectorTypeId } from './opsgenie';
