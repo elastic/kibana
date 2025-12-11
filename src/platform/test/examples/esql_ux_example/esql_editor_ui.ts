@@ -34,19 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should submit query with Ctrl+Enter keyboard shortcut', async () => {
-      await esql.setEsqlEditorQuery('FROM logstash-* | LIMIT 10');
-
-      const editor = await testSubjects.find('ESQLEditor');
-      const textarea = await editor.findByCssSelector('textarea');
-
-      await textarea.type([Key.CONTROL, Key.ENTER]);
-      await retry.try(async () => {
-        const calloutExists = await testSubjects.exists('querySubmittedCallout');
-        expect(calloutExists).to.be(true);
-      });
-    });
-
     it('should change datasource and search with visor', async () => {
       // Open visor with Ctrl+K
       const editor = await testSubjects.find('ESQLEditor');
@@ -76,9 +63,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const query = await esql.getEsqlEditorQuery();
+        expect(query).to.contain('KQL("""test""")');
+      });
+    });
 
-        expect(query).to.contain('KQL');
-        expect(query).to.contain('test');
+    it('should submit query with Ctrl+Enter keyboard shortcut', async () => {
+      await esql.setEsqlEditorQuery('FROM logstash-* | LIMIT 10');
+
+      const editor = await testSubjects.find('ESQLEditor');
+      const textarea = await editor.findByCssSelector('textarea');
+
+      await textarea.type([Key.CONTROL, Key.ENTER]);
+      await retry.try(async () => {
+        const calloutExists = await testSubjects.exists('querySubmittedCallout');
+        expect(calloutExists).to.be(true);
       });
     });
 

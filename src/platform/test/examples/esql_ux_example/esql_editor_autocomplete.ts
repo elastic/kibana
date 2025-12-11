@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-const SOURCE_QUERY = 'FROM logstash-* | ';
+const SOURCE_QUERY = 'FROM logstash-* ';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -41,12 +41,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show suggestions automatically after pipe and space', async () => {
-      await esql.typeEsqlEditorQuery(SOURCE_QUERY);
+      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
     });
 
     it('should not insert unwanted characters after operator selection', async () => {
-      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}WHERE bytes `);
+      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| WHERE bytes `);
       await waitForSuggestionWidget(true);
 
       await browser.pressKeys(browser.keys.ENTER);
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open timepicker and insert date when selecting a day', async () => {
-      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}WHERE @timestamp > `);
+      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| WHERE @timestamp > `);
       await browser.pressKeys(browser.keys.ENTER);
 
       const todayButton = await find.byCssSelector('.react-datepicker__day--today');
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should close suggestions when clicking on editor footer', async () => {
-      await esql.typeEsqlEditorQuery(SOURCE_QUERY);
+      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
 
       await testSubjects.click('ESQLEditor-run-query');
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should automatically show suggestions when refocusing editor', async () => {
-      await esql.typeEsqlEditorQuery(SOURCE_QUERY);
+      await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
 
       await testSubjects.click('ESQLEditor-run-query');
