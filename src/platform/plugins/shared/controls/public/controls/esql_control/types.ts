@@ -27,7 +27,7 @@ type HideExistsUnusedState = Pick<OptionsListComponentState, 'existsSelected'>;
 type HideSortUnusedState = Pick<OptionsListComponentState, 'sort'>;
 type DisableLoadSuggestionsUnusedState = Pick<
   OptionsListComponentState,
-  'dataLoading' | 'requestSize' | 'runPastTimeout'
+  'requestSize' | 'runPastTimeout'
 >;
 type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
 

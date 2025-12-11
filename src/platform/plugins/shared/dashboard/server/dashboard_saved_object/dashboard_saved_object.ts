@@ -105,9 +105,9 @@ export const createDashboardSavedObjectType = ({
           value: { type: 'integer', index: false, doc_values: false },
         },
       },
+      // Deprecated, kept in mappings for backwards compatibility only
       controlGroupInput: {
         properties: {
-          /** TODO: Most of these settings are being removed. What should we do with this? */
           controlStyle: { type: 'keyword', index: false, doc_values: false },
           chainingSystem: { type: 'keyword', index: false, doc_values: false },
           panelsJSON: { type: 'text', index: false },

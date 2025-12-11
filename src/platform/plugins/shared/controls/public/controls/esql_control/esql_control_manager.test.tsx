@@ -9,7 +9,8 @@
 
 import { waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/esql-types';
-import { initializeESQLControlSelections } from './esql_control_selections';
+import { initializeESQLControlManager } from './esql_control_manager';
+import { BehaviorSubject } from 'rxjs';
 
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
@@ -25,7 +26,13 @@ jest.mock('./utils/get_esql_single_column_values', () => {
   };
 });
 
-describe('initializeESQLControlSelections', () => {
+const mockFetch$ = new BehaviorSubject({});
+jest.mock('@kbn/presentation-publishing', () => ({
+  ...jest.requireActual('@kbn/presentation-publishing'),
+  fetch$: () => mockFetch$,
+}));
+
+describe('initializeESQLControlManager', () => {
   const uuid = 'myESQLControl';
 
   const dashboardApi = {};
@@ -42,12 +49,7 @@ describe('initializeESQLControlSelections', () => {
       } as ESQLControlState;
 
       let dataHasLoaded = false;
-      const selections = initializeESQLControlSelections(
-        uuid,
-        dashboardApi,
-        initialState,
-        jest.fn()
-      );
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
 
       selections.internalApi.availableOptions$.subscribe((result) => {
         if (result?.length === 5) dataHasLoaded = true;
@@ -85,12 +87,7 @@ describe('initializeESQLControlSelections', () => {
         controlType: EsqlControlType.STATIC_VALUES,
       } as ESQLControlState;
 
-      const selections = initializeESQLControlSelections(
-        uuid,
-        dashboardApi,
-        initialState,
-        jest.fn()
-      );
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
 
       await waitFor(() => {
         const availableOptions = selections.internalApi.availableOptions$.getValue();
@@ -131,12 +128,7 @@ describe('initializeESQLControlSelections', () => {
         esqlQuery: '',
       } as ESQLControlState;
 
-      const selections = initializeESQLControlSelections(
-        uuid,
-        dashboardApi,
-        initialState,
-        jest.fn()
-      );
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
       await waitFor(() => {
         const variable = selections.api.esqlVariable$.getValue();
         expect(variable).toEqual({
@@ -162,12 +154,7 @@ describe('initializeESQLControlSelections', () => {
         esqlQuery: '',
       } as ESQLControlState;
 
-      const selections = initializeESQLControlSelections(
-        uuid,
-        dashboardApi,
-        initialState,
-        jest.fn()
-      );
+      const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
       await waitFor(() => {
         const variable = selections.api.esqlVariable$.getValue();
         expect(variable).toEqual({
@@ -196,11 +183,11 @@ describe('initializeESQLControlSelections', () => {
       } as ESQLControlState;
 
       const setDataLoadingMock = jest.fn();
-      initializeESQLControlSelections(initialState, controlFetch$, setDataLoadingMock);
+      initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
 
       setDataLoadingMock.mockClear();
       // Initial variables
-      controlFetch$.next({
+      mockFetch$.next({
         esqlVariables: [
           {
             key: 'variable1',
@@ -216,7 +203,7 @@ describe('initializeESQLControlSelections', () => {
 
       // Change the variable
       setDataLoadingMock.mockClear();
-      controlFetch$.next({
+      mockFetch$.next({
         esqlVariables: [
           {
             key: 'variable1',
@@ -243,10 +230,10 @@ describe('initializeESQLControlSelections', () => {
       } as ESQLControlState;
 
       const setDataLoadingMock = jest.fn();
-      initializeESQLControlSelections(initialState, controlFetch$, setDataLoadingMock);
+      initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
 
       // Initial variables
-      controlFetch$.next({
+      mockFetch$.next({
         esqlVariables: [
           {
             key: 'variable1',
@@ -261,7 +248,7 @@ describe('initializeESQLControlSelections', () => {
       });
 
       setDataLoadingMock.mockClear();
-      controlFetch$.next({
+      mockFetch$.next({
         esqlVariables: [
           {
             key: 'variable1',
