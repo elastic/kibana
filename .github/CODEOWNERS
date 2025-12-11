@@ -559,6 +559,7 @@ src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-r
 src/platform/packages/shared/kbn-opentelemetry-attributes @elastic/kibana-core
 src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-otel-demo @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiler @elastic/obs-knowledge-team

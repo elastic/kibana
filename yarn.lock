@@ -7750,6 +7750,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/otel-demo@link:src/platform/packages/shared/kbn-otel-demo":
+  version "0.0.0"
+  uid ""
+
 "@kbn/otel-semantic-conventions@link:src/platform/packages/shared/kbn-otel-semantic-conventions":
   version "0.0.0"
   uid ""

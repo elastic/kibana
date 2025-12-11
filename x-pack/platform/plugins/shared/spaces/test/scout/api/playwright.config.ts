@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export enum DataInputStep {
-  Rules = 1,
-  Macros = 2,
-  Lookups = 3,
-  End = 10,
-}
+import { createPlaywrightConfig } from '@kbn/scout';
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
