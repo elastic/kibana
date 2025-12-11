@@ -273,7 +273,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
     name: 'agent.internal',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
-      defaultMessage: 'Advanced Internal YAML Settings',
+      defaultMessage: 'Advanced internal YAML settings',
     }),
     description: () => (
       <FormattedMessage
