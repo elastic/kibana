@@ -10,18 +10,33 @@ import { test } from '../../fixtures';
 test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
+
     await pageObjects.rulesPage.goto();
+
+    await pageObjects.rulesPage.createRuleButton.click();
+    await pageObjects.rulesPage.observabilityCategory.click();
+    await pageObjects.rulesPage.customThresholdRuleType.click();
   });
 
-  test('should render the empty chart only once at bootstrap', async ({ pageObjects, page }) => {
+  test('should render the empty chart only once at bootstrap', async ({ page }) => {
     const previewChartDataTestSubj = 'thresholdRulePreviewChart';
-    await pageObjects.rulesPage.createRuleButton.click();
-
-    await pageObjects.rulesPage.observabilityCategory.click();
-
-    await pageObjects.rulesPage.customThresholdRuleType.click();
 
     const previewChart = page.testSubj.locator(previewChartDataTestSubj);
     await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
+  });
+
+  test('should render the correct error message', async ({ page }) => {
+    await page.testSubj.click('customEquation');
+
+    const customEquationField = page.testSubj.locator('thresholdRuleCustomEquationEditorFieldText');
+    await customEquationField.click();
+
+    await customEquationField.fill('A +');
+
+    await page.testSubj.click('o11yClosablePopoverTitleButton');
+
+    const lensFailure = page.testSubj.locator('embeddable-lens-failure');
+    await expect(lensFailure).toBeVisible();
+    await expect(lensFailure).toContainText('An error occurred while rendering the chart');
   });
 });
