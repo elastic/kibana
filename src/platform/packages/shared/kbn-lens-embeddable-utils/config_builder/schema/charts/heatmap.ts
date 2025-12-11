@@ -90,7 +90,16 @@ const heatmapSharedStateSchema = {
   cells: schema.maybe(
     schema.object(
       {
-        labels: schema.maybe(simpleLabelsSchema),
+        labels: schema.maybe(
+          schema.object({
+            visible: schema.maybe(
+              schema.boolean({
+                defaultValue: false,
+                meta: { description: 'Whether to show cell labels' },
+              })
+            ),
+          })
+        ),
       },
       { meta: { description: 'Cells configuration' } }
     )
