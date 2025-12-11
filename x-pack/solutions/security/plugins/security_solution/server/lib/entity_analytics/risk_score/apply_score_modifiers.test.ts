@@ -597,11 +597,6 @@ describe('riskScoreDocFactory', () => {
         is_privileged_user: true,
       },
     };
-    //   category_3_score: 5,
-    //   category_3_count: 1,
-    //   is_privileged_user: true,
-    //   privileged_user_modifier: 2,
-    // };
 
     const result = factory(mockBucket, criticalityFields, privmonFields);
 

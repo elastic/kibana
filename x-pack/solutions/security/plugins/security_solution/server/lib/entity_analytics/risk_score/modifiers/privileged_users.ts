@@ -20,13 +20,6 @@ import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/pr
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { Modifier } from './types';
 
-export interface PrivmonRiskFields {
-  category_3_score: number;
-  category_3_count: number;
-  is_privileged_user?: boolean;
-  privileged_user_modifier?: number;
-}
-
 interface ApplyCriticalityModifierParams {
   page: {
     buckets: RiskScoreBucket[];
