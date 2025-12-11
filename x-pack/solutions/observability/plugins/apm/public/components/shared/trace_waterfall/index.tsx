@@ -21,7 +21,7 @@ import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
-import { WaterfallFoldButton } from './waterfall_fold_button';
+import { WaterfallAccordionButton } from './waterfall_accordion_button';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -83,7 +83,7 @@ function TraceWaterfallComponent() {
     serviceName,
     showAccordion,
     isAccordionOpen,
-    toggleAccordionOpen,
+    toggleAllAccordions,
   } = useTraceWaterfallContext();
 
   return (
@@ -106,7 +106,7 @@ function TraceWaterfallComponent() {
             `}
           >
             {showAccordion && (
-              <WaterfallFoldButton isOpen={isAccordionOpen} onClick={toggleAccordionOpen} />
+              <WaterfallAccordionButton isOpen={isAccordionOpen} onClick={toggleAllAccordions} />
             )}
             <TimelineAxisContainer
               xMax={duration}

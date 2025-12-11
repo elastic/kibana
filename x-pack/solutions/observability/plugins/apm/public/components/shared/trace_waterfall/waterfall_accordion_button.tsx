@@ -10,12 +10,12 @@ import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-export interface WaterfallFoldButtonProps {
+export interface WaterfallAccordionButtonProps {
   isOpen: boolean;
   onClick: () => void;
 }
 
-export function WaterfallFoldButton({ isOpen, onClick }: WaterfallFoldButtonProps) {
+export function WaterfallAccordionButton({ isOpen, onClick }: WaterfallAccordionButtonProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -23,7 +23,7 @@ export function WaterfallFoldButton({ isOpen, onClick }: WaterfallFoldButtonProp
       size="m"
       onClick={onClick}
       iconType={isOpen ? 'fold' : 'unfold'}
-      data-test-subj="traceWaterfallFoldButton"
+      data-test-subj="traceWaterfallAccordionButton"
       css={css`
         position: absolute;
         z-index: ${euiTheme.levels.menu};

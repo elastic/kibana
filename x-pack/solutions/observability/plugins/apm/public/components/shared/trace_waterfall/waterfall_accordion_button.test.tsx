@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import type { WaterfallFoldButtonProps } from './waterfall_fold_button';
-import { WaterfallFoldButton } from './waterfall_fold_button';
+import type { WaterfallAccordionButtonProps } from './waterfall_accordion_button';
+import { WaterfallAccordionButton } from './waterfall_accordion_button';
 
-describe('WaterfallFoldButton', () => {
-  const renderButton = (props: WaterfallFoldButtonProps) => {
-    return render(<WaterfallFoldButton {...props} />);
+describe('WaterfallAccordionButton', () => {
+  const renderButton = (props: WaterfallAccordionButtonProps) => {
+    return render(<WaterfallAccordionButton {...props} />);
   };
 
   it('renders with fold icon when isOpen is true', () => {
     renderButton({ isOpen: true, onClick: jest.fn() });
 
-    const button = screen.getByTestId('traceWaterfallFoldButton');
+    const button = screen.getByTestId('traceWaterfallAccordionButton');
 
     expect(button.querySelector('[data-euiicon-type="fold"]')).toBeInTheDocument();
     expect(button).toHaveAttribute('aria-label', 'Click to fold the waterfall');
@@ -26,7 +26,7 @@ describe('WaterfallFoldButton', () => {
   it('renders with unfold icon when isOpen is false', () => {
     renderButton({ isOpen: false, onClick: jest.fn() });
 
-    const button = screen.getByTestId('traceWaterfallFoldButton');
+    const button = screen.getByTestId('traceWaterfallAccordionButton');
 
     expect(button.querySelector('[data-euiicon-type="unfold"]')).toBeInTheDocument();
     expect(button).toHaveAttribute('aria-label', 'Click to unfold the waterfall');
@@ -36,7 +36,7 @@ describe('WaterfallFoldButton', () => {
 
     renderButton({ isOpen: true, onClick });
 
-    const button = screen.getByTestId('traceWaterfallFoldButton');
+    const button = screen.getByTestId('traceWaterfallAccordionButton');
 
     fireEvent.click(button);
 
