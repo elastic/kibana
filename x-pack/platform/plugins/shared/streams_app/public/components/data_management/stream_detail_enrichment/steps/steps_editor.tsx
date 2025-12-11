@@ -14,22 +14,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { validationErrorTypeLabels } from '@kbn/streamlang';
+import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useStreamDetail } from '../../../../hooks/use_stream_detail';
+import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
+import { NoStepsEmptyPrompt } from '../empty_prompts';
+import { PipelineSuggestion } from '../pipeline_suggestions/pipeline_suggestion';
+import { SuggestPipelinePanel } from '../pipeline_suggestions/suggest_pipeline_panel';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
   useStreamEnrichmentEvents,
-} from './state_management/stream_enrichment_state_machine';
-import { selectValidationErrors } from './state_management/stream_enrichment_state_machine/selectors';
-import { hasValidMessageFieldsForSuggestion } from './utils';
-import { NoStepsEmptyPrompt } from './empty_prompts';
-import { RootSteps } from './steps/root_steps';
-import { useAIFeatures } from '../../../hooks/use_ai_features';
-import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
-import { useStreamDetail } from '../../../hooks/use_stream_detail';
-import { PipelineSuggestion } from './pipeline_suggestions/pipeline_suggestion';
-import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
-import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_panel';
-import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
+  useInteractiveModeSelector,
+} from '../state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from '../state_management/stream_enrichment_state_machine/selectors';
+import { getActiveDataSourceRef } from '../state_management/stream_enrichment_state_machine/utils';
+import { hasValidMessageFieldsForSuggestion } from '../utils';
+import { RootSteps } from './root_steps';
+import { SuggestionLoadingPrompt } from '../../shared/suggestion_loading_prompt';
 
 interface ErrorPanelsProps {
   showBottomBar: boolean;
@@ -229,7 +230,7 @@ const ErrorPanels = React.memo<ErrorPanelsProps>(({ showBottomBar }) => {
 });
 
 export const StepsEditor = React.memo(() => {
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+  const stepRefs = useInteractiveModeSelector((state) => state.context.stepRefs);
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
   const isLoadingSamples = useStreamEnrichmentSelector((state) =>
     getActiveDataSourceRef(state.context.dataSourcesRefs)
@@ -238,14 +239,14 @@ export const StepsEditor = React.memo(() => {
   );
 
   // Pipeline suggestion state
-  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  const isLoadingSuggestion = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' })
   );
-  const suggestedPipeline = useStreamEnrichmentSelector(
+  const suggestedPipeline = useInteractiveModeSelector(
     (snapshot) => snapshot.context.suggestedPipeline
   );
-  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  const isViewingSuggestion = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' })
   );
 
   // Pipeline suggestion events
@@ -261,9 +262,7 @@ export const StepsEditor = React.memo(() => {
   }, [samples]);
 
   const hasSteps = !isEmpty(stepRefs);
-  const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
-  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
-  const hasChanges = canUpdate && !isSimulating;
+  const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
 
   const aiFeatures = useAIFeatures();
   const {
