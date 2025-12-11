@@ -18,13 +18,13 @@ export function createTestConfig(settings: Settings) {
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackAPITestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.ts')
+      require.resolve('@kbn/test-suites-xpack-platform/api_integration/config')
     );
 
     return {
+      ...xPackAPITestsConfig.getAll(),
+
       testFiles,
-      servers: xPackAPITestsConfig.get('servers'),
-      services: xPackAPITestsConfig.get('services'),
       junit: {
         reportName: name,
       },
@@ -33,7 +33,6 @@ export function createTestConfig(settings: Settings) {
         ...xPackAPITestsConfig.get('esTestCluster'),
         license,
       },
-      kbnTestServer: xPackAPITestsConfig.get('kbnTestServer'),
     };
   };
 }

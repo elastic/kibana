@@ -110,6 +110,10 @@ export class LensConfigBuilder {
     this.enableAPITransforms = enableAPITransforms;
   }
 
+  public get isEnabled() {
+    return this.enableAPITransforms;
+  }
+
   public setEnabled(enabled: boolean) {
     this.enableAPITransforms = enabled;
   }
@@ -204,6 +208,7 @@ export class LensConfigBuilder {
       throw new Error(`No API converter found for chart type: ${visType} as ${type}`);
     }
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
+    // @ts-expect-error upgrade typescript v5.9.3
     return {
       ...converter.fromLensStateToAPI(config),
       ...filtersAndQueryToApiFormat(config),

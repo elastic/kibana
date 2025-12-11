@@ -76,6 +76,13 @@ export interface AgentConfiguration {
    */
   instructions?: string;
   /**
+   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   *
+   * This will impact both the research and answer prompts. For custom per-step instructions, use the `research` and `answer` configuration fields instead.
+   */
+  replace_default_instructions?: boolean;
+
+  /**
    * List of tools exposed to the agent
    */
   tools: ToolSelection[];
@@ -96,6 +103,10 @@ export interface AgentResearchStepConfiguration {
    * Custom instruction for the agent's research step.
    */
   instructions?: string;
+  /**
+   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   */
+  replace_default_instructions?: boolean;
 }
 
 export interface AgentAnswerStepConfiguration {
@@ -103,6 +114,10 @@ export interface AgentAnswerStepConfiguration {
    * Custom instruction for the agent's answer step.
    */
   instructions?: string;
+  /**
+   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   */
+  replace_default_instructions?: boolean;
 }
 
 /**

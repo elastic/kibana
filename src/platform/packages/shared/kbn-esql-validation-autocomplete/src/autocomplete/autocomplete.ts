@@ -28,18 +28,27 @@ import type {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
-import { getAstContext } from '../shared/context';
-import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
+import { getCursorContext } from '../shared/get_cursor_context';
 import { getFromCommandHelper } from '../shared/resources_helpers';
-import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
-import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
-import { getQueryForFields } from './get_query_for_fields';
-import type { GetColumnMapFn } from '../shared/columns';
-import { getColumnsByTypeRetriever } from '../shared/columns';
+import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
+import { getQueryForFields } from '../shared/get_query_for_fields';
+import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
+
+function isSourceCommandSuggestion({ label }: { label: string }) {
+  const sourceCommands = esqlCommandRegistry
+    .getSourceCommandNames()
+    .map((cmd) => cmd.toUpperCase());
+
+  return sourceCommands.includes(label);
+}
+function isHeaderCommandSuggestion({ label }: { label: string }) {
+  return label === 'SET';
+}
 
 const orderingEngine = new SuggestionOrderingEngine();
 
@@ -52,7 +61,7 @@ export async function suggest(
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = parse(correctedQuery, { withFormatting: true });
 
-  const astContext = getAstContext(innerText, root, offset);
+  const astContext = getCursorContext(innerText, root, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -60,7 +69,7 @@ export async function suggest(
 
   // Use the appropriate AST context for field retrieval
   // When in a subquery, use the subquery's AST to get only its fields
-  const astForFields = astContext.isCursorInSubquery ? astContext.astForContext : root;
+  const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
     getQueryForFields(correctedQuery, astForFields),

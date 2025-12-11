@@ -421,7 +421,7 @@ export interface ValueFormatConfig {
 
 export interface LensDocument {
   savedObjectId?: string;
-  type?: string;
+  type?: string; // what is this type for? It's always 'lens'
   title: string;
   description?: string;
   visualizationType: string | null;

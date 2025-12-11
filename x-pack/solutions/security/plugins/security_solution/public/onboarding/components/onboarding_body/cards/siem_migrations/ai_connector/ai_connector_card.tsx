@@ -65,7 +65,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
       return false;
     }
     const connector = checkCompleteMetadata.connectors.find((c) => c.id === storedConnectorId);
-    return connector?.actionTypeId === '.inference' ?? false;
+    return connector?.actionTypeId === '.inference';
   }, [checkCompleteMetadata, storedConnectorId]);
 
   if (!checkCompleteMetadata) {
