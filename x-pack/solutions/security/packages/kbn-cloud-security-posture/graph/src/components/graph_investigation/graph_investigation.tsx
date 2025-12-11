@@ -364,11 +364,48 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [originEventIds]);
 
     const nodes = useMemo(() => {
+      let firstEntityNodeProcessed = false;
       return (
         data?.nodes.map((node) => {
           if (isEntityNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
+
+            // DEBUG: Add availableInEntityStore to first entity node
+            if (
+              !firstEntityNodeProcessed &&
+              node.documentsData &&
+              node.documentsData.length > 0 &&
+              node.documentsData[0].entity
+            ) {
+              firstEntityNodeProcessed = true;
+              const updatedDocumentsData = [...node.documentsData];
+              updatedDocumentsData[0] = {
+                ...updatedDocumentsData[0],
+                entity: {
+                  ...updatedDocumentsData[0].entity,
+                  availableInEntityStore: false,
+                } as any,
+              };
+
+              console.log('DEBUG: First entity node modified:', {
+                nodeId: node.id,
+                hasDocumentsData: !!updatedDocumentsData[0],
+                hasEntity: !!updatedDocumentsData[0].entity,
+                availableInEntityStore: (updatedDocumentsData[0].entity as any)
+                  ?.availableInEntityStore,
+                fullEntity: updatedDocumentsData[0].entity,
+              });
+
+              return {
+                ...node,
+                documentsData: updatedDocumentsData,
+                expandButtonClick: nodeExpandButtonClickHandler,
+                ipClickHandler: createIpClickHandler(nodeIps),
+                countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              };
+            }
+
             return {
               ...node,
               expandButtonClick: nodeExpandButtonClickHandler,
