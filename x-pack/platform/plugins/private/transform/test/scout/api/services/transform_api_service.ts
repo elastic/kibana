@@ -5,31 +5,16 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import type { PutTransformsRequestSchema } from '../../../../server/routes/api_schemas/transforms';
 
 export interface TransformApiService {
   createTransform: (transformId: string, config: PutTransformsRequestSchema) => Promise<void>;
   waitForTransformToExist: (transformId: string) => Promise<void>;
-  createTransformWithSecondaryAuth: (
-    transformId: string,
-    config: PutTransformsRequestSchema,
-    encodedApiKey: string,
-    deferValidation?: boolean
-  ) => Promise<void>;
-  deleteTransform: (transformId: string) => Promise<void>;
   cleanTransformIndices: () => Promise<void>;
-  deleteDataViewByTitle: (title: string) => Promise<void>;
-  getTransform: (transformId: string) => Promise<any>;
-  getTransformStats: (transformId: string) => Promise<any>;
-  deleteIndices: (index: string) => Promise<void>;
 }
 
-export function getTransformApiService(
-  kbnClient: KbnClient,
-  esClient: Client
-): TransformApiService {
+export function getTransformApiService(esClient: Client): TransformApiService {
   return {
     async waitForTransformToExist(transformId: string) {
       let retries = 10;
@@ -46,6 +31,7 @@ export function getTransformApiService(
         }
       }
     },
+
     async createTransform(transformId: string, config: PutTransformsRequestSchema) {
       try {
         await esClient.transform.putTransform({
@@ -55,50 +41,6 @@ export function getTransformApiService(
         await this.waitForTransformToExist(transformId);
       } catch (error) {
         throw new Error(`Failed to create transform ${transformId}: ${error}`);
-      }
-    },
-
-    async createTransformWithSecondaryAuth(
-      transformId: string,
-      config: PutTransformsRequestSchema,
-      encodedApiKey: string,
-      deferValidation = false
-    ) {
-      try {
-        await esClient.transform.putTransform(
-          {
-            transform_id: transformId,
-            defer_validation: deferValidation,
-            ...config,
-          } as any,
-          {
-            headers: {
-              'es-secondary-authorization': `ApiKey ${encodedApiKey}`,
-            },
-          }
-        );
-
-        await this.waitForTransformToExist(transformId);
-      } catch (error) {
-        throw new Error(`Failed to create transform ${transformId}: ${error}`);
-      }
-    },
-
-    async deleteTransform(transformId: string) {
-      try {
-        // Stop the transform first
-        await esClient.transform.stopTransform({
-          transform_id: transformId,
-          force: true,
-          wait_for_completion: true,
-        });
-
-        // Then delete it
-        await esClient.transform.deleteTransform({
-          transform_id: transformId,
-        });
-      } catch (error) {
-        throw new Error(`Failed to delete transform ${transformId}: ${error}`);
       }
     },
 
@@ -139,59 +81,6 @@ export function getTransformApiService(
         }
       } catch (error) {
         throw new Error(`Failed to delete transform notification indices: ${error}`);
-      }
-    },
-
-    async deleteDataViewByTitle(title: string) {
-      try {
-        // Get all data views to find the one with matching title
-        const response = await kbnClient.request({
-          method: 'GET',
-          path: '/api/data_views',
-        });
-
-        const dataViews = (response.data as any).data_view || [];
-        const dataView = dataViews.find((dv: any) => dv.title === title);
-
-        if (dataView && dataView.id) {
-          await kbnClient.request({
-            method: 'DELETE',
-            path: `/api/data_views/data_view/${dataView.id}`,
-          });
-        }
-      } catch (error) {
-        throw new Error(`Failed to delete data view with title ${title}: ${error}`);
-      }
-    },
-
-    async getTransform(transformId: string) {
-      try {
-        const response = await esClient.transform.getTransform({ transform_id: transformId });
-        return response.transforms[0];
-      } catch (error) {
-        throw new Error(`Failed to get transform ${transformId}: ${error}`);
-      }
-    },
-
-    async getTransformStats(transformId: string) {
-      try {
-        const response = await esClient.transform.getTransformStats({
-          transform_id: transformId,
-        });
-        return response.transforms[0];
-      } catch (error) {
-        throw new Error(`Failed to get transform stats for ${transformId}: ${error}`);
-      }
-    },
-
-    async deleteIndices(index: string) {
-      try {
-        await esClient.indices.delete({
-          index,
-          ignore_unavailable: true,
-        });
-      } catch (error) {
-        throw new Error(`Failed to delete indices ${index}: ${error}`);
       }
     },
   };

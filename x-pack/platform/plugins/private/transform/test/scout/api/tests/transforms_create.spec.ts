@@ -11,6 +11,29 @@ import { generateTransformConfig, generateDestIndex } from '../helpers/transform
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from './constants';
 
+// use Scout data views API service when available
+const deleteDataViewByTitle = async (title: string) => {
+  try {
+    // Get all data views to find the one with matching title
+    const response = await kbnClient.request({
+      method: 'GET',
+      path: '/api/data_views',
+    });
+
+    const dataViews = (response.data as any).data_view || [];
+    const dataView = dataViews.find((dv: any) => dv.title === title);
+
+    if (dataView && dataView.id) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/api/data_views/data_view/${dataView.id}`,
+      });
+    }
+  } catch (error) {
+    throw new Error(`Failed to delete data view with title ${title}: ${error}`);
+  }
+};
+
 apiTest.describe(
   '/internal/transform/transforms/{transformId}/ create',
   { tag: tags.ESS_ONLY },
@@ -54,7 +77,7 @@ apiTest.describe(
       });
     });
 
-    apiTest('should create a transform with data view', async ({ apiClient, apiServices }) => {
+    apiTest('should create a transform with data view', async ({ apiClient }) => {
       const transformId = 'test_transform_id_create_with_data_view';
       const destinationIndex = generateDestIndex(transformId);
 
@@ -85,45 +108,42 @@ apiTest.describe(
       ]);
 
       // Clean up data view
-      await apiServices.transform.deleteDataViewByTitle(destinationIndex);
+      await deleteDataViewByTitle(destinationIndex);
     });
 
-    apiTest(
-      'should create a transform with data view and time field',
-      async ({ apiClient, apiServices }) => {
-        const transformId = 'test_transform_id_create_with_data_view_and_time_field';
-        const destinationIndex = generateDestIndex(transformId);
+    apiTest('should create a transform with data view and time field', async ({ apiClient }) => {
+      const transformId = 'test_transform_id_create_with_data_view_and_time_field';
+      const destinationIndex = generateDestIndex(transformId);
 
-        const { statusCode, body } = await apiClient.put(
-          `internal/transform/transforms/${transformId}?createDataView=true&timeFieldName=@timestamp`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...transformPowerUserApiCredentials.apiKeyHeader,
-            },
-            body: generateTransformConfig(transformId),
-            responseType: 'json',
-          }
-        );
-
-        expect(statusCode).toBe(200);
-
-        // The data view id will be returned as a non-deterministic uuid
-        // so we cannot assert the actual id returned. We'll just assert
-        // that a data view has been created a no errors were returned.
-        expect(body.dataViewsCreated).toHaveLength(1);
-        expect(body.dataViewsErrors).toHaveLength(0);
-        expect(body.errors).toHaveLength(0);
-        expect(body.transformsCreated).toMatchObject([
-          {
-            transform: transformId,
+      const { statusCode, body } = await apiClient.put(
+        `internal/transform/transforms/${transformId}?createDataView=true&timeFieldName=@timestamp`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
-        ]);
+          body: generateTransformConfig(transformId),
+          responseType: 'json',
+        }
+      );
 
-        // Clean up data view
-        await apiServices.transform.deleteDataViewByTitle(destinationIndex);
-      }
-    );
+      expect(statusCode).toBe(200);
+
+      // The data view id will be returned as a non-deterministic uuid
+      // so we cannot assert the actual id returned. We'll just assert
+      // that a data view has been created a no errors were returned.
+      expect(body.dataViewsCreated).toHaveLength(1);
+      expect(body.dataViewsErrors).toHaveLength(0);
+      expect(body.errors).toHaveLength(0);
+      expect(body.transformsCreated).toMatchObject([
+        {
+          transform: transformId,
+        },
+      ]);
+
+      // Clean up data view
+      await deleteDataViewByTitle(destinationIndex);
+    });
 
     apiTest(
       'should not allow pivot and latest configs in same transform',
