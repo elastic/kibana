@@ -16,6 +16,7 @@ examples/embeddable_examples @elastic/kibana-presentation
 examples/error_boundary @elastic/appex-sharedux
 examples/eso_model_version_example @elastic/kibana-security
 examples/esql_ast_inspector @elastic/kibana-esql
+examples/esql_ux_example @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
 examples/expressions_explorer @elastic/kibana-visualizations
 examples/feature_control_examples @elastic/kibana-security
@@ -961,6 +962,7 @@ x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kiban
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-streamlang-yaml-editor @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-exploration-team
@@ -1412,6 +1414,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
+/src/platform/test/examples/esql_ux_example @elastic/kibana-esql
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
 /src/platform/test/functional/page_objects/index_editor.ts @elastic/kibana-esql
 /src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
