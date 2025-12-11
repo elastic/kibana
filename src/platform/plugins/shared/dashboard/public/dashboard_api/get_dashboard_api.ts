@@ -21,7 +21,7 @@ import {
 } from './control_group_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { getLastSavedState } from './default_dashboard_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
@@ -121,10 +121,7 @@ export function getDashboardApi({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
-    lastSavedState: {
-      ...DEFAULT_DASHBOARD_STATE,
-      ...readResult?.data,
-    },
+    lastSavedState: getLastSavedState(readResult),
     layoutManager,
     savedObjectId$,
     settingsManager,

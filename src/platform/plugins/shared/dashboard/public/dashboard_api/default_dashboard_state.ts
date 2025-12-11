@@ -17,3 +17,10 @@ export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   title: '',
   tags: [],
 };
+
+export function getLastSavedState(readResult?: DashboardReadResponseBody) {
+  return {
+    ...DEFAULT_DASHBOARD_STATE,
+    ...readResult?.data
+  };
+}
