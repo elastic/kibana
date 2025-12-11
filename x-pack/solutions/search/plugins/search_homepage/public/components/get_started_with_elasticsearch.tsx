@@ -87,9 +87,11 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
           alignItems="flexStart"
         >
           <EuiFlexItem grow={false}>
-            <EuiText size="relative" color='subdued'>{card.description}</EuiText>
+            <EuiText size="relative" color="subdued">
+              {card.description}
+            </EuiText>
           </EuiFlexItem>
-          <EuiSpacer size='s' />
+          <EuiSpacer size="s" />
           <EuiFlexItem>{card.buttonComponent}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiCard>

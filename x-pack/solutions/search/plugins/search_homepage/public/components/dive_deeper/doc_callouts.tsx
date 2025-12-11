@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 export interface DocCalloutsProps {
@@ -35,11 +35,7 @@ export const DocCallouts: React.FC<DocCalloutsProps> = ({
       </EuiText>
       <EuiSpacer size="m" />
       <span>
-        <EuiLink
-          external
-          href={buttonHref}
-          data-test-subj={dataTestSubj}
-        >
+        <EuiLink external href={buttonHref} data-test-subj={dataTestSubj}>
           {buttonLabel}
         </EuiLink>
       </span>

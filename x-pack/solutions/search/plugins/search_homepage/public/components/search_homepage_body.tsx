@@ -17,16 +17,15 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { AlternateSolutions } from './alternate_solutions/alternate_solutions';
 import { DiveDeeperWithElasticsearch } from './dive_deeper/dive_deeper_with_elasticsearch';
-import { Footer } from './footer/footer';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../analytics/constants';
 import { GetStartedWithElasticsearch } from './get_started_with_elasticsearch';
 import { CloudServerlessPromo } from './cloud_serverless_promo/cloud_serverless_promo';
 import { useKibana } from '../hooks/use_kibana';
-import { i18n } from '@kbn/i18n';
 
 export const SearchHomepageBody = () => {
   const usageTracker = useUsageTracker();
@@ -82,7 +81,6 @@ export const SearchHomepageBody = () => {
             <DiveDeeperWithElasticsearch />
           </EuiFlexItem>
         </EuiFlexItem>
-
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>
   );

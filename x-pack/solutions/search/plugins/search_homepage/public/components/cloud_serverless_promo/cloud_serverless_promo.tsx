@@ -15,17 +15,17 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
-  useCurrentEuiBreakpoint
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export const CloudServerlessPromo = () => {
-    const currentBreakpoint = useCurrentEuiBreakpoint();
-  
+  const currentBreakpoint = useCurrentEuiBreakpoint();
+
   return (
-    <EuiFlexGroup gutterSize='xl' direction={currentBreakpoint === 'xl' ? 'row' : 'column'}>
+    <EuiFlexGroup gutterSize="xl" direction={currentBreakpoint === 'xl' ? 'row' : 'column'}>
       <EuiFlexItem>
         <PromoItem promoItem="hosted" />
       </EuiFlexItem>
@@ -86,10 +86,9 @@ export const PromoItem = ({ promoItem }: { promoItem: 'serverless' | 'hosted' })
     alignItems: 'center',
   });
   const { logoPath, logoAltText, promoTitle, description, externalLink } = PROMO_ITEMS[promoItem];
-  
 
   return (
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="l" >
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="l">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center" alignItems="flexStart">
           <EuiFlexItem css={logoContainerStyle} grow={false}>
