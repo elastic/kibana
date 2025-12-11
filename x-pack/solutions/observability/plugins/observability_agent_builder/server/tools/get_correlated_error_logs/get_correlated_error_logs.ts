@@ -11,8 +11,8 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -51,7 +51,10 @@ export function createGetCorrelatedErrorLogsTool({
   core,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
 }): StaticToolRegistration<typeof getCorrelatedErrorLogsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getCorrelatedErrorLogsSchema> = {
