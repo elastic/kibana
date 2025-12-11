@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import type { OnechatPluginStart } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
+import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 interface OnechatNavControlServices {
   onechat: OnechatPluginStart;
@@ -24,6 +25,12 @@ export function OnechatNavControl() {
   const {
     services: { onechat },
   } = useKibana<OnechatNavControlServices>();
+
+  const { show: hasShowPrivilege } = useUiPrivileges();
+
+  if (!hasShowPrivilege) {
+    return null;
+  }
 
   return (
     <EuiToolTip content={buttonLabel}>
