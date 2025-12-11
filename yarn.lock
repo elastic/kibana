@@ -6570,6 +6570,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ux-example-plugin@link:examples/esql_ux_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
