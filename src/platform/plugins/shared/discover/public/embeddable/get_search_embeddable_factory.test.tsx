@@ -145,7 +145,7 @@ describe('saved search embeddable', () => {
     });
 
     it('should render field stats table in AGGREGATED_LEVEL view mode', async () => {
-      const { search, resolveSearch } = createSearchFnMock(0);
+      const { search } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
         partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
@@ -199,7 +199,7 @@ describe('saved search embeddable', () => {
     });
 
     it('should not fetch documents when in field statistics view mode', async () => {
-      const { search, resolveSearch } = createSearchFnMock(1);
+      const { search } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
         partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
