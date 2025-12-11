@@ -4582,6 +4582,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-insights@link:x-pack/platform/packages/shared/ai-insights":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-security-labs-content@link:x-pack/solutions/security/packages/ai-security-labs-content":
   version "0.0.0"
   uid ""
@@ -6574,6 +6578,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ux-example-plugin@link:examples/esql_ux_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
@@ -7590,10 +7598,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
-  version "0.0.0"
-  uid ""
-
 "@kbn/observability-ai-assistant-app-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_app":
   version "0.0.0"
   uid ""
@@ -7735,6 +7739,10 @@
   uid ""
 
 "@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
+  version "0.0.0"
+  uid ""
+
+"@kbn/otel-demo@link:src/platform/packages/shared/kbn-otel-demo":
   version "0.0.0"
   uid ""
 
@@ -8903,6 +8911,10 @@
   uid ""
 
 "@kbn/streamlang-tests@link:x-pack/platform/packages/shared/kbn-streamlang-tests":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streamlang-yaml-editor@link:x-pack/platform/packages/shared/kbn-streamlang-yaml-editor":
   version "0.0.0"
   uid ""
 

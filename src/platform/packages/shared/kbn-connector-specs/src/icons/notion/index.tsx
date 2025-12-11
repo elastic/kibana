@@ -13,6 +13,7 @@ import type { ConnectorIconProps } from '../../types';
 
 import notionIcon from './notion.png';
 
+// eslint-disable-next-line import/no-default-export
 export default (props: ConnectorIconProps) => {
   return <EuiIcon type={notionIcon} {...props} />;
 };
