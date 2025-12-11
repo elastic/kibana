@@ -10,17 +10,24 @@ import { i18n } from '@kbn/i18n';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
+import { useLicense } from '../../hooks/use_license';
 // Constants in the observability_agent_builder plugin:
 // TODO: remove after removing data access plugins' dependencies on observability
 const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
-const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
 export function AlertAiInsight({ alert }: { alert: AlertData }) {
   const {
-    services: { onechat, http, featureFlags },
+    services: {
+      onechat,
+      http,
+      application: { capabilities },
+    },
   } = useKibana();
+
+  const { getLicense } = useLicense();
+  const license = getLicense();
+  const hasAgentBuilderAccess = capabilities?.agentBuilder?.show === true;
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -75,12 +82,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
     });
   };
 
-  const isObservabilityAgentEnabled = featureFlags.getBooleanValue(
-    OBSERVABILITY_AGENT_FEATURE_FLAG,
-    OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
-  );
-
-  if (!onechat || !isObservabilityAgentEnabled) {
+  if (!onechat || !hasAgentBuilderAccess) {
     return null;
   }
 
@@ -92,6 +94,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
       description={i18n.translate('xpack.observability.alertAiInsight.descriptionLabel', {
         defaultMessage: 'Get helpful insights from our Elastic AI Agent.',
       })}
+      license={license}
       content={summary}
       isLoading={isLoading}
       error={error}
