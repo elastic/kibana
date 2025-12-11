@@ -113,12 +113,9 @@ export const swapReferencesRoute =
         },
         router.handleLegacyErrors(
           handleErrors(async (ctx, req, res) => {
-            const savedObjectsContract = (await ctx.core).savedObjects;
-            const types = savedObjectsContract.typeRegistry.getAllTypes();
-            const savedObjectsClient = savedObjectsContract.getClient({
-              // Make sure to search through all the hidden types as well.
-              includedHiddenTypes: types.filter((t) => t.hidden).map((t) => t.name),
-            });
+            const savedObjectsClient = (await ctx.core).savedObjects.client;
+            const [core] = await getStartServices();
+            const types = core.savedObjects.getTypeRegistry().getAllTypes();
             const type = req.body.fromType || DATA_VIEW_SAVED_OBJECT_TYPE;
             const searchId =
               !Array.isArray(req.body.forId) && req.body.forId !== undefined
