@@ -267,6 +267,176 @@ describe('AutomaticImportSetupService', () => {
     });
   });
 
+  describe('deleteDataStream', () => {
+    let mockEsClient: any;
+
+    beforeEach(async () => {
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+      mockEsClient = {} as any;
+    });
+
+    it('should delete data stream and call all required services', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 5 });
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
+
+      expect(mockRemoveTask).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+      });
+      expect(mockDeleteSamples).toHaveBeenCalledWith(
+        'integration-123',
+        'data-stream-456',
+        mockEsClient
+      );
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'integration-123',
+        'data-stream-456',
+        undefined
+      );
+    });
+
+    it('should pass options to saved object service delete', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const options = { force: true };
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'integration-123',
+        'data-stream-456',
+        options
+      );
+    });
+
+    it('should throw error if saved object service is not initialized', async () => {
+      (service as any).savedObjectService = null;
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Saved Objects service not initialized.');
+    });
+
+    it('should handle errors from task manager service', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
+      const mockDeleteSavedObject = jest.fn();
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Task removal failed');
+
+      expect(mockDeleteSamples).not.toHaveBeenCalled();
+      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from samples index service', async () => {
+      const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest.fn();
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Sample deletion failed');
+
+      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from saved object service', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest
+        .fn()
+        .mockRejectedValue(new Error('Saved object deletion failed'));
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Saved object deletion failed');
+    });
+
+    it('should execute operations in correct order', async () => {
+      const executionOrder: string[] = [];
+      const mockDeleteSamples = jest.fn().mockImplementation(async () => {
+        executionOrder.push('deleteSamples');
+        return { deleted: 0 };
+      });
+      const mockRemoveTask = jest.fn().mockImplementation(async () => {
+        executionOrder.push('removeTask');
+      });
+      const mockDeleteSavedObject = jest.fn().mockImplementation(async () => {
+        executionOrder.push('deleteSavedObject');
+      });
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
+
+      expect(executionOrder).toEqual(['removeTask', 'deleteSamples', 'deleteSavedObject']);
+    });
+  });
+
   describe('integration', () => {
     it('should properly initialize and setup the service', async () => {
       const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(

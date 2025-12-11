@@ -14,6 +14,7 @@ pageLoadAssetSize:
   cases: 153204
   charts: 40269
   cloud: 10648
+  cloudConnect: 7932
   cloudDataMigration: 5687
   cloudDefend: 8146
   cloudExperiments: 103984
@@ -171,7 +172,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 30665
   stackAlerts: 31499
-  stackConnectors: 81148
+  stackConnectors: 85421
   streams: 10000
   streamsApp: 23974
   synthetics: 31571

@@ -200,7 +200,6 @@ function buildEuiGridColumn({
       cellActions = dataViewField
         ? buildCellActions(
             dataViewField,
-            isPlainRecord,
             toastNotifications,
             valueToStringConverter,
             onFilter,

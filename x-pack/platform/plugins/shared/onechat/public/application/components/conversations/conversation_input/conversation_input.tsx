@@ -24,7 +24,7 @@ import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { MessageEditor, useMessageEditor } from './message_editor';
 import { InputActions } from './input_actions';
-import { borderRadiusXlStyles } from '../conversation.styles';
+import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
 
@@ -138,8 +138,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     display: flex;
     flex-direction: column;
     height: 100%;
-    /* Aligns editor text with action menus' text */
-    padding-left: ${euiTheme.size.m};
   `;
   // Hide attachments if there's an error from current round or if message has been just sent
   const shouldHideAttachments = Boolean(error) || isSendingMessage;

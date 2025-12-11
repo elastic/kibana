@@ -107,9 +107,9 @@
             "signature": [
               "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
-              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
               "AppCategory",
-              "; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
+              "; app: readonly string[]; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -385,9 +385,9 @@
         "signature": [
           "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
-          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
           "AppCategory",
-          "; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
+          "; app: readonly string[]; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",
@@ -1474,6 +1474,16 @@
           "<",
           "SecuritySubFeatureId",
           "> | undefined; security_workflow_insights?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
+          "> | undefined; graph_visualization?: ",
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",

@@ -15,7 +15,7 @@ import { ConversationHeader } from './conversation_header/conversation_header';
 import { AgentBuilderTourProvider } from '../../context/agent_builder_tour_context';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
-import { conversationBackgroundStyles } from './conversation.styles';
+import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -24,15 +24,14 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     border: none;
     ${conversationBackgroundStyles(euiTheme)}
   `;
-  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
     justify-content: center;
-    height: ${headerHeight};
+    height: ${headerHeight}px;
   `;
   const contentStyles = css`
     width: 100%;
     height: 100%;
-    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
     display: flex;
     justify-content: center;
     align-items: center;

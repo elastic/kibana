@@ -530,4 +530,164 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(searchResult.hits.total).toEqual({ value: 1, relation: 'eq' });
     });
   });
+
+  describe('deleteSamplesForDataStream', () => {
+    it('should delete all samples for a specific data stream', async () => {
+      // Add samples first
+      const params: AddSamplesToDataStreamParams = {
+        integrationId: 'integration-delete-1',
+        dataStreamId: 'data-stream-delete-1',
+        rawSamples: ['Log line 1', 'Log line 2', 'Log line 3'],
+        originalSource: { sourceType: 'file', sourceValue: 'test.txt' },
+        authenticatedUser: mockUser,
+        esClient,
+      };
+
+      await samplesIndexService.addSamplesToDataStream(params);
+      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
+
+      // Verify samples exist
+      const beforeDelete = await samplesIndexService.getSamplesForDataStream(
+        'integration-delete-1',
+        'data-stream-delete-1',
+        esClient
+      );
+      expect(beforeDelete).toHaveLength(3);
+
+      // Delete samples
+      const result = await samplesIndexService.deleteSamplesForDataStream(
+        'integration-delete-1',
+        'data-stream-delete-1',
+        esClient
+      );
+
+      expect(result.deleted).toBe(3);
+
+      // Verify samples are deleted
+      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
+      const afterDelete = await samplesIndexService.getSamplesForDataStream(
+        'integration-delete-1',
+        'data-stream-delete-1',
+        esClient
+      );
+      expect(afterDelete).toHaveLength(0);
+    });
+
+    it('should return zero when no samples exist', async () => {
+      const result = await samplesIndexService.deleteSamplesForDataStream(
+        'non-existent-integration',
+        'non-existent-datastream',
+        esClient
+      );
+
+      expect(result.deleted).toBe(0);
+    });
+
+    it('should only delete samples for the specified data stream', async () => {
+      // Add samples to first data stream
+      const params1: AddSamplesToDataStreamParams = {
+        integrationId: 'integration-isolate-1',
+        dataStreamId: 'data-stream-isolate-1',
+        rawSamples: ['Log 1 for DS1', 'Log 2 for DS1'],
+        originalSource: { sourceType: 'file', sourceValue: 'ds1.txt' },
+        authenticatedUser: mockUser,
+        esClient,
+      };
+
+      // Add samples to second data stream
+      const params2: AddSamplesToDataStreamParams = {
+        integrationId: 'integration-isolate-1',
+        dataStreamId: 'data-stream-isolate-2',
+        rawSamples: ['Log 1 for DS2', 'Log 2 for DS2', 'Log 3 for DS2'],
+        originalSource: { sourceType: 'file', sourceValue: 'ds2.txt' },
+        authenticatedUser: mockUser,
+        esClient,
+      };
+
+      await samplesIndexService.addSamplesToDataStream(params1);
+      await samplesIndexService.addSamplesToDataStream(params2);
+      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
+
+      // Delete samples from first data stream only
+      const result = await samplesIndexService.deleteSamplesForDataStream(
+        'integration-isolate-1',
+        'data-stream-isolate-1',
+        esClient
+      );
+
+      expect(result.deleted).toBe(2);
+
+      // Verify first data stream is empty
+      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
+      const samples1 = await samplesIndexService.getSamplesForDataStream(
+        'integration-isolate-1',
+        'data-stream-isolate-1',
+        esClient
+      );
+      expect(samples1).toHaveLength(0);
+
+      // Verify second data stream still has samples
+      const samples2 = await samplesIndexService.getSamplesForDataStream(
+        'integration-isolate-1',
+        'data-stream-isolate-2',
+        esClient
+      );
+      expect(samples2).toHaveLength(3);
+      expect(samples2).toContain('Log 1 for DS2');
+      expect(samples2).toContain('Log 2 for DS2');
+      expect(samples2).toContain('Log 3 for DS2');
+    });
+
+    it('should isolate samples between different integrations', async () => {
+      // Add samples to first integration
+      const params1: AddSamplesToDataStreamParams = {
+        integrationId: 'integration-iso-1',
+        dataStreamId: 'data-stream-iso',
+        rawSamples: ['Log 1 for Int1', 'Log 2 for Int1'],
+        originalSource: { sourceType: 'file', sourceValue: 'int1.txt' },
+        authenticatedUser: mockUser,
+        esClient,
+      };
+
+      // Add samples to second integration with same data stream ID
+      const params2: AddSamplesToDataStreamParams = {
+        integrationId: 'integration-iso-2',
+        dataStreamId: 'data-stream-iso',
+        rawSamples: ['Log 1 for Int2', 'Log 2 for Int2', 'Log 3 for Int2'],
+        originalSource: { sourceType: 'file', sourceValue: 'int2.txt' },
+        authenticatedUser: mockUser,
+        esClient,
+      };
+
+      await samplesIndexService.addSamplesToDataStream(params1);
+      await samplesIndexService.addSamplesToDataStream(params2);
+      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
+
+      // Delete samples from first integration only
+      const result = await samplesIndexService.deleteSamplesForDataStream(
+        'integration-iso-1',
+        'data-stream-iso',
+        esClient
+      );
+
+      expect(result.deleted).toBe(2);
+
+      // Verify first integration's samples are deleted
+      await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
+      const samples1 = await samplesIndexService.getSamplesForDataStream(
+        'integration-iso-1',
+        'data-stream-iso',
+        esClient
+      );
+      expect(samples1).toHaveLength(0);
+
+      // Verify second integration's samples still exist
+      const samples2 = await samplesIndexService.getSamplesForDataStream(
+        'integration-iso-2',
+        'data-stream-iso',
+        esClient
+      );
+      expect(samples2).toHaveLength(3);
+    });
+  });
 });

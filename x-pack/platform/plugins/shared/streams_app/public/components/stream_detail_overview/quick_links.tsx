@@ -21,7 +21,7 @@ const EMPTY_ATTACHMENT_LIST: Attachment[] = [];
 export function QuickLinks({ definition }: { definition: Streams.ingest.all.GetResponse }) {
   const router = useStreamsAppRouter();
   const attachmentsFetch = useAttachmentsFetch({
-    name: definition.stream.name,
+    streamName: definition.stream.name,
   });
 
   if (definition && !attachmentsFetch.loading && attachmentsFetch.value?.attachments.length === 0) {

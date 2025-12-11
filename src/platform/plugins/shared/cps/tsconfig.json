@@ -15,7 +15,6 @@
     "@kbn/cps-utils",
     "@kbn/es-query",
     "@kbn/i18n-react",
-    "@kbn/i18n"
   ],
   "exclude": [
     "target/**/*",

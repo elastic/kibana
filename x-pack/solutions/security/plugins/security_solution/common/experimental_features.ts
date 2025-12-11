@@ -207,6 +207,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
    */
   agentBuilderEnabled: false,
+  /**
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
+   */
+  linuxDnsEvents: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

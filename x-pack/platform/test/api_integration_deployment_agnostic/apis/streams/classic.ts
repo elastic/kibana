@@ -798,7 +798,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 streamName: ORPHANED_STREAM_NAME,
               },
               query: {
-                attachmentType: 'dashboard',
+                attachmentTypes: ['dashboard'],
               },
             },
           }
@@ -838,7 +838,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 streamName: 'non-existing-stream',
               },
               query: {
-                attachmentType: 'dashboard',
+                attachmentTypes: ['dashboard'],
               },
             },
           }

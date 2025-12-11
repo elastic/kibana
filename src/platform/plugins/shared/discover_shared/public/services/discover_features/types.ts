@@ -20,6 +20,7 @@ import type {
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type React from 'react';
 import type { FeaturesRegistry } from '../../../common';
 
 /**

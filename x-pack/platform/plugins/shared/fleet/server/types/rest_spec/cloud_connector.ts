@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -19,6 +21,14 @@ export const CreateCloudConnectorRequestSchema = {
       {
         meta: { description: 'The cloud provider type: aws, azure, or gcp.' },
       }
+    ),
+    accountType: schema.maybe(
+      schema.oneOf([schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)], {
+        meta: {
+          description:
+            'The account type: single-account (single account/subscription) or organization-account (organization-wide).',
+        },
+      })
     ),
     vars: schema.recordOf(
       schema.string({ minLength: 1, maxLength: 100 }),
@@ -52,6 +62,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
@@ -86,6 +97,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       name: schema.string(),
       namespace: schema.maybe(schema.string()),
       cloudProvider: schema.string(),
+      accountType: schema.maybe(schema.string()),
       vars: CloudConnectorResponseVarsSchema,
       packagePolicyCount: schema.number(),
       created_at: schema.string(),
@@ -108,6 +120,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
@@ -148,6 +161,14 @@ export const UpdateCloudConnectorRequestSchema = {
         meta: { description: 'The name of the cloud connector.' },
       })
     ),
+    accountType: schema.maybe(
+      schema.oneOf([schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)], {
+        meta: {
+          description:
+            'The account type: single-account (single account/subscription) or organization-account (organization-wide).',
+        },
+      })
+    ),
     vars: schema.maybe(
       schema.recordOf(
         schema.string({ minLength: 1, maxLength: 100 }),
@@ -178,6 +199,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
