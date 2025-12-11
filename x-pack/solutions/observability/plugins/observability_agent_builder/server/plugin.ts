@@ -46,8 +46,8 @@ export class ObservabilityAgentBuilderPlugin
       ObservabilityAgentBuilderPluginStartDependencies,
       ObservabilityAgentBuilderPluginStart
     >,
-    plugins: ObservabilityAgentPluginSetupDependencies
-  ): ObservabilityAgentPluginSetup {
+    plugins: ObservabilityAgentBuilderPluginSetupDependencies
+  ): ObservabilityAgentBuilderPluginSetup {
     registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
       this.logger.error(`Error registering observability agent: ${error}`);
     });
@@ -65,7 +65,7 @@ export class ObservabilityAgentBuilderPlugin
       this.logger.error(`Error registering observability attachments: ${error}`);
     });
 
-    registerServerRoutes({ core, logger: this.logger, dataRegistry: this.dataRegistry });
+    registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
 
     return {
       registerDataProvider: (id, provider) => this.dataRegistry.registerDataProvider(id, provider),

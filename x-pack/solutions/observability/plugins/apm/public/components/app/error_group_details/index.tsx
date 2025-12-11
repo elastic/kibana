@@ -85,7 +85,7 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
   const { onPageReady } = usePerformanceContext();
-  const { observabilityAIAssistant, onechat, core } = useApmPluginContext();
+  const { observabilityAIAssistant, onechat } = useApmPluginContext();
 
   const {
     path: { groupId },

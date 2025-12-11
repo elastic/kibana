@@ -58,7 +58,6 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
   const [context, setContext] = useState('');
 
   const license = useLicenseContext();
-  const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
 
   const errorId = error.error.id;
   const serviceName = error.service.name;
