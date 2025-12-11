@@ -23,7 +23,6 @@ import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/component
 import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 import { PreviewLink } from '../../../shared/components/preview_link';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -80,8 +79,6 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
-
-  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -168,25 +165,19 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           const ruleName = row[ALERT_RULE_NAME] as string;
           const ruleId = row['kibana.alert.rule.uuid'] as string;
 
-          const cellContent = canReadRules ? (
+          const cellContent = (
             <PreviewLink
-                field={ALERT_RULE_NAME}
-                value={ruleName}
-                scopeId={scopeId}
-                ruleId={ruleId}
-                data-test-subj={`${dataTestSubj}RulePreview`}
-              >
-                <span>{ruleName}</span>
-              </PreviewLink>
-          ) : (
-            <span>{ruleName}</span>
-          )
-
-          return (
-            <CellTooltipWrapper tooltip={ruleName}>
-              {cellContent}
-            </CellTooltipWrapper>
+              field={ALERT_RULE_NAME}
+              value={ruleName}
+              scopeId={scopeId}
+              ruleId={ruleId}
+              data-test-subj={`${dataTestSubj}RulePreview`}
+            >
+              <span>{ruleName}</span>
+            </PreviewLink>
           );
+
+          return <CellTooltipWrapper tooltip={ruleName}>{cellContent}</CellTooltipWrapper>;
         },
       },
       {
@@ -224,7 +215,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [scopeId, dataTestSubj, canReadRules]
+    [scopeId, dataTestSubj]
   );
 
   return (
