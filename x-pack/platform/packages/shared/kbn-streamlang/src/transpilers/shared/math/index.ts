@@ -48,6 +48,11 @@ export {
   getMathFunctionsByCategory,
   doesFunctionReturnBoolean,
   getMathParameterNames,
+  getRequiredArgCount,
+  getTotalArgCount,
+  getFunctionsWithArity,
+  getVariableArityFunctions,
+  getBinaryComparisonFunctions,
 } from './language_definition';
 export type {
   MathFunctionDefinition,
@@ -58,3 +63,12 @@ export type {
 // Documentation - generated from language_definition
 export { getMathExpressionLanguageDocSections } from './language_docs';
 export type { MathLanguageDocumentationSections } from './language_docs';
+
+// TinyMath utilities - type guards and re-exports
+export {
+  parseMathExpression,
+  isTinymathVariable,
+  isTinymathFunction,
+  isTinymathLiteral,
+} from './tinymath_utils';
+export type { TinymathAST, TinymathFunction, TinymathVariable } from './tinymath_utils';

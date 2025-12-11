@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-/**
- * Painless field access utilities for `field_access_pattern: 'flexible'`.
- * Uses flat keys (e.g., 'a.b.c') for both reading and writing.
- */
+// Painless field access utilities for `field_access_pattern: 'flexible'`.
+// Which uses flat keys (e.g., 'a.b.c') for both reading and writing.
 
 /**
- * Accessor for READING field values using flexible dot-notation.
+ * Accessor for reading field values using flexible dot-notation.
  *
  * @example
  * painlessFieldAccessor('order.total') -> "$('order.total', null)"
@@ -21,7 +19,7 @@ export function painlessFieldAccessor(field: string, defaultValue: string = 'nul
 }
 
 /**
- * Accessor for WRITING field values using flat key notation.
+ * Accessor for writing field values using flat key notation.
  * Uses single bracket with the full dotted path to create flat keys,
  * consistent with how $() reads them.
  *

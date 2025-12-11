@@ -93,15 +93,15 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
-// Manual Ingest Pipeline (escape hatch)
-export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
-  ManualIngestPipelineProcessor,
-  { where: 'if' }
->;
-
 // Math (uses script processor internally)
 export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
   MathProcessor,
+  { where: 'if' }
+>;
+
+// Manual Ingest Pipeline (escape hatch)
+export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
+  ManualIngestPipelineProcessor,
   { where: 'if' }
 >;
 

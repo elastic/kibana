@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Initialize Peggy require hook for .peggy grammar files.
+// Needed for Math processor related tests where the math expression language is based on .peggy grammar files.
 import '../../../peggy_loader';
 
 import { createPlaywrightConfig } from '@kbn/scout';

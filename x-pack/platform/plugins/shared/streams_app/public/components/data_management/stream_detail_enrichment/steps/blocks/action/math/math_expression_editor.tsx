@@ -28,7 +28,7 @@ import { validateMathExpression, getMathExpressionLanguageDocSections } from '@k
 import type { ProcessorFormState } from '../../../../types';
 import { useEnrichmentFieldSuggestions } from '../../../../../../../hooks/use_field_suggestions';
 // Import to register the math language with Monaco
-import { MATH_LANGUAGE_ID } from './math_expression_tokenization';
+import { STREAMS_MATH_LANGUAGE_ID } from './math_expression_tokenization';
 import {
   registerMathCompletionProvider,
   registerMathSignatureHelpProvider,
@@ -192,7 +192,7 @@ export const MathExpressionEditor: React.FC = () => {
 
         {/* Code Editor */}
         <CodeEditor
-          languageId={MATH_LANGUAGE_ID}
+          languageId={STREAMS_MATH_LANGUAGE_ID}
           value={field.value ?? ''}
           onChange={field.onChange}
           height="100px"

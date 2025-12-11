@@ -7,10 +7,10 @@
 
 import { monaco } from '@kbn/monaco';
 
-export const MATH_LANGUAGE_ID = 'streams_math';
+export const STREAMS_MATH_LANGUAGE_ID = 'streams_math';
 
 // Register the language
-monaco.languages.register({ id: MATH_LANGUAGE_ID });
+monaco.languages.register({ id: STREAMS_MATH_LANGUAGE_ID });
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   wordPattern: /[^()'"\s,]+/g,
@@ -52,7 +52,7 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
 };
 
 // Set up the language when Monaco loads it
-monaco.languages.onLanguage(MATH_LANGUAGE_ID, () => {
-  monaco.languages.setMonarchTokensProvider(MATH_LANGUAGE_ID, lexerRules);
-  monaco.languages.setLanguageConfiguration(MATH_LANGUAGE_ID, languageConfiguration);
+monaco.languages.onLanguage(STREAMS_MATH_LANGUAGE_ID, () => {
+  monaco.languages.setMonarchTokensProvider(STREAMS_MATH_LANGUAGE_ID, lexerRules);
+  monaco.languages.setLanguageConfiguration(STREAMS_MATH_LANGUAGE_ID, languageConfiguration);
 });

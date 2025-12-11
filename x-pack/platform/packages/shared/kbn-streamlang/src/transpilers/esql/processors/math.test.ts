@@ -212,10 +212,7 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  // ============================================
-  // Stage 2: Math Functions
-  // ============================================
-
+  // Math Functions
   describe('single-argument functions', () => {
     it('should transpile abs(): "abs(price - 10)"', () => {
       const processor: MathProcessor = {
@@ -629,10 +626,7 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  // ============================================
-  // Stage 2: where condition handling
-  // ============================================
-
+  // Where condition handling
   describe('where condition', () => {
     it('should wrap with CASE WHEN for where condition: eq filter', () => {
       const processor: MathProcessor = {
@@ -687,10 +681,7 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  // ============================================
-  // Stage 2: ignore_missing handling
-  // ============================================
-
+  // ignore_missing handling
   describe('ignore_missing handling', () => {
     it('should generate null checks for single field when ignore_missing is true', () => {
       const processor: MathProcessor = {
@@ -776,10 +767,7 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  // ============================================
-  // Stage 2: Combined where + ignore_missing
-  // ============================================
-
+  // Combined where + ignore_missing
   describe('combined where and ignore_missing', () => {
     it('should combine where and ignore_missing conditions with AND', () => {
       const processor: MathProcessor = {
@@ -815,10 +803,7 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  // ============================================
-  // Stage 2: Validation errors
-  // ============================================
-
+  // Validation errors
   describe('validation errors', () => {
     it('should throw error for rejected function: mean()', () => {
       const processor: MathProcessor = {

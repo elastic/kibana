@@ -11,8 +11,6 @@ import type {
   BinaryExpressionArithmeticOperator,
   BinaryExpressionComparisonOperator,
 } from '@kbn/esql-ast/src/types';
-import { parse } from '@kbn/tinymath';
-import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
 import type { MathProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import {
@@ -20,6 +18,10 @@ import {
   BINARY_ARITHMETIC_OPERATORS,
   validateMathExpression,
   extractFieldsFromMathExpression,
+  parseMathExpression,
+  isTinymathVariable,
+  isTinymathFunction,
+  type TinymathAST,
 } from '../../shared/math';
 
 /**
@@ -30,20 +32,6 @@ import {
 type ESQLBinaryOperator =
   | BinaryExpressionArithmeticOperator
   | Exclude<BinaryExpressionComparisonOperator, '=~'>;
-
-/**
- * Checks if a TinyMath node is a variable (field reference)
- */
-function isTinymathVariable(node: TinymathAST): node is TinymathVariable {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'variable';
-}
-
-/**
- * Checks if a TinyMath node is a function
- */
-function isTinymathFunction(node: TinymathAST): node is TinymathFunction {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'function';
-}
 
 /**
  * Converts a TinyMath AST node to an ES|QL AST item
@@ -157,10 +145,10 @@ function buildNotNullCheck(fields: string[]): ESQLSingleAstItem | null {
  * Generates: EVAL <to> = <expression>
  *
  * With `where` condition:
- *   EVAL <to> = CASE WHEN <where> THEN <expression> ELSE <to> END
+ *   EVAL <to> = CASE(<where>, <expression>, <to>)
  *
  * With `ignore_missing: true`:
- *   EVAL <to> = CASE WHEN field1 IS NOT NULL AND field2 IS NOT NULL THEN <expression> ELSE <to> END
+ *   EVAL <to> = CASE(field1 IS NOT NULL AND field2 IS NOT NULL, <expression>, <to>)
  *
  * @example
  *   { action: 'math', expression: 'price * quantity', to: 'total' }
@@ -168,7 +156,7 @@ function buildNotNullCheck(fields: string[]): ESQLSingleAstItem | null {
  *
  * @example
  *   { action: 'math', expression: 'abs(price - 10)', to: 'diff', where: { field: 'active', eq: true } }
- *   -> EVAL diff = CASE WHEN active == true THEN ABS(price - 10) ELSE diff END
+ *   -> EVAL diff = CASE(active == true, ABS(price - 10), diff)
  */
 export function convertMathProcessorToESQL(processor: MathProcessor): ESQLAstCommand[] {
   // Validate the expression before processing
@@ -178,7 +166,7 @@ export function convertMathProcessorToESQL(processor: MathProcessor): ESQLAstCom
   }
 
   // Parse the TinyMath expression into an AST
-  const ast = parse(processor.expression);
+  const ast = parseMathExpression(processor.expression);
 
   // Convert the TinyMath AST to ES|QL AST
   const mathExpression = convertTinymathToESQL(ast);
@@ -206,7 +194,7 @@ export function convertMathProcessorToESQL(processor: MathProcessor): ESQLAstCom
     conditionExpression = whereExpression || ignoreMissingExpression;
   }
 
-  // If there's a condition, wrap in CASE WHEN ... THEN ... ELSE <to> END
+  // If there's a condition, wrap in CASE(condition, expression, default)
   const assignment = conditionExpression
     ? Builder.expression.func.call('CASE', [
         conditionExpression,

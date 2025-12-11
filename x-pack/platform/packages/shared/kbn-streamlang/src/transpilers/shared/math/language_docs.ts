@@ -19,10 +19,7 @@ import {
  * It contains only non-language elements like intro text and section labels.
  */
 
-// ============================================
-// Intro text (not part of language definition)
-// ============================================
-
+// Intro text for documentation
 export const mathExpressionLanguageIntro = i18n.translate('xpack.streams.math.docsIntro', {
   defaultMessage: `## Math Expressions
 
@@ -64,10 +61,6 @@ Fields are referenced directly by name:
 `,
 });
 
-// ============================================
-// Types for documentation output
-// ============================================
-
 export interface MathLanguageDocumentationSections {
   groups: Array<{
     label: string;
@@ -80,10 +73,7 @@ export interface MathLanguageDocumentationSections {
   initialSection: string;
 }
 
-// ============================================
 // Section labels
-// ============================================
-
 const sectionLabels = {
   math: i18n.translate('xpack.streams.math.docs.sectionFunctions', {
     defaultMessage: 'Functions',
@@ -102,10 +92,7 @@ const sectionLabels = {
   }),
 };
 
-// ============================================
 // Helper functions
-// ============================================
-
 /**
  * Convert a function definition to markdown documentation
  */
@@ -125,10 +112,6 @@ function formatFunctionToMarkdown(func: MathFunctionDefinition): string {
 function getFunctionsByDocSection(section: string): MathFunctionDefinition[] {
   return ALL_MATH_FUNCTIONS.filter((f) => CATEGORY_TO_DOC_SECTION[f.category] === section);
 }
-
-// ============================================
-// Public API
-// ============================================
 
 /**
  * Get documentation sections formatted for LanguageDocumentationPopover.

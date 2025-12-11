@@ -15,6 +15,7 @@ import {
   getRejectionReason,
   validateArity,
 } from './function_registry';
+import { getFunctionsWithArity, getBinaryComparisonFunctions } from './language_definition';
 
 describe('FUNCTION_REGISTRY', () => {
   describe('structure', () => {
@@ -43,7 +44,8 @@ describe('FUNCTION_REGISTRY', () => {
   });
 
   describe('single-arg functions', () => {
-    const singleArgFuncs = ['abs', 'sqrt', 'cbrt', 'ceil', 'floor', 'exp', 'sin', 'cos', 'tan'];
+    // Derive from language_definition to keep in sync
+    const singleArgFuncs = getFunctionsWithArity(1);
 
     singleArgFuncs.forEach((func) => {
       it(`should define ${func} with arity 1`, () => {
@@ -76,7 +78,9 @@ describe('FUNCTION_REGISTRY', () => {
   });
 
   describe('binary operators', () => {
-    const binaryOps = ['mod', 'lt', 'gt', 'eq', 'neq', 'lte', 'gte'];
+    // mod is special: arithmetic function but rendered as % operator
+    // Comparison functions are derived from language_definition
+    const binaryOps = ['mod', ...getBinaryComparisonFunctions()];
 
     binaryOps.forEach((op) => {
       it(`should define ${op} as binary operator`, () => {

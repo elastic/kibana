@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { parse } from '@kbn/tinymath';
-import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
 import {
   FUNCTION_REGISTRY,
   BINARY_ARITHMETIC_OPERATORS,
   REJECTED_FUNCTIONS,
   validateArity,
 } from './function_registry';
+import {
+  parseMathExpression,
+  isTinymathVariable,
+  isTinymathFunction,
+  type TinymathAST,
+} from './tinymath_utils';
 
 /**
  * Result of validating a math expression
@@ -22,20 +26,6 @@ export interface ValidationResult {
   valid: boolean;
   /** List of validation errors (empty if valid) */
   errors: string[];
-}
-
-/**
- * Checks if a TinyMath node is a variable (field reference)
- */
-function isTinymathVariable(node: TinymathAST): node is TinymathVariable {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'variable';
-}
-
-/**
- * Checks if a TinyMath node is a function
- */
-function isTinymathFunction(node: TinymathAST): node is TinymathFunction {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'function';
 }
 
 /**
@@ -129,7 +119,7 @@ export function validateMathExpression(expression: string): ValidationResult {
   // Parse the expression
   let ast: TinymathAST;
   try {
-    ast = parse(expression);
+    ast = parseMathExpression(expression);
   } catch (parseError) {
     const message = parseError instanceof Error ? parseError.message : String(parseError);
     return {

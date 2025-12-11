@@ -19,10 +19,6 @@ import { i18n } from '@kbn/i18n';
  * - Type inference
  */
 
-// ============================================
-// Types
-// ============================================
-
 export type MathFunctionCategory =
   | 'arithmetic'
   | 'rounding'
@@ -66,10 +62,6 @@ export interface OperatorDefinition {
   isComparison?: boolean;
 }
 
-// ============================================
-// Helper to derive parameter names from args
-// ============================================
-
 /**
  * Get parameter names from function args (for signature help)
  * Optional args are suffixed with '?'
@@ -78,10 +70,7 @@ export function getMathParameterNames(func: MathFunctionDefinition): string[] {
   return func.args.map((arg) => (arg.optional ? `${arg.name}?` : arg.name));
 }
 
-// ============================================
 // Arithmetic Functions
-// ============================================
-
 export const ARITHMETIC_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'abs',
@@ -175,10 +164,7 @@ export const ARITHMETIC_FUNCTIONS: MathFunctionDefinition[] = [
   },
 ];
 
-// ============================================
 // Rounding Functions
-// ============================================
-
 export const ROUNDING_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'ceil',
@@ -215,10 +201,7 @@ export const ROUNDING_FUNCTIONS: MathFunctionDefinition[] = [
   },
 ];
 
-// ============================================
 // Trigonometric Functions
-// ============================================
-
 export const TRIGONOMETRY_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'sin',
@@ -326,10 +309,7 @@ export const TRIGONOMETRY_FUNCTIONS: MathFunctionDefinition[] = [
   },
 ];
 
-// ============================================
 // Logarithmic Functions
-// ============================================
-
 export const LOGARITHMIC_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'log',
@@ -356,10 +336,7 @@ export const LOGARITHMIC_FUNCTIONS: MathFunctionDefinition[] = [
   },
 ];
 
-// ============================================
 // Comparison Functions (return boolean)
-// ============================================
-
 export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'eq',
@@ -453,10 +430,7 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   },
 ];
 
-// ============================================
 // Constants
-// ============================================
-
 export const CONSTANT_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'pi',
@@ -493,9 +467,7 @@ export const CONSTANT_FUNCTIONS: MathFunctionDefinition[] = [
   },
 ];
 
-// ============================================
 // Operators
-// ============================================
 
 export const ARITHMETIC_OPERATORS: OperatorDefinition[] = [
   { symbol: '+', description: 'Addition' },
@@ -513,10 +485,6 @@ export const COMPARISON_OPERATORS: OperatorDefinition[] = [
   { symbol: '==', description: 'Equal', isComparison: true },
   // Note: != is NOT supported. Use neq(a, b) function instead.
 ];
-
-// ============================================
-// Combined Lists (derived from above)
-// ============================================
 
 /**
  * All math functions - the complete list
@@ -553,10 +521,6 @@ export const ALL_FUNCTION_NAMES = new Set(ALL_MATH_FUNCTIONS.map((f) => f.name))
  */
 export const CONSTANT_FUNCTION_NAMES = new Set(CONSTANT_FUNCTIONS.map((f) => f.name));
 
-// ============================================
-// Lookup helpers
-// ============================================
-
 const FUNCTION_MAP = new Map(ALL_MATH_FUNCTIONS.map((f) => [f.name, f]));
 
 /**
@@ -582,9 +546,44 @@ export function doesFunctionReturnBoolean(name: string): boolean {
   return BOOLEAN_RETURNING_MATH_FUNCTIONS.has(name);
 }
 
-// ============================================
-// Category to doc section mapping
-// ============================================
+/**
+ * Get required argument count for a function
+ */
+export function getRequiredArgCount(func: MathFunctionDefinition): number {
+  return func.args.filter((arg) => !arg.optional).length;
+}
+
+/**
+ * Get total argument count (including optional) for a function
+ */
+export function getTotalArgCount(func: MathFunctionDefinition): number {
+  return func.args.length;
+}
+
+/**
+ * Get functions with exactly N required arguments (excluding constants)
+ */
+export function getFunctionsWithArity(arity: number): string[] {
+  return ALL_MATH_FUNCTIONS.filter(
+    (f) => !f.isConstant && getRequiredArgCount(f) === arity && getTotalArgCount(f) === arity
+  ).map((f) => f.name);
+}
+
+/**
+ * Get functions with variable arity (have optional arguments)
+ */
+export function getVariableArityFunctions(): string[] {
+  return ALL_MATH_FUNCTIONS.filter((f) => !f.isConstant && f.args.some((arg) => arg.optional)).map(
+    (f) => f.name
+  );
+}
+
+/**
+ * Get binary comparison function names (eq, neq, lt, gt, lte, gte)
+ */
+export function getBinaryComparisonFunctions(): string[] {
+  return COMPARISON_FUNCTIONS.map((f) => f.name);
+}
 
 export const CATEGORY_TO_DOC_SECTION: Record<MathFunctionCategory, string> = {
   arithmetic: 'math',

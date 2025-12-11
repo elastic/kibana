@@ -12,11 +12,9 @@ import {
   getMathParameterNames,
 } from '@kbn/streamlang';
 import type { Suggestion } from '../../../../../shared/autocomplete_selector';
-import { MATH_LANGUAGE_ID } from './math_expression_tokenization';
+import { STREAMS_MATH_LANGUAGE_ID } from './math_expression_tokenization';
 
-// ============================================
 // Completion items creation
-// ============================================
 
 /**
  * Creates completion items for math functions
@@ -69,9 +67,7 @@ function createFieldCompletionItems(
   }));
 }
 
-// ============================================
 // Completion provider
-// ============================================
 
 /**
  * Registers the completion provider for the math expression language.
@@ -81,7 +77,7 @@ function createFieldCompletionItems(
 export function registerMathCompletionProvider(
   fieldSuggestions: Suggestion[] = []
 ): monaco.IDisposable {
-  return monaco.languages.registerCompletionItemProvider(MATH_LANGUAGE_ID, {
+  return monaco.languages.registerCompletionItemProvider(STREAMS_MATH_LANGUAGE_ID, {
     triggerCharacters: ['(', ' ', '.'],
 
     provideCompletionItems(
@@ -123,9 +119,7 @@ export function registerMathCompletionProvider(
   });
 }
 
-// ============================================
 // Signature help provider
-// ============================================
 
 /**
  * Finds the function name at or before the given position in the text.
@@ -174,7 +168,7 @@ function findFunctionContext(
  * Returns a disposable that should be called on component unmount.
  */
 export function registerMathSignatureHelpProvider(): monaco.IDisposable {
-  return monaco.languages.registerSignatureHelpProvider(MATH_LANGUAGE_ID, {
+  return monaco.languages.registerSignatureHelpProvider(STREAMS_MATH_LANGUAGE_ID, {
     signatureHelpTriggerCharacters: ['(', ','],
     signatureHelpRetriggerCharacters: [','],
 

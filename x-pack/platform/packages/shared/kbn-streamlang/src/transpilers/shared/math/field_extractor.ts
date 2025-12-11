@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import { parse } from '@kbn/tinymath';
-import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
-
-/**
- * Checks if a TinyMath node is a variable (field reference)
- */
-function isTinymathVariable(node: TinymathAST): node is TinymathVariable {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'variable';
-}
-
-/**
- * Checks if a TinyMath node is a function
- */
-function isTinymathFunction(node: TinymathAST): node is TinymathFunction {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'function';
-}
+import {
+  parseMathExpression,
+  isTinymathVariable,
+  isTinymathFunction,
+  type TinymathAST,
+} from './tinymath_utils';
 
 /**
  * Recursively extracts all field references from a TinyMath AST node.
@@ -70,7 +60,7 @@ import { BOOLEAN_RETURNING_MATH_FUNCTIONS } from './language_definition';
 export function inferMathExpressionReturnType(expression: string): 'number' | 'boolean' {
   let ast: TinymathAST;
   try {
-    ast = parse(expression);
+    ast = parseMathExpression(expression);
   } catch {
     // If parsing fails, default to number
     return 'number';
@@ -115,7 +105,7 @@ export function extractFieldsFromMathExpression(expression: string): string[] {
   // Parse the expression
   let ast: TinymathAST;
   try {
-    ast = parse(expression);
+    ast = parseMathExpression(expression);
   } catch {
     // If parsing fails, return empty array
     // Validation errors will be caught by the validator

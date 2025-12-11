@@ -51,9 +51,7 @@ export interface FunctionDefinition {
  * in the transpilers as they are the core TinyMath operators.
  */
 export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
-  // ============================================
   // Single-argument math functions
-  // ============================================
   abs: { esql: 'ABS', painless: 'Math.abs', arity: 1 },
   sqrt: { esql: 'SQRT', painless: 'Math.sqrt', arity: 1 },
   cbrt: { esql: 'CBRT', painless: 'Math.cbrt', arity: 1 },
@@ -62,9 +60,7 @@ export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   exp: { esql: 'EXP', painless: 'Math.exp', arity: 1 },
   signum: { esql: 'SIGNUM', painless: 'Math.signum', arity: 1 },
 
-  // ============================================
   // Trigonometric functions
-  // ============================================
   sin: { esql: 'SIN', painless: 'Math.sin', arity: 1 },
   cos: { esql: 'COS', painless: 'Math.cos', arity: 1 },
   tan: { esql: 'TAN', painless: 'Math.tan', arity: 1 },
@@ -80,26 +76,18 @@ export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   cosh: { esql: 'COSH', painless: 'Math.cosh', arity: 1 },
   tanh: { esql: 'TANH', painless: 'Math.tanh', arity: 1 },
 
-  // ============================================
   // Logarithmic functions
-  // ============================================
   log: { esql: 'LOG', painless: 'Math.log', arity: [1, 2], esqlArgOrder: 'swap' },
   log_ten: { esql: 'LOG10', painless: 'Math.log10', arity: 1 },
 
-  // ============================================
   // Variable-arity functions
-  // ============================================
   round: { esql: 'ROUND', painless: 'Math.round', arity: [1, 2] },
 
-  // ============================================
   // Two-argument functions
-  // ============================================
   pow: { esql: 'POW', painless: 'Math.pow', arity: 2 },
   hypot: { esql: 'HYPOT', painless: 'Math.hypot', arity: 2 }, // sqrt(x^2 + y^2)
 
-  // ============================================
   // Binary operators (rendered as infix: a op b)
-  // ============================================
   mod: { esql: '%', painless: '%', arity: 2, isBinaryOp: true },
 
   // Comparison operators (return boolean)
@@ -112,9 +100,7 @@ export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   lte: { esql: '<=', painless: '<=', arity: 2, isBinaryOp: true },
   gte: { esql: '>=', painless: '>=', arity: 2, isBinaryOp: true },
 
-  // ============================================
   // Constants (0-arity functions)
-  // ============================================
   pi: { esql: 'PI', painless: 'Math.PI', arity: 0, isConstant: true },
   e: { esql: 'E', painless: 'Math.E', arity: 0, isConstant: true },
   tau: { esql: 'TAU', painless: '(2 * Math.PI)', arity: 0, isConstant: true },

@@ -6,8 +6,6 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { parse } from '@kbn/tinymath';
-import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
 import type { MathProcessor } from '../../../../types/processors';
 import { painlessFieldAccessor, painlessFieldAssignment } from '../../../../types/utils';
 import {
@@ -15,21 +13,11 @@ import {
   BINARY_ARITHMETIC_OPERATORS,
   validateMathExpression,
   extractFieldsFromMathExpression,
+  parseMathExpression,
+  isTinymathVariable,
+  isTinymathFunction,
+  type TinymathAST,
 } from '../../shared/math';
-
-/**
- * Checks if a TinyMath node is a variable (field reference)
- */
-function isTinymathVariable(node: TinymathAST): node is TinymathVariable {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'variable';
-}
-
-/**
- * Checks if a TinyMath node is a function
- */
-function isTinymathFunction(node: TinymathAST): node is TinymathFunction {
-  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'function';
-}
 
 /**
  * Converts a TinyMath AST node to Painless expression string.
@@ -142,7 +130,7 @@ export function processMathProcessor(
     source = `throw new IllegalArgumentException("${errorMessage}");`;
   } else {
     // Parse and convert to Painless
-    const ast = parse(processor.expression);
+    const ast = parseMathExpression(processor.expression);
     const painlessExpression = convertTinymathToPainless(ast);
 
     // Build the assignment statement using flat key notation
