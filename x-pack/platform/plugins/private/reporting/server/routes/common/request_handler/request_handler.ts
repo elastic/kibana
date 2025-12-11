@@ -123,8 +123,6 @@ export abstract class RequestHandler<
       });
     }
 
-    console.log('jobParams:', jobParams);
-
     try {
       validateJobParams(jobParams);
     } catch (err) {
