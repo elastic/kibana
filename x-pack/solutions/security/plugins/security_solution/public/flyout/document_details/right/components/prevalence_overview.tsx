@@ -40,13 +40,13 @@ const CUSTOM_TIME_RANGE_LABEL = (
 );
 const DEFAULT_TIME_RANGE_TOOLTIP = (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.custom-time-range-applied-tooltip"
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.tooltipLabel"
     defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the last 30 days. To choose a custom time range, click the section title, then use the date time picker in the left panel."
   />
 );
 const CUSTOM_TIME_RANGE_TOOLTIP = (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.custom-time-range-applied-tooltip"
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.tooltipLabel"
     defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the time range that you chose. To choose a different custom time range, click the section title, then use the date time picker in the left panel."
   />
 );

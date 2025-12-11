@@ -957,6 +957,70 @@
           "The hex color string for the severity, corresponding to the current theme."
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.validateCustomFilterFields",
+        "type": "Function",
+        "tags": [],
+        "label": "validateCustomFilterFields",
+        "description": [
+          "\nValidates that fields in a KQL filter are not in the disallowlist for the given result type."
+        ],
+        "signature": [
+          "(kqlQueryString: string, resultType: ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.MlAnomalyResultType",
+            "text": "MlAnomalyResultType"
+          },
+          ") => string | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.validateCustomFilterFields.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kqlQueryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.validateCustomFilterFields.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "resultType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.MlAnomalyResultType",
+                "text": "MlAnomalyResultType"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -3720,6 +3784,72 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.BASE_RECORD_FILTER_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "BASE_RECORD_FILTER_FIELDS",
+        "description": [
+          "\nBase record fields that are always available for filtering anomaly records,\nregardless of job configuration."
+        ],
+        "signature": [
+          "readonly [\"initial_record_score\", \"function\", \"field_name\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.DETECTOR_FILTER_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DETECTOR_FILTER_FIELDS",
+        "description": [
+          "\nDetector field names used in anomaly records."
+        ],
+        "signature": [
+          "{ readonly PARTITION_FIELD_NAME: \"partition_field_name\"; readonly PARTITION_FIELD_VALUE: \"partition_field_value\"; readonly BY_FIELD_NAME: \"by_field_name\"; readonly BY_FIELD_VALUE: \"by_field_value\"; readonly OVER_FIELD_NAME: \"over_field_name\"; readonly OVER_FIELD_VALUE: \"over_field_value\"; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.DISALLOWED_FILTER_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DISALLOWED_FILTER_FIELDS",
+        "description": [],
+        "signature": [
+          "readonly [\"job_id\", \"is_interim\", \"record_score\", \"influencer_score\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.INFLUENCER_FILTER_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "INFLUENCER_FILTER_FIELDS",
+        "description": [
+          "\nInfluencer fields available for filtering anomaly influencers."
+        ],
+        "signature": [
+          "readonly [\"influencer_field_name\", \"influencer_field_value\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_ANOMALY_RESULT_TYPE",
         "type": "Object",
         "tags": [],
@@ -4003,6 +4133,40 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.NESTED_ACTUAL_TYPICAL_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "NESTED_ACTUAL_TYPICAL_FIELDS",
+        "description": [
+          "\nNested field for population jobs (actual/typical are nested under causes)."
+        ],
+        "signature": [
+          "readonly [\"causes.actual\", \"causes.typical\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.RECORD_INFLUENCER_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "RECORD_INFLUENCER_FIELDS",
+        "description": [
+          "\nInfluencer fields for anomaly records when jobs have influencers configured."
+        ],
+        "signature": [
+          "readonly [\"influencers.influencer_field_name\", \"influencers.influencer_field_values\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.SPARSE_DATA_AGGREGATIONS",
         "type": "Object",
         "tags": [],
@@ -4062,6 +4226,23 @@
           ".LOW_NON_NULL_SUM]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.TOP_LEVEL_ACTUAL_TYPICAL_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "TOP_LEVEL_ACTUAL_TYPICAL_FIELDS",
+        "description": [
+          "\nActual/typical value fields for non-population jobs."
+        ],
+        "signature": [
+          "readonly [\"actual\", \"typical\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

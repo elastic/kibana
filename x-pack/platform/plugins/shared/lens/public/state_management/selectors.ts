@@ -38,6 +38,7 @@ export const selectDataViews = (state: LensState) => state.lens.dataViews;
 export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
+export const selectSelectedLayerId = (state: LensState) => state.lens.visualization.selectedLayerId;
 
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {

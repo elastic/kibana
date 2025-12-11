@@ -7,21 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardState } from '../../types';
 
-export function transformTagsIn({
-  tags,
-  references,
-}: {
-  tags: DashboardState['tags'];
-  references?: SavedObjectReference[];
-}) {
+export function transformTagsIn(tags: DashboardState['tags']) {
   const uniqueTagIds = new Set<string>([]);
-  (references ?? []).forEach(({ type, id }) => {
-    if (type === tagSavedObjectTypeName) uniqueTagIds.add(id);
-  });
   (tags ?? []).forEach((tagId) => {
     uniqueTagIds.add(tagId);
   });

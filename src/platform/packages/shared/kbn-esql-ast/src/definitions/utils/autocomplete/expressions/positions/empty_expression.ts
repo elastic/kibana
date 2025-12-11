@@ -24,7 +24,11 @@ import type {
 } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../commands_registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
-import { allStarConstant } from '../../../../../..';
+import {
+  allStarConstant,
+  valuePlaceholderConstant,
+  defaultValuePlaceholderConstant,
+} from '../../../../../..';
 
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
@@ -47,8 +51,21 @@ async function handleFunctionParameterContext(
   functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
+  const { paramDefinitions } = functionParamContext;
+  const analyzer = SignatureAnalyzer.from(functionParamContext);
+
   // Early validation
-  if (!isValidFunctionParameterPosition(functionParamContext)) {
+  if (!analyzer) {
+    return [];
+  }
+
+  // Empty paramDefinitions = no valid signature for this position → return []
+  // Example: FUNC(double, double, /) with only 1-2 param signatures → suggest nothing
+  //
+  // Exception (continue suggesting) for:
+  // - variadic functions (CONCAT, COALESCE): minParams defined, accepts unlimited params
+  // - repeating signatures (CASE): accepts unlimited condition/value pairs
+  if (paramDefinitions.length === 0 && !analyzer.isVariadic && !analyzer.hasRepeatingSignature) {
     return [];
   }
 
@@ -60,29 +77,7 @@ async function handleFunctionParameterContext(
   }
 
   // Build composite suggestions (literals + fields + functions)
-  return buildCompositeSuggestions(functionParamContext, ctx);
-}
-
-/** Validates that we can suggest for this function parameter position */
-function isValidFunctionParameterPosition(functionParamContext: FunctionParamContext): boolean {
-  const { functionDefinition, paramDefinitions } = functionParamContext;
-
-  if (!functionDefinition) {
-    return false;
-  }
-
-  // Empty paramDefinitions = no valid signature for this position → return false
-  // Example: FUNC(double, double, /) with only 1-2 param signatures → suggest nothing
-  //
-  // Exception (continue suggesting) only for variadic functions (CONCAT, COALESCE):
-  // minParams defined, accepts unlimited params
-  const isVariadicFunction = functionDefinition.signatures?.some((sig) => sig.minParams != null);
-
-  if (paramDefinitions.length === 0 && !isVariadicFunction) {
-    return false;
-  }
-
-  return true;
+  return buildCompositeSuggestions(functionParamContext, ctx, analyzer);
 }
 
 /** Try suggestions that are exclusive (if present, return only these) */
@@ -92,13 +87,6 @@ function tryExclusiveSuggestions(
 ): ISuggestionItem[] {
   const { functionDefinition, paramDefinitions } = functionParamContext;
   const { options } = ctx;
-
-  const suggestions: ISuggestionItem[] = [];
-
-  // Special case: COUNT function suggests "*" (e.g., "COUNT(*)")
-  if (matchesSpecialFunction(functionDefinition!.name, 'count')) {
-    suggestions.push(allStarConstant);
-  }
 
   // Enum values are exclusive - if present, return only those
   const enumItems = buildEnumValueSuggestions(
@@ -112,33 +100,43 @@ function tryExclusiveSuggestions(
     return enumItems;
   }
 
-  return suggestions;
+  return [];
 }
 
 /** Build composite suggestions: literals + fields + functions */
 async function buildCompositeSuggestions(
   functionParamContext: FunctionParamContext,
-  ctx: ExpressionContext
+  ctx: ExpressionContext,
+  analyzer: SignatureAnalyzer
 ): Promise<ISuggestionItem[]> {
+  const { functionDefinition } = functionParamContext;
   const { options } = ctx;
 
   // Determine configuration
   const config = getParamSuggestionConfig(
     functionParamContext,
-    options.isCursorFollowedByComma ?? false
+    options.isCursorFollowedByComma ?? false,
+    analyzer
   );
 
   const suggestions: ISuggestionItem[] = [];
+
+  // Special case: COUNT function suggests "*" (e.g., "COUNT(*)")
+  if (matchesSpecialFunction(functionDefinition!.name, 'count')) {
+    suggestions.push(allStarConstant);
+  }
+
+  if (config.isAmbiguousPosition) {
+    suggestions.push(defaultValuePlaceholderConstant);
+  } else if (config.isRepeatingValuePosition) {
+    suggestions.push(valuePlaceholderConstant);
+  }
 
   // Add literal suggestions
   suggestions.push(...buildLiteralSuggestions(functionParamContext, ctx, config));
 
   // Add field and function suggestions
-  if (config.allowFieldsAndFunctions) {
-    suggestions.push(
-      ...(await buildFieldAndFunctionSuggestions(functionParamContext, ctx, config))
-    );
-  }
+  suggestions.push(...(await buildFieldAndFunctionSuggestions(functionParamContext, ctx, config)));
 
   return suggestions;
 }
@@ -277,26 +275,25 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     suggestions.push(...builder.build());
   }
 
-  // Suggest control variables (e.g., "?fieldName", "$valueName") if supported and not already present
-  if (context?.supportsControls) {
-    const hasControl = suggestions.some((suggestion) =>
-      suggestion.command?.id?.includes('esql.control')
+  // Suggest control variables (e.g., "??fieldName", "?valueName") if supported and not already present
+  const hasControl = suggestions.some((suggestion) =>
+    suggestion.command?.id?.includes('esql.control')
+  );
+
+  if (!hasControl) {
+    const prefix = getVariablePrefix(controlType);
+    const variableNames =
+      context?.variables
+        ?.filter(({ type }) => type === controlType)
+        .map(({ key }) => `${prefix}${key}`) ?? [];
+
+    const controlSuggestions = getControlSuggestion(
+      controlType,
+      ControlTriggerSource.SMART_SUGGESTION,
+      variableNames,
+      Boolean(context?.supportsControls)
     );
-
-    if (!hasControl) {
-      const prefix = getVariablePrefix(controlType);
-      const variableNames =
-        context.variables
-          ?.filter(({ type }) => type === controlType)
-          .map(({ key }) => `${prefix}${key}`) ?? [];
-
-      const controlSuggestions = getControlSuggestion(
-        controlType,
-        ControlTriggerSource.SMART_SUGGESTION,
-        variableNames
-      );
-      suggestions.push(...controlSuggestions);
-    }
+    suggestions.push(...controlSuggestions);
   }
 
   return suggestions;
@@ -322,11 +319,11 @@ function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionP
 /** Derives suggestion configuration for next function parameter */
 function getParamSuggestionConfig(
   functionParamContext: FunctionParamContext,
-  isCursorFollowedByComma: boolean
+  isCursorFollowedByComma: boolean,
+  analyzer: SignatureAnalyzer
 ) {
   const { functionDefinition } = functionParamContext;
-  const analyzer = SignatureAnalyzer.from(functionParamContext);
-  const acceptedTypes = (analyzer?.getAcceptedTypes() ?? ['any']) as FunctionParameterType[];
+  const acceptedTypes = analyzer.getAcceptedTypes() as FunctionParameterType[];
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
 
@@ -339,9 +336,13 @@ function getParamSuggestionConfig(
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);
-  const allowFieldsAndFunctions = true;
 
-  return { acceptedTypes, shouldAddComma, allowFieldsAndFunctions };
+  return {
+    acceptedTypes,
+    shouldAddComma,
+    isRepeatingValuePosition: analyzer.isRepeatingValuePosition,
+    isAmbiguousPosition: analyzer.isAmbiguousPosition,
+  };
 }
 
 /** Builds suggestions for enum/predefined values */

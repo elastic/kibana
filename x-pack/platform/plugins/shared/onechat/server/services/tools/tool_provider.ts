@@ -5,44 +5,10 @@
  * 2.0.
  */
 
-import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
-import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
-import type {
-  ToolHandlerFn,
-  LlmDescriptionHandler,
-  ToolAvailabilityContext,
-  ToolAvailabilityResult,
-} from '@kbn/onechat-server';
+import type { ToolType } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-
-type InternalToolAvailabilityHandler = (
-  context: ToolAvailabilityContext
-) => MaybePromise<ToolAvailabilityResult>;
-
-export interface InternalToolDefinition<
-  TType extends ToolType = ToolType,
-  TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
-> extends ToolDefinition<TType, TConfig> {
-  /**
-   * Check if the tool is available for the current context.
-   */
-  isAvailable: InternalToolAvailabilityHandler;
-  /**
-   * Generates the schema attached to this tool.
-   */
-  getSchema: () => MaybePromise<TSchema>;
-  /**
-   * Get the handler which can be used to execute the tool.
-   */
-  getHandler: () => MaybePromise<ToolHandlerFn<z.infer<TSchema>>>;
-  /**
-   * Optional handled to add additional instructions to the LLM
-   * when specified, this will fully replace the description when converting to LLM tools.
-   */
-  getLlmDescription?: LlmDescriptionHandler<TConfig>;
-}
+import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
 
 export interface ToolCreateParams<TConfig extends object = {}> {
   id: string;

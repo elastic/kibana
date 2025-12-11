@@ -23,17 +23,34 @@ export * from './common_attributes.gen';
 
 // Attack discovery Schemas
 export * from './attack_discovery/attack_discovery_alert.gen';
-export * from './attack_discovery/routes/internal/post/post_attack_discovery_bulk.route.gen';
-export * from './attack_discovery/routes/internal/get/find_attack_discoveries_route.gen';
 export * from './attack_discovery/common_attributes.gen';
-export * from './attack_discovery/routes/internal/post/post_attack_discovery_route.gen';
-export * from './attack_discovery/routes/internal/schedules/crud_attack_discovery_schedules_route.gen';
-export * from './attack_discovery/routes/internal/get/get_attack_discovery_generations.route.gen';
-export * from './attack_discovery/routes/internal/post/post_attack_discovery_generations_dismiss.route.gen';
-export * from './attack_discovery/routes/internal/schedules/find_attack_discovery_schedules_route.gen';
-export * from './attack_discovery/routes/internal/schedules/schedules.gen';
+export * from './attack_discovery/routes/internal/privileges/get_missing_privileges.gen';
+export { AttackDiscoveryFindInternalResponse } from './attack_discovery/attack_discovery_find_internal_response.gen';
 
-export { AttackDiscoveryApiSchedule } from './attack_discovery/routes/public/schedules/schedules_api.gen';
+export {
+  AttackDiscoveryApiSchedule,
+  AttackDiscoveryApiScheduleAction,
+  AttackDiscoveryApiScheduleCreateProps,
+  AttackDiscoveryApiScheduleExecution,
+  AttackDiscoveryApiScheduleExecutionStatus,
+  AttackDiscoveryApiScheduleGeneralAction,
+  AttackDiscoveryApiScheduleParams,
+  AttackDiscoveryApiScheduleSystemAction,
+  AttackDiscoveryApiScheduleUpdateProps,
+} from './attack_discovery/routes/public/schedules/schedules_api.gen';
+
+// Frontend/internal types (camelCase)
+export {
+  AttackDiscoverySchedule,
+  AttackDiscoveryScheduleAction,
+  AttackDiscoveryScheduleCreateProps,
+  AttackDiscoveryScheduleExecution,
+  AttackDiscoveryScheduleExecutionStatus,
+  AttackDiscoveryScheduleGeneralAction,
+  AttackDiscoveryScheduleParams,
+  AttackDiscoveryScheduleSystemAction,
+  AttackDiscoveryScheduleUpdateProps,
+} from './attack_discovery/routes/public/schedules/schedules.gen';
 
 export { AttackDiscoveryApiAlert } from './attack_discovery/attack_discovery_api_alert.gen';
 

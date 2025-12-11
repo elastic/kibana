@@ -574,7 +574,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       alertId: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`)
+        .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute?validate_alerts_existence=false`)
         .set(samlAuth.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(204);

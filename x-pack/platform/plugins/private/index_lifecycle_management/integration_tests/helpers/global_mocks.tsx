@@ -20,15 +20,35 @@ jest.mock('@elastic/eui', () => {
     ...original,
     // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
     // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-        data-currentvalue={props.selectedOptions}
-        onChange={async (syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
+    EuiComboBox: (props: any) => {
+      const selectedValue = props.selectedOptions?.[0]?.label || '';
+
+      return (
+        <input
+          data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+          data-currentvalue={selectedValue}
+          value={selectedValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const newValue = e.target.value;
+            if (newValue === '') {
+              // Empty value - call onChange with empty array
+              props.onChange([]);
+            } else {
+              // Non-empty value - call onChange with option object
+              props.onChange([{ label: newValue }]);
+            }
+          }}
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter' && props.onCreateOption) {
+              const inputValue = (e.target as HTMLInputElement).value;
+              if (inputValue) {
+                props.onCreateOption(inputValue);
+              }
+            }
+          }}
+        />
+      );
+    },
     EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
   };
 });

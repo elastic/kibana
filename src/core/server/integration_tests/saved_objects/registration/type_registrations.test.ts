@@ -34,6 +34,7 @@ const previouslyRegisteredTypes = [
   'canvas-workpad',
   'canvas-workpad-template',
   'cloud',
+  'cloud-connect-api-key',
   'cloud-security-posture-settings',
   'cases',
   'cases-comments',
@@ -175,6 +176,7 @@ const previouslyRegisteredTypes = [
   'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
+  'gap_auto_fill_scheduler',
 ].sort();
 
 describe('SO type registrations', () => {

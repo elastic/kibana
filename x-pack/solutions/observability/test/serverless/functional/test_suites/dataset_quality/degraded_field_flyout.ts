@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
+import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
 import {
   ANOTHER_1024_CHARS,
   CONSISTENT_TAGS,

@@ -16,16 +16,8 @@ import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-interna
 import { ToolingLog } from '@kbn/tooling-log';
 import { setTimeout as timer } from 'timers/promises';
 import type { Root } from '@kbn/core-root-server-internal';
-import type { ServerHandles } from '../types';
 
-export async function startServers(): Promise<ServerHandles> {
-  const [esServer, kibanaRoot] = await Promise.all([startElasticsearch(), startKibana()]);
-  const coreStart = await kibanaRoot.start();
-  const typeRegistry = coreStart.savedObjects.getTypeRegistry();
-  return { esServer, kibanaRoot, typeRegistry };
-}
-
-async function startElasticsearch(): Promise<TestElasticsearchUtils> {
+export async function startElasticsearch(): Promise<TestElasticsearchUtils> {
   const { startES } = createTestServers({
     adjustTimeout: () => {},
     settings: {
@@ -39,7 +31,7 @@ async function startElasticsearch(): Promise<TestElasticsearchUtils> {
   return await startES();
 }
 
-async function startKibana(): Promise<Root> {
+export async function setupKibana(): Promise<Root> {
   const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
   const kibanaRoot = createRootWithCorePlugins(
     {
@@ -76,21 +68,27 @@ async function startKibana(): Promise<Root> {
   return kibanaRoot;
 }
 
-export async function stopServers(serverHandles: ServerHandles) {
+export async function stopKibana(kibanaServer: Root) {
   await timer(2_000);
-  await Promise.race([
-    serverHandles.kibanaRoot.shutdown(),
-    timeout(8_000, 'Timeout waiting for Kibana to stop'),
-  ]);
-
-  await timer(5_000);
-  await Promise.race([
-    serverHandles.esServer.stop(),
-    timeout(5_000, 'Timeout waiting for ES to stop'),
-  ]);
+  await runWithTimeout(
+    kibanaServer.shutdown.bind(kibanaServer),
+    'Timeout waiting for Kibana to stop'
+  );
 }
 
-async function timeout(millis: number, message: string): Promise<void> {
-  await timer(millis);
-  throw new Error(message);
+export async function stopElasticsearch(esServer: TestElasticsearchUtils) {
+  await timer(2_000);
+  await runWithTimeout(esServer.stop.bind(esServer), 'Timeout waiting for ES to stop');
+}
+
+async function runWithTimeout(
+  task: () => Promise<void>,
+  message: string,
+  millis: number = 5_000
+): Promise<void> {
+  const timeout = async () => {
+    await timer(millis);
+    throw new Error(message);
+  };
+  await Promise.race([task(), timeout()]);
 }

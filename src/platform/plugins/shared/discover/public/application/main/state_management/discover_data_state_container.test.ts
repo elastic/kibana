@@ -76,11 +76,14 @@ describe('test getDataStateContainer', () => {
     });
 
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledTimes(1);
-    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
-      dataSource: stateContainer.appState.get().dataSource,
-      dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
-      query: stateContainer.appState.get().query,
-    });
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith(
+      {
+        dataSource: stateContainer.getCurrentTab().appState.dataSource,
+        dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
+        query: stateContainer.getCurrentTab().appState.query,
+      },
+      expect.any(Function)
+    );
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
 
@@ -169,7 +172,7 @@ describe('test getDataStateContainer', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
-    const appUnsub = stateContainer.appState.initAndSync();
+    stateContainer.actions.initializeAndSync();
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
@@ -203,17 +206,17 @@ describe('test getDataStateContainer', () => {
       breakdownField: false,
       hideChart: false,
     });
-    expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
-    expect(stateContainer.appState.get().rowHeight).toEqual(3);
+    expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
+    expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
     dataUnsub();
-    appUnsub();
+    stateContainer.actions.stopSyncing();
   });
 
   it('should not update app state from default profile state', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
-    const appUnsub = stateContainer.appState.initAndSync();
+    stateContainer.actions.initializeAndSync();
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
@@ -245,9 +248,9 @@ describe('test getDataStateContainer', () => {
       breakdownField: false,
       hideChart: false,
     });
-    expect(stateContainer.appState.get().columns).toEqual(['default_column']);
-    expect(stateContainer.appState.get().rowHeight).toBeUndefined();
+    expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
+    expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
     dataUnsub();
-    appUnsub();
+    stateContainer.actions.stopSyncing();
   });
 });

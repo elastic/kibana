@@ -54,7 +54,7 @@ describe('Lens flyout', () => {
             testDatasource: { state: {}, isLoading: true },
             testDatasource2: { state: {}, isLoading: true },
           },
-          visualization: { state: {}, activeId: 'testVis' },
+          visualization: { state: {}, activeId: 'testVis', selectedLayerId: null },
         })
       );
       updaterFn.mockClear();
@@ -72,12 +72,12 @@ describe('Lens flyout', () => {
     test('updater is not run on store initialization actions', () => {
       store.dispatch(
         initEmpty({
-          newState: { visualization: { state: {}, activeId: 'testVis' } },
+          newState: { visualization: { state: {}, activeId: 'testVis', selectedLayerId: null } },
         })
       );
       store.dispatch(
         initExisting({
-          visualization: { state: {}, activeId: 'testVis' },
+          visualization: { state: {}, activeId: 'testVis', selectedLayerId: null },
         })
       );
       expect(updaterFn).not.toHaveBeenCalled();

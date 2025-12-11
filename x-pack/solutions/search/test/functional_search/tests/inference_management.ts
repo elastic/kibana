@@ -64,6 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('renders successfully', async () => {
         await pageObjects.searchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
       });
+      it('renders successfully with custom headers', async () => {
+        await pageObjects.searchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToAllowCustomHeaders();
+      });
     });
 
     describe('edit inference flyout', () => {
