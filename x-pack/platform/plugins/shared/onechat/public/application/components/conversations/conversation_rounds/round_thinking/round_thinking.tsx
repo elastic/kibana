@@ -19,18 +19,14 @@ interface RoundThinkingProps {
   isLoading: boolean;
 }
 
-const bounceIn = keyframes`
-  0% {
+const fadeIn = keyframes`
+  from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: translate(-8px, -8px);
   }
-  70% {
+  to {
     opacity: 1;
-    transform: scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
+    transform: translate(0, 0);
   }
 `;
 
@@ -42,14 +38,13 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     setShowThinkingPanel(!showThinkingPanel);
   };
 
-  const bounceInStyles = css`
-    animation: ${bounceIn} ${euiTheme.animation.normal} ease-out;
-    transform-origin: top left;
+  const fadeInStyles = css`
+    animation: ${fadeIn} ${euiTheme.animation.fast} ease-out;
   `;
 
   if (showThinkingPanel) {
     return (
-      <EuiFlexGroup css={bounceInStyles} responsive={false}>
+      <EuiFlexGroup css={fadeInStyles} responsive={false}>
         <EuiFlexItem>
           <RoundThinkingPanel
             steps={steps}
