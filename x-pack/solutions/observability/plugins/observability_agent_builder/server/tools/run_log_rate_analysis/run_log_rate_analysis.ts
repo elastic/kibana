@@ -15,8 +15,8 @@ import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_l
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
@@ -51,7 +51,10 @@ export function createRunLogRateAnalysisTool({
   core,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
 }): StaticToolRegistration<typeof logRateAnalysisSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
