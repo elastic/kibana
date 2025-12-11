@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { readConfigFile } from './loader';
-export { getConfigFilePath, loadServersConfig } from './utils';
-export { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from './discovery';
-export type { Config } from './config';
+import type { ScoutServerConfig } from '../../../../types';
+import { defaultConfig } from './base.config';
+
+export const servers: ScoutServerConfig = defaultConfig;
