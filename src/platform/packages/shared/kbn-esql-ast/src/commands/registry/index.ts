@@ -8,32 +8,32 @@
  */
 
 import { CommandRegistry } from './registry';
-import { limitCommand } from './commands/limit';
-import { dropCommand } from './commands/drop';
-import { keepCommand } from './commands/keep';
-import { forkCommand } from './commands/fork';
-import { renameCommand } from './commands/rename';
-import { changePointCommand } from './commands/change_point';
-import { completionCommand } from './commands/completion';
-import { dissectCommand } from './commands/dissect';
-import { enrichCommand } from './commands/enrich';
-import { evalCommand } from './commands/eval';
-import { fromCommand } from './commands/from';
-import { grokCommand } from './commands/grok';
-import { joinCommand } from './commands/join';
-import { mvExpandCommand } from './commands/mv_expand';
-import { rowCommand } from './commands/row';
-import { sortCommand } from './commands/sort';
-import { statsCommand } from './commands/stats';
-import { inlineStatsCommand } from './commands/inlinestats';
-import { sampleCommand } from './commands/sample';
-import { showCommand } from './commands/show';
-import { timeseriesCommand } from './commands/timeseries';
-import { whereCommand } from './commands/where';
-import { fuseCommand } from './commands/fuse';
-import { rerankCommand } from './commands/rerank';
+import { limitCommand } from './limit';
+import { dropCommand } from './drop';
+import { keepCommand } from './keep';
+import { forkCommand } from './fork';
+import { renameCommand } from './rename';
+import { changePointCommand } from './change_point';
+import { completionCommand } from './completion';
+import { dissectCommand } from './dissect';
+import { enrichCommand } from './enrich';
+import { evalCommand } from './eval';
+import { fromCommand } from './from';
+import { grokCommand } from './grok';
+import { joinCommand } from './join';
+import { mvExpandCommand } from './mv_expand';
+import { rowCommand } from './row';
+import { sortCommand } from './sort';
+import { statsCommand } from './stats';
+import { inlineStatsCommand } from './inlinestats';
+import { sampleCommand } from './sample';
+import { showCommand } from './show';
+import { timeseriesCommand } from './timeseries';
+import { whereCommand } from './where';
+import { fuseCommand } from './fuse';
+import { rerankCommand } from './rerank';
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
-import { setCommand } from './commands/set';
+import { setCommand } from './set';
 
 const esqlCommandRegistry = new CommandRegistry();
 
