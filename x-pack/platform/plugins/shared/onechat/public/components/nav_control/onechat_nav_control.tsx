@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { OnechatPluginStart, OnechatStartDependencies } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
+import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 interface OnechatNavControlServices {
   onechat: OnechatPluginStart;
@@ -23,7 +24,13 @@ export function OnechatNavControl() {
     services: { onechat, aiAssistantManagementSelection },
   } = useKibana<OnechatNavControlServices>();
 
+  const { show: hasShowPrivilege } = useUiPrivileges();
+
   useEffect(() => {
+    if (!hasShowPrivilege) {
+      return;
+    }
+
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
       if (selection === AIChatExperience.Agent) {
         onechat.openConversationFlyout();
@@ -34,7 +41,11 @@ export function OnechatNavControl() {
     return () => {
       openChatSubscription.unsubscribe();
     };
-  }, [onechat, aiAssistantManagementSelection]);
+  }, [hasShowPrivilege, onechat, aiAssistantManagementSelection]);
+
+  if (!hasShowPrivilege) {
+    return null;
+  }
 
   return (
     <EuiToolTip content={buttonLabel}>
