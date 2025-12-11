@@ -10,21 +10,20 @@
 import type {
   FormBasedLayer,
   FormBasedPersistedState,
-  LensTagCloudState,
+  ChoroplethChartState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
-import { LENS_TAGCLOUD_DEFAULT_STATE, TAGCLOUD_ORIENTATION } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type {
   LensApiState,
-  TagcloudState,
-  LensApiAllMetricOrFormulaOperations,
+  RegionMapState,
   LensApiBucketOperations,
-  TagcloudStateESQL,
-  TagcloudStateNoESQL,
+  RegionMapStateESQL,
+  RegionMapStateNoESQL,
+  LensApiFieldMetricOrFormulaOperation,
 } from '../../schema';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
@@ -36,11 +35,10 @@ import {
   generateApiLayer,
   generateLayer,
   getAdhocDataviews,
-  isTextBasedLayer,
   operationFromColumn,
+  isTextBasedLayer,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import {
@@ -50,41 +48,31 @@ import {
   getSharedChartLensStateToAPI,
 } from './utils';
 
-const ACCESSOR = 'tagcloud_accessor';
-function getAccessorName(type: 'metric' | 'tag') {
+const ACCESSOR = 'region_map_accessor';
+function getAccessorName(type: 'metric' | 'region') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: TagcloudState): LensTagCloudState {
+function buildVisualizationState(config: RegionMapState): ChoroplethChartState {
   const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
     valueAccessor: getAccessorName('metric'),
-    orientation: layer.orientation
-      ? layer.orientation === 'horizontal'
-        ? TAGCLOUD_ORIENTATION.SINGLE
-        : layer.orientation === 'vertical'
-        ? TAGCLOUD_ORIENTATION.RIGHT_ANGLED
-        : TAGCLOUD_ORIENTATION.MULTIPLE
-      : LENS_TAGCLOUD_DEFAULT_STATE.orientation,
-    maxFontSize: layer.font_size?.max ?? LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
-    minFontSize: layer.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
-    showLabel: layer.metric?.show_metric_label ?? LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
-    tagAccessor: getAccessorName('tag'),
-    ...(layer.tag_by.color
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.tag_by.color) }
+    regionAccessor: getAccessorName('region'),
+    ...(layer.region.ems
+      ? { emsLayerId: layer.region.ems.boundaries, emsField: layer.region.ems.join }
       : {}),
   };
 }
 
-function getTagcloudDataset(
+function getRegionMapDataset(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
-): TagcloudState['dataset'] {
+): RegionMapState['dataset'] {
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
   if (!dataset || dataset.type == null) {
@@ -94,75 +82,62 @@ function getTagcloudDataset(
   return dataset;
 }
 
-function getTagcloudMetric(
+function getRegionMapMetric(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
-  visualization: LensTagCloudState
-): TagcloudState['metric'] {
+  visualization: ChoroplethChartState
+): RegionMapState['metric'] {
   if (visualization.valueAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  return {
-    ...(isTextBasedLayer(layer)
-      ? getValueApiColumn(visualization.valueAccessor, layer)
-      : (operationFromColumn(
-          visualization.valueAccessor,
-          layer
-        ) as LensApiAllMetricOrFormulaOperations)),
-    show_metric_label: visualization.showLabel,
-  };
+  return isTextBasedLayer(layer)
+    ? getValueApiColumn(visualization.valueAccessor, layer)
+    : (operationFromColumn(
+        visualization.valueAccessor,
+        layer
+      ) as LensApiFieldMetricOrFormulaOperation);
 }
 
-function getTagcloudTagBy(
+function getRegionMapRegion(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
-  visualization: LensTagCloudState
-): TagcloudState['tag_by'] {
-  if (visualization.tagAccessor == null) {
-    throw new Error('Tag accessor is missing in the visualization state');
+  visualization: ChoroplethChartState
+): RegionMapState['region'] {
+  if (visualization.regionAccessor == null) {
+    throw new Error('Region accessor is missing in the visualization state');
   }
-
-  const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
 
   return {
     ...(isTextBasedLayer(layer)
-      ? getValueApiColumn(visualization.tagAccessor, layer)
-      : (operationFromColumn(visualization.tagAccessor, layer) as LensApiBucketOperations)),
-    ...(colorMapping ? { color: colorMapping } : {}),
+      ? getValueApiColumn(visualization.regionAccessor, layer)
+      : (operationFromColumn(visualization.regionAccessor, layer) as LensApiBucketOperations)),
+    ...(visualization.emsLayerId && visualization.emsField
+      ? { ems: { boundaries: visualization.emsLayerId, join: visualization.emsField } }
+      : {}),
   };
 }
 
 function reverseBuildVisualizationState(
-  visualization: LensTagCloudState,
+  visualization: ChoroplethChartState,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): TagcloudState {
-  const dataset = getTagcloudDataset(layer, adHocDataViews, references, adhocReferences, layerId);
-  const metric = getTagcloudMetric(layer, visualization);
-  const tagBy = getTagcloudTagBy(layer, visualization);
+): RegionMapState {
+  const dataset = getRegionMapDataset(layer, adHocDataViews, references, adhocReferences, layerId);
+  const metric = getRegionMapMetric(layer, visualization);
+  const region = getRegionMapRegion(layer, visualization);
 
   return {
-    type: 'tagcloud',
+    type: 'region_map',
     dataset,
     ...generateApiLayer(layer),
     metric,
-    tag_by: tagBy,
-    orientation:
-      visualization.orientation === TAGCLOUD_ORIENTATION.SINGLE
-        ? 'horizontal'
-        : visualization.orientation === TAGCLOUD_ORIENTATION.MULTIPLE
-        ? 'angled'
-        : 'vertical',
-    font_size: {
-      min: visualization.minFontSize,
-      max: visualization.maxFontSize,
-    },
-  } as TagcloudState;
+    region,
+  } as RegionMapState;
 }
 
-function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: RegionMapStateNoESQL): FormBasedPersistedState['layers'] {
   const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -170,35 +145,35 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
 
   addLayerColumn(defaultLayer, getAccessorName('metric'), columns);
   const breakdownColumn = fromBucketLensApiToLensState(
-    layer.tag_by as LensApiBucketOperations,
+    layer.region,
     columns.map((col) => ({ column: col, id: getAccessorName('metric') }))
   );
-  addLayerColumn(defaultLayer, getAccessorName('tag'), breakdownColumn, true);
+  addLayerColumn(defaultLayer, getAccessorName('region'), breakdownColumn, true);
 
   return layers;
 }
 
-function getValueColumns(layer: TagcloudStateESQL) {
+function getValueColumns(layer: RegionMapStateESQL) {
   return [
     getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    getValueColumn(getAccessorName('tag'), layer.tag_by.column),
+    getValueColumn(getAccessorName('region'), layer.region.column),
   ];
 }
 
-type TagcloudAttributes = Extract<
+type RegionMapAttributes = Extract<
   TypedLensSerializedState['attributes'],
-  { visualizationType: 'lnsTagcloud' }
+  { visualizationType: 'lnsChoropleth' }
 >;
 
-type TagcloudAttributesWithoutFiltersAndQuery = Omit<TagcloudAttributes, 'state'> & {
-  state: Omit<TagcloudAttributes['state'], 'filters' | 'query'>;
+type RegionMapAttributesWithoutFiltersAndQuery = Omit<RegionMapAttributes, 'state'> & {
+  state: Omit<RegionMapAttributes['state'], 'filters' | 'query'>;
 };
 
 export function fromAPItoLensState(
-  config: TagcloudState
-): TagcloudAttributesWithoutFiltersAndQuery {
+  config: RegionMapState
+): RegionMapAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as TagcloudStateNoESQL);
+    buildFormBasedLayer(cfg as RegionMapStateNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -213,7 +188,7 @@ export function fromAPItoLensState(
     : [];
 
   return {
-    visualizationType: 'lnsTagcloud',
+    visualizationType: 'lnsChoropleth',
     ...getSharedChartAPIToLensState(config),
     references,
     state: {
@@ -227,9 +202,9 @@ export function fromAPItoLensState(
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'tagcloud' }> {
+): Extract<LensApiState, { type: 'region_map' }> {
   const { state } = config;
-  const visualization = state.visualization as LensTagCloudState;
+  const visualization = state.visualization as ChoroplethChartState;
   const layers = getDatasourceLayers(state);
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
