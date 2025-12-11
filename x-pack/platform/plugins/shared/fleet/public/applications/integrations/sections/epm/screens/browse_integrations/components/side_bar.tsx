@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFacetButton, EuiFacetGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFacetButton,
+  EuiFacetGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+import styled from '@emotion/styled';
 
 export interface CategoryFacet {
   count: number;
@@ -67,7 +75,13 @@ export interface Props {
   onCategoryChange: (category: CategoryFacet) => unknown;
 }
 
-export const SideBar: React.FC<Props> = ({
+const StickySidebar = styled(EuiFlexItem)`
+  position: sticky;
+  top: var(--kbn-application--sticky-headers-offset, 96px);
+  padding-top: ${(props) => props.theme.euiTheme.size.m /* 24px */};
+`;
+
+export const Sidebar: React.FC<Props> = ({
   isLoading,
   categories,
   selectedCategory,
@@ -76,7 +90,7 @@ export const SideBar: React.FC<Props> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div>
+    <StickySidebar>
       <EuiAccordion
         id="categoriesUserIntegrationsAccordion"
         buttonContent={i18n.translate('xpack.fleet.epmList.userIntegrationAccordionLabel', {
@@ -115,7 +129,7 @@ export const SideBar: React.FC<Props> = ({
           onCategoryChange={onCategoryChange}
         />
       </EuiAccordion>
-    </div>
+    </StickySidebar>
   );
 };
 

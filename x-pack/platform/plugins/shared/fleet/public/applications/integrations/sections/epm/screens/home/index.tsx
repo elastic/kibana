@@ -126,7 +126,11 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         {ExperimentalFeaturesService.get().newBrowseIntegrationUx ? (
-          <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
+          <DefaultLayout
+            section="browse"
+            noSpacerInContent={true}
+            notificationsBySection={notificationsBySection}
+          >
             <BrowseIntegrationsPage prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
           </DefaultLayout>
         ) : (

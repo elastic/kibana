@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { ExtendedIntegrationCategory } from '../../home/category_facets';
+import { useLocalSearch } from '@kbn/fleet-plugin/public/applications/integrations/hooks';
 
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
@@ -37,6 +38,8 @@ export function useBrowseIntegrationHook({
     selectedSubCategory,
     setSelectedSubCategory,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+
+  const localSearch = useLocalSearch(filteredCards, !!isLoading);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {

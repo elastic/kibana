@@ -9,14 +9,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexItem,
-  EuiCallOut,
-  EuiLink,
-  EuiSpacer,
-  EuiFlexGroup,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiCallOut, EuiLink, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -28,7 +21,7 @@ import { categoryExists } from '../home';
 
 import { PackageGrid } from './components/package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
-import { SideBar } from './components/side_bar';
+import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
 
 const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
@@ -156,31 +149,32 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       gutterSize="l"
       data-test-subj="epmList.integrationCards"
     >
-      <EuiFlexItem>
-        <SideBar
-          isLoading={isLoading}
-          categories={mainCategories}
-          selectedCategory={selectedCategory}
-          onCategoryChange={onCategoryChange}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={5}
-        data-test-subj="epmList.mainColumn"
-        style={{
-          position: 'relative',
-          backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
-          alignSelf: 'stretch',
-        }}
-      >
-        <SearchAndFiltersBar />
-        <EuiSpacer size="m" />
-        <PackageGrid
-          items={filteredCards}
-          isLoading={
-            isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
-          }
-        />
+      <Sidebar
+        isLoading={isLoading}
+        categories={mainCategories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={onCategoryChange}
+      />
+      <EuiFlexItem grow={5}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <SearchAndFiltersBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <EuiFlexItem
+            grow={1}
+            data-test-subj="epmList.mainColumn"
+            style={{
+              position: 'relative',
+              backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+              alignSelf: 'stretch',
+            }}
+          >
+            <PackageGrid
+              items={filteredCards}
+              isLoading={
+                isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

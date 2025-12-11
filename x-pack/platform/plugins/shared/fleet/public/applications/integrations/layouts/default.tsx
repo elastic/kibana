@@ -18,10 +18,11 @@ interface Props {
   section?: Section;
   children?: React.ReactNode;
   notificationsBySection?: Partial<Record<Section, number>>;
+  noSpacerInContent?: boolean;
 }
 
 export const DefaultLayout: React.FC<Props> = memo(
-  ({ section, children, notificationsBySection }) => {
+  ({ section, children, notificationsBySection, noSpacerInContent }) => {
     const { automaticImport } = useStartServices();
     const { getHref } = useLink();
     const tabs = [
@@ -51,6 +52,7 @@ export const DefaultLayout: React.FC<Props> = memo(
 
     return (
       <WithHeaderLayout
+        noSpacerInContent={noSpacerInContent}
         leftColumn={
           <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
             <EuiText>
