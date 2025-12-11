@@ -470,6 +470,20 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }
 
   public async download(scriptId: string): Promise<ScriptDownloadResponse> {
-    throw new ScriptLibraryError('Not implemented', 501);
+    const scriptSo = await this.getScriptSavedObject(scriptId);
+
+    const file = await this.filesClient
+      .get({ id: scriptSo.attributes.file_id })
+      .catch(
+        catchAndWrapError.withMessage(
+          `Failed to initialise File instance for file id [${scriptSo.attributes.file_id}] of script [${scriptId}]`
+        )
+      );
+
+    return {
+      stream: await file.downloadContent(),
+      fileName: scriptSo.attributes.file_name,
+      mimeType: file.data.mimeType,
+    };
   }
 }
