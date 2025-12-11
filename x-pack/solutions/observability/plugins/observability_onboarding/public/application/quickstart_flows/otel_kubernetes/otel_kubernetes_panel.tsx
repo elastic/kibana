@@ -45,6 +45,7 @@ import {
 import { buildValuesFileUrl } from './build_values_file_url';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 
 export const OtelKubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
@@ -105,6 +106,7 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
+      <ManagedOtlpCallout />
       <EuiSteps
         steps={[
           {
