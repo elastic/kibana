@@ -20,7 +20,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
-import type { ActionTypeExecutorResult, SubFeature } from '../common';
+import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsClient } from './actions_client';
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -200,6 +200,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
+  source?: ActionTypeSource;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -259,26 +260,9 @@ export interface ActionTaskExecutorParams {
   actionTaskParamsId: string;
 }
 
-export interface ProxySettings {
-  proxyUrl: string;
-  proxyBypassHosts: Set<string> | undefined;
-  proxyOnlyHosts: Set<string> | undefined;
-  proxyHeaders?: Record<string, string>;
-  proxySSLSettings: SSLSettings;
-}
-
 export interface ResponseSettings {
   maxContentLength: number;
   timeout: number;
-}
-
-export interface SSLSettings {
-  verificationMode?: 'none' | 'certificate' | 'full';
-  pfx?: Buffer;
-  cert?: Buffer;
-  key?: Buffer;
-  passphrase?: string;
-  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
