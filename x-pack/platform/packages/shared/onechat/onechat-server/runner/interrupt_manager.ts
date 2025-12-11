@@ -12,14 +12,19 @@ import type { ToolHandlerPromptReturn } from '../tools/handler';
 export interface PromptManager {
   set(toolCallId: string, prompt: ToolConfirmationPromptWithResponse): void;
   clear(): void;
-  forTool(opts: { toolId: string; toolCallId?: string }): ToolPromptManager;
+  forTool(opts: {
+    toolId: string;
+    toolCallId?: string;
+    toolParams: Record<string, any>;
+  }): ToolPromptManager;
 }
 
 export interface ToolPromptManager {
+  // TODO: probably expose a lighter version with only the state and result
   /**
-   * Returns the current interrupt request, if any.
+   * Returns the currently pending prompt, if any.
    */
-  getCurrentPrompt(): ToolConfirmationPromptWithResponse | undefined;
+  getPendingPrompt(): ToolConfirmationPromptWithResponse | undefined;
   /**
    * Creates a confirmation prompt which can be returned by the tool handler
    */

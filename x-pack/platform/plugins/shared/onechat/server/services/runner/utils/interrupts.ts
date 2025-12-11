@@ -21,9 +21,9 @@ export const createInterruptManager = (): PromptManager => {
     clear: () => {
       promptMap.clear();
     },
-    forTool: ({ toolId, toolCallId }): ToolPromptManager => {
+    forTool: ({ toolId, toolCallId, toolParams }): ToolPromptManager => {
       return {
-        getCurrentPrompt: () => {
+        getPendingPrompt: () => {
           return toolCallId ? promptMap.get(toolCallId) : undefined;
         },
         confirm: ({ state, ...confirm }) => {
@@ -33,6 +33,7 @@ export const createInterruptManager = (): PromptManager => {
             data: {
               toolId,
               toolCallId: toolCallId ?? 'unknown',
+              toolParams,
             },
             confirm,
             state: state ?? {},
@@ -56,6 +57,11 @@ export const initPromptManager = ({
   if (conversation?.rounds.length) {
     const lastRound = conversation.rounds[conversation.rounds.length - 1];
     const interrupt = lastRound.pending_prompt;
-    // TODO: actually populate
+    if (interrupt) {
+      promptManager.set(interrupt.data.toolCallId, {
+        ...interrupt,
+        response: { confirmed: true }, // TODO: actually get value
+      });
+    }
   }
 };

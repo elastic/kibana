@@ -22,6 +22,8 @@ export const StateAnnotation = Annotation.Root({
     default: () => 10,
   }),
   // internals
+  awaitingPrompt: Annotation<AgentPrompt>(),
+
   currentCycle: Annotation<number>({
     reducer: (a, b) => b,
     default: () => 0,

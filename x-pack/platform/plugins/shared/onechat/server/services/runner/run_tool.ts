@@ -121,7 +121,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent, toolId, toolCallId } = toolExecutionParams;
+  const { onEvent, toolId, toolCallId, toolParams } = toolExecutionParams;
   const {
     request,
     elasticsearch,
@@ -145,7 +145,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
       request,
     }),
-    prompts: promptManager.forTool({ toolId, toolCallId }),
+    prompts: promptManager.forTool({ toolId, toolCallId, toolParams }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };

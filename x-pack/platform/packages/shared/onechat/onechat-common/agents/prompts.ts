@@ -41,6 +41,7 @@ export interface ToolConfirmationPrompt extends ConfirmationPrompt {
   data: {
     toolId: string;
     toolCallId: string;
+    toolParams: Record<string, unknown>;
   };
 }
 

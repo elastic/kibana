@@ -35,6 +35,10 @@ export interface ToolsAndMappings {
    * ID mapping that can be used to retrieve the onechat tool id from the langchain tool id.
    */
   idMappings: ToolIdMapping;
+  /**
+   * ID mapping to get the langchain tool fron onechat id map
+   */
+  onechatToLangchainIdMap: ToolIdMapping;
 }
 
 export const toolsToLangchain = async ({
@@ -65,6 +69,7 @@ export const toolsToLangchain = async ({
   return {
     tools: convertedTools,
     idMappings: reverseMappings,
+    onechatToLangchainIdMap,
   };
 };
 
@@ -129,10 +134,8 @@ export const toolToLangchain = async ({
       const input = omit(rawInput, ['_reasoning']);
 
       try {
-        logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
         const toolReturn = await tool.execute({ toolParams: input, onEvent, toolCallId });
         const content = JSON.stringify({ results: toolReturn.results });
-        logger.debug(`Tool ${tool.id} returned reply of length ${content.length}`);
         return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e}`);

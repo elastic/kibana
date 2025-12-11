@@ -62,9 +62,6 @@ export const processToolNodeResponse = (
 
   const interruptMessage = toolMessages.find((message) => {
     const result: ToolHandlerReturn | undefined = message.artifact;
-
-    console.log('result', JSON.stringify(result, undefined, 2));
-
     return result && isToolHandlerInterruptReturn(result);
   });
 

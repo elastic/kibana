@@ -5,39 +5,46 @@
  * 2.0.
  */
 
-import { StateGraph, START as _START_, END as _END_ } from '@langchain/langgraph';
+import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
+import { ConversationRoundStatus } from '@kbn/onechat-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
 import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
-import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
+import {
+  createReasoningEvent,
+  createToolCallMessage,
+  ToolIdMapping,
+} from '@kbn/onechat-genai-utils/langchain';
+import { AgentPromptSource } from '@kbn/onechat-common/agents/prompts';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
-import { getResearchAgentPrompt, getAnswerAgentPrompt } from './prompts';
+import { getAnswerAgentPrompt, getResearchAgentPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
 import {
+  processAnswerResponse,
   processResearchResponse,
   processToolNodeResponse,
-  processAnswerResponse,
 } from './action_utils';
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
-  isToolCallAction,
-  isHandoverAction,
-  isAgentErrorAction,
-  isAnswerAction,
-  isStructuredAnswerAction,
-  isToolPromptAction,
   errorAction,
   handoverAction,
+  isAgentErrorAction,
+  isAnswerAction,
+  isHandoverAction,
+  isStructuredAnswerAction,
+  isToolCallAction,
+  isToolPromptAction,
+  toolCallAction,
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 
@@ -54,6 +61,7 @@ export const createAgentGraph = ({
   structuredOutput = false,
   outputSchema,
   processedConversation,
+  onechatToLangchainIdMap,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -64,8 +72,42 @@ export const createAgentGraph = ({
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
+  onechatToLangchainIdMap: ToolIdMapping;
 }) => {
-  const toolNode = new ToolNode<BaseMessage[]>(tools);
+  const initialize = async (state: StateType) => {
+    const lastRound =
+      processedConversation.previousRounds[processedConversation.previousRounds.length - 1];
+
+    if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
+      const awaitingPrompt = lastRound.pending_prompt!;
+      if (awaitingPrompt.source === AgentPromptSource.tool) {
+        // TODO: add tool call action
+        const toolName =
+          onechatToLangchainIdMap.get(awaitingPrompt.data.toolId) ?? awaitingPrompt.data.toolId;
+        const action = toolCallAction([
+          {
+            toolName,
+            args: awaitingPrompt.data.toolParams,
+            toolCallId: awaitingPrompt.data.toolCallId,
+          },
+        ]);
+        return { mainActions: [action], awaitingPrompt };
+      } else {
+        throw invalidState(
+          `[initialize] expected last round to be a tool prompt, got ${awaitingPrompt.source}`
+        );
+      }
+    }
+
+    return {};
+  };
+
+  const initializeEdge = async (state: StateType) => {
+    if (state.awaitingPrompt) {
+      return steps.resumeToolExecution;
+    }
+    return steps.researchAgent;
+  };
 
   const researcherModel = chatModel.bindTools(tools).withConfig({
     tags: [tags.agent, tags.researchAgent],
@@ -131,6 +173,8 @@ export const createAgentGraph = ({
     throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
   };
 
+  const toolNode = new ToolNode<BaseMessage[]>(tools);
+
   const executeTool = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
     if (!isToolCallAction(lastAction)) {
@@ -140,6 +184,21 @@ export const createAgentGraph = ({
     }
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
+    const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
+    const action = processToolNodeResponse(toolNodeResult);
+    return {
+      mainActions: [action],
+    };
+  };
+
+  const resumeToolExecution = async (state: StateType) => {
+    const toolPrompt = state.awaitingPrompt;
+    const toolName = onechatToLangchainIdMap.get(toolPrompt.data.toolId) ?? toolPrompt.data.toolId;
+    const toolCallMessage = createToolCallMessage({
+      toolName,
+      args: toolPrompt.data.toolParams,
+      toolCallId: toolPrompt.data.toolCallId,
+    });
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const action = processToolNodeResponse(toolNodeResult);
     return {
@@ -267,20 +326,30 @@ export const createAgentGraph = ({
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     // nodes
+    .addNode(steps.initialize, initialize)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
+    .addNode(steps.resumeToolExecution, resumeToolExecution)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.prepareToAnswer, prepareToAnswer)
     .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
     // edges
-    .addEdge(_START_, steps.researchAgent)
+    .addEdge(_START_, steps.initialize)
+    .addConditionalEdges(steps.initialize, initializeEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.resumeToolExecution]: steps.resumeToolExecution,
+    })
     .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.handleToolInterrupt]: steps.handleToolInterrupt,
+    })
+    .addConditionalEdges(steps.resumeToolExecution, executeToolEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
     })

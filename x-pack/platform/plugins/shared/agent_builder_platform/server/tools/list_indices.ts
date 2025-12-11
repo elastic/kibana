@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { AgentInterruptType } from '@kbn/onechat-common/chat/interruptions';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -35,12 +35,22 @@ This parameter should only be used when you already know of a specific pattern t
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
     handler: async ({ pattern }, { esClient, logger, prompts }) => {
-      // TODO: remove
-      return prompts.confirm({
-        message: 'Are you sure you want to list all indices?',
-        state: {},
-      });
-      ////
+      const pendingPrompt = prompts.getPendingPrompt();
+      console.log('***** IN LIST INDICES TOOL *****', pendingPrompt);
+
+      if (!pendingPrompt) {
+        // no pending prompt, it's a normal call to the tool, so we ask for confirmation
+        return prompts.confirm({
+          message: 'Are you sure you want to list all indices?',
+          state: {},
+        });
+      }
+
+      if (!pendingPrompt.response.confirmed) {
+        return {
+          results: [createErrorResult(`User denied usage of the tool`)],
+        };
+      }
 
       logger.debug(`list indices tool called with pattern: ${pattern}`);
       const {

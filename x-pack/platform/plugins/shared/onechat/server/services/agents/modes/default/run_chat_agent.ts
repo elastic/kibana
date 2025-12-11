@@ -55,7 +55,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, attachments, events }
+  { logger, request, modelProvider, toolProvider, promptManager, attachments, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -73,11 +73,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachmentsService: attachments,
   });
 
-  /////
-  // console.log('*** runAgent', nextInput);
-  // throw new Error('dev mode');
-  /////
-
   const selectedTools = await selectTools({
     conversation: processedConversation,
     toolProvider,
@@ -86,7 +81,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
   });
 
-  const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
+  const {
+    tools: langchainTools,
+    idMappings: toolIdMapping,
+    onechatToLangchainIdMap,
+  } = await toolsToLangchain({
     tools: selectedTools,
     logger,
     request,
@@ -122,6 +121,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
+    onechatToLangchainIdMap,
     processedConversation,
   });
 
@@ -171,6 +171,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
+
+  /////
+  // throw new Error('dev mode');
+  /////
 
   return {
     round,

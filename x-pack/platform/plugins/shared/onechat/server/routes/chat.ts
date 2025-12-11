@@ -176,7 +176,7 @@ export function registerChatRoutes({
       browser_api_tools: browserApiTools,
     } = payload;
 
-    const interruptResponse = confirm !== undefined ? { confirm } : undefined;
+    const promptResponse = confirm !== undefined ? { confirmed: confirm } : undefined;
 
     return chatService.converse({
       agentId,
@@ -187,7 +187,7 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: {
         message: input,
-        interrupt_response: interruptResponse,
+        prompt_response: promptResponse,
         attachments,
       },
       request,

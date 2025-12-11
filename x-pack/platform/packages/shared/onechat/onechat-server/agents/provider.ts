@@ -80,7 +80,7 @@ export interface AgentHandlerContext {
   /**
    * Used to manage interruptions.
    */
-  interruptManager: PromptManager;
+  promptManager: PromptManager;
   /**
    * Event emitter that can be used to emits custom events
    */

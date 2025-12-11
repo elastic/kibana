@@ -23,9 +23,9 @@ export interface RoundInput {
    */
   attachments?: Attachment[];
   /**
-   * Response from the user to an interrupt request.
+   * Response from the user to a prompt request.
    */
-  interrupt_response?: Record<string, unknown>;
+  prompt_response?: Record<string, unknown>;
 }
 
 /**
@@ -41,9 +41,9 @@ export interface RawRoundInput {
    */
   attachments?: AttachmentInput[];
   /**
-   * Response from the user to an interrupt request.
+   * Response from the user to an prompt request.
    */
-  interrupt_response?: Record<string, unknown>;
+  prompt_response?: Record<string, unknown>;
 }
 
 /**
