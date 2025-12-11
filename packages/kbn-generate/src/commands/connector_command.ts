@@ -311,16 +311,31 @@ export const ConnectorCommand: GenerateCommand = {
         // Find the elastic-connectors section and its children
         for (let i = 0; i < lines.length; i++) {
           if (lines[i].includes('file: connectors-kibana/elastic-connectors.md')) {
-            // Found the section, now find the last child
+            // Found the section, look for the children block
+            let childIndent = '';
             for (let j = i + 1; j < lines.length; j++) {
-              if (lines[j].trim().startsWith('- file: connectors-kibana/')) {
+              const currentIndent = lines[j].match(/^(\s*)/)?.[1] || '';
+
+              // First, find the children: line
+              if (lines[j].trim() === 'children:') {
+                continue;
+              }
+
+              // Capture the indentation of the first child
+              if (!childIndent && lines[j].trim().startsWith('- file:')) {
+                childIndent = currentIndent;
                 insertAt = j;
-              } else if (
-                lines[j].trim().startsWith('- file:') &&
-                !lines[j].includes('connectors-kibana/')
-              ) {
-                // We've left the connectors section
-                break;
+                continue;
+              }
+
+              // If we have child indent, only consider lines at the same level
+              if (childIndent) {
+                if (currentIndent === childIndent && lines[j].trim().startsWith('- file:')) {
+                  insertAt = j;
+                } else if (currentIndent.length < childIndent.length) {
+                  // We've outdented, meaning we left the children section
+                  break;
+                }
               }
             }
             break;
