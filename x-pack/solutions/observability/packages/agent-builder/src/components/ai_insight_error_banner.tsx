@@ -11,30 +11,16 @@ import { EuiCallOut, EuiButton } from '@elastic/eui';
 
 export interface AiInsightErrorBannerProps {
   error?: string;
-  isEmptyResponse?: boolean;
   onRetry?: () => void;
-  'data-test-subj'?: string;
 }
 
-export function AiInsightErrorBanner({
-  error,
-  onRetry,
-  'data-test-subj': dataTestSubj,
-}: AiInsightErrorBannerProps) {
-  const title = error
-    ? i18n.translate('observabilityAgentBuilder.aiInsight.errorTitle', {
-        defaultMessage: 'Failed to generate AI insight',
-      })
-    : i18n.translate('observabilityAgentBuilder.aiInsight.emptyResponseTitle', {
-        defaultMessage: 'Empty response received',
-      });
-
-  const message =
-    error ||
-    i18n.translate('observabilityAgentBuilder.aiInsight.emptyResponseMessage', {
-      defaultMessage:
-        'The AI insight could not be generated. Please try again or contact your administrator if the problem persists.',
-    });
+export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerProps) {
+  const title = i18n.translate('observabilityAgentBuilder.aiInsight.errorTitle', {
+    defaultMessage: 'Failed to generate AI insight',
+  });
+  const message = i18n.translate('observabilityAgentBuilder.aiInsight.errorMessage', {
+    defaultMessage: `The AI insight could not be generated due to the error: ${error}`,
+  });
 
   return (
     <EuiCallOut
@@ -42,11 +28,11 @@ export function AiInsightErrorBanner({
       color="danger"
       iconType="alert"
       title={title}
-      data-test-subj={`${dataTestSubj}ErrorBanner`}
+      data-test-subj={`AiInsightErrorBanner`}
     >
       <p>{message}</p>
       {onRetry && (
-        <EuiButton size="s" onClick={onRetry} data-test-subj={`${dataTestSubj}RetryButton`}>
+        <EuiButton size="s" onClick={onRetry} data-test-subj={`AiInsightErrorBannerRetryButton`}>
           {i18n.translate('observabilityAgentBuilder.aiInsight.retryButton', {
             defaultMessage: 'Try again',
           })}

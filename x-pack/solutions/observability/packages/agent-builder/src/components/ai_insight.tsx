@@ -93,13 +93,8 @@ export function AiInsight({
           <EuiPanel color="subdued">
             <EuiSkeletonText lines={3} />
           </EuiPanel>
-        ) : error || (content !== undefined && (!content || !content.trim())) ? (
-          <AiInsightErrorBanner
-            error={error}
-            isEmptyResponse={content !== undefined && (!content || !content.trim()) && !error}
-            onRetry={onOpen}
-            data-test-subj={dataTestSubj}
-          />
+        ) : error ? (
+          <AiInsightErrorBanner error={error} onRetry={onOpen} />
         ) : (
           <EuiMarkdownFormat textSize="s">{content ?? ''}</EuiMarkdownFormat>
         )}
