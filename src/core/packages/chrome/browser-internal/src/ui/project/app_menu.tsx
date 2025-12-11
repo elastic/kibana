@@ -12,7 +12,7 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo } from 'react';
-import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
+import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
 interface AppMenuBarProps {

@@ -4,19 +4,6 @@
 
 ## Usage
 
-- Using `core.navigation.ui` API:
-
-```typescript
-// In your plugin's start method
-public start(core: CoreStart, plugins: PluginsStart) {
-  const { ui } = plugins.navigation;
-  // TODO: Define how to mount in header after upcoming extension point changes.
-  return {
-    renderTopNav: (props) => <ui.TopNavMenuBeta {...props} />
-  };
-}
-```
-
 - Direct import:
 
 ```typescript
@@ -24,7 +11,6 @@ import { TopNavMenuBeta} from '@kbn/navigation-plugin/public'
 
 const MyComponent = (props: TopNavMenuConfigBeta) => {
 
-  // TODO: Define how to mount in header after upcoming extension point changes.
   return <TopNavMenuBeta {...props} />
 }
 ```

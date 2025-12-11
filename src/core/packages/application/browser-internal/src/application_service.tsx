@@ -12,7 +12,6 @@ import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscri
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
-import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
@@ -33,6 +32,7 @@ import type {
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 

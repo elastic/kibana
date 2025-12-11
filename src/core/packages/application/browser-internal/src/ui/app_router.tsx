@@ -21,7 +21,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
+import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';

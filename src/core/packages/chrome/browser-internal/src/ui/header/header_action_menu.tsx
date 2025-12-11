@@ -11,8 +11,8 @@ import type { FC } from 'react';
 import React, { useRef, useLayoutEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
-import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
-// import { TopNavMenuBeta } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
+import { TopNavMenuBeta } from '@kbn/app-menu';
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };
@@ -72,8 +72,7 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter, config })
   }, [config]);
 
   if (menuConfig) {
-    // return <TopNavMenuBeta config={menuConfig} />;
-    return null;
+    return <TopNavMenuBeta config={menuConfig} />;
   }
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;

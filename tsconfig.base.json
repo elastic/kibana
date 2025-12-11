@@ -116,6 +116,8 @@
       "@kbn/apm-utils/*": ["src/platform/packages/shared/kbn-apm-utils/*"],
       "@kbn/app-link-test-plugin": ["src/platform/test/plugin_functional/plugins/app_link_test"],
       "@kbn/app-link-test-plugin/*": ["src/platform/test/plugin_functional/plugins/app_link_test/*"],
+      "@kbn/app-menu": ["src/platform/packages/shared/kbn-app-menu"],
+      "@kbn/app-menu/*": ["src/platform/packages/shared/kbn-app-menu/*"],
       "@kbn/application-usage-test-plugin": ["x-pack/platform/test/usage_collection/plugins/application_usage_test"],
       "@kbn/application-usage-test-plugin/*": ["x-pack/platform/test/usage_collection/plugins/application_usage_test/*"],
       "@kbn/audit-log-plugin": ["x-pack/platform/test/security_api_integration/plugins/audit_log"],

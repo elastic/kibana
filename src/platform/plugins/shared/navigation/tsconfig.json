@@ -8,8 +8,8 @@
     "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts"
-  ],
+    "server/**/*.ts",
+],
   "kbn_references": [
     "@kbn/core",
     "@kbn/unified-search-plugin",

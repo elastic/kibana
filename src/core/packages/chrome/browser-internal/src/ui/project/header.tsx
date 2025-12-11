@@ -38,7 +38,7 @@ import type { Observable } from 'rxjs';
 import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
-import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
+import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';

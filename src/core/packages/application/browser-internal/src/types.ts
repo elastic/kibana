@@ -17,7 +17,7 @@ import type {
   ApplicationSetup,
   ApplicationStart,
 } from '@kbn/core-application-browser';
-import type { TopNavMenuConfigBeta } from '@kbn/navigation-plugin/public/top_nav_menu_beta/types';
+import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
 
 /** @internal */
 export interface Mounter {

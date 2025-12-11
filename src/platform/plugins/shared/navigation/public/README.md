@@ -13,7 +13,6 @@ interface NavigationPublicStart {
   ui: {
     TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
     AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
-    TopNavMenuBeta: ({ config, visible}: { config: TopNavMenuConfigBeta, visible: boolean }) => React.ReactElement;
     createTopNavWithCustomContext: (
       customUnifiedSearch?: UnifiedSearchPublicPluginStart,
       customExtensions?: RegisteredTopNavMenuData[]
