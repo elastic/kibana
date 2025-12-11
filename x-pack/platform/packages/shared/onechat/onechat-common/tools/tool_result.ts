@@ -23,6 +23,8 @@ export enum SupportedChartType {
   Gauge = 'gauge',
   Tagcloud = 'tagcloud',
   XY = 'xy',
+  RegionMap = 'region_map',
+  Heatmap = 'heatmap',
 }
 
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
