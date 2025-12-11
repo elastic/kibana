@@ -21,9 +21,10 @@ export function RedirectToHomeIfUnauthorized({
 }) {
   const {
     application: { capabilities, navigateToApp },
+    settings,
   } = coreStart;
 
-  const chatExperience = coreStart.settings.client.get<AIChatExperience>(
+  const chatExperience = settings.client.get<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
     AIChatExperience.Classic
   );

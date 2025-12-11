@@ -127,7 +127,7 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
     end,
   ]);
 
-  if (!onechat || !isObservabilityAgentEnabled || !hasEnterpriseLicense) {
+  if (!onechat || !hasEnterpriseLicense) {
     return <></>;
   }
 
@@ -140,6 +140,7 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
         description={i18n.translate('xpack.apm.errorAiInsight.descriptionLabel', {
           defaultMessage: 'Get helpful insights from our Elastic AI Agent',
         })}
+        license={license}
         content={summary}
         isLoading={isLoading}
         onOpen={fetchAiInsights}
