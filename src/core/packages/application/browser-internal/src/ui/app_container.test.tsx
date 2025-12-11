@@ -24,6 +24,7 @@ describe('AppContainer', () => {
   const appId = 'someApp';
   const setAppLeaveHandler = jest.fn();
   const setAppActionMenu = jest.fn();
+  const setAppActionMenuBeta = jest.fn();
   const setIsMounting = jest.fn();
   const theme$ = themeServiceMock.createTheme$();
 
@@ -86,6 +87,7 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
+        setAppActionMenuBeta={setAppActionMenuBeta}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -123,6 +125,7 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
+        setAppActionMenuBeta={setAppActionMenuBeta}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -165,6 +168,7 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
+        setAppActionMenuBeta={setAppActionMenuBeta}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -199,6 +203,7 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
+        setAppActionMenuBeta={setAppActionMenuBeta}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -235,6 +240,7 @@ describe('AppContainer', () => {
             mounter={mounter}
             setAppLeaveHandler={setAppLeaveHandler}
             setAppActionMenu={setAppActionMenu}
+            setAppActionMenuBeta={setAppActionMenuBeta}
             setIsMounting={setIsMounting}
             createScopedHistory={(appPath: string) =>
               // Create a history using the appPath as the current location
