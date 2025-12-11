@@ -415,6 +415,11 @@ export class TaskManagerRunner implements TaskRunner {
       const originalTaskCancel = this.task.cancel;
       this.task.cancel = async function () {
         abortController.abort();
+
+        // Stop updating retryAt for long running tasks if the task is cancelled
+        if (stopUpdatingLongRunningTasks) {
+          stopUpdatingLongRunningTasks();
+        }
         if (originalTaskCancel) return originalTaskCancel.call(this);
       };
 
@@ -428,11 +433,6 @@ export class TaskManagerRunner implements TaskRunner {
       const result = await this.executionContext.withContext(ctx, () =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
-
-      // Stop updating retryAt for long running tasks once the task has finished
-      if (stopUpdatingLongRunningTasks) {
-        stopUpdatingLongRunningTasks();
-      }
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -457,6 +457,10 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
     } finally {
+      // Stop updating retryAt for long running tasks once the task has finished
+      if (stopUpdatingLongRunningTasks) {
+        stopUpdatingLongRunningTasks();
+      }
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
   }
@@ -966,11 +970,14 @@ export class TaskManagerRunner implements TaskRunner {
               { validate: false, doc: taskInstance }
             )) as ConcreteTaskInstanceWithStartedAt
           );
-        } catch (e) {
+        } catch (error) {
           this.logger.warn(
-            `Unable to update retryAt for long running task: ${this.id} - ${e.message}`,
+            `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,
             { tags: [this.id, this.taskType] }
           );
+          if (SavedObjectsErrorHelpers.isConflictError(error)) {
+            stop();
+          }
         }
         timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
       }
@@ -981,13 +988,17 @@ export class TaskManagerRunner implements TaskRunner {
     });
     let timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
 
-    return () => {
-      stopped = true;
-      clearTimeout(timer);
-      this.logger.info(`Stopping interval to update retryAt for long running task: ${this.id}`, {
-        tags: [this.id, this.taskType],
-      });
+    const stop = () => {
+      if (timer) {
+        stopped = true;
+        clearTimeout(timer);
+        timer = null;
+        this.logger.info(`Stopping interval to update retryAt for long running task: ${this.id}`, {
+          tags: [this.id, this.taskType],
+        });
+      }
     };
+    return stop;
   }
 }
 
