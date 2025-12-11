@@ -1,8 +1,7 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/observability-agent-builder",
+  "id": "@kbn/ai-insights",
   "owner": ["@elastic/obs-ai-team"],
   "group": "platform",
   "visibility": "shared"
 }
-
