@@ -342,7 +342,9 @@ describe('LensVisService attributes', () => {
                   "layerId": "unifiedHistogram",
                   "layerType": "data",
                   "seriesType": "bar_stacked",
-                  "splitAccessor": "breakdown_column",
+                  "splitAccessors": Array [
+                    "breakdown_column",
+                  ],
                   "xAccessor": "date_column",
                 },
               ],
