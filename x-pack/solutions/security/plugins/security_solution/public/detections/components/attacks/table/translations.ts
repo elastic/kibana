@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export enum DataInputStep {
-  Rules = 1,
-  Macros = 2,
-  Lookups = 3,
-  End = 10,
-}
+import { i18n } from '@kbn/i18n';
+
+export const SHOW_ANONYMIZED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.tableSection.showAnonymizedLabel',
+  {
+    defaultMessage: 'Show anonymized values',
+  }
+);

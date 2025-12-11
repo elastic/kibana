@@ -25,11 +25,12 @@ import {
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
   SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
-  SIEM_RULE_MIGRATION_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_STOP_PATH,
   SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
+  SIEM_RULE_MIGRATION_RULES_PATH,
+  SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -93,6 +94,30 @@ export const createRuleMigration = async ({
     signal,
     body: JSON.stringify({ name }),
   });
+};
+
+export interface AddRulesToQradarMigrationParams {
+  /** `id` of the migration to add the rules to */
+  migrationId: string;
+  /** The body containing the list of rules to be added to the migration */
+  body: { xml: string };
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+
+interface AddRulesToQradarMigrationResponse {
+  count: number;
+}
+
+export const addRulesToQRadarMigration = async ({
+  migrationId,
+  body,
+  signal,
+}: AddRulesToQradarMigrationParams) => {
+  return KibanaServices.get().http.post<AddRulesToQradarMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_QRADAR_RULES_PATH, { migration_id: migrationId }),
+    { body: JSON.stringify(body), version: '1', signal }
+  );
 };
 
 export interface AddRulesToMigrationParams {
