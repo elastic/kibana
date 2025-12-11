@@ -38,7 +38,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     attachmentsService,
     resultStore,
     logger,
-    savedObjects,
     actions,
   } = manager.deps;
 
