@@ -27,6 +27,17 @@ const ecsFields = {
     short: 'Date/time when the event originated.',
     type: 'date',
   },
+  'user.name': {
+    dashed_name: 'user-name',
+    description: 'Short name or login of the user.',
+    example: 'a.einstein',
+    flat_name: 'user.name',
+    level: 'core',
+    name: 'name',
+    normalize: [],
+    short: 'Short name or login of the user.',
+    type: 'keyword',
+  },
 } as TEcsFields;
 
 const metadataFields = {
@@ -107,6 +118,13 @@ const otelFields = {
     name: 'severity_text',
     description: 'The severity text (also known as log level).',
     type: 'keyword',
+  },
+  // Add a native OTel field with the 'attributes.' prefix to test priority
+  'attributes.custom.otel.field': {
+    name: 'attributes.custom.otel.field',
+    description: 'A native OTel field with attributes prefix.',
+    type: 'keyword',
+    example: 'otel-value',
   },
 } as Partial<TOtelFields>;
 
@@ -397,6 +415,40 @@ describe('FieldsMetadataClient class', () => {
       expect(fields['@timestamp'].source).toBe('ecs'); // Second priority
       expect(fields['service.name'].source).toBe('otel'); // Lowest priority (fallback)
       expect(fields['http.request.method'].source).toBe('otel'); // Lowest priority (fallback)
+    });
+
+    it('should prioritize OTel over ECS for prefixed fields (attributes.* and resource.attributes.*)', async () => {
+      // Test that native OTel prefixed fields take priority over ECS proxy-generated prefixed fields
+      const nativeOtelField = await fieldsMetadataClient.getByName('attributes.custom.otel.field');
+
+      expectToBeDefined(nativeOtelField);
+      expect(nativeOtelField.source).toBe('otel');
+      expect(nativeOtelField.description).toBe('A native OTel field with attributes prefix.');
+      expect(nativeOtelField.example).toBe('otel-value');
+    });
+
+    it('should return ECS proxy-generated prefixed field when OTel does not have that base field', async () => {
+      // When requesting a prefixed field where OTel doesn't have the base field,
+      // it should fall back to the ECS proxy-generated field
+      // Use a field that exists in ECS but not in OTel
+      const ecsProxyField = await fieldsMetadataClient.getByName('attributes.user.name');
+
+      expectToBeDefined(ecsProxyField);
+      // Since 'user.name' doesn't exist in our mock OTel fields, it falls back to ECS
+      expect(ecsProxyField.source).toBe('ecs');
+      expect(ecsProxyField.name).toBe('attributes.user.name');
+      expect(ecsProxyField.flat_name).toBe('attributes.user.name');
+    });
+
+    it('should prioritize OTel for prefixed fields when OTel has the base field', async () => {
+      // When requesting a prefixed field where OTel DOES have the base field,
+      // OTel should be prioritized over ECS
+      const otelField = await fieldsMetadataClient.getByName('attributes.@timestamp');
+
+      expectToBeDefined(otelField);
+      // OTel has '@timestamp', so even with 'attributes.' prefix, OTel takes priority
+      expect(otelField.source).toBe('otel');
+      expect(otelField.description).toContain('Time when the event occurred');
     });
   });
 

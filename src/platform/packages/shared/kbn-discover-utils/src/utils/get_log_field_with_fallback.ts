@@ -14,8 +14,9 @@ import { getFirstAvailableFieldValue } from './get_field_value_with_fallback';
 export const getLogFieldWithFallback = <T extends keyof LogDocumentOverview>(
   doc: Record<string, unknown> | LogDocumentOverview,
   rankingOrder: readonly T[],
-  includeFormattedValue?: boolean
+  options: { includeFormattedValue?: boolean; includeOriginalValue?: boolean } = {}
 ) => {
+  const { includeFormattedValue = false, includeOriginalValue = false } = options;
   const { field, value } = getFirstAvailableFieldValue(
     doc as Record<string, unknown>,
     rankingOrder
@@ -32,7 +33,12 @@ export const getLogFieldWithFallback = <T extends keyof LogDocumentOverview>(
       }
     }
 
-    return { field, value: valueAsString, formattedValue };
+    return {
+      field,
+      value: valueAsString,
+      formattedValue,
+      originalValue: includeOriginalValue ? value : undefined,
+    };
   }
 
   // If none of the ranks (fallbacks) are present
