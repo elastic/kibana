@@ -19,12 +19,12 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline } from '@kbn/file-upload-common';
-import { useFileUploadContext, UPLOAD_TYPE } from '../../..';
 import { Mappings } from './file_status/mappings';
 import { Settings } from './file_status/settings';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
 import type { CombinedField } from './combined_fields';
 import { CombinedFieldsForm } from './combined_fields';
+import { useFileUploadContext, UPLOAD_TYPE } from '../../use_file_upload';
 
 interface Props {
   canCreateDataView?: boolean;

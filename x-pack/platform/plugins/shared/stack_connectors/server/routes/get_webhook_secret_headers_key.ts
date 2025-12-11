@@ -21,6 +21,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 
 export interface ConnectorsPluginsStart {
@@ -38,7 +39,8 @@ export interface ConnectorAttributes {
 
 export const getWebhookSecretHeadersKeyRoute = (
   router: IRouter,
-  getStartServices: StartServicesAccessor<ConnectorsPluginsStart, unknown>
+  getStartServices: StartServicesAccessor<ConnectorsPluginsStart, unknown>,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
   router.get(
     {
@@ -73,9 +75,19 @@ export const getWebhookSecretHeadersKeyRoute = (
         const connector = await actionsClient.get({ id });
         const spaceId = spaces.spacesService.getSpaceId(req);
 
-        if (!['.webhook', '.cases-webhook'].includes(connector.actionTypeId)) {
+        const allowedConnectorTypes = ['.webhook', '.cases-webhook'];
+
+        if (experimentalFeatures.agentBuilderExternalMcpOn) {
+          allowedConnectorTypes.push('.mcp');
+        }
+
+        if (!allowedConnectorTypes.includes(connector.actionTypeId)) {
           return res.badRequest({
-            body: { message: 'Connector must be a webhook or cases webhook' },
+            body: {
+              message: `Connector must be one of the following types: ${allowedConnectorTypes.join(
+                ', '
+              )}`,
+            },
           });
         }
         const encryptedClient = encryptedSavedObjects.getClient({

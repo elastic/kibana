@@ -12,10 +12,12 @@
       "onechat",
       "apmDataAccess",
       "logsDataAccess",
+      "inference",
       "security",
       "ruleRegistry",
       "dataViews",
-      "metricsDataAccess"
+      "metricsDataAccess",
+      "inference"
     ],
     "optionalPlugins": ["ml"],
     "requiredBundles": [],

@@ -19,7 +19,7 @@ import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
-import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import { useInteractiveModeSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { getStepPanelColour } from '../../../utils';
 import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
@@ -34,7 +34,7 @@ import { NestedChildrenProcessingSummary } from './nested_children_processing_su
 export const WhereBlock = (props: StepConfigurationProps) => {
   const { stepRef, stepUnderEdit, rootLevelMap, stepsProcessingSummaryMap, level } = props;
   const { euiTheme } = useEuiTheme();
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+  const stepRefs = useInteractiveModeSelector((state) => state.context.stepRefs);
   const isFirstMount = useFirstMountState();
   const freshBlockRef = useRef<HTMLDivElement>(null);
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
@@ -48,7 +48,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
-  const childSteps = useStreamEnrichmentSelector((state) =>
+  const childSteps = useInteractiveModeSelector((state) =>
     state.context.stepRefs.filter(
       (ref) => ref.getSnapshot().context.step.parentId === step.customIdentifier
     )

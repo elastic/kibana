@@ -23,6 +23,7 @@ interface Query {
   title: string;
   category: SignificantEventType;
   severity_score: number;
+  evidence?: string[];
 }
 
 /**

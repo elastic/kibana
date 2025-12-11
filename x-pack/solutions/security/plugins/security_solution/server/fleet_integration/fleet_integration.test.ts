@@ -140,6 +140,7 @@ describe('Fleet integrations', () => {
     licenseService.start(licenseEmitter);
     experimentalFeatures = {
       trustedDevices: true,
+      linuxDnsEvents: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
@@ -393,6 +394,16 @@ describe('Fleet integrations', () => {
         expect(policyConfig.global_telemetry_enabled).toBe(targetValue);
       }
     );
+
+    it('should remove Linux DNS events when linuxDnsEvents feature flag is disabled', async () => {
+      // @ts-expect-error write to readonly property for testing
+      experimentalFeatures.linuxDnsEvents = false;
+      const manifestManager = buildManifestManagerMock();
+
+      const packagePolicy = await invokeCallback(manifestManager);
+
+      expect(packagePolicy.inputs[0].config!.policy.value.linux.events.dns).toBeUndefined();
+    });
   });
 
   describe('package policy post create callback', () => {

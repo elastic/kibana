@@ -6,7 +6,8 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
+import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
 import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
 import { getApmErrors } from '../../routes/assistant_functions/get_observability_alert_details_context/get_apm_errors';
@@ -61,9 +62,12 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmDownstreamDependencies',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-      const [coreStart] = await core.getStartServices();
-      const randomSampler = await getRandomSampler({ coreStart, probability: 1, request });
+      const { apmEventClient, randomSampler } = await buildApmToolResources({
+        core,
+        plugins,
+        request,
+        logger,
+      });
 
       return getApmDownstreamDependencies({
         apmEventClient,
@@ -122,6 +126,23 @@ export function registerDataProviders({
         transactionName,
         start,
         end,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmErrorDetails',
+    async ({ request, errorId, serviceName, serviceEnvironment, start, end, kuery = '' }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+
+      return getErrorSampleDetails({
+        apmEventClient,
+        errorId,
+        serviceName,
+        start: parseDatemath(start),
+        end: parseDatemath(end),
+        environment: serviceEnvironment ?? '',
+        kuery,
       });
     }
   );

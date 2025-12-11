@@ -7,23 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, type ESQLFunction } from '@kbn/esql-ast';
+import { type ESQLFunction } from '@kbn/esql-ast';
 import {
   getFunctionDefinition,
   getFormattedFunctionSignature,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
-import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
+import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 
 export async function getFunctionSignatureHover(
   fnNode: ESQLFunction,
   getColumnMap: GetColumnMapFn
 ): Promise<Array<{ value: string }>> {
-  // Getting the columns map is not expensive, it's already cached.
-  const columnsMap = await getColumnMap();
-
   // Use function name and argument types as cache key, fnName:argType1,argType2
-  const cacheKey = getFunctionCachekey(fnNode, columnsMap);
+  const cacheKey = fnNode.name;
   const cached = fromCache(cacheKey);
   if (cached) {
     return cached;
@@ -31,7 +28,7 @@ export async function getFunctionSignatureHover(
 
   const fnDefinition = getFunctionDefinition(fnNode.name);
   if (fnDefinition) {
-    const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode, columnsMap);
+    const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode);
 
     const result = [
       {
@@ -49,23 +46,3 @@ ${formattedSignature}
     return [];
   }
 }
-
-/**
- * Returns a cache key for the function signature hover based on function name and argument types.
- * fnName:argType1,argType2
- *
- * @param fnNode
- * @param columnsMap
- * @returns
- */
-const getFunctionCachekey = (fnNode: ESQLFunction, columnsMap: ColumnsMap) => {
-  const argTypes: string[] = [];
-  Walker.walk(fnNode, {
-    visitColumn: (columnNode) => {
-      const columnType = columnsMap.get(columnNode.name)?.type || 'unknown';
-      argTypes.push(columnType);
-    },
-  });
-
-  return `${fnNode.name}:${argTypes.join(',')}`;
-};

@@ -12439,6 +12439,20 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Signature.isSignatureRepeating",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSignatureRepeating",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -16479,6 +16493,21 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.defaultValuePlaceholderConstant",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultValuePlaceholderConstant",
+        "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQL_ARITHMETIC_TYPES",
         "type": "Object",
         "tags": [],
@@ -17271,6 +17300,21 @@
         "type": "Object",
         "tags": [],
         "label": "subqueryCompleteItem",
+        "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.valuePlaceholderConstant",
+        "type": "Object",
+        "tags": [],
+        "label": "valuePlaceholderConstant",
         "description": [],
         "signature": [
           "ISuggestionItem"

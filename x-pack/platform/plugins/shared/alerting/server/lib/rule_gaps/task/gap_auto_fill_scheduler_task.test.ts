@@ -390,7 +390,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         const result = await taskRunner.run();
 
         expect(result).toEqual({ state: {} });
-        expectFinalLog('skipped', 'no rules with gaps');
+        expectFinalLog('no_gaps', 'no rules with gaps');
         expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
           expect.objectContaining({
             start: expect.any(String),

@@ -358,7 +358,7 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
-  test('processAlerts() should set maintenance windows IDs on new alerts and remove the expired maintenance windows from the active and recovered alerts', async () => {
+  test('processAlerts() should set maintenance windows IDs and names on new alerts and remove the expired maintenance windows from the active and recovered alerts', async () => {
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
@@ -367,6 +367,7 @@ describe('Legacy Alerts Client', () => {
           eventEndTime: new Date().toISOString(),
           status: MaintenanceWindowStatus.Running,
           id: 'test-id1',
+          title: 'Maintenance Window 1',
         },
         {
           ...getMockMaintenanceWindow(),
@@ -374,6 +375,7 @@ describe('Legacy Alerts Client', () => {
           eventEndTime: new Date().toISOString(),
           status: MaintenanceWindowStatus.Running,
           id: 'test-id5',
+          title: 'Maintenance Window 5',
         },
       ],
       maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id5'],
@@ -384,6 +386,7 @@ describe('Legacy Alerts Client', () => {
       meta: {
         uuid: 'bar',
         maintenanceWindowIds: ['test-id1', 'test-id2'],
+        maintenanceWindowNames: ['Maintenance Window 1', 'Maintenance Window 2'],
       },
     };
 
@@ -392,6 +395,7 @@ describe('Legacy Alerts Client', () => {
       meta: {
         uuid: 'ghi',
         maintenanceWindowIds: ['test-id1', `test-id3`],
+        maintenanceWindowNames: ['Maintenance Window 1', 'Maintenance Window 3'],
       },
     };
 
@@ -436,11 +440,21 @@ describe('Legacy Alerts Client', () => {
       'test-id1',
       'test-id5',
     ]);
+    expect(alertsClient.getProcessedAlerts('new')['1'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
+      'Maintenance Window 5',
+    ]);
     expect(alertsClient.getProcessedAlerts('active')['2'].getMaintenanceWindowIds()).toEqual([
       'test-id1',
     ]);
+    expect(alertsClient.getProcessedAlerts('active')['2'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
+    ]);
     expect(alertsClient.getProcessedAlerts('recovered')['3'].getMaintenanceWindowIds()).toEqual([
       'test-id1',
+    ]);
+    expect(alertsClient.getProcessedAlerts('recovered')['3'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
     ]);
   });
 

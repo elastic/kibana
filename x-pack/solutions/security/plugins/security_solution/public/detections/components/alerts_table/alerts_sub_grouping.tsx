@@ -12,7 +12,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DynamicGroupingProps } from '@kbn/grouping/src';
+import type { DynamicGroupingProps, ParsedGroupingAggregation } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -92,6 +92,17 @@ interface OwnProps {
    * Data view scope
    */
   pageScope?: PageScope;
+
+  /**
+   * A callback function that is invoked whenever the grouping aggregations are updated.
+   * It receives the parsed aggregation data as its only argument. This can be used to
+   * react to changes in the grouped data, for example, to extract information from
+   * the aggregation results.
+   */
+  onAggregationsChange?: (
+    aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
+    groupingLevel?: number
+  ) => void;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -120,6 +131,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   to,
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
+  onAggregationsChange,
 }) => {
   const {
     services: { uiSettings },
@@ -257,6 +269,12 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       ),
     [alertsGroupsData?.aggregations, selectedGroup, uniqueValue]
   );
+
+  useEffect(() => {
+    if (!isLoadingGroups) {
+      onAggregationsChange?.(aggs, groupingLevel);
+    }
+  }, [aggs, groupingLevel, isLoadingGroups, onAggregationsChange]);
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {

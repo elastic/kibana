@@ -33,7 +33,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
@@ -74,7 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  const doTests = () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
+    this.tags(['esGate']);
+
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -242,29 +243,6 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
       });
-    });
-  };
-
-  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
-    this.tags(['esGate']);
-
-    describe('ESQL based risk scoring', () => {
-      doTests();
-    });
-
-    describe('scripted metric based risk scoring', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
     });
   });
 };

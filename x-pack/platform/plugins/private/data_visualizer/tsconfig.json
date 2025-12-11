@@ -85,6 +85,7 @@
     "@kbn/file-upload",
     "@kbn/charts-theme",
     "@kbn/presentation-util",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": [
     "target/**/*",

@@ -54,6 +54,7 @@ interface GeneratedSignificantEventQuery {
     type: FeatureType;
   };
   severity_score: number;
+  evidence?: string[];
 }
 
 type SignificantEventsGenerateResponse = Observable<

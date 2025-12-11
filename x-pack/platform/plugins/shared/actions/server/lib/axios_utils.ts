@@ -15,9 +15,10 @@ import type {
 } from 'axios';
 import { AxiosHeaders, isAxiosError } from 'axios';
 import type { Logger } from '@kbn/core/server';
+import type { SSLSettings } from '@kbn/actions-utils';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorUsageCollector, SSLSettings } from '../types';
+import type { ConnectorUsageCollector } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 import { createAndThrowUserError } from './create_and_throw_user_error';
 import { getBeforeRedirectFn } from './before_redirect';

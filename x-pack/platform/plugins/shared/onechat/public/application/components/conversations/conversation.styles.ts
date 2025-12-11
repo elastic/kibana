@@ -8,6 +8,8 @@
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
+export const headerHeight = 88;
+
 const maxConversationWidthStyles = css`
   max-width: 800px;
 `;
@@ -25,17 +27,6 @@ export const conversationElementWidthStyles = css`
 export const fullWidthAndHeightStyles = css`
   width: 100%;
   height: 100%;
-`;
-
-const ROUNDED_BORDER_RADIUS = '6px';
-export const ROUNDED_BORDER_RADIUS_LARGE = '12px';
-const ROUNDED_BORDER_RADIUS_EXTRA_LARGE = '16px';
-
-export const roundedBorderRadiusStyles = css`
-  border-radius: ${ROUNDED_BORDER_RADIUS};
-`;
-export const borderRadiusXlStyles = css`
-  border-radius: ${ROUNDED_BORDER_RADIUS_EXTRA_LARGE};
 `;
 
 export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`

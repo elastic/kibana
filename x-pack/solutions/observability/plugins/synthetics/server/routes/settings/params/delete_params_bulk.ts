@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
+import { getExistingParamsSpaces } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { DeleteParamsResponse } from '../../../../common/runtime_types';
+import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -31,13 +32,16 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   handler: async ({ savedObjectsClient, request, server, spaceId }) => {
     const { ids } = request.body;
 
+    const existingParamsSpaces = await getExistingParamsSpaces(savedObjectsClient, ids);
+
     const result = await savedObjectsClient.bulkDelete(
       ids.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
 
-    await runSynPrivateLocationMonitorsTaskSoon({
+    await asyncGlobalParamsPropagation({
       server,
+      paramsSpacesToSync: existingParamsSpaces,
     });
 
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));

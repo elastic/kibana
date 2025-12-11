@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyncPrivateLocationMonitorsTask } from '../../../tasks/sync_private_locations_monitors_task';
+import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -21,16 +21,15 @@ export const syncParamsSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = ()
     },
   },
   writeAccess: true,
-  handler: async ({ syntheticsMonitorClient, server }): Promise<any> => {
+  handler: async ({ syntheticsMonitorClient, server, spaceId }): Promise<any> => {
     const soClient = server.coreStart.savedObjects.createInternalRepository();
 
     const allPrivateLocations = await getPrivateLocations(soClient);
 
-    const syncTask = new SyncPrivateLocationMonitorsTask(server, syntheticsMonitorClient);
     if (allPrivateLocations.length > 0) {
-      await syncTask.syncGlobalParams({
-        allPrivateLocations,
-        soClient,
+      await asyncGlobalParamsPropagation({
+        server,
+        paramsSpacesToSync: [spaceId],
       });
     }
 

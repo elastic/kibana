@@ -4983,33 +4983,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.ChartSectionConfiguration",
-        "type": "Type",
-        "tags": [],
-        "label": "ChartSectionConfiguration",
-        "description": [
-          "\nSupports customizing the chart (UnifiedHistogram) section in Discover"
-        ],
-        "signature": [
-          "{ Component: React.ComponentType<",
-          "ChartSectionProps",
-          " & ",
-          {
-            "pluginId": "@kbn/restorable-state",
-            "scope": "public",
-            "docId": "kibKbnRestorableStatePluginApi",
-            "section": "def-public.RestorableStateProviderProps",
-            "text": "RestorableStateProviderProps"
-          },
-          "<T>>; replaceDefaultChart: true; localStorageKeyPrefix?: string | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; } | { replaceDefaultChart: false; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
         "id": "def-public.UnifiedHistogramAdapters",
         "type": "Type",
         "tags": [],

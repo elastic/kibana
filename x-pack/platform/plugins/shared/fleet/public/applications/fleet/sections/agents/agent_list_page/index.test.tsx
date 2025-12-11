@@ -328,6 +328,20 @@ describe('agent_list_page', () => {
   describe('Uninstall agent', () => {
     let renderResult: RenderResult;
 
+    /**
+     * Helper to navigate into a submenu panel in the hierarchical menu.
+     */
+    async function navigateToSubmenu(submenuText: string) {
+      const submenuButton = renderResult.getByText(submenuText).closest('button');
+      if (submenuButton) {
+        await act(async () => {
+          fireEvent.click(submenuButton);
+        });
+        // Wait a bit for panel transition
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
+
     beforeEach(async () => {
       mockedSendGetAgentsForRq.mockResolvedValue({
         items: [
@@ -367,27 +381,45 @@ describe('agent_list_page', () => {
     it('should not render "Uninstall agent" menu item for managed Agent', async () => {
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
 
+      // Open the actions menu for managed agent (agent2)
       await act(async () => {
         fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[1]);
       });
 
+      // For managed agents, "Security and removal" submenu should not exist
+      expect(renderResult.queryByText('Security and removal')).not.toBeInTheDocument();
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
     });
 
     it('should render "Uninstall agent" menu item for not managed Agent', async () => {
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
 
+      // Open the actions menu for non-managed agent (agent1)
       await act(async () => {
         fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
       });
 
-      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
+      // Navigate to "Security and removal" submenu
+      await navigateToSubmenu('Security and removal');
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
+      });
     });
 
     it('should open uninstall commands flyout when clicking on "Uninstall agent"', async () => {
+      // Open the actions menu for non-managed agent (agent1)
       await act(async () => {
         fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
       });
+
+      // Navigate to "Security and removal" submenu
+      await navigateToSubmenu('Security and removal');
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
+      });
+
       expect(renderResult.queryByTestId('uninstall-command-flyout')).not.toBeInTheDocument();
 
       await act(async () => {

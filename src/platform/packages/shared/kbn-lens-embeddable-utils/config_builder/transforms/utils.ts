@@ -186,7 +186,7 @@ function getReferenceCriteria(layerId: string) {
  * @returns Lens API Dataset configuration
  */
 export const buildDatasetState = (
-  layer: FormBasedLayer | FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
