@@ -8,9 +8,9 @@
  */
 
 import { parse } from '..';
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 import type { ESQLForkParens } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('FORK', () => {
   describe('correctly formatted', () => {

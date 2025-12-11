@@ -6,7 +6,7 @@
  */
 
 import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-ast';
 import Fs from 'fs/promises';
 import Path from 'path';
 import type { Argv } from 'yargs';

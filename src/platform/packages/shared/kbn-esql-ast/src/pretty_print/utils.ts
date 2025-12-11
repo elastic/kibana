@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { default as esql_lexer } from '../antlr/esql_lexer';
+import { default as esql_lexer } from '../parser/antlr/esql_lexer';
 
 let _quotableKeywords: Set<string> | undefined;
 

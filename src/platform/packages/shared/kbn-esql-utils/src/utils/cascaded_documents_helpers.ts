@@ -29,7 +29,7 @@ import {
 import type {
   StatsCommandSummary,
   StatsFieldSummary,
-} from '@kbn/esql-ast/src/mutate/commands/stats';
+} from '@kbn/esql-ast/src/ast/mutate/commands/stats';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,

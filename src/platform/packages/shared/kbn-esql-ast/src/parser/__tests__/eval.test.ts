@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 
 describe('EVAL', () => {
   describe('correctly formatted', () => {

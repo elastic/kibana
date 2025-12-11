@@ -8,9 +8,9 @@
  */
 
 import { parse } from '..';
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 import type { ESQLColumn, ESQLCommand, ESQLFunction, ESQLInlineCast } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('WHERE', () => {
   describe('correctly formatted', () => {
