@@ -23,6 +23,13 @@ export const types_duration = z.union([
     z.enum(['0'])
 ]);
 
+export const types_ulong = z.number();
+
+export const types_byte_size = z.union([
+    z.number(),
+    z.string()
+]);
+
 /**
  * Path to field or array of paths. Some API's support wildcards in the path to select multiple fields.
  */
@@ -33,6 +40,8 @@ export const types_field = z.string().register(z.globalRegistry, {
 export const types_uint = z.number();
 
 export const types_epoch_time_unit_millis = types_unit_millis;
+
+export const types_version_string = z.string();
 
 /**
  * A date and time, either as a string whose format can depend on the context (defaulting to ISO 8601), or a
@@ -2199,8 +2208,6 @@ export const types_aggregations_minimum_interval = z.enum([
     'year'
 ]);
 
-export const types_op_type = z.enum(['index', 'create']);
-
 export const types_refresh = z.enum([
     'true',
     'false',
@@ -2309,6 +2316,252 @@ export const types_indices = z.union([
     types_index_name,
     z.array(types_index_name)
 ]);
+
+export const types_uuid = z.string();
+
+export const types_mapping_data_stream_timestamp = z.object({
+    enabled: z.boolean()
+});
+
+export const types_mapping_source_field_mode = z.enum([
+    'disabled',
+    'stored',
+    'synthetic'
+]);
+
+export const types_mapping_source_field = z.object({
+    compress: z.optional(z.boolean()),
+    compress_threshold: z.optional(z.string()),
+    enabled: z.optional(z.boolean()),
+    excludes: z.optional(z.array(z.string())),
+    includes: z.optional(z.array(z.string())),
+    mode: z.optional(types_mapping_source_field_mode)
+});
+
+export const types_mapping_size_field = z.object({
+    enabled: z.boolean()
+});
+
+export const types_mapping_routing_field = z.object({
+    required: z.boolean()
+});
+
+export const types_mapping_index_field = z.object({
+    enabled: z.boolean()
+});
+
+export const types_mapping_field_names_field = z.object({
+    enabled: z.boolean()
+});
+
+export const types_analysis_icu_collation_case_first = z.enum(['lower', 'upper']);
+
+export const types_analysis_icu_collation_alternate = z.enum(['shifted', 'non-ignorable']);
+
+export const types_analysis_icu_collation_decomposition = z.enum(['no', 'identical']);
+
+export const types_analysis_icu_collation_strength = z.enum([
+    'primary',
+    'secondary',
+    'tertiary',
+    'quaternary',
+    'identical'
+]);
+
+export const types_mapping_index_options = z.enum([
+    'docs',
+    'freqs',
+    'positions',
+    'offsets'
+]);
+
+export const types_mapping_synthetic_source_keep_enum = z.enum([
+    'none',
+    'arrays',
+    'all'
+]);
+
+export const types_mapping_dynamic_mapping = z.enum([
+    'strict',
+    'runtime',
+    'true',
+    'false'
+]);
+
+export const types_mapping_time_series_metric_type = z.enum([
+    'gauge',
+    'counter',
+    'summary',
+    'histogram',
+    'position'
+]);
+
+export const types_mapping_on_script_error = z.enum(['fail', 'continue']);
+
+export const types_short = z.number();
+
+export const types_byte = z.number();
+
+export const types_mapping_geo_orientation = z.enum([
+    'right',
+    'RIGHT',
+    'counterclockwise',
+    'ccw',
+    'left',
+    'LEFT',
+    'clockwise',
+    'cw'
+]);
+
+export const types_mapping_geo_strategy = z.enum(['recursive', 'term']);
+
+export const types_mapping_geo_point_metric_type = z.enum([
+    'gauge',
+    'counter',
+    'position'
+]);
+
+export const types_mapping_suggest_context = z.object({
+    name: types_name,
+    path: z.optional(types_field),
+    type: z.string(),
+    precision: z.optional(z.union([
+        z.number(),
+        z.string()
+    ]))
+});
+
+export const types_mapping_sparse_vector_index_options = z.object({
+    prune: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Whether to perform pruning, omitting the non-significant tokens from the query to improve query performance.\nIf prune is true but the pruning_config is not specified, pruning will occur but default values will be used.\nDefault: false'
+    })),
+    pruning_config: z.optional(types_token_pruning_config)
+});
+
+export const types_mapping_chunking_settings = z.object({
+    strategy: z.string().register(z.globalRegistry, {
+        description: 'The chunking strategy: `sentence`, `word`, `none` or `recursive`.\n\n * If `strategy` is set to `recursive`, you must also specify:\n\n- `max_chunk_size`\n- either `separators` or`separator_group`\n\nLearn more about different chunking strategies in the linked documentation.'
+    }),
+    separator_group: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Only applicable to the `recursive` strategy and required when using it.\n\nSets a predefined list of separators in the saved chunking settings based on the selected text type.\nValues can be `markdown` or `plaintext`.\n\nUsing this parameter is an alternative to manually specifying a custom `separators` list.'
+    })),
+    separators: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Only applicable to the `recursive` strategy and required when using it.\n\nA list of strings used as possible split points when chunking text.\n\nEach string can be a plain string or a regular expression (regex) pattern.\nThe system tries each separator in order to split the text, starting from the first item in the list.\n\nAfter splitting, it attempts to recombine smaller pieces into larger chunks that stay within\nthe `max_chunk_size` limit, to reduce the total number of chunks generated.'
+    })),
+    max_chunk_size: z.number().register(z.globalRegistry, {
+        description: 'The maximum size of a chunk in words.\nThis value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy).\nThis value should not exceed the window size for the associated model.'
+    }),
+    overlap: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of overlapping words for chunks.\nIt is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.'
+    })),
+    sentence_overlap: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of overlapping sentences for chunks.\nIt is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.'
+    }))
+});
+
+export const types_mapping_dense_vector_index_options_rescore_vector = z.object({
+    oversample: z.number().register(z.globalRegistry, {
+        description: 'The oversampling factor to use when searching for the nearest neighbor. This is only applicable to the quantized formats: `bbq_*`, `int4_*`, and `int8_*`.\nWhen provided, `oversample * k` vectors will be gathered and then their scores will be re-computed with the original vectors.\n\nvalid values are between `1.0` and `10.0` (inclusive), or `0` exactly to disable oversampling.'
+    })
+});
+
+export const types_mapping_dense_vector_index_options_type = z.enum([
+    'bbq_flat',
+    'bbq_hnsw',
+    'bbq_disk',
+    'flat',
+    'hnsw',
+    'int4_flat',
+    'int4_hnsw',
+    'int8_flat',
+    'int8_hnsw'
+]);
+
+export const types_mapping_dense_vector_index_options = z.object({
+    confidence_interval: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The confidence interval to use when quantizing the vectors. Can be any value between and including `0.90` and\n`1.0` or exactly `0`. When the value is `0`, this indicates that dynamic quantiles should be calculated for\noptimized quantization. When between `0.90` and `1.0`, this value restricts the values used when calculating\nthe quantization thresholds.\n\nFor example, a value of `0.95` will only use the middle `95%` of the values when calculating the quantization\nthresholds (e.g. the highest and lowest `2.5%` of values will be ignored).\n\nDefaults to `1/(dims + 1)` for `int8` quantized vectors and `0` for `int4` for dynamic quantile calculation.\n\nOnly applicable to `int8_hnsw`, `int4_hnsw`, `int8_flat`, and `int4_flat` index types.'
+    })),
+    ef_construction: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of candidates to track while assembling the list of nearest neighbors for each new node.\n\nOnly applicable to `hnsw`, `int8_hnsw`, `bbq_hnsw`, and `int4_hnsw` index types.'
+    })),
+    m: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of neighbors each node will be connected to in the HNSW graph.\n\nOnly applicable to `hnsw`, `int8_hnsw`, `bbq_hnsw`, and `int4_hnsw` index types.'
+    })),
+    type: types_mapping_dense_vector_index_options_type,
+    rescore_vector: z.optional(types_mapping_dense_vector_index_options_rescore_vector),
+    on_disk_rescore: z.optional(z.boolean().register(z.globalRegistry, {
+        description: '`true` if vector rescoring should be done on-disk\n\nOnly applicable to `bbq_disk`, `bbq_hnsw`, `int4_hnsw`, `int8_hnsw`'
+    }))
+});
+
+export const types_mapping_semantic_text_index_options = z.object({
+    dense_vector: z.optional(types_mapping_dense_vector_index_options),
+    sparse_vector: z.optional(types_mapping_sparse_vector_index_options)
+});
+
+export const types_mapping_rank_vector_element_type = z.enum([
+    'byte',
+    'float',
+    'bit'
+]);
+
+export const types_mapping_subobjects = z.enum(['true', 'false']);
+
+export const types_mapping_dense_vector_similarity = z.enum([
+    'cosine',
+    'dot_product',
+    'l2_norm',
+    'max_inner_product'
+]);
+
+export const types_mapping_dense_vector_element_type = z.enum([
+    'bit',
+    'byte',
+    'float',
+    'bfloat16'
+]);
+
+export const indices_types_numeric_fielddata_format = z.enum(['array', 'disabled']);
+
+export const indices_types_numeric_fielddata = z.object({
+    format: indices_types_numeric_fielddata_format
+});
+
+export const indices_types_fielddata_frequency_filter = z.object({
+    max: z.number(),
+    min: z.number(),
+    min_segment_size: z.number()
+});
+
+export const types_mapping_term_vector_option = z.enum([
+    'no',
+    'yes',
+    'with_offsets',
+    'with_positions',
+    'with_positions_offsets',
+    'with_positions_offsets_payloads',
+    'with_positions_payloads'
+]);
+
+export const types_mapping_text_index_prefixes = z.object({
+    max_chars: z.number(),
+    min_chars: z.number()
+});
+
+export const types_mapping_match_type = z.enum(['simple', 'regex']);
+
+export const types_mapping_all_field = z.object({
+    analyzer: z.string(),
+    enabled: z.boolean(),
+    omit_norms: z.boolean(),
+    search_analyzer: z.string(),
+    similarity: z.string(),
+    store: z.boolean(),
+    store_term_vector_offsets: z.boolean(),
+    store_term_vector_payloads: z.boolean(),
+    store_term_vector_positions: z.boolean(),
+    store_term_vectors: z.boolean()
+});
 
 /**
  * Base type for multi-bucket aggregation results that can hold sub-aggregations results.
@@ -2570,6 +2823,1936 @@ export const types_aggregations_value_count_aggregate = types_aggregations_singl
 export const types_aggregations_cardinality_aggregate = types_aggregations_aggregate_base.and(z.object({
     value: z.number()
 }));
+
+export const indices_types_storage_type = z.union([
+    z.enum([
+        'fs',
+        'niofs',
+        'mmapfs',
+        'hybridfs'
+    ]),
+    z.string()
+]);
+
+export const indices_types_storage = z.object({
+    type: indices_types_storage_type,
+    allow_mmap: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'You can restrict the use of the mmapfs and the related hybridfs store type via the setting node.store.allow_mmap.\nThis is a boolean setting indicating whether or not memory-mapping is allowed. The default is to allow it. This\nsetting is useful, for example, if you are in an environment where you can not control the ability to create a lot\nof memory maps so you need disable the ability to use memory-mapping.'
+    })),
+    stats_refresh_interval: z.optional(types_duration)
+});
+
+export const indices_types_indexing_pressure_memory = z.object({
+    limit: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Number of outstanding bytes that may be consumed by indexing requests. When this limit is reached or exceeded,\nthe node will reject new coordinating and primary operations. When replica operations consume 1.5x this limit,\nthe node will reject new replica operations. Defaults to 10% of the heap.'
+    }))
+});
+
+export const indices_types_indexing_pressure = z.object({
+    memory: indices_types_indexing_pressure_memory
+});
+
+export const indices_types_slowlog_treshold_levels = z.object({
+    warn: z.optional(types_duration),
+    info: z.optional(types_duration),
+    debug: z.optional(types_duration),
+    trace: z.optional(types_duration)
+});
+
+export const indices_types_indexing_slowlog_tresholds = z.object({
+    index: z.optional(indices_types_slowlog_treshold_levels)
+});
+
+export const indices_types_indexing_slowlog_settings = z.object({
+    level: z.optional(z.string()),
+    source: z.optional(z.number()),
+    reformat: z.optional(z.boolean()),
+    threshold: z.optional(indices_types_indexing_slowlog_tresholds)
+});
+
+export const indices_types_source_mode = z.enum([
+    'disabled',
+    'stored',
+    'synthetic'
+]);
+
+export const indices_types_mapping_limit_settings_source_fields = z.object({
+    mode: indices_types_source_mode
+});
+
+export const indices_types_mapping_limit_settings_dimension_fields = z.object({
+    limit: z.optional(z.number().register(z.globalRegistry, {
+        description: '[preview] This functionality is in technical preview and may be changed or removed in a future release.\nElastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.'
+    }))
+});
+
+export const indices_types_mapping_limit_settings_field_name_length = z.object({
+    limit: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Setting for the maximum length of a field name. This setting isn’t really something that addresses mappings explosion but\nmight still be useful if you want to limit the field length. It usually shouldn’t be necessary to set this setting. The\ndefault is okay unless a user starts to add a huge number of fields with really long names. Default is `Long.MAX_VALUE` (no limit).'
+    }))
+});
+
+export const indices_types_mapping_limit_settings_nested_objects = z.object({
+    limit: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps\nto prevent out of memory errors when a document contains too many nested objects.'
+    }))
+});
+
+export const indices_types_mapping_limit_settings_nested_fields = z.object({
+    limit: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The maximum number of distinct nested mappings in an index. The nested type should only be used in special cases, when\narrays of objects need to be queried independently of each other. To safeguard against poorly designed mappings, this\nsetting limits the number of unique nested types per index.'
+    }))
+});
+
+export const indices_types_mapping_limit_settings_depth = z.object({
+    limit: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The maximum depth for a field, which is measured as the number of inner objects. For instance, if all fields are defined\nat the root object level, then the depth is 1. If there is one object mapping, then the depth is 2, etc.'
+    }))
+});
+
+export const indices_types_mapping_limit_settings_total_fields = z.object({
+    limit: z.optional(z.union([
+        z.number(),
+        z.string()
+    ])),
+    ignore_dynamic_beyond_limit: z.optional(z.union([
+        z.boolean(),
+        z.string()
+    ]))
+});
+
+/**
+ * Mapping Limit Settings
+ */
+export const indices_types_mapping_limit_settings = z.object({
+    coerce: z.optional(z.boolean()),
+    total_fields: z.optional(indices_types_mapping_limit_settings_total_fields),
+    depth: z.optional(indices_types_mapping_limit_settings_depth),
+    nested_fields: z.optional(indices_types_mapping_limit_settings_nested_fields),
+    nested_objects: z.optional(indices_types_mapping_limit_settings_nested_objects),
+    field_name_length: z.optional(indices_types_mapping_limit_settings_field_name_length),
+    dimension_fields: z.optional(indices_types_mapping_limit_settings_dimension_fields),
+    source: z.optional(indices_types_mapping_limit_settings_source_fields),
+    ignore_malformed: z.optional(z.union([
+        z.boolean(),
+        z.string()
+    ]))
+}).register(z.globalRegistry, {
+    description: 'Mapping Limit Settings'
+});
+
+export const indices_types_settings_similarity_lmj = z.object({
+    type: z.enum(['LMJelinekMercer']),
+    lambda: z.optional(z.number())
+});
+
+export const indices_types_settings_similarity_lmd = z.object({
+    type: z.enum(['LMDirichlet']),
+    mu: z.optional(z.number())
+});
+
+export const types_ib_lambda = z.enum(['df', 'ttf']);
+
+export const types_ib_distribution = z.enum(['ll', 'spl']);
+
+export const types_normalization = z.enum([
+    'no',
+    'h1',
+    'h2',
+    'h3',
+    'z'
+]);
+
+export const indices_types_settings_similarity_ib = z.object({
+    type: z.enum(['IB']),
+    distribution: types_ib_distribution,
+    lambda: types_ib_lambda,
+    normalization: types_normalization
+});
+
+export const types_dfr_basic_model = z.enum([
+    'be',
+    'd',
+    'g',
+    'if',
+    'in',
+    'ine',
+    'p'
+]);
+
+export const types_dfr_after_effect = z.enum([
+    'no',
+    'b',
+    'l'
+]);
+
+export const indices_types_settings_similarity_dfr = z.object({
+    type: z.enum(['DFR']),
+    after_effect: types_dfr_after_effect,
+    basic_model: types_dfr_basic_model,
+    normalization: types_normalization
+});
+
+export const types_dfi_independence_measure = z.enum([
+    'standardized',
+    'saturated',
+    'chisquared'
+]);
+
+export const indices_types_settings_similarity_dfi = z.object({
+    type: z.enum(['DFI']),
+    independence_measure: types_dfi_independence_measure
+});
+
+export const indices_types_settings_similarity_boolean = z.object({
+    type: z.enum(['boolean'])
+});
+
+export const indices_types_settings_similarity_bm25 = z.object({
+    type: z.enum(['BM25']),
+    b: z.optional(z.number()),
+    discount_overlaps: z.optional(z.boolean()),
+    k1: z.optional(z.number())
+});
+
+export const indices_types_cache_queries = z.object({
+    enabled: z.boolean()
+});
+
+export const indices_types_queries = z.object({
+    cache: z.optional(indices_types_cache_queries)
+});
+
+export const indices_types_index_settings_time_series = z.object({
+    end_time: z.optional(types_date_time),
+    start_time: z.optional(types_date_time)
+});
+
+export const types_analysis_nori_decompound_mode = z.enum([
+    'discard',
+    'none',
+    'mixed'
+]);
+
+export const types_analysis_tokenizer_base = z.object({
+    version: z.optional(types_version_string)
+});
+
+export const types_analysis_nori_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['nori_tokenizer']),
+    decompound_mode: z.optional(types_analysis_nori_decompound_mode),
+    discard_punctuation: z.optional(z.boolean()),
+    user_dictionary: z.optional(z.string()),
+    user_dictionary_rules: z.optional(z.array(z.string()))
+}));
+
+export const types_analysis_kuromoji_tokenization_mode = z.enum([
+    'normal',
+    'search',
+    'extended'
+]);
+
+export const types_analysis_kuromoji_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['kuromoji_tokenizer']),
+    discard_punctuation: z.optional(z.boolean()),
+    mode: types_analysis_kuromoji_tokenization_mode,
+    nbest_cost: z.optional(z.number()),
+    nbest_examples: z.optional(z.string()),
+    user_dictionary: z.optional(z.string()),
+    user_dictionary_rules: z.optional(z.array(z.string())),
+    discard_compound_token: z.optional(z.boolean())
+}));
+
+export const types_analysis_icu_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['icu_tokenizer']),
+    rule_files: z.string()
+}));
+
+export const types_analysis_whitespace_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['whitespace']),
+    max_token_length: z.optional(z.number())
+}));
+
+export const types_analysis_uax_email_url_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['uax_url_email']),
+    max_token_length: z.optional(z.number())
+}));
+
+export const types_analysis_thai_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['thai'])
+}));
+
+export const types_analysis_standard_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['standard']),
+    max_token_length: z.optional(z.number())
+}));
+
+export const types_analysis_simple_pattern_split_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['simple_pattern_split']),
+    pattern: z.optional(z.string())
+}));
+
+export const types_analysis_simple_pattern_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['simple_pattern']),
+    pattern: z.optional(z.string())
+}));
+
+export const types_analysis_pattern_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['pattern']),
+    flags: z.optional(z.string()),
+    group: z.optional(z.number()),
+    pattern: z.optional(z.string())
+}));
+
+/**
+ * Some APIs will return values such as numbers also as a string (notably epoch timestamps). This behavior
+ * is used to capture this behavior while keeping the semantics of the field type.
+ *
+ * Depending on the target language, code generators can keep the union or remove it and leniently parse
+ * strings to the target type.
+ */
+export const spec_utils_stringifiedboolean = z.union([
+    z.boolean(),
+    z.string()
+]);
+
+/**
+ * Some APIs will return values such as numbers also as a string (notably epoch timestamps). This behavior
+ * is used to capture this behavior while keeping the semantics of the field type.
+ *
+ * Depending on the target language, code generators can keep the union or remove it and leniently parse
+ * strings to the target type.
+ */
+export const spec_utils_stringifiedinteger = z.union([
+    z.number(),
+    z.string()
+]);
+
+export const types_analysis_path_hierarchy_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['path_hierarchy']),
+    buffer_size: z.optional(spec_utils_stringifiedinteger),
+    delimiter: z.optional(z.string()),
+    replacement: z.optional(z.string()),
+    reverse: z.optional(spec_utils_stringifiedboolean),
+    skip: z.optional(spec_utils_stringifiedinteger)
+}));
+
+export const types_analysis_token_char = z.enum([
+    'letter',
+    'digit',
+    'whitespace',
+    'punctuation',
+    'symbol',
+    'custom'
+]);
+
+export const types_analysis_n_gram_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['ngram']),
+    custom_token_chars: z.optional(z.string()),
+    max_gram: z.optional(z.number()),
+    min_gram: z.optional(z.number()),
+    token_chars: z.optional(z.array(types_analysis_token_char))
+}));
+
+export const types_analysis_lowercase_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['lowercase'])
+}));
+
+export const types_analysis_letter_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['letter'])
+}));
+
+export const types_analysis_keyword_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['keyword']),
+    buffer_size: z.optional(z.number())
+}));
+
+export const types_analysis_edge_n_gram_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['edge_ngram']),
+    custom_token_chars: z.optional(z.string()),
+    max_gram: z.optional(z.number()),
+    min_gram: z.optional(z.number()),
+    token_chars: z.optional(z.array(types_analysis_token_char))
+}));
+
+export const types_analysis_classic_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['classic']),
+    max_token_length: z.optional(z.number())
+}));
+
+export const types_analysis_char_group_tokenizer = types_analysis_tokenizer_base.and(z.object({
+    type: z.enum(['char_group']),
+    tokenize_on_chars: z.array(z.string()),
+    max_token_length: z.optional(z.number())
+}));
+
+export const types_analysis_tokenizer_definition = z.union([
+    z.object({
+        type: z.literal('char_group')
+    }).and(types_analysis_char_group_tokenizer),
+    z.object({
+        type: z.literal('classic')
+    }).and(types_analysis_classic_tokenizer),
+    z.object({
+        type: z.literal('edge_ngram')
+    }).and(types_analysis_edge_n_gram_tokenizer),
+    z.object({
+        type: z.literal('keyword')
+    }).and(types_analysis_keyword_tokenizer),
+    z.object({
+        type: z.literal('letter')
+    }).and(types_analysis_letter_tokenizer),
+    z.object({
+        type: z.literal('lowercase')
+    }).and(types_analysis_lowercase_tokenizer),
+    z.object({
+        type: z.literal('ngram')
+    }).and(types_analysis_n_gram_tokenizer),
+    z.object({
+        type: z.literal('path_hierarchy')
+    }).and(types_analysis_path_hierarchy_tokenizer),
+    z.object({
+        type: z.literal('pattern')
+    }).and(types_analysis_pattern_tokenizer),
+    z.object({
+        type: z.literal('simple_pattern')
+    }).and(types_analysis_simple_pattern_tokenizer),
+    z.object({
+        type: z.literal('simple_pattern_split')
+    }).and(types_analysis_simple_pattern_split_tokenizer),
+    z.object({
+        type: z.literal('standard')
+    }).and(types_analysis_standard_tokenizer),
+    z.object({
+        type: z.literal('thai')
+    }).and(types_analysis_thai_tokenizer),
+    z.object({
+        type: z.literal('uax_url_email')
+    }).and(types_analysis_uax_email_url_tokenizer),
+    z.object({
+        type: z.literal('whitespace')
+    }).and(types_analysis_whitespace_tokenizer),
+    z.object({
+        type: z.literal('icu_tokenizer')
+    }).and(types_analysis_icu_tokenizer),
+    z.object({
+        type: z.literal('kuromoji_tokenizer')
+    }).and(types_analysis_kuromoji_tokenizer),
+    z.object({
+        type: z.literal('nori_tokenizer')
+    }).and(types_analysis_nori_tokenizer)
+]);
+
+export const types_analysis_tokenizer = z.union([
+    z.string(),
+    types_analysis_tokenizer_definition
+]);
+
+export const types_analysis_custom_normalizer = z.object({
+    type: z.enum(['custom']),
+    char_filter: z.optional(z.array(z.string())),
+    filter: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_lowercase_normalizer = z.object({
+    type: z.enum(['lowercase'])
+});
+
+export const types_analysis_normalizer = z.union([
+    z.object({
+        type: z.literal('lowercase')
+    }).and(types_analysis_lowercase_normalizer),
+    z.object({
+        type: z.literal('custom')
+    }).and(types_analysis_custom_normalizer)
+]);
+
+export const types_analysis_token_filter_base = z.object({
+    version: z.optional(types_version_string)
+});
+
+export const types_analysis_compound_word_token_filter_base = types_analysis_token_filter_base.and(z.object({
+    max_subword_size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Maximum subword character length. Longer subword tokens are excluded from the output. Defaults to `15`.'
+    })),
+    min_subword_size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Minimum subword character length. Shorter subword tokens are excluded from the output. Defaults to `2`.'
+    })),
+    min_word_size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Minimum word character length. Shorter word tokens are excluded from the output. Defaults to `5`.'
+    })),
+    only_longest_match: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, only include the longest matching subword. Defaults to `false`.'
+    })),
+    word_list: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'A list of subwords to look for in the token stream. If found, the subword is included in the token output.\nEither this parameter or `word_list_path` must be specified.'
+    })),
+    word_list_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file that contains a list of subwords to find in the token stream. If found, the subword is included in the token output.\nThis path must be absolute or relative to the config location, and the file must be UTF-8 encoded. Each token in the file must be separated by a line break.\nEither this parameter or `word_list` must be specified.'
+    }))
+}));
+
+export const types_analysis_dictionary_decompounder_token_filter = types_analysis_compound_word_token_filter_base.and(z.object({
+    type: z.enum(['dictionary_decompounder'])
+}));
+
+export const types_analysis_phonetic_rule_type = z.enum(['approx', 'exact']);
+
+export const types_analysis_phonetic_name_type = z.enum([
+    'generic',
+    'ashkenazi',
+    'sephardic'
+]);
+
+export const types_analysis_phonetic_language = z.enum([
+    'any',
+    'common',
+    'cyrillic',
+    'english',
+    'french',
+    'german',
+    'hebrew',
+    'hungarian',
+    'polish',
+    'romanian',
+    'russian',
+    'spanish'
+]);
+
+export const types_analysis_phonetic_encoder = z.enum([
+    'metaphone',
+    'double_metaphone',
+    'soundex',
+    'refined_soundex',
+    'caverphone1',
+    'caverphone2',
+    'cologne',
+    'nysiis',
+    'koelnerphonetik',
+    'haasephonetik',
+    'beider_morse',
+    'daitch_mokotoff'
+]);
+
+export const types_analysis_phonetic_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['phonetic']),
+    encoder: types_analysis_phonetic_encoder,
+    languageset: z.optional(z.union([
+        types_analysis_phonetic_language,
+        z.array(types_analysis_phonetic_language)
+    ])),
+    max_code_len: z.optional(z.number()),
+    name_type: z.optional(types_analysis_phonetic_name_type),
+    replace: z.optional(z.boolean()),
+    rule_type: z.optional(types_analysis_phonetic_rule_type)
+}));
+
+export const types_analysis_icu_transform_direction = z.enum(['forward', 'reverse']);
+
+export const types_analysis_icu_transform_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['icu_transform']),
+    dir: z.optional(types_analysis_icu_transform_direction),
+    id: z.string()
+}));
+
+export const types_analysis_icu_normalization_type = z.enum([
+    'nfc',
+    'nfkc',
+    'nfkc_cf'
+]);
+
+export const types_analysis_icu_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['icu_normalizer']),
+    name: types_analysis_icu_normalization_type
+}));
+
+export const types_analysis_icu_folding_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['icu_folding']),
+    unicode_set_filter: z.string()
+}));
+
+export const types_analysis_icu_collation_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['icu_collation']),
+    alternate: z.optional(types_analysis_icu_collation_alternate),
+    caseFirst: z.optional(types_analysis_icu_collation_case_first),
+    caseLevel: z.optional(z.boolean()),
+    country: z.optional(z.string()),
+    decomposition: z.optional(types_analysis_icu_collation_decomposition),
+    hiraganaQuaternaryMode: z.optional(z.boolean()),
+    language: z.optional(z.string()),
+    numeric: z.optional(z.boolean()),
+    rules: z.optional(z.string()),
+    strength: z.optional(types_analysis_icu_collation_strength),
+    variableTop: z.optional(z.string()),
+    variant: z.optional(z.string())
+}));
+
+export const types_analysis_kuromoji_part_of_speech_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['kuromoji_part_of_speech']),
+    stoptags: z.array(z.string())
+}));
+
+export const types_analysis_kuromoji_reading_form_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['kuromoji_readingform']),
+    use_romaji: z.boolean()
+}));
+
+export const types_analysis_kuromoji_stemmer_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['kuromoji_stemmer']),
+    minimum_length: z.number()
+}));
+
+export const types_analysis_ja_stop_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['ja_stop']),
+    stopwords: z.optional(types_analysis_stop_words)
+}));
+
+export const types_analysis_word_delimiter_token_filter_base = types_analysis_token_filter_base.and(z.object({
+    catenate_all: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter produces catenated tokens for chains of alphanumeric characters separated by non-alphabetic delimiters. Defaults to `false`.'
+    })),
+    catenate_numbers: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter produces catenated tokens for chains of numeric characters separated by non-alphabetic delimiters. Defaults to `false`.'
+    })),
+    catenate_words: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter produces catenated tokens for chains of alphabetical characters separated by non-alphabetic delimiters. Defaults to `false`.'
+    })),
+    generate_number_parts: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter includes tokens consisting of only numeric characters in the output. If `false`, the filter excludes these tokens from the output. Defaults to `true`.'
+    })),
+    generate_word_parts: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter includes tokens consisting of only alphabetical characters in the output. If `false`, the filter excludes these tokens from the output. Defaults to `true`.'
+    })),
+    preserve_original: z.optional(spec_utils_stringifiedboolean),
+    protected_words: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Array of tokens the filter won’t split.'
+    })),
+    protected_words_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file that contains a list of tokens the filter won’t split.\nThis path must be absolute or relative to the `config` location, and the file must be UTF-8 encoded. Each token in the file must be separated by a line break.'
+    })),
+    split_on_case_change: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter splits tokens at letter case transitions. For example: camelCase -> [ camel, Case ]. Defaults to `true`.'
+    })),
+    split_on_numerics: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter splits tokens at letter-number transitions. For example: j2se -> [ j, 2, se ]. Defaults to `true`.'
+    })),
+    stem_english_possessive: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter removes the English possessive (`\'s`) from the end of each token. For example: O\'Neil\'s -> [ O, Neil ]. Defaults to `true`.'
+    })),
+    type_table: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Array of custom type mappings for characters. This allows you to map non-alphanumeric characters as numeric or alphanumeric to avoid splitting on those characters.'
+    })),
+    type_table_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file that contains custom type mappings for characters. This allows you to map non-alphanumeric characters as numeric or alphanumeric to avoid splitting on those characters.'
+    }))
+}));
+
+export const types_analysis_word_delimiter_token_filter = types_analysis_word_delimiter_token_filter_base.and(z.object({
+    type: z.enum(['word_delimiter'])
+}));
+
+export const types_analysis_word_delimiter_graph_token_filter = types_analysis_word_delimiter_token_filter_base.and(z.object({
+    type: z.enum(['word_delimiter_graph']),
+    adjust_offsets: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter adjusts the offsets of split or catenated tokens to better reflect their actual position in the token stream. Defaults to `true`.'
+    })),
+    ignore_keywords: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter skips tokens with a keyword attribute of true. Defaults to `false`.'
+    }))
+}));
+
+export const types_analysis_uppercase_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['uppercase'])
+}));
+
+export const types_analysis_unique_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['unique']),
+    only_on_same_position: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, only remove duplicate tokens in the same position. Defaults to `false`.'
+    }))
+}));
+
+export const types_analysis_truncate_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['truncate']),
+    length: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Character limit for each token. Tokens exceeding this limit are truncated. Defaults to `10`.'
+    }))
+}));
+
+export const types_analysis_trim_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['trim'])
+}));
+
+export const types_analysis_synonym_format = z.enum(['solr', 'wordnet']);
+
+export const types_analysis_synonym_token_filter_base = types_analysis_token_filter_base.and(z.object({
+    expand: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Expands definitions for equivalent synonym rules. Defaults to `true`.'
+    })),
+    format: z.optional(types_analysis_synonym_format),
+    lenient: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` ignores errors while parsing the synonym rules. It is important to note that only those synonym rules which cannot get parsed are ignored. Defaults to the value of the `updateable` setting.'
+    })),
+    synonyms: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Used to define inline synonyms.'
+    })),
+    synonyms_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Used to provide a synonym file. This path must be absolute or relative to the `config` location.'
+    })),
+    synonyms_set: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Provide a synonym set created via Synonyms Management APIs.'
+    })),
+    tokenizer: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Controls the tokenizers that will be used to tokenize the synonym, this parameter is for backwards compatibility for indices that created before 6.0.'
+    })),
+    updateable: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` allows reloading search analyzers to pick up changes to synonym files. Only to be used for search analyzers. Defaults to `false`.'
+    }))
+}));
+
+export const types_analysis_synonym_token_filter = types_analysis_synonym_token_filter_base.and(z.object({
+    type: z.enum(['synonym'])
+}));
+
+export const types_analysis_synonym_graph_token_filter = types_analysis_synonym_token_filter_base.and(z.object({
+    type: z.enum(['synonym_graph'])
+}));
+
+export const types_analysis_stop_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['stop']),
+    ignore_case: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, stop word matching is case insensitive. For example, if `true`, a stop word of the matches and removes `The`, `THE`, or `the`. Defaults to `false`.'
+    })),
+    remove_trailing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the last token of a stream is removed if it’s a stop word. Defaults to `true`.'
+    })),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file that contains a list of stop words to remove.\nThis path must be absolute or relative to the `config` location, and the file must be UTF-8 encoded. Each stop word in the file must be separated by a line break.'
+    }))
+}));
+
+export const types_analysis_stemmer_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['stemmer']),
+    language: z.optional(z.string())
+}));
+
+export const types_analysis_stemmer_override_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['stemmer_override']),
+    rules: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'A list of mapping rules to use.'
+    })),
+    rules_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'A path (either relative to `config` location, or absolute) to a list of mappings.'
+    }))
+}));
+
+export const types_analysis_sorani_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['sorani_normalization'])
+}));
+
+export const types_analysis_snowball_language = z.enum([
+    'Arabic',
+    'Armenian',
+    'Basque',
+    'Catalan',
+    'Danish',
+    'Dutch',
+    'English',
+    'Estonian',
+    'Finnish',
+    'French',
+    'German',
+    'German2',
+    'Hungarian',
+    'Italian',
+    'Irish',
+    'Kp',
+    'Lithuanian',
+    'Lovins',
+    'Norwegian',
+    'Porter',
+    'Portuguese',
+    'Romanian',
+    'Russian',
+    'Serbian',
+    'Spanish',
+    'Swedish',
+    'Turkish'
+]);
+
+export const types_analysis_snowball_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['snowball']),
+    language: z.optional(types_analysis_snowball_language)
+}));
+
+export const types_analysis_shingle_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['shingle']),
+    filler_token: z.optional(z.string().register(z.globalRegistry, {
+        description: 'String used in shingles as a replacement for empty positions that do not contain a token. This filler token is only used in shingles, not original unigrams. Defaults to an underscore (`_`).'
+    })),
+    max_shingle_size: z.optional(spec_utils_stringifiedinteger),
+    min_shingle_size: z.optional(spec_utils_stringifiedinteger),
+    output_unigrams: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the output includes the original input tokens. If `false`, the output only includes shingles; the original input tokens are removed. Defaults to `true`.'
+    })),
+    output_unigrams_if_no_shingles: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the output includes the original input tokens only if no shingles are produced; if shingles are produced, the output only includes shingles. Defaults to `false`.'
+    })),
+    token_separator: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Separator used to concatenate adjacent tokens to form a shingle. Defaults to a space (`" "`).'
+    }))
+}));
+
+export const types_analysis_serbian_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['serbian_normalization'])
+}));
+
+export const types_analysis_scandinavian_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['scandinavian_normalization'])
+}));
+
+export const types_analysis_scandinavian_folding_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['scandinavian_folding'])
+}));
+
+export const types_analysis_russian_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['russian_stem'])
+}));
+
+export const types_analysis_reverse_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['reverse'])
+}));
+
+export const types_analysis_remove_duplicates_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['remove_duplicates'])
+}));
+
+export const types_analysis_porter_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['porter_stem'])
+}));
+
+export const types_analysis_persian_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['persian_stem'])
+}));
+
+export const types_analysis_persian_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['persian_normalization'])
+}));
+
+export const types_analysis_pattern_replace_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['pattern_replace']),
+    all: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, all substrings matching the pattern parameter’s regular expression are replaced. If `false`, the filter replaces only the first matching substring in each token. Defaults to `true`.'
+    })),
+    flags: z.optional(z.string()),
+    pattern: z.string().register(z.globalRegistry, {
+        description: 'Regular expression, written in Java’s regular expression syntax. The filter replaces token substrings matching this pattern with the substring in the `replacement` parameter.'
+    }),
+    replacement: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Replacement substring. Defaults to an empty substring (`""`).'
+    }))
+}));
+
+export const types_analysis_pattern_capture_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['pattern_capture']),
+    patterns: z.array(z.string()).register(z.globalRegistry, {
+        description: 'A list of regular expressions to match.'
+    }),
+    preserve_original: z.optional(spec_utils_stringifiedboolean)
+}));
+
+export const types_analysis_nori_part_of_speech_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['nori_part_of_speech']),
+    stoptags: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'An array of part-of-speech tags that should be removed.'
+    }))
+}));
+
+export const types_analysis_n_gram_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['ngram']),
+    max_gram: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Maximum length of characters in a gram. Defaults to `2`.'
+    })),
+    min_gram: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Minimum length of characters in a gram. Defaults to `1`.'
+    })),
+    preserve_original: z.optional(spec_utils_stringifiedboolean)
+}));
+
+export const types_analysis_multiplexer_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['multiplexer']),
+    filters: z.array(z.string()).register(z.globalRegistry, {
+        description: 'A list of token filters to apply to incoming tokens.'
+    }),
+    preserve_original: z.optional(spec_utils_stringifiedboolean)
+}));
+
+export const types_analysis_min_hash_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['min_hash']),
+    bucket_count: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Number of buckets to which hashes are assigned. Defaults to `512`.'
+    })),
+    hash_count: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Number of ways to hash each token in the stream. Defaults to `1`.'
+    })),
+    hash_set_size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Number of hashes to keep from each bucket. Defaults to `1`.\nHashes are retained by ascending size, starting with the bucket’s smallest hash first.'
+    })),
+    with_rotation: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter fills empty buckets with the value of the first non-empty bucket to its circular right if the `hash_set_size` is `1`. If the `bucket_count` argument is greater than 1, this parameter defaults to `true`. Otherwise, this parameter defaults to `false`.'
+    }))
+}));
+
+export const types_analysis_lowercase_token_filter_languages = z.enum([
+    'greek',
+    'irish',
+    'turkish'
+]);
+
+export const types_analysis_lowercase_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['lowercase']),
+    language: z.optional(types_analysis_lowercase_token_filter_languages)
+}));
+
+export const types_analysis_limit_token_count_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['limit']),
+    consume_all_tokens: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the limit filter exhausts the token stream, even if the `max_token_count` has already been reached. Defaults to `false`.'
+    })),
+    max_token_count: z.optional(spec_utils_stringifiedinteger)
+}));
+
+export const types_analysis_length_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['length']),
+    max: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Maximum character length of a token. Longer tokens are excluded from the output. Defaults to `Integer.MAX_VALUE`, which is `2^31-1` or `2147483647`.'
+    })),
+    min: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Minimum character length of a token. Shorter tokens are excluded from the output. Defaults to `0`.'
+    }))
+}));
+
+export const types_analysis_k_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['kstem'])
+}));
+
+export const types_analysis_keyword_repeat_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['keyword_repeat'])
+}));
+
+export const types_analysis_keyword_marker_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['keyword_marker']),
+    ignore_case: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, matching for the `keywords` and `keywords_path` parameters ignores letter case. Defaults to `false`.'
+    })),
+    keywords: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    keywords_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file that contains a list of keywords. Tokens that match these keywords are not stemmed.\nThis path must be absolute or relative to the `config` location, and the file must be UTF-8 encoded. Each word in the file must be separated by a line break.\nThis parameter, `keywords`, or `keywords_pattern` must be specified. You cannot specify this parameter and `keywords_pattern`.'
+    })),
+    keywords_pattern: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Java regular expression used to match tokens. Tokens that match this expression are marked as keywords and not stemmed.\nThis parameter, `keywords`, or `keywords_path` must be specified. You cannot specify this parameter and `keywords` or `keywords_pattern`.'
+    }))
+}));
+
+export const types_analysis_keep_words_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['keep']),
+    keep_words: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'List of words to keep. Only tokens that match words in this list are included in the output.\nEither this parameter or `keep_words_path` must be specified.'
+    })),
+    keep_words_case: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, lowercase all keep words. Defaults to `false`.'
+    })),
+    keep_words_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file that contains a list of words to keep. Only tokens that match words in this list are included in the output.\nThis path must be absolute or relative to the `config` location, and the file must be UTF-8 encoded. Each word in the file must be separated by a line break.\nEither this parameter or `keep_words` must be specified.'
+    }))
+}));
+
+export const types_analysis_keep_types_mode = z.enum(['include', 'exclude']);
+
+export const types_analysis_keep_types_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['keep_types']),
+    mode: z.optional(types_analysis_keep_types_mode),
+    types: z.array(z.string()).register(z.globalRegistry, {
+        description: 'List of token types to keep or remove.'
+    })
+}));
+
+export const types_analysis_indic_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['indic_normalization'])
+}));
+
+export const types_analysis_hyphenation_decompounder_token_filter = types_analysis_compound_word_token_filter_base.and(z.object({
+    type: z.enum(['hyphenation_decompounder']),
+    hyphenation_patterns_path: z.string().register(z.globalRegistry, {
+        description: 'Path to an Apache FOP (Formatting Objects Processor) XML hyphenation pattern file.\nThis path must be absolute or relative to the `config` location. Only FOP v1.2 compatible files are supported.'
+    }),
+    no_sub_matches: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, do not match sub tokens in tokens that are in the word list. Defaults to `false`.'
+    })),
+    no_overlapping_matches: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, do not allow overlapping tokens. Defaults to `false`.'
+    }))
+}));
+
+export const types_analysis_hunspell_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['hunspell']),
+    dedup: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, duplicate tokens are removed from the filter’s output. Defaults to `true`.'
+    })),
+    dictionary: z.optional(z.string().register(z.globalRegistry, {
+        description: 'One or more `.dic` files (e.g, `en_US.dic`, my_custom.dic) to use for the Hunspell dictionary.\nBy default, the `hunspell` filter uses all `.dic` files in the `<$ES_PATH_CONF>/hunspell/<locale>` directory specified using the `lang`, `language`, or `locale` parameter.'
+    })),
+    locale: z.string().register(z.globalRegistry, {
+        description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
+    }),
+    longest_only: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, only the longest stemmed version of each token is included in the output. If `false`, all stemmed versions of the token are included. Defaults to `false`.'
+    }))
+}));
+
+export const types_analysis_hindi_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['hindi_normalization'])
+}));
+
+export const types_analysis_german_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['german_stem'])
+}));
+
+export const types_analysis_german_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['german_normalization'])
+}));
+
+export const types_analysis_french_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['french_stem'])
+}));
+
+export const types_analysis_flatten_graph_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['flatten_graph'])
+}));
+
+export const types_analysis_fingerprint_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['fingerprint']),
+    max_output_size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Maximum character length, including whitespace, of the output token. Defaults to `255`. Concatenated tokens longer than this will result in no token output.'
+    })),
+    separator: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Character to use to concatenate the token stream input. Defaults to a space.'
+    }))
+}));
+
+export const types_analysis_elision_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['elision']),
+    articles: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'List of elisions to remove.\nTo be removed, the elision must be at the beginning of a token and be immediately followed by an apostrophe. Both the elision and apostrophe are removed.\nFor custom `elision` filters, either this parameter or `articles_path` must be specified.'
+    })),
+    articles_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file that contains a list of elisions to remove.\nThis path must be absolute or relative to the `config` location, and the file must be UTF-8 encoded. Each elision in the file must be separated by a line break.\nTo be removed, the elision must be at the beginning of a token and be immediately followed by an apostrophe. Both the elision and apostrophe are removed.\nFor custom `elision` filters, either this parameter or `articles` must be specified.'
+    })),
+    articles_case: z.optional(spec_utils_stringifiedboolean)
+}));
+
+export const types_analysis_edge_n_gram_side = z.enum(['front', 'back']);
+
+export const types_analysis_edge_n_gram_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['edge_ngram']),
+    max_gram: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Maximum character length of a gram. For custom token filters, defaults to `2`. For the built-in edge_ngram filter, defaults to `1`.'
+    })),
+    min_gram: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Minimum character length of a gram. Defaults to `1`.'
+    })),
+    side: z.optional(types_analysis_edge_n_gram_side),
+    preserve_original: z.optional(spec_utils_stringifiedboolean)
+}));
+
+export const types_analysis_dutch_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['dutch_stem'])
+}));
+
+export const types_analysis_delimited_payload_encoding = z.enum([
+    'int',
+    'float',
+    'identity'
+]);
+
+export const types_analysis_delimited_payload_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['delimited_payload']),
+    delimiter: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Character used to separate tokens from payloads. Defaults to `|`.'
+    })),
+    encoding: z.optional(types_analysis_delimited_payload_encoding)
+}));
+
+export const types_analysis_decimal_digit_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['decimal_digit'])
+}));
+
+export const types_analysis_czech_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['czech_stem'])
+}));
+
+export const types_analysis_common_grams_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['common_grams']),
+    common_words: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'A list of tokens. The filter generates bigrams for these tokens.\nEither this or the `common_words_path` parameter is required.'
+    })),
+    common_words_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Path to a file containing a list of tokens. The filter generates bigrams for these tokens.\nThis path must be absolute or relative to the `config` location. The file must be UTF-8 encoded. Each token in the file must be separated by a line break.\nEither this or the `common_words` parameter is required.'
+    })),
+    ignore_case: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, matches for common words matching are case-insensitive. Defaults to `false`.'
+    })),
+    query_mode: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the filter excludes the following tokens from the output:\n- Unigrams for common words\n- Unigrams for terms followed by common words\nDefaults to `false`. We recommend enabling this parameter for search analyzers.'
+    }))
+}));
+
+export const types_analysis_classic_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['classic'])
+}));
+
+export const types_analysis_cjk_width_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['cjk_width'])
+}));
+
+export const types_analysis_cjk_bigram_ignored_script = z.enum([
+    'han',
+    'hangul',
+    'hiragana',
+    'katakana'
+]);
+
+export const types_analysis_cjk_bigram_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['cjk_bigram']),
+    ignored_scripts: z.optional(z.array(types_analysis_cjk_bigram_ignored_script).register(z.globalRegistry, {
+        description: 'Array of character scripts for which to disable bigrams.'
+    })),
+    output_unigrams: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, emit tokens in both bigram and unigram form. If `false`, a CJK character is output in unigram form when it has no adjacent characters. Defaults to `false`.'
+    }))
+}));
+
+export const types_analysis_brazilian_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['brazilian_stem'])
+}));
+
+export const types_analysis_bengali_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['bengali_normalization'])
+}));
+
+export const types_analysis_ascii_folding_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['asciifolding']),
+    preserve_original: z.optional(spec_utils_stringifiedboolean)
+}));
+
+export const types_analysis_arabic_normalization_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['arabic_normalization'])
+}));
+
+export const types_analysis_arabic_stem_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['arabic_stem'])
+}));
+
+export const types_analysis_apostrophe_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['apostrophe'])
+}));
+
+export const types_analysis_char_filter_base = z.object({
+    version: z.optional(types_version_string)
+});
+
+export const types_analysis_kuromoji_iteration_mark_char_filter = types_analysis_char_filter_base.and(z.object({
+    type: z.enum(['kuromoji_iteration_mark']),
+    normalize_kana: z.boolean(),
+    normalize_kanji: z.boolean()
+}));
+
+export const types_analysis_icu_normalization_mode = z.enum(['decompose', 'compose']);
+
+export const types_analysis_icu_normalization_char_filter = types_analysis_char_filter_base.and(z.object({
+    type: z.enum(['icu_normalizer']),
+    mode: z.optional(types_analysis_icu_normalization_mode),
+    name: z.optional(types_analysis_icu_normalization_type),
+    unicode_set_filter: z.optional(z.string())
+}));
+
+export const types_analysis_pattern_replace_char_filter = types_analysis_char_filter_base.and(z.object({
+    type: z.enum(['pattern_replace']),
+    flags: z.optional(z.string()),
+    pattern: z.string(),
+    replacement: z.optional(z.string())
+}));
+
+export const types_analysis_mapping_char_filter = types_analysis_char_filter_base.and(z.object({
+    type: z.enum(['mapping']),
+    mappings: z.optional(z.array(z.string())),
+    mappings_path: z.optional(z.string())
+}));
+
+export const types_analysis_html_strip_char_filter = types_analysis_char_filter_base.and(z.object({
+    type: z.enum(['html_strip']),
+    escaped_tags: z.optional(z.array(z.string()))
+}));
+
+export const types_analysis_char_filter_definition = z.union([
+    z.object({
+        type: z.literal('html_strip')
+    }).and(types_analysis_html_strip_char_filter),
+    z.object({
+        type: z.literal('mapping')
+    }).and(types_analysis_mapping_char_filter),
+    z.object({
+        type: z.literal('pattern_replace')
+    }).and(types_analysis_pattern_replace_char_filter),
+    z.object({
+        type: z.literal('icu_normalizer')
+    }).and(types_analysis_icu_normalization_char_filter),
+    z.object({
+        type: z.literal('kuromoji_iteration_mark')
+    }).and(types_analysis_kuromoji_iteration_mark_char_filter)
+]);
+
+export const types_analysis_char_filter = z.union([
+    z.string(),
+    types_analysis_char_filter_definition
+]);
+
+export const types_analysis_thai_analyzer = z.object({
+    type: z.enum(['thai']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_turkish_analyzer = z.object({
+    type: z.enum(['turkish']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_swedish_analyzer = z.object({
+    type: z.enum(['swedish']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_spanish_analyzer = z.object({
+    type: z.enum(['spanish']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_sorani_analyzer = z.object({
+    type: z.enum(['sorani']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_serbian_analyzer = z.object({
+    type: z.enum(['serbian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_russian_analyzer = z.object({
+    type: z.enum(['russian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_romanian_analyzer = z.object({
+    type: z.enum(['romanian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_portuguese_analyzer = z.object({
+    type: z.enum(['portuguese']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_persian_analyzer = z.object({
+    type: z.enum(['persian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_norwegian_analyzer = z.object({
+    type: z.enum(['norwegian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_lithuanian_analyzer = z.object({
+    type: z.enum(['lithuanian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_latvian_analyzer = z.object({
+    type: z.enum(['latvian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_italian_analyzer = z.object({
+    type: z.enum(['italian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_irish_analyzer = z.object({
+    type: z.enum(['irish']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_indonesian_analyzer = z.object({
+    type: z.enum(['indonesian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_hungarian_analyzer = z.object({
+    type: z.enum(['hungarian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_hindi_analyzer = z.object({
+    type: z.enum(['hindi']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_greek_analyzer = z.object({
+    type: z.enum(['greek']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_german_analyzer = z.object({
+    type: z.enum(['german']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_galician_analyzer = z.object({
+    type: z.enum(['galician']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_french_analyzer = z.object({
+    type: z.enum(['french']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_finnish_analyzer = z.object({
+    type: z.enum(['finnish']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_estonian_analyzer = z.object({
+    type: z.enum(['estonian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_english_analyzer = z.object({
+    type: z.enum(['english']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_dutch_analyzer = z.object({
+    type: z.enum(['dutch']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_danish_analyzer = z.object({
+    type: z.enum(['danish']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_czech_analyzer = z.object({
+    type: z.enum(['czech']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_cjk_analyzer = z.object({
+    type: z.enum(['cjk']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_chinese_analyzer = z.object({
+    type: z.enum(['chinese']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_catalan_analyzer = z.object({
+    type: z.enum(['catalan']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_bulgarian_analyzer = z.object({
+    type: z.enum(['bulgarian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_brazilian_analyzer = z.object({
+    type: z.enum(['brazilian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string())
+});
+
+export const types_analysis_bengali_analyzer = z.object({
+    type: z.enum(['bengali']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_basque_analyzer = z.object({
+    type: z.enum(['basque']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_armenian_analyzer = z.object({
+    type: z.enum(['armenian']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_arabic_analyzer = z.object({
+    type: z.enum(['arabic']),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string()),
+    stem_exclusion: z.optional(z.array(z.string()))
+});
+
+export const types_analysis_snowball_analyzer = z.object({
+    type: z.enum(['snowball']),
+    version: z.optional(types_version_string),
+    language: types_analysis_snowball_language,
+    stopwords: z.optional(types_analysis_stop_words)
+});
+
+export const types_analysis_kuromoji_analyzer = z.object({
+    type: z.enum(['kuromoji']),
+    mode: z.optional(types_analysis_kuromoji_tokenization_mode),
+    user_dictionary: z.optional(z.string())
+});
+
+export const types_analysis_icu_analyzer = z.object({
+    type: z.enum(['icu_analyzer']),
+    method: types_analysis_icu_normalization_type,
+    mode: types_analysis_icu_normalization_mode
+});
+
+export const types_analysis_whitespace_analyzer = z.object({
+    type: z.enum(['whitespace']),
+    version: z.optional(types_version_string)
+});
+
+export const types_analysis_stop_analyzer = z.object({
+    type: z.enum(['stop']),
+    version: z.optional(types_version_string),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The path to a file containing stop words.'
+    }))
+});
+
+export const types_analysis_standard_analyzer = z.object({
+    type: z.enum(['standard']),
+    max_token_length: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The maximum token length. If a token is seen that exceeds this length then it is split at `max_token_length` intervals.\nDefaults to `255`.'
+    })),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The path to a file containing stop words.'
+    }))
+});
+
+export const types_analysis_simple_analyzer = z.object({
+    type: z.enum(['simple']),
+    version: z.optional(types_version_string)
+});
+
+export const types_analysis_pattern_analyzer = z.object({
+    type: z.enum(['pattern']),
+    version: z.optional(types_version_string),
+    flags: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Java regular expression flags. Flags should be pipe-separated, eg "CASE_INSENSITIVE|COMMENTS".'
+    })),
+    lowercase: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Should terms be lowercased or not.\nDefaults to `true`.'
+    })),
+    pattern: z.optional(z.string().register(z.globalRegistry, {
+        description: 'A Java regular expression.\nDefaults to `\\W+`.'
+    })),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The path to a file containing stop words.'
+    }))
+});
+
+export const types_analysis_nori_analyzer = z.object({
+    type: z.enum(['nori']),
+    version: z.optional(types_version_string),
+    decompound_mode: z.optional(types_analysis_nori_decompound_mode),
+    stoptags: z.optional(z.array(z.string())),
+    user_dictionary: z.optional(z.string())
+});
+
+export const types_analysis_keyword_analyzer = z.object({
+    type: z.enum(['keyword']),
+    version: z.optional(types_version_string)
+});
+
+export const types_analysis_fingerprint_analyzer = z.object({
+    type: z.enum(['fingerprint']),
+    version: z.optional(types_version_string),
+    max_output_size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The maximum token size to emit. Tokens larger than this size will be discarded.\nDefaults to `255`'
+    })),
+    separator: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The character to use to concatenate the terms.\nDefaults to a space.'
+    })),
+    stopwords: z.optional(types_analysis_stop_words),
+    stopwords_path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The path to a file containing stop words.'
+    }))
+});
+
+export const types_analysis_custom_analyzer = z.object({
+    type: z.enum(['custom']),
+    char_filter: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    filter: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    position_increment_gap: z.optional(z.number()),
+    position_offset_gap: z.optional(z.number()),
+    tokenizer: z.string()
+});
+
+export const types_analysis_analyzer = z.union([
+    z.object({
+        type: z.literal('custom')
+    }).and(types_analysis_custom_analyzer),
+    z.object({
+        type: z.literal('fingerprint')
+    }).and(types_analysis_fingerprint_analyzer),
+    z.object({
+        type: z.literal('keyword')
+    }).and(types_analysis_keyword_analyzer),
+    z.object({
+        type: z.literal('nori')
+    }).and(types_analysis_nori_analyzer),
+    z.object({
+        type: z.literal('pattern')
+    }).and(types_analysis_pattern_analyzer),
+    z.object({
+        type: z.literal('simple')
+    }).and(types_analysis_simple_analyzer),
+    z.object({
+        type: z.literal('standard')
+    }).and(types_analysis_standard_analyzer),
+    z.object({
+        type: z.literal('stop')
+    }).and(types_analysis_stop_analyzer),
+    z.object({
+        type: z.literal('whitespace')
+    }).and(types_analysis_whitespace_analyzer),
+    z.object({
+        type: z.literal('icu_analyzer')
+    }).and(types_analysis_icu_analyzer),
+    z.object({
+        type: z.literal('kuromoji')
+    }).and(types_analysis_kuromoji_analyzer),
+    z.object({
+        type: z.literal('snowball')
+    }).and(types_analysis_snowball_analyzer),
+    z.object({
+        type: z.literal('arabic')
+    }).and(types_analysis_arabic_analyzer),
+    z.object({
+        type: z.literal('armenian')
+    }).and(types_analysis_armenian_analyzer),
+    z.object({
+        type: z.literal('basque')
+    }).and(types_analysis_basque_analyzer),
+    z.object({
+        type: z.literal('bengali')
+    }).and(types_analysis_bengali_analyzer),
+    z.object({
+        type: z.literal('brazilian')
+    }).and(types_analysis_brazilian_analyzer),
+    z.object({
+        type: z.literal('bulgarian')
+    }).and(types_analysis_bulgarian_analyzer),
+    z.object({
+        type: z.literal('catalan')
+    }).and(types_analysis_catalan_analyzer),
+    z.object({
+        type: z.literal('chinese')
+    }).and(types_analysis_chinese_analyzer),
+    z.object({
+        type: z.literal('cjk')
+    }).and(types_analysis_cjk_analyzer),
+    z.object({
+        type: z.literal('czech')
+    }).and(types_analysis_czech_analyzer),
+    z.object({
+        type: z.literal('danish')
+    }).and(types_analysis_danish_analyzer),
+    z.object({
+        type: z.literal('dutch')
+    }).and(types_analysis_dutch_analyzer),
+    z.object({
+        type: z.literal('english')
+    }).and(types_analysis_english_analyzer),
+    z.object({
+        type: z.literal('estonian')
+    }).and(types_analysis_estonian_analyzer),
+    z.object({
+        type: z.literal('finnish')
+    }).and(types_analysis_finnish_analyzer),
+    z.object({
+        type: z.literal('french')
+    }).and(types_analysis_french_analyzer),
+    z.object({
+        type: z.literal('galician')
+    }).and(types_analysis_galician_analyzer),
+    z.object({
+        type: z.literal('german')
+    }).and(types_analysis_german_analyzer),
+    z.object({
+        type: z.literal('greek')
+    }).and(types_analysis_greek_analyzer),
+    z.object({
+        type: z.literal('hindi')
+    }).and(types_analysis_hindi_analyzer),
+    z.object({
+        type: z.literal('hungarian')
+    }).and(types_analysis_hungarian_analyzer),
+    z.object({
+        type: z.literal('indonesian')
+    }).and(types_analysis_indonesian_analyzer),
+    z.object({
+        type: z.literal('irish')
+    }).and(types_analysis_irish_analyzer),
+    z.object({
+        type: z.literal('italian')
+    }).and(types_analysis_italian_analyzer),
+    z.object({
+        type: z.literal('latvian')
+    }).and(types_analysis_latvian_analyzer),
+    z.object({
+        type: z.literal('lithuanian')
+    }).and(types_analysis_lithuanian_analyzer),
+    z.object({
+        type: z.literal('norwegian')
+    }).and(types_analysis_norwegian_analyzer),
+    z.object({
+        type: z.literal('persian')
+    }).and(types_analysis_persian_analyzer),
+    z.object({
+        type: z.literal('portuguese')
+    }).and(types_analysis_portuguese_analyzer),
+    z.object({
+        type: z.literal('romanian')
+    }).and(types_analysis_romanian_analyzer),
+    z.object({
+        type: z.literal('russian')
+    }).and(types_analysis_russian_analyzer),
+    z.object({
+        type: z.literal('serbian')
+    }).and(types_analysis_serbian_analyzer),
+    z.object({
+        type: z.literal('sorani')
+    }).and(types_analysis_sorani_analyzer),
+    z.object({
+        type: z.literal('spanish')
+    }).and(types_analysis_spanish_analyzer),
+    z.object({
+        type: z.literal('swedish')
+    }).and(types_analysis_swedish_analyzer),
+    z.object({
+        type: z.literal('turkish')
+    }).and(types_analysis_turkish_analyzer),
+    z.object({
+        type: z.literal('thai')
+    }).and(types_analysis_thai_analyzer)
+]);
+
+export const indices_types_settings_query_string = z.object({
+    lenient: spec_utils_stringifiedboolean
+});
+
+export const indices_types_translog_retention = z.object({
+    size: z.optional(types_byte_size),
+    age: z.optional(types_duration)
+});
+
+export const indices_types_translog_durability = z.enum([
+    'request',
+    'REQUEST',
+    'async',
+    'ASYNC'
+]);
+
+export const indices_types_translog = z.object({
+    sync_interval: z.optional(types_duration),
+    durability: z.optional(indices_types_translog_durability),
+    flush_threshold_size: z.optional(types_byte_size),
+    retention: z.optional(indices_types_translog_retention)
+});
+
+export const indices_types_index_versioning = z.object({
+    created: z.optional(types_version_string),
+    created_string: z.optional(z.string())
+});
+
+/**
+ * Some APIs will return values such as numbers also as a string (notably epoch timestamps). This behavior
+ * is used to capture this behavior while keeping the semantics of the field type.
+ *
+ * Depending on the target language, code generators can keep the union or remove it and leniently parse
+ * strings to the target type.
+ */
+export const spec_utils_stringified_epoch_time_unit_millis = z.union([
+    types_epoch_time_unit_millis,
+    z.string()
+]);
+
+export const indices_types_index_settings_lifecycle_step = z.object({
+    wait_time_threshold: z.optional(types_duration)
+});
+
+export const indices_types_index_settings_lifecycle = z.object({
+    name: z.optional(types_name),
+    indexing_complete: z.optional(spec_utils_stringifiedboolean),
+    origination_date: z.optional(z.number().register(z.globalRegistry, {
+        description: 'If specified, this is the timestamp used to calculate the index age for its phase transitions. Use this setting\nif you create a new index that contains old data and want to use the original creation date to calculate the index\nage. Specified as a Unix epoch value in milliseconds.'
+    })),
+    parse_origination_date: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Set to true to parse the origination date from the index name. This origination date is used to calculate the index age\nfor its phase transitions. The index name must match the pattern ^.*-{date_format}-\\\\d+, where the date_format is\nyyyy.MM.dd and the trailing digits are optional. An index that was rolled over would normally match the full format,\nfor example logs-2016.10.31-000002). If the index name doesn’t match the pattern, index creation fails.'
+    })),
+    step: z.optional(indices_types_index_settings_lifecycle_step),
+    rollover_alias: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The index alias to update when the index rolls over. Specify when using a policy that contains a rollover action.\nWhen the index rolls over, the alias is updated to reflect that the index is no longer the write index. For more\ninformation about rolling indices, see Rollover.'
+    })),
+    prefer_ilm: z.optional(z.union([
+        z.boolean(),
+        z.string()
+    ]))
+});
+
+export const types_pipeline_name = z.string();
+
+export const indices_types_index_routing_rebalance_options = z.enum([
+    'all',
+    'primaries',
+    'replicas',
+    'none'
+]);
+
+export const indices_types_index_routing_rebalance = z.object({
+    enable: indices_types_index_routing_rebalance_options
+});
+
+export const indices_types_index_routing_allocation_disk = z.object({
+    threshold_enabled: z.optional(z.union([
+        z.boolean(),
+        z.string()
+    ]))
+});
+
+export const indices_types_index_routing_allocation_initial_recovery = z.object({
+    _id: z.optional(types_id)
+});
+
+export const indices_types_index_routing_allocation_include = z.object({
+    _tier_preference: z.optional(z.string()),
+    _id: z.optional(types_id)
+});
+
+export const indices_types_index_routing_allocation_options = z.enum([
+    'all',
+    'primaries',
+    'new_primaries',
+    'none'
+]);
+
+export const indices_types_index_routing_allocation = z.object({
+    enable: z.optional(indices_types_index_routing_allocation_options),
+    include: z.optional(indices_types_index_routing_allocation_include),
+    initial_recovery: z.optional(indices_types_index_routing_allocation_initial_recovery),
+    disk: z.optional(indices_types_index_routing_allocation_disk)
+});
+
+export const indices_types_index_routing = z.object({
+    allocation: z.optional(indices_types_index_routing_allocation),
+    rebalance: z.optional(indices_types_index_routing_rebalance)
+});
+
+export const indices_types_settings_highlight = z.object({
+    max_analyzed_offset: z.optional(z.number())
+});
+
+export const indices_types_settings_analyze = z.object({
+    max_token_count: z.optional(spec_utils_stringifiedinteger)
+});
+
+export const indices_types_index_setting_blocks = z.object({
+    read_only: z.optional(spec_utils_stringifiedboolean),
+    read_only_allow_delete: z.optional(spec_utils_stringifiedboolean),
+    read: z.optional(spec_utils_stringifiedboolean),
+    write: z.optional(spec_utils_stringifiedboolean),
+    metadata: z.optional(spec_utils_stringifiedboolean)
+});
+
+export const indices_types_slowlog_tresholds = z.object({
+    query: z.optional(indices_types_slowlog_treshold_levels),
+    fetch: z.optional(indices_types_slowlog_treshold_levels)
+});
+
+export const indices_types_slowlog_settings = z.object({
+    level: z.optional(z.string()),
+    source: z.optional(z.number()),
+    reformat: z.optional(z.boolean()),
+    threshold: z.optional(indices_types_slowlog_tresholds)
+});
+
+export const indices_types_search_idle = z.object({
+    after: z.optional(types_duration)
+});
+
+export const indices_types_settings_search = z.object({
+    idle: z.optional(indices_types_search_idle),
+    slowlog: z.optional(indices_types_slowlog_settings)
+});
+
+export const indices_types_merge_scheduler = z.object({
+    max_thread_count: z.optional(spec_utils_stringifiedinteger),
+    max_merge_count: z.optional(spec_utils_stringifiedinteger)
+});
+
+export const indices_types_merge = z.object({
+    scheduler: z.optional(indices_types_merge_scheduler)
+});
+
+/**
+ * A `null` value that is to be interpreted as an actual value, unless other uses of `null` that are equivalent
+ * to a missing value. It is used for exemple in settings, where using the `NullValue` for a setting will reset
+ * it to its default value.
+ */
+export const spec_utils_null_value = z.union([
+    z.string(),
+    z.null()
+]);
+
+export const indices_types_index_check_on_startup = z.enum([
+    'true',
+    'false',
+    'checksum'
+]);
+
+export const indices_types_segment_sort_missing = z.enum(['_last', '_first']);
+
+export const indices_types_segment_sort_mode = z.enum([
+    'min',
+    'MIN',
+    'max',
+    'MAX'
+]);
+
+export const indices_types_segment_sort_order = z.enum([
+    'asc',
+    'ASC',
+    'desc',
+    'DESC'
+]);
+
+export const indices_types_index_segment_sort = z.object({
+    field: z.optional(types_fields),
+    order: z.optional(z.union([
+        indices_types_segment_sort_order,
+        z.array(indices_types_segment_sort_order)
+    ])),
+    mode: z.optional(z.union([
+        indices_types_segment_sort_mode,
+        z.array(indices_types_segment_sort_mode)
+    ])),
+    missing: z.optional(z.union([
+        indices_types_segment_sort_missing,
+        z.array(indices_types_segment_sort_missing)
+    ]))
+});
+
+export const indices_types_retention_lease = z.object({
+    period: types_duration
+});
+
+export const indices_types_soft_deletes = z.object({
+    enabled: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Indicates whether soft deletes are enabled on the index.'
+    })),
+    retention_lease: z.optional(indices_types_retention_lease)
+});
+
+export const types_acknowledged_response_base = z.object({
+    acknowledged: z.boolean().register(z.globalRegistry, {
+        description: 'For a successful response, this value is always true. On failure, an exception is returned instead.'
+    })
+});
 
 export const global_search_types_term_suggest_option = z.object({
     text: z.string(),
@@ -3707,27 +5890,191 @@ export const types_aggregations_hdr_percentile_ranks_aggregate = types_aggregati
 
 export const types_aggregations_hdr_percentiles_aggregate = types_aggregations_percentiles_aggregate_base.and(z.record(z.string(), z.unknown()));
 
-export const global_get_get_result = z.object({
-    _index: types_index_name,
-    fields: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
-        description: 'If the `stored_fields` parameter is set to `true` and `found` is `true`, it contains the document fields stored in the index.'
-    })),
-    _ignored: z.optional(z.array(z.string())),
-    found: z.boolean().register(z.globalRegistry, {
-        description: 'Indicates whether the document exists.'
+export const types_indices_response_base = types_acknowledged_response_base.and(z.object({
+    _shards: z.optional(types_shard_statistics)
+}));
+
+export const esql_types_esql_param = z.union([
+    types_field_value,
+    z.array(types_field_value)
+]);
+
+export const esql_types_esql_shard_failure = z.object({
+    shard: z.number(),
+    index: z.union([
+        types_index_name,
+        z.string(),
+        z.null()
+    ]),
+    node: z.optional(types_node_id),
+    reason: types_error_cause
+});
+
+export const esql_types_esql_shard_info = z.object({
+    total: z.number(),
+    successful: z.optional(z.number()),
+    skipped: z.optional(z.number()),
+    failed: z.optional(z.number())
+});
+
+export const esql_types_esql_cluster_status = z.enum([
+    'running',
+    'successful',
+    'partial',
+    'skipped',
+    'failed'
+]);
+
+export const esql_types_esql_cluster_details = z.object({
+    status: esql_types_esql_cluster_status,
+    indices: z.string(),
+    took: z.optional(types_duration_value_unit_millis),
+    _shards: z.optional(esql_types_esql_shard_info),
+    failures: z.optional(z.array(esql_types_esql_shard_failure))
+});
+
+export const esql_types_esql_cluster_info = z.object({
+    total: z.number(),
+    successful: z.number(),
+    running: z.number(),
+    skipped: z.number(),
+    partial: z.number(),
+    failed: z.number(),
+    details: z.record(z.string(), esql_types_esql_cluster_details)
+});
+
+export const esql_types_esql_column_info = z.object({
+    name: z.string(),
+    type: z.string()
+});
+
+export const esql_types_esql_result = z.object({
+    took: z.optional(types_duration_value_unit_millis),
+    is_partial: z.optional(z.boolean()),
+    all_columns: z.optional(z.array(esql_types_esql_column_info)),
+    columns: z.array(esql_types_esql_column_info),
+    values: z.array(z.array(types_field_value)),
+    _clusters: z.optional(esql_types_esql_cluster_info),
+    profile: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
+        description: 'Profiling information. Present if `profile` was `true` in the request.\nThe contents of this field are currently unstable.'
+    }))
+});
+
+export const esql_types_table_values_long_double = z.union([
+    z.number(),
+    z.array(z.number())
+]);
+
+export const esql_types_table_values_long_value = z.union([
+    z.number(),
+    z.array(z.number())
+]);
+
+export const esql_types_table_values_keyword_value = z.union([
+    z.string(),
+    z.array(z.string())
+]);
+
+export const esql_types_table_values_integer_value = z.union([
+    z.number(),
+    z.array(z.number())
+]);
+
+export const esql_types_table_values_container = z.object({
+    integer: z.optional(z.array(esql_types_table_values_integer_value)),
+    keyword: z.optional(z.array(esql_types_table_values_keyword_value)),
+    long: z.optional(z.array(esql_types_table_values_long_value)),
+    double: z.optional(z.array(esql_types_table_values_long_double))
+});
+
+export const esql_types_esql_format = z.enum([
+    'csv',
+    'json',
+    'tsv',
+    'txt',
+    'yaml',
+    'cbor',
+    'smile',
+    'arrow'
+]);
+
+export const types_inline_get_dict_user_defined = z.object({
+    fields: z.optional(z.record(z.string(), z.record(z.string(), z.unknown()))),
+    found: z.boolean(),
+    _seq_no: z.optional(types_sequence_number),
+    _primary_term: z.optional(z.number()),
+    _routing: z.optional(types_routing),
+    _source: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())))
+});
+
+export const global_bulk_response_item = z.object({
+    _id: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    _index: z.string().register(z.globalRegistry, {
+        description: 'The name of the index associated with the operation.\nIf the operation targeted a data stream, this is the backing index into which the document was written.'
     }),
-    _id: types_id,
+    status: z.number().register(z.globalRegistry, {
+        description: 'The HTTP status code returned for the operation.'
+    }),
+    failure_store: z.optional(global_bulk_failure_store_status),
+    error: z.optional(types_error_cause),
     _primary_term: z.optional(z.number().register(z.globalRegistry, {
-        description: 'The primary term assigned to the document for the indexing operation.'
+        description: 'The primary term assigned to the document for the operation.\nThis property is returned only for successful operations.'
     })),
-    _routing: z.optional(z.string().register(z.globalRegistry, {
-        description: 'The explicit routing, if set.'
+    result: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The result of the operation.\nSuccessful values are `created`, `deleted`, and `updated`.'
     })),
     _seq_no: z.optional(types_sequence_number),
-    _source: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
-        description: 'If `found` is `true`, it contains the document data formatted in JSON.\nIf the `_source` parameter is set to `false` or the `stored_fields` parameter is set to `true`, it is excluded.'
+    _shards: z.optional(types_shard_statistics),
+    _version: z.optional(types_version_number),
+    forced_refresh: z.optional(z.boolean()),
+    get: z.optional(types_inline_get_dict_user_defined)
+});
+
+export const global_bulk_operation_base = z.object({
+    _id: z.optional(types_id),
+    _index: z.optional(types_index_name),
+    routing: z.optional(types_routing),
+    if_primary_term: z.optional(z.number()),
+    if_seq_no: z.optional(types_sequence_number),
+    version: z.optional(types_version_number),
+    version_type: z.optional(types_version_type)
+});
+
+export const global_bulk_delete_operation = global_bulk_operation_base.and(z.record(z.string(), z.unknown()));
+
+export const global_bulk_update_operation = global_bulk_operation_base.and(z.object({
+    require_alias: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the request\'s actions must target an index alias.'
     })),
-    _version: z.optional(types_version_number)
+    retry_on_conflict: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of times an update should be retried in the case of a version conflict.'
+    }))
+}));
+
+export const global_bulk_write_operation = global_bulk_operation_base.and(z.object({
+    dynamic_templates: z.optional(z.record(z.string(), z.string()).register(z.globalRegistry, {
+        description: 'A map from the full name of fields to the name of dynamic templates.\nIt defaults to an empty map.\nIf a name matches a dynamic template, that template will be applied regardless of other match predicates defined in the template.\nIf a field is already defined in the mapping, then this parameter won\'t be used.'
+    })),
+    pipeline: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
+    })),
+    require_alias: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the request\'s actions must target an index alias.'
+    }))
+}));
+
+export const global_bulk_create_operation = global_bulk_write_operation.and(z.record(z.string(), z.unknown()));
+
+export const global_bulk_index_operation = global_bulk_write_operation.and(z.record(z.string(), z.unknown()));
+
+export const global_bulk_operation_container = z.object({
+    index: z.optional(global_bulk_index_operation),
+    create: z.optional(global_bulk_create_operation),
+    update: z.optional(global_bulk_update_operation),
+    delete: z.optional(global_bulk_delete_operation)
 });
 
 export const types_wait_for_active_shard_options = z.enum(['all', 'index-setting']);
@@ -5420,6 +7767,1098 @@ export const types_aggregations_adjacency_matrix_aggregation = types_aggregation
     }))
 }));
 
+export const types_mapping_icu_collation_property = z.lazy((): any => types_mapping_doc_values_property_base).and(z.object({
+    type: z.enum(['icu_collation_keyword']),
+    norms: z.optional(z.boolean()),
+    index_options: z.optional(types_mapping_index_options),
+    index: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Should the field be searchable?'
+    })),
+    null_value: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Accepts a string value which is substituted for any explicit null values. Defaults to null, which means the field is treated as missing.'
+    })),
+    rules: z.optional(z.string()),
+    language: z.optional(z.string()),
+    country: z.optional(z.string()),
+    variant: z.optional(z.string()),
+    strength: z.optional(types_analysis_icu_collation_strength),
+    decomposition: z.optional(types_analysis_icu_collation_decomposition),
+    alternate: z.optional(types_analysis_icu_collation_alternate),
+    case_level: z.optional(z.boolean()),
+    case_first: z.optional(types_analysis_icu_collation_case_first),
+    numeric: z.optional(z.boolean()),
+    variable_top: z.optional(z.string()),
+    hiragana_quaternary_mode: z.optional(z.boolean())
+}));
+
+export const types_mapping_property = z.union([
+    z.object({
+        type: z.literal('binary')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_binary_property))),
+    z.object({
+        type: z.literal('boolean')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_boolean_property))),
+    z.object({
+        type: z.literal('{dynamic_type}')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_dynamic_property))),
+    z.object({
+        type: z.literal('join')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_join_property))),
+    z.object({
+        type: z.literal('keyword')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_keyword_property))),
+    z.object({
+        type: z.literal('match_only_text')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_match_only_text_property))),
+    z.object({
+        type: z.literal('percolator')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_percolator_property))),
+    z.object({
+        type: z.literal('rank_feature')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_rank_feature_property))),
+    z.object({
+        type: z.literal('rank_features')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_rank_features_property))),
+    z.object({
+        type: z.literal('search_as_you_type')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_search_as_you_type_property))),
+    z.object({
+        type: z.literal('text')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_text_property))),
+    z.object({
+        type: z.literal('version')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_version_property))),
+    z.object({
+        type: z.literal('wildcard')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_wildcard_property))),
+    z.object({
+        type: z.literal('date_nanos')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_date_nanos_property))),
+    z.object({
+        type: z.literal('date')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_date_property))),
+    z.object({
+        type: z.literal('aggregate_metric_double')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_aggregate_metric_double_property))),
+    z.object({
+        type: z.literal('dense_vector')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_dense_vector_property))),
+    z.object({
+        type: z.literal('flattened')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_flattened_property))),
+    z.object({
+        type: z.literal('nested')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_nested_property))),
+    z.object({
+        type: z.literal('object')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_object_property))),
+    z.object({
+        type: z.literal('passthrough')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_passthrough_object_property))),
+    z.object({
+        type: z.literal('rank_vectors')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_rank_vector_property))),
+    z.object({
+        type: z.literal('semantic_text')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_semantic_text_property))),
+    z.object({
+        type: z.literal('sparse_vector')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_sparse_vector_property))),
+    z.object({
+        type: z.literal('completion')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_completion_property))),
+    z.object({
+        type: z.literal('constant_keyword')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_constant_keyword_property))),
+    z.object({
+        type: z.literal('counted_keyword')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_counted_keyword_property))),
+    z.object({
+        type: z.literal('alias')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_field_alias_property))),
+    z.object({
+        type: z.literal('histogram')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_histogram_property))),
+    z.object({
+        type: z.literal('ip')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_ip_property))),
+    z.object({
+        type: z.literal('murmur3')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_murmur3_hash_property))),
+    z.object({
+        type: z.literal('token_count')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_token_count_property))),
+    z.object({
+        type: z.literal('geo_point')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_geo_point_property))),
+    z.object({
+        type: z.literal('geo_shape')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_geo_shape_property))),
+    z.object({
+        type: z.literal('point')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_point_property))),
+    z.object({
+        type: z.literal('shape')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_shape_property))),
+    z.object({
+        type: z.literal('byte')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_byte_number_property))),
+    z.object({
+        type: z.literal('double')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_double_number_property))),
+    z.object({
+        type: z.literal('float')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_float_number_property))),
+    z.object({
+        type: z.literal('half_float')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_half_float_number_property))),
+    z.object({
+        type: z.literal('integer')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_integer_number_property))),
+    z.object({
+        type: z.literal('long')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_long_number_property))),
+    z.object({
+        type: z.literal('scaled_float')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_scaled_float_number_property))),
+    z.object({
+        type: z.literal('short')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_short_number_property))),
+    z.object({
+        type: z.literal('unsigned_long')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_unsigned_long_number_property))),
+    z.object({
+        type: z.literal('date_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_date_range_property))),
+    z.object({
+        type: z.literal('double_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_double_range_property))),
+    z.object({
+        type: z.literal('float_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_float_range_property))),
+    z.object({
+        type: z.literal('integer_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_integer_range_property))),
+    z.object({
+        type: z.literal('ip_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_ip_range_property))),
+    z.object({
+        type: z.literal('long_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_long_range_property))),
+    z.object({
+        type: z.literal('icu_collation_keyword')
+    }).and(types_mapping_icu_collation_property)
+]);
+
+export const types_mapping_long_range_property = z.lazy((): any => types_mapping_range_property_base).and(z.object({
+    type: z.enum(['long_range'])
+}));
+
+export const types_mapping_property_base = z.object({
+    meta: z.optional(z.record(z.string(), z.string()).register(z.globalRegistry, {
+        description: 'Metadata about the field.'
+    })),
+    properties: z.optional(z.record(z.string(), types_mapping_property)),
+    ignore_above: z.optional(z.number()),
+    dynamic: z.optional(types_mapping_dynamic_mapping),
+    fields: z.optional(z.record(z.string(), types_mapping_property)),
+    synthetic_source_keep: z.optional(types_mapping_synthetic_source_keep_enum)
+});
+
+export const types_mapping_core_property_base = types_mapping_property_base.and(z.object({
+    copy_to: z.optional(types_fields),
+    store: z.optional(z.boolean())
+}));
+
+export const types_mapping_doc_values_property_base = types_mapping_core_property_base.and(z.object({
+    doc_values: z.optional(z.boolean())
+}));
+
+export const types_mapping_range_property_base = types_mapping_doc_values_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    coerce: z.optional(z.boolean()),
+    index: z.optional(z.boolean())
+}));
+
+export const types_mapping_ip_range_property = types_mapping_range_property_base.and(z.object({
+    type: z.enum(['ip_range'])
+}));
+
+export const types_mapping_integer_range_property = types_mapping_range_property_base.and(z.object({
+    type: z.enum(['integer_range'])
+}));
+
+export const types_mapping_float_range_property = types_mapping_range_property_base.and(z.object({
+    type: z.enum(['float_range'])
+}));
+
+export const types_mapping_double_range_property = types_mapping_range_property_base.and(z.object({
+    type: z.enum(['double_range'])
+}));
+
+export const types_mapping_date_range_property = types_mapping_range_property_base.and(z.object({
+    format: z.optional(z.string()),
+    type: z.enum(['date_range'])
+}));
+
+export const types_mapping_unsigned_long_number_property = z.lazy((): any => types_mapping_number_property_base).and(z.object({
+    type: z.enum(['unsigned_long']),
+    null_value: z.optional(types_ulong)
+}));
+
+export const types_mapping_number_property_base = types_mapping_doc_values_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    coerce: z.optional(z.boolean()),
+    ignore_malformed: z.optional(z.boolean()),
+    index: z.optional(z.boolean()),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    script: z.optional(types_script),
+    time_series_metric: z.optional(types_mapping_time_series_metric_type),
+    time_series_dimension: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'For internal use by Elastic only. Marks the field as a time series dimension. Defaults to false.'
+    }))
+}));
+
+export const types_mapping_short_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['short']),
+    null_value: z.optional(types_short)
+}));
+
+export const types_mapping_scaled_float_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['scaled_float']),
+    null_value: z.optional(z.number()),
+    scaling_factor: z.optional(z.number())
+}));
+
+export const types_mapping_long_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['long']),
+    null_value: z.optional(z.number())
+}));
+
+export const types_mapping_integer_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['integer']),
+    null_value: z.optional(z.number())
+}));
+
+export const types_mapping_half_float_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['half_float']),
+    null_value: z.optional(z.number())
+}));
+
+export const types_mapping_float_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['float']),
+    null_value: z.optional(z.number())
+}));
+
+export const types_mapping_double_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['double']),
+    null_value: z.optional(z.number())
+}));
+
+export const types_mapping_byte_number_property = types_mapping_number_property_base.and(z.object({
+    type: z.enum(['byte']),
+    null_value: z.optional(types_byte)
+}));
+
+/**
+ * The `shape` data type facilitates the indexing of and searching with arbitrary `x, y` cartesian shapes such as
+ * rectangles and polygons.
+ */
+export const types_mapping_shape_property = types_mapping_doc_values_property_base.and(z.object({
+    coerce: z.optional(z.boolean()),
+    ignore_malformed: z.optional(z.boolean()),
+    ignore_z_value: z.optional(z.boolean()),
+    orientation: z.optional(types_mapping_geo_orientation),
+    type: z.enum(['shape'])
+}));
+
+export const types_mapping_point_property = types_mapping_doc_values_property_base.and(z.object({
+    ignore_malformed: z.optional(z.boolean()),
+    ignore_z_value: z.optional(z.boolean()),
+    null_value: z.optional(z.string()),
+    type: z.enum(['point'])
+}));
+
+/**
+ * The `geo_shape` data type facilitates the indexing of and searching with arbitrary geo shapes such as rectangles
+ * and polygons.
+ */
+export const types_mapping_geo_shape_property = types_mapping_doc_values_property_base.and(z.object({
+    coerce: z.optional(z.boolean()),
+    ignore_malformed: z.optional(z.boolean()),
+    ignore_z_value: z.optional(z.boolean()),
+    index: z.optional(z.boolean()),
+    orientation: z.optional(types_mapping_geo_orientation),
+    strategy: z.optional(types_mapping_geo_strategy),
+    type: z.enum(['geo_shape'])
+}));
+
+export const types_mapping_geo_point_property = types_mapping_doc_values_property_base.and(z.object({
+    ignore_malformed: z.optional(z.boolean()),
+    ignore_z_value: z.optional(z.boolean()),
+    null_value: z.optional(types_geo_location),
+    index: z.optional(z.boolean()),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    script: z.optional(types_script),
+    type: z.enum(['geo_point']),
+    time_series_metric: z.optional(types_mapping_geo_point_metric_type)
+}));
+
+export const types_mapping_token_count_property = types_mapping_doc_values_property_base.and(z.object({
+    analyzer: z.optional(z.string()),
+    boost: z.optional(z.number()),
+    index: z.optional(z.boolean()),
+    null_value: z.optional(z.number()),
+    enable_position_increments: z.optional(z.boolean()),
+    type: z.enum(['token_count'])
+}));
+
+export const types_mapping_murmur3_hash_property = types_mapping_doc_values_property_base.and(z.object({
+    type: z.enum(['murmur3'])
+}));
+
+export const types_mapping_ip_property = types_mapping_doc_values_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    index: z.optional(z.boolean()),
+    ignore_malformed: z.optional(z.boolean()),
+    null_value: z.optional(z.string()),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    script: z.optional(types_script),
+    time_series_dimension: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'For internal use by Elastic only. Marks the field as a time series dimension. Defaults to false.'
+    })),
+    type: z.enum(['ip'])
+}));
+
+export const types_mapping_histogram_property = types_mapping_property_base.and(z.object({
+    ignore_malformed: z.optional(z.boolean()),
+    type: z.enum(['histogram'])
+}));
+
+export const types_mapping_field_alias_property = types_mapping_property_base.and(z.object({
+    path: z.optional(types_field),
+    type: z.enum(['alias'])
+}));
+
+export const types_mapping_counted_keyword_property = types_mapping_property_base.and(z.object({
+    type: z.enum(['counted_keyword']),
+    index: z.optional(z.boolean())
+}));
+
+export const types_mapping_constant_keyword_property = types_mapping_property_base.and(z.object({
+    value: z.optional(z.record(z.string(), z.unknown())),
+    type: z.enum(['constant_keyword'])
+}));
+
+export const types_mapping_completion_property = types_mapping_doc_values_property_base.and(z.object({
+    analyzer: z.optional(z.string()),
+    contexts: z.optional(z.array(types_mapping_suggest_context)),
+    max_input_length: z.optional(z.number()),
+    preserve_position_increments: z.optional(z.boolean()),
+    preserve_separators: z.optional(z.boolean()),
+    search_analyzer: z.optional(z.string()),
+    type: z.enum(['completion'])
+}));
+
+export const types_mapping_sparse_vector_property = types_mapping_property_base.and(z.object({
+    store: z.optional(z.boolean()),
+    type: z.enum(['sparse_vector']),
+    index_options: z.optional(types_mapping_sparse_vector_index_options)
+}));
+
+export const types_mapping_semantic_text_property = z.object({
+    type: z.enum(['semantic_text']),
+    meta: z.optional(z.record(z.string(), z.string())),
+    inference_id: z.optional(types_id),
+    search_inference_id: z.optional(types_id),
+    index_options: z.optional(types_mapping_semantic_text_index_options),
+    chunking_settings: z.optional(z.union([
+        types_mapping_chunking_settings,
+        z.string(),
+        z.null()
+    ])),
+    fields: z.optional(z.record(z.string(), types_mapping_property).register(z.globalRegistry, {
+        description: 'Multi-fields allow the same string value to be indexed in multiple ways for different purposes, such as one\nfield for search and a multi-field for sorting and aggregations, or the same string value analyzed by different analyzers.'
+    }))
+});
+
+/**
+ * Technical preview
+ */
+export const types_mapping_rank_vector_property = types_mapping_property_base.and(z.object({
+    type: z.enum(['rank_vectors']),
+    element_type: z.optional(types_mapping_rank_vector_element_type),
+    dims: z.optional(z.number())
+}));
+
+export const types_mapping_passthrough_object_property = types_mapping_core_property_base.and(z.object({
+    type: z.optional(z.enum(['passthrough'])),
+    enabled: z.optional(z.boolean()),
+    priority: z.optional(z.number()),
+    time_series_dimension: z.optional(z.boolean())
+}));
+
+export const types_mapping_object_property = types_mapping_core_property_base.and(z.object({
+    enabled: z.optional(z.boolean()),
+    subobjects: z.optional(types_mapping_subobjects),
+    type: z.optional(z.enum(['object']))
+}));
+
+export const types_mapping_nested_property = types_mapping_core_property_base.and(z.object({
+    enabled: z.optional(z.boolean()),
+    include_in_parent: z.optional(z.boolean()),
+    include_in_root: z.optional(z.boolean()),
+    type: z.enum(['nested'])
+}));
+
+export const types_mapping_flattened_property = types_mapping_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    depth_limit: z.optional(z.number()),
+    doc_values: z.optional(z.boolean()),
+    eager_global_ordinals: z.optional(z.boolean()),
+    index: z.optional(z.boolean()),
+    index_options: z.optional(types_mapping_index_options),
+    null_value: z.optional(z.string()),
+    similarity: z.optional(z.string()),
+    split_queries_on_whitespace: z.optional(z.boolean()),
+    time_series_dimensions: z.optional(z.array(z.string())),
+    type: z.enum(['flattened'])
+}));
+
+export const types_mapping_dense_vector_property = types_mapping_property_base.and(z.object({
+    type: z.enum(['dense_vector']),
+    dims: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Number of vector dimensions. Can\'t exceed `4096`. If `dims` is not specified, it will be set to the length of\nthe first vector added to the field.'
+    })),
+    element_type: z.optional(types_mapping_dense_vector_element_type),
+    index: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, you can search this field using the kNN search API.'
+    })),
+    index_options: z.optional(types_mapping_dense_vector_index_options),
+    similarity: z.optional(types_mapping_dense_vector_similarity)
+}));
+
+export const types_mapping_aggregate_metric_double_property = types_mapping_property_base.and(z.object({
+    type: z.enum(['aggregate_metric_double']),
+    default_metric: z.string(),
+    ignore_malformed: z.optional(z.boolean()),
+    metrics: z.array(z.string()),
+    time_series_metric: z.optional(types_mapping_time_series_metric_type)
+}));
+
+export const types_mapping_date_property = types_mapping_doc_values_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    fielddata: z.optional(indices_types_numeric_fielddata),
+    format: z.optional(z.string()),
+    ignore_malformed: z.optional(z.boolean()),
+    index: z.optional(z.boolean()),
+    script: z.optional(types_script),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    null_value: z.optional(types_date_time),
+    precision_step: z.optional(z.number()),
+    locale: z.optional(z.string()),
+    type: z.enum(['date'])
+}));
+
+export const types_mapping_date_nanos_property = types_mapping_doc_values_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    format: z.optional(z.string()),
+    ignore_malformed: z.optional(z.boolean()),
+    index: z.optional(z.boolean()),
+    script: z.optional(types_script),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    null_value: z.optional(types_date_time),
+    precision_step: z.optional(z.number()),
+    type: z.enum(['date_nanos'])
+}));
+
+export const types_mapping_wildcard_property = types_mapping_doc_values_property_base.and(z.object({
+    type: z.enum(['wildcard']),
+    null_value: z.optional(z.string())
+}));
+
+export const types_mapping_version_property = types_mapping_doc_values_property_base.and(z.object({
+    type: z.enum(['version'])
+}));
+
+export const types_mapping_text_property = types_mapping_core_property_base.and(z.object({
+    analyzer: z.optional(z.string()),
+    boost: z.optional(z.number()),
+    eager_global_ordinals: z.optional(z.boolean()),
+    fielddata: z.optional(z.boolean()),
+    fielddata_frequency_filter: z.optional(indices_types_fielddata_frequency_filter),
+    index: z.optional(z.boolean()),
+    index_options: z.optional(types_mapping_index_options),
+    index_phrases: z.optional(z.boolean()),
+    index_prefixes: z.optional(z.union([
+        types_mapping_text_index_prefixes,
+        z.string(),
+        z.null()
+    ])),
+    norms: z.optional(z.boolean()),
+    position_increment_gap: z.optional(z.number()),
+    search_analyzer: z.optional(z.string()),
+    search_quote_analyzer: z.optional(z.string()),
+    similarity: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    term_vector: z.optional(types_mapping_term_vector_option),
+    type: z.enum(['text'])
+}));
+
+export const types_mapping_search_as_you_type_property = types_mapping_core_property_base.and(z.object({
+    analyzer: z.optional(z.string()),
+    index: z.optional(z.boolean()),
+    index_options: z.optional(types_mapping_index_options),
+    max_shingle_size: z.optional(z.number()),
+    norms: z.optional(z.boolean()),
+    search_analyzer: z.optional(z.string()),
+    search_quote_analyzer: z.optional(z.string()),
+    similarity: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    term_vector: z.optional(types_mapping_term_vector_option),
+    type: z.enum(['search_as_you_type'])
+}));
+
+export const types_mapping_rank_features_property = types_mapping_property_base.and(z.object({
+    positive_score_impact: z.optional(z.boolean()),
+    type: z.enum(['rank_features'])
+}));
+
+export const types_mapping_rank_feature_property = types_mapping_property_base.and(z.object({
+    positive_score_impact: z.optional(z.boolean()),
+    type: z.enum(['rank_feature'])
+}));
+
+export const types_mapping_percolator_property = types_mapping_property_base.and(z.object({
+    type: z.enum(['percolator'])
+}));
+
+/**
+ * A variant of text that trades scoring and efficiency of positional queries for space efficiency. This field
+ * effectively stores data the same way as a text field that only indexes documents (index_options: docs) and
+ * disables norms (norms: false). Term queries perform as fast if not faster as on text fields, however queries
+ * that need positions such as the match_phrase query perform slower as they need to look at the _source document
+ * to verify whether a phrase matches. All queries return constant scores that are equal to 1.0.
+ */
+export const types_mapping_match_only_text_property = z.object({
+    type: z.enum(['match_only_text']),
+    fields: z.optional(z.record(z.string(), types_mapping_property).register(z.globalRegistry, {
+        description: 'Multi-fields allow the same string value to be indexed in multiple ways for different purposes, such as one\nfield for search and a multi-field for sorting and aggregations, or the same string value analyzed by different analyzers.'
+    })),
+    meta: z.optional(z.record(z.string(), z.string()).register(z.globalRegistry, {
+        description: 'Metadata about the field.'
+    })),
+    copy_to: z.optional(types_fields)
+}).register(z.globalRegistry, {
+    description: 'A variant of text that trades scoring and efficiency of positional queries for space efficiency. This field\neffectively stores data the same way as a text field that only indexes documents (index_options: docs) and\ndisables norms (norms: false). Term queries perform as fast if not faster as on text fields, however queries\nthat need positions such as the match_phrase query perform slower as they need to look at the _source document\nto verify whether a phrase matches. All queries return constant scores that are equal to 1.0.'
+});
+
+export const types_mapping_keyword_property = types_mapping_doc_values_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    eager_global_ordinals: z.optional(z.boolean()),
+    index: z.optional(z.boolean()),
+    index_options: z.optional(types_mapping_index_options),
+    script: z.optional(types_script),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    normalizer: z.optional(z.string()),
+    norms: z.optional(z.boolean()),
+    null_value: z.optional(z.string()),
+    similarity: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    split_queries_on_whitespace: z.optional(z.boolean()),
+    time_series_dimension: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'For internal use by Elastic only. Marks the field as a time series dimension. Defaults to false.'
+    })),
+    type: z.enum(['keyword'])
+}));
+
+export const types_mapping_join_property = types_mapping_property_base.and(z.object({
+    relations: z.optional(z.record(z.string(), z.union([
+        types_relation_name,
+        z.array(types_relation_name)
+    ]))),
+    eager_global_ordinals: z.optional(z.boolean()),
+    type: z.enum(['join'])
+}));
+
+export const types_mapping_dynamic_property = types_mapping_doc_values_property_base.and(z.object({
+    type: z.enum(['{dynamic_type}']),
+    enabled: z.optional(z.boolean()),
+    null_value: z.optional(types_field_value),
+    boost: z.optional(z.number()),
+    coerce: z.optional(z.boolean()),
+    script: z.optional(types_script),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    ignore_malformed: z.optional(z.boolean()),
+    time_series_metric: z.optional(types_mapping_time_series_metric_type),
+    analyzer: z.optional(z.string()),
+    eager_global_ordinals: z.optional(z.boolean()),
+    index: z.optional(z.boolean()),
+    index_options: z.optional(types_mapping_index_options),
+    index_phrases: z.optional(z.boolean()),
+    index_prefixes: z.optional(z.union([
+        types_mapping_text_index_prefixes,
+        z.string(),
+        z.null()
+    ])),
+    norms: z.optional(z.boolean()),
+    position_increment_gap: z.optional(z.number()),
+    search_analyzer: z.optional(z.string()),
+    search_quote_analyzer: z.optional(z.string()),
+    term_vector: z.optional(types_mapping_term_vector_option),
+    format: z.optional(z.string()),
+    precision_step: z.optional(z.number()),
+    locale: z.optional(z.string())
+}));
+
+export const types_mapping_boolean_property = types_mapping_doc_values_property_base.and(z.object({
+    boost: z.optional(z.number()),
+    fielddata: z.optional(indices_types_numeric_fielddata),
+    index: z.optional(z.boolean()),
+    null_value: z.optional(z.boolean()),
+    ignore_malformed: z.optional(z.boolean()),
+    script: z.optional(types_script),
+    on_script_error: z.optional(types_mapping_on_script_error),
+    time_series_dimension: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'For internal use by Elastic only. Marks the field as a time series dimension. Defaults to false.'
+    })),
+    type: z.enum(['boolean'])
+}));
+
+export const types_mapping_binary_property = types_mapping_doc_values_property_base.and(z.object({
+    type: z.enum(['binary'])
+}));
+
+export const types_mapping_dynamic_template = z.object({
+    match: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    path_match: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    unmatch: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    path_unmatch: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    match_mapping_type: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    unmatch_mapping_type: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    match_pattern: z.optional(types_mapping_match_type)
+}).and(z.object({
+    mapping: z.optional(types_mapping_property),
+    runtime: z.optional(types_mapping_runtime_field)
+}));
+
+export const types_mapping_type_mapping = z.object({
+    all_field: z.optional(types_mapping_all_field),
+    date_detection: z.optional(z.boolean()),
+    dynamic: z.optional(types_mapping_dynamic_mapping),
+    dynamic_date_formats: z.optional(z.array(z.string())),
+    dynamic_templates: z.optional(z.array(z.record(z.string(), types_mapping_dynamic_template))),
+    _field_names: z.optional(types_mapping_field_names_field),
+    index_field: z.optional(types_mapping_index_field),
+    _meta: z.optional(types_metadata),
+    numeric_detection: z.optional(z.boolean()),
+    properties: z.optional(z.record(z.string(), types_mapping_property)),
+    _routing: z.optional(types_mapping_routing_field),
+    _size: z.optional(types_mapping_size_field),
+    _source: z.optional(types_mapping_source_field),
+    runtime: z.optional(z.record(z.string(), types_mapping_runtime_field)),
+    enabled: z.optional(z.boolean()),
+    subobjects: z.optional(types_mapping_subobjects),
+    _data_stream_timestamp: z.optional(types_mapping_data_stream_timestamp)
+});
+
+export const indices_types_settings_similarity_scripted = z.object({
+    type: z.enum(['scripted']),
+    script: types_script,
+    weight_script: z.optional(types_script)
+});
+
+export const indices_types_settings_similarity = z.union([
+    z.object({
+        type: z.literal('BM25')
+    }).and(indices_types_settings_similarity_bm25),
+    z.object({
+        type: z.literal('boolean')
+    }).and(indices_types_settings_similarity_boolean),
+    z.object({
+        type: z.literal('DFI')
+    }).and(indices_types_settings_similarity_dfi),
+    z.object({
+        type: z.literal('DFR')
+    }).and(indices_types_settings_similarity_dfr),
+    z.object({
+        type: z.literal('IB')
+    }).and(indices_types_settings_similarity_ib),
+    z.object({
+        type: z.literal('LMDirichlet')
+    }).and(indices_types_settings_similarity_lmd),
+    z.object({
+        type: z.literal('LMJelinekMercer')
+    }).and(indices_types_settings_similarity_lmj),
+    z.object({
+        type: z.literal('scripted')
+    }).and(indices_types_settings_similarity_scripted)
+]);
+
+export const types_analysis_predicate_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['predicate_token_filter']),
+    script: types_script
+}));
+
+export const types_analysis_condition_token_filter = types_analysis_token_filter_base.and(z.object({
+    type: z.enum(['condition']),
+    filter: z.array(z.string()).register(z.globalRegistry, {
+        description: 'Array of token filters. If a token matches the predicate script in the `script` parameter, these filters are applied to the token in the order provided.'
+    }),
+    script: types_script
+}));
+
+export const types_analysis_token_filter_definition = z.union([
+    z.object({
+        type: z.literal('apostrophe')
+    }).and(types_analysis_apostrophe_token_filter),
+    z.object({
+        type: z.literal('arabic_stem')
+    }).and(types_analysis_arabic_stem_token_filter),
+    z.object({
+        type: z.literal('arabic_normalization')
+    }).and(types_analysis_arabic_normalization_token_filter),
+    z.object({
+        type: z.literal('asciifolding')
+    }).and(types_analysis_ascii_folding_token_filter),
+    z.object({
+        type: z.literal('bengali_normalization')
+    }).and(types_analysis_bengali_normalization_token_filter),
+    z.object({
+        type: z.literal('brazilian_stem')
+    }).and(types_analysis_brazilian_stem_token_filter),
+    z.object({
+        type: z.literal('cjk_bigram')
+    }).and(types_analysis_cjk_bigram_token_filter),
+    z.object({
+        type: z.literal('cjk_width')
+    }).and(types_analysis_cjk_width_token_filter),
+    z.object({
+        type: z.literal('classic')
+    }).and(types_analysis_classic_token_filter),
+    z.object({
+        type: z.literal('common_grams')
+    }).and(types_analysis_common_grams_token_filter),
+    z.object({
+        type: z.literal('condition')
+    }).and(types_analysis_condition_token_filter),
+    z.object({
+        type: z.literal('czech_stem')
+    }).and(types_analysis_czech_stem_token_filter),
+    z.object({
+        type: z.literal('decimal_digit')
+    }).and(types_analysis_decimal_digit_token_filter),
+    z.object({
+        type: z.literal('delimited_payload')
+    }).and(types_analysis_delimited_payload_token_filter),
+    z.object({
+        type: z.literal('dutch_stem')
+    }).and(types_analysis_dutch_stem_token_filter),
+    z.object({
+        type: z.literal('edge_ngram')
+    }).and(types_analysis_edge_n_gram_token_filter),
+    z.object({
+        type: z.literal('elision')
+    }).and(types_analysis_elision_token_filter),
+    z.object({
+        type: z.literal('fingerprint')
+    }).and(types_analysis_fingerprint_token_filter),
+    z.object({
+        type: z.literal('flatten_graph')
+    }).and(types_analysis_flatten_graph_token_filter),
+    z.object({
+        type: z.literal('french_stem')
+    }).and(types_analysis_french_stem_token_filter),
+    z.object({
+        type: z.literal('german_normalization')
+    }).and(types_analysis_german_normalization_token_filter),
+    z.object({
+        type: z.literal('german_stem')
+    }).and(types_analysis_german_stem_token_filter),
+    z.object({
+        type: z.literal('hindi_normalization')
+    }).and(types_analysis_hindi_normalization_token_filter),
+    z.object({
+        type: z.literal('hunspell')
+    }).and(types_analysis_hunspell_token_filter),
+    z.object({
+        type: z.literal('hyphenation_decompounder')
+    }).and(types_analysis_hyphenation_decompounder_token_filter),
+    z.object({
+        type: z.literal('indic_normalization')
+    }).and(types_analysis_indic_normalization_token_filter),
+    z.object({
+        type: z.literal('keep_types')
+    }).and(types_analysis_keep_types_token_filter),
+    z.object({
+        type: z.literal('keep')
+    }).and(types_analysis_keep_words_token_filter),
+    z.object({
+        type: z.literal('keyword_marker')
+    }).and(types_analysis_keyword_marker_token_filter),
+    z.object({
+        type: z.literal('keyword_repeat')
+    }).and(types_analysis_keyword_repeat_token_filter),
+    z.object({
+        type: z.literal('kstem')
+    }).and(types_analysis_k_stem_token_filter),
+    z.object({
+        type: z.literal('length')
+    }).and(types_analysis_length_token_filter),
+    z.object({
+        type: z.literal('limit')
+    }).and(types_analysis_limit_token_count_token_filter),
+    z.object({
+        type: z.literal('lowercase')
+    }).and(types_analysis_lowercase_token_filter),
+    z.object({
+        type: z.literal('min_hash')
+    }).and(types_analysis_min_hash_token_filter),
+    z.object({
+        type: z.literal('multiplexer')
+    }).and(types_analysis_multiplexer_token_filter),
+    z.object({
+        type: z.literal('ngram')
+    }).and(types_analysis_n_gram_token_filter),
+    z.object({
+        type: z.literal('nori_part_of_speech')
+    }).and(types_analysis_nori_part_of_speech_token_filter),
+    z.object({
+        type: z.literal('pattern_capture')
+    }).and(types_analysis_pattern_capture_token_filter),
+    z.object({
+        type: z.literal('pattern_replace')
+    }).and(types_analysis_pattern_replace_token_filter),
+    z.object({
+        type: z.literal('persian_normalization')
+    }).and(types_analysis_persian_normalization_token_filter),
+    z.object({
+        type: z.literal('persian_stem')
+    }).and(types_analysis_persian_stem_token_filter),
+    z.object({
+        type: z.literal('porter_stem')
+    }).and(types_analysis_porter_stem_token_filter),
+    z.object({
+        type: z.literal('predicate_token_filter')
+    }).and(types_analysis_predicate_token_filter),
+    z.object({
+        type: z.literal('remove_duplicates')
+    }).and(types_analysis_remove_duplicates_token_filter),
+    z.object({
+        type: z.literal('reverse')
+    }).and(types_analysis_reverse_token_filter),
+    z.object({
+        type: z.literal('russian_stem')
+    }).and(types_analysis_russian_stem_token_filter),
+    z.object({
+        type: z.literal('scandinavian_folding')
+    }).and(types_analysis_scandinavian_folding_token_filter),
+    z.object({
+        type: z.literal('scandinavian_normalization')
+    }).and(types_analysis_scandinavian_normalization_token_filter),
+    z.object({
+        type: z.literal('serbian_normalization')
+    }).and(types_analysis_serbian_normalization_token_filter),
+    z.object({
+        type: z.literal('shingle')
+    }).and(types_analysis_shingle_token_filter),
+    z.object({
+        type: z.literal('snowball')
+    }).and(types_analysis_snowball_token_filter),
+    z.object({
+        type: z.literal('sorani_normalization')
+    }).and(types_analysis_sorani_normalization_token_filter),
+    z.object({
+        type: z.literal('stemmer_override')
+    }).and(types_analysis_stemmer_override_token_filter),
+    z.object({
+        type: z.literal('stemmer')
+    }).and(types_analysis_stemmer_token_filter),
+    z.object({
+        type: z.literal('stop')
+    }).and(types_analysis_stop_token_filter),
+    z.object({
+        type: z.literal('synonym_graph')
+    }).and(types_analysis_synonym_graph_token_filter),
+    z.object({
+        type: z.literal('synonym')
+    }).and(types_analysis_synonym_token_filter),
+    z.object({
+        type: z.literal('trim')
+    }).and(types_analysis_trim_token_filter),
+    z.object({
+        type: z.literal('truncate')
+    }).and(types_analysis_truncate_token_filter),
+    z.object({
+        type: z.literal('unique')
+    }).and(types_analysis_unique_token_filter),
+    z.object({
+        type: z.literal('uppercase')
+    }).and(types_analysis_uppercase_token_filter),
+    z.object({
+        type: z.literal('word_delimiter_graph')
+    }).and(types_analysis_word_delimiter_graph_token_filter),
+    z.object({
+        type: z.literal('word_delimiter')
+    }).and(types_analysis_word_delimiter_token_filter),
+    z.object({
+        type: z.literal('ja_stop')
+    }).and(types_analysis_ja_stop_token_filter),
+    z.object({
+        type: z.literal('kuromoji_stemmer')
+    }).and(types_analysis_kuromoji_stemmer_token_filter),
+    z.object({
+        type: z.literal('kuromoji_readingform')
+    }).and(types_analysis_kuromoji_reading_form_token_filter),
+    z.object({
+        type: z.literal('kuromoji_part_of_speech')
+    }).and(types_analysis_kuromoji_part_of_speech_token_filter),
+    z.object({
+        type: z.literal('icu_collation')
+    }).and(types_analysis_icu_collation_token_filter),
+    z.object({
+        type: z.literal('icu_folding')
+    }).and(types_analysis_icu_folding_token_filter),
+    z.object({
+        type: z.literal('icu_normalizer')
+    }).and(types_analysis_icu_normalization_token_filter),
+    z.object({
+        type: z.literal('icu_transform')
+    }).and(types_analysis_icu_transform_token_filter),
+    z.object({
+        type: z.literal('phonetic')
+    }).and(types_analysis_phonetic_token_filter),
+    z.object({
+        type: z.literal('dictionary_decompounder')
+    }).and(types_analysis_dictionary_decompounder_token_filter)
+]);
+
+export const types_analysis_token_filter = z.union([
+    z.string(),
+    types_analysis_token_filter_definition
+]);
+
+export const indices_types_index_settings_analysis = z.object({
+    analyzer: z.optional(z.record(z.string(), types_analysis_analyzer)),
+    char_filter: z.optional(z.record(z.string(), types_analysis_char_filter)),
+    filter: z.optional(z.record(z.string(), types_analysis_token_filter)),
+    normalizer: z.optional(z.record(z.string(), types_analysis_normalizer)),
+    tokenizer: z.optional(z.record(z.string(), types_analysis_tokenizer))
+});
+
+export const indices_types_index_settings = z.object({
+    get index() {
+        return z.optional(z.lazy((): any => indices_types_index_settings));
+    },
+    mode: z.optional(z.string()),
+    routing_path: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    soft_deletes: z.optional(indices_types_soft_deletes),
+    sort: z.optional(indices_types_index_segment_sort),
+    number_of_shards: z.optional(z.union([
+        z.number(),
+        z.string()
+    ])),
+    number_of_replicas: z.optional(z.union([
+        z.number(),
+        z.string()
+    ])),
+    number_of_routing_shards: z.optional(z.number()),
+    check_on_startup: z.optional(indices_types_index_check_on_startup),
+    codec: z.optional(z.string()),
+    routing_partition_size: z.optional(spec_utils_stringifiedinteger),
+    load_fixed_bitset_filters_eagerly: z.optional(z.boolean()),
+    hidden: z.optional(z.union([
+        z.boolean(),
+        z.string()
+    ])),
+    auto_expand_replicas: z.optional(z.union([
+        z.string(),
+        spec_utils_null_value
+    ])),
+    merge: z.optional(indices_types_merge),
+    search: z.optional(indices_types_settings_search),
+    refresh_interval: z.optional(types_duration),
+    max_result_window: z.optional(z.number()),
+    max_inner_result_window: z.optional(z.number()),
+    max_rescore_window: z.optional(z.number()),
+    max_docvalue_fields_search: z.optional(z.number()),
+    max_script_fields: z.optional(z.number()),
+    max_ngram_diff: z.optional(z.number()),
+    max_shingle_diff: z.optional(z.number()),
+    blocks: z.optional(indices_types_index_setting_blocks),
+    max_refresh_listeners: z.optional(z.number()),
+    analyze: z.optional(indices_types_settings_analyze),
+    highlight: z.optional(indices_types_settings_highlight),
+    max_terms_count: z.optional(z.number()),
+    max_regex_length: z.optional(z.number()),
+    routing: z.optional(indices_types_index_routing),
+    gc_deletes: z.optional(types_duration),
+    default_pipeline: z.optional(types_pipeline_name),
+    final_pipeline: z.optional(types_pipeline_name),
+    lifecycle: z.optional(indices_types_index_settings_lifecycle),
+    provided_name: z.optional(types_name),
+    creation_date: z.optional(spec_utils_stringified_epoch_time_unit_millis),
+    creation_date_string: z.optional(types_date_time),
+    uuid: z.optional(types_uuid),
+    version: z.optional(indices_types_index_versioning),
+    verified_before_close: z.optional(z.union([
+        z.boolean(),
+        z.string()
+    ])),
+    format: z.optional(z.union([
+        z.string(),
+        z.number()
+    ])),
+    max_slices_per_scroll: z.optional(z.number()),
+    translog: z.optional(indices_types_translog),
+    query_string: z.optional(indices_types_settings_query_string),
+    priority: z.optional(z.union([
+        z.number(),
+        z.string()
+    ])),
+    top_metrics_max_size: z.optional(z.number()),
+    analysis: z.optional(indices_types_index_settings_analysis),
+    get settings() {
+        return z.optional(z.lazy((): any => indices_types_index_settings));
+    },
+    time_series: z.optional(indices_types_index_settings_time_series),
+    queries: z.optional(indices_types_queries),
+    similarity: z.optional(z.record(z.string(), indices_types_settings_similarity).register(z.globalRegistry, {
+        description: 'Configure custom similarity settings to customize how search results are scored.'
+    })),
+    mapping: z.optional(indices_types_mapping_limit_settings),
+    'indexing.slowlog': z.optional(indices_types_indexing_slowlog_settings),
+    indexing_pressure: z.optional(indices_types_indexing_pressure),
+    store: z.optional(indices_types_storage)
+});
+
 export const types_aggregations_top_hits_aggregate = types_aggregations_aggregate_base.and(z.lazy(() => z.object({
     get hits() {
         return z.lazy((): any => global_search_types_hits_metadata);
@@ -5572,6 +9011,39 @@ export const global_search_response_body = z.object({
     _scroll_id: z.optional(types_scroll_id),
     suggest: z.optional(z.record(z.string(), z.array(global_search_types_suggest))),
     terminated_early: z.optional(z.boolean())
+});
+
+export const indices_types_alias = z.object({
+    filter: z.optional(types_query_dsl_query_container),
+    index_routing: z.optional(types_routing),
+    is_hidden: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the alias is hidden.\nAll indices for the alias must have the same `is_hidden` value.'
+    })),
+    is_write_index: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the index is the write index for the alias.'
+    })),
+    routing: z.optional(types_routing),
+    search_routing: z.optional(types_routing)
+});
+
+export const global_bulk_update_action = z.object({
+    detect_noop: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If true, the `result` in the response is set to \'noop\' when no changes to the document occur.'
+    })),
+    doc: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
+        description: 'A partial update to an existing document.'
+    })),
+    doc_as_upsert: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Set to `true` to use the contents of `doc` as the value of `upsert`.'
+    })),
+    script: z.optional(types_script),
+    scripted_upsert: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Set to `true` to run the script whether or not the document exists.'
+    })),
+    _source: z.optional(global_search_types_source_config),
+    upsert: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
+        description: 'If the document does not already exist, the contents of `upsert` are inserted as a new document.\nIf the document exists, the `script` is run.'
+    }))
 });
 
 /**
@@ -5940,315 +9412,91 @@ export const search_index = types_indices;
 /**
  * If `true`, the request's actions must target a data stream (existing or to be created).
  */
-export const index_require_data_stream = z.boolean().register(z.globalRegistry, {
+export const bulk_require_data_stream = z.boolean().register(z.globalRegistry, {
     description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
 });
 
 /**
- * If `true`, the destination must be an index alias.
+ * If `true`, the request's actions must target an index alias.
  */
-export const index_require_alias = z.boolean().register(z.globalRegistry, {
-    description: 'If `true`, the destination must be an index alias.'
+export const bulk_require_alias = z.boolean().register(z.globalRegistry, {
+    description: 'If `true`, the request\'s actions must target an index alias.'
 });
 
 /**
  * The number of shard copies that must be active before proceeding with the operation.
- * You can set it to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
- * The default value of `1` means it waits for each primary shard to be active.
+ * Set to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
+ * The default is `1`, which waits for each primary shard to be active.
  */
-export const index_wait_for_active_shards = types_wait_for_active_shards;
+export const bulk_wait_for_active_shards = types_wait_for_active_shards;
 
 /**
- * The version type.
- */
-export const index_version_type = types_version_type;
-
-/**
- * An explicit version number for concurrency control.
- * It must be a non-negative long number.
- */
-export const index_version = types_version_number;
-
-/**
- * The period the request waits for the following operations: automatic index creation, dynamic mapping updates, waiting for active shards.
- *
- * This parameter is useful for situations where the primary shard assigned to perform the operation might not be available when the operation runs.
- * Some reasons for this might be that the primary shard is currently recovering from a gateway or undergoing relocation.
- * By default, the operation will wait on the primary shard to become available for at least 1 minute before failing and responding with an error.
+ * The period each action waits for the following operations: automatic index creation, dynamic mapping updates, and waiting for active shards.
+ * The default is `1m` (one minute), which guarantees Elasticsearch waits for at least the timeout before failing.
  * The actual wait time could be longer, particularly when multiple waits occur.
  */
-export const index_timeout = types_duration;
+export const bulk_timeout = types_duration;
+
+/**
+ * A comma-separated list of source fields to include in the response.
+ * If this parameter is specified, only these source fields are returned.
+ * You can exclude fields from this subset using the `_source_excludes` query parameter.
+ * If the `_source` parameter is `false`, this parameter is ignored.
+ */
+export const bulk_source_includes = types_fields;
+
+/**
+ * A comma-separated list of source fields to exclude from the response.
+ * You can also use this parameter to exclude fields from the subset specified in `_source_includes` query parameter.
+ * If the `_source` parameter is `false`, this parameter is ignored.
+ */
+export const bulk_source_excludes = types_fields;
+
+/**
+ * Indicates whether to return the `_source` field (`true` or `false`) or contains a list of fields to return.
+ */
+export const bulk_source = global_search_types_source_config_param;
 
 /**
  * A custom value that is used to route operations to a specific shard.
  */
-export const index_routing = types_routing;
+export const bulk_routing = types_routing;
 
 /**
  * If `true`, Elasticsearch refreshes the affected shards to make this operation visible to search.
- * If `wait_for`, it waits for a refresh to make this operation visible to search.
- * If `false`, it does nothing with refreshes.
+ * If `wait_for`, wait for a refresh to make this operation visible to search.
+ * If `false`, do nothing with refreshes.
+ * Valid values: `true`, `false`, `wait_for`.
  */
-export const index_refresh = types_refresh;
+export const bulk_refresh = types_refresh;
 
 /**
- * The ID of the pipeline to use to preprocess incoming documents.
- * If the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.
- * If a final pipeline is configured it will always run, regardless of the value of this parameter.
- */
-export const index_pipeline = z.string().register(z.globalRegistry, {
-    description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.\nIf a final pipeline is configured it will always run, regardless of the value of this parameter.'
-});
-
-/**
- * Set to `create` to only index the document if it does not already exist (put if absent).
- * If a document with the specified `_id` already exists, the indexing operation will fail.
- * The behavior is the same as using the `<index>/_create` endpoint.
- * If a document ID is specified, this paramater defaults to `index`.
- * Otherwise, it defaults to `create`.
- * If the request targets a data stream, an `op_type` of `create` is required.
- */
-export const index_op_type = types_op_type;
-
-/**
- * True or false if to include the document source in the error message in case of parsing errors.
- */
-export const index_include_source_on_error = z.boolean().register(z.globalRegistry, {
-    description: 'True or false if to include the document source in the error message in case of parsing errors.'
-});
-
-/**
- * Only perform the operation if the document has this sequence number.
- */
-export const index_if_seq_no = types_sequence_number;
-
-/**
- * Only perform the operation if the document has this primary term.
- */
-export const index_if_primary_term = z.number().register(z.globalRegistry, {
-    description: 'Only perform the operation if the document has this primary term.'
-});
-
-/**
- * The name of the data stream or index to target.
- * If the target doesn't exist and matches the name or wildcard (`*`) pattern of an index template with a `data_stream` definition, this request creates the data stream.
- * If the target doesn't exist and doesn't match a data stream template, this request creates the index.
- * You can check for existing targets with the resolve index API.
- */
-export const index_index = types_index_name;
-
-/**
- * A unique identifier for the document.
- * To automatically generate a document ID, use the `POST /<target>/_doc/` request format and omit this parameter.
- */
-export const index_id = types_id;
-
-/**
- * The number of shard copies that must be active before proceeding with the operation.
- * You can set it to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
- * The default value of `1` means it waits for each primary shard to be active.
- */
-export const create_wait_for_active_shards = types_wait_for_active_shards;
-
-/**
- * The version type.
- */
-export const create_version_type = types_version_type;
-
-/**
- * The explicit version number for concurrency control.
- * It must be a non-negative long number.
- */
-export const create_version = types_version_number;
-
-/**
- * The period the request waits for the following operations: automatic index creation, dynamic mapping updates, waiting for active shards.
- * Elasticsearch waits for at least the specified timeout period before failing.
- * The actual wait time could be longer, particularly when multiple waits occur.
- *
- * This parameter is useful for situations where the primary shard assigned to perform the operation might not be available when the operation runs.
- * Some reasons for this might be that the primary shard is currently recovering from a gateway or undergoing relocation.
- * By default, the operation will wait on the primary shard to become available for at least 1 minute before failing and responding with an error.
- * The actual wait time could be longer, particularly when multiple waits occur.
- */
-export const create_timeout = types_duration;
-
-/**
- * A custom value that is used to route operations to a specific shard.
- */
-export const create_routing = types_routing;
-
-/**
- * If `true`, the request's actions must target a data stream (existing or to be created).
- */
-export const create_require_data_stream = z.boolean().register(z.globalRegistry, {
-    description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
-});
-
-/**
- * If `true`, the destination must be an index alias.
- */
-export const create_require_alias = z.boolean().register(z.globalRegistry, {
-    description: 'If `true`, the destination must be an index alias.'
-});
-
-/**
- * If `true`, Elasticsearch refreshes the affected shards to make this operation visible to search.
- * If `wait_for`, it waits for a refresh to make this operation visible to search.
- * If `false`, it does nothing with refreshes.
- */
-export const create_refresh = types_refresh;
-
-/**
- * The ID of the pipeline to use to preprocess incoming documents.
+ * The pipeline identifier to use to preprocess incoming documents.
  * If the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.
  * If a final pipeline is configured, it will always run regardless of the value of this parameter.
  */
-export const create_pipeline = z.string().register(z.globalRegistry, {
-    description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
+export const bulk_pipeline = z.string().register(z.globalRegistry, {
+    description: 'The pipeline identifier to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
+});
+
+/**
+ * If `true`, the response will include the ingest pipelines that were run for each index or create.
+ */
+export const bulk_list_executed_pipelines = z.boolean().register(z.globalRegistry, {
+    description: 'If `true`, the response will include the ingest pipelines that were run for each index or create.'
 });
 
 /**
  * True or false if to include the document source in the error message in case of parsing errors.
  */
-export const create_include_source_on_error = z.boolean().register(z.globalRegistry, {
+export const bulk_include_source_on_error = z.boolean().register(z.globalRegistry, {
     description: 'True or false if to include the document source in the error message in case of parsing errors.'
 });
 
 /**
- * The name of the data stream or index to target.
- * If the target doesn't exist and matches the name or wildcard (`*`) pattern of an index template with a `data_stream` definition, this request creates the data stream.
- * If the target doesn't exist and doesn’t match a data stream template, this request creates the index.
+ * The name of the data stream, index, or index alias to perform bulk actions on.
  */
-export const create_index = types_index_name;
-
-/**
- * A unique identifier for the document.
- * To automatically generate a document ID, use the `POST /<target>/_doc/` request format.
- */
-export const create_id = types_id;
-
-/**
- * The query in Lucene query string syntax. This parameter cannot be used with a request body.
- */
-export const count_q = z.string().register(z.globalRegistry, {
-    description: 'The query in Lucene query string syntax. This parameter cannot be used with a request body.'
-});
-
-/**
- * The maximum number of documents to collect for each shard.
- * If a query reaches this limit, Elasticsearch terminates the query early.
- * Elasticsearch collects documents before sorting.
- *
- * IMPORTANT: Use with caution.
- * Elasticsearch applies this parameter to each shard handling the request.
- * When possible, let Elasticsearch perform early termination automatically.
- * Avoid specifying this parameter for requests that target data streams with backing indices across multiple data tiers.
- */
-export const count_terminate_after = z.number().register(z.globalRegistry, {
-    description: 'The maximum number of documents to collect for each shard.\nIf a query reaches this limit, Elasticsearch terminates the query early.\nElasticsearch collects documents before sorting.\n\nIMPORTANT: Use with caution.\nElasticsearch applies this parameter to each shard handling the request.\nWhen possible, let Elasticsearch perform early termination automatically.\nAvoid specifying this parameter for requests that target data streams with backing indices across multiple data tiers.'
-});
-
-/**
- * A custom value used to route operations to a specific shard.
- */
-export const count_routing = types_routing;
-
-/**
- * The node or shard the operation should be performed on.
- * By default, it is random.
- */
-export const count_preference = z.string().register(z.globalRegistry, {
-    description: 'The node or shard the operation should be performed on.\nBy default, it is random.'
-});
-
-/**
- * The minimum `_score` value that documents must have to be included in the result.
- */
-export const count_min_score = z.number().register(z.globalRegistry, {
-    description: 'The minimum `_score` value that documents must have to be included in the result.'
-});
-
-/**
- * If `true`, format-based query failures (such as providing text to a numeric field) in the query string will be ignored.
- * This parameter can be used only when the `q` query string parameter is specified.
- */
-export const count_lenient = z.boolean().register(z.globalRegistry, {
-    description: 'If `true`, format-based query failures (such as providing text to a numeric field) in the query string will be ignored.\nThis parameter can be used only when the `q` query string parameter is specified.'
-});
-
-/**
- * If `false`, the request returns an error if it targets a missing or closed index.
- */
-export const count_ignore_unavailable = z.boolean().register(z.globalRegistry, {
-    description: 'If `false`, the request returns an error if it targets a missing or closed index.'
-});
-
-/**
- * If `true`, concrete, expanded, or aliased indices are ignored when frozen.
- *
- * @deprecated
- */
-export const count_ignore_throttled = z.boolean().register(z.globalRegistry, {
-    description: 'If `true`, concrete, expanded, or aliased indices are ignored when frozen.'
-});
-
-/**
- * The type of index that wildcard patterns can match.
- * If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams.
- * It supports comma-separated values, such as `open,hidden`.
- */
-export const count_expand_wildcards = types_expand_wildcards;
-
-/**
- * The field to use as a default when no field prefix is given in the query string.
- * This parameter can be used only when the `q` query string parameter is specified.
- */
-export const count_df = z.string().register(z.globalRegistry, {
-    description: 'The field to use as a default when no field prefix is given in the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
-});
-
-/**
- * The default operator for query string query: `and` or `or`.
- * This parameter can be used only when the `q` query string parameter is specified.
- */
-export const count_default_operator = types_query_dsl_operator;
-
-/**
- * If `true`, wildcard and prefix queries are analyzed.
- * This parameter can be used only when the `q` query string parameter is specified.
- */
-export const count_analyze_wildcard = z.boolean().register(z.globalRegistry, {
-    description: 'If `true`, wildcard and prefix queries are analyzed.\nThis parameter can be used only when the `q` query string parameter is specified.'
-});
-
-/**
- * The analyzer to use for the query string.
- * This parameter can be used only when the `q` query string parameter is specified.
- */
-export const count_analyzer = z.string().register(z.globalRegistry, {
-    description: 'The analyzer to use for the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
-});
-
-/**
- * If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.
- * This behavior applies even if the request targets other open indices.
- * For example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.
- */
-export const count_allow_no_indices = z.boolean().register(z.globalRegistry, {
-    description: 'If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.\nThis behavior applies even if the request targets other open indices.\nFor example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.'
-});
-
-/**
- * A comma-separated list of data streams, indices, and aliases to search.
- * It supports wildcards (`*`).
- * To search all data streams and indices, omit this parameter or use `*` or `_all`.
- */
-export const count_index = types_indices;
-
-export const index = z.record(z.string(), z.unknown());
-
-export const create = z.record(z.string(), z.unknown());
+export const bulk_index = types_index_name;
 
 export const search = z.object({
     aggregations: z.optional(z.record(z.string(), types_aggregations_aggregation_container).register(z.globalRegistry, {
@@ -6327,315 +9575,409 @@ export const search = z.object({
     }))
 });
 
-export const count = z.object({
-    query: z.optional(types_query_dsl_query_container)
+export const bulk = z.array(z.union([
+    global_bulk_operation_container,
+    global_bulk_update_action,
+    z.record(z.string(), z.unknown())
+]));
+
+export const indices_delete_request = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        index: types_indices
+    }),
+    query: z.optional(z.object({
+        allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.\nThis behavior applies even if the request targets other open indices.'
+        })),
+        expand_wildcards: z.optional(types_expand_wildcards),
+        ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if it targets a missing or closed index.'
+        })),
+        master_timeout: z.optional(types_duration),
+        timeout: z.optional(types_duration)
+    }))
 });
 
-export const create1_request = z.object({
-    body: create,
+export const indices_delete_response = types_indices_response_base;
+
+export const indices_exists_request = z.object({
+    body: z.optional(z.never()),
     path: z.object({
-        index: types_index_name,
-        id: types_id
+        index: types_indices
+    }),
+    query: z.optional(z.object({
+        allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.\nThis behavior applies even if the request targets other open indices.'
+        })),
+        expand_wildcards: z.optional(types_expand_wildcards),
+        flat_settings: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, returns settings in flat format.'
+        })),
+        ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if it targets a missing or closed index.'
+        })),
+        include_defaults: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, return all default settings in the response.'
+        })),
+        local: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request retrieves information from the local node only.'
+        }))
+    }))
+});
+
+export const bulk_request = z.object({
+    body: bulk,
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'True or false if to include the document source in the error message in case of parsing errors.'
+        })),
+        list_executed_pipelines: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response will include the ingest pipelines that were run for each index or create.'
+        })),
+        pipeline: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The pipeline identifier to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
+        })),
+        refresh: z.optional(types_refresh),
+        routing: z.optional(types_routing),
+        _source: z.optional(global_search_types_source_config_param),
+        _source_excludes: z.optional(types_fields),
+        _source_includes: z.optional(types_fields),
+        timeout: z.optional(types_duration),
+        wait_for_active_shards: z.optional(types_wait_for_active_shards),
+        require_alias: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request\'s actions must target an index alias.'
+        })),
+        require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
+        }))
+    }))
+});
+
+export const bulk_response = z.object({
+    errors: z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, one or more of the operations in the bulk request did not complete successfully.'
+    }),
+    items: z.array(z.record(z.string(), global_bulk_response_item)).register(z.globalRegistry, {
+        description: 'The result of each operation in the bulk request, in the order they were submitted.'
+    }),
+    took: z.number().register(z.globalRegistry, {
+        description: 'The length of time, in milliseconds, it took to process the bulk request.'
+    }),
+    ingest_took: z.optional(z.number())
+});
+
+export const bulk1_request = z.object({
+    body: bulk,
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'True or false if to include the document source in the error message in case of parsing errors.'
+        })),
+        list_executed_pipelines: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response will include the ingest pipelines that were run for each index or create.'
+        })),
+        pipeline: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The pipeline identifier to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
+        })),
+        refresh: z.optional(types_refresh),
+        routing: z.optional(types_routing),
+        _source: z.optional(global_search_types_source_config_param),
+        _source_excludes: z.optional(types_fields),
+        _source_includes: z.optional(types_fields),
+        timeout: z.optional(types_duration),
+        wait_for_active_shards: z.optional(types_wait_for_active_shards),
+        require_alias: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request\'s actions must target an index alias.'
+        })),
+        require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
+        }))
+    }))
+});
+
+export const bulk1_response = z.object({
+    errors: z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, one or more of the operations in the bulk request did not complete successfully.'
+    }),
+    items: z.array(z.record(z.string(), global_bulk_response_item)).register(z.globalRegistry, {
+        description: 'The result of each operation in the bulk request, in the order they were submitted.'
+    }),
+    took: z.number().register(z.globalRegistry, {
+        description: 'The length of time, in milliseconds, it took to process the bulk request.'
+    }),
+    ingest_took: z.optional(z.number())
+});
+
+export const bulk2_request = z.object({
+    body: bulk,
+    path: z.object({
+        index: types_index_name
     }),
     query: z.optional(z.object({
         include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'True or false if to include the document source in the error message in case of parsing errors.'
         })),
+        list_executed_pipelines: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response will include the ingest pipelines that were run for each index or create.'
+        })),
         pipeline: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
+            description: 'The pipeline identifier to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
         })),
         refresh: z.optional(types_refresh),
+        routing: z.optional(types_routing),
+        _source: z.optional(global_search_types_source_config_param),
+        _source_excludes: z.optional(types_fields),
+        _source_includes: z.optional(types_fields),
+        timeout: z.optional(types_duration),
+        wait_for_active_shards: z.optional(types_wait_for_active_shards),
         require_alias: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the destination must be an index alias.'
+            description: 'If `true`, the request\'s actions must target an index alias.'
         })),
         require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
-        })),
-        routing: z.optional(types_routing),
-        timeout: z.optional(types_duration),
-        version: z.optional(types_version_number),
-        version_type: z.optional(types_version_type),
-        wait_for_active_shards: z.optional(types_wait_for_active_shards)
+        }))
     }))
 });
 
-export const create1_response = types_write_response_base;
+export const bulk2_response = z.object({
+    errors: z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, one or more of the operations in the bulk request did not complete successfully.'
+    }),
+    items: z.array(z.record(z.string(), global_bulk_response_item)).register(z.globalRegistry, {
+        description: 'The result of each operation in the bulk request, in the order they were submitted.'
+    }),
+    took: z.number().register(z.globalRegistry, {
+        description: 'The length of time, in milliseconds, it took to process the bulk request.'
+    }),
+    ingest_took: z.optional(z.number())
+});
 
-export const create_request = z.object({
-    body: create,
+export const bulk3_request = z.object({
+    body: bulk,
     path: z.object({
-        index: types_index_name,
-        id: types_id
+        index: types_index_name
     }),
     query: z.optional(z.object({
         include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'True or false if to include the document source in the error message in case of parsing errors.'
         })),
+        list_executed_pipelines: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response will include the ingest pipelines that were run for each index or create.'
+        })),
         pipeline: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
+            description: 'The pipeline identifier to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, setting the value to `_none` turns off the default ingest pipeline for this request.\nIf a final pipeline is configured, it will always run regardless of the value of this parameter.'
         })),
         refresh: z.optional(types_refresh),
+        routing: z.optional(types_routing),
+        _source: z.optional(global_search_types_source_config_param),
+        _source_excludes: z.optional(types_fields),
+        _source_includes: z.optional(types_fields),
+        timeout: z.optional(types_duration),
+        wait_for_active_shards: z.optional(types_wait_for_active_shards),
         require_alias: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the destination must be an index alias.'
+            description: 'If `true`, the request\'s actions must target an index alias.'
         })),
         require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
+        }))
+    }))
+});
+
+export const bulk3_response = z.object({
+    errors: z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, one or more of the operations in the bulk request did not complete successfully.'
+    }),
+    items: z.array(z.record(z.string(), global_bulk_response_item)).register(z.globalRegistry, {
+        description: 'The result of each operation in the bulk request, in the order they were submitted.'
+    }),
+    took: z.number().register(z.globalRegistry, {
+        description: 'The length of time, in milliseconds, it took to process the bulk request.'
+    }),
+    ingest_took: z.optional(z.number())
+});
+
+export const esql_query_request = z.object({
+    body: z.object({
+        columnar: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'By default, ES|QL returns results as rows. For example, FROM returns each individual document as one row. For the JSON, YAML, CBOR and smile formats, ES|QL can return the results in a columnar fashion where one row represents all the values of a certain column in the results.'
         })),
-        routing: z.optional(types_routing),
+        filter: z.optional(types_query_dsl_query_container),
+        locale: z.optional(z.string()),
+        params: z.optional(z.array(esql_types_esql_param).register(z.globalRegistry, {
+            description: 'To avoid any attempts of hacking or code injection, extract the values in a separate list of parameters. Use question mark placeholders (?) in the query string for each of the parameters.'
+        })),
+        profile: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If provided and `true` the response will include an extra `profile` object\nwith information on how the query was executed. This information is for human debugging\nand its format can change at any time but it can give some insight into the performance\nof each part of the query.'
+        })),
+        query: z.string().register(z.globalRegistry, {
+            description: 'The ES|QL query API accepts an ES|QL query string in the query parameter, runs it, and returns the results.'
+        }),
+        tables: z.optional(z.record(z.string(), z.record(z.string(), esql_types_table_values_container)).register(z.globalRegistry, {
+            description: 'Tables to use with the LOOKUP operation. The top level key is the table\nname and the next level key is the column name.'
+        })),
+        include_ccs_metadata: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'When set to `true` and performing a cross-cluster/cross-project query, the response will include an extra `_clusters`\nobject with information about the clusters that participated in the search along with info such as shards\ncount.'
+        })),
+        include_execution_metadata: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'When set to `true`, the response will include an extra `_clusters`\nobject with information about the clusters that participated in the search along with info such as shards\ncount.\nThis is similar to `include_ccs_metadata`, but it also returns metadata when the query is not CCS/CPS'
+        }))
+    }),
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        format: z.optional(esql_types_esql_format),
+        delimiter: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The character to use between values within a CSV row. Only valid for the CSV format.'
+        })),
+        drop_null_columns: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Should columns that are entirely `null` be removed from the `columns` and `values` portion of the results?\nDefaults to `false`. If `true` then the response will include an extra section under the name `all_columns` which has the name of all columns.'
+        })),
+        allow_partial_results: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, partial results will be returned if there are shard failures, but the query can continue to execute on other clusters and shards.\nIf `false`, the query will fail if there are any failures.\n\nTo override the default behavior, you can set the `esql.query.allow_partial_results` cluster setting to `false`.'
+        }))
+    }))
+});
+
+export const esql_query_response = esql_types_esql_result;
+
+export const indices_create_request = z.object({
+    body: z.optional(z.object({
+        aliases: z.optional(z.record(z.string(), indices_types_alias).register(z.globalRegistry, {
+            description: 'Aliases for the index.'
+        })),
+        mappings: z.optional(types_mapping_type_mapping),
+        settings: z.optional(indices_types_index_settings)
+    })),
+    path: z.object({
+        index: types_index_name
+    }),
+    query: z.optional(z.object({
+        master_timeout: z.optional(types_duration),
         timeout: z.optional(types_duration),
-        version: z.optional(types_version_number),
-        version_type: z.optional(types_version_type),
         wait_for_active_shards: z.optional(types_wait_for_active_shards)
     }))
 });
 
-export const create_response = types_write_response_base;
-
-export const delete_request = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        index: types_index_name,
-        id: types_id
-    }),
-    query: z.optional(z.object({
-        if_primary_term: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Only perform the operation if the document has this primary term.'
-        })),
-        if_seq_no: z.optional(types_sequence_number),
-        refresh: z.optional(types_refresh),
-        routing: z.optional(types_routing),
-        timeout: z.optional(types_duration),
-        version: z.optional(types_version_number),
-        version_type: z.optional(types_version_type),
-        wait_for_active_shards: z.optional(types_wait_for_active_shards)
-    }))
+export const indices_create_response = z.object({
+    index: types_index_name,
+    shards_acknowledged: z.boolean(),
+    acknowledged: z.boolean()
 });
 
-export const delete_response = types_write_response_base;
-
-export const get_request = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        index: types_index_name,
-        id: types_id
-    }),
+export const search_request = z.object({
+    body: z.optional(search),
+    path: z.optional(z.never()),
     query: z.optional(z.object({
+        allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.\nThis behavior applies even if the request targets other open indices.\nFor example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.'
+        })),
+        allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true` and there are shard request timeouts or shard failures, the request returns partial results.\nIf `false`, it returns an error with no partial results.\n\nTo override the default behavior, you can set the `search.default_allow_partial_results` cluster setting to `false`.'
+        })),
+        analyzer: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The analyzer to use for the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, wildcard and prefix queries are analyzed.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        batched_reduce_size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of shard results that should be reduced at once on the coordinating node.\nIf the potential number of shards in the request can be large, this value should be used as a protection mechanism to reduce the memory overhead per search request.'
+        })),
+        ccs_minimize_roundtrips: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, network round-trips between the coordinating node and the remote clusters are minimized when running cross-cluster search (CCS) requests.'
+        })),
+        default_operator: z.optional(types_query_dsl_operator),
+        df: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The field to use as a default when no field prefix is given in the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        docvalue_fields: z.optional(types_fields),
+        expand_wildcards: z.optional(types_expand_wildcards),
+        explain: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request returns detailed information about score computation as part of a hit.'
+        })),
+        ignore_throttled: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, concrete, expanded or aliased indices will be ignored when frozen.'
+        })),
+        ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if it targets a missing or closed index.'
+        })),
+        include_named_queries_score: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response includes the score contribution from any named queries.\n\nThis functionality reruns each named query on every hit in a search response.\nTypically, this adds a small overhead to a request.\nHowever, using computationally expensive named queries on a large number of hits may add significant overhead.'
+        })),
+        lenient: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, format-based query failures (such as providing text to a numeric field) in the query string will be ignored.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        max_concurrent_shard_requests: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of concurrent shard requests per node that the search runs concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests.'
+        })),
         preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The node or shard the operation should be performed on.\nBy default, the operation is randomized between the shard replicas.\n\nIf it is set to `_local`, the operation will prefer to be run on a local allocated shard when possible.\nIf it is set to a custom value, the value is used to guarantee that the same shards will be used for the same custom value.\nThis can help with "jumping values" when hitting different shards in different refresh states.\nA sample value can be something like the web session ID or the user name.'
+            description: 'The nodes and shards used for the search.\nBy default, Elasticsearch selects from eligible nodes and shards using adaptive replica selection, accounting for allocation awareness.\nValid values are:\n\n* `_only_local` to run the search only on shards on the local node.\n* `_local` to, if possible, run the search on shards on the local node, or if not, select shards using the default method.\n* `_only_nodes:<node-id>,<node-id>` to run the search on only the specified nodes IDs. If suitable shards exist on more than one selected node, use shards on those nodes using the default method. If none of the specified nodes are available, select shards from any available node using the default method.\n* `_prefer_nodes:<node-id>,<node-id>` to if possible, run the search on the specified nodes IDs. If not, select shards using the default method.\n* `_shards:<shard>,<shard>` to run the search only on the specified shards. You can combine this value with other `preference` values. However, the `_shards` value must come first. For example: `_shards:2,3|_local`.\n* `<custom-string>` (any string that does not start with `_`) to route searches with the same `<custom-string>` to the same shards in the same order.'
         })),
-        realtime: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the request is real-time as opposed to near-real-time.'
+        pre_filter_shard_size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'A threshold that enforces a pre-filter roundtrip to prefilter search shards based on query rewriting if the number of shards the search request expands to exceeds the threshold.\nThis filter roundtrip can limit the number of shards significantly if for instance a shard can not match any documents based on its rewrite method (if date filters are mandatory to match but the shard bounds and the query are disjoint).\nWhen unspecified, the pre-filter phase is executed if any of these conditions is met:\n\n* The request targets more than 128 shards.\n* The request targets one or more read-only index.\n* The primary sort of the query targets an indexed field.'
         })),
-        refresh: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the request refreshes the relevant shards before retrieving the document.\nSetting it to `true` should be done after careful thought and verification that this does not cause a heavy load on the system (and slow down indexing).'
+        request_cache: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the caching of search results is enabled for requests where `size` is `0`.\nIt defaults to index level settings.'
         })),
         routing: z.optional(types_routing),
+        scroll: z.optional(types_duration),
+        search_type: z.optional(types_search_type),
+        stats: z.optional(z.array(z.string()).register(z.globalRegistry, {
+            description: 'Specific `tag` of the request for logging and statistical purposes.'
+        })),
+        stored_fields: z.optional(types_fields),
+        suggest_field: z.optional(types_field),
+        suggest_mode: z.optional(types_suggest_mode),
+        suggest_size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of suggestions to return.\nThis parameter can be used only when the `suggest_field` and `suggest_text` query string parameters are specified.'
+        })),
+        suggest_text: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The source text for which the suggestions should be returned.\nThis parameter can be used only when the `suggest_field` and `suggest_text` query string parameters are specified.'
+        })),
+        terminate_after: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The maximum number of documents to collect for each shard.\nIf a query reaches this limit, Elasticsearch terminates the query early.\nElasticsearch collects documents before sorting.\n\nIMPORTANT: Use with caution.\nElasticsearch applies this parameter to each shard handling the request.\nWhen possible, let Elasticsearch perform early termination automatically.\nAvoid specifying this parameter for requests that target data streams with backing indices across multiple data tiers.\nIf set to `0` (default), the query does not terminate early.'
+        })),
+        timeout: z.optional(types_duration),
+        track_total_hits: z.optional(global_search_types_track_hits),
+        track_scores: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request calculates and returns document scores, even if the scores are not used for sorting.'
+        })),
+        typed_keys: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, aggregation and suggester names are be prefixed by their respective types in the response.'
+        })),
+        rest_total_hits_as_int: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Indicates whether `hits.total` should be rendered as an integer or an object in the rest search response.'
+        })),
+        version: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request returns the document version as part of a hit.'
+        })),
         _source: z.optional(global_search_types_source_config_param),
         _source_excludes: z.optional(types_fields),
         _source_exclude_vectors: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Whether vectors should be excluded from _source'
         })),
         _source_includes: z.optional(types_fields),
-        stored_fields: z.optional(types_fields),
-        version: z.optional(types_version_number),
-        version_type: z.optional(types_version_type)
-    }))
-});
-
-export const get_response = global_get_get_result;
-
-export const exists_request = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        index: types_index_name,
-        id: types_id
-    }),
-    query: z.optional(z.object({
-        preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The node or shard the operation should be performed on.\nBy default, the operation is randomized between the shard replicas.\n\nIf it is set to `_local`, the operation will prefer to be run on a local allocated shard when possible.\nIf it is set to a custom value, the value is used to guarantee that the same shards will be used for the same custom value.\nThis can help with "jumping values" when hitting different shards in different refresh states.\nA sample value can be something like the web session ID or the user name.'
-        })),
-        realtime: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the request is real-time as opposed to near-real-time.'
-        })),
-        refresh: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the request refreshes the relevant shards before retrieving the document.\nSetting it to `true` should be done after careful thought and verification that this does not cause a heavy load on the system (and slow down indexing).'
-        })),
-        routing: z.optional(types_routing),
-        _source: z.optional(global_search_types_source_config_param),
-        _source_excludes: z.optional(types_fields),
-        _source_includes: z.optional(types_fields),
-        stored_fields: z.optional(types_fields),
-        version: z.optional(types_version_number),
-        version_type: z.optional(types_version_type)
-    }))
-});
-
-export const index_request = z.object({
-    body: index,
-    path: z.object({
-        index: types_index_name,
-        id: types_id
-    }),
-    query: z.optional(z.object({
-        if_primary_term: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Only perform the operation if the document has this primary term.'
-        })),
-        if_seq_no: z.optional(types_sequence_number),
-        include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'True or false if to include the document source in the error message in case of parsing errors.'
-        })),
-        op_type: z.optional(types_op_type),
-        pipeline: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.\nIf a final pipeline is configured it will always run, regardless of the value of this parameter.'
-        })),
-        refresh: z.optional(types_refresh),
-        routing: z.optional(types_routing),
-        timeout: z.optional(types_duration),
-        version: z.optional(types_version_number),
-        version_type: z.optional(types_version_type),
-        wait_for_active_shards: z.optional(types_wait_for_active_shards),
-        require_alias: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the destination must be an index alias.'
-        })),
-        require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
-        }))
-    }))
-});
-
-export const index_response = types_write_response_base;
-
-export const index2_request = z.object({
-    body: index,
-    path: z.object({
-        index: types_index_name
-    }),
-    query: z.optional(z.object({
-        if_primary_term: z.optional(z.number().register(z.globalRegistry, {
-            description: 'Only perform the operation if the document has this primary term.'
-        })),
-        if_seq_no: z.optional(types_sequence_number),
-        include_source_on_error: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'True or false if to include the document source in the error message in case of parsing errors.'
-        })),
-        op_type: z.optional(types_op_type),
-        pipeline: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The ID of the pipeline to use to preprocess incoming documents.\nIf the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.\nIf a final pipeline is configured it will always run, regardless of the value of this parameter.'
-        })),
-        refresh: z.optional(types_refresh),
-        routing: z.optional(types_routing),
-        timeout: z.optional(types_duration),
-        version: z.optional(types_version_number),
-        version_type: z.optional(types_version_type),
-        wait_for_active_shards: z.optional(types_wait_for_active_shards),
-        require_alias: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the destination must be an index alias.'
-        })),
-        require_data_stream: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, the request\'s actions must target a data stream (existing or to be created).'
-        }))
-    }))
-});
-
-export const index2_response = types_write_response_base;
-
-export const count_request = z.object({
-    body: z.optional(count),
-    path: z.optional(z.never()),
-    query: z.optional(z.object({
-        allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.\nThis behavior applies even if the request targets other open indices.\nFor example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.'
-        })),
-        analyzer: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The analyzer to use for the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, wildcard and prefix queries are analyzed.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        default_operator: z.optional(types_query_dsl_operator),
-        df: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The field to use as a default when no field prefix is given in the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        expand_wildcards: z.optional(types_expand_wildcards),
-        ignore_throttled: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, concrete, expanded, or aliased indices are ignored when frozen.'
-        })),
-        ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `false`, the request returns an error if it targets a missing or closed index.'
-        })),
-        lenient: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, format-based query failures (such as providing text to a numeric field) in the query string will be ignored.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        min_score: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The minimum `_score` value that documents must have to be included in the result.'
-        })),
-        preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The node or shard the operation should be performed on.\nBy default, it is random.'
-        })),
-        routing: z.optional(types_routing),
-        terminate_after: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The maximum number of documents to collect for each shard.\nIf a query reaches this limit, Elasticsearch terminates the query early.\nElasticsearch collects documents before sorting.\n\nIMPORTANT: Use with caution.\nElasticsearch applies this parameter to each shard handling the request.\nWhen possible, let Elasticsearch perform early termination automatically.\nAvoid specifying this parameter for requests that target data streams with backing indices across multiple data tiers.'
+        seq_no_primary_term: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request returns the sequence number and primary term of the last modification of each hit.'
         })),
         q: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The query in Lucene query string syntax. This parameter cannot be used with a request body.'
-        }))
+            description: 'A query in the Lucene query string syntax.\nQuery parameter searches do not support the full Elasticsearch Query DSL but are handy for testing.\n\nIMPORTANT: This parameter overrides the query parameter in the request body.\nIf both parameters are specified, documents matching the query request body parameter are not returned.'
+        })),
+        size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of hits to return.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
+        })),
+        from: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The starting document offset, which must be non-negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
+        })),
+        sort: z.optional(z.union([
+            z.string(),
+            z.array(z.string())
+        ]))
     }))
 });
 
-export const count_response = z.object({
-    count: z.number(),
-    _shards: types_shard_statistics
-});
-
-export const count2_request = z.object({
-    body: z.optional(count),
-    path: z.object({
-        index: types_indices
-    }),
-    query: z.optional(z.object({
-        allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.\nThis behavior applies even if the request targets other open indices.\nFor example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.'
-        })),
-        analyzer: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The analyzer to use for the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, wildcard and prefix queries are analyzed.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        default_operator: z.optional(types_query_dsl_operator),
-        df: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The field to use as a default when no field prefix is given in the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        expand_wildcards: z.optional(types_expand_wildcards),
-        ignore_throttled: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, concrete, expanded, or aliased indices are ignored when frozen.'
-        })),
-        ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `false`, the request returns an error if it targets a missing or closed index.'
-        })),
-        lenient: z.optional(z.boolean().register(z.globalRegistry, {
-            description: 'If `true`, format-based query failures (such as providing text to a numeric field) in the query string will be ignored.\nThis parameter can be used only when the `q` query string parameter is specified.'
-        })),
-        min_score: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The minimum `_score` value that documents must have to be included in the result.'
-        })),
-        preference: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The node or shard the operation should be performed on.\nBy default, it is random.'
-        })),
-        routing: z.optional(types_routing),
-        terminate_after: z.optional(z.number().register(z.globalRegistry, {
-            description: 'The maximum number of documents to collect for each shard.\nIf a query reaches this limit, Elasticsearch terminates the query early.\nElasticsearch collects documents before sorting.\n\nIMPORTANT: Use with caution.\nElasticsearch applies this parameter to each shard handling the request.\nWhen possible, let Elasticsearch perform early termination automatically.\nAvoid specifying this parameter for requests that target data streams with backing indices across multiple data tiers.'
-        })),
-        q: z.optional(z.string().register(z.globalRegistry, {
-            description: 'The query in Lucene query string syntax. This parameter cannot be used with a request body.'
-        }))
-    }))
-});
-
-export const count2_response = z.object({
-    count: z.number(),
-    _shards: types_shard_statistics
-});
+export const search_response = global_search_response_body;
 
 export const search1_request = z.object({
     body: z.optional(search),
@@ -6750,6 +10092,122 @@ export const search1_request = z.object({
 });
 
 export const search1_response = global_search_response_body;
+
+export const search2_request = z.object({
+    body: z.optional(search),
+    path: z.object({
+        index: types_indices
+    }),
+    query: z.optional(z.object({
+        allow_no_indices: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indices.\nThis behavior applies even if the request targets other open indices.\nFor example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.'
+        })),
+        allow_partial_search_results: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true` and there are shard request timeouts or shard failures, the request returns partial results.\nIf `false`, it returns an error with no partial results.\n\nTo override the default behavior, you can set the `search.default_allow_partial_results` cluster setting to `false`.'
+        })),
+        analyzer: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The analyzer to use for the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        analyze_wildcard: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, wildcard and prefix queries are analyzed.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        batched_reduce_size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of shard results that should be reduced at once on the coordinating node.\nIf the potential number of shards in the request can be large, this value should be used as a protection mechanism to reduce the memory overhead per search request.'
+        })),
+        ccs_minimize_roundtrips: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, network round-trips between the coordinating node and the remote clusters are minimized when running cross-cluster search (CCS) requests.'
+        })),
+        default_operator: z.optional(types_query_dsl_operator),
+        df: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The field to use as a default when no field prefix is given in the query string.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        docvalue_fields: z.optional(types_fields),
+        expand_wildcards: z.optional(types_expand_wildcards),
+        explain: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request returns detailed information about score computation as part of a hit.'
+        })),
+        ignore_throttled: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, concrete, expanded or aliased indices will be ignored when frozen.'
+        })),
+        ignore_unavailable: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `false`, the request returns an error if it targets a missing or closed index.'
+        })),
+        include_named_queries_score: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response includes the score contribution from any named queries.\n\nThis functionality reruns each named query on every hit in a search response.\nTypically, this adds a small overhead to a request.\nHowever, using computationally expensive named queries on a large number of hits may add significant overhead.'
+        })),
+        lenient: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, format-based query failures (such as providing text to a numeric field) in the query string will be ignored.\nThis parameter can be used only when the `q` query string parameter is specified.'
+        })),
+        max_concurrent_shard_requests: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of concurrent shard requests per node that the search runs concurrently.\nThis value should be used to limit the impact of the search on the cluster in order to limit the number of concurrent shard requests.'
+        })),
+        preference: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The nodes and shards used for the search.\nBy default, Elasticsearch selects from eligible nodes and shards using adaptive replica selection, accounting for allocation awareness.\nValid values are:\n\n* `_only_local` to run the search only on shards on the local node.\n* `_local` to, if possible, run the search on shards on the local node, or if not, select shards using the default method.\n* `_only_nodes:<node-id>,<node-id>` to run the search on only the specified nodes IDs. If suitable shards exist on more than one selected node, use shards on those nodes using the default method. If none of the specified nodes are available, select shards from any available node using the default method.\n* `_prefer_nodes:<node-id>,<node-id>` to if possible, run the search on the specified nodes IDs. If not, select shards using the default method.\n* `_shards:<shard>,<shard>` to run the search only on the specified shards. You can combine this value with other `preference` values. However, the `_shards` value must come first. For example: `_shards:2,3|_local`.\n* `<custom-string>` (any string that does not start with `_`) to route searches with the same `<custom-string>` to the same shards in the same order.'
+        })),
+        pre_filter_shard_size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'A threshold that enforces a pre-filter roundtrip to prefilter search shards based on query rewriting if the number of shards the search request expands to exceeds the threshold.\nThis filter roundtrip can limit the number of shards significantly if for instance a shard can not match any documents based on its rewrite method (if date filters are mandatory to match but the shard bounds and the query are disjoint).\nWhen unspecified, the pre-filter phase is executed if any of these conditions is met:\n\n* The request targets more than 128 shards.\n* The request targets one or more read-only index.\n* The primary sort of the query targets an indexed field.'
+        })),
+        request_cache: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the caching of search results is enabled for requests where `size` is `0`.\nIt defaults to index level settings.'
+        })),
+        routing: z.optional(types_routing),
+        scroll: z.optional(types_duration),
+        search_type: z.optional(types_search_type),
+        stats: z.optional(z.array(z.string()).register(z.globalRegistry, {
+            description: 'Specific `tag` of the request for logging and statistical purposes.'
+        })),
+        stored_fields: z.optional(types_fields),
+        suggest_field: z.optional(types_field),
+        suggest_mode: z.optional(types_suggest_mode),
+        suggest_size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of suggestions to return.\nThis parameter can be used only when the `suggest_field` and `suggest_text` query string parameters are specified.'
+        })),
+        suggest_text: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The source text for which the suggestions should be returned.\nThis parameter can be used only when the `suggest_field` and `suggest_text` query string parameters are specified.'
+        })),
+        terminate_after: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The maximum number of documents to collect for each shard.\nIf a query reaches this limit, Elasticsearch terminates the query early.\nElasticsearch collects documents before sorting.\n\nIMPORTANT: Use with caution.\nElasticsearch applies this parameter to each shard handling the request.\nWhen possible, let Elasticsearch perform early termination automatically.\nAvoid specifying this parameter for requests that target data streams with backing indices across multiple data tiers.\nIf set to `0` (default), the query does not terminate early.'
+        })),
+        timeout: z.optional(types_duration),
+        track_total_hits: z.optional(global_search_types_track_hits),
+        track_scores: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request calculates and returns document scores, even if the scores are not used for sorting.'
+        })),
+        typed_keys: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, aggregation and suggester names are be prefixed by their respective types in the response.'
+        })),
+        rest_total_hits_as_int: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Indicates whether `hits.total` should be rendered as an integer or an object in the rest search response.'
+        })),
+        version: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request returns the document version as part of a hit.'
+        })),
+        _source: z.optional(global_search_types_source_config_param),
+        _source_excludes: z.optional(types_fields),
+        _source_exclude_vectors: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Whether vectors should be excluded from _source'
+        })),
+        _source_includes: z.optional(types_fields),
+        seq_no_primary_term: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request returns the sequence number and primary term of the last modification of each hit.'
+        })),
+        q: z.optional(z.string().register(z.globalRegistry, {
+            description: 'A query in the Lucene query string syntax.\nQuery parameter searches do not support the full Elasticsearch Query DSL but are handy for testing.\n\nIMPORTANT: This parameter overrides the query parameter in the request body.\nIf both parameters are specified, documents matching the query request body parameter are not returned.'
+        })),
+        size: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The number of hits to return.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
+        })),
+        from: z.optional(z.number().register(z.globalRegistry, {
+            description: 'The starting document offset, which must be non-negative.\nBy default, you cannot page through more than 10,000 hits using the `from` and `size` parameters.\nTo page through more hits, use the `search_after` parameter.'
+        })),
+        sort: z.optional(z.union([
+            z.string(),
+            z.array(z.string())
+        ]))
+    }))
+});
+
+export const search2_response = global_search_response_body;
 
 export const search3_request = z.object({
     body: z.optional(search),

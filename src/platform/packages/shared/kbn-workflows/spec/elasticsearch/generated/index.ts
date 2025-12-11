@@ -11,31 +11,29 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/6caf375).
- * Generated at: 2025-12-11T13:54:12.731Z
- * Source: elasticsearch-specification repository (8 APIs)
+ * Generated at: 2025-12-11T14:41:07.180Z
+ * Source: elasticsearch-specification repository (7 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
 // import contracts from individual files
-import { COUNT_CONTRACT } from './elasticsearch.count.gen';
-import { CREATE_CONTRACT } from './elasticsearch.create.gen';
-import { DELETE_CONTRACT } from './elasticsearch.delete.gen';
-import { EXISTS_CONTRACT } from './elasticsearch.exists.gen';
-import { GET_CONTRACT } from './elasticsearch.get.gen';
-import { INDEX_CONTRACT } from './elasticsearch.index.gen';
+import { BULK_CONTRACT } from './elasticsearch.bulk.gen';
+import { ESQL_QUERY_CONTRACT } from './elasticsearch.esql_query.gen';
+import { INDICES_CREATE_CONTRACT } from './elasticsearch.indices_create.gen';
+import { INDICES_DELETE_CONTRACT } from './elasticsearch.indices_delete.gen';
+import { INDICES_EXISTS_CONTRACT } from './elasticsearch.indices_exists.gen';
 import { SEARCH_CONTRACT } from './elasticsearch.search.gen';
 import { UPDATE_CONTRACT } from './elasticsearch.update.gen';
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contracts
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
-  COUNT_CONTRACT,
-  CREATE_CONTRACT,
-  DELETE_CONTRACT,
-  EXISTS_CONTRACT,
-  GET_CONTRACT,
-  INDEX_CONTRACT,
+  BULK_CONTRACT,
+  ESQL_QUERY_CONTRACT,
+  INDICES_CREATE_CONTRACT,
+  INDICES_DELETE_CONTRACT,
+  INDICES_EXISTS_CONTRACT,
   SEARCH_CONTRACT,
   UPDATE_CONTRACT,
 ];
