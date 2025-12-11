@@ -49,6 +49,7 @@ export function filterDocsByGroundTruthIndices(
 /**
  * Precision@K = (number of relevant docs in top K) / K
  * Measures noise: what fraction of retrieved docs are relevant
+ * Note: When fewer than K docs are retrieved, we still divide by K (standard Precision@K behavior).
  */
 export function calculatePrecision(hits: number, k: number): number {
   if (k <= 0) {

@@ -17,6 +17,7 @@ import {
   createSpanLatencyEvaluator,
   createRagEvaluators,
   type GroundTruth,
+  type RetrievedDoc,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -133,10 +134,10 @@ export function createEvaluateDataset({
           .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
           .flatMap((step) => step.results ?? [])
           .map((result) => ({
-            index: result.data?.reference?.index ?? '',
-            id: result.data?.reference?.id ?? '',
+            index: result.data?.reference?.index,
+            id: result.data?.reference?.id,
           }))
-          .filter((doc) => doc.id && doc.index);
+          .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
       },
       extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
         referenceOutput?.groundTruth ?? {},

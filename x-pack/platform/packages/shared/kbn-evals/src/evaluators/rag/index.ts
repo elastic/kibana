@@ -77,7 +77,18 @@ export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput 
     name: PRECISION_EVALUATOR_NAME,
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
-      const metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
+      let metrics: RagMetrics | null;
+      try {
+        metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
+      } catch (error) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: `Precision@K evaluation failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        };
+      }
 
       if (!metrics) {
         return {
@@ -105,7 +116,18 @@ export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = u
     name: RECALL_EVALUATOR_NAME,
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
-      const metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
+      let metrics: RagMetrics | null;
+      try {
+        metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
+      } catch (error) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: `Recall@K evaluation failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        };
+      }
 
       if (!metrics) {
         return {
@@ -133,7 +155,18 @@ export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unkno
     name: F1_EVALUATOR_NAME,
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
-      const metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
+      let metrics: RagMetrics | null;
+      try {
+        metrics = computeRagMetrics(config, output as TOutput, expected as TReferenceOutput);
+      } catch (error) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: `F1@K evaluation failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        };
+      }
 
       if (!metrics) {
         return {

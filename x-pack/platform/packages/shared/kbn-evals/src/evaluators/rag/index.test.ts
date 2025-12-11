@@ -304,7 +304,7 @@ describe('RAG Evaluators', () => {
 
       // After filtering: only index-a docs remain: [doc_1, doc_Z]
       // doc_1 is relevant, doc_Z is not
-      // Precision = 1/5 = 0.2
+      // Precision = 1/2 = 0.5
       expect(result.score).toBe(0.5);
     });
 
@@ -333,8 +333,8 @@ describe('RAG Evaluators', () => {
       });
 
       // No filtering: all 5 docs are considered
-      // Only doc_1 is relevant
-      // Precision = 1/5 = 0.2
+      // No relevant docs in top K
+      // Precision = 0/5 = 0.0
       expect(result.score).toBe(0.0);
     });
   });
@@ -390,6 +390,54 @@ describe('RAG Evaluators', () => {
 
       // Perfect precision (4/4) and perfect recall (4/4)
       expect(result.score).toBe(1);
+    });
+  });
+
+  describe('extractor error handling', () => {
+    it('should return unavailable when extractGroundTruth throws', async () => {
+      const errorConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        k: 5,
+        extractRetrievedDocs: (output) => output.retrievedDocs,
+        extractGroundTruth: () => {
+          throw new Error('Ground truth extraction failed');
+        },
+      };
+
+      const evaluator = createPrecisionAtKEvaluator(errorConfig);
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { retrievedDocs: [createDoc('doc_1')] },
+        expected: { groundTruth },
+        metadata: {},
+      });
+
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('unavailable');
+      expect(result.explanation).toContain('Ground truth extraction failed');
+    });
+
+    it('should return unavailable when extractRetrievedDocs throws', async () => {
+      const errorConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        k: 5,
+        extractRetrievedDocs: () => {
+          throw new Error('Retrieved docs extraction failed');
+        },
+        extractGroundTruth: (referenceOutput) => referenceOutput.groundTruth,
+      };
+
+      const evaluator = createRecallAtKEvaluator(errorConfig);
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { retrievedDocs: [createDoc('doc_1')] },
+        expected: { groundTruth },
+        metadata: {},
+      });
+
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('unavailable');
+      expect(result.explanation).toContain('Retrieved docs extraction failed');
     });
   });
 });
