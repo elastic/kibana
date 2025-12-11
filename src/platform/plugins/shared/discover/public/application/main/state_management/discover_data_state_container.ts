@@ -30,6 +30,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { getESQLQueryColumns, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -355,10 +356,31 @@ export function getDataStateContainer({
             abortController,
           };
 
-          // Trigger chart fetching after the pre fetch state has been updated
-          // to ensure state values that would affect data fetching are set
-          // trigger in parallel with the main request for Classic mode
-          fetchChart$.next(latestFetchDetails);
+          const currentTab = getCurrentTab();
+          const query = currentTab.appState.query;
+          const isEsqlQuery = isOfAggregateQueryType(query);
+
+          if (isEsqlQuery) {
+            const esqlQueryColumns = await getESQLQueryColumns({
+              esqlQuery: query.esql,
+              search: services.data.search.search,
+              variables: currentTab.esqlVariables,
+              signal: abortController.signal,
+              timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+            });
+            dataSubjects.documents$.next({
+              ...dataSubjects.documents$.getValue(),
+              esqlQueryColumns,
+            });
+          }
+
+          const isEsqlQueryWithTransformationalCommand =
+            isEsqlQuery && hasTransformationalCommand(query.esql);
+          if (!isEsqlQueryWithTransformationalCommand) {
+            // Trigger the chart fetch for classic or ESQL without transformational commands, in the case of transformational
+            // commands we need to wait for the documents result.
+            fetchChart$.next(latestFetchDetails);
+          }
 
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
@@ -372,6 +394,11 @@ export function getDataStateContainer({
             reset: options.reset,
             abortController,
             onFetchRecordsComplete: async () => {
+              if (isEsqlQueryWithTransformationalCommand && !abortController.signal.aborted) {
+                // defer triggering chart fetching until after main request completes for ES|QL mode
+                fetchChart$.next(latestFetchDetails);
+              }
+
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
