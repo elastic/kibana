@@ -218,7 +218,8 @@ describe('integrationKnowledgeTool', () => {
         },
       });
       // Verify content is truncated to MAX_CONTENT_LENGTH (4000) + truncation message
-      expect(result.results[0].data.content.content.length).toBeLessThan(veryLongContent.length);
+      const data = result.results[0].data as { content: { content: string } };
+      expect(data.content.content.length).toBeLessThan(veryLongContent.length);
     });
 
     it('handles packages without version', async () => {
