@@ -129,6 +129,9 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
                 '--xpack.uptime.service.devUrl=mockDevUrl',
                 '--xpack.uptime.service.manifestUrl=mockDevUrl',
                 `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
+                `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+                  integrationKnowledge: false,
+                })}`,
               ]
             : []),
           ...(dockerRegistryPort
