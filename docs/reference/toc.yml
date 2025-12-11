@@ -42,6 +42,7 @@ toc:
         children:
           - file: connectors-kibana/cases-action-type.md
           - file: connectors-kibana/index-action-type.md
+          - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
