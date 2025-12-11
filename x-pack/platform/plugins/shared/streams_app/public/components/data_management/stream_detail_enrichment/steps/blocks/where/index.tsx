@@ -89,15 +89,16 @@ export const WhereBlock = (props: StepConfigurationProps) => {
       <EuiPanel
         data-test-subj="streamsAppConditionBlock"
         hasShadow={false}
-        paddingSize="none"
         color={isUnderEdit && isRootStepValue ? undefined : panelColour}
         css={
           isUnderEdit
             ? css`
+                position: relative;
                 border: 1px solid ${euiTheme.colors.borderStrongPrimary};
                 box-sizing: border-box;
               `
             : css`
+                position: relative;
                 border: ${isSelected
                   ? `1px solid ${euiTheme.colors.primary}`
                   : euiTheme.border.thin};
@@ -106,129 +107,96 @@ export const WhereBlock = (props: StepConfigurationProps) => {
               `
         }
       >
-        <ConditionBlockWrapper isUnderEdit={isUnderEdit} onClick={onClick}>
-          {/* The step under edit isn't part of the same root level hierarchy,
+        {/* The button that catches clicks on the empty
+        space around the condition content in order to toggle
+        filtering by the condition */}
+        {!isUnderEdit && (
+          <button
+            onClick={onClick}
+            css={css`
+              position: absolute;
+              top: 0;
+              left: 0;
+              height: 100%;
+              width: 100%;
+              cursor: default;
+            `}
+          />
+        )}
+        {/* The step under edit isn't part of the same root level hierarchy,
          so we'll cover this item and all children */}
-          {stepUnderEdit &&
-            rootLevelMap.get(step.customIdentifier) !==
-              rootLevelMap.get(stepUnderEdit.customIdentifier) && <BlockDisableOverlay />}
-          {isUnderEdit ? (
-            <WhereBlockConfiguration stepRef={stepRef} ref={freshBlockRef} />
-          ) : (
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  {hasChildren ? (
-                    <EuiFlexItem
-                      grow={false}
-                      css={css`
-                        margin-left: -${euiTheme.size.xxs};
-                      `}
-                    >
-                      <EuiButtonIcon
-                        iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                        onClick={toggle}
-                        aria-label={i18n.translate(
-                          'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
-                          {
-                            defaultMessage: 'Toggle nested steps',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
+        {stepUnderEdit &&
+          rootLevelMap.get(step.customIdentifier) !==
+            rootLevelMap.get(stepUnderEdit.customIdentifier) && <BlockDisableOverlay />}
+        {isUnderEdit ? (
+          <WhereBlockConfiguration stepRef={stepRef} ref={freshBlockRef} />
+        ) : (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                {hasChildren ? (
                   <EuiFlexItem
-                    // Overflow is here to faciliate text truncation of long conditions in the summary
+                    grow={false}
                     css={css`
-                      overflow: hidden;
+                      margin-left: -${euiTheme.size.xxs};
                     `}
                   >
-                    <WhereBlockSummary {...props} onClick={onClick} />
+                    <EuiButtonIcon
+                      iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                      onClick={toggle}
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
+                        {
+                          defaultMessage: 'Toggle nested steps',
+                        }
+                      )}
+                    />
                   </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {hasChildren && !isExpanded && (
-                <EuiFlexItem>
-                  <EuiPanel color={nestedSummaryPanelColour} hasShadow={false} paddingSize="s">
-                    <NestedChildrenProcessingSummary
-                      childIds={descendantIds!}
-                      stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                    />
-                  </EuiPanel>
+                ) : null}
+                <EuiFlexItem
+                  // Overflow is here to faciliate text truncation of long conditions in the summary
+                  css={css`
+                    overflow: hidden;
+                  `}
+                >
+                  <WhereBlockSummary {...props} onClick={onClick} />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          )}
-          {hasChildren && isExpanded && (
-            <>
-              <EuiSpacer size="s" />
-              <ConnectedNodesList>
-                {childSteps.map((childStep, index) => (
-                  <li key={childStep.id}>
-                    <StepsListItem
-                      stepRef={childStep}
-                      level={level + 1}
-                      stepUnderEdit={stepUnderEdit}
-                      rootLevelMap={rootLevelMap}
-                      stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                      isFirstStepInLevel={index === 0}
-                      isLastStepInLevel={index === childSteps.length - 1}
-                      readOnly={props.readOnly}
-                    />
-                  </li>
-                ))}
-              </ConnectedNodesList>
-            </>
-          )}
-        </ConditionBlockWrapper>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {hasChildren && !isExpanded && (
+              <EuiFlexItem>
+                <EuiPanel color={nestedSummaryPanelColour} hasShadow={false} paddingSize="s">
+                  <NestedChildrenProcessingSummary
+                    childIds={descendantIds!}
+                    stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        )}
+        {hasChildren && isExpanded && (
+          <>
+            <EuiSpacer size="s" />
+            <ConnectedNodesList>
+              {childSteps.map((childStep, index) => (
+                <li key={childStep.id}>
+                  <StepsListItem
+                    stepRef={childStep}
+                    level={level + 1}
+                    stepUnderEdit={stepUnderEdit}
+                    rootLevelMap={rootLevelMap}
+                    stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                    isFirstStepInLevel={index === 0}
+                    isLastStepInLevel={index === childSteps.length - 1}
+                    readOnly={props.readOnly}
+                  />
+                </li>
+              ))}
+            </ConnectedNodesList>
+          </>
+        )}
       </EuiPanel>
     </>
   );
 };
-
-function ConditionBlockWrapper({
-  isUnderEdit,
-  children,
-  onClick,
-}: {
-  isUnderEdit: boolean;
-  children: React.ReactNode;
-  onClick?: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  if (isUnderEdit) {
-    return (
-      <div
-        css={css`
-          padding: ${euiTheme.size.m};
-        `}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  return (
-    <button
-      ref={buttonRef}
-      onClick={(event) => {
-        if (event.target !== buttonRef.current) {
-          return;
-        }
-
-        onClick?.();
-      }}
-      css={css`
-        height: 100%;
-        width: 100%;
-        text-align: start;
-        cursor: default;
-        padding: ${euiTheme.size.m};
-      `}
-    >
-      {children}
-    </button>
-  );
-}
