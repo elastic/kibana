@@ -27,9 +27,8 @@ import { uiActionsService } from '../../services/kibana_services';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
-import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
+import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
-import { initializeDefaultControlManager } from '../default_control_manager';
 import { VariableControlsStrings } from './constants';
 
 export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQLControlApi> => {
@@ -37,16 +36,12 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-      const defaultControlManager = initializeDefaultControlManager();
       const titlesManager = initializeTitleManager(state);
 
-      // TODO Rename this; this is actually the state manager for all non-default control state params, "selections" is a confusing name
-      const selections = initializeESQLControlSelections(
-        uuid,
-        parentApi,
-        state,
-        defaultControlManager.api.setDataLoading
-      );
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+      const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
+
+      const selections = initializeESQLControlManager(uuid, parentApi, state, setDataLoading);
 
       function serializeState() {
         return {
@@ -77,8 +72,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       const api = finalizeApi({
         ...titlesManager.api,
         ...unsavedChangesApi,
-        ...defaultControlManager.api,
         ...selections.api,
+        dataLoading$,
         isExpandable: false,
         isCustomizable: false,
         /**
@@ -127,7 +122,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         exclude: false,
         existsSelected: false,
         requestSize: 0,
-        dataLoading: false,
         sort: undefined,
         runPastTimeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
@@ -154,6 +148,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         isDuplicable: false,
         isPinnable: true,
         uuid,
+        setDataLoading,
         makeSelection(key?: string) {
           const singleSelect = selections.api.singleSelect$.value ?? true;
           if (singleSelect && key) {
