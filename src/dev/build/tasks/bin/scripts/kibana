@@ -24,10 +24,6 @@ test_node() {
   fi
 }
 
-if [ -f "${CONFIG_DIR}/node.options" ]; then
-  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
-fi
-
 {{#darwin}}
 NODE="${DIR}/node/default/bin/node"
 {{/darwin}}
@@ -44,8 +40,27 @@ NODE="${DIR}/node/pointer-compression/bin/node"
 {{/linux}}
 test_node
 
+BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
+if [ -f "${CONFIG_DIR}/node.options" ]; then
+  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
+fi
 # Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 # For now only on POSIX platforms, term signals work differently on Windows.
 NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT="${NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT:---heapsnapshot-signal=SIGUSR2 --diagnostic-dir=$DIR/data}"
+ALL_NODE_OPTIONS="$BASE_NODE_OPTIONS $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS"
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/kibana/dist" "${@}"
+if [ "$ELASTIC_CONTAINER" = "true" ] && ! echo "$ALL_NODE_OPTIONS" | grep -q -- '--max-old-space-size'; then
+  max_old_space_percentage=75
+  heap_mb=
+  cgroup_memory_limit_bytes=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null)
+  mem_available_kb=$(grep -E '^MemAvailable:' /proc/meminfo 2>/dev/null | grep -Eo '[0-9]+')
+  if [ "$cgroup_memory_limit_bytes" != "max" ] && echo "$cgroup_memory_limit_bytes" | grep -qE '^[0-9]+$'; then
+    heap_mb=$(( cgroup_memory_limit_bytes * max_old_space_percentage / 100 / 1024 / 1024 ))
+  elif echo "$mem_available_kb" | grep -qE '^[0-9]+$'; then
+    heap_mb=$(( mem_available_kb * max_old_space_percentage / 100 / 1024 ))
+  fi
+  [ "$heap_mb" -gt 4096 ] 2>/dev/null && heap_mb=4096
+  [ "$heap_mb" -gt 0 ] 2>/dev/null && ALL_NODE_OPTIONS="$ALL_NODE_OPTIONS --max-old-space-size=$heap_mb"
+fi
+
+NODE_OPTIONS="$ALL_NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/kibana/dist" "${@}"
