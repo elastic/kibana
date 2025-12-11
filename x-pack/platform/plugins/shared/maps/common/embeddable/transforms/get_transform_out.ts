@@ -14,13 +14,17 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
-  function transformOut(state: StoredMapEmbeddableState, references?: Reference[]) {
+  function transformOut(
+    state: StoredMapEmbeddableState,
+    panelReferences?: Reference[],
+    containerReferences?: Reference[]
+  ) {
     const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
+      ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
       : undefined;
 
     // by ref
-    const savedObjectRef = (references ?? []).find(
+    const savedObjectRef = (panelReferences ?? []).find(
       (ref) => MAP_SAVED_OBJECT_TYPE === ref.type && ref.name === MAP_SAVED_OBJECT_REF_NAME
     );
     if (savedObjectRef) {
@@ -38,7 +42,12 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         attributes: transformMapAttributesOut(
           (state as MapByValueState).attributes,
-          references ?? []
+          (targetName: string) => {
+            const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
+            if (panelRef) return panelRef;
+
+            return (containerReferences ?? []).find(({ name }) => name === targetName);
+          }
         ),
       };
     }

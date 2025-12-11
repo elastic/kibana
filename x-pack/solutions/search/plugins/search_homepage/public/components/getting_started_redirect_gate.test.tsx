@@ -21,25 +21,15 @@ jest.mock('../hooks/use_search_getting_started_feature_flag', () => ({
 
 describe('GettingStartedRedirectGate', () => {
   const navigateToApp = jest.fn();
-  const getCurrent = jest.fn();
   const coreStartMock = {
     application: {
       navigateToApp,
-    },
-    userProfile: {
-      getCurrent,
     },
   } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    // Default: return a user with 'admin' role
-    getCurrent.mockResolvedValue({
-      user: {
-        roles: ['admin'],
-      },
-    });
   });
 
   const renderGate = () =>
@@ -49,80 +39,48 @@ describe('GettingStartedRedirectGate', () => {
       </GettingStartedRedirectGate>
     );
 
-  it('renders children', async () => {
-    (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
-    const { getByTestId } = renderGate();
-    expect(getByTestId('child')).toBeInTheDocument();
-    // Wait for async effects to complete
-    await waitFor(() => expect(getCurrent).toHaveBeenCalled());
+  describe('when feature flag is disabled', () => {
+    beforeEach(() => {
+      (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(false);
+    });
+
+    it('always renders children and never redirects', () => {
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('renders children even when not visited', () => {
+      // localStorage is empty (not visited)
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
   });
 
-  describe.each([
-    // [featureFlag, roles, visited, shouldNavigate, description]
-    [true, ['admin'], undefined, true, 'navigates when feature enabled, admin role, not visited'],
-    [true, ['admin'], 'false', true, 'navigates when feature enabled, admin role, visited=false'],
-    [true, ['admin'], 'true', false, 'does not navigate when already visited'],
-    [false, ['admin'], undefined, false, 'does not navigate when feature flag disabled'],
-    [
-      false,
-      ['admin'],
-      'false',
-      false,
-      'does not navigate when feature flag disabled even if visited=false',
-    ],
-    [true, ['viewer'], undefined, false, 'does not navigate when user is viewer only'],
-    [
-      true,
-      ['viewer'],
-      'false',
-      false,
-      'does not navigate when user is viewer only even if visited=false',
-    ],
-    [true, ['viewer'], 'true', false, 'does not navigate when user is viewer only and visited'],
-    [
-      false,
-      ['viewer'],
-      undefined,
-      false,
-      'does not navigate when viewer and feature flag disabled',
-    ],
-    [
-      true,
-      ['viewer', 'editor'],
-      undefined,
-      true,
-      'navigates when user has viewer plus other roles',
-    ],
-    [true, ['editor'], undefined, true, 'navigates when user has editor role'],
-    [
-      true,
-      ['editor', 'admin'],
-      undefined,
-      true,
-      'navigates when user has multiple non-viewer roles',
-    ],
-    [true, [], undefined, true, 'navigates when user has no roles'],
-  ])('navigation logic', (featureFlag, roles, visited, shouldNavigate, description) => {
-    it(description, async () => {
-      (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(featureFlag);
-      getCurrent.mockResolvedValue({
-        user: {
-          roles,
-        },
-      });
+  describe('when feature flag is enabled', () => {
+    beforeEach(() => {
+      (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
+    });
 
-      if (visited !== undefined) {
-        localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, visited);
-      }
+    it('renders children when already visited', () => {
+      localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
 
-      renderGate();
-      await waitFor(() => expect(getCurrent).toHaveBeenCalled());
+    it('does NOT render children and redirects when not visited', async () => {
+      const { queryByTestId } = renderGate();
+      expect(queryByTestId('child')).not.toBeInTheDocument();
+      await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
+    });
 
-      if (shouldNavigate) {
-        await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
-      } else {
-        expect(navigateToApp).not.toHaveBeenCalled();
-      }
+    it('does NOT render children and redirects when visited=false', async () => {
+      localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'false');
+      const { queryByTestId } = renderGate();
+      expect(queryByTestId('child')).not.toBeInTheDocument();
+      await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
     });
   });
 });
