@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
   - '@kbn/security-plugin-types-server'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod

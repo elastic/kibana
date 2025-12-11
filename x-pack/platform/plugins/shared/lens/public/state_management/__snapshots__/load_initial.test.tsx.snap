@@ -91,6 +91,7 @@ Object {
       "type": "lens",
       "visualizationType": "testVis",
     },
+    "projectRouting": undefined,
     "query": Object {
       "language": "lucene",
       "query": "",
