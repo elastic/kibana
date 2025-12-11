@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { LogoContainerStyle } from './styles';
 
 export const Observability: React.FC = () => {
   const { http, cloud } = useKibana().services;
@@ -39,16 +40,6 @@ export const Observability: React.FC = () => {
   // const analyzeLogsIntegration = useMemo(() => {
   //   return http.basePath.prepend('/app/integrations/browse/observability');
   // }, [http]);
-
-  const LogoContainerStyle = ({ euiTheme }: UseEuiTheme) => ({
-    borderRadius: euiTheme.border.radius.medium,
-    padding: euiTheme.size.base,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    width: `${euiTheme.base * 6}px`,
-    height: `${euiTheme.base * 6}px`,
-    justifyContent: 'center',
-    alignItems: 'center',
-  });
 
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="l" data-test-subj="observabilitySection">

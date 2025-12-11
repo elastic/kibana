@@ -17,18 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
+import { LogoContainerStyle } from './styles';
 
 export const Security: React.FC = () => {
-  const LogoContainerStyle = ({ euiTheme }: UseEuiTheme) => ({
-    borderRadius: euiTheme.border.radius.medium,
-    padding: euiTheme.size.base,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    width: `${euiTheme.base * 6}px`,
-    height: `${euiTheme.base * 6}px`,
-    justifyContent: 'center',
-    alignItems: 'center',
-  });
-
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="l" data-test-subj="securitySection">
       <EuiFlexItem grow={false}>
