@@ -402,15 +402,6 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * ```
    */
   selector?: ESQLStringLiteral | undefined;
-
-  /**
-   * Represents the alias for the source, used to qualify field references.
-   *
-   * ```
-   * ... | LOOKUP JOIN <index> AS <alias> ON ...
-   * ```
-   */
-  alias?: string | undefined;
 }
 
 /**

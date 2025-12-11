@@ -1230,9 +1230,25 @@ export class CstToAstConverter {
     return command;
   }
 
-  private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
+  private fromJoinTarget(
+    ctx: cst.JoinTargetContext
+  ): ast.ESQLSource | ast.ESQLBinaryExpression<'as'> {
     if (ctx._index) {
-      return this.toSourceWithAlias(ctx._index, ctx._qualifier);
+      const source = this.toSource(ctx._index);
+
+      if (ctx._qualifier) {
+        const alias = Builder.identifier(
+          { name: ctx._qualifier.text },
+          this.createParserFieldsFromToken(ctx._qualifier)
+        );
+
+        return Builder.expression.func.binary('as', [source, alias], undefined, {
+          location: getPosition(ctx.start, ctx.stop),
+          text: ctx.getText(),
+        });
+      }
+
+      return source;
     } else {
       return Builder.expression.source.node(
         {
@@ -2450,20 +2466,6 @@ export class CstToAstConverter {
   }
 
   // ----------------------------------------------------- expression: "source"
-
-  private toSourceWithAlias(
-    indexCtx: antlr.ParserRuleContext,
-    aliasToken?: antlr.Token,
-    type: 'index' | 'policy' = 'index'
-  ): ast.ESQLSource {
-    const source = this.toSource(indexCtx, type);
-
-    if (aliasToken) {
-      source.alias = aliasToken.text;
-    }
-
-    return source;
-  }
 
   private toSource(
     ctx: antlr.ParserRuleContext,

@@ -31,7 +31,7 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
  */
 export const LeafPrinter = {
   source: (node: ESQLSource): string => {
-    const { index, name, prefix, selector, alias } = node;
+    const { index, name, prefix, selector } = node;
     let text = (index ? LeafPrinter.string(index) : name) || '';
 
     if (prefix) {
@@ -39,9 +39,6 @@ export const LeafPrinter = {
     }
     if (selector) {
       text = `${text}::${LeafPrinter.string(selector)}`;
-    }
-    if (alias) {
-      text = `${text} AS ${alias}`;
     }
 
     return text;

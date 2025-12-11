@@ -65,9 +65,13 @@ describe('<TYPE> JOIN command', () => {
         commandType: 'lookup',
         args: [
           {
-            type: 'source',
-            name: 'languages_lookup',
-            alias: 'll',
+            type: 'function',
+            subtype: 'binary-expression',
+            name: 'as',
+            args: [
+              { type: 'source', name: 'languages_lookup' },
+              { type: 'identifier', name: 'll' },
+            ],
           },
           {},
         ],
