@@ -76,18 +76,29 @@ const buildModifier = (
   const weightedModifier =
     globalWeight !== undefined ? criticalityModifier * globalWeight : criticalityModifier;
 
-  // const updatedNormalizedScore = bayesianUpdate({
-  //   modifier: criticalityModifier,
-  //   score: weightedNormalizedScore,
-  // });
-
-  // const contribution = updatedNormalizedScore - weightedNormalizedScore;
-
   return {
     type: 'asset_criticality',
     modifier_value: weightedModifier,
     metadata: {
       criticality_level: criticality?.criticality_level,
     },
+  };
+};
+
+export const buildLegacyCriticalityFields = (
+  modifier?: Modifier<'asset_criticality'> & { contribution: number }
+): AssetCriticalityRiskFields => {
+  if (!modifier?.metadata?.criticality_level) {
+    return {
+      category_2_score: 0,
+      category_2_count: 0,
+    };
+  }
+
+  return {
+    criticality_level: modifier.metadata?.criticality_level,
+    criticality_modifier: modifier.modifier_value,
+    category_2_score: modifier?.contribution ?? 0,
+    category_2_count: 1,
   };
 };

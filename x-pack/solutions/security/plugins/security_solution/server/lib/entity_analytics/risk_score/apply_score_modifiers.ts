@@ -23,7 +23,11 @@ import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_VALUE } from './constants';
 import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
 
-import { applyCriticalityModifier } from './modifiers/asset_criticality';
+import { getGlobalWeightForIdentifierType } from './calculate_risk_scores';
+import {
+  applyCriticalityModifier,
+  buildLegacyCriticalityFields,
+} from './modifiers/asset_criticality';
 
 import { applyPrivmonModifier } from './modifiers/privileged_users';
 import type { ExperimentalFeatures } from '../../../../common';
@@ -141,14 +145,18 @@ export const riskScoreDocFactory =
       contribution: max10DecimalPlaces(getContribution(modifier.modifier_value ?? 1)),
     }));
 
+    const found = modifiers.find((mod) => mod.type === 'asset_criticality') as
+      | (Modifier<'asset_criticality'> & { contribution: number })
+      | undefined;
+    const legacyCat2Fields = buildLegacyCriticalityFields(found);
+
     return {
       '@timestamp': now,
       id_field: identifierField,
       id_value: bucket.key[identifierField],
       ...finalRiskScoreFields,
       ...alertsRiskScoreFields,
-      ...criticalityModifierFields,
-      ...privmonWatchlistModifierFields,
+      ...legacyCat2Fields,
       modifiers,
       notes: risk.value.notes,
       inputs: risk.value.risk_inputs.map((riskInput) => ({

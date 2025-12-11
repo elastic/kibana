@@ -179,20 +179,6 @@ describe('applyCriticalityModifier', () => {
       // Verify that the calculation uses the original normalized score
       expect(mockGetCriticalityModifier).toHaveBeenCalledWith('high_impact');
     });
-
-    it('should calculate contribution score correctly', async () => {
-      const result = await applyCriticalityModifier({
-        page: mockPage,
-        deps: {
-          assetCriticalityService,
-          logger,
-        },
-      });
-
-      // Verify contribution score is calculated (should be greater than 0)
-      expect(result[0].category_2_score).toBeGreaterThan(0);
-      expect(result[0].category_2_score).toBeLessThan(100);
-    });
   });
 
   describe('without criticality records', () => {

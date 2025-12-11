@@ -233,52 +233,6 @@ describe('applyPrivmonModifier', () => {
       });
     });
 
-    it('should apply global weight when provided', async () => {
-      const globalWeight = 0.8;
-      const result = await applyPrivmonModifier({
-        page: mockPage,
-        deps: {
-          privmonUserCrudService,
-          logger,
-        },
-        globalWeight,
-        experimentalFeatures,
-      });
-
-      // Verify contribution score is calculated with global weight
-      expect(result[0].category_3_score).toBeGreaterThan(0);
-    });
-
-    it('should not apply global weight when undefined', async () => {
-      const result = await applyPrivmonModifier({
-        page: mockPage,
-        deps: {
-          privmonUserCrudService,
-          logger,
-        },
-        globalWeight: undefined,
-        experimentalFeatures,
-      });
-
-      // Verify contribution score is calculated without global weight
-      expect(result[0].category_3_score).toBeGreaterThan(0);
-    });
-
-    it('should calculate contribution score correctly', async () => {
-      const result = await applyPrivmonModifier({
-        page: mockPage,
-        deps: {
-          privmonUserCrudService,
-          logger,
-        },
-        experimentalFeatures,
-      });
-
-      // Verify contribution score is calculated (should be greater than 0)
-      expect(result[0].category_3_score).toBeGreaterThan(0);
-      expect(result[0].category_3_score).toBeLessThan(100);
-    });
-
     it('should use PRIVILEGED_USER_MODIFIER constant (value: 2)', async () => {
       const result = await applyPrivmonModifier({
         page: mockPage,
@@ -290,7 +244,7 @@ describe('applyPrivmonModifier', () => {
       });
 
       // Verify the modifier is applied (result should have privileged_user_modifier set)
-      expect(result[0].privileged_user_modifier).toBe(2);
+      expect(result[0]?.modifier_value).toBe(PRIVILEGED_USER_MODIFIER);
     });
   });
 

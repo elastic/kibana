@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
+
 interface ModifierTypeMap {
   asset_criticality: {
     subtype: void;
-    metadata: { criticality_level: string | undefined };
+    metadata: { criticality_level: AssetCriticalityRecord['criticality_level'] | undefined };
   };
   // NOTE: When we introduce more watchlists, we'll extend this by adding a descriminated union
   watchlist: {
