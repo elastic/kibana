@@ -37,9 +37,9 @@ export class TrialCompanionUserNBAServiceImpl implements TrialCompanionUserNBASe
           currentSO.id,
           current
         );
-        this.logger.info(`Updated user milestone seen SO: ${JSON.stringify(response)}`);
+        this.logger.debug(`Updated user milestone seen SO: ${JSON.stringify(response)}`);
       } else {
-        this.logger.info(`User milestone seen SO already exists for user ${userId}`);
+        this.logger.debug(`User milestone seen SO already exists for user ${userId}`);
       }
     } else {
       const response = await this.soClient.create<NBAUserSeenSavedObjectAttributes>(
@@ -49,13 +49,12 @@ export class TrialCompanionUserNBAServiceImpl implements TrialCompanionUserNBASe
           milestoneIds: [milestoneId],
         }
       );
-      this.logger.info(`Created user milestone seen SO: ${JSON.stringify(response)}`);
+      this.logger.debug(`Created user milestone seen SO: ${JSON.stringify(response)}`);
     }
   }
 
   public async nextNBA(userId: string): Promise<Milestone | undefined> {
     const milestone = await this.repo.getCurrent();
-    this.logger.info(`Fetched current milestone: ${JSON.stringify(milestone)}`);
     const userStatus = await this.getUserNBAStatus(userId);
 
     if (

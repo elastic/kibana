@@ -39,7 +39,7 @@ export const installedPackagesM1 = (logger: Logger, packageService: PackageServi
       const nonDefaultPackages = installedPackageNames.filter(
         (pkg) => !defaultPackages.includes(pkg)
       );
-      logger.info(
+      logger.debug(
         `verifyNonDefaultPackagesInstalled: Fetched Fleet packages: ${
           packages.length
         } items, non-default packages: ${
@@ -61,7 +61,6 @@ export const installedPackagesM1 = (logger: Logger, packageService: PackageServi
 // for testing / demo purposes
 export const allSetM7 = (logger: Logger): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
-    logger.info('allSet: all conditions met for the highest milestone');
     return Milestone.M7;
   };
 };
@@ -131,8 +130,6 @@ async function fetchCollectorResults<T>(
   collectorType: string,
   { logger, collectorContext, usageCollection }: UsageCollectorDeps
 ): Promise<T | undefined> {
-  logger.info(`Fetching telemetry from usage collector ${collectorType}`);
-
   try {
     const collector = usageCollection.getCollectorByType(collectorType);
     if (!collector) {
@@ -144,8 +141,6 @@ async function fetchCollectorResults<T>(
     if (!result) {
       return undefined;
     }
-
-    logger.info(`result: ${JSON.stringify(result, null, 2)}`);
 
     return result as T;
   } catch (error) {

@@ -101,7 +101,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
   }
 
   public async start(start: TrialCompanionMilestoneServiceStart) {
-    this.logger.info('Starting TrialCompanionMilestoneService');
+    this.logger.debug('Starting TrialCompanionMilestoneService');
     if (!this.enabled) {
       this.logger.info('TrialCompanionMilestoneService is disabled, skipping start');
       return;
@@ -124,11 +124,11 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.logger.debug('about to refresh milestones in the saved objects store');
     try {
       const saved = await this.getMilestoneRepository().getCurrent();
-      this.logger.info(`Current milestone from SO: ${JSON.stringify(saved)}`);
+      this.logger.debug(`Current milestone from SO: ${JSON.stringify(saved)}`);
 
       let currentMilestoneId: Milestone | undefined;
-      // TODO: potential optimization: stop checking once we reach the final milestone, we could check SO in start function
-      // TODO: potential optimization: run only detectors for milestones higher than the current one
+      // potential optimization: stop checking once we reach the final milestone, we could check SO in start function
+      // potential optimization: run only detectors for milestones higher than the current one
       for (const d of this.detectors) {
         const milestoneId = await d();
         if (milestoneId) {
@@ -137,7 +137,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
         }
       }
 
-      this.logger.info(`Current milestone detected: ${currentMilestoneId}`);
+      this.logger.debug(`Current milestone detected: ${currentMilestoneId}`);
 
       let updated: NBAMilestone | undefined;
       if (currentMilestoneId) {
@@ -150,7 +150,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
           updated = saved;
         }
       }
-      this.logger.info(`Current milestone updated: ${JSON.stringify(updated)}`);
+      this.logger.debug(`Current milestone updated: ${JSON.stringify(updated)}`);
     } catch (e) {
       this.logger.error(`Error refreshing milestones: ${e.message}`);
     }

@@ -57,7 +57,7 @@ export class TrialCompanionMilestoneRepositoryImpl implements TrialCompanionMile
       }
     );
 
-    this.logger.info(
+    this.logger.debug(
       `Saved milestone with id ${response.id} and milestoneId ${
         milestone.milestoneId
       }. Response: ${JSON.stringify(response)}`
