@@ -19,7 +19,7 @@ interface GetOnEnabledChangeParams {
 interface GetOnEnabledChangeResult {
   custom: boolean;
   flappingChange: RuleSpecificFlappingProperties | null;
-  disable?: boolean;
+  hide?: boolean;
 }
 
 export const getOnEnabledChange = ({
@@ -45,6 +45,6 @@ export const getOnEnabledChange = ({
       lookBackWindow: currentFlappingSettings.lookBackWindow,
       statusChangeThreshold: currentFlappingSettings.statusChangeThreshold,
     },
-    disable: enabled,
+    hide: enabled,
   };
 };

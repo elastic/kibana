@@ -175,7 +175,7 @@ describe('RuleSettingsFlappingForm', () => {
     expect(onFlappingChangeMock).not.toHaveBeenCalled();
   });
 
-  it('should show custom badge and disable custom configuration switch form if global flapping is disabled and rule flapping is enabled', async () => {
+  it('should show custom badge and hide custom configuration switch form if global flapping is disabled and rule flapping is enabled', async () => {
     const disabledSpaceFlappingSettings = { ...spaceFlappingSettings, enabled: false };
     let flappingSettings = null;
     const onFlappingChangeMock = jest.fn((changes) => {
@@ -213,7 +213,7 @@ describe('RuleSettingsFlappingForm', () => {
       result.getByTestId('rulesSettingsFlappingEnableSwitch').getAttribute('aria-checked')
     ).toBe('true');
     expect(result.getByTestId('rulesSettingsFlappingCustomBadge')).toBeInTheDocument();
-    expect(result.getByTestId('rulesSettingsFlappingCustomSwitch')).toBeDisabled();
+    expect(result.queryByTestId('rulesSettingsFlappingCustomSwitch')).not.toBeInTheDocument();
     expect(onFlappingChangeMock).toHaveBeenCalledWith({
       enabled: true,
       lookBackWindow: 20,

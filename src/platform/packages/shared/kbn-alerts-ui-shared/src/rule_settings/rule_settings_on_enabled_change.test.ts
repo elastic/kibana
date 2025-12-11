@@ -46,7 +46,7 @@ describe('getExecutionDurationPercentiles', () => {
     });
     expect(changes).toEqual({
       custom: true,
-      disable: false,
+      hide: false,
       flappingChange: {
         enabled: false,
         lookBackWindow: 20,
@@ -66,7 +66,7 @@ describe('getExecutionDurationPercentiles', () => {
     });
     expect(changes).toEqual({
       custom: true,
-      disable: true,
+      hide: true,
       flappingChange: {
         enabled: true,
         lookBackWindow: 20,
@@ -94,7 +94,7 @@ describe('getExecutionDurationPercentiles', () => {
     });
     expect(changes).toEqual({
       custom: true,
-      disable: true,
+      hide: true,
       flappingChange: {
         enabled: true,
         lookBackWindow: 10,
@@ -118,7 +118,7 @@ describe('getExecutionDurationPercentiles', () => {
     });
     expect(changes).toEqual({
       custom: true,
-      disable: true,
+      hide: true,
       flappingChange: {
         enabled: true,
         lookBackWindow: 13,

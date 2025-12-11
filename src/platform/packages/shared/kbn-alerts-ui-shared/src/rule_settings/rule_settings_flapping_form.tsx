@@ -76,7 +76,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
 
   const { euiTheme } = useEuiTheme();
 
-  const [disableOverride, setDisableOverride] = useState<boolean>(false);
+  const [hideOverride, setHideOverride] = useState<boolean>(false);
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
       flappingSettings &&
       flappingSettings.enabled
     ) {
-      setDisableOverride(true);
+      setHideOverride(true);
     }
     if (flappingSettings) {
       setIsCustom(true);
@@ -152,7 +152,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
       if (!spaceFlappingSettings) {
         return;
       }
-      const { custom, flappingChange, disable } = getOnEnabledChange({
+      const { custom, flappingChange, hide } = getOnEnabledChange({
         enabled: value,
         spaceFlappingSettings,
         flappingSettings,
@@ -167,8 +167,8 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
 
       setIsCustom(custom);
 
-      if (disable) {
-        setDisableOverride(disable);
+      if (hide) {
+        setHideOverride(hide);
       }
     },
     [spaceFlappingSettings, flappingSettings, onFlappingChange, internalOnFlappingChange]
@@ -265,7 +265,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
   ]);
 
   const flappingFormSwitch = useMemo(() => {
-    if (!enabled) {
+    if (!enabled || hideOverride) {
       return null;
     }
     return (
@@ -275,7 +275,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
           data-test-subj="rulesSettingsFlappingCustomSwitch"
           checked={!!flappingSettings}
           label={flappingOverrideConfiguration}
-          disabled={!canWriteFlappingSettingsUI || disableOverride}
+          disabled={!canWriteFlappingSettingsUI}
           onChange={onFlappingOverrideToggle}
         />
       </EuiFlexItem>
@@ -284,7 +284,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     flappingSettings,
     canWriteFlappingSettingsUI,
     enabled,
-    disableOverride,
+    hideOverride,
     onFlappingOverrideToggle,
   ]);
 
