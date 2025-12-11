@@ -79,6 +79,7 @@ export const createPersistedToolClient = ({
       request,
       spaceId: space,
       savedObjectsClient,
+      actions,
     };
   };
 

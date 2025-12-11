@@ -6,15 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { McpToolConfig } from '@kbn/onechat-common/tools';
-import {
-  MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-  type McpConnectorToolsAttributes,
-} from '@kbn/stack-connectors-plugin/server/saved_objects';
+import { listMcpTools } from './tool_type';
 
 /**
  * Validates that the connector exists and is an MCP connector.
@@ -49,27 +45,25 @@ export async function validateConnector({
 }
 
 /**
- * Validates that the tool name exists on the MCP server.
- * The tool list is stored in a saved object populated when the connector calls listTools.
+ * Validates that the tool name exists on the MCP server by calling listTools.
  */
 export async function validateToolName({
-  savedObjectsClient,
+  actions,
+  request,
   connectorId,
   toolName,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
   connectorId: string;
   toolName: string;
 }): Promise<void> {
   try {
-    const toolsSO = await savedObjectsClient.get<McpConnectorToolsAttributes>(
-      MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-      connectorId
-    );
-    const tool = toolsSO.attributes.tools.find((t) => t.name === toolName);
+    const { tools } = await listMcpTools({ actions, request, connectorId });
+    const tool = tools.find((t) => t.name === toolName);
 
     if (!tool) {
-      const availableTools = toolsSO.attributes.tools.map((t) => t.name).join(', ');
+      const availableTools = tools.map((t) => t.name).join(', ');
       throw createBadRequestError(
         `Tool '${toolName}' not found on MCP connector '${connectorId}'. Available tools: ${availableTools || 'none'}`
       );
@@ -79,7 +73,7 @@ export async function validateToolName({
     if (error && typeof error === 'object' && 'isBoom' in error) {
       throw error;
     }
-    // If saved object doesn't exist, the tools haven't been discovered yet
+    // If listTools fails, the connector may not be accessible or the MCP server may be down
     throw createBadRequestError(
       `Unable to verify tool '${toolName}' on connector '${connectorId}'. ` +
         `Ensure the connector has successfully connected to the MCP server.`
@@ -97,12 +91,10 @@ export async function validateToolName({
 export async function validateConfig({
   actions,
   request,
-  savedObjectsClient,
   config,
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract;
   config: McpToolConfig;
 }): Promise<void> {
   await validateConnector({
@@ -112,9 +104,9 @@ export async function validateConfig({
   });
 
   await validateToolName({
-    savedObjectsClient,
+    actions,
+    request,
     connectorId: config.connector_id,
     toolName: config.tool_name,
   });
 }
-

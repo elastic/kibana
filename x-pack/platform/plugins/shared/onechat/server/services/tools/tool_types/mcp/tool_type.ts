@@ -9,36 +9,114 @@ import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { McpToolConfig } from '@kbn/onechat-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import {
-  MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-  type McpConnectorToolsAttributes,
-} from '@kbn/stack-connectors-plugin/server/saved_objects';
+import type { Tool, ListToolsResponse } from '@kbn/mcp-client';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
-import { getMcpToolDescription } from './get_mcp_tool_description';
 
 /**
- * Retrieves the input schema for a specific MCP tool from the saved object.
- * Returns undefined if the saved object or tool is not found.
+ * Type guard to validate ListToolsResponse structure from MCP connector.
+ * Ensures runtime safety when processing connector responses.
  */
-async function getMcpToolInputSchema(
-  savedObjectsClient: SavedObjectsClientContract,
-  connectorId: string,
-  toolName: string
-): Promise<Record<string, unknown> | undefined> {
-  try {
-    const toolsSO = await savedObjectsClient.get<McpConnectorToolsAttributes>(
-      MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-      connectorId
+function isListToolsResponse(data: unknown): data is ListToolsResponse {
+  if (typeof data !== 'object' || data === null) return false;
+  if (!('tools' in data)) return false;
+  const { tools } = data as { tools: unknown };
+  if (!Array.isArray(tools)) return false;
+  return tools.every(
+    (tool) =>
+      typeof tool === 'object' &&
+      tool !== null &&
+      'name' in tool &&
+      typeof (tool as Tool).name === 'string' &&
+      'inputSchema' in tool &&
+      typeof (tool as Tool).inputSchema === 'object'
+  );
+}
+
+/**
+ * Lists available tools from an MCP connector by calling the listTools subAction.
+ */
+export async function listMcpTools({
+  actions,
+  request,
+  connectorId,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+}): Promise<ListToolsResponse> {
+  const actionsClient = await actions.getActionsClientWithRequest(request);
+  const result = await actionsClient.execute({
+    actionId: connectorId,
+    params: {
+      subAction: 'listTools',
+      subActionParams: {},
+    },
+  });
+
+  if (result.status === 'error') {
+    throw new Error(result.message || 'Failed to list MCP tools');
+  }
+
+  // Runtime validation to ensure type safety
+  if (!isListToolsResponse(result.data)) {
+    throw new Error(
+      `Invalid response from MCP connector '${connectorId}': expected ListToolsResponse with tools array`
     );
-    const tool = toolsSO.attributes.tools.find((t) => t.name === toolName);
+  }
+
+  return result.data;
+}
+
+/**
+ * Retrieves the input schema for a specific MCP tool by calling listTools on the connector.
+ * Returns undefined if the connector or tool is not found.
+ */
+async function getMcpToolInputSchema({
+  actions,
+  request,
+  connectorId,
+  toolName,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+  toolName: string;
+}): Promise<Record<string, unknown> | undefined> {
+  try {
+    const { tools } = await listMcpTools({ actions, request, connectorId });
+    const tool = tools.find((t) => t.name === toolName);
     return tool?.inputSchema;
   } catch (error) {
-    // Saved object not found or other error - return undefined so getSchema will throw
+    // Connector not found or other error - return undefined so getSchema will throw
+    return undefined;
+  }
+}
+
+/**
+ * Retrieves the description for a specific MCP tool by calling listTools on the connector.
+ * Returns undefined if the connector or tool is not found.
+ */
+async function getMcpToolDescription({
+  actions,
+  request,
+  connectorId,
+  toolName,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+  toolName: string;
+}): Promise<string | undefined> {
+  try {
+    const { tools } = await listMcpTools({ actions, request, connectorId });
+    const tool = tools.find((t) => t.name === toolName);
+    return tool?.description;
+  } catch (error) {
+    // Connector not found or other error - return undefined
     return undefined;
   }
 }
@@ -93,7 +171,7 @@ async function executeMcpTool({
  * Architecture:
  * - connector_id: References the MCP Stack Connector that connects to the MCP server
  * - tool_name: The name of the tool on the MCP server to invoke
- * - Input schema: Retrieved from the mcp-connector-tools saved object (populated by connector's listTools)
+ * - Input schema: Retrieved by calling listTools on the MCP connector
  * - Execution: Calls the connector's callTool sub-action with the tool name and arguments
  */
 export const getMcpToolType = (): ToolTypeDefinition<
@@ -103,11 +181,11 @@ export const getMcpToolType = (): ToolTypeDefinition<
 > => {
   return {
     toolType: ToolType.mcp,
-    getDynamicProps: (config, { savedObjectsClient }) => {
+    getDynamicProps: (config, { request, actions }) => {
       return {
         getHandler: () => {
           return async (params, context) => {
-            const { logger, actions, request } = context;
+            const { logger, actions: contextActions, request: contextRequest } = context;
 
             logger.debug(
               `Executing MCP tool: connector=${config.connector_id}, tool=${config.tool_name}`
@@ -115,8 +193,8 @@ export const getMcpToolType = (): ToolTypeDefinition<
 
             try {
               const result = await executeMcpTool({
-                actions,
-                request,
+                actions: contextActions,
+                request: contextRequest,
                 connectorId: config.connector_id,
                 toolName: config.tool_name,
                 toolArguments: params,
@@ -139,7 +217,9 @@ export const getMcpToolType = (): ToolTypeDefinition<
                 results: [
                   {
                     type: ToolResultType.other,
-                    data: result.content,
+                    // MCP tool results are dynamic - content type varies per tool.
+                    // Cast is acceptable as ToolResultType.other handles arbitrary data.
+                    data: result.content as Record<string, unknown>,
                   },
                 ],
               };
@@ -160,17 +240,18 @@ export const getMcpToolType = (): ToolTypeDefinition<
         },
 
         getSchema: async () => {
-          // Retrieve input schema from mcp-connector-tools saved object
-          const inputSchema = await getMcpToolInputSchema(
-            savedObjectsClient,
-            config.connector_id,
-            config.tool_name
-          );
+          // Retrieve input schema by calling listTools on the MCP connector
+          const inputSchema = await getMcpToolInputSchema({
+            actions,
+            request,
+            connectorId: config.connector_id,
+            toolName: config.tool_name,
+          });
 
           if (!inputSchema) {
             throw new Error(
               `Failed to retrieve input schema for MCP tool '${config.tool_name}' from connector '${config.connector_id}'. ` +
-                `The mcp-connector-tools saved object may be missing or the tool may not exist on the MCP server.`
+                `The MCP connector may not be accessible or the tool may not exist on the MCP server.`
             );
           }
 
@@ -201,11 +282,10 @@ export const getMcpToolType = (): ToolTypeDefinition<
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
 
-    validateForCreate: async ({ config, context: { request, savedObjectsClient, actions } }) => {
+    validateForCreate: async ({ config, context: { request, actions } }) => {
       await validateConfig({
         actions,
         request,
-        savedObjectsClient,
         config,
       });
       return config;
@@ -214,7 +294,7 @@ export const getMcpToolType = (): ToolTypeDefinition<
     validateForUpdate: async ({
       update,
       current,
-      context: { request, savedObjectsClient, actions },
+      context: { request, actions },
     }) => {
       const mergedConfig = {
         ...current,
@@ -224,19 +304,19 @@ export const getMcpToolType = (): ToolTypeDefinition<
       await validateConfig({
         actions,
         request,
-        savedObjectsClient,
         config: mergedConfig,
       });
 
       return mergedConfig;
     },
 
-    getAutoDescription: async (config, { savedObjectsClient }) => {
-      return getMcpToolDescription(
-        savedObjectsClient,
-        config.connector_id,
-        config.tool_name
-      );
+    getAutoDescription: async (config, { request, actions }) => {
+      return getMcpToolDescription({
+        actions,
+        request,
+        connectorId: config.connector_id,
+        toolName: config.tool_name,
+      });
     },
   };
 };

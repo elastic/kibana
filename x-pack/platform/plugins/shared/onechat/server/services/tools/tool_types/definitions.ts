@@ -69,6 +69,7 @@ export interface ToolTypeConversionContext {
   spaceId: string;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
+  actions: ActionsPluginStart;
 }
 
 export interface ToolTypeValidatorContext {
@@ -152,6 +153,7 @@ export interface ToolDynamicPropsContext {
   spaceId: string;
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
+  actions: ActionsPluginStart;
 }
 
 export type ToolHandlerDynamicPropsFn<

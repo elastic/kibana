@@ -39,6 +39,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     logger,
     savedObjects,
+    actions,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -63,6 +64,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
       savedObjects,
+      actions,
     }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };

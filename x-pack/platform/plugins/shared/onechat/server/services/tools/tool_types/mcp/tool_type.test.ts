@@ -9,8 +9,7 @@ import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE } from '@kbn/stack-connectors-plugin/server/saved_objects';
-import { getMcpToolType } from './tool_type';
+import { getMcpToolType, listMcpTools } from './tool_type';
 
 jest.mock('@n8n/json-schema-to-zod', () => ({
   jsonSchemaToZod: jest.fn(),
@@ -24,6 +23,7 @@ describe('MCP tool_type', () => {
   let mockActions: jest.Mocked<ActionsPluginStart>;
   let mockActionsClient: {
     execute: jest.Mock;
+    get: jest.Mock;
   };
   let mockRequest: KibanaRequest;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -37,11 +37,33 @@ describe('MCP tool_type', () => {
     tool_name: 'test_tool',
   };
 
+  const mockToolsResponse = {
+    tools: [
+      {
+        name: 'test_tool',
+        description: 'Test tool description',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Search query' },
+          },
+          required: ['query'],
+        },
+      },
+      {
+        name: 'other_tool',
+        description: 'Other tool',
+        inputSchema: {},
+      },
+    ],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockActionsClient = {
       execute: jest.fn(),
+      get: jest.fn(),
     };
 
     mockActions = {
@@ -58,6 +80,99 @@ describe('MCP tool_type', () => {
       debug: jest.fn(),
       error: jest.fn(),
     };
+  });
+
+  describe('listMcpTools', () => {
+    it('should call listTools subAction on the connector', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse,
+      });
+
+      const result = await listMcpTools({
+        actions: mockActions,
+        request: mockRequest,
+        connectorId: 'test-connector-id',
+      });
+
+      expect(mockActions.getActionsClientWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockActionsClient.execute).toHaveBeenCalledWith({
+        actionId: 'test-connector-id',
+        params: {
+          subAction: 'listTools',
+          subActionParams: {},
+        },
+      });
+      expect(result).toEqual(mockToolsResponse);
+    });
+
+    it('should throw error when listTools fails', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+        message: 'Failed to connect to MCP server',
+      });
+
+      await expect(
+        listMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+        })
+      ).rejects.toThrow('Failed to connect to MCP server');
+    });
+
+    it('should throw default error message when no message provided', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+      });
+
+      await expect(
+        listMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+        })
+      ).rejects.toThrow('Failed to list MCP tools');
+    });
+
+    it('should throw error when response does not match ListToolsResponse structure', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: { invalid: 'response' }, // Missing 'tools' array
+      });
+
+      await expect(
+        listMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+        })
+      ).rejects.toThrow(
+        "Invalid response from MCP connector 'test-connector-id': expected ListToolsResponse with tools array"
+      );
+    });
+
+    it('should throw error when tools array contains invalid tool objects', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: {
+          tools: [
+            { name: 'valid_tool', inputSchema: {} },
+            { invalid: 'tool' }, // Missing required fields
+          ],
+        },
+      });
+
+      await expect(
+        listMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+        })
+      ).rejects.toThrow(
+        "Invalid response from MCP connector 'test-connector-id': expected ListToolsResponse with tools array"
+      );
+    });
   });
 
   describe('getMcpToolType', () => {
@@ -77,10 +192,11 @@ describe('MCP tool_type', () => {
     describe('getHandler', () => {
       it('should execute MCP tool successfully and return results', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -88,7 +204,7 @@ describe('MCP tool_type', () => {
           data: { result: 'success', value: 42 },
         });
 
-        const handler = dynamicProps.getHandler();
+        const handler = await dynamicProps.getHandler();
         const params = { query: 'test query' };
         const context = {
           logger: mockLogger,
@@ -124,10 +240,11 @@ describe('MCP tool_type', () => {
 
       it('should return error result when connector execution returns error status', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -135,7 +252,7 @@ describe('MCP tool_type', () => {
           message: 'Tool execution failed: invalid parameters',
         });
 
-        const handler = dynamicProps.getHandler();
+        const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
           actions: mockActions,
@@ -156,17 +273,18 @@ describe('MCP tool_type', () => {
 
       it('should return error result with default message when connector error has no message', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
           status: 'error',
         });
 
-        const handler = dynamicProps.getHandler();
+        const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
           actions: mockActions,
@@ -187,16 +305,17 @@ describe('MCP tool_type', () => {
 
       it('should catch exceptions and return error result', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
         const testError = new Error('Connection timeout');
         mockActions.getActionsClientWithRequest.mockRejectedValue(testError);
 
-        const handler = dynamicProps.getHandler();
+        const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
           actions: mockActions,
@@ -220,15 +339,16 @@ describe('MCP tool_type', () => {
 
       it('should handle non-Error exceptions', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
         mockActions.getActionsClientWithRequest.mockRejectedValue('string error');
 
-        const handler = dynamicProps.getHandler();
+        const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
           actions: mockActions,
@@ -249,35 +369,18 @@ describe('MCP tool_type', () => {
     });
 
     describe('getSchema', () => {
-      it('should retrieve and convert input schema from saved object', async () => {
+      it('should retrieve and convert input schema from listTools', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
-        const mockInputSchema = {
-          type: 'object',
-          properties: {
-            query: { type: 'string', description: 'Search query' },
-          },
-          required: ['query'],
-        };
-
-        mockSavedObjectsClient.get.mockResolvedValue({
-          id: 'test-connector-id',
-          type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-          attributes: {
-            connectorId: 'test-connector-id',
-            tools: [
-              { name: 'test_tool', description: 'Test tool', inputSchema: mockInputSchema },
-              { name: 'other_tool', description: 'Other tool', inputSchema: {} },
-            ],
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-          references: [],
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'ok',
+          data: mockToolsResponse,
         });
 
         const mockZodSchema = { _def: { typeName: 'ZodObject' } };
@@ -285,49 +388,52 @@ describe('MCP tool_type', () => {
 
         const schema = await dynamicProps.getSchema();
 
-        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-          MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-          'test-connector-id'
-        );
-        expect(mockJsonSchemaToZod).toHaveBeenCalledWith(mockInputSchema);
+        expect(mockActionsClient.execute).toHaveBeenCalledWith({
+          actionId: 'test-connector-id',
+          params: {
+            subAction: 'listTools',
+            subActionParams: {},
+          },
+        });
+        expect(mockJsonSchemaToZod).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
         expect(schema).toBe(mockZodSchema);
       });
 
-      it('should throw error when saved object not found', async () => {
+      it('should throw error when listTools fails', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
-        mockSavedObjectsClient.get.mockRejectedValue(new Error('Saved object not found'));
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'error',
+          message: 'Connection failed',
+        });
 
         await expect(dynamicProps.getSchema()).rejects.toThrow(
           `Failed to retrieve input schema for MCP tool 'test_tool' from connector 'test-connector-id'`
         );
       });
 
-      it('should throw error when tool not found in saved object', async () => {
+      it('should throw error when tool not found in listTools response', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
-        mockSavedObjectsClient.get.mockResolvedValue({
-          id: 'test-connector-id',
-          type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-          attributes: {
-            connectorId: 'test-connector-id',
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'ok',
+          data: {
             tools: [
               { name: 'other_tool', description: 'Other tool', inputSchema: {} },
             ],
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
           },
-          references: [],
         });
 
         await expect(dynamicProps.getSchema()).rejects.toThrow(
@@ -338,25 +444,16 @@ describe('MCP tool_type', () => {
 
       it('should throw error when jsonSchemaToZod fails', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
-        const malformedSchema = { invalid: 'schema' };
-        mockSavedObjectsClient.get.mockResolvedValue({
-          id: 'test-connector-id',
-          type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-          attributes: {
-            connectorId: 'test-connector-id',
-            tools: [
-              { name: 'test_tool', description: 'Test tool', inputSchema: malformedSchema },
-            ],
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-          references: [],
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'ok',
+          data: mockToolsResponse,
         });
 
         mockJsonSchemaToZod.mockImplementation(() => {
@@ -366,17 +463,18 @@ describe('MCP tool_type', () => {
         await expect(dynamicProps.getSchema()).rejects.toThrow(
           `Failed to convert JSON Schema to Zod for MCP tool 'test_tool': Invalid JSON Schema`
         );
-        expect(mockJsonSchemaToZod).toHaveBeenCalledWith(malformedSchema);
+        expect(mockJsonSchemaToZod).toHaveBeenCalled();
       });
     });
 
     describe('getLlmDescription', () => {
-      it('should return formatted description with MCP-specific information', () => {
+      it('should return formatted description with MCP-specific information', async () => {
         const toolType = getMcpToolType();
-        const dynamicProps = toolType.getDynamicProps(testConfig, {
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
         const result = dynamicProps.getLlmDescription!({
@@ -389,16 +487,17 @@ describe('MCP tool_type', () => {
         expect(result).toContain("Server tool name: 'test_tool'");
       });
 
-      it('should include the correct tool name from config', () => {
+      it('should include the correct tool name from config', async () => {
         const toolType = getMcpToolType();
         const customConfig = {
           connector_id: 'my-connector',
           tool_name: 'custom_search_tool',
         };
-        const dynamicProps = toolType.getDynamicProps(customConfig, {
+        const dynamicProps = await toolType.getDynamicProps(customConfig, {
           savedObjectsClient: mockSavedObjectsClient,
           request: mockRequest,
           spaceId: 'default',
+          actions: mockActions,
         });
 
         const result = dynamicProps.getLlmDescription!({
@@ -410,5 +509,74 @@ describe('MCP tool_type', () => {
       });
     });
   });
-});
 
+  describe('getAutoDescription', () => {
+    it('should fetch tool description from listTools', async () => {
+      const toolType = getMcpToolType();
+
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse,
+      });
+
+      const description = await toolType.getAutoDescription!(testConfig, {
+        request: mockRequest,
+        spaceId: 'default',
+        esClient: {} as any,
+        savedObjectsClient: mockSavedObjectsClient,
+        actions: mockActions,
+      });
+
+      expect(description).toBe('Test tool description');
+      expect(mockActionsClient.execute).toHaveBeenCalledWith({
+        actionId: 'test-connector-id',
+        params: {
+          subAction: 'listTools',
+          subActionParams: {},
+        },
+      });
+    });
+
+    it('should return undefined when tool not found', async () => {
+      const toolType = getMcpToolType();
+
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: {
+          tools: [
+            { name: 'other_tool', description: 'Other description', inputSchema: {} },
+          ],
+        },
+      });
+
+      const description = await toolType.getAutoDescription!(testConfig, {
+        request: mockRequest,
+        spaceId: 'default',
+        esClient: {} as any,
+        savedObjectsClient: mockSavedObjectsClient,
+        actions: mockActions,
+      });
+
+      expect(description).toBeUndefined();
+    });
+
+    it('should return undefined when listTools fails', async () => {
+      const toolType = getMcpToolType();
+
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+        message: 'Connection failed',
+      });
+
+      const description = await toolType.getAutoDescription!(testConfig, {
+        request: mockRequest,
+        spaceId: 'default',
+        esClient: {} as any,
+        savedObjectsClient: mockSavedObjectsClient,
+        actions: mockActions,
+      });
+
+      expect(description).toBeUndefined();
+    });
+  });
+});

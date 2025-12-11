@@ -6,11 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
-import { MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE } from '@kbn/stack-connectors-plugin/server/saved_objects';
 import { validateConnector, validateToolName, validateConfig } from './validate_configuration';
 
 jest.mock('@kbn/onechat-common', () => ({
@@ -25,15 +23,23 @@ describe('MCP validate_configuration', () => {
   let mockActions: jest.Mocked<ActionsPluginStart>;
   let mockActionsClient: {
     get: jest.Mock;
+    execute: jest.Mock;
   };
   let mockRequest: KibanaRequest;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
+  const mockToolsResponse = {
+    tools: [
+      { name: 'tool_one', description: 'First tool', inputSchema: {} },
+      { name: 'tool_two', description: 'Second tool', inputSchema: {} },
+    ],
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockActionsClient = {
       get: jest.fn(),
+      execute: jest.fn(),
     };
 
     mockActions = {
@@ -41,10 +47,6 @@ describe('MCP validate_configuration', () => {
     } as unknown as jest.Mocked<ActionsPluginStart>;
 
     mockRequest = {} as KibanaRequest;
-
-    mockSavedObjectsClient = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>;
 
     mockCreateBadRequestError.mockImplementation((message: string) => {
       const error = new Error(message) as Error & { isBoom: boolean };
@@ -129,54 +131,39 @@ describe('MCP validate_configuration', () => {
 
   describe('validateToolName', () => {
     it('should pass validation when tool exists on connector', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'test-connector-id',
-        type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        attributes: {
-          connectorId: 'test-connector-id',
-          tools: [
-            { name: 'tool_one', description: 'First tool', inputSchema: {} },
-            { name: 'tool_two', description: 'Second tool', inputSchema: {} },
-          ],
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        },
-        references: [],
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse,
       });
 
       await expect(
         validateToolName({
-          savedObjectsClient: mockSavedObjectsClient,
+          actions: mockActions,
+          request: mockRequest,
           connectorId: 'test-connector-id',
           toolName: 'tool_one',
         })
       ).resolves.toBeUndefined();
 
-      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-        MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        'test-connector-id'
-      );
+      expect(mockActionsClient.execute).toHaveBeenCalledWith({
+        actionId: 'test-connector-id',
+        params: {
+          subAction: 'listTools',
+          subActionParams: {},
+        },
+      });
     });
 
     it('should throw error when tool is not found on connector', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'test-connector-id',
-        type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        attributes: {
-          connectorId: 'test-connector-id',
-          tools: [
-            { name: 'tool_one', description: 'First tool', inputSchema: {} },
-            { name: 'tool_two', description: 'Second tool', inputSchema: {} },
-          ],
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        },
-        references: [],
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse,
       });
 
       await expect(
         validateToolName({
-          savedObjectsClient: mockSavedObjectsClient,
+          actions: mockActions,
+          request: mockRequest,
           connectorId: 'test-connector-id',
           toolName: 'non_existent_tool',
         })
@@ -188,21 +175,15 @@ describe('MCP validate_configuration', () => {
     });
 
     it('should show "none" when no tools are available', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'test-connector-id',
-        type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        attributes: {
-          connectorId: 'test-connector-id',
-          tools: [],
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        },
-        references: [],
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: { tools: [] },
       });
 
       await expect(
         validateToolName({
-          savedObjectsClient: mockSavedObjectsClient,
+          actions: mockActions,
+          request: mockRequest,
           connectorId: 'test-connector-id',
           toolName: 'some_tool',
         })
@@ -213,12 +194,16 @@ describe('MCP validate_configuration', () => {
       );
     });
 
-    it('should throw error when tools saved object does not exist', async () => {
-      mockSavedObjectsClient.get.mockRejectedValue(new Error('Saved object not found'));
+    it('should throw error when listTools fails', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+        message: 'Connection failed',
+      });
 
       await expect(
         validateToolName({
-          savedObjectsClient: mockSavedObjectsClient,
+          actions: mockActions,
+          request: mockRequest,
           connectorId: 'test-connector-id',
           toolName: 'some_tool',
         })
@@ -231,20 +216,14 @@ describe('MCP validate_configuration', () => {
     });
 
     it('should re-throw boom errors from tool not found check', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'test-connector-id',
-        type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        attributes: {
-          connectorId: 'test-connector-id',
-          tools: [],
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        },
-        references: [],
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: { tools: [] },
       });
 
       const thrownError = await validateToolName({
-        savedObjectsClient: mockSavedObjectsClient,
+        actions: mockActions,
+        request: mockRequest,
         connectorId: 'test-connector-id',
         toolName: 'missing_tool',
       }).catch((e) => e);
@@ -261,23 +240,17 @@ describe('MCP validate_configuration', () => {
         name: 'My MCP Connector',
       });
 
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'test-connector-id',
-        type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        attributes: {
-          connectorId: 'test-connector-id',
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: {
           tools: [{ name: 'search_documents', description: 'Search tool', inputSchema: {} }],
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
         },
-        references: [],
       });
 
       await expect(
         validateConfig({
           actions: mockActions,
           request: mockRequest,
-          savedObjectsClient: mockSavedObjectsClient,
           config: {
             connector_id: 'test-connector-id',
             tool_name: 'search_documents',
@@ -293,7 +266,6 @@ describe('MCP validate_configuration', () => {
         validateConfig({
           actions: mockActions,
           request: mockRequest,
-          savedObjectsClient: mockSavedObjectsClient,
           config: {
             connector_id: 'invalid-connector',
             tool_name: 'some_tool',
@@ -305,7 +277,7 @@ describe('MCP validate_configuration', () => {
         `Connector 'invalid-connector' not found or not accessible`
       );
       // Tool validation should not be called if connector validation fails
-      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockActionsClient.execute).not.toHaveBeenCalled();
     });
 
     it('should fail validation if tool is not found', async () => {
@@ -315,23 +287,17 @@ describe('MCP validate_configuration', () => {
         name: 'My MCP Connector',
       });
 
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'test-connector-id',
-        type: MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-        attributes: {
-          connectorId: 'test-connector-id',
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: {
           tools: [{ name: 'other_tool', description: 'Other tool', inputSchema: {} }],
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
         },
-        references: [],
       });
 
       await expect(
         validateConfig({
           actions: mockActions,
           request: mockRequest,
-          savedObjectsClient: mockSavedObjectsClient,
           config: {
             connector_id: 'test-connector-id',
             tool_name: 'missing_tool',
@@ -355,7 +321,6 @@ describe('MCP validate_configuration', () => {
         validateConfig({
           actions: mockActions,
           request: mockRequest,
-          savedObjectsClient: mockSavedObjectsClient,
           config: {
             connector_id: 'test-connector-id',
             tool_name: 'some_tool',
@@ -368,7 +333,7 @@ describe('MCP validate_configuration', () => {
         expect.stringContaining('is not an MCP connector')
       );
       // Tool validation should not be called
-      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockActionsClient.execute).not.toHaveBeenCalled();
     });
   });
 });
