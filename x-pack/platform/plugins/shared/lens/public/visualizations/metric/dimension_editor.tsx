@@ -47,7 +47,7 @@ import {
   legacyMetricStateDefaults,
 } from './constants';
 
-export type SupportingVisType = 'panel' | 'bar' | 'trendline';
+export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
 export type ApplyColor = 'background' | 'value';
 
