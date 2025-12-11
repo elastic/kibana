@@ -11,7 +11,7 @@ import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/comm
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { MetricField, Dimension } from '../../../types';
-import { getTimeSeriesMetric, hasValue } from '../../../common/utils/fields';
+import { hasValue } from '../../../common/utils/fields';
 import { DIMENSION_TYPES } from '../../../common/constants';
 
 const FILTER_OUT_FIELDS = new Set([
@@ -69,14 +69,13 @@ export const extractFields = ({
     }
 
     const esqlColumn = columnByName.get(fieldName);
-    const timeSeriesMetric = getTimeSeriesMetric(fieldSpec, esqlColumn);
 
-    if (Boolean(timeSeriesMetric)) {
+    if (Boolean(fieldSpec.timeSeriesMetric)) {
       metricFields.push({
         index,
         name: fieldName,
         type: esqlColumn?.meta?.esType || 'unknown',
-        instrument: timeSeriesMetric,
+        instrument: fieldSpec.timeSeriesMetric,
         dimensions: [],
       });
     } else if (

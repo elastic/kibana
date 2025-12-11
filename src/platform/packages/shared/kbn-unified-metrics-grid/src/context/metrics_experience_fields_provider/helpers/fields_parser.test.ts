@@ -60,31 +60,6 @@ describe('fields_parser', () => {
       });
     });
 
-    it('assigns intrument based on field type when timeSeriesMetric is null', () => {
-      const dataViewFieldMap: DataViewFieldMap = {
-        'system.network.bytes': {
-          name: 'system.network.bytes',
-          type: 'number',
-          esTypes: ['counter_long'],
-          searchable: true,
-          aggregatable: true,
-        },
-      };
-
-      const columns: DatatableColumn[] = [
-        {
-          id: 'system.network.bytes',
-          name: 'system.network.bytes',
-          meta: { type: 'number', esType: 'counter_long' },
-        },
-      ];
-
-      const result = extractFields({ ...baseParams, dataViewFieldMap, columns });
-
-      expect(result.metricFields).toHaveLength(1);
-      expect(result.metricFields[0].instrument).toBe('counter');
-    });
-
     it('extracts dimensions with timeSeriesDimension attribute', () => {
       const dataViewFieldMap: DataViewFieldMap = {
         'host.name': {
@@ -244,7 +219,7 @@ describe('fields_parser', () => {
       expect(result.sampleRowByMetric.get('system.cpu.utilization')).toEqual(rows[2]);
     });
 
-    it('populates fieldSpecsByRow WeakMap', () => {
+    it('populates fieldSpecsByRow', () => {
       const rows: DatatableRow[] = [{ 'system.cpu.utilization': 0.5, 'host.name': 'host-1' }];
 
       const result = createSampleRowByMetric({ rows, fieldSpecs: baseFieldSpecs });

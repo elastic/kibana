@@ -7,21 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { estypes } from '@elastic/elasticsearch';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-
-export const getTimeSeriesMetric = (
-  fieldSpec: FieldSpec,
-  column?: DatatableColumn
-): estypes.MappingTimeSeriesMetricType | undefined => {
-  if (!fieldSpec.timeSeriesMetric && column?.meta?.esType?.startsWith('counter_')) {
-    return 'counter';
-  }
-
-  return fieldSpec.timeSeriesMetric;
-};
-
 export const hasValue = (value: unknown): boolean => {
   if (value == null) {
     return false;
