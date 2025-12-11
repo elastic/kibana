@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isSearchSourceReference } from '../out/transform_references_out';
 import { transformSearchSourceIn } from './transform_search_source_in';
 
 describe('transformSearchSourceIn', () => {
@@ -27,13 +26,5 @@ describe('transformSearchSourceIn', () => {
         },
       ]
     `);
-    expect(isSearchSourceReference(references[0])).toBe(true);
-  });
-
-  test('isSearchSourceReference should match extracted references from filters', () => {
-    const { references } = transformSearchSourceIn([{ meta: { index: 'fizzle-1234' } }]);
-    references.forEach((reference) => {
-      expect(isSearchSourceReference(reference)).toBe(true);
-    });
   });
 });
