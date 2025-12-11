@@ -34,6 +34,7 @@ export interface RestoreConfig extends BaseConfig {
 // Replay configuration
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
+  concurrency?: number;
 }
 
 // Unified result type (ReplayResult is superset of RestoreResult)

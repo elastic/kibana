@@ -23,7 +23,7 @@ import { reindexAllIndices } from './reindex';
 import { verifyIndexTemplates } from './templates';
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, logger, snapshotUrl, patterns } = config;
+  const { esClient, logger, snapshotUrl, patterns, concurrency } = config;
 
   const result: LoadResult = {
     success: false,
@@ -86,6 +86,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       logger,
       restoredIndices,
       originalIndices: indicesToRestore,
+      concurrency,
     });
     result.reindexedIndices = reindexedIndices;
 

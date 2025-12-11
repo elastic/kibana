@@ -68,9 +68,10 @@ node scripts/es_snapshot_loader replay \
 
 ### Replay-specific Options
 
-| Flag         | Description                                                                           |
-| ------------ | ------------------------------------------------------------------------------------- |
-| `--patterns` | Comma-separated data stream patterns to replay (default: `logs-*,metrics-*,traces-*`) |
+| Flag            | Description                                                                           |
+| --------------- | ------------------------------------------------------------------------------------- |
+| `--patterns`    | Comma-separated data stream patterns to replay (default: `logs-*,metrics-*,traces-*`) |
+| `--concurrency` | Number of indices to reindex in parallel (default: all at once)                       |
 
 ## Programmatic API
 
@@ -103,6 +104,7 @@ const result = await replaySnapshot({
   logger,
   snapshotUrl: 'file:///path/to/snapshot',
   patterns: ['logs-*', 'metrics-*', 'traces-*'],
+  concurrency: 5, // optional: limit parallel reindex operations
 });
 
 if (result.success) {

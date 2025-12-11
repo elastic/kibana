@@ -154,23 +154,33 @@ function runReplayCli(): void {
 
   run(
     async ({ log, flags }) => {
-      const { 'snapshot-url': snapshotUrl, patterns: patternsFlag } = flags as CommonFlags & {
+      const {
+        'snapshot-url': snapshotUrl,
+        patterns: patternsFlag,
+        concurrency: concurrencyFlag,
+      } = flags as CommonFlags & {
         patterns?: string;
+        concurrency?: string;
       };
 
       if (!snapshotUrl) throw new Error('--snapshot-url is required');
 
       const esClient = await getEsClient(flags as CommonFlags, log);
       const patterns = parseCommaSeparatedList(patternsFlag) ?? DEFAULT_DATA_STREAM_PATTERNS;
+      const concurrency = concurrencyFlag ? parseInt(concurrencyFlag, 10) : undefined;
+      if (concurrencyFlag && (isNaN(concurrency!) || concurrency! < 1)) {
+        throw new Error('--concurrency must be a positive integer');
+      }
       const logger = toolingLogToLogger({ flags, log });
 
       log.info(`Snapshot Replay`);
       log.info(`===============`);
       log.info(`Snapshot URL: ${snapshotUrl}`);
       log.info(`Index patterns: ${patterns.join(', ')}`);
+      if (concurrency) log.info(`Concurrency: ${concurrency}`);
       log.info('');
 
-      const result = await replaySnapshot({ esClient, logger, snapshotUrl, patterns });
+      const result = await replaySnapshot({ esClient, logger, snapshotUrl, patterns, concurrency });
 
       if (result.success) {
         log.success(`Snapshot replay completed successfully`);
@@ -187,12 +197,15 @@ function runReplayCli(): void {
       description:
         'Replay an Elasticsearch snapshot with timestamp transformation for data streams',
       flags: {
-        string: ['snapshot-url', 'kibana-url', 'es-url', 'patterns'],
+        string: ['snapshot-url', 'kibana-url', 'es-url', 'patterns', 'concurrency'],
         help: `
       Usage: node scripts/es_snapshot_loader replay [options]
       ${COMMON_FLAGS_HELP}
       --patterns          Comma-separated data stream patterns to replay
                           Default: logs-*,metrics-*,traces-*
+
+      --concurrency       Number of indices to reindex in parallel
+                          Default: all indices at once (no limit)
         `,
         default: { patterns: DEFAULT_DATA_STREAM_PATTERNS.join(',') },
         allowUnexpected: false,

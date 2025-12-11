@@ -131,7 +131,7 @@ export async function reindexAllIndices({
   logger,
   restoredIndices,
   originalIndices,
-  concurrency = 5,
+  concurrency,
 }: {
   esClient: Client;
   logger: Logger;
@@ -150,13 +150,17 @@ export async function reindexAllIndices({
     return { sourceIndex, destIndex, isDataStream };
   });
 
-  logger.info(`Starting parallel reindex of ${jobs.length} indices (concurrency: ${concurrency})`);
+  const batchSize = concurrency ?? jobs.length;
+  const concurrencyLabel = concurrency ? `concurrency: ${concurrency}` : 'all at once';
+  logger.info(`Starting parallel reindex of ${jobs.length} indices (${concurrencyLabel})`);
 
-  for (let i = 0; i < jobs.length; i += concurrency) {
-    const batch = jobs.slice(i, i + concurrency);
-    logger.debug(
-      `Processing batch ${Math.floor(i / concurrency) + 1}/${Math.ceil(jobs.length / concurrency)}`
-    );
+  for (let i = 0; i < jobs.length; i += batchSize) {
+    const batch = jobs.slice(i, i + batchSize);
+    if (concurrency) {
+      logger.debug(
+        `Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(jobs.length / batchSize)}`
+      );
+    }
 
     const taskResults = await Promise.all(
       batch.map(async (job) => {
