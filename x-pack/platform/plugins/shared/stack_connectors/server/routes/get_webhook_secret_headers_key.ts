@@ -86,7 +86,7 @@ export const getWebhookSecretHeadersKeyRoute = (
             body: {
               message: `Connector must be one of the following types: ${allowedConnectorTypes.join(
                 ', '
-              )}.`,
+              )}`,
             },
           });
         }
