@@ -16,6 +16,7 @@ examples/embeddable_examples @elastic/kibana-presentation
 examples/error_boundary @elastic/appex-sharedux
 examples/eso_model_version_example @elastic/kibana-security
 examples/esql_ast_inspector @elastic/kibana-esql
+examples/esql_ux_example @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
 examples/expressions_explorer @elastic/kibana-visualizations
 examples/feature_control_examples @elastic/kibana-security
@@ -556,6 +557,7 @@ src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-r
 src/platform/packages/shared/kbn-opentelemetry-attributes @elastic/kibana-core
 src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-otel-demo @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiler @elastic/obs-knowledge-team
@@ -912,6 +914,7 @@ x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
+x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
@@ -961,6 +964,7 @@ x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kiban
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-streamlang-yaml-editor @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-exploration-team
@@ -1412,6 +1416,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
+/src/platform/test/examples/esql_ux_example @elastic/kibana-esql
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
 /src/platform/test/functional/page_objects/index_editor.ts @elastic/kibana-esql
 /src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
@@ -2300,6 +2305,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
+
+# Connector Specs
+src/platform/packages/shared/kbn-connector-specs/src/specs/** @elastic/workflows-eng
 
 # Gap fill feature has shared responsibility between response-ops and security-detection-engine
 /x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine

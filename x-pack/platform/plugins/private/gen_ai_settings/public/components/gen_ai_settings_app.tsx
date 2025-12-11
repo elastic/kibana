@@ -34,6 +34,7 @@ import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
+import { ChatExperience } from './chat_experience/chat_experience';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -47,6 +48,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     isPermissionsBased,
     showAiBreadcrumb,
     showAiAssistantsVisibilitySetting,
+    showChatExperienceSetting,
   } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
@@ -98,9 +100,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must ${
-              hasConnectorsAllPrivilege ? 'set up' : 'have'
-            } a Generative AI connector. {manageConnectors}`}
+            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. 
+              By default, Elastic uses its Elastic Managed LLM connector ({additionalCostsIncur}) when no custom connectors are available. 
+              When available, Elastic uses the last used custom connector. Set up your own connectors or disable the AI Assistant from the AI feature visibility setting below. 
+              Select a default AI connector to enforce the choice for your space. {manageConnectors}`}
             values={{
               manageConnectors: (
                 <EuiLink
@@ -114,6 +117,15 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                     defaultMessage={
                       hasConnectorsAllPrivilege ? 'Manage connectors' : 'View connectors'
                     }
+                  />
+                </EuiLink>
+              ),
+              additionalCostsIncur: (
+                // TODO: Update link when documentation is ready
+                <EuiLink href="#" target="_blank">
+                  <FormattedMessage
+                    id="genAiSettings.additionalCostsLink"
+                    defaultMessage="additional costs incur"
                   />
                 </EuiLink>
               ),
@@ -321,6 +333,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   />
                 </EuiFormRow>
               </EuiDescribedFormGroup>
+            )}
+            {showChatExperienceSetting && (
+              <EuiFlexItem>
+                <ChatExperience />
+              </EuiFlexItem>
             )}
             {showAiAssistantsVisibilitySetting && (
               <EuiFlexItem>
