@@ -947,7 +947,7 @@ describe('dimension editor', () => {
       const clickOnSupportingVis = async (type: SupportingVisType) => {
         const supportingVis = supportingVisOptions[type];
         if (!supportingVis) {
-          throw new Error(`Supporting visualization ${type} not found`);
+          throw new Error(`Background chart ${type} not found`);
         }
         await userEvent.click(supportingVis);
       };
@@ -1011,7 +1011,7 @@ describe('dimension editor', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
-    describe('supporting visualizations', () => {
+    describe('background visualizations', () => {
       const stateWOTrend = {
         ...metricAccessorState,
         trendlineLayerId: undefined,
