@@ -108,3 +108,10 @@ export const SHOWING = i18n.translate('genAiSettings.documentation.showing', {
 export const OF = i18n.translate('genAiSettings.documentation.of', {
   defaultMessage: 'of',
 });
+
+export const INSUFFICIENT_PRIVILEGES = i18n.translate(
+  'genAiSettings.documentation.insufficientPrivileges',
+  {
+    defaultMessage: "Agent Builder 'All' privileges are required to manage documentation",
+  }
+);

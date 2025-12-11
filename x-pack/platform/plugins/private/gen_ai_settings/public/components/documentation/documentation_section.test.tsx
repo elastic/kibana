@@ -38,8 +38,16 @@ describe('DocumentationSection', () => {
       },
     });
 
-  const renderComponent = (productDocBase: ProductDocBasePluginStart = mockProductDocBase) => {
+  const renderComponent = (
+    productDocBase: ProductDocBasePluginStart = mockProductDocBase,
+    hasManagePrivilege: boolean = true
+  ) => {
     const queryClient = createQueryClient();
+    // Set capabilities directly on the mock before rendering
+    (coreStart.application.capabilities as Record<string, Record<string, boolean>>).agentBuilder = {
+      show: true,
+      manageAgents: hasManagePrivilege,
+    };
     return render(
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
@@ -71,15 +79,8 @@ describe('DocumentationSection', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Elastic documents')).toBeInTheDocument();
-        expect(screen.getByText('Security labs')).toBeInTheDocument();
-      });
-    });
-
-    it('should show Tech Preview badge for Elastic documents', async () => {
-      renderComponent(mockProductDocBase);
-
-      await waitFor(() => {
-        expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();
+        // Security labs is commented out for now - will be enabled later
+        expect(screen.queryByText('Security labs')).not.toBeInTheDocument();
       });
     });
   });
@@ -151,7 +152,7 @@ describe('DocumentationSection', () => {
         perProducts: {},
       });
 
-      renderComponent(mockProductDocBase);
+      renderComponent(mockProductDocBase, true);
 
       await waitFor(() => {
         expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
@@ -173,7 +174,7 @@ describe('DocumentationSection', () => {
         perProducts: {},
       });
 
-      renderComponent(mockProductDocBase);
+      renderComponent(mockProductDocBase, true);
 
       await waitFor(() => {
         expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
@@ -186,6 +187,82 @@ describe('DocumentationSection', () => {
           inferenceId: '.elser-2-elasticsearch',
         });
       });
+    });
+  });
+
+  describe('RBAC - insufficient privileges', () => {
+    it('should disable install button when user lacks manage privilege', async () => {
+      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+        inferenceId: '.elser-2-elasticsearch',
+        overall: 'uninstalled',
+        perProducts: {},
+      });
+
+      renderComponent(mockProductDocBase, false);
+
+      await waitFor(() => {
+        const installButton = screen.getByTestId('documentation-install-elastic_documents');
+        expect(installButton).toBeInTheDocument();
+        expect(installButton).toBeDisabled();
+      });
+    });
+
+    it('should disable uninstall button when user lacks manage privilege', async () => {
+      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+        inferenceId: '.elser-2-elasticsearch',
+        overall: 'installed',
+        perProducts: {},
+      });
+
+      renderComponent(mockProductDocBase, false);
+
+      await waitFor(() => {
+        const uninstallButton = screen.getByTestId('documentation-uninstall-elastic_documents');
+        expect(uninstallButton).toBeInTheDocument();
+        expect(uninstallButton).toBeDisabled();
+      });
+    });
+
+    it('should not call install when install button is clicked without privilege', async () => {
+      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+        inferenceId: '.elser-2-elasticsearch',
+        overall: 'uninstalled',
+        perProducts: {},
+      });
+
+      renderComponent(mockProductDocBase, false);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('documentation-install-elastic_documents'));
+
+      // Wait a bit to ensure no call was made
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(mockProductDocBase.installation.install).not.toHaveBeenCalled();
+    });
+
+    it('should not call uninstall when uninstall button is clicked without privilege', async () => {
+      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+        inferenceId: '.elser-2-elasticsearch',
+        overall: 'installed',
+        perProducts: {},
+      });
+
+      renderComponent(mockProductDocBase, false);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('documentation-uninstall-elastic_documents'));
+
+      // Wait a bit to ensure no call was made
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(mockProductDocBase.installation.uninstall).not.toHaveBeenCalled();
     });
   });
 });

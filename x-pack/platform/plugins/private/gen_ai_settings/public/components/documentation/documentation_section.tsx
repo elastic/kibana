@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -29,7 +30,7 @@ import {
 } from '@kbn/product-doc-base-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
-import { ELASTIC_DOCS_ID, SECURITY_LABS_ID } from './types';
+import { ELASTIC_DOCS_ID } from './types';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -38,7 +39,10 @@ interface DocumentationSectionProps {
 
 export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ productDocBase }) => {
   const { services } = useKibana();
-  const { notifications } = services;
+  const { notifications, application } = services;
+
+  // Check if user has Agent Builder 'All' privileges (manageAgents capability)
+  const hasManagePrivilege = application.capabilities.agentBuilder?.manageAgents === true;
 
   const { status, isLoading, refetch } = useProductDocStatus(productDocBase);
 
@@ -102,35 +106,35 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         id: ELASTIC_DOCS_ID,
         name: i18n.ELASTIC_DOCS_NAME,
         status: elasticDocsStatus,
-        isTechPreview: true,
+        isTechPreview: false,
         isStubbed: false,
         icon: 'logoElastic',
       },
-      {
-        id: SECURITY_LABS_ID,
-        name: i18n.SECURITY_LABS_NAME,
-        status: 'uninstalled',
-        isTechPreview: false,
-        isStubbed: true,
-        icon: 'logoSecurity',
-      },
+      // TODO: Enable Security Labs after https://github.com/elastic/kibana/issues/244946 is worked
+      // {
+      //   id: SECURITY_LABS_ID,
+      //   name: i18n.SECURITY_LABS_NAME,
+      //   status: 'uninstalled',
+      //   isTechPreview: false,
+      //   isStubbed: true,
+      //   icon: 'logoSecurity',
+      // },
     ];
   }, [status]);
 
   const getStatusBadge = useCallback((itemStatus: DocumentationStatus) => {
+    // Status badge only shows binary state: Installed or Not installed
+    // Action states (installing/uninstalling) are shown in the action button
     switch (itemStatus) {
       case 'installed':
         return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
-      case 'installing':
-        // During installation, keep showing "Not installed" - the action column shows the spinner
-        return <EuiBadge color="hollow">{i18n.STATUS_NOT_INSTALLED}</EuiBadge>;
       case 'uninstalling':
-        // During uninstallation, keep showing "Installed" - the action column shows the spinner
         return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
       case 'error':
         return <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>;
       case 'not_available':
         return <EuiBadge color="warning">{i18n.STATUS_NOT_AVAILABLE}</EuiBadge>;
+      case 'installing':
       case 'uninstalled':
       default:
         return <EuiBadge color="hollow">{i18n.STATUS_NOT_INSTALLED}</EuiBadge>;
@@ -139,17 +143,27 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const getActionButton = useCallback(
     (item: DocumentationItem) => {
-      // Check both local mutation state AND server-reported status
+      // Use server status OR local mutation state to determine if action is in progress
       const isItemInstalling =
-        (isInstalling && item.id === ELASTIC_DOCS_ID && item.status !== 'installed') ||
-        item.status === 'installing';
+        item.status === 'installing' || (isInstalling && item.id === ELASTIC_DOCS_ID);
       const isItemUninstalling =
-        (isUninstalling && item.id === ELASTIC_DOCS_ID && item.status === 'installed') ||
-        item.status === 'uninstalling';
+        item.status === 'uninstalling' || (isUninstalling && item.id === ELASTIC_DOCS_ID);
+
+      // Helper to wrap button with tooltip when user lacks privileges
+      const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
+        if (!hasManagePrivilege) {
+          return (
+            <EuiToolTip content={i18n.INSUFFICIENT_PRIVILEGES} position="top">
+              {button}
+            </EuiToolTip>
+          );
+        }
+        return button;
+      };
 
       // Stubbed items show disabled install button
       if (item.isStubbed && item.status !== 'not_available') {
-        return (
+        return wrapWithPrivilegeTooltip(
           <EuiButtonEmpty
             size="xs"
             iconType="download"
@@ -163,11 +177,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
       // Not available - show retry
       if (item.status === 'not_available') {
-        return (
+        return wrapWithPrivilegeTooltip(
           <EuiButtonEmpty
             size="xs"
             iconType="refresh"
-            onClick={() => refetch()}
+            onClick={hasManagePrivilege ? () => refetch() : undefined}
+            isDisabled={!hasManagePrivilege}
             data-test-subj={`documentation-retry-${item.id}`}
           >
             {i18n.ACTION_RETRY}
@@ -177,11 +192,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
       // Error state - show retry
       if (item.status === 'error') {
-        return (
+        return wrapWithPrivilegeTooltip(
           <EuiButtonEmpty
             size="xs"
             iconType="refresh"
-            onClick={() => handleRetry(item.id)}
+            onClick={hasManagePrivilege ? () => handleRetry(item.id) : undefined}
+            isDisabled={!hasManagePrivilege}
             data-test-subj={`documentation-retry-${item.id}`}
           >
             {i18n.ACTION_RETRY}
@@ -205,11 +221,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
       // Installed - show uninstall button
       if (item.status === 'installed') {
-        return (
+        return wrapWithPrivilegeTooltip(
           <EuiButtonEmpty
             size="xs"
             iconType="returnKey"
-            onClick={() => handleUninstall(item.id)}
+            onClick={hasManagePrivilege ? () => handleUninstall(item.id) : undefined}
+            isDisabled={!hasManagePrivilege}
             data-test-subj={`documentation-uninstall-${item.id}`}
           >
             {i18n.ACTION_UNINSTALL}
@@ -232,18 +249,27 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       }
 
       // Default - show install button
-      return (
+      return wrapWithPrivilegeTooltip(
         <EuiButtonEmpty
           size="xs"
           iconType="download"
-          onClick={() => handleInstall(item.id)}
+          onClick={hasManagePrivilege ? () => handleInstall(item.id) : undefined}
+          isDisabled={!hasManagePrivilege}
           data-test-subj={`documentation-install-${item.id}`}
         >
           {i18n.ACTION_INSTALL}
         </EuiButtonEmpty>
       );
     },
-    [handleInstall, handleUninstall, handleRetry, isInstalling, isUninstalling, refetch]
+    [
+      handleInstall,
+      handleUninstall,
+      handleRetry,
+      isInstalling,
+      isUninstalling,
+      refetch,
+      hasManagePrivilege,
+    ]
   );
 
   const columns: Array<EuiBasicTableColumn<DocumentationItem>> = useMemo(

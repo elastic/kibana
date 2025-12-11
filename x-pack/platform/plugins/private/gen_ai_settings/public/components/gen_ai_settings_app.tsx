@@ -25,6 +25,8 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -52,7 +54,15 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showChatExperienceSetting,
   } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
-  const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
+  const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
+
+  // Determine current chat experience (including unsaved changes)
+  const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
+  const currentChatExperience =
+    unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
+    chatExperienceField?.savedValue ??
+    AIChatExperience.Classic;
+  const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
 
   const hasConnectorsAllPrivilege =
     application.capabilities.actions?.show === true &&
@@ -356,9 +366,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 
-          <EuiSpacer size="l" />
+          {isAgentExperience && (
+            <>
+              <EuiSpacer size="l" />
 
-          <DocumentationSection productDocBase={productDocBase} />
+              <DocumentationSection productDocBase={productDocBase} />
+            </>
+          )}
         </EuiPageSection>
       </div>
       {!isEmpty(unsavedChanges) && (
