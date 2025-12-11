@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { load } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod';
@@ -23,6 +24,22 @@ export const zodStringWithDurationValidation = z
       }
     ),
   });
+
+export const zodStringWithYamlValidation = z.string().refine(
+  (val) => {
+    try {
+      const parsed = load(val);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  },
+  {
+    message: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage', {
+      defaultMessage: 'Must be a valid YAML string',
+    }),
+  }
+);
 
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
@@ -267,7 +284,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_internal',
     },
-    schema: z.string(),
+    schema: zodStringWithYamlValidation,
     type: 'yaml',
     example_value: `'agent:\n internal:\n runtime:\n default: otel'`,
   },
