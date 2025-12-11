@@ -13,7 +13,7 @@ export const DOCUMENTATION_TITLE = i18n.translate('genAiSettings.documentation.t
 
 export const DOCUMENTATION_DESCRIPTION = i18n.translate('genAiSettings.documentation.description', {
   defaultMessage:
-    'Help improve Agent Builder responses to your prompts by installing product documentation.',
+    'Help improve Agent Builder responses to your prompts by installing product documentation. All entries are global to the cluster.',
 });
 
 export const ELASTIC_DOCS_NAME = i18n.translate('genAiSettings.documentation.elasticDocs.name', {
