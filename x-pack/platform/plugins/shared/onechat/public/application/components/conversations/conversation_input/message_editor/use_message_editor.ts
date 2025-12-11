@@ -26,6 +26,12 @@ export interface MessageEditorInstance {
    * @param replaceLength - Number of characters to replace (searchTerm length + 1 for @)
    */
   insertMention: (id: string, type: 'viz' | 'map', replaceLength: number) => void;
+  /**
+   * Remove a mention text from the editor content.
+   *
+   * @param mentionText - The full mention text to remove (e.g., "@viz:abc123")
+   */
+  removeMentionText: (mentionText: string) => void;
 }
 
 /**
@@ -159,6 +165,38 @@ export const useMessageEditor = (): MessageEditorInstance => {
             editor.focus();
           }
         }
+
+        // Dispatch input event to trigger highlight layer update
+        editor.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      },
+      removeMentionText: (mentionText: string) => {
+        const editor = ref.current;
+        if (!editor) {
+          return;
+        }
+
+        const text = editor.textContent || '';
+        // Look for the mention text (with optional trailing space)
+        const mentionWithSpace = `${mentionText} `;
+        let newText: string;
+
+        if (text.includes(mentionWithSpace)) {
+          // Remove mention with trailing space
+          newText = text.replace(mentionWithSpace, '');
+        } else if (text.includes(mentionText)) {
+          // Remove mention without trailing space
+          newText = text.replace(mentionText, '');
+        } else {
+          // Mention not found, nothing to remove
+          return;
+        }
+
+        // Clean up any double spaces that might result
+        newText = newText.replace(/  +/g, ' ').trim();
+
+        // Update the editor content
+        editor.textContent = newText;
+        syncIsEmpty();
 
         // Dispatch input event to trigger highlight layer update
         editor.dispatchEvent(new InputEvent('input', { bubbles: true }));

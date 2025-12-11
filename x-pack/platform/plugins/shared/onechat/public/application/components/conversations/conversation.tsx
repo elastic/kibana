@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, useEuiOverflowScroll, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import type { VersionedAttachment } from '@kbn/onechat-common/attachments';
+import type { VersionedAttachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import {
   useHasActiveConversation,
   useConversationAttachments,
@@ -47,14 +47,49 @@ export const Conversation: React.FC<{}> = () => {
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
-  const { isEmbeddedContext } = useConversationContext();
+  const { isEmbeddedContext, attachments: flyoutAttachments } = useConversationContext();
   const conversationAttachments = useConversationAttachments();
   const referencedAttachmentIds = useReferencedAttachmentIds();
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
+  const isNewConversation = !conversationId;
 
   // Sync flyout-provided attachments to conversation-level attachments
   useSyncFlyoutAttachments();
+
+  // For new conversations, convert flyout attachments to preview versioned attachments
+  // so they can be displayed in the attachments panel before the first message is sent
+  const previewAttachments = useMemo((): VersionedAttachment[] => {
+    if (!isNewConversation || !flyoutAttachments?.length) {
+      return [];
+    }
+    // Convert AttachmentInput[] to VersionedAttachment[] for display
+    return flyoutAttachments
+      .filter((att) => !att.hidden)
+      .map((att, idx): VersionedAttachment => ({
+        id: att.id ?? `preview-${idx}`,
+        type: att.type,
+        description: att.description,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            type: att.type,
+            data: att.data,
+            created_at: new Date().toISOString(),
+            status: 'active',
+            content_hash: 'preview', // Placeholder hash for preview attachments
+          },
+        ],
+        // Mark as preview so we know these aren't persisted yet
+        client_id: att.id,
+      }));
+  }, [isNewConversation, flyoutAttachments]);
+
+  // Use conversation attachments if available, otherwise show preview attachments for new conversations
+  const displayAttachments = conversationAttachments?.length
+    ? conversationAttachments
+    : previewAttachments;
 
   // Handler to update an attachment (creates new version)
   const handleUpdateAttachment = useCallback(
@@ -109,7 +144,7 @@ export const Conversation: React.FC<{}> = () => {
 
   // Hook to open attachment viewer flyout
   const { openViewer: openAttachmentViewer } = useAttachmentViewer({
-    attachments: conversationAttachments,
+    attachments: displayAttachments,
     onUpdate: handleUpdateAttachment,
     onRename: handleRenameAttachment,
   });
@@ -224,24 +259,24 @@ export const Conversation: React.FC<{}> = () => {
           <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
             <ConversationRounds
               scrollContainerHeight={scrollContainerHeight}
-              conversationAttachments={conversationAttachments}
+              conversationAttachments={displayAttachments}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
         {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
       </EuiFlexItem>
       {/* Conversation-level attachments panel */}
-      {conversationAttachments && conversationAttachments.length > 0 && (
+      {displayAttachments && displayAttachments.length > 0 && (
         <EuiFlexItem
           css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
           grow={false}
         >
           <ConversationAttachmentsPanel
-            attachments={conversationAttachments}
+            attachments={displayAttachments}
             referencedAttachmentIds={referencedAttachmentIds}
-            onDeleteAttachment={handleDeleteAttachment}
-            onPermanentDeleteAttachment={handlePermanentDeleteAttachment}
-            onRestoreAttachment={handleRestoreAttachment}
+            onDeleteAttachment={isNewConversation ? undefined : handleDeleteAttachment}
+            onPermanentDeleteAttachment={isNewConversation ? undefined : handlePermanentDeleteAttachment}
+            onRestoreAttachment={isNewConversation ? undefined : handleRestoreAttachment}
             onOpenAttachmentViewer={openAttachmentViewer}
             autoCollapse
           />

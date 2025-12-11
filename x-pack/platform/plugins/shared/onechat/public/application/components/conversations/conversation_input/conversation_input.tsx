@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
@@ -34,9 +34,25 @@ import {
   type VisualizationSuggestion,
 } from '../../../hooks/use_visualization_search';
 import { parseMentions, type VisualizationSuggestionInfo } from '../../../utils/parse_mentions';
-import type { VisualizationRefSavedObjectType } from '@kbn/onechat-common/attachments';
+import { AttachmentType, type VisualizationRefSavedObjectType } from '@kbn/onechat-common/attachments';
 
 const INPUT_MIN_HEIGHT = '150px';
+
+/**
+ * Convert a selected visualization suggestion to an attachment-like object for display
+ */
+const suggestionToAttachmentPill = (suggestion: VisualizationSuggestion) => ({
+  id: suggestion.id,
+  type: AttachmentType.visualizationRef,
+  data: {
+    saved_object_id: suggestion.id,
+    saved_object_type: suggestion.type,
+    title: suggestion.title,
+  },
+  description: suggestion.title,
+  // Mark as hidden=false so it shows in the pills row
+  hidden: false,
+});
 const useInputBorderStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
@@ -146,8 +162,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   // --- Mention Autocomplete Integration ---
 
-  // Track selected suggestions for title resolution
-  const selectedSuggestionsRef = useRef<Map<string, VisualizationSuggestion>>(new Map());
+  // Track selected suggestions for title resolution AND for display as pills
+  // Using state so that adding/removing suggestions triggers re-render for pills
+  const [selectedSuggestions, setSelectedSuggestions] = useState<Map<string, VisualizationSuggestion>>(new Map());
   const [isMentionPopoverOpen, setIsMentionPopoverOpen] = useState(false);
 
   // Detect @mentions in editor
@@ -183,8 +200,12 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
       // eslint-disable-next-line no-console
       console.debug('[ConversationInput] handleMentionSelect called:', suggestion.title, 'searchTerm:', mentionContext.searchTerm);
 
-      // Store the selected suggestion for title mapping
-      selectedSuggestionsRef.current.set(suggestion.id, suggestion);
+      // Store the selected suggestion for title mapping (using state for re-render)
+      setSelectedSuggestions((prev) => {
+        const next = new Map(prev);
+        next.set(suggestion.id, suggestion);
+        return next;
+      });
 
       // Determine the mention type based on visualization type
       const mentionType: 'viz' | 'map' = suggestion.type === 'map' ? 'map' : 'viz';
@@ -224,15 +245,24 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   // Hide attachments if there's an error from current round or if message has been just sent
   const shouldHideAttachments = Boolean(error) || isSendingMessage;
 
+  // Convert selected suggestions to attachment-like pills for display
+  const mentionAttachmentPills = useMemo(() => {
+    return Array.from(selectedSuggestions.values()).map(suggestionToAttachmentPill);
+  }, [selectedSuggestions]);
+
   const visibleAttachments = useMemo(() => {
-    if (!attachments || shouldHideAttachments) return [];
-    return attachments
-      .filter((attachment) => !attachment.hidden)
-      .map((attachment, idx) => ({
-        ...attachment,
-        id: attachment.id ?? `attachment-${idx}`,
-      }));
-  }, [attachments, shouldHideAttachments]);
+    const contextAttachments = (!attachments || shouldHideAttachments)
+      ? []
+      : attachments
+          .filter((attachment) => !attachment.hidden)
+          .map((attachment, idx) => ({
+            ...attachment,
+            id: attachment.id ?? `attachment-${idx}`,
+          }));
+
+    // Combine context attachments with mention attachment pills
+    return [...contextAttachments, ...mentionAttachmentPills];
+  }, [attachments, shouldHideAttachments, mentionAttachmentPills]);
 
   const isNewConversation = !conversationId;
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
@@ -270,7 +300,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     // Parse mentions and create attachments
     // Build suggestion info map with title AND actual saved object type
     const suggestionInfoMap: Record<string, VisualizationSuggestionInfo> = {};
-    selectedSuggestionsRef.current.forEach((suggestion, id) => {
+    selectedSuggestions.forEach((suggestion, id) => {
       suggestionInfoMap[id] = {
         title: suggestion.title,
         savedObjectType: suggestion.type as VisualizationRefSavedObjectType,
@@ -287,15 +317,47 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
     // Clear editor and selected suggestions
     messageEditor.clear();
-    selectedSuggestionsRef.current.clear();
+    setSelectedSuggestions(new Map());
     onSubmit?.();
   };
+
+  // Handler to remove a mention attachment pill (and its mention from the editor)
+  const handleRemoveMentionAttachment = useCallback(
+    (attachmentId: string) => {
+      // Remove from selected suggestions
+      setSelectedSuggestions((prev) => {
+        const next = new Map(prev);
+        next.delete(attachmentId);
+        return next;
+      });
+
+      // Also remove the mention text from the editor
+      // The mention format is @viz:id or @map:id
+      const suggestion = selectedSuggestions.get(attachmentId);
+      if (suggestion) {
+        const mentionType = suggestion.type === 'map' ? 'map' : 'viz';
+        const mentionText = `@${mentionType}:${attachmentId}`;
+        messageEditor.removeMentionText(mentionText);
+      }
+    },
+    [selectedSuggestions, messageEditor]
+  );
 
   return (
     <InputContainer isDisabled={isInputDisabled}>
       {visibleAttachments.length > 0 && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} removable />
+          <AttachmentPillsRow
+            attachments={visibleAttachments}
+            removable
+            onRemoveAttachment={(attachmentId) => {
+              // Check if this is a mention attachment (exists in selectedSuggestions)
+              if (selectedSuggestions.has(attachmentId)) {
+                handleRemoveMentionAttachment(attachmentId);
+              }
+              // Context attachments are handled by the default handler in AttachmentPillsRow
+            }}
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem css={editorContainerStyles}>

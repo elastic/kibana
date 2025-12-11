@@ -16,6 +16,8 @@ export interface AttachmentPillsRowProps {
   attachments: AttachmentInput[] | Attachment[];
   removable?: boolean;
   onAttachmentClick?: (attachmentId: string) => void;
+  /** Custom remove handler - if provided, overrides the default context removeAttachment */
+  onRemoveAttachment?: (attachmentId: string, index: number) => void;
 }
 
 const labels = {
@@ -28,12 +30,22 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   attachments,
   removable = false,
   onAttachmentClick,
+  onRemoveAttachment,
 }) => {
-  const { removeAttachment } = useConversationContext();
+  const { removeAttachment: contextRemoveAttachment } = useConversationContext();
 
   if (attachments.length === 0) {
     return null;
   }
+
+  // Create a remove handler that uses the custom handler if provided, otherwise falls back to context
+  const handleRemove = (attachmentId: string | undefined, index: number) => {
+    if (onRemoveAttachment && attachmentId) {
+      onRemoveAttachment(attachmentId, index);
+    } else {
+      contextRemoveAttachment?.(index);
+    }
+  };
 
   return (
     <EuiBadgeGroup
@@ -46,7 +58,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
         <AttachmentPill
           key={attachment.id ?? `${attachment.type}-${index}`}
           attachment={attachment as Attachment}
-          onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
+          onRemoveAttachment={removable ? () => handleRemove(attachment.id, index) : undefined}
           onClick={
             onAttachmentClick && attachment.id ? () => onAttachmentClick(attachment.id!) : undefined
           }
