@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
    */
   const CONFIGURED_UPGRADE_INTERCEPT_INTERVAL = 7 * 24 * 60 * 60 * 1000;
 
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -33,6 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('page load checks', () => {
       it("displays the upgrade intercept if it's display condition is met", async () => {
         await PageObjects.common.navigateToUrl('home');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         let timingRecord: Record<string, { timerStart: Date }> = {};
 

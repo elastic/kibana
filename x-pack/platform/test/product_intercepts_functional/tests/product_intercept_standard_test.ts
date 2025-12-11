@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
    */
   const CONFIGURED_STANDARD_INTERCEPT_INTERVAL = 90 * 24 * 60 * 60 * 1000;
 
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -24,10 +24,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Standard Product intercept', () => {
     const interceptTestId = `intercept-${TRIGGER_DEF_ID}`;
 
-    // FLAKY: https://github.com/elastic/kibana/issues/245800
-    describe.skip('on initial page load', () => {
+    describe('on initial page load', () => {
       it('presents all available navigable steps', async () => {
         await PageObjects.common.navigateToUrl('home');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         let timingRecord: Record<string, { timerStart: Date }> = {};
 
@@ -54,10 +55,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Refresh the page and expect the intercept to be displayed
         await browser.refresh();
-
-        await retry.waitFor('wait for product intercept to be displayed', async () => {
-          return await testSubjects.exists(interceptTestId);
-        });
 
         await retry.waitFor('wait for product intercept to be displayed', async () => {
           const intercept = await testSubjects.find(interceptTestId);
@@ -92,6 +89,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('transitions from one tab to another and back again will cause the intercept to be displayed if the intercept interval has elapsed on transitioning', async () => {
         // navigate the home journey to set a record for new intercept journey
         await PageObjects.common.navigateToUrl('home');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         let timingRecord: Record<string, { timerStart: Date }> = {};
 
