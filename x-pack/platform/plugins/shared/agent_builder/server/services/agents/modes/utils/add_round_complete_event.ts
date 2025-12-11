@@ -43,6 +43,7 @@ import type {
   ModelProvider,
   ModelProviderStats,
 } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';
@@ -63,6 +64,7 @@ export const addRoundCompleteEvent = ({
   getConversationState,
   modelProvider,
   stateManager,
+  attachmentStateManager,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -70,6 +72,7 @@ export const addRoundCompleteEvent = ({
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
   getConversationState: () => ConversationInternalState;
+  attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
@@ -104,6 +107,7 @@ export const addRoundCompleteEvent = ({
               round,
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
+              attachments: attachmentStateManager.getAll(),
             },
           };
 

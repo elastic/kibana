@@ -197,6 +197,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       startTime,
       modelProvider,
       stateManager,
+      attachmentStateManager: context.attachmentStateManager,
     }),
     evictInternalEvents(),
     shareReplay()
