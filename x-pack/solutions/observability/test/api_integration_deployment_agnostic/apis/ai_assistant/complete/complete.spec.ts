@@ -525,9 +525,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body as Readable);
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await getConversationById({
-          observabilityAIAssistantAPIClient,
-          conversationId,
+        const fullConversation = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId,
+            },
+          },
         });
 
         proxy.interceptWithResponse('Good night, sir!').catch((e) => {
@@ -576,6 +580,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
         });
         after(async () => {
+          proxy.close();
           await observabilityAIAssistantAPIClient.deleteActionConnector({
             actionId: connectorId,
           });
