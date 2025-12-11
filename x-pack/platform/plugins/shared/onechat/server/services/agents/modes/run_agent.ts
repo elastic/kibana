@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   AgentCapabilities,
   Conversation,
@@ -58,6 +59,10 @@ export interface RunAgentParams {
    * If not provided, uses a default schema.
    */
   outputSchema?: Record<string, unknown>;
+  /**
+   * Optional saved objects client for resolving visualization references.
+   */
+  savedObjectsClient?: SavedObjectsClientContract;
 }
 
 export interface RunAgentResponse {

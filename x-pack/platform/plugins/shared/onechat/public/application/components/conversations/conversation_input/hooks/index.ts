@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { MessageEditor } from './message_editor';
-export { useMessageEditor } from './use_message_editor';
-export type { MessageEditorInstance } from './use_message_editor';
+export { useMentionDetection, createResetMentionContext } from './use_mention_detection';
+export type { MentionContext } from './use_mention_detection';

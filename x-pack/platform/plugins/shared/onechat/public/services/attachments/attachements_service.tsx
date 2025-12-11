@@ -19,6 +19,7 @@ import {
   EsqlEditorRenderer,
   ScreenContextContentRenderer,
   VisualizationContentRenderer,
+  VisualizationRefContentRenderer,
   DefaultJsonRenderer,
 } from './default_renderers';
 
@@ -64,6 +65,10 @@ export class AttachmentsService {
     visualization: {
       renderContent: VisualizationContentRenderer,
       isEditable: false,
+    },
+    visualization_ref: {
+      renderContent: VisualizationRefContentRenderer,
+      isEditable: false, // Reference attachments are read-only
     },
   };
 

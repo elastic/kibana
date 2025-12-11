@@ -29,7 +29,10 @@ import {
   TextAttachmentEditor,
   EsqlAttachmentEditor,
 } from '../../application/components/attachment_viewer/editors';
-import { VisualizationContentRenderer } from '../../application/components/attachment_viewer/renderers';
+import {
+  VisualizationContentRenderer,
+  VisualizationRefContentRenderer,
+} from '../../application/components/attachment_viewer/renderers';
 
 // Helper to extract content from attachment data
 // Handles both { content: string } and raw string formats
@@ -168,9 +171,9 @@ export const DefaultJsonRenderer: React.FC<AttachmentContentProps> = ({ version 
 };
 
 /**
- * Re-export visualization renderer for use in the service.
+ * Re-export visualization renderers for use in the service.
  */
-export { VisualizationContentRenderer };
+export { VisualizationContentRenderer, VisualizationRefContentRenderer };
 
 /**
  * Type definitions for render functions.

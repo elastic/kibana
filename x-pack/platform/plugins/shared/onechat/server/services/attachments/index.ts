@@ -11,3 +11,9 @@ export {
 } from './attachment_type_registry';
 export { type AttachmentService, createAttachmentService } from './attachment_service';
 export type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
+export {
+  savedObjectResolver,
+  createSavedObjectResolver,
+  type SavedObjectResolver,
+  type SavedObjectResolution,
+} from './saved_object_resolver';

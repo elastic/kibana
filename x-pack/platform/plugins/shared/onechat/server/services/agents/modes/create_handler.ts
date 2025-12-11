@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import type { AgentHandlerFn } from '@kbn/onechat-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { AgentHandlerFn, AgentHandlerContext } from '@kbn/onechat-server';
 import type { InternalAgentDefinition } from '../agent_registry';
 import { runAgent } from './run_agent';
+
+/**
+ * Extended agent handler function type that includes savedObjectsClient
+ */
+export type ExtendedAgentHandlerFn = (
+  params: Parameters<AgentHandlerFn>[0],
+  context: AgentHandlerContext,
+  extra: { savedObjectsClient?: SavedObjectsClientContract }
+) => ReturnType<AgentHandlerFn>;
 
 /**
  * Create the handler function for the default onechat agent.
@@ -16,7 +26,7 @@ export const createAgentHandler = ({
   agent,
 }: {
   agent: InternalAgentDefinition;
-}): AgentHandlerFn => {
+}): ExtendedAgentHandlerFn => {
   return async (
     {
       agentParams: {
@@ -31,7 +41,8 @@ export const createAgentHandler = ({
       runId,
       abortSignal,
     },
-    context
+    context,
+    { savedObjectsClient }
   ) => {
     const effectiveConfiguration = {
       ...agent.configuration,
@@ -50,6 +61,7 @@ export const createAgentHandler = ({
         browserApiTools,
         structuredOutput,
         outputSchema,
+        savedObjectsClient,
       },
       context
     );

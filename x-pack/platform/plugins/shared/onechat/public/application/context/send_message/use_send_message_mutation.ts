@@ -9,6 +9,7 @@ import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo } from 'react';
 import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -59,11 +60,23 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = async ({ message }: { message: string }) => {
+  const sendMessage = async ({
+    message,
+    additionalAttachments,
+  }: {
+    message: string;
+    additionalAttachments?: AttachmentInput[];
+  }) => {
     const signal = messageControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
     }
+
+    // Merge context attachments with additional attachments (e.g., from @mentions)
+    const allAttachments = [
+      ...(attachments ?? []),
+      ...(additionalAttachments ?? []),
+    ];
 
     const events$ = chatService.chat({
       signal,
@@ -71,7 +84,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
-      attachments: attachments ?? [],
+      attachments: allAttachments,
       browserApiTools: browserApiToolsMetadata,
     });
 
@@ -81,15 +94,20 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
-    onMutate: ({ message }) => {
+    onMutate: ({ message, additionalAttachments }) => {
       const isNewConversation = !conversationId;
       isMutatingNewConversationRef.current = isNewConversation;
       setPendingMessage(message);
       removeError();
       messageControllerRef.current = new AbortController();
+      // Merge context attachments with additional attachments (e.g., from @mentions)
+      const allAttachments = [
+        ...(attachments ?? []),
+        ...(additionalAttachments ?? []),
+      ];
       conversationActions.addOptimisticRound({
         userMessage: message,
-        attachments: attachments ?? [],
+        attachments: allAttachments,
       });
       if (isNewConversation) {
         if (!agentId) {

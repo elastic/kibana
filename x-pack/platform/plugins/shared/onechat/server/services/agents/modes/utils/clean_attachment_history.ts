@@ -17,6 +17,7 @@ const ATTACHMENT_TOOL_IDS = [
   platformCoreTools.attachmentRead,
   platformCoreTools.attachmentUpdate,
   platformCoreTools.attachmentAdd,
+  platformCoreTools.attachmentAddRef,
   platformCoreTools.attachmentDelete,
   platformCoreTools.attachmentList,
   platformCoreTools.attachmentDiff,
@@ -106,6 +107,14 @@ const getCleanedSummary = (toolId: string, data: Record<string, unknown>): strin
       const attachmentId = data.attachment_id ?? data.id ?? 'unknown';
       const type = data.type ?? 'unknown';
       return `Added new ${type} attachment ${attachmentId}`;
+    }
+
+    case platformCoreTools.attachmentAddRef: {
+      const attachmentId = data.attachment_id ?? data.id ?? 'unknown';
+      const savedObjectType = data.saved_object_type ?? 'unknown';
+      const savedObjectId = data.saved_object_id ?? 'unknown';
+      const title = data.title ?? savedObjectId;
+      return `Added reference to ${savedObjectType} "${title}" as attachment ${attachmentId}`;
     }
 
     case platformCoreTools.attachmentDelete: {

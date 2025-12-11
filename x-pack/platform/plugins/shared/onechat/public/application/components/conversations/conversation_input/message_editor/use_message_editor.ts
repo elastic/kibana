@@ -17,6 +17,15 @@ export interface MessageEditorInstance {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
+  /**
+   * Insert a mention reference at the current cursor position,
+   * replacing the @searchTerm with @type:id format.
+   *
+   * @param id - The saved object ID of the visualization
+   * @param type - The mention type ('viz' or 'map')
+   * @param replaceLength - Number of characters to replace (searchTerm length + 1 for @)
+   */
+  insertMention: (id: string, type: 'viz' | 'map', replaceLength: number) => void;
 }
 
 /**
@@ -73,13 +82,86 @@ export const useMessageEditor = (): MessageEditorInstance => {
           if (selection && ref.current.firstChild) {
             selection.setPosition(ref.current.firstChild, text.length);
           }
+          // Dispatch input event to trigger highlight layer update
+          ref.current.dispatchEvent(new InputEvent('input', { bubbles: true }));
         }
       },
       clear: () => {
         if (ref.current) {
           ref.current.textContent = '';
           setIsEmpty(true);
+          // Dispatch input event to trigger highlight layer update
+          ref.current.dispatchEvent(new InputEvent('input', { bubbles: true }));
         }
+      },
+      insertMention: (id: string, type: 'viz' | 'map', replaceLength: number) => {
+        const editor = ref.current;
+        if (!editor) {
+          // eslint-disable-next-line no-console
+          console.debug('[insertMention] No editor ref');
+          return;
+        }
+
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+          // eslint-disable-next-line no-console
+          console.debug('[insertMention] No selection');
+          return;
+        }
+
+        const range = selection.getRangeAt(0);
+        if (!editor.contains(range.startContainer)) {
+          // eslint-disable-next-line no-console
+          console.debug('[insertMention] Selection not in editor');
+          return;
+        }
+
+        // Get current text and cursor position
+        const text = editor.textContent || '';
+        const cursorPos = getCursorPositionInEditor(editor, selection);
+
+        // eslint-disable-next-line no-console
+        console.debug('[insertMention] Current state:', { text, cursorPos, replaceLength });
+
+        // Calculate the start position of the mention (@searchTerm)
+        const mentionStart = cursorPos - replaceLength;
+        if (mentionStart < 0) {
+          // eslint-disable-next-line no-console
+          console.debug('[insertMention] mentionStart < 0:', mentionStart);
+          return;
+        }
+
+        // Create the mention reference text (add space after to move cursor out of mention)
+        const mentionText = `@${type}:${id} `;
+
+        // Construct new text: before mention + mention + after cursor
+        const newText = text.substring(0, mentionStart) + mentionText + text.substring(cursorPos);
+
+        // eslint-disable-next-line no-console
+        console.debug('[insertMention] New text:', newText);
+
+        // Update the editor content
+        editor.textContent = newText;
+        syncIsEmpty();
+
+        // Position cursor after the inserted mention
+        const newCursorPos = mentionStart + mentionText.length;
+        const textNode = editor.firstChild;
+        if (textNode && selection) {
+          const newRange = document.createRange();
+          try {
+            newRange.setStart(textNode, Math.min(newCursorPos, textNode.textContent?.length || 0));
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          } catch (e) {
+            // Fallback: focus at end
+            editor.focus();
+          }
+        }
+
+        // Dispatch input event to trigger highlight layer update
+        editor.dispatchEvent(new InputEvent('input', { bubbles: true }));
       },
       isEmpty,
     }),
@@ -88,3 +170,14 @@ export const useMessageEditor = (): MessageEditorInstance => {
 
   return instance;
 };
+
+/**
+ * Helper function to get cursor position within the editor
+ */
+function getCursorPositionInEditor(editor: HTMLElement, selection: Selection): number {
+  const range = selection.getRangeAt(0);
+  const preCaretRange = document.createRange();
+  preCaretRange.selectNodeContents(editor);
+  preCaretRange.setEnd(range.startContainer, range.startOffset);
+  return preCaretRange.toString().length;
+}

@@ -38,6 +38,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     attachmentsService,
     resultStore,
     logger,
+    savedObjects,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -77,9 +78,12 @@ export const runAgent = async ({
   const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
   const manager = parentManager.createChild(context);
 
-  const { agentsService, request } = manager.deps;
+  const { agentsService, request, savedObjects } = manager.deps;
   const agentRegistry = await agentsService.getRegistry({ request });
   const agent = await agentRegistry.get(agentId);
+
+  // Get scoped saved objects client for resolving visualization references
+  const savedObjectsClient = savedObjects.getScopedClient(request);
 
   const agentResult = await withAgentSpan({ agent }, async () => {
     const agentHandler = createAgentHandler({ agent });
@@ -90,7 +94,8 @@ export const runAgent = async ({
         agentParams,
         abortSignal,
       },
-      agentHandlerContext
+      agentHandlerContext,
+      { savedObjectsClient }
     );
   });
 

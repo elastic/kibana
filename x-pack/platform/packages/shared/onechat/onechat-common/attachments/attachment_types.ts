@@ -17,6 +17,8 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   visualization = 'visualization',
+  /** Reference to a saved visualization - read-only, resolves content on read */
+  visualizationRef = 'visualization_ref',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +26,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
+  [AttachmentType.visualizationRef]: VisualizationRefAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -99,6 +102,44 @@ export interface VisualizationAttachmentData {
   esql?: string;
   /** Optional description of the visualization */
   description?: string;
+}
+
+/**
+ * Supported saved object types for visualization references.
+ */
+export type VisualizationRefSavedObjectType = 'lens' | 'visualization' | 'map';
+
+export const visualizationRefAttachmentDataSchema = z.object({
+  // Reference data
+  saved_object_id: z.string(),
+  saved_object_type: z.enum(['lens', 'visualization', 'map']),
+  // Cached metadata (for display without resolution)
+  title: z.string().optional(),
+  description: z.string().optional(),
+  // Resolution tracking
+  last_resolved_at: z.string().nullable().optional(),
+  // Cached resolved content (filled on read)
+  resolved_content: z.unknown().optional(),
+});
+
+/**
+ * Data for a visualization reference attachment.
+ * Contains a reference to a saved visualization object.
+ * Content is resolved on-demand when the attachment is read.
+ */
+export interface VisualizationRefAttachmentData {
+  /** ID of the saved object being referenced */
+  saved_object_id: string;
+  /** Type of saved object */
+  saved_object_type: VisualizationRefSavedObjectType;
+  /** Cached title from saved object (for display) */
+  title?: string;
+  /** Cached description */
+  description?: string;
+  /** When the reference was last resolved */
+  last_resolved_at?: string | null;
+  /** Resolved content (populated on read) */
+  resolved_content?: unknown;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

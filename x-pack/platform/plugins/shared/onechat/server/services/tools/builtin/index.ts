@@ -9,7 +9,9 @@ export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_r
 export { createBuiltinProviderFn } from './builtin_provider';
 export {
   createAttachmentTools,
+  createAttachmentToolsWithOptions,
   attachmentToolIds,
   inlineModeAttachmentToolIds,
   summaryModeAttachmentToolIds,
+  type CreateAttachmentToolsOptions,
 } from './attachment_tools';

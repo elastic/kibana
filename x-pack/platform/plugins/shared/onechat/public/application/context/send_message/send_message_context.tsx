@@ -6,11 +6,12 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
-  sendMessage: ({ message }: { message: string }) => void;
+  sendMessage: (params: { message: string; additionalAttachments?: AttachmentInput[] }) => void;
   isResponseLoading: boolean;
   error: unknown;
   pendingMessage: string | undefined;

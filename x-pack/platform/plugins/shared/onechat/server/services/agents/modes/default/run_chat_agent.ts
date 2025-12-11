@@ -31,7 +31,7 @@ import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
-import { createAttachmentTools } from '../../../tools/builtin/attachment_tools';
+import { createAttachmentToolsWithOptions } from '../../../tools/builtin/attachment_tools';
 
 /**
  * Converts BuiltinToolDefinition to ExecutableTool format.
@@ -76,6 +76,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput = false,
     outputSchema,
     startTime = new Date(),
+    savedObjectsClient,
   },
   { logger, request, modelProvider, toolProvider, attachments, events }
 ) => {
@@ -93,11 +94,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // This enables the LLM to read, update, add, and manage attachments
   const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? []);
 
+  // Add input attachments (e.g., from @mentions) to the state manager
+  // so they can be accessed via attachment_read tool
+  if (nextInput.attachments?.length) {
+    for (const inputAttachment of nextInput.attachments) {
+      // Only add if not already in the state manager
+      if (!attachmentStateManager.get(inputAttachment.id ?? '')) {
+        attachmentStateManager.add({
+          id: inputAttachment.id,
+          type: inputAttachment.type,
+          data: inputAttachment.data,
+          description: inputAttachment.description,
+          hidden: inputAttachment.hidden,
+        });
+      }
+    }
+  }
+
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     attachmentsService: attachments,
     conversationAttachments: attachmentStateManager.toArray(),
+    attachmentStateManager,
+    savedObjectsClient,
   });
 
   const selectedTools = await selectTools({
@@ -110,7 +130,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Create and add attachment management tools
   // These tools allow the LLM to add, read, update, delete attachments
-  const attachmentToolDefinitions = createAttachmentTools(attachmentStateManager);
+  const attachmentToolDefinitions = createAttachmentToolsWithOptions({
+    attachmentManager: attachmentStateManager,
+    savedObjectsClient,
+  });
   const attachmentTools = attachmentToolDefinitions.map(convertBuiltinToExecutable);
   const allSelectedTools = [...selectedTools, ...attachmentTools];
 

@@ -11,6 +11,7 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   securityServiceMock,
+  savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -67,6 +68,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
@@ -82,6 +84,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),

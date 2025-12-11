@@ -12,3 +12,9 @@ export { useAttachmentEditor } from './use_attachment_editor';
 export type { UseAttachmentEditorOptions, UseAttachmentEditorReturn } from './use_attachment_editor';
 export { useAttachmentViewer } from './use_attachment_viewer';
 export type { UseAttachmentViewerOptions, UseAttachmentViewerReturn } from './use_attachment_viewer';
+export { useVisualizationSearch } from './use_visualization_search';
+export type {
+  VisualizationType,
+  VisualizationSuggestion,
+  UseVisualizationSearchResult,
+} from './use_visualization_search';

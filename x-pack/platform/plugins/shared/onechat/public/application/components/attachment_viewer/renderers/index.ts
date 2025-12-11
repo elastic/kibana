@@ -6,3 +6,4 @@
  */
 
 export { VisualizationContentRenderer } from './visualization_renderer';
+export { VisualizationRefContentRenderer } from './visualization_ref_renderer';

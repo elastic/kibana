@@ -6,7 +6,12 @@
  */
 
 import type { VersionedAttachment } from '@kbn/onechat-common/attachments';
-import { getLatestVersion, isAttachmentActive } from '@kbn/onechat-common/attachments';
+import {
+  getLatestVersion,
+  isAttachmentActive,
+  AttachmentType,
+  type VisualizationRefAttachmentData,
+} from '@kbn/onechat-common/attachments';
 import { inlineModeAttachmentToolIds, summaryModeAttachmentToolIds } from '../../../tools/builtin';
 
 /**
@@ -97,15 +102,33 @@ const formatInlineAttachments = (attachments: VersionedAttachment[]): string => 
       // Format content based on type, with reasonable truncation for large content
       let contentStr: string;
       try {
-        contentStr =
-          typeof latest.data === 'string' ? latest.data : JSON.stringify(latest.data, null, 2);
-
-        // Truncate very large content to prevent context overflow
-        const maxContentLength = 10000;
-        if (contentStr.length > maxContentLength) {
+        // Special handling for visualization_ref - don't include resolved_content in inline view
+        // The resolved_content is only for internal versioning, not for the LLM
+        if (attachment.type === AttachmentType.visualizationRef) {
+          const refData = latest.data as VisualizationRefAttachmentData;
+          // Show reference info without the full resolved content
+          const refInfo = {
+            saved_object_id: refData.saved_object_id,
+            saved_object_type: refData.saved_object_type,
+            title: refData.title,
+            description: refData.description,
+            last_resolved_at: refData.last_resolved_at,
+            // Indicate whether content is available
+            has_content: !!refData.resolved_content,
+          };
+          contentStr = JSON.stringify(refInfo, null, 2);
+          contentStr += '\n[Use attachment_read to get the full visualization content]';
+        } else {
           contentStr =
-            contentStr.substring(0, maxContentLength) +
-            '\n... [content truncated, use attachment_read for full content]';
+            typeof latest.data === 'string' ? latest.data : JSON.stringify(latest.data, null, 2);
+
+          // Truncate very large content to prevent context overflow
+          const maxContentLength = 10000;
+          if (contentStr.length > maxContentLength) {
+            contentStr =
+              contentStr.substring(0, maxContentLength) +
+              '\n... [content truncated, use attachment_read for full content]';
+          }
         }
       } catch {
         contentStr = '[Unable to serialize content]';

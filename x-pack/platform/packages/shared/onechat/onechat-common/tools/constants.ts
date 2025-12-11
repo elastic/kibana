@@ -31,6 +31,7 @@ export const platformCoreTools = {
   attachmentRead: platformCoreTool('attachment_read'),
   attachmentUpdate: platformCoreTool('attachment_update'),
   attachmentAdd: platformCoreTool('attachment_add'),
+  attachmentAddRef: platformCoreTool('attachment_add_ref'),
   attachmentDelete: platformCoreTool('attachment_delete'),
   attachmentList: platformCoreTool('attachment_list'),
   attachmentDiff: platformCoreTool('attachment_diff'),

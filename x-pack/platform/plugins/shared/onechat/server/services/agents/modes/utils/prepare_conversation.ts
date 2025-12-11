@@ -12,16 +12,25 @@ import type {
   AttachmentInput,
   VersionedAttachment,
 } from '@kbn/onechat-common/attachments';
+import {
+  AttachmentType,
+  getLatestVersion,
+  hashContent,
+  type VisualizationRefAttachmentData,
+} from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import type {
   AttachmentRepresentation,
   AttachmentBoundedTool,
 } from '@kbn/onechat-server/attachments';
+import type { AttachmentStateManager } from '@kbn/onechat-server/attachments';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
 } from './attachment_presentation';
+import { savedObjectResolver } from '../../../attachments/saved_object_resolver';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
@@ -59,12 +68,18 @@ export const prepareConversation = async ({
   nextInput,
   attachmentsService,
   conversationAttachments,
+  attachmentStateManager,
+  savedObjectsClient,
 }: {
   previousRounds: ConversationRound[];
   nextInput: RawRoundInput;
   attachmentsService: AttachmentsService;
   /** NEW: Conversation-level versioned attachments */
   conversationAttachments?: VersionedAttachment[];
+  /** Optional: Attachment state manager to update by-ref attachments */
+  attachmentStateManager?: AttachmentStateManager;
+  /** Optional: Saved objects client for resolving by-ref attachments */
+  savedObjectsClient?: SavedObjectsClientContract;
 }): Promise<ProcessedConversation> => {
   const processedNextInput = await prepareRoundInput({ input: nextInput, attachmentsService });
   const processedRounds = await Promise.all(
@@ -93,9 +108,21 @@ export const prepareConversation = async ({
     })
   );
 
+  // Re-resolve all by-ref attachments before presenting to LLM
+  // This ensures we detect any changes to underlying saved objects
+  if (attachmentStateManager && savedObjectsClient && conversationAttachments?.length) {
+    await resolveByRefAttachments({
+      attachmentStateManager,
+      savedObjectsClient,
+    });
+  }
+
+  // Get updated attachments after resolution (may have new versions)
+  const updatedConversationAttachments = attachmentStateManager?.toArray() ?? conversationAttachments;
+
   // Prepare attachment presentation if conversation has versioned attachments
-  const attachmentPresentation = conversationAttachments?.length
-    ? prepareAttachmentPresentation(conversationAttachments)
+  const attachmentPresentation = updatedConversationAttachments?.length
+    ? prepareAttachmentPresentation(updatedConversationAttachments)
     : undefined;
 
   return {
@@ -103,7 +130,7 @@ export const prepareConversation = async ({
     previousRounds: processedRounds,
     attachmentTypes,
     attachments: allAttachments,
-    conversationAttachments,
+    conversationAttachments: updatedConversationAttachments,
     attachmentPresentation,
   };
 };
@@ -170,4 +197,88 @@ const inputToFinal = (input: AttachmentInput): Attachment => {
     ...input,
     id: input.id ?? getToolResultId(),
   };
+};
+
+/**
+ * Resolves all by-ref attachments (e.g., visualization_ref) and updates them if content changed.
+ * This ensures the LLM sees the latest content and version numbers are updated accordingly.
+ */
+const resolveByRefAttachments = async ({
+  attachmentStateManager,
+  savedObjectsClient,
+}: {
+  attachmentStateManager: AttachmentStateManager;
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<void> => {
+  const allAttachments = attachmentStateManager.getAll();
+
+  // Find all visualization_ref attachments
+  const refAttachments = allAttachments.filter(
+    (attachment) => attachment.type === AttachmentType.visualizationRef
+  );
+
+  if (refAttachments.length === 0) {
+    return;
+  }
+
+  // eslint-disable-next-line no-console
+  console.debug('[resolveByRefAttachments] Resolving', refAttachments.length, 'by-ref attachments');
+
+  // Resolve each ref attachment in parallel
+  await Promise.all(
+    refAttachments.map(async (attachment) => {
+      const latestVersion = getLatestVersion(attachment);
+      if (!latestVersion) {
+        return;
+      }
+
+      const refData = latestVersion.data as VisualizationRefAttachmentData;
+
+      try {
+        // Resolve the saved object
+        const resolution = await savedObjectResolver.resolve(
+          refData.saved_object_id,
+          refData.saved_object_type,
+          savedObjectsClient
+        );
+
+        if (!resolution.found) {
+          // eslint-disable-next-line no-console
+          console.debug('[resolveByRefAttachments] Saved object not found:', refData.saved_object_id);
+          return;
+        }
+
+        // Check if content has changed by comparing hashes
+        const newContentHash = hashContent(resolution.content);
+        const cachedContentHash = refData.resolved_content
+          ? hashContent(refData.resolved_content)
+          : null;
+        const contentChanged = cachedContentHash !== null && cachedContentHash !== newContentHash;
+
+        // Update if content changed or if this is the first resolution
+        if (contentChanged || !refData.resolved_content) {
+          // eslint-disable-next-line no-console
+          console.debug('[resolveByRefAttachments] Updating attachment:', attachment.id, {
+            contentChanged,
+            firstResolution: !refData.resolved_content,
+          });
+
+          const updatedRefData: VisualizationRefAttachmentData = {
+            ...refData,
+            title: resolution.title || refData.title,
+            description: resolution.description || refData.description,
+            last_resolved_at: new Date().toISOString(),
+            resolved_content: resolution.content,
+          };
+
+          // This creates a new version if content changed
+          attachmentStateManager.update(attachment.id, updatedRefData);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.debug('[resolveByRefAttachments] Error resolving attachment:', attachment.id, error);
+        // Don't fail the whole operation if one attachment fails to resolve
+      }
+    })
+  );
 };

@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
@@ -27,6 +27,14 @@ import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../conversation.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { useMentionDetection } from './hooks';
+import { MentionSuggestionsPopover } from './mention_suggestions_popover';
+import {
+  useVisualizationSearch,
+  type VisualizationSuggestion,
+} from '../../../hooks/use_visualization_search';
+import { parseMentions, type VisualizationSuggestionInfo } from '../../../utils/parse_mentions';
+import type { VisualizationRefSavedObjectType } from '@kbn/onechat-common/attachments';
 
 const INPUT_MIN_HEIGHT = '150px';
 const useInputBorderStyles = () => {
@@ -116,6 +124,9 @@ const enabledPlaceholder = i18n.translate(
 );
 
 export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
+  // eslint-disable-next-line no-console
+  console.debug('[ConversationInput] Component rendering');
+
   const isSendingMessage = useIsSendingMessage();
   const { sendMessage, pendingMessage, error } = useSendMessage();
   const { isFetched } = useOnechatAgents();
@@ -133,6 +144,74 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
+  // --- Mention Autocomplete Integration ---
+
+  // Track selected suggestions for title resolution
+  const selectedSuggestionsRef = useRef<Map<string, VisualizationSuggestion>>(new Map());
+  const [isMentionPopoverOpen, setIsMentionPopoverOpen] = useState(false);
+
+  // Detect @mentions in editor
+  const editorRef = messageEditor._internal.ref;
+  // eslint-disable-next-line no-console
+  console.debug('[ConversationInput] About to call useMentionDetection with ref:', editorRef);
+  const mentionContext = useMentionDetection(editorRef);
+  // eslint-disable-next-line no-console
+  console.debug('[ConversationInput] mentionContext:', mentionContext);
+
+  // Search for visualizations based on mention search term
+  const {
+    suggestions: vizSuggestions,
+    isLoading: isSearchLoading,
+    search: searchVisualizations,
+    clear: clearVisualizationSearch,
+  } = useVisualizationSearch();
+
+  // Trigger search when mention is active
+  useEffect(() => {
+    if (mentionContext.isActive && mentionContext.searchTerm !== undefined) {
+      searchVisualizations(mentionContext.searchTerm);
+      setIsMentionPopoverOpen(true);
+    } else {
+      clearVisualizationSearch();
+      setIsMentionPopoverOpen(false);
+    }
+  }, [mentionContext.isActive, mentionContext.searchTerm, searchVisualizations, clearVisualizationSearch]);
+
+  // Handle mention selection
+  const handleMentionSelect = useCallback(
+    (suggestion: VisualizationSuggestion) => {
+      // eslint-disable-next-line no-console
+      console.debug('[ConversationInput] handleMentionSelect called:', suggestion.title, 'searchTerm:', mentionContext.searchTerm);
+
+      // Store the selected suggestion for title mapping
+      selectedSuggestionsRef.current.set(suggestion.id, suggestion);
+
+      // Determine the mention type based on visualization type
+      const mentionType: 'viz' | 'map' = suggestion.type === 'map' ? 'map' : 'viz';
+
+      // Calculate replace length: @ + searchTerm length
+      const replaceLength = mentionContext.searchTerm.length + 1; // +1 for @
+
+      // eslint-disable-next-line no-console
+      console.debug('[ConversationInput] Inserting mention:', { id: suggestion.id, mentionType, replaceLength });
+
+      // Insert the mention into the editor
+      messageEditor.insertMention(suggestion.id, mentionType, replaceLength);
+
+      // Close the popover and clear search
+      clearVisualizationSearch();
+    },
+    [mentionContext.searchTerm, messageEditor, clearVisualizationSearch]
+  );
+
+  // Handle popover close
+  const handleMentionPopoverClose = useCallback(() => {
+    setIsMentionPopoverOpen(false);
+    clearVisualizationSearch();
+  }, [clearVisualizationSearch]);
+
+  // --- End Mention Autocomplete Integration ---
+
   const { euiTheme } = useEuiTheme();
   const editorContainerStyles = css`
     display: flex;
@@ -140,6 +219,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     height: 100%;
     /* Aligns editor text with action menus' text */
     padding-left: ${euiTheme.size.m};
+    position: relative;
   `;
   // Hide attachments if there's an error from current round or if message has been just sent
   const shouldHideAttachments = Boolean(error) || isSendingMessage;
@@ -186,8 +266,28 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
       return;
     }
     const content = messageEditor.getContent();
-    sendMessage({ message: content });
+
+    // Parse mentions and create attachments
+    // Build suggestion info map with title AND actual saved object type
+    const suggestionInfoMap: Record<string, VisualizationSuggestionInfo> = {};
+    selectedSuggestionsRef.current.forEach((suggestion, id) => {
+      suggestionInfoMap[id] = {
+        title: suggestion.title,
+        savedObjectType: suggestion.type as VisualizationRefSavedObjectType,
+      };
+    });
+
+    const { attachments: mentionAttachments } = parseMentions(content, suggestionInfoMap);
+
+    // Send message with mention attachments
+    sendMessage({
+      message: content,
+      additionalAttachments: mentionAttachments.length > 0 ? mentionAttachments : undefined,
+    });
+
+    // Clear editor and selected suggestions
     messageEditor.clear();
+    selectedSuggestionsRef.current.clear();
     onSubmit?.();
   };
 
@@ -205,6 +305,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
           disabled={isInputDisabled}
           placeholder={placeholder}
           data-test-subj="agentBuilderConversationInputEditor"
+        />
+        {/* Mention suggestions popover */}
+        <MentionSuggestionsPopover
+          isOpen={mentionContext.isActive}
+          anchorPosition={mentionContext.anchorPosition}
+          suggestions={vizSuggestions}
+          isLoading={isSearchLoading}
+          onSelect={handleMentionSelect}
+          onClose={handleMentionPopoverClose}
         />
       </EuiFlexItem>
       {!isInputDisabled && (
