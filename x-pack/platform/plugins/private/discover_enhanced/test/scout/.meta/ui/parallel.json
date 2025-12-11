@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:03:09.722Z",
-  "sha1": "4ebdabbb2f59457a685a6b803aa5b45701dfb583",
+  "lastModified": "2025-12-11T11:36:47.470Z",
+  "sha1": "5d35ef3d45bf2d889286af743f81db1b1d7e4f62",
   "tests": [
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
@@ -37,7 +37,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
-        "line": 60,
+        "line": 66,
         "column": 14
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
-        "line": 78,
+        "line": 84,
         "column": 14
       }
     },
@@ -76,17 +76,14 @@
       "title": "Discover app - value suggestions: useTimeRange disabled show up if outside of range",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@svlSearch",
+        "@ess"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
-        "line": 36,
+        "line": 41,
         "column": 14
       }
     },
@@ -95,17 +92,14 @@
       "title": "Discover app - value suggestions: useTimeRange disabled show up if in range",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@svlSearch",
+        "@ess"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
-        "line": 49,
+        "line": 54,
         "column": 14
       }
     },
@@ -114,17 +108,14 @@
       "title": "Discover app - value suggestions: useTimeRange enabled dont show up if outside of range",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@svlSearch",
+        "@ess"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 34,
+        "line": 39,
         "column": 14
       }
     },
@@ -133,17 +124,14 @@
       "title": "Discover app - value suggestions: useTimeRange enabled show up if in range",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@svlSearch",
+        "@ess"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 40,
+        "line": 45,
         "column": 14
       }
     },
@@ -152,17 +140,14 @@
       "title": "Discover app - value suggestions: useTimeRange enabled also displays descriptions for operators",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@svlSearch",
+        "@ess"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 53,
+        "line": 58,
         "column": 14
       }
     }

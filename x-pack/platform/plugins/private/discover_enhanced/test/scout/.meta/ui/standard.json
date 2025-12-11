@@ -1,24 +1,21 @@
 {
-  "lastModified": "2025-12-03T19:03:13.427Z",
-  "sha1": "4ebdabbb2f59457a685a6b803aa5b45701dfb583",
+  "lastModified": "2025-12-11T11:36:49.485Z",
+  "sha1": "5d35ef3d45bf2d889286af743f81db1b1d7e4f62",
   "tests": [
     {
       "id": "451ff2b9982142c-9a17f71a4f5ef91",
       "title": "Discover App - Performance Metrics & Bundle Analysis collects and validates JS Bundles loaded on page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch",
+        "@ess",
         "@perf"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 41,
+        "line": 40,
         "column": 9
       }
     },
@@ -27,18 +24,15 @@
       "title": "Discover App - Performance Metrics & Bundle Analysis measures Performance Metrics before and after Discover load",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch",
+        "@ess",
         "@perf"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 92,
+        "line": 97,
         "column": 9
       }
     },
@@ -47,13 +41,10 @@
       "title": "Discover App - Lighthouse Performance Audit runs audit on Discover Page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
         "@svlSearch",
+        "@ess",
         "@perf"
       ],
       "location": {
@@ -67,17 +58,14 @@
       "title": "Discover app - saved search embeddable should allow removing the dashboard panel after the underlying saved search has been deleted",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
         "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
         "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@svlSearch",
+        "@ess"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts",
-        "line": 64,
+        "line": 63,
         "column": 7
       }
     }
