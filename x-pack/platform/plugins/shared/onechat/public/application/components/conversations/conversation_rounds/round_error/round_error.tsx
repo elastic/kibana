@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { isContextLengthExceededAgentError } from '@kbn/onechat-common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -14,9 +15,11 @@ import { RoundErrorThinkingTitle } from './round_error_thinking_title';
 import { ContextExceededRoundError } from './context_exceeded_round_error';
 import { GenericRoundError } from './generic_round_error';
 import { RoundErrorThinkingPanel } from './round_error_thinking_panel';
+import { RoundSteps } from '../round_thinking/steps/round_steps';
 
 interface RoundErrorProps {
   error: unknown;
+  errorSteps: ConversationRoundStep[];
   onRetry: () => void;
 }
 
@@ -29,7 +32,7 @@ const labels = {
   }),
 };
 
-export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
+export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRetry }) => {
   const { euiTheme } = useEuiTheme();
   const [showErrorThinkingPanel, setShowErrorThinkingPanel] = useState(false);
 
@@ -52,6 +55,7 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
     >
       {showErrorThinkingPanel ? (
         <RoundErrorThinkingPanel onClose={toggleErrorThinkingPanel}>
+          <RoundSteps isLoading={false} steps={errorSteps} />
           {errorContent}
         </RoundErrorThinkingPanel>
       ) : (
