@@ -21,14 +21,18 @@ import {
 } from './shared';
 import { positionSchema } from '../alignments';
 
-export const titleSchemaProps = {
-  value: schema.maybe(schema.string({ defaultValue: '' })),
-  visible: schema.maybe(schema.boolean()),
+export const axisTitleSchemaProps = {
+  value: schema.maybe(
+    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
+  ),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
 };
 
 const legendSchemaProps = {
-  truncate_after_lines: schema.maybe(schema.number()),
-  visible: schema.maybe(schema.boolean()),
+  truncate_after_lines: schema.maybe(
+    schema.number({ meta: { description: 'Number of lines before truncating legend text' } })
+  ),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
   size: schema.maybe(
     schema.oneOf(
       [
@@ -38,18 +42,20 @@ const legendSchemaProps = {
         schema.literal('large'),
         schema.literal('xlarge'),
       ],
-      { defaultValue: 'auto' }
+      { defaultValue: 'auto', meta: { description: 'Size of the legend' } }
     )
   ),
-  position: schema.maybe(positionSchema()),
+  position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
 
 const labelsSchemaProps = {
-  visible: schema.maybe(schema.boolean({ defaultValue: true })),
+  visible: schema.maybe(
+    schema.boolean({ defaultValue: true, meta: { description: 'Whether to show axis labels' } })
+  ),
   orientation: schema.maybe(
     schema.oneOf(
       [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('angled')],
-      { defaultValue: 'horizontal' }
+      { defaultValue: 'horizontal', meta: { description: 'Orientation of the axis labels' } }
     )
   ),
 };
@@ -58,29 +64,37 @@ const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'))
 
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),
-  legend: schema.maybe(schema.object(legendSchemaProps)),
+  legend: schema.maybe(
+    schema.object(legendSchemaProps, { meta: { description: 'Legend configuration' } })
+  ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   axes: schema.maybe(
-    schema.object({
-      x: schema.maybe(
-        schema.object({
-          title: schema.maybe(schema.object(titleSchemaProps)),
-          labels: schema.maybe(schema.object(labelsSchemaProps)),
-        })
-      ),
-      y: schema.maybe(
-        schema.object({
-          title: schema.maybe(schema.object(titleSchemaProps)),
-          labels: schema.maybe(simpleLabelsSchema),
-        })
-      ),
-    })
+    schema.object(
+      {
+        x: schema.maybe(
+          schema.object({
+            title: schema.maybe(schema.object(axisTitleSchemaProps)),
+            labels: schema.maybe(schema.object(labelsSchemaProps)),
+          })
+        ),
+        y: schema.maybe(
+          schema.object({
+            title: schema.maybe(schema.object(axisTitleSchemaProps)),
+            labels: schema.maybe(simpleLabelsSchema),
+          })
+        ),
+      },
+      { meta: { description: 'Axis configuration for X and Y axes' } }
+    )
   ),
   cells: schema.maybe(
-    schema.object({
-      labels: schema.maybe(simpleLabelsSchema),
-    })
+    schema.object(
+      {
+        labels: schema.maybe(simpleLabelsSchema),
+      },
+      { meta: { description: 'Cells configuration' } }
+    )
   ),
 };
 
