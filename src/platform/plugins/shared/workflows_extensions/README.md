@@ -103,49 +103,31 @@ Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
 import { myStepCommonDefinition } from '../../common/step_types/my_step';
 
-// Handler function that executes the step logic
-const myStepHandler: StepHandler = async (context) => {
-  try {
-    const { message, count } = context.input;
-
-    // Access workflow context
-    const workflowContext = context.contextManager.getContext();
-
-    // Use the scoped Elasticsearch client if needed
-    const esClient = context.contextManager.getScopedEsClient();
-
-    // Log information
-    context.logger.info(`Processing step with message: ${message}`);
-
-    // Perform your step logic here
-    const result = `Processed: ${message}${count ? ` (count: ${count})` : ''}`;
-
-    return { output: { result } };
-  } catch (error) {
-    context.logger.error('My step execution failed', error);
-    return { error };
-  }
-};
-
-export const myStepDefinition: ServerStepDefinition = {
-  ...myStepCommonDefinition,
-  handler: myStepHandler,
-};
-```
-
-If you need to inject dependencies (like core services or plugin APIs) into your step handler, convert the step definition into a factory function:
-
-```typescript
-export const getMyStepWithDepsDefinition = (coreSetup: CoreSetup) =>
+export const getMyStepDefinition = (coreSetup: CoreSetup) =>
   createServerStepDefinition({
-    ...myStepWithDepsDefinition,
+    ...myStepCommonDefinition,
     handler: async (context) => {
-      const [coreStart, depsStart] = await coreSetup.getStartServices();
-      const { http } = coreStart;
-      const { inference, uiSettings } = depsStart;
+      try {
+        const [coreStart, depsStart] = await coreSetup.getStartServices();
+        const { http } = coreStart;
+        const { message, count } = context.input;
 
-      return {
-        output: 'step with deps output'
+        // Access workflow context
+        const workflowContext = context.contextManager.getContext();
+
+        // Use the scoped Elasticsearch client if needed
+        const esClient = context.contextManager.getScopedEsClient();
+
+        // Log information
+        context.logger.info(`Processing step with message: ${message}`);
+
+        // Perform your step logic here
+        const result = `Processed: ${message}${count ? ` (count: ${count})` : ''}`;
+
+        return { output: { result } };
+      } catch (error) {
+        context.logger.error('My step execution failed', error);
+        return { error };
       }
     }
   })
@@ -201,7 +183,7 @@ Register the step definitions in both server and public plugin setup:
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { myStepDefinition } from './workflows/step_types/my_step';
-import { myStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
+import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
 
 
 export interface MyPluginServerSetupDeps {
@@ -210,11 +192,11 @@ export interface MyPluginServerSetupDeps {
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: MyPluginServerSetupDeps) {
-    // Register server-side step definitions
-    plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
+    // Create the step definition passing the necessary dependencies to factory function
+    const stepDefinition = getMyStepDefinition(core);
 
-    // Register server-side step definition using its factory function
-    plugins.workflowsExtensions.registerStepDefinition(myStepWithDepsDefinition(core));
+    // Register server-side step definition using its factory function result
+    plugins.workflowsExtensions.registerStepDefinition(stepDefinition);
   }
 }
 ```
