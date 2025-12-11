@@ -881,12 +881,6 @@
     "uiStateJSON",
     "version"
   ],
-  "mcp-connector-tools": [
-    "connectorId",
-    "createdAt",
-    "tools",
-    "updatedAt"
-  ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],
   "ml-job": [

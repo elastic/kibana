@@ -2878,23 +2878,6 @@
       }
     }
   },
-  "mcp-connector-tools": {
-    "dynamic": false,
-    "properties": {
-      "connectorId": {
-        "type": "keyword"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "tools": {
-        "type": "object"
-      },
-      "updatedAt": {
-        "type": "date"
-      }
-    }
-  },
   "metrics-data-source": {
     "dynamic": false,
     "properties": {}
