@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilderPlatform: 64202
-  aiAssistantManagementSelection: 10000
+  aiAssistantManagementSelection: 13590
   aiops: 15359
   alerting: 26932
   apm: 38573
@@ -206,6 +206,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 2554
+  workflowsExtensions: 61264
   workflowsManagement: 8497
   workplaceAIApp: 6135
