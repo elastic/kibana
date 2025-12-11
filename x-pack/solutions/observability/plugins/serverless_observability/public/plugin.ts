@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
-import { combineLatest, map, of } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
@@ -66,40 +66,49 @@ export class ServerlessObservabilityPlugin
     serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
+    const roleManagementEnabled = security.authz.isRoleManagementEnabled();
 
-    const showAiAssistant =
-      core.settings.client.get<AIChatExperience>(
-        AI_CHAT_EXPERIENCE_TYPE,
-        AIChatExperience.Classic
-      ) !== AIChatExperience.Agent;
-
-    const extendCardNavDefinitions = serverless.getNavigationCards(
-      security.authz.isRoleManagementEnabled(),
-      aiAssistantIsEnabled && showAiAssistant
-        ? {
-            observabilityAiAssistantManagement: {
-              category: appCategories.OTHER,
-              title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
-                defaultMessage: 'AI Assistant Settings',
-              }),
-              description: i18n.translate(
-                'xpack.serverlessObservability.aiAssistantManagementDescription',
-                {
-                  defaultMessage:
-                    'Manage knowledge base and control assistant behavior, including response language.',
+    chatExperience$
+      .pipe(
+        map(
+          (chatExperience) =>
+            Boolean(aiAssistantIsEnabled) && chatExperience !== AIChatExperience.Agent
+        ),
+        distinctUntilChanged(),
+        map((showAiAssistant) =>
+          serverless.getNavigationCards(
+            roleManagementEnabled,
+            showAiAssistant
+              ? {
+                  observabilityAiAssistantManagement: {
+                    category: appCategories.OTHER,
+                    title: i18n.translate(
+                      'xpack.serverlessObservability.aiAssistantManagementTitle',
+                      {
+                        defaultMessage: 'AI Assistant Settings',
+                      }
+                    ),
+                    description: i18n.translate(
+                      'xpack.serverlessObservability.aiAssistantManagementDescription',
+                      {
+                        defaultMessage:
+                          'Manage knowledge base and control assistant behavior, including response language.',
+                      }
+                    ),
+                    icon: 'sparkles',
+                  },
                 }
-              ),
-              icon: 'sparkles',
-            },
-          }
-        : undefined
-    );
-
-    management.setupCardsNavigation({
-      enabled: true,
-      hideLinksTo: [appIds.RULES],
-      extendCardNavDefinitions,
-    });
+              : undefined
+          )
+        )
+      )
+      .subscribe((extendCardNavDefinitions) => {
+        management.setupCardsNavigation({
+          enabled: true,
+          hideLinksTo: [appIds.RULES],
+          extendCardNavDefinitions,
+        });
+      });
 
     return {};
   }
