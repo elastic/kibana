@@ -12,11 +12,8 @@ import {
   ALERTS_AS_DATA_FIND_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { createAlertsIndex, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { getAlertStatus } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const query = {

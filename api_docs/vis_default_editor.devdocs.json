@@ -76,9 +76,9 @@
                   },
                   "<",
                   {
-                    "pluginId": "visualizations",
+                    "pluginId": "@kbn/visualizations-common",
                     "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
+                    "docId": "kibKbnVisualizationsCommonPluginApi",
                     "section": "def-common.VisParams",
                     "text": "VisParams"
                   },

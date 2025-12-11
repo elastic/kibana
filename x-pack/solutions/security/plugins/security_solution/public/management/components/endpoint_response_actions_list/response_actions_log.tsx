@@ -9,7 +9,6 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
@@ -64,13 +63,6 @@ export const ResponseActionsLog = memo<
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsCrowdstrikeManualHostIsolationEnabled'
-    );
-    const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsMSDefenderEndpointEnabled'
-    );
-
     // Used to decide if display global loader or not (only the fist time tha page loads)
     const [isFirstAttempt, setIsFirstAttempt] = useState(true);
 
@@ -114,8 +106,6 @@ export const ResponseActionsLog = memo<
       commandsFromUrl,
       agentIdsFromUrl,
       isFlyout,
-      isCrowdstrikeEnabled,
-      isMicrosoftDefenderEnabled,
       statusesFromUrl,
       setQueryParams,
       usersFromUrl,

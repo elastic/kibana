@@ -143,6 +143,8 @@ export const buildDataViewMock = ({
     },
     getRuntimeField: () => null,
     getAllowHidden: () => false,
+    isTSDBMode: () =>
+      dataViewFields.some((field) => field.timeSeriesMetric || field.timeSeriesDimension),
     setFieldCount: jest.fn(),
   } as unknown as DataView;
 

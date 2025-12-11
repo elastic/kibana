@@ -32,6 +32,7 @@ const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = lazyObject({
     registerType: jest.fn(),
     registerSubActionConnectorType: jest.fn(),
+    getAxiosInstanceWithAuth: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
@@ -50,6 +51,7 @@ const createStartMock = () => {
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getAllTypes: jest.fn(),
+    listTypes: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
     getActionsAuthorizationWithRequest: jest

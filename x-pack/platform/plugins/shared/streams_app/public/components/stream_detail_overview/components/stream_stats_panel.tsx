@@ -27,7 +27,6 @@ import {
 } from '../../data_management/stream_detail_lifecycle/helpers/format_bytes';
 import { useDataStreamStats } from '../../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
-import { useAggregations } from '../../data_management/stream_detail_lifecycle/hooks/use_ingestion_rate';
 
 interface StreamStatsPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -91,12 +90,7 @@ const StatItem = ({ label, value, withBorder = false }: StatItemProps) => {
 
 export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
   const { timeState } = useTimefilter();
-  const { aggregations } = useAggregations({
-    definition,
-    timeState,
-    isFailureStore: false,
-  });
-  const dataStreamStats = useDataStreamStats({ definition, timeState, aggregations }).stats;
+  const data = useDataStreamStats({ definition, timeState }).stats;
   const retentionLabel = i18n.translate('xpack.streams.entityDetailOverview.retention', {
     defaultMessage: 'Data retention',
   });
@@ -140,7 +134,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                     { defaultMessage: 'Total doc count' }
                   )}
                 >
-                  {dataStreamStats ? formatNumber(dataStreamStats.totalDocs || 0, 'decimal0') : '-'}
+                  {data ? formatNumber(data.ds.stats.totalDocs || 0, 'decimal0') : '-'}
                 </PrivilegesWarningIconWrapper>
               }
             />
@@ -154,9 +148,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                     { defaultMessage: 'Size in bytes' }
                   )}
                 >
-                  {dataStreamStats && dataStreamStats.sizeBytes
-                    ? formatBytes(dataStreamStats.sizeBytes)
-                    : '-'}
+                  {data && data.ds.stats.sizeBytes ? formatBytes(data.ds.stats.sizeBytes) : '-'}
                 </PrivilegesWarningIconWrapper>
               }
               withBorder
@@ -185,9 +177,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                     { defaultMessage: 'Ingestion rate' }
                   )}
                 >
-                  {dataStreamStats
-                    ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true)
-                    : '-'}
+                  {data?.ds.stats ? formatIngestionRate(data.ds.stats.bytesPerDay || 0, true) : '-'}
                 </PrivilegesWarningIconWrapper>
               }
               withBorder

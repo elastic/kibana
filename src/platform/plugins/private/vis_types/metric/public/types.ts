@@ -8,7 +8,7 @@
  */
 
 import type { Range } from '@kbn/expressions-plugin/public';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { ColorMode, Labels, Style, ColorSchemas } from '@kbn/charts-plugin/public';
 
 export const visType = 'metric';

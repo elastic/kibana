@@ -90,6 +90,11 @@ export interface WalkerOptions {
     parent: types.ESQLProperNode | undefined,
     walker: WalkerVisitorApi
   ) => void;
+  visitParens?: (
+    node: types.ESQLParens,
+    parent: types.ESQLProperNode | undefined,
+    walker: WalkerVisitorApi
+  ) => void;
 
   /**
    * Called on every expression node.
@@ -703,6 +708,15 @@ export class Walker {
     }
   }
 
+  public walkParens(node: types.ESQLParens, parent: types.ESQLProperNode | undefined): void {
+    const { options } = this;
+    (options.visitParens ?? options.visitAny)?.(node, parent, this);
+
+    if (node.child) {
+      this.walkSingleAstItem(node.child, node);
+    }
+  }
+
   public walkQuery(
     node: types.ESQLAstQueryExpression,
     parent: types.ESQLProperNode | undefined
@@ -768,6 +782,10 @@ export class Walker {
       }
       case 'inlineCast': {
         this.walkInlineCast(node, parent);
+        break;
+      }
+      case 'parens': {
+        this.walkParens(node as types.ESQLParens, parent);
         break;
       }
       case 'identifier': {

@@ -6,20 +6,34 @@
  */
 import { useMemo } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
+import { getSpaceIdFromPath, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { useOnechatServices } from './use_onechat_service';
 import { useKibana } from './use_kibana';
+import { useSpaceId } from './use_space_id';
 
 export const useKibanaUrl = () => {
   const {
-    startDependencies: { cloud },
+    startDependencies: { cloud, spaces },
   } = useOnechatServices();
   const {
     services: { http },
   } = useKibana();
+  const spaceId = useSpaceId(spaces);
 
   const kibanaUrl = useMemo(() => {
-    return http.basePath.publicBaseUrl ?? cloud?.kibanaUrl ?? getFallbackKibanaUrl(http);
-  }, [cloud, http]);
+    const baseUrl = http.basePath.publicBaseUrl ?? cloud?.kibanaUrl ?? getFallbackKibanaUrl(http);
+
+    const pathname = new URL(baseUrl).pathname;
+    const serverBasePath = http.basePath.serverBasePath;
+    const { pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(pathname, serverBasePath);
+
+    if (!pathHasExplicitSpaceIdentifier) {
+      return addSpaceIdToPath(baseUrl, spaceId);
+    }
+
+    return baseUrl;
+  }, [cloud, http, spaceId]);
+
   return { kibanaUrl };
 };
 

@@ -21,7 +21,7 @@ import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { omit, once } from 'lodash';
 import moment from 'moment';
 import { indexPatternToCcs } from '@kbn/es-query';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '../../..';
+import { describeDataset, formatDocumentAnalysis } from '../../..';
 import { EsqlPrompt } from './prompt';
 
 const loadEsqlDocBase = once(() => EsqlDocumentBase.load());
@@ -122,7 +122,7 @@ export async function executeAsEsqlAgent({
 
         return {
           response: {
-            analysis: sortAndTruncateAnalyzedFields(analysis),
+            analysis: formatDocumentAnalysis(analysis),
           },
         };
       },

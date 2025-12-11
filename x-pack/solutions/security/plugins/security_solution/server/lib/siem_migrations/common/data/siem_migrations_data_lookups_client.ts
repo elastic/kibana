@@ -8,6 +8,7 @@
 import { sha256 } from 'js-sha256';
 import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { retryTransientEsErrors } from '@kbn/index-adapter';
+import { toValidIndexName } from '@kbn/utils';
 import { LOOKUPS_INDEX_PREFIX } from '../../../../../common/siem_migrations/constants';
 
 export type LookupData = object[];
@@ -21,7 +22,8 @@ export class SiemMigrationsDataLookupsClient {
   ) {}
 
   async create(lookupName: string, data: LookupData): Promise<string> {
-    const indexName = `${LOOKUPS_INDEX_PREFIX}${this.spaceId}_${lookupName}`;
+    const sanitizedLookupName = this.getSanitizedLookupName(lookupName);
+    const indexName = `${LOOKUPS_INDEX_PREFIX}${this.spaceId}_${sanitizedLookupName}`;
     try {
       await this.executeEs(() =>
         this.esScopedClient.asCurrentUser.indices.create({
@@ -67,5 +69,15 @@ export class SiemMigrationsDataLookupsClient {
 
   private generateDocumentHash(document: object): string {
     return sha256.create().update(JSON.stringify(document)).hex(); // document need to be created in a deterministic way
+  }
+
+  private getSanitizedLookupName(lookupName: string): string {
+    try {
+      return toValidIndexName(lookupName);
+    } catch (error) {
+      const message = `Error creating lookup index from lookup: ${lookupName}. It does not conform to index naming rules. ${error.message}`;
+      this.logger.error(message);
+      throw new Error(message);
+    }
   }
 }

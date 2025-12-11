@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 
-export const mockExperimentConnector: Connector = {
+export const mockExperimentConnector: Connector = createMockConnector({
   name: 'Gemini 1.5 Pro 002',
   actionTypeId: '.gemini',
   config: {
@@ -16,11 +17,6 @@ export const mockExperimentConnector: Connector = {
     gcpRegion: 'test-region',
     gcpProjectID: 'test-project-id',
   },
-  secrets: {
-    credentialsJson: '{}',
-  },
   id: 'gemini-1-5-pro-002',
   isPreconfigured: true,
-  isSystemAction: false,
-  isDeprecated: false,
-} as Connector;
+});

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
+import { SuggestionCategory } from '@kbn/esql-ast';
 import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -34,8 +35,13 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
-        sortText: '1',
+        command: {
+          arguments: [{ triggerSource: 'question_mark' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
+        category: SuggestionCategory.CUSTOM_ACTION,
+        sortText: '0000',
       });
 
       expect(suggestions).toContainEqual({
@@ -43,8 +49,8 @@ describe('autocomplete.suggest', () => {
         text: 'value',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '1A',
+        category: 'user_defined_column',
+        sortText: '0001',
       });
     });
 
@@ -65,8 +71,13 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.functions.create', title: 'Click to create' },
-        sortText: '1',
+        command: {
+          arguments: [{ triggerSource: 'smart_suggestion' }],
+          id: 'esql.control.functions.create',
+          title: 'Click to create',
+        },
+        category: SuggestionCategory.CUSTOM_ACTION,
+        sortText: '0000',
       });
     });
 
@@ -93,8 +104,8 @@ describe('autocomplete.suggest', () => {
         text: '??function',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '1A',
+        category: 'user_defined_column',
+        sortText: '0001',
       });
     });
 
@@ -115,8 +126,13 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.fields.create', title: 'Click to create' },
-        sortText: '11',
+        command: {
+          arguments: [{ triggerSource: 'smart_suggestion' }],
+          id: 'esql.control.fields.create',
+          title: 'Click to create',
+        },
+        category: SuggestionCategory.CUSTOM_ACTION,
+        sortText: '0002',
       });
     });
 
@@ -143,8 +159,8 @@ describe('autocomplete.suggest', () => {
         text: '??field',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '11A',
+        category: 'user_defined_column',
+        sortText: '0000',
       });
     });
 
@@ -171,8 +187,41 @@ describe('autocomplete.suggest', () => {
         text: '?interval',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '1A',
+        category: 'user_defined_column',
+        sortText: '0000',
+      });
+    });
+
+    test('suggests `?multiValue` option', async () => {
+      const { suggest } = await setup();
+
+      const suggestions = await suggest('FROM index_a | WHERE MV_CONTAINS( /', {
+        callbacks: {
+          canSuggestVariables: () => true,
+          getVariables: () => [
+            {
+              key: 'interval',
+              value: '1 hour',
+              type: ESQLVariableType.TIME_LITERAL,
+            },
+            {
+              key: 'multiValue',
+              value: ['value1', 'value2'],
+              type: ESQLVariableType.MULTI_VALUES,
+            },
+          ],
+          getColumnsFor: () =>
+            Promise.resolve([{ name: '@timestamp', type: 'date', userDefined: false }]),
+        },
+      });
+
+      expect(suggestions).toContainEqual({
+        label: '?multiValue',
+        text: '?multiValue',
+        kind: 'Constant',
+        detail: 'Named parameter',
+        category: 'user_defined_column',
+        sortText: '0004',
       });
     });
 
@@ -193,8 +242,13 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
-        sortText: '1',
+        command: {
+          arguments: [{ triggerSource: 'question_mark' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
+        category: SuggestionCategory.CUSTOM_ACTION,
+        sortText: '0000',
       });
     });
 
@@ -215,8 +269,13 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
-        sortText: '11',
+        command: {
+          arguments: [{ triggerSource: 'smart_suggestion' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
+        category: SuggestionCategory.CUSTOM_ACTION,
+        sortText: '0000',
       });
     });
 
@@ -243,8 +302,8 @@ describe('autocomplete.suggest', () => {
         text: '?value',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '11A',
+        category: 'user_defined_column',
+        sortText: '0001',
       });
     });
 
@@ -265,8 +324,13 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
-        sortText: '1',
+        command: {
+          arguments: [{ triggerSource: 'question_mark' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
+        category: SuggestionCategory.CUSTOM_ACTION,
+        sortText: '0000',
       });
     });
   });

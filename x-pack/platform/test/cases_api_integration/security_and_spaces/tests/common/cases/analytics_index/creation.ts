@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('cases index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases.default-securitysolution';
+      const indexName = '.internal.cases.securitysolution-default';
       const painlessScriptId = 'cai_cases_script_1';
       const version = indexVersion;
 
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('activity index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases-activity.default-securitysolution';
+      const indexName = '.internal.cases-activity.securitysolution-default';
       const painlessScriptId = 'cai_activity_script_1';
       const version = indexVersion;
 
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('attachments index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases-attachments.default-securitysolution';
+      const indexName = '.internal.cases-attachments.securitysolution-default';
       const painlessScriptId = 'cai_attachments_script_1';
       const version = indexVersion;
 
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('comments index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases-comments.default-securitysolution';
+      const indexName = '.internal.cases-comments.securitysolution-default';
       const painlessScriptId = 'cai_comments_script_1';
       const version = indexVersion;
 

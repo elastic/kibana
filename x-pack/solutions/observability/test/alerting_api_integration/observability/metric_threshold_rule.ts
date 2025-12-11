@@ -127,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         await esClient.deleteByQuery({
           index: METRICS_ALERTS_INDEX,
           query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+          conflicts: 'proceed',
         });
         await esClient.deleteByQuery({
           index: '.kibana-event-log-*',

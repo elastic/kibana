@@ -11,7 +11,6 @@ import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-
 import type { Suite, Test } from './fake_mocha_types';
 import type { Providers, Config } from './lib';
 import {
@@ -166,24 +165,30 @@ export class FunctionalTestRunner {
         providers,
         skipRootHooks: true,
         esVersion: this.esVersion,
+        reporter: 'base',
       });
 
-      const queue = new Set([mocha.suite]);
-      const allTests: Test[] = [];
-      for (const suite of queue) {
-        for (const test of suite.tests) {
-          allTests.push(test);
-        }
-        for (const childSuite of suite.suites) {
-          queue.add(childSuite);
-        }
-      }
+      // Run Mocha in dry-run mode to let its native filtering (grep, tags, etc.) determine
+      // which tests would execute, and capture the resulting execution/pending counts.
+      const statsFromDryRun = await new Promise<{
+        suites: number;
+        tests: number;
+        passes: number;
+        pending: number;
+        failures: number;
+      }>((resolve) => {
+        const runner = mocha.dryRun(true).run(() => {
+          resolve(runner.stats);
+        });
+      });
 
-      return {
-        testCount: allTests.length,
-        nonSkippedTestCount: allTests.filter((t) => !t.pending).length,
+      const stats = {
+        testCount: statsFromDryRun.tests,
+        nonSkippedTestCount: statsFromDryRun.tests - statsFromDryRun.pending,
         testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
+
+      return stats;
     });
   }
 

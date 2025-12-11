@@ -140,6 +140,11 @@ const statsRoute = createDatasetQualityServerRoute({
         : ({} as Record<string, number | undefined>),
     ]);
 
+    const clusterDefaultRetentionPeriod = isServerless
+      ? undefined
+      : await getDataStreamDefaultRetentionPeriod({
+          esClient,
+        });
     return {
       datasetUserPrivileges,
       dataStreamsStats: dataStreams.map((dataStream: DataStreamStat) => {
@@ -147,6 +152,8 @@ const statsRoute = createDatasetQualityServerRoute({
         dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
         dataStream.totalDocs = dataStreamsStats[dataStream.name]?.totalDocs;
         dataStream.creationDate = dataStreamsCreationDate[dataStream.name];
+        dataStream.defaultRetentionPeriod =
+          dataStream.defaultRetentionPeriod || clusterDefaultRetentionPeriod;
 
         return dataStream;
       }),
@@ -490,7 +497,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     if (!dataStreamDetails || Object.keys(dataStreamDetails).length === 0) {
       return {} as DataStreamDetails;
     }
-    const details = { ...dataStreamDetails };
+    const details = { ...dataStreamDetails, isServerless };
 
     if (!isServerless && details.defaultRetentionPeriod === undefined) {
       details.defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({

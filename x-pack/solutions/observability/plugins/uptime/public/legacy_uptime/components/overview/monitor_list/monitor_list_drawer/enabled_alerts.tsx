@@ -60,6 +60,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
       <EuiDescriptionListDescription>
         {listItems.length === 0 && !loading && (
           <EuiCallOut
+            announceOnMount
             size="s"
             title={i18n.translate('xpack.uptime.monitorList.enabledAlerts.noAlert', {
               defaultMessage: 'No rules are enabled for this monitor.',

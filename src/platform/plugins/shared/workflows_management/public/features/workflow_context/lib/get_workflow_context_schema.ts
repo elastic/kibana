@@ -9,7 +9,7 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowContextSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { inferZodType } from '../../../../common/lib/zod';
 
 export function getWorkflowContextSchema(definition: WorkflowYaml) {
@@ -34,14 +34,32 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
               const opts = input.options ?? [];
               valueSchema = z.any();
               if (opts.length > 0) {
-                const literals = opts.map((o) => z.literal(o)) as [
-                  z.ZodLiteral<any>,
-                  z.ZodLiteral<any>,
-                  ...z.ZodLiteral<any>[]
-                ];
+                const literals = opts.map((o) => z.literal(o));
                 valueSchema = z.union(literals);
               }
               break;
+            case 'array': {
+              // Create a union of all possible array types to show comprehensive type information
+              // This allows the type description to show "string[] | number[] | boolean[]"
+              const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
+              const { minItems, maxItems } = input;
+              const applyConstraints = (
+                schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
+              ) => {
+                let s = schema;
+                if (minItems != null) s = s.min(minItems);
+                if (maxItems != null) s = s.max(maxItems);
+                return s;
+              };
+              valueSchema = z.union(
+                arraySchemas.map(applyConstraints) as [
+                  z.ZodArray<z.ZodString>,
+                  z.ZodArray<z.ZodNumber>,
+                  z.ZodArray<z.ZodBoolean>
+                ]
+              );
+              break;
+            }
             default:
               valueSchema = z.any();
               break;

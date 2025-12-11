@@ -21,6 +21,25 @@
     "functions": [
       {
         "parentPluginId": "@kbn/check-saved-objects-cli",
+        "id": "def-common.getRemovedTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getRemovedTypes",
+        "description": [
+          "\nGets the removed types from the removed_types.json file."
+        ],
+        "signature": [
+          "() => Promise<string[]>"
+        ],
+        "path": "packages/kbn-check-saved-objects-cli/src/migrations/removed_types/get_removed_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/check-saved-objects-cli",
         "id": "def-common.runCheckMappingsUpdateCli",
         "type": "Function",
         "tags": [],

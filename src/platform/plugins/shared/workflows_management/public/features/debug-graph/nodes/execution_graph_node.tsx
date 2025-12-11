@@ -9,14 +9,15 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
-import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
 import type { Node } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React from 'react';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import type { NodeType } from './types';
 import { atomicNodes, mainScopeNodes, secondaryScopeNodes } from './types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface WorkflowNodeData extends Record<string, any> {
   stepType: NodeType;
   label: string;

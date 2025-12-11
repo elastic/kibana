@@ -15,6 +15,12 @@ export type EmbeddableTransforms<
   EmbeddableState extends object = object
 > = {
   /**
+   * Temporary flag indicating transformOut injects references
+   * When true, container REST API responses will drop references for panels that use transformOut
+   * TODO: remove once all reference injection is done in server
+   */
+  transformOutInjectsReferences?: boolean;
+  /**
    * Converts StoredEmbeddableState and injects references into EmbeddableState
    */
   transformOut?: (storedState: StoredEmbeddableState, references?: Reference[]) => EmbeddableState;
@@ -34,4 +40,8 @@ export type EmbeddableTransforms<
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
   schema?: Type<object>;
+  /**
+   * Throws error when panel config is not supported.
+   */
+  throwOnUnmappedPanel?: (config: EmbeddableState) => void;
 };

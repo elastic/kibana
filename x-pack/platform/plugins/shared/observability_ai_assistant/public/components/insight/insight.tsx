@@ -443,6 +443,7 @@ export function Insight({
   } else if (messages.status === FETCH_STATUS.FAILURE) {
     children = (
       <EuiCallOut
+        announceOnMount
         size="s"
         title={i18n.translate(
           'xpack.observabilityAiAssistant.insight.div.errorFetchingMessagesLabel',

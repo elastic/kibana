@@ -9,7 +9,7 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
+import type { CollapseFunction } from '@kbn/lens-common';
 import { getConfiguration } from '.';
 import type { VisParams } from '../../types';
 

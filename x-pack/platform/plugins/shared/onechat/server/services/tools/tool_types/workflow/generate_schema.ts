@@ -7,9 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/v1';
-import type { WorkflowInputSchema } from '@kbn/workflows/spec/schema';
-
-type InputType = z.infer<typeof WorkflowInputSchema>;
+import type { WorkflowInput } from '@kbn/workflows/spec/schema';
 
 export const generateSchema = ({ workflow }: { workflow: WorkflowDetailDto }): z.ZodObject<any> => {
   if (!workflow.definition || !workflow.definition.inputs) {
@@ -26,7 +24,7 @@ export const generateSchema = ({ workflow }: { workflow: WorkflowDetailDto }): z
   return z.object(schemaFields).describe('Parameters needed to execute the workflow');
 };
 
-const generateField = (input: InputType) => {
+const generateField = (input: WorkflowInput) => {
   let field: z.ZodTypeAny;
 
   switch (input.type) {
@@ -42,6 +40,25 @@ const generateField = (input: InputType) => {
     case 'choice':
       field = z.enum(input.options as [string, ...string[]]);
       break;
+    case 'array': {
+      const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
+      const { minItems, maxItems } = input;
+      const applyConstraints = (schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>) => {
+        let s = schema;
+        if (minItems != null) s = s.min(minItems);
+        if (maxItems != null) s = s.max(maxItems);
+        return s;
+      };
+      const arr = z.union(
+        arraySchemas.map(applyConstraints) as [
+          z.ZodArray<z.ZodString>,
+          z.ZodArray<z.ZodNumber>,
+          z.ZodArray<z.ZodBoolean>
+        ]
+      );
+      field = input.required ? arr : arr.optional();
+      break;
+    }
     default:
       field = z.any();
       break;

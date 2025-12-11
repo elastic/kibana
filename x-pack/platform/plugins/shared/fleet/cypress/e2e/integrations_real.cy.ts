@@ -13,6 +13,7 @@ import {
   installPackageWithVersion,
   deleteIntegrations,
   clickIfVisible,
+  calculateAssetCount,
 } from '../tasks/integrations';
 import {
   AGENT_POLICY_NAME_LINK,
@@ -75,6 +76,7 @@ function getAllIntegrations() {
     cy.wait(50);
     cy.getBySel(INTEGRATION_LIST)
       .find('.euiCard')
+      .should('be.visible')
       .each((element) => {
         const attrValue = element.attr('data-test-subj');
         if (attrValue) {
@@ -101,33 +103,28 @@ describe('Add Integration - Real API', () => {
   afterEach(() => {});
 
   it('should install integration without policy', () => {
+    // Intercept the package info API to get the asset count
+    cy.intercept('GET', '**/api/fleet/epm/packages/tomcat**').as('getPackageInfo');
     cy.visit('/app/integrations/detail/tomcat/settings');
 
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+    cy.wait('@getPackageInfo').then((interception) => {
+      const packageInfo = interception.response?.body.item;
+      const assetCount = calculateAssetCount(packageInfo);
 
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
+      // Assert against the actual asset count from the package
+      cy.get('.euiCallOut').contains(
+        `This action will install ${assetCount} asset${assetCount === 1 ? '' : 's'}`
+      );
+      cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
-    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
-  });
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
 
-  it('should install integration without policy', () => {
-    cy.visit('/app/integrations/detail/tomcat/settings');
-
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-
-    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+      cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+      cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+    });
   });
 
   it('should display Apache integration in the Policies list once installed ', () => {
@@ -198,6 +195,7 @@ describe('Add Integration - Real API', () => {
     clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
 
     cy.getBySel(SETTINGS_TAB).click();
+    cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX);
     cy.getBySel(UPDATE_PACKAGE_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
@@ -209,24 +207,6 @@ describe('Add Integration - Real API', () => {
       cy.getBySel(PACKAGE_VERSION).contains(newVersion);
     });
   });
-
-  it('should filter integrations by category', () => {
-    setupIntegrations();
-    cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
-
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
-
-    getAllIntegrations().then((items) => {
-      expect(items).to.have.length.greaterThan(29);
-    });
-
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
-    getAllIntegrations().then((items) => {
-      expect(items).to.have.length.greaterThan(3);
-    });
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
-  });
 });
 
 describe('It should handle non existing package', () => {
@@ -237,6 +217,59 @@ describe('It should handle non existing package', () => {
     cy.visit('/app/integrations/detail/packagedonotexists');
 
     cy.contains('[packagedonotexists] package not installed or found in registry').should('exist');
+  });
+});
+
+describe('Browsing integrations - Real API', () => {
+  const viewPortDimensions = [
+    [1200, 800],
+    [375, 667],
+  ];
+
+  viewPortDimensions.forEach((dimensions) => {
+    describe(`Viewport: ${dimensions[0]}x${dimensions[1]}`, () => {
+      beforeEach(() => {
+        cy.viewport(dimensions[0], dimensions[1]);
+        login();
+      });
+
+      it('should display a list of integrations', () => {
+        setupIntegrations();
+
+        // Wait for loading to complete
+        cy.getBySel(LOADING_SPINNER).should('not.exist');
+
+        // Verify that integrations are displayed
+        cy.getBySel(INTEGRATION_LIST).should('be.visible');
+        getAllIntegrations().should('have.length.greaterThan', 50);
+      });
+
+      it('should filter integrations by category', () => {
+        setupIntegrations();
+        cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
+
+        getAllIntegrations().then((items) => {
+          expect(items).to.have.length.greaterThan(29);
+        });
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
+        getAllIntegrations().then((items) => {
+          expect(items).to.have.length.greaterThan(3);
+        });
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
+      });
+
+      it('should filter integrations by search term', () => {
+        setupIntegrations();
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('1Password');
+        cy.getBySel(getIntegrationCard('1password')).should('be.visible');
+      });
+    });
   });
 });
 

@@ -155,6 +155,7 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
             {isEditMode && (
               <>
                 <EuiCallOut
+                  announceOnMount={false}
                   title={calloutTitle}
                   color="warning"
                   iconType="warning"

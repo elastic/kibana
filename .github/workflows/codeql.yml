@@ -28,12 +28,10 @@ jobs:
         persist-credentials: false
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3.28.18
+      uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
-        packs: |
-          githubsecuritylab/codeql-${{ matrix.language }}-queries
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
     # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
@@ -50,16 +48,10 @@ jobs:
         echo "CHECKOUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3.28.18
+      uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
-        # CodeQL divides the memory between ts and jvm, though most of the memory is used by the ts.
-        # We double the memory, so ts can use it in full capacity.
-        # Refer to https://github.com/github/codeql/blob/59a77a873c894bca7274a7ed7c7c6d937547e9b3/javascript/resources/tools/autobuild.sh#L7-L13
-        # 2 * 14576, considering our runner is 4 CPU/16GB.
-        CODEQL_RAM: 29152
-        CODEQL_THREADS: 2
       with:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}

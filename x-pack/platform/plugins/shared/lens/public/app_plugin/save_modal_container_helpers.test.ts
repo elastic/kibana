@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { makeDefaultServices } from '../mocks';
-import type { LensAppServices } from './types';
 import { redirectToDashboard } from './save_modal_container_helpers';
 import type { LensSerializedState } from '..';
+import type { LensAppServices } from '@kbn/lens-common';
 
 describe('redirectToDashboard', () => {
   const embeddableInput = {
@@ -15,11 +15,11 @@ describe('redirectToDashboard', () => {
   } as unknown as LensSerializedState;
   const mockServices = makeDefaultServices();
 
-  it('should call the navigateToWithMultipleEmbeddablePackage with the correct args if originatingApp is given', () => {
-    const navigateToWithMultipleEmbeddablePackageSpy = jest.fn();
+  it('should call the navigateToWithEmbeddablePackages with the correct args if originatingApp is given', () => {
+    const navigateToWithEmbeddablePackagesSpy = jest.fn();
     const transferService = {
       ...mockServices.stateTransfer,
-      navigateToWithMultipleEmbeddablePackage: navigateToWithMultipleEmbeddablePackageSpy,
+      navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesSpy,
     } as unknown as LensAppServices['stateTransfer'];
     redirectToDashboard({
       embeddableInput,
@@ -28,17 +28,17 @@ describe('redirectToDashboard', () => {
       getOriginatingPath: jest.fn(),
       stateTransfer: transferService,
     });
-    expect(navigateToWithMultipleEmbeddablePackageSpy).toHaveBeenCalledWith('security', {
+    expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('security', {
       path: '#/view/id',
       state: [{ serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' }],
     });
   });
 
-  it('should call the navigateToWithMultipleEmbeddablePackage with the correct args if originatingApp is an empty string', () => {
-    const navigateToWithMultipleEmbeddablePackageSpy = jest.fn();
+  it('should call the navigateToWithEmbeddablePackages with the correct args if originatingApp is an empty string', () => {
+    const navigateToWithEmbeddablePackagesSpy = jest.fn();
     const transferService = {
       ...mockServices.stateTransfer,
-      navigateToWithMultipleEmbeddablePackage: navigateToWithMultipleEmbeddablePackageSpy,
+      navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesSpy,
     } as unknown as LensAppServices['stateTransfer'];
     redirectToDashboard({
       embeddableInput,
@@ -47,7 +47,7 @@ describe('redirectToDashboard', () => {
       getOriginatingPath: jest.fn(),
       stateTransfer: transferService,
     });
-    expect(navigateToWithMultipleEmbeddablePackageSpy).toHaveBeenCalledWith('dashboards', {
+    expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('dashboards', {
       path: '#/view/id',
       state: [{ serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' }],
     });

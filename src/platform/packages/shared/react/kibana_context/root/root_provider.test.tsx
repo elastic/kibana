@@ -45,7 +45,7 @@ describe('KibanaRootContextProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'borealis' };
 
     render(
       <KibanaRootContextProvider
@@ -66,7 +66,7 @@ describe('KibanaRootContextProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'amsterdam' });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'borealis' });
 
     render(
       <KibanaRootContextProvider
@@ -88,7 +88,7 @@ describe('KibanaRootContextProvider', () => {
 
     // Update theme to light mode
     act(() => {
-      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
+      coreTheme$.next({ darkMode: false, name: 'borealis' });
     });
 
     // Wait for the theme to update

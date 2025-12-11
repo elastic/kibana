@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { of, defer, shareReplay, forkJoin, switchMap } from 'rxjs';
+import { of, forkJoin, switchMap } from 'rxjs';
 import { type Conversation, type RoundCompleteEvent } from '@kbn/onechat-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
@@ -51,21 +51,20 @@ export const createConversation$ = ({
  */
 export const updateConversation$ = ({
   conversationClient,
-  conversation$,
+  conversation,
   title$,
   roundCompletedEvents$,
 }: {
+  conversation: Conversation;
   title$: Observable<string>;
-  conversation$: Observable<Conversation>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
 }) => {
   return forkJoin({
-    conversation: conversation$,
     title: title$,
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
-    switchMap(({ conversation, title, roundCompletedEvent }) => {
+    switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.update({
         id: conversation.id,
         title,
@@ -78,17 +77,28 @@ export const updateConversation$ = ({
   );
 };
 
-export const conversationExists$ = ({
+/**
+ * Check if a conversation exists
+ */
+export const conversationExists = async ({
   conversationId,
   conversationClient,
 }: {
   conversationId: string;
   conversationClient: ConversationClient;
-}): Observable<boolean> => {
-  return defer(() => conversationClient.exists(conversationId));
+}): Promise<boolean> => {
+  return conversationClient.exists(conversationId);
 };
 
-export const getConversation$ = ({
+export type ConversationOperation = 'CREATE' | 'UPDATE';
+
+export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
+
+/**
+ * Get a conversation by ID, or create a placeholder for new conversations
+ * Also determines the operation type (CREATE or UPDATE) based on the same logic
+ */
+export const getConversation = async ({
   agentId,
   conversationId,
   autoCreateConversationWithId = false,
@@ -98,39 +108,39 @@ export const getConversation$ = ({
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
-}): Observable<Conversation> => {
-  return defer(() => {
-    if (conversationId) {
-      if (autoCreateConversationWithId) {
-        return conversationExists$({ conversationId, conversationClient }).pipe(
-          switchMap((exists) => {
-            if (exists) {
-              return conversationClient.get(conversationId);
-            } else {
-              return of(placeholderConversation({ conversationId, agentId }));
-            }
-          })
-        );
-      } else {
-        return conversationClient.get(conversationId);
-      }
-    } else {
-      return of(placeholderConversation({ agentId }));
-    }
-  }).pipe(shareReplay());
+}): Promise<ConversationWithOperation> => {
+  // Case 1: No conversation ID - create new with placeholder
+  if (!conversationId) {
+    return {
+      ...placeholderConversation({ agentId }),
+      operation: 'CREATE',
+    };
+  }
+
+  // Case 2: Conversation ID specified and autoCreate is false - update existing
+  if (!autoCreateConversationWithId) {
+    return {
+      ...(await conversationClient.get(conversationId)),
+      operation: 'UPDATE',
+    };
+  }
+
+  // Case 3: Conversation ID specified and autoCreate is true - check if exists
+  const exists = await conversationExists({ conversationId, conversationClient });
+  if (exists) {
+    return {
+      ...(await conversationClient.get(conversationId)),
+      operation: 'UPDATE',
+    };
+  } else {
+    return {
+      ...placeholderConversation({ conversationId, agentId }),
+      operation: 'CREATE',
+    };
+  }
 };
 
-export const createPlaceholderConversation$ = ({
-  agentId,
-  conversationId,
-}: {
-  agentId: string;
-  conversationId?: string;
-}): Observable<Conversation> => {
-  return of(placeholderConversation({ agentId, conversationId }));
-};
-
-const placeholderConversation = ({
+export const placeholderConversation = ({
   agentId,
   conversationId,
 }: {

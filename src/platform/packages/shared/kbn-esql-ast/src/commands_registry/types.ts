@@ -12,12 +12,14 @@ import type {
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
   ESQLSourceResult,
+  ESQLFieldWithMetadata,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
-import type { FieldType, SupportedDataType } from '../definitions/types';
+import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
+import type { SuggestionCategory } from '../sorting/types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -66,11 +68,16 @@ export interface ISuggestionItem {
    */
   sortText?: string;
   /**
+   * The category of the suggestion, used for sorting and prioritization
+   */
+  category?: SuggestionCategory;
+  /**
    * Suggestions can trigger a command by id. This is useful to trigger specific actions in some contexts
    */
   command?: {
     title: string;
     id: string;
+    arguments?: { [key: string]: string }[];
   };
   /**
    * The range that should be replaced when the suggestion is applied
@@ -104,18 +111,6 @@ export type GetColumnsByTypeFn = (
 ) => Promise<ISuggestionItem[]>;
 
 // TODO consider not exporting this
-export interface ESQLFieldWithMetadata {
-  name: string;
-  type: FieldType;
-  userDefined: false;
-  isEcs?: boolean;
-  hasConflict?: boolean;
-  metadata?: {
-    description?: string;
-  };
-}
-
-// TODO consider not exporting this
 export interface ESQLUserDefinedColumn {
   name: string;
   // invalid expressions produce columns of type "unknown"
@@ -142,6 +137,7 @@ export interface ICommandCallbacks {
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  isServerless?: boolean;
 }
 
 export interface ICommandContext {
@@ -156,6 +152,7 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  isCursorInSubquery?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.

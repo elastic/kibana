@@ -19,19 +19,19 @@ import {
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import { referenceLineIconsSet } from '../../../../shared_components/icon_set';
-import type { VisualizationDimensionEditorProps } from '../../../../types';
-import type { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
+import type { XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import type { FormatFactory } from '../../../../../common/types';
 
-import { updateLayer } from '..';
+import { updateLayer } from '../../toolbar';
 import { idPrefix } from '../dimension_editor';
 import { isHorizontalChart } from '../../state_helpers';
 import { MarkerDecorationPosition } from '../shared/marker_decoration_settings';
 import { defaultReferenceLineColor } from '../../color_assignment';
 
 export const ReferenceLinePanel = (
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
     palettes: KbnPalettes;

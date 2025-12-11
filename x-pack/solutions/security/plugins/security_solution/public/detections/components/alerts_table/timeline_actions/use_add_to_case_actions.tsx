@@ -18,8 +18,8 @@ import type { AlertTableContextMenuItem } from '../types';
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
-  ecsData?: Ecs;
-  nonEcsData?: TimelineNonEcsData[];
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
   refetch?: (() => void) | undefined;
 }

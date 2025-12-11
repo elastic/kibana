@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -19,14 +19,6 @@ import {
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
-  resilient: schema.object({
-    additionalFields: schema.object({
-      enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: true }),
-      }),
-    }),
-  }),
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
     validate(list) {

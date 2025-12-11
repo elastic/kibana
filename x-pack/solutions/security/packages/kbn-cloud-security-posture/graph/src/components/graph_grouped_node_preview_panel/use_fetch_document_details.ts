@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { number } from 'io-ts';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
@@ -14,6 +14,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { showDetailsErrorToast } from '../utils';
 import type { EventItem, AlertItem } from './components/grouped_item/types';
 
@@ -85,19 +89,34 @@ export const buildDocumentsRequest = (
   },
 });
 
+/**
+ * Normalizes a value to an array of strings.
+ * - undefined/null → undefined
+ * - string → [string] (single element array)
+ * - string[] → string[] (pass through)
+ */
+const normalizeToArray = (value?: string | string[]): string[] | undefined => {
+  if (value === undefined || value === null) return undefined;
+  return Array.isArray(value) ? value : [value];
+};
+
 const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
   // TODO Fix typing issue and replace `any`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hitSource = hit._source as Record<string, any>;
   return {
-    itemType: hit._index?.includes('alerts-security.alerts-') ? 'alert' : 'event',
+    itemType: hit._index?.includes('alerts-security.alerts-')
+      ? DOCUMENT_TYPE_ALERT
+      : DOCUMENT_TYPE_EVENT,
     id: hitSource.event?.id,
+    docId: hit._id,
+    index: hit._index,
     timestamp: hitSource['@timestamp'],
     action: hitSource.event?.action,
     actor: { id: hitSource.actor?.entity?.id },
     target: { id: hitSource.target?.entity?.id },
-    ip: hitSource.source?.ip,
-    countryCode: hitSource.source?.geo?.country_iso_code,
+    ips: normalizeToArray(hitSource.source?.ip),
+    countryCodes: normalizeToArray(hitSource.source?.geo?.country_iso_code),
   };
 };
 

@@ -69,6 +69,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
         {configContainsIssues ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.title"
@@ -111,6 +112,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
         {notifyWhenWarning ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.notifyWhenWarning"

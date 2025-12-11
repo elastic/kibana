@@ -18,6 +18,7 @@ export const createIndex = async ({
   log,
   elserInferenceId = internalElserInferenceId,
   isServerless = false,
+  abortController,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
@@ -26,21 +27,27 @@ export const createIndex = async ({
   log: Logger;
   elserInferenceId?: string;
   isServerless?: boolean;
+  abortController?: AbortController;
 }) => {
   log.debug(`Creating index ${indexName}`);
 
   overrideInferenceId(mappings, elserInferenceId);
 
-  await esClient.indices.create({
-    index: indexName,
-    mappings,
-    settings: !isServerless
-      ? {
-          auto_expand_replicas: '0-1',
-          'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
-        }
-      : undefined,
-  });
+  await esClient.indices.create(
+    {
+      index: indexName,
+      mappings,
+      settings: !isServerless
+        ? {
+            auto_expand_replicas: '0-1',
+            'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
+          }
+        : undefined,
+    },
+    {
+      signal: abortController?.signal,
+    }
+  );
 };
 
 const overrideInferenceId = (mappings: MappingTypeMapping, inferenceId: string) => {

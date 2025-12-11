@@ -58,7 +58,7 @@ function generateId() {
   return uuidv4();
 }
 
-interface StarredQueryMetadata {
+export interface StarredQueryMetadata {
   queryString: string;
   createdAt: string;
   status: 'success' | 'warning' | 'error';
@@ -113,7 +113,7 @@ export class EsqlStarredQueriesService {
     });
   }
 
-  private checkIfQueryIsStarred(queryString: string) {
+  checkIfQueryIsStarred(queryString: string) {
     return this.starredQueries.some((item) => item.queryString === queryString);
   }
 

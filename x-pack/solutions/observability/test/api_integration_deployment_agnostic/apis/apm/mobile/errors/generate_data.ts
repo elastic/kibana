@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 
 export const config = {
   appleTransaction: {
@@ -25,11 +25,13 @@ export async function generateData({
   serviceName,
   start,
   end,
+  withoutErrorId = false,
 }: {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
+  withoutErrorId?: boolean;
 }) {
   const serviceGoProdInstance = apm
     .service({ name: serviceName, environment: 'production', agentName: 'swift' })
@@ -66,6 +68,7 @@ export async function generateData({
                   message: `Error ${index}`,
                   type: transaction.name,
                   culprit: `Error culprit ${index}`,
+                  withoutErrorId,
                 })
                 .timestamp(timestamp)
             )

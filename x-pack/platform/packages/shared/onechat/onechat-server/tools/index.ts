@@ -11,6 +11,10 @@ export type {
   StaticEsqlTool,
   StaticWorkflowTool,
   StaticIndexSearchTool,
+  ToolAvailabilityContext,
+  ToolAvailabilityHandler,
+  ToolAvailabilityResult,
+  ToolAvailabilityConfig,
 } from './builtin';
 export type {
   ToolHandlerFn,
@@ -19,3 +23,4 @@ export type {
   ToolHandlerResult,
 } from './handler';
 export { getToolResultId, createErrorResult, isToolResultId } from './utils';
+export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';

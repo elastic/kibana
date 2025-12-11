@@ -99,6 +99,17 @@ export class ScoutPlaywrightReporter implements Reporter {
     };
   }
 
+  private getScoutConfigCategory(configPath: string): ScoutTestRunConfigCategory {
+    const pattern = /scout\/(api|ui)\//;
+    const match = configPath.match(pattern);
+    if (match) {
+      return match[1] === 'api'
+        ? ScoutTestRunConfigCategory.API_TEST
+        : ScoutTestRunConfigCategory.UI_TEST;
+    }
+    return ScoutTestRunConfigCategory.UNKNOWN;
+  }
+
   /**
    * Root path of this reporter's output
    */
@@ -119,7 +130,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (config.configFile !== undefined) {
       configInfo = {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.configFile)),
-        category: ScoutTestRunConfigCategory.UI_TEST,
+        category: this.getScoutConfigCategory(config.configFile),
       };
     }
 

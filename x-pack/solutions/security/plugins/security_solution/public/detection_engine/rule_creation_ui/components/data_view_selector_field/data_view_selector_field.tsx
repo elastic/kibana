@@ -49,6 +49,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
       {!areDataViewsFetching && isDataViewIdValid(field.value) && !selectedOption && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.DATA_VIEW_NOT_FOUND_WARNING_LABEL}
             color="warning"
             iconType="question"
@@ -62,6 +63,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
       {field.value === SECURITY_DEFAULT_DATA_VIEW_ID && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.DATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL}
             color="warning"
             iconType="question"

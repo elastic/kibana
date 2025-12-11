@@ -29,7 +29,7 @@ export const IntegrationsManageDataSource = () => {
         <p>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.integrations.infoText"
-            defaultMessage="By default, all users with admin roles or groups are considered privileged. You can customize which roles or groups are monitored as privileged."
+            defaultMessage="By default, all users with admin roles or groups are considered privileged."
           />
         </p>
       </EuiText>

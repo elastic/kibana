@@ -304,7 +304,7 @@ const componentStyles = {
   }),
   fieldItemButton: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
-    const boxShadow = euiShadowXSmall(themeContext);
+    const boxShadow = euiShadowXSmall(themeContext, { border: 'none' });
 
     return css({
       width: '100%',

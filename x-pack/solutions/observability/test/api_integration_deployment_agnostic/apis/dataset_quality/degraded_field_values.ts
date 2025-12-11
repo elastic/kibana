@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from '@kbn/expect';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';

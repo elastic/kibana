@@ -14,3 +14,12 @@ export const FLEET_PROXY_SAVED_OBJECT_TYPE = 'fleet-proxy';
 export const PROXY_URL_REGEX = /^(http[s]?|socks5):\/\/[^\s$.?#].[^\s]*$/gm;
 
 export const SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID = 'default-fleet-server';
+
+// Fleet Server IDs used for agentless policies:
+//  - For ECH, this is created by Fleet, see `createCloudFleetServerHostsIfNeeded` in:
+//    `x-pack/platform/plugins/shared/fleet/server/services/preconfiguration/fleet_server_host.ts`
+//  - For Serverless, this is the `default-fleet-server` host that is created from
+//    preconfiguration via project controller
+//  - Both are uneditable by users due to having `is_preconfigured: true` set
+export const ECH_AGENTLESS_FLEET_SERVER_HOST_ID = 'internal-agentless-fleet-server';
+export const SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID = SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID;

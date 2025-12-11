@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { EventsTableForCases } from './table';
+import {
+  EMPTY_EVENTS_TABLE_FOR_CASES_ID,
+  EventsTableForCases,
+  LOADING_EVENTS_TABLE_FOR_CASES_ID,
+} from './table';
 import { TestProviders } from '../../../common/mock';
 import { useCaseEventsDataView } from './use_events_data_view';
 
@@ -60,13 +64,25 @@ describe('EventsTableForCases', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
+    // renders loading initially
+    expect(screen.getByTestId(LOADING_EVENTS_TABLE_FOR_CASES_ID)).toBeInTheDocument();
 
     // Check if value cells are displayed at all
     await waitFor(() => {
+      expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
+
       const cells = screen.getAllByTestId('dataGridRowCell');
 
       expect(cells.length).toBeGreaterThan(2);
+    });
+  });
+
+  it('renders empty state for no events', async () => {
+    jest.mocked(searchEvents).mockResolvedValue([]);
+    render(<EventsTableForCases events={[]} />, { wrapper: TestProviders });
+
+    await waitFor(() => {
+      expect(screen.getByTestId(EMPTY_EVENTS_TABLE_FOR_CASES_ID)).toBeInTheDocument();
     });
   });
 

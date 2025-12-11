@@ -20,9 +20,9 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import type { DateRange } from '../common/types';
-import type { LensDocument } from './persistence';
 import type {
+  LensDocument,
+  DateRange,
   Datasource,
   DatasourceMap,
   Visualization,
@@ -31,10 +31,16 @@ import type {
   DraggedField,
   DragDropOperation,
   UserMessage,
+  DatasourceStates,
+  VisualizationState,
   TriggerEvent,
-} from './types';
-import { isOperation, isLensBrushEvent, isLensMultiFilterEvent, isLensFilterEvent } from './types';
-import type { DatasourceStates, VisualizationState } from './state_management';
+} from '@kbn/lens-common';
+import {
+  isOperation,
+  isLensBrushEvent,
+  isLensMultiFilterEvent,
+  isLensFilterEvent,
+} from './types_guards';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
 

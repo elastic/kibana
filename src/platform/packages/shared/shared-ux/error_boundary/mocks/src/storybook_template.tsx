@@ -10,22 +10,11 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-import {
-  EuiCollapsibleNavBeta,
-  EuiHeader,
-  EuiHeaderSection,
-  EuiLink,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 
 export const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
-      <EuiHeader position="fixed">
-        <EuiHeaderSection>
-          <EuiCollapsibleNavBeta />
-        </EuiHeaderSection>
-      </EuiHeader>
       <EuiPageTemplate>
         <EuiPageTemplate.Header pageTitle="Welcome to my page" />
         <EuiPageTemplate.Section grow={true}>{children}</EuiPageTemplate.Section>

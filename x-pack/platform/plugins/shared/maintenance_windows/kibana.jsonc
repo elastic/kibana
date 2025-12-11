@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/maintenance-windows-plugin",
+  "owner": "@elastic/response-ops",
+  "description": "This plugin exposes functionalities to manage maintenance windows.",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "maintenanceWindows",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "maintenanceWindows"],
+    "requiredPlugins": ["features", "licensing", "taskManager", "navigation"],
+    "extraPublicDirs": ["common"]
+  }
+}

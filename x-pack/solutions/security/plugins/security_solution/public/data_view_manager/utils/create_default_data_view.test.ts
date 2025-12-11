@@ -6,17 +6,13 @@
  */
 
 import {
-  type CreateDefaultDataViewDependencies,
   createDefaultDataView,
+  type CreateDefaultDataViewDependencies,
 } from './create_default_data_view';
 import { initDataView } from '../../sourcerer/store/model';
 import * as helpersAccess from '../../helpers_access';
 import * as createSourcererDataViewModule from '../../sourcerer/containers/create_sourcerer_data_view';
-import {
-  DEFAULT_ALERT_DATA_VIEW_ID,
-  DEFAULT_DATA_VIEW_ID,
-  DETECTION_ENGINE_INDEX_URL,
-} from '../../../common/constants';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../common/constants';
 
 jest.mock('../../helpers_access');
 jest.mock('../../sourcerer/containers/create_sourcerer_data_view');
@@ -76,11 +72,12 @@ describe('createDefaultDataView', () => {
     expect(mockHttp.fetch).toHaveBeenCalledWith(DETECTION_ENGINE_INDEX_URL, expect.any(Object));
     expect(createSourcererDataViewModule.createSourcererDataView).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: { patternList: ['pattern-*', 'signal-index'] },
-        dataViewService: mockDataViewService,
-        dataViewId: `${DEFAULT_DATA_VIEW_ID}-space1`,
-        alertDataViewId: `${DEFAULT_ALERT_DATA_VIEW_ID}-space1`,
-        signalIndexName: 'signal-index',
+        alertDetails: { dataViewId: 'security-solution-alert-space1', indexName: 'signal-index' },
+        dataViewService: {},
+        defaultDetails: {
+          dataViewId: 'security-solution-space1',
+          patternList: ['pattern-*', 'signal-index'],
+        },
       })
     );
     expect(result.defaultDataView).toMatchObject({ id: 'dv1', title: 'title1' });

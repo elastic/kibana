@@ -6,11 +6,8 @@
  */
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type {
-  ServiceFactory,
-  ExternalServiceITOM,
-  ExecutorSubActionAddEventParams,
-} from '../lib/servicenow/types';
+import type { ExecutorSubActionAddEventParams } from '@kbn/connector-schemas/servicenow_itom';
+import type { ServiceFactory, ExternalServiceITOM } from '../lib/servicenow/types';
 
 import { createExternalService as createExternalServiceCommon } from '../lib/servicenow/service';
 import { addServiceMessageToError } from '../lib/servicenow/utils';

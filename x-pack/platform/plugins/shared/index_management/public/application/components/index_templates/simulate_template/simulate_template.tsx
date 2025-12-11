@@ -26,77 +26,99 @@ interface Props {
   template?: { [key: string]: any };
   filters?: Filters;
   templateName?: string;
+  isVirtualized?: boolean;
+  overflowHeight?: number;
 }
 
-export const SimulateTemplate = React.memo(({ template, filters, templateName }: Props) => {
-  const [templatePreview, setTemplatePreview] = useState('{}');
+const DEFAULT_OVERFLOW_HEIGHT = 550;
 
-  const updatePreview = useCallback(async () => {
-    if (!templateName && (!template || Object.keys(template).length === 0)) {
-      return;
-    }
+export const SimulateTemplate = React.memo(
+  ({
+    template,
+    filters,
+    templateName,
+    isVirtualized = true,
+    overflowHeight = DEFAULT_OVERFLOW_HEIGHT,
+  }: Props) => {
+    const [templatePreview, setTemplatePreview] = useState('{}');
 
-    const indexTemplate = templateName
-      ? undefined
-      : serializeTemplate(
-          stripEmptyFields(template, { types: ['string'] }) as TemplateDeserialized
-        );
-    const { data, error } = await simulateIndexTemplate({ template: indexTemplate, templateName });
-    let filteredTemplate = data;
-
-    if (data) {
-      // "Overlapping" info is only useful when simulating against an index
-      // which we don't do here.
-      delete data.overlapping;
-
-      if (data.template && data.template.mappings === undefined) {
-        // Adding some extra logic to return an empty object for "mappings" as ES does not
-        // return one in that case (empty objects _are_ returned for "settings" and "aliases")
-        // Issue: https://github.com/elastic/elasticsearch/issues/60968
-        data.template.mappings = {};
+    const updatePreview = useCallback(async () => {
+      if (!templateName && (!template || Object.keys(template).length === 0)) {
+        return;
       }
 
-      if (filters) {
-        filteredTemplate = Object.entries(filters).reduce(
-          (acc, [key, value]) => {
-            if (!value) {
-              delete acc[key];
-            }
-            return acc;
-          },
-          { ...data.template } as any
-        );
-      }
-    }
+      const indexTemplate = templateName
+        ? undefined
+        : serializeTemplate(
+            stripEmptyFields(template, { types: ['string'] }) as TemplateDeserialized
+          );
+      const { data, error } = await simulateIndexTemplate({
+        template: indexTemplate,
+        templateName,
+      });
+      let filteredTemplate = data;
 
-    setTemplatePreview(JSON.stringify(filteredTemplate ?? error, null, 2));
-  }, [template, filters, templateName]);
+      if (data) {
+        // "Overlapping" info is only useful when simulating against an index
+        // which we don't do here.
+        delete data.overlapping;
 
-  useEffect(() => {
-    updatePreview();
-  }, [updatePreview]);
-
-  const isEmpty = templatePreview === '{}';
-  const hasFilters = Boolean(filters);
-
-  if (isEmpty && hasFilters) {
-    return (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.simulateTemplate.noFilterSelected"
-            defaultMessage="Select at least one option to preview."
-          />
+        if (data.template && data.template.mappings === undefined) {
+          // Adding some extra logic to return an empty object for "mappings" as ES does not
+          // return one in that case (empty objects _are_ returned for "settings" and "aliases")
+          // Issue: https://github.com/elastic/elasticsearch/issues/60968
+          data.template.mappings = {};
         }
-        iconType="pin"
-        size="s"
-      />
+
+        if (filters) {
+          filteredTemplate = Object.entries(filters).reduce(
+            (acc, [key, value]) => {
+              if (!value) {
+                delete acc[key];
+              }
+              return acc;
+            },
+            { ...data.template } as any
+          );
+        }
+      }
+
+      setTemplatePreview(JSON.stringify(filteredTemplate ?? error, null, 2));
+    }, [template, filters, templateName]);
+
+    useEffect(() => {
+      updatePreview();
+    }, [updatePreview]);
+
+    const isEmpty = templatePreview === '{}';
+    const hasFilters = Boolean(filters);
+
+    if (isEmpty && hasFilters) {
+      return (
+        <EuiCallOut
+          announceOnMount={false}
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.simulateTemplate.noFilterSelected"
+              defaultMessage="Select at least one option to preview."
+            />
+          }
+          iconType="pin"
+          size="s"
+        />
+      );
+    }
+
+    return isEmpty ? null : (
+      <EuiCodeBlock
+        language="json"
+        isCopyable={true}
+        data-test-subj="simulateTemplatePreview"
+        isVirtualized={isVirtualized}
+        overflowHeight={overflowHeight}
+      >
+        {templatePreview}
+      </EuiCodeBlock>
     );
   }
-
-  return isEmpty ? null : (
-    <EuiCodeBlock language="json" isCopyable={true} data-test-subj="simulateTemplatePreview">
-      {templatePreview}
-    </EuiCodeBlock>
-  );
-});
+);

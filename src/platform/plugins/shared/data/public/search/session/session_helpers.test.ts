@@ -17,7 +17,7 @@ import type { NowProviderInternalContract } from '../../now_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
-import { getSessionsClientMock } from './mocks';
+import { getSearchSessionEBTManagerMock, getSessionsClientMock } from './mocks';
 
 let sessionService: ISessionService;
 let state$: BehaviorSubject<SearchSessionState>;
@@ -56,6 +56,7 @@ beforeEach(() => {
         },
         ...rest,
       ]),
+    getSearchSessionEBTManagerMock(),
     getSessionsClientMock(),
     nowProvider,
     undefined,

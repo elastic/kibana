@@ -81,6 +81,7 @@ describe('reindex API', () => {
           licensing: licensingMockInstance,
           security: securityMockInstance,
           version,
+          rollupsEnabled: true,
         });
       },
     };

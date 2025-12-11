@@ -1,0 +1,581 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import type * as http from 'http';
+import { v4 as uuidv4 } from 'uuid';
+
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupMockServer } from '../agents/helpers/mock_agentless_api';
+import { SpaceTestApiClient } from '../space_awareness/api_helper';
+import {
+  cleanFleetIndices,
+  expectToRejectWithError,
+  expectToRejectWithNotFound,
+} from '../space_awareness/helpers';
+
+export default function (providerContext: FtrProviderContext) {
+  describe('Agentless Policies', () => {
+    const { getService } = providerContext;
+    const es = getService('es');
+    const supertest = getService('supertest');
+
+    const kibanaServer = getService('kibanaServer');
+
+    skipIfNoDockerRegistry(providerContext);
+
+    const apiClient = new SpaceTestApiClient(supertest);
+
+    let mockApiServer: http.Server;
+    describe('Create Agentless Policy', () => {
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+        mockApiServer.addListener('request', (request) => {
+          request.on('data', (data) => {
+            apiCalls.push({
+              url: request.url || '',
+              method: request.method || '',
+              data: JSON.parse(data.toString()),
+            });
+          });
+        });
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      let apiCalls: Array<{
+        url: string;
+        method: string;
+        data: any;
+      }> = [];
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        apiCalls = [];
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should allow to create an agentless policy and create related resources', async () => {
+        const id = uuidv4();
+
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: `test_agentless-${Date.now()}`,
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
+        expect(packagePolicy.item.supports_agentless).to.be(true);
+
+        const agentPolicy = await apiClient.getAgentPolicy(policy.item.id);
+        expect(agentPolicy.item.supports_agentless).to.be(true);
+
+        expect(apiCalls.length).to.be(1);
+        expect(apiCalls[0].url).to.be('/agentless-api/api/v1/ess/deployments');
+        expect(apiCalls[0].method).to.be('POST');
+        expect(apiCalls[0].data.policy_id).to.be(agentPolicy.item.id);
+        expect(apiCalls[0].data.policy_id).to.be(agentPolicy.item.id);
+        expect(apiCalls[0].data.fleet_url).to.be('https://deploymentid.fleet.hello.com:443');
+        expect(apiCalls[0].data.fleet_token).not.to.be(undefined);
+        expect(apiCalls[0].data.labels).to.eql({
+          owner: {
+            org: 'security',
+            division: 'engineering',
+            team: 'security-service-integrations',
+          },
+        });
+      });
+
+      it('should handle id conflict and not delete existing package or agent policy', async () => {
+        const id = uuidv4();
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: `test_agentless-${Date.now()}`,
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.createAgentlessPolicy({
+              id,
+              package: {
+                name: 'test_agentless',
+                version: '1.0.0',
+              },
+              name: `test_agentless-${Date.now()}`,
+              description: 'test agentless policy',
+              namespace: 'default',
+              inputs: {
+                'sample-httpjson': {
+                  enabled: true,
+                  vars: {
+                    api_key: 'TEST_VALUE_API_KEY',
+                  },
+                  streams: {},
+                },
+              },
+            }),
+          /409 "Conflict"/
+        );
+
+        const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
+        expect(packagePolicy.item.supports_agentless).to.be(true);
+
+        const agentPolicy = await apiClient.getAgentPolicy(policy.item.id);
+        expect(agentPolicy.item.supports_agentless).to.be(true);
+      });
+
+      it('should handle package policy name conflict and not delete existing package policy', async () => {
+        const packagePolicyName = `test_agentless-${Date.now()}`;
+
+        const packagePolicyRes = await apiClient.createPackagePolicy(undefined, {
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: packagePolicyName,
+          description: 'test ',
+          namespace: 'default',
+          policy_ids: [],
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        const id = uuidv4();
+        await expectToRejectWithError(
+          () =>
+            apiClient.createAgentlessPolicy({
+              id,
+              package: {
+                name: 'test_agentless',
+                version: '1.0.0',
+              },
+              name: packagePolicyName,
+              description: 'test agentless policy',
+              namespace: 'default',
+              inputs: {
+                'sample-httpjson': {
+                  enabled: true,
+                  vars: {
+                    api_key: 'TEST_VALUE_API_KEY',
+                  },
+                  streams: {},
+                },
+              },
+            }),
+          /409 "Conflict"/
+        );
+
+        await apiClient.getPackagePolicy(packagePolicyRes.item.id);
+
+        await expectToRejectWithNotFound(() => apiClient.getAgentPolicy(id));
+      });
+
+      it('should handle agent policy name conflict and not delete existing agent policy', async () => {
+        const packagePolicyId = uuidv4();
+        const packagePolicyName = `test_agentless-${Date.now()}`;
+        const agentPolicyName = `Agentless policy for ${packagePolicyName}`;
+
+        const agentPolicyRes = await apiClient.createAgentPolicy(undefined, {
+          name: agentPolicyName,
+          description: 'test ',
+          namespace: 'default',
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.createAgentlessPolicy({
+              id: packagePolicyId,
+              package: {
+                name: 'test_agentless',
+                version: '1.0.0',
+              },
+              name: packagePolicyName,
+              description: 'test agentless policy',
+              namespace: 'default',
+              inputs: {
+                'sample-httpjson': {
+                  enabled: true,
+                  vars: {
+                    api_key: 'TEST_VALUE_API_KEY',
+                  },
+                  streams: {},
+                },
+              },
+            }),
+          /409 "Conflict"/
+        );
+
+        await apiClient.getAgentPolicy(agentPolicyRes.item.id);
+
+        await expectToRejectWithNotFound(() => apiClient.getPackagePolicy(packagePolicyId));
+      });
+    });
+
+    describe('Delete Agentless Policy', () => {
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+
+        mockApiServer.addListener('request', (request) => {
+          apiCalls.push({
+            url: request.url || '',
+            method: request.method || '',
+          });
+        });
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      let apiCalls: Array<{
+        url: string;
+        method: string;
+      }> = [];
+      let policyId: string;
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+
+        policyId = uuidv4();
+
+        await apiClient.createAgentlessPolicy({
+          id: policyId,
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: `test_agentless-${Date.now()}`,
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        apiCalls = [];
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should allow to delete an agentless policy and delete related resources', async () => {
+        await apiClient.deleteAgentlessPolicy(policyId);
+
+        await expectToRejectWithNotFound(() => apiClient.getPackagePolicy(policyId));
+
+        await expectToRejectWithNotFound(() => apiClient.getAgentPolicy(policyId));
+
+        expect(apiCalls.length).to.be(1);
+        expect(apiCalls[0].url).to.be(`/agentless-api/api/v1/ess/deployments/${policyId}`);
+        expect(apiCalls[0].method).to.be('DELETE');
+      });
+    });
+
+    describe('Sync Agentless Policies', () => {
+      let apiCalls: Array<{
+        url: string;
+        method: string;
+        data?: any;
+      }> = [];
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+        mockApiServer.addListener('request', (request) => {
+          if (request.method === 'POST') {
+            request.on('data', (data) => {
+              apiCalls.push({
+                url: request.url || '',
+                method: request.method || '',
+                data: JSON.parse(data.toString()),
+              });
+            });
+          } else {
+            apiCalls.push({
+              url: request.url || '',
+              method: request.method || '',
+            });
+          }
+        });
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+
+        await apiClient.createAgentlessPolicy({
+          id: 'agentless-deployment-1',
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: 'Test agentless policy ' + Date.now(),
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        await apiClient.createAgentlessPolicy({
+          id: 'agentless-deployment-3',
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: 'Test agentless policy ' + Date.now(),
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+        apiCalls = [];
+      });
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should allow to sync agentless policies', async () => {
+        // agentless-deployment-1 is already synced
+        // agentless-deployment-2 does not exist anymore and should be deleted
+        // agentless-deployment-3 needs to be created
+
+        await apiClient.syncAgentlessPolicies();
+        expect(apiCalls.length).to.be(3);
+
+        expect(apiCalls.find((call) => call.method === 'GET')).not.to.be(undefined);
+        expect(
+          apiCalls.find(
+            (call) => call.method === 'POST' && call.data?.policy_id === 'agentless-deployment-3'
+          )
+        ).not.to.be(undefined);
+        expect(
+          apiCalls.find(
+            (call) =>
+              call.url === '/agentless-api/api/v1/ess/deployments/agentless-deployment-2' &&
+              call.method === 'DELETE'
+          )
+        ).not.to.be(undefined);
+      });
+
+      it('should do nothing in dryrun', async () => {
+        // agentless-deployment-1 is already synced
+        // agentless-deployment-2 does not exist anymore and should be deleted
+        // agentless-deployment-3 needs to be created
+
+        await apiClient.syncAgentlessPolicies({ dryRun: true });
+        expect(apiCalls.length).to.be(1);
+        expect(apiCalls.find((call) => call.method === 'GET')).not.to.be(undefined);
+      });
+    });
+
+    describe.skip('Agentless Policy with Cloud Connectors', () => {
+      // See individual tests for more details
+      // Will be resolved in https://github.com/elastic/security-team/issues/14864
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089);
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it.skip('should create agentless policy with AWS cloud connector (requires cloud connector support in test package)', async () => {
+        // Will be resolved in https://github.com/elastic/security-team/issues/14864
+        // Note: This test is skipped because the test_agentless package doesn't support cloud connectors
+        // To enable this test, we would need to:
+        // 1. Create a test package with cloud connector support in the deployment_modes
+        // 2. Configure the agent policy to enable cloud connectors with target_csp: 'aws'
+        // 3. Provide the necessary vars (role_arn, external_id) in the inputs
+
+        const id = uuidv4();
+
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'cloud_security_posture', // Would need to use a real CSP package or create test package
+            version: '3.1.1',
+          },
+          name: `cspm-aws-${Date.now()}`,
+          description: 'test agentless policy with AWS cloud connector',
+          namespace: 'default',
+          inputs: {
+            'cspm-cloudbeat/cis_aws': {
+              enabled: true,
+              streams: {
+                'cloud_security_posture.findings': {
+                  enabled: true,
+                  vars: {
+                    role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+                    external_id: {
+                      id: 'test-external-id',
+                      isSecretRef: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
+        expect(packagePolicy.item.supports_agentless).to.be(true);
+        expect(packagePolicy.item.supports_cloud_connector).to.be(true);
+        expect(packagePolicy.item.cloud_connector_id).not.to.be(undefined);
+      });
+
+      it.skip('should decrement cloud connector package count when deleting agentless policy (requires cloud connector setup)', async () => {
+        // Will be resolved in https://github.com/elastic/security-team/issues/14864
+        // Note: This test is skipped for the same reasons as above
+        // This would test:
+        // 1. Create an agentless policy with cloud connector
+        // 2. Verify cloud connector packagePolicyCount is 1
+        // 3. Delete the agentless policy
+        // 4. Verify cloud connector packagePolicyCount is decremented to 0
+
+        const id = uuidv4();
+
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'cloud_security_posture',
+            version: '3.1.1',
+          },
+          name: `cspm-aws-${Date.now()}`,
+          description: 'test agentless policy with AWS cloud connector',
+          namespace: 'default',
+          inputs: {
+            'cspm-cloudbeat/cis_aws': {
+              enabled: true,
+              streams: {
+                'cloud_security_posture.findings': {
+                  enabled: true,
+                  vars: {
+                    role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+                    external_id: {
+                      id: 'test-external-id',
+                      isSecretRef: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
+        const cloudConnectorId = packagePolicy.item.cloud_connector_id;
+
+        // Get cloud connector before deletion
+        const cloudConnectorBefore = await supertest
+          .get(`/api/fleet/cloud_connectors/${cloudConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(cloudConnectorBefore.body.item.packagePolicyCount).to.be(1);
+
+        // Delete the agentless policy
+        await apiClient.deleteAgentlessPolicy(id);
+
+        // Get cloud connector after deletion
+        const cloudConnectorAfter = await supertest
+          .get(`/api/fleet/cloud_connectors/${cloudConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(cloudConnectorAfter.body.item.packagePolicyCount).to.be(0);
+      });
+    });
+  });
+}

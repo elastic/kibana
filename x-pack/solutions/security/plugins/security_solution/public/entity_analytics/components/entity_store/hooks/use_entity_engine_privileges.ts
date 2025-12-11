@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../../../api/api';

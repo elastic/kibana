@@ -11,6 +11,12 @@ import type {
   RollupGetJobsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
+export type GetRollupJobByIndexNameType = (
+  esClient: ElasticsearchClient,
+  log: Logger,
+  index: string
+) => Promise<string | undefined>;
+
 export async function getRollupJobByIndexName(
   esClient: ElasticsearchClient,
   log: Logger,

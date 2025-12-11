@@ -11,8 +11,10 @@ import { css } from '@emotion/react';
 import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
+import type {
+  VisualizationDimensionEditorProps,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 
 import type { ColumnState } from '../../../../common/expressions';
 

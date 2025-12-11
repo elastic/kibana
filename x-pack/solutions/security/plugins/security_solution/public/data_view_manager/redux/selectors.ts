@@ -7,10 +7,10 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 
-import type { DataViewManagerScopeName } from '../constants';
+import type { PageScope } from '../constants';
 import type { RootState } from './reducer';
 
-export const sourcererAdapterSelector = (scope: DataViewManagerScopeName) =>
+export const sourcererAdapterSelector = (scope: PageScope) =>
   createSelector([(state: RootState) => state.dataViewManager], (dataViewManager) => {
     const scopedState = dataViewManager[scope];
 

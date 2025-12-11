@@ -13,7 +13,6 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -23,7 +22,8 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../../utils';
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

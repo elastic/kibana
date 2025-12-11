@@ -75,6 +75,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -177,6 +178,7 @@ export interface ObservabilityPublicPluginsStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
+  onechat?: OnechatPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -193,7 +195,6 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
   private telemetry: TelemetryService;
-  private isServerless: boolean = false;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -216,12 +217,12 @@ export class Plugin
           visibleIn: [],
         },
       ],
+      keywords: ['alerts', 'rules'],
     },
   ];
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
     this.telemetry = new TelemetryService();
-    this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -315,7 +316,6 @@ export class Plugin
         'logs',
         'metrics',
         'apm',
-        'slo',
         'performance',
         'trace',
         'agent',
@@ -475,7 +475,6 @@ export class Plugin
                       }),
                       app: 'streams',
                       path: '/',
-                      isTechnicalPreview: this.isServerless,
                       matchPath(currentPath: string) {
                         return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
                       },

@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { getTimeFieldFromESQLQuery, getIndexPatternFromESQLQuery } from './query_parsing_helpers';
+import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -25,20 +26,55 @@ async function sha256(str: string) {
   }
 }
 
-// Some applications need to have a dataview to work properly with ES|QL queries
-// This is a helper to create one. The id is constructed from the indexpattern.
-// As there are no runtime fields or field formatters or default time fields
-// the same adhoc dataview can be constructed/used. This comes with great advantages such
-// as solving the problem described here https://github.com/elastic/kibana/issues/168131
-export async function getESQLAdHocDataview(
-  query: string,
-  dataViewsService: DataViewsPublicPluginStart,
+/**
+ * Creates an ad-hoc DataView for ES|QL queries.
+ *
+ * Some applications need to have a DataView to work properly with ES|QL queries.
+ * This helper creates an ad-hoc DataView with an ID constructed from the index pattern.
+ * Since there are no runtime fields, field formatters, or default time fields,
+ * the same ad-hoc DataView can be constructed/reused, which solves caching issues
+ * described in https://github.com/elastic/kibana/issues/168131.
+ *
+ * The function automatically detects the time field by making an HTTP request to determine
+ * if '@timestamp' exists across all indices in the query. If all indices contain the field,
+ * it sets '@timestamp' as the time field; otherwise, no time field is set.
+ *
+ * @param dataViewsService - The DataViews service instance used to create the DataView
+ * @param query - The ES|QL query string to extract the index pattern from
+ * @param options - Optional configuration for DataView creation
+ * @param options.allowNoIndex - Whether to allow creating a DataView for non-existent indices
+ * @param options.skipFetchFields - Whether to skip fetching fields for performance reasons
+ * @param options.createNewInstanceEvenIfCachedOneAvailable - Forces creation of a new instance, clearing any cached DataView
+ * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
+ *
+ * @returns Promise that resolves to the created DataView with the detected time field (if any)
+ *
+ */
+export async function getESQLAdHocDataview({
+  dataViewsService,
+  query,
+  options,
+  http,
+}: {
+  // the data views service to use to create the data view
+  dataViewsService: DataViewsPublicPluginStart;
+  // the ES|QL query to extract the index pattern from
+  query: string;
   options?: {
     allowNoIndex?: boolean;
     createNewInstanceEvenIfCachedOneAvailable?: boolean;
-  }
-) {
-  const timeField = getTimeFieldFromESQLQuery(query);
+    skipFetchFields?: boolean;
+  };
+  // optional http service to use to fetch the time field, if needed
+  http?: HttpStart;
+}) {
+  const encodedQuery = encodeURIComponent(query);
+  const response = (await http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error('Failed to fetch the timefield', error);
+    return undefined;
+  })) as { timeField?: string } | undefined;
+  const timeField = response?.timeField;
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataViewId = await sha256(`esql-${indexPattern}`);
 
@@ -46,22 +82,19 @@ export async function getESQLAdHocDataview(
     // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
   }
+  const skipFetchFields = options?.skipFetchFields ?? false;
 
-  const dataView = await dataViewsService.create({
-    title: indexPattern,
-    type: ESQL_TYPE,
-    id: dataViewId,
-    allowNoIndex: options?.allowNoIndex,
-  });
-
-  dataView.timeFieldName = timeField;
-
-  // If the indexPattern is empty string means that the user used either the ROW, SHOW INFO commands
-  // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
-  if (!timeField && indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
-    dataView.timeFieldName = '@timestamp';
-  }
-
+  const dataView = await dataViewsService.create(
+    {
+      title: indexPattern,
+      type: ESQL_TYPE,
+      id: dataViewId,
+      allowNoIndex: options?.allowNoIndex,
+      timeFieldName: timeField || undefined,
+    },
+    // important to skip if you just need the dataview without the fields for performance reasons
+    skipFetchFields
+  );
   return dataView;
 }
 

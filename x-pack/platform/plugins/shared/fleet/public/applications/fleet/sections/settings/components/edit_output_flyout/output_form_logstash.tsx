@@ -86,6 +86,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutTitle',
               { defaultMessage: 'Proceed with caution!' }

@@ -8,6 +8,15 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+declare global {
+  interface Window {
+    /**
+     * Debug setting to make requests complete slower than normal. data.search.aggs.shardDelay.enabled has to be set via settings for this to work
+     */
+    ELASTIC_LENS_DELAY_SECONDS?: number;
+  }
+}
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');

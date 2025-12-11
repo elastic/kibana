@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import type { ToolSelection, ToolSelectionRelevantFields } from '@kbn/onechat-common';
-import { allToolsSelectionWildcard } from '@kbn/onechat-common';
-import { toggleToolSelection, isToolSelected } from './tool_selection_utils';
+import type {
+  ToolSelection,
+  ToolSelectionRelevantFields,
+  ToolDefinition,
+} from '@kbn/onechat-common';
+import { ToolType, allToolsSelectionWildcard } from '@kbn/onechat-common';
+import {
+  toggleToolSelection,
+  isToolSelected,
+  cleanInvalidToolReferences,
+} from './tool_selection_utils';
+import type { AgentEditState } from '../hooks/agents/use_agent_edit';
 
 describe('tool_selection_utils', () => {
   const mockTools: ToolSelectionRelevantFields[] = [
@@ -67,6 +76,79 @@ describe('tool_selection_utils', () => {
       expect(result[0].tool_ids).toContain('tool2');
       expect(result[0].tool_ids).toContain('tool3');
       expect(result[0].tool_ids).not.toContain(allToolsSelectionWildcard);
+    });
+  });
+
+  describe('cleanInvalidToolReferences', () => {
+    const mockToolDefinitions: ToolDefinition[] = [
+      {
+        id: 'tool1',
+        type: ToolType.esql,
+        description: 'Tool 1',
+        readonly: false,
+        tags: [],
+        configuration: {},
+      },
+      {
+        id: 'tool2',
+        type: ToolType.esql,
+        description: 'Tool 2',
+        readonly: false,
+        tags: [],
+        configuration: {},
+      },
+      {
+        id: 'tool3',
+        type: ToolType.esql,
+        description: 'Tool 3',
+        readonly: false,
+        tags: [],
+        configuration: {},
+      },
+    ];
+
+    const createAgentData = (toolIds: string[][]): AgentEditState => ({
+      id: 'test-agent',
+      name: 'Test Agent',
+      description: 'Test',
+      labels: [],
+      avatar_color: '',
+      avatar_symbol: '',
+      configuration: {
+        instructions: '',
+        tools: toolIds.map((ids) => ({ tool_ids: ids })),
+      },
+    });
+
+    it('should remove non-existent tool IDs and preserve valid ones', () => {
+      const data = createAgentData([['tool1', 'invalid_tool', 'tool2']]);
+      const result = cleanInvalidToolReferences(data, mockToolDefinitions);
+
+      expect(result.configuration.tools).toEqual([{ tool_ids: ['tool1', 'tool2'] }]);
+    });
+
+    it('should preserve wildcard selection while removing invalid tools', () => {
+      const data = createAgentData([['*', 'invalid_tool']]);
+      const result = cleanInvalidToolReferences(data, mockToolDefinitions);
+
+      expect(result.configuration.tools).toEqual([{ tool_ids: ['*'] }]);
+    });
+
+    it('should remove empty selections after filtering out invalid tools', () => {
+      const data = createAgentData([['tool1'], ['invalid_tool'], ['tool2']]);
+      const result = cleanInvalidToolReferences(data, mockToolDefinitions);
+
+      expect(result.configuration.tools).toEqual([
+        { tool_ids: ['tool1'] },
+        { tool_ids: ['tool2'] },
+      ]);
+    });
+
+    it('should return empty array when all tool references are invalid', () => {
+      const data = createAgentData([['invalid1', 'invalid2']]);
+      const result = cleanInvalidToolReferences(data, mockToolDefinitions);
+
+      expect(result.configuration.tools).toEqual([]);
     });
   });
 });

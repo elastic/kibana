@@ -10,7 +10,7 @@
 import { CharStreams, type Token } from 'antlr4';
 import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
-import { attachDecorations, collectDecorations } from './formatting';
+import { attachDecorations, collectDecorations } from './decorations';
 import { Builder } from '../builder';
 import { CstToAstConverter } from './cst_to_ast_converter';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
@@ -18,6 +18,7 @@ import { default as ESQLParser } from '../antlr/esql_parser';
 import type {
   ESQLAst,
   ESQLAstExpression,
+  ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLMap,
@@ -105,6 +106,45 @@ export class Parser {
     }
 
     return result;
+  };
+
+  /**
+   * Parse a single ES|QL header pseudo-command, generating an AST and a list of parsing errors.
+   *
+   * Make sure to check the returned `errors` list for any parsing issues.
+   *
+   * For example:
+   *
+   * ```typescript
+   * const result = Parser.parseSetCommand('SET a = "foo"');
+   * ```
+   *
+   * @param src Source text of a SET pseudo-command to parse.
+   * @param options Parsing options.
+   * @returns A result object containing the parsed SET command, its AST, tokens, and errors.
+   */
+  public static readonly parseHeaderCommand = (
+    src: string,
+    options?: ParseOptions
+  ): ParseResult<ESQLAstHeaderCommand> => {
+    const text = src.trimEnd().replace(/;{1}$/, '');
+    const result = Parser.parse(`${text}; FROM a`, options);
+
+    if (!result.errors.length) {
+      const header = result.root.header;
+
+      if (header && header.length > 0) {
+        const setCommand = header[0];
+
+        return {
+          ...result,
+          root: setCommand as any,
+          ast: [setCommand as any],
+        };
+      }
+    }
+
+    throw new Error(`Invalid header command: ${src}`);
   };
 
   /**

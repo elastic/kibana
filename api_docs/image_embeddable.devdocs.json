@@ -29,7 +29,53 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-server.ImageConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageConfig",
+        "description": [],
+        "signature": [
+          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-server.ImageConfigState",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageConfigState",
+        "description": [],
+        "signature": [
+          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-server.ImageEmbeddableState",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageEmbeddableState",
+        "description": [],
+        "signature": [
+          "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly enhancements?: any; readonly hidePanelTitles?: boolean | undefined; readonly imageConfig: Readonly<{ altText?: string | undefined; backgroundColor?: string | undefined; } & { src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }>; }"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {

@@ -170,7 +170,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       {hasExpressionErrors ? (
         <Fragment>
           <EuiSpacer />
-          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+          <EuiCallOut announceOnMount color="danger" size="s" title={expressionErrorMessage} />
           <EuiSpacer />
         </Fragment>
       ) : null}

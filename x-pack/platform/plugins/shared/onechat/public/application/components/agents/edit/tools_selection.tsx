@@ -35,6 +35,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const displayTools = useMemo(() => {
     let result = tools;
@@ -81,6 +82,11 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     setPageIndex(newPageIndex);
   }, []);
 
+  const handlePageSizeChange = useCallback((newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPageIndex(0);
+  }, []);
+
   if (toolsLoading) {
     return <EuiLoadingSpinner size="l" />;
   }
@@ -112,6 +118,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         disabled={disabled}
         pageIndex={pageIndex}
         onPageChange={handlePageChange}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
       />
     </div>
   );

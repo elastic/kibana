@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "jsx": "react",
@@ -31,6 +31,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/content-management-user-profiles",
     "@kbn/core-user-profile-browser",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*"

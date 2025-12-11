@@ -53,6 +53,20 @@ import {
 
 const SKIP_COLLECTION = 'Skip Collection';
 
+/**
+ * Checks if an error is related to license restrictions
+ */
+function isLicenseError(error: any): boolean {
+  const errorType = error?.meta?.body?.error?.type;
+  const errorReason = error?.meta?.body?.error?.reason?.toLowerCase() || '';
+  const errorMessage = error?.message?.toLowerCase() || '';
+
+  return (
+    errorType === 'security_exception' &&
+    (errorReason.includes('license') || errorMessage.includes('license'))
+  );
+}
+
 export class DataTelemetryService {
   private readonly logger: Logger;
 
@@ -165,6 +179,13 @@ export class DataTelemetryService {
               } catch (e) {
                 if (e.message === SKIP_COLLECTION) {
                   data = null; // Collection is skipped, skip reporting
+                } else if (isLicenseError(e)) {
+                  // License errors are expected in certain deployments (e.g., basic license)
+                  // and don't indicate a problem with the system
+                  service.logger.debug(
+                    `[Logs Data Telemetry] Skipping telemetry collection due to license restriction: ${e.message}`
+                  );
+                  data = null;
                 } else {
                   service.logger.error(e);
                 }
@@ -227,6 +248,7 @@ export class DataTelemetryService {
         logsIndexPatterns: LOGS_DATASET_INDEX_PATTERNS,
         excludeStreamsStartingWith: [...NON_LOG_SIGNALS, ...EXCLUDE_ELASTIC_LOGS],
         breatheDelay: BREATHE_DELAY_MEDIUM,
+        logger: this.logger,
       }).pipe(
         switchMap((dataStreamsAndIndicesInfo) => {
           if (dataStreamsAndIndicesInfo.length > MAX_STREAMS_TO_REPORT) {

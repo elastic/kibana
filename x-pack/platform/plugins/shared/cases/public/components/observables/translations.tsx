@@ -151,6 +151,10 @@ export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
   }
 );
 
+export const AGENT_ID = i18n.translate('xpack.cases.caseView.observables.agentId', {
+  defaultMessage: 'Agent id',
+});
+
 export const HOST_NAME = i18n.translate('xpack.cases.caseView.observables.hostName', {
   defaultMessage: 'Host name',
 });

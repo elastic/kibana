@@ -175,7 +175,7 @@ To ensure authenticated communication between Elastic and {{sn}}, create a {{sn}
 2. Click **New**.
 3. Complete the form, then right-click on the menu bar and click **Save**.
 4. Go to the **Roles** tab and click **Edit**.
-5. Assign the integration user the following roles: 
+5. Assign the integration user the following roles:
 
     * `import_set_loader`
     * `import_transformer`

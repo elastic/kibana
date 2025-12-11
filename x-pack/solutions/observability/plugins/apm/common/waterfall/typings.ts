@@ -78,6 +78,7 @@ export interface WaterfallError {
   transaction?: { id?: string };
   parent?: { id?: string };
   span?: { id?: string };
+  eventName?: string;
   error: {
     id: string;
     log?: {

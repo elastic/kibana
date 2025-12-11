@@ -944,14 +944,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       );
     },
 
-    async deleteAllRulesEs() {
-      await es.deleteByQuery({
-        index: '.kibana_alerting_cases',
-        query: { term: { type: 'alert' } },
-        conflicts: 'proceed',
-      });
-    },
-
     async deleteAllActionConnectors({ roleAuthc }: { roleAuthc: RoleCredentials }): Promise<any> {
       const res = await supertestWithoutAuth
         .get(`/api/actions/connectors`)

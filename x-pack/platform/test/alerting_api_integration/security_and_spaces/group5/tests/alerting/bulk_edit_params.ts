@@ -11,7 +11,8 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { GlobalReadAtSpace1, Space1AllAtSpace1 } from '../../../scenarios';
+import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
+import { DefaultSpace, GlobalReadAtSpace1, Space1AllAtSpace1, Superuser } from '../../../scenarios';
 import { checkAAD, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { AlertUtils } from '../../../../common/lib';
@@ -24,21 +25,20 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertest);
-  const alertUtils = new AlertUtils({
-    user: GlobalReadAtSpace1.user,
-    space: GlobalReadAtSpace1.space,
-    supertestWithoutAuth,
-  });
 
-  async function createDetectionRule(actions?: any[]) {
+  async function createDetectionRule({
+    actions,
+    spaceIdToBeCreatedIn = spaceId,
+    tags = [],
+  }: { actions?: any[]; spaceIdToBeCreatedIn?: string; tags?: string[] } = {}): Promise<string> {
     // create a detection rule to be updated
     const response = await supertest
-      .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
+      .post(`${getUrlPrefix(spaceIdToBeCreatedIn)}/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send({
         enabled: true,
         name: 'test siem query rule',
-        tags: [],
+        tags: tags ?? [],
         rule_type_id: 'siem.queryRule',
         consumer: 'siem',
         schedule: { interval: '24h' },
@@ -83,10 +83,17 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
       .expect(200);
 
     const ruleId = response.body.id;
-    objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
+    objectRemover.add(spaceIdToBeCreatedIn, ruleId, 'rule', 'alerting');
     return ruleId;
   }
+
   describe('bulkEditRuleParamsWithReadAuth', () => {
+    const alertUtils = new AlertUtils({
+      user: GlobalReadAtSpace1.user,
+      space: GlobalReadAtSpace1.space,
+      supertestWithoutAuth,
+    });
+
     afterEach(async () => {
       await objectRemover.removeAll();
     });
@@ -447,14 +454,16 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
         .expect(200);
       objectRemover.add(spaceId, createdConnector.id, 'connector', 'actions');
 
-      const ruleId = await createDetectionRule([
-        {
-          id: createdConnector.id,
-          group: 'default',
-          params: {},
-          frequency: { summary: false, notify_when: 'onActiveAlert' },
-        },
-      ]);
+      const ruleId = await createDetectionRule({
+        actions: [
+          {
+            id: createdConnector.id,
+            group: 'default',
+            params: {},
+            frequency: { summary: false, notify_when: 'onActiveAlert' },
+          },
+        ],
+      });
 
       // Get the rule from ES
       const rawRuleBefore = await es.get<SavedObject<RawRule>>({
@@ -555,6 +564,65 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
 
       // Ensure AAD isn't broken
       await checkAAD({ supertest, spaceId, type: RULE_SAVED_OBJECT_TYPE, id: ruleId });
+    });
+
+    describe('internally managed rule types', () => {
+      const rulePayload = getAlwaysFiringInternalRule();
+
+      const payloadWithFilter = {
+        filter: `alert.attributes.tags: "internally-managed"`,
+        operations: [
+          {
+            operation: 'set',
+            field: 'exceptionsList',
+            value: [{ id: 'new', list_id: 'foo', namespace_type: 'single', type: 'rule_default' }],
+          },
+        ],
+      };
+
+      const alertUtilsSuperUser = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
+
+      it('should ignore internal rule types when trying to bulk update using the filter param', async () => {
+        const { body: internalRuleType } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send({ ...rulePayload, tags: ['internally-managed'] })
+          .expect(200);
+
+        const nonInternalRuleTypeId = await createDetectionRule({
+          spaceIdToBeCreatedIn: 'default',
+          tags: ['internally-managed'],
+        });
+
+        await supertest
+          .post('/api/alerting_fixture/_bulk_edit_params')
+          .set('kbn-xsrf', 'foo')
+          .send(payloadWithFilter)
+          .expect(200);
+
+        const { body: updatedInternalRuleType } = await supertest
+          .get(`/api/alerting/rule/${internalRuleType.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        const { body: updatedNonInternalRuleType } = await supertest
+          .get(`/api/alerting/rule/${nonInternalRuleTypeId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        expect(updatedInternalRuleType.params).toEqual({});
+        expect(updatedNonInternalRuleType.params.exceptionsList).toEqual([
+          { id: 'new', list_id: 'foo', namespace_type: 'single', type: 'rule_default' },
+        ]);
+
+        const res = await alertUtilsSuperUser.deleteInternallyManagedRule(internalRuleType.id);
+
+        expect(res.statusCode).toEqual(200);
+      });
     });
   });
 }

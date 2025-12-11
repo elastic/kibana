@@ -57,34 +57,32 @@ export const detectAndPreProcessPastedCommand = (
   let hasProcessedSelectorArgs = false;
 
   // Process each selector argument to extract embedded values
-  for (const [argName, argDef] of selectorArguments) {
+  for (const [argName] of selectorArguments) {
     const argPattern = new RegExp(`--${argName}\\s*[=]\\s*(["'][^"]*["']|\\S+)`, 'g');
     let match;
 
     while ((match = argPattern.exec(rawInput)) !== null) {
       hasProcessedSelectorArgs = true; // Mark that we processed a selector argument
 
-      if (argDef.selectorShowTextValue === true) {
-        let value = match[1];
+      let value = match[1];
 
-        // Remove quotes if present
-        if (
-          (value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))
-        ) {
-          value = value.slice(1, -1);
-        }
-
-        // Store the extracted value in argState format
-        if (!result.extractedArgState[argName]) {
-          result.extractedArgState[argName] = [];
-        }
-
-        result.extractedArgState[argName].push({
-          value,
-          valueText: value,
-        });
+      // Remove quotes if present
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
       }
+
+      // Store the extracted value in argState format
+      if (!result.extractedArgState[argName]) {
+        result.extractedArgState[argName] = [];
+      }
+
+      result.extractedArgState[argName].push({
+        value,
+        valueText: value,
+      });
 
       // Replace the full argument with value with just the argument name (for both types)
       cleanedCommand = cleanedCommand.replace(match[0], `--${argName}`);

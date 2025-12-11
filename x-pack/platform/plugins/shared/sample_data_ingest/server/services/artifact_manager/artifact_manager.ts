@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { unlink } from 'fs/promises';
 import type { Logger } from '@kbn/logging';
 import { DocumentationProduct, getArtifactName } from '@kbn/product-doc-common';
+import { deleteFile } from '@kbn/fs';
 import { DatasetSampleType } from '../../../common';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -57,7 +57,10 @@ export class ArtifactManager {
     this.log = logger;
   }
 
-  async prepareArtifact(sampleType: DatasetSampleType): Promise<PreparedArtifact> {
+  async prepareArtifact(
+    sampleType: DatasetSampleType,
+    abortController?: AbortController
+  ): Promise<PreparedArtifact> {
     const productName = mapDatasetSampleTypeToProduct[sampleType];
 
     if (!productName) {
@@ -66,13 +69,18 @@ export class ArtifactManager {
     const productVersion = majorMinor(await this.getProductVersion(productName));
     const artifactFileName = getArtifactName({ productName, productVersion });
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-    const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+    const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
     this.log.debug(`Downloading artifact from [${artifactUrl}]`);
-    await download(artifactUrl, artifactPath, 'application/zip');
+    const artifactFullPath = await download(
+      artifactUrl,
+      artifactPathAtVolume,
+      'application/zip',
+      abortController
+    );
 
-    this.downloadedFiles.add(artifactPath);
+    this.downloadedFiles.add(artifactPathAtVolume);
 
-    const archive = await openZipArchive(artifactPath);
+    const archive = await openZipArchive(artifactFullPath);
     validateArtifactArchive(archive);
 
     const [manifest, mappings] = await Promise.all([
@@ -103,7 +111,7 @@ export class ArtifactManager {
   async cleanup() {
     for (const filePath of this.downloadedFiles) {
       try {
-        await unlink(filePath);
+        await deleteFile(filePath);
         this.log.debug(`Deleted downloaded file: ${filePath}`);
       } catch (error) {
         this.log.warn(`Failed to delete file ${filePath}: ${error.message}`);

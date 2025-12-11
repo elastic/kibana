@@ -9,7 +9,10 @@
 export { test, spaceTest } from './src/playwright';
 
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
+export { expect, lighthouseTest, apiTest, tags } from '@kbn/scout';
+
+// Custom global setup hook with profiling support
+export { globalSetupHook } from './src/playwright/global_hooks/profiling_setup';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {

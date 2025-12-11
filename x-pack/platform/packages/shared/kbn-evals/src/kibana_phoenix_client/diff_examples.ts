@@ -14,6 +14,8 @@ function normaliseExample(example: Example | ExampleWithId) {
   return {
     input: example.input,
     output: example.output,
+    // Phoenix sets some defaults in stored examples (like `annotations`),
+    // so we emit them here
     metadata: omitBy(example.metadata, isEmpty),
   };
 }

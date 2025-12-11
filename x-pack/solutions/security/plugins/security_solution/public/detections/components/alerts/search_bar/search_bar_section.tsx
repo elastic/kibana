@@ -18,25 +18,32 @@ export interface SearchBarSectionProps {
   /**
    * DataView object to pass to the SiemSearchBar component.
    */
-  dataView: DataViewSpec | DataView; // TODO clean types when we remove the newDataViewPickerEnabled feature flag
+  dataView: DataView;
+  /**
+   * Old sourcerer dataView object to pass to the SiemSearchBar component.
+   */
+  sourcererDataViewSpec: DataViewSpec; // TODO remove when we remove the newDataViewPickerEnabled feature flag
 }
 
 /**
  * UI section of the alerts page that renders the global search bar.
  */
-export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
-  const { pollForSignalIndex } = useSignalHelpers();
+export const SearchBarSection = memo(
+  ({ dataView, sourcererDataViewSpec }: SearchBarSectionProps) => {
+    const { pollForSignalIndex } = useSignalHelpers();
 
-  return (
-    <FiltersGlobal>
-      <SiemSearchBar
-        dataTestSubj={SEARCH_BAR_TEST_ID}
-        id={InputsModelId.global}
-        pollForSignalIndex={pollForSignalIndex}
-        sourcererDataView={dataView}
-      />
-    </FiltersGlobal>
-  );
-});
+    return (
+      <FiltersGlobal>
+        <SiemSearchBar
+          dataTestSubj={SEARCH_BAR_TEST_ID}
+          dataView={dataView}
+          id={InputsModelId.global}
+          pollForSignalIndex={pollForSignalIndex}
+          sourcererDataViewSpec={sourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+        />
+      </FiltersGlobal>
+    );
+  }
+);
 
 SearchBarSection.displayName = 'SearchBarSection';

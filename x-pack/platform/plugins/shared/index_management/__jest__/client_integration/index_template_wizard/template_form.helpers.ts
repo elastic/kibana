@@ -207,6 +207,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       }
 
       if (indexMode) {
+        form.toggleEuiSwitch('toggleIndexMode');
         form.setSelectValue('indexModeField', indexMode);
       }
     });
@@ -393,6 +394,7 @@ export type TestSubjects =
   | 'templateForm'
   | 'templateFormContainer'
   | 'testingEditor'
+  | 'toggleIndexMode'
   | 'versionField'
   | 'aliasesEditor'
   | 'settingsEditor'
@@ -400,6 +402,6 @@ export type TestSubjects =
   | 'valueDataRetentionField'
   | 'formWizardStep-5'
   | 'lifecycleValue'
-  | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
-  | 'previewIndexTemplate';
+  | 'previewIndexTemplate'
+  | 'advancedOptionsTab';

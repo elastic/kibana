@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIconTip, type EuiBadgeProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { type EuiBadgeProps, EuiIconTip } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 type WorkflowStatusProps = EuiBadgeProps & {
   valid: boolean;

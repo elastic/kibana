@@ -9,8 +9,8 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
-import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
 import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import { injectVisReferences } from '../../references/inject_vis_references';
 

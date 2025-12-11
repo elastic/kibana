@@ -410,8 +410,8 @@ describe('SynchronizationTaskRunner', () => {
 
     expect(logger.error).not.toBeCalled();
     expect(logger.debug).toBeCalledWith(
-      '[.internal.cases.default-securitysolution] Destination index does not exist, skipping synchronization task.',
-      { tags: ['cai-synchronization', '.internal.cases.default-securitysolution'] }
+      '[.internal.cases.securitysolution-default] Destination index does not exist, skipping synchronization task.',
+      { tags: ['cai-synchronization', '.internal.cases.securitysolution-default'] }
     );
   });
 
@@ -435,12 +435,12 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases.default-securitysolution] Synchronization reindex failed. Error: My retryable error',
+        '[.internal.cases.securitysolution-default] Synchronization reindex failed. Error: My retryable error',
         {
           tags: [
             'cai-synchronization',
             'cai-synchronization-error',
-            '.internal.cases.default-securitysolution',
+            '.internal.cases.securitysolution-default',
           ],
         }
       );
@@ -465,12 +465,12 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases.default-securitysolution] Synchronization reindex failed. Error: My unrecoverable error',
+        '[.internal.cases.securitysolution-default] Synchronization reindex failed. Error: My unrecoverable error',
         {
           tags: [
             'cai-synchronization',
             'cai-synchronization-error',
-            '.internal.cases.default-securitysolution',
+            '.internal.cases.securitysolution-default',
           ],
         }
       );

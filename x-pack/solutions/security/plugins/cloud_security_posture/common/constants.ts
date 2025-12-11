@@ -52,10 +52,6 @@ export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
 
-export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
-export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_vulnerabilities';
-
 export const VULNERABILITIES_INDEX_NAME = 'logs-cloud_security_posture.vulnerabilities';
 export const VULNERABILITIES_INDEX_PATTERN = 'logs-cloud_security_posture.vulnerabilities-default*';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
@@ -168,7 +164,6 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
-export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 export const CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION = '1.0.0';
 
 export const LOCAL_STORAGE_INTEGRATIONS_PAGE_ROUTE_CALLOUT_KEY = 'IntegrationsPageRouteCalloutKey';

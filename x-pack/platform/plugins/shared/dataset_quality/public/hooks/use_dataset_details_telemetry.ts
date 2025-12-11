@@ -170,9 +170,9 @@ function getDatasetDetailsEbtProps({
 }): DatasetDetailsEbtProps {
   const indexName = datasetDetails.rawName;
   const dataStream = {
-    dataset: datasetDetails.name,
-    namespace: datasetDetails.namespace,
-    type: datasetDetails.type,
+    dataset: datasetDetails.name ?? '',
+    namespace: datasetDetails.namespace ?? '',
+    type: datasetDetails.name && datasetDetails.namespace ? datasetDetails.type : '',
   };
   const degradedDocs = dataStreamDetails?.degradedDocsCount ?? 0;
   const failedDocs = dataStreamDetails?.failedDocsCount ?? 0;

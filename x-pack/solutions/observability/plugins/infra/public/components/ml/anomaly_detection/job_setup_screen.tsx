@@ -279,6 +279,7 @@ export const JobSetupScreen = (props: Props) => {
             <FeatureFeedbackButton
               data-test-subj={`infraML${props.jobType}FlyoutFeedbackLink`}
               formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
+              sanitizedPath={document.location.pathname}
               kibanaVersion={kibanaVersion}
               isCloudEnv={isCloudEnv}
               isServerlessEnv={isServerlessEnv}
@@ -309,7 +310,12 @@ export const JobSetupScreen = (props: Props) => {
             <EuiSpacer />
             {setupStatus.reasons.map((errorMessage, i) => (
               <React.Fragment key={i}>
-                <EuiCallOut color="danger" iconType="warning" title={errorCalloutTitle}>
+                <EuiCallOut
+                  announceOnMount
+                  color="danger"
+                  iconType="warning"
+                  title={errorCalloutTitle}
+                >
                   <EuiCode transparentBackground>{errorMessage}</EuiCode>
                 </EuiCallOut>
                 <EuiSpacer />

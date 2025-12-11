@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import type {
@@ -39,7 +40,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
 import type { ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorForm } from './connector_form';
-import type { ConnectorFormSchema } from './types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { SectionLoading } from '../../components';
 
@@ -73,6 +73,7 @@ const ConnectorAddModal = ({
     config: {},
     secrets: {},
     isMissingSecrets: false,
+    isConnectorTypeDeprecated: false,
   });
 
   const canSave = hasSaveActionsCapability(capabilities);
@@ -111,6 +112,7 @@ const ConnectorAddModal = ({
         config: {},
         secrets: {},
         isMissingSecrets: false,
+        isConnectorTypeDeprecated: false,
       });
       if (resetConnectorForm.current) {
         resetConnectorForm.current({

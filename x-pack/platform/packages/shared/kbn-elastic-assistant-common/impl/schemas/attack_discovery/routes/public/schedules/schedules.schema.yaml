@@ -172,7 +172,7 @@ components:
       type: string
       description: The connector ID.
 
-    AttackDiscoveryScheduleAction:
+    AttackDiscoveryScheduleGeneralAction:
       type: object
       properties:
         actionTypeId:
@@ -192,8 +192,31 @@ components:
           $ref: '#/components/schemas/AttackDiscoveryScheduleActionFrequency'
       required:
         - actionTypeId
+        - group
         - id
         - params
+
+    AttackDiscoveryScheduleSystemAction:
+      type: object
+      properties:
+        actionTypeId:
+          type: string
+          description: The action type used for sending notifications.
+        id:
+          $ref: '#/components/schemas/AttackDiscoveryScheduleActionId'
+        params:
+          $ref: '#/components/schemas/AttackDiscoveryScheduleActionParams'
+        uuid:
+          $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - actionTypeId
+        - id
+        - params
+
+    AttackDiscoveryScheduleAction:
+      oneOf:
+        - $ref: '#/components/schemas/AttackDiscoveryScheduleGeneralAction'
+        - $ref: '#/components/schemas/AttackDiscoveryScheduleSystemAction'
 
     AttackDiscoveryScheduleExecutionStatus:
       type: string

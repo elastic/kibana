@@ -7,7 +7,7 @@
 
 import { ToolType } from '@kbn/onechat-common';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isWorkflowTool } from '@kbn/onechat-common/tools';
+import { isWorkflowTool } from '@kbn/onechat-common/tools/types/workflow';
 
 import { WorkflowConfiguration } from '../../sections/configuration_fields/workflow_configuration_fields';
 
@@ -31,6 +31,7 @@ export const workflowToolRegistryEntry: ToolTypeRegistryEntry<WorkflowToolFormDa
     ...commonToolFormDefaultValues,
     type: ToolType.workflow,
     workflow_id: '',
+    wait_for_completion: true,
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {
     if (!isWorkflowTool(tool)) {

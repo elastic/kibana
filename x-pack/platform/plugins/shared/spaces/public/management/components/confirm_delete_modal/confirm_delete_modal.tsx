@@ -92,6 +92,7 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
       {isCurrentSpace && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={i18n.translate('xpack.spaces.management.confirmDeleteModal.currentSpaceTitle', {

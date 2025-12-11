@@ -9,16 +9,12 @@ import { getDefaultConnector, getOptionalRequestParams } from './helpers';
 import type { AIConnector } from '../connectorland/connector_selector';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('helpers', () => {
   describe('getDefaultConnector', () => {
-    const defaultConnector: AIConnector = {
+    const defaultConnector: AIConnector = createMockActionConnector({
       actionTypeId: '.gen-ai',
-      isPreconfigured: false,
-      isDeprecated: false,
-      referencedByCount: 0,
-      isMissingSecrets: false,
-      isSystemAction: false,
       secrets: {},
       id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
       name: 'OpenAI',
@@ -26,7 +22,7 @@ describe('helpers', () => {
         apiProvider: 'OpenAI',
         apiUrl: 'https://api.openai.com/v1/chat/completions',
       },
-    };
+    });
 
     const connector2: AIConnector = {
       ...defaultConnector,

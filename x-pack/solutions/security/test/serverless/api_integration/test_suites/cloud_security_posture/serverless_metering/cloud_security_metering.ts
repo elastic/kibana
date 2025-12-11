@@ -11,7 +11,7 @@ import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
 import type * as http from 'http';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { EsIndexDataProvider } from '../utils';
 import { getMockFindings } from './mock_data';
 import type { FtrProviderContext } from '../../../ftr_provider_context';

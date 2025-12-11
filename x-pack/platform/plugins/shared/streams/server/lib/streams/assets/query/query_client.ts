@@ -232,7 +232,7 @@ export class QueryClient {
 
     const { rulesClient } = this.dependencies;
     await rulesClient
-      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink) })
+      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink), ignoreInternalRuleTypes: false })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 400) {
           return;

@@ -221,6 +221,38 @@ export class RuleTypeRunner<
               context.namespace ?? DEFAULT_NAMESPACE_STRING
             }] namespace`,
           };
+
+          let maintenanceWindowsPromise: Promise<{
+            ids: string[];
+            names: string[];
+          }> | null = null;
+
+          const getMaintenanceWindowsData = async () => {
+            if (!maintenanceWindowsPromise) {
+              maintenanceWindowsPromise = (async () => {
+                if (context.maintenanceWindowsService) {
+                  const { maintenanceWindows, maintenanceWindowsWithoutScopedQueryIds } =
+                    await context.maintenanceWindowsService.getMaintenanceWindows({
+                      eventLogger: context.alertingEventLogger,
+                      request: context.request,
+                      ruleTypeCategory: ruleType.category,
+                      spaceId: context.spaceId,
+                    });
+
+                  const ids = maintenanceWindowsWithoutScopedQueryIds ?? [];
+                  const maintenanceWindowNamesMap = new Map(
+                    (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+                  );
+                  const names = ids.map((id) => maintenanceWindowNamesMap.get(id) || id);
+
+                  return { ids, names };
+                }
+                return { ids: [], names: [] };
+              })();
+            }
+            return maintenanceWindowsPromise;
+          };
+
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
               ruleType.executor({
@@ -231,17 +263,12 @@ export class RuleTypeRunner<
                   actionsClient,
                   getDataViews: executorServices.getDataViews,
                   getMaintenanceWindowIds: async () => {
-                    if (context.maintenanceWindowsService) {
-                      const { maintenanceWindowsWithoutScopedQueryIds } =
-                        await context.maintenanceWindowsService.getMaintenanceWindows({
-                          eventLogger: context.alertingEventLogger,
-                          request: context.request,
-                          ruleTypeCategory: ruleType.category,
-                          spaceId: context.spaceId,
-                        });
-                      return maintenanceWindowsWithoutScopedQueryIds ?? [];
-                    }
-                    return [];
+                    const { ids } = await getMaintenanceWindowsData();
+                    return ids;
+                  },
+                  getMaintenanceWindowNames: async () => {
+                    const { names } = await getMaintenanceWindowsData();
+                    return names;
                   },
                   getSearchSourceClient: async () => {
                     if (!wrappedSearchSourceClient) {
@@ -381,28 +408,6 @@ export class RuleTypeRunner<
         }
       })
     );
-
-    await withAlertingSpan('alerting:updating-maintenance-windows', async () => {
-      if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
-        const updateAlertsMaintenanceWindowResult =
-          await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
-
-        // Set the event log MW ids again, this time including the ids that matched alerts with
-        // scoped query
-        if (
-          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
-          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
-        ) {
-          context.alertingEventLogger.setMaintenanceWindowIds(
-            updateAlertsMaintenanceWindowResult.maintenanceWindowIds
-          );
-        }
-      } else {
-        context.logger.debug(
-          `skipping updating alerts with maintenance windows for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
-        );
-      }
-    });
 
     alertsClient.logAlerts({
       ruleRunMetricsStore: context.ruleRunMetricsStore,

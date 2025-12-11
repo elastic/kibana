@@ -30,6 +30,7 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
       <EuiSpacer size="m" />
       {createState.status === CREATE_STATUS.CREATED ? (
         <EuiCallOut
+          announceOnMount
           data-test-subj="agentPolicyCreateStatusCallOut"
           title={
             <FormattedMessage
@@ -42,6 +43,7 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
         />
       ) : (
         <EuiCallOut
+          announceOnMount
           data-test-subj="agentPolicyCreateStatusCallOut"
           title={
             <FormattedMessage

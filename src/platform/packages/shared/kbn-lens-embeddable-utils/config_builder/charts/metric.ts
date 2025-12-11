@@ -11,7 +11,7 @@ import type {
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
+} from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensMetricConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../types';
@@ -19,8 +19,7 @@ import {
   addLayerColumn,
   addLayerFormulaColumns,
   buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
+  extractReferences,
   mapToFormula,
 } from '../utils';
 import {
@@ -208,18 +207,19 @@ export async function buildMetric(
     getValueColumns,
     dataViewsAPI
   );
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
+
   return {
     title: config.title,
     visualizationType: 'lnsMetric',
-    references: buildReferences(dataviews),
+    references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

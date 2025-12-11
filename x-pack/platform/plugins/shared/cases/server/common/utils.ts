@@ -15,6 +15,7 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
@@ -90,6 +91,7 @@ export const transformNewCase = ({
   category: newCase.category ?? null,
   customFields: newCase.customFields ?? [],
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
 });
 
@@ -402,15 +404,16 @@ export const extractLensReferencesFromCommentString = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   comment: string
 ): SavedObjectReference[] => {
-  const extract = lensEmbeddableFactory()?.extract;
+  const extract = lensEmbeddableFactory().extract;
 
   if (extract) {
     const parsedComment = parseCommentString(comment);
     const lensVisualizations = getLensVisualizations(parsedComment.children);
-    const flattenRefs = flatMap(
-      lensVisualizations,
-      (lensObject) => extract(lensObject)?.references ?? []
-    );
+    const flattenRefs = flatMap(lensVisualizations, (vis) => {
+      // TODO: Improve these types
+      const lensVis = vis as unknown as LensEmbeddableStateWithType;
+      return extract(lensVis).references;
+    });
 
     const uniqRefs = uniqWith(
       flattenRefs,

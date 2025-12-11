@@ -423,23 +423,34 @@ describe('PendingActionsSelector', () => {
         page: 1,
         pageSize: 200,
         statuses: ['pending'],
+        commands: [
+          'isolate',
+          'unisolate',
+          'kill-process',
+          'suspend-process',
+          'running-processes',
+          'get-file',
+          'execute',
+          'upload',
+          'scan',
+          'runscript',
+          'memory-dump',
+        ],
       },
       {
-        enabled: true,
-        refetchInterval: false,
+        enabled: false,
       }
     );
   });
 
-  test('enables refetch interval when popover is open and disables when closed', async () => {
+  test('should fetch data when popover is opened', async () => {
     // Test with popover closed (default state)
     await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
-        refetchInterval: false, // Should be false when popover is closed
-        enabled: true,
+        enabled: false,
       })
     );
 
@@ -454,10 +465,39 @@ describe('PendingActionsSelector', () => {
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
-        refetchInterval: 3000, // Should be 3000ms when popover is open
         enabled: true,
       })
     );
+  });
+
+  test('should not fetch data repeatedly when popover is open', async () => {
+    // Test with popover closed (default state)
+    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+
+    // Clear previous calls
+    mockUseGetEndpointActionList.mockClear();
+
+    // Test with popover open
+    await renderAndWaitForComponent(
+      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+    );
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        enabled: true,
+      })
+    );
+
+    // expect only being called once
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledTimes(1);
   });
 
   describe('Privilege validation', () => {
@@ -621,6 +661,25 @@ describe('PendingActionsSelector', () => {
       expect(commandElement.parentElement).toHaveAttribute('class');
       expect(commandElement.parentElement?.className).toContain('css-');
     });
+  });
+
+  test('excludes cancel actions from the pending actions query', async () => {
+    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        commands: expect.any(Array),
+      }),
+      expect.any(Object)
+    );
+
+    // Get the actual commands array that was passed
+    const callArgs = mockUseGetEndpointActionList.mock.calls[0][0];
+    const commandsArray = callArgs.commands;
+
+    expect(commandsArray).toBeDefined();
+    expect(commandsArray).not.toContain('cancel');
+    expect(commandsArray!.length).toBeGreaterThan(0);
   });
 
   describe('Unified tooltip for disabled options', () => {

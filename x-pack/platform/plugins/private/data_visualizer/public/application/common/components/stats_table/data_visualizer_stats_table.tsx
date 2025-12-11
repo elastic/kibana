@@ -389,6 +389,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const $panelWidthS = `calc(max(20%, 225px))`;
   const $panelWidthM = `calc(max(30%, 300px))`;
+  const $panelWidthL = `calc(max(35%, 400px))`;
 
   const dvTableCss = css({
     thead: {
@@ -440,11 +441,12 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         },
       },
       '& .dvTopValues__wrapper': {
-        minWidth: 'fit-content',
+        minWidth: $panelWidthM,
+        maxWidth: $panelWidthL,
       },
       '& .dvPanel__wrapper': {
         '&.dvPanel--compressed': {
-          width: $panelWidthS,
+          minWidth: $panelWidthS,
         },
         '&.dvPanel--uniform': {
           minWidth: $panelWidthS,
@@ -459,6 +461,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
 
       '& .dvMap__wrapper': {
+        minWidth: $panelWidthL,
         height: '240px',
       },
       '& .dvText__wrapper': {
@@ -490,7 +493,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <EuiInMemoryTable<T>
-            message={message}
+            noItemsMessage={message}
             css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}

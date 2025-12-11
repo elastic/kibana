@@ -6,7 +6,8 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useQueryClient } from '@tanstack/react-query';
+import '@kbn/react-query/mock';
+import { useQueryClient } from '@kbn/react-query';
 import {
   useGetMigrationTranslationStats,
   useInvalidateGetMigrationTranslationStats,
@@ -15,10 +16,6 @@ import { getDashboardMigrationTranslationStats } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
 jest.mock('../api');
-jest.mock('@tanstack/react-query', () => ({
-  ...jest.requireActual('@tanstack/react-query'),
-  useQueryClient: jest.fn(),
-}));
 
 describe('Get Migration Translation Stats Hooks', () => {
   afterEach(() => {

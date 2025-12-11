@@ -178,8 +178,8 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems={'flexEnd'}>
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" alignItems={'flexEnd'} wrap>
+        <EuiFlexItem grow={false} style={{ minWidth: '400px' }}>
           <EuiFormRow
             label={
               <FormattedMessage
@@ -216,6 +216,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.previewAlert.previewErrorTitle"

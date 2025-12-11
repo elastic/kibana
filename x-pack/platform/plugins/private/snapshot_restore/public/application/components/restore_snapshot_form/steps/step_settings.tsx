@@ -105,6 +105,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             iconType="question"
             title={i18n.translate(
               'xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.title',

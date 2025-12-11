@@ -15,26 +15,6 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-# Add an introduction to spaces
-  - target: '$'
-    description: Add an extra page about spaces
-    update:
-      x-topics:
-        - title: Kibana spaces
-          content: |
-            Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
-            You can use the default space or create your own spaces.
-
-            To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
-            For example:
-
-            ```
-            curl -X GET "http://localhost:5601/s/marketing/api/data_views"
-            ```
-
-            If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
-
-            To learn more, check out [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces).
 # Add tag descriptions that are specific to the Stack APIs
   - target: '$.tags[?(@.name=="cases")]'
     description: Change tag description and displayName
@@ -119,6 +99,7 @@ actions:
                 $ref: "../examples/copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -143,6 +124,7 @@ actions:
                 $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -170,6 +152,7 @@ actions:
                 $ref: "../examples/update_saved_objects_spaces_request1.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:

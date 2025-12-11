@@ -11,17 +11,26 @@ import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-pl
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type {
+  UnifiedFieldListRestorableState,
+  UnifiedFieldListSidebarContainerProps,
+} from '@kbn/unified-field-list';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { DiscoverAppState } from '../discover_app_state_container';
+import type {
+  DiscoverGridSettings,
+  DiscoverSession,
+  VIEW_MODE,
+} from '@kbn/saved-search-plugin/common';
+import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { DiscoverDataSource } from '../../../../../common/data_sources';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -36,7 +45,90 @@ export interface TabStateGlobalState {
   filters?: Filter[];
 }
 
+export interface DiscoverAppState {
+  /**
+   * Columns displayed in the table
+   */
+  columns?: string[];
+  /**
+   * Array of applied filters
+   */
+  filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
+  /**
+   * Hide chart
+   */
+  hideChart?: boolean;
+  /**
+   * The current data source
+   */
+  dataSource?: DiscoverDataSource;
+  /**
+   * Used interval of the histogram
+   */
+  interval?: string;
+  /**
+   * Lucence or KQL query
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   */
+  sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
+  /**
+   * Document explorer row height option
+   */
+  rowHeight?: number;
+  /**
+   * Document explorer header row height option
+   */
+  headerRowHeight?: number;
+  /**
+   * Number of rows in the grid per page
+   */
+  rowsPerPage?: number;
+  /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
+   * Breakdown field of chart
+   */
+  breakdownField?: string;
+  /**
+   * Density of table
+   */
+  density?: DataGridDensity;
+}
+
+export enum TabInitializationStatus {
+  NotStarted = 'NotStarted',
+  InProgress = 'InProgress',
+  Complete = 'Complete',
+  NoData = 'NoData',
+  Error = 'Error',
+}
+
 export interface TabState extends TabItem {
+  initializationState:
+    | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
+    | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
@@ -44,10 +136,11 @@ export interface TabState extends TabItem {
     controlGroupJson?: string;
     searchSessionId?: string;
   };
-  initialAppState?: DiscoverAppState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
+  appState: DiscoverAppState;
+  previousAppState: DiscoverAppState;
   controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   /**
    * ESQL query variables
@@ -68,8 +161,10 @@ export interface TabState extends TabItem {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
+    fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
+    metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
   };
 }
 

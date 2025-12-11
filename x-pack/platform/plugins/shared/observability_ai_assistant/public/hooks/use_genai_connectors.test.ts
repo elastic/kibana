@@ -14,6 +14,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 // Mock dependencies and data
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
@@ -31,7 +32,7 @@ jest.mock('../../common/utils/get_inference_connector', () => ({
   getInferenceConnectorInfo: jest.fn((connector) => connector),
 }));
 const mockConnectors: FindActionResult[] = [
-  {
+  createMockConnectorFindResult({
     id: 'connector-1',
     name: 'Connector 1',
     actionTypeId: '.gen-ai',
@@ -40,8 +41,8 @@ const mockConnectors: FindActionResult[] = [
     isPreconfigured: false,
     isDeprecated: false,
     isSystemAction: false,
-  },
-  {
+  }),
+  createMockConnectorFindResult({
     id: 'connector-2',
     name: 'Connector 2',
     actionTypeId: '.gen-ai',
@@ -50,8 +51,8 @@ const mockConnectors: FindActionResult[] = [
     isPreconfigured: false,
     isDeprecated: false,
     isSystemAction: false,
-  },
-  {
+  }),
+  createMockConnectorFindResult({
     id: 'elastic-llm',
     name: 'Elastic LLM',
     actionTypeId: '.inference',
@@ -60,7 +61,7 @@ const mockConnectors: FindActionResult[] = [
     isPreconfigured: true,
     isDeprecated: false,
     isSystemAction: false,
-  },
+  }),
 ];
 
 const mockAssistant: Partial<ObservabilityAIAssistantService> = {

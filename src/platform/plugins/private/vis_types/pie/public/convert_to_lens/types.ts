@@ -11,8 +11,8 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import type {
   NavigateToLensContext,
-  PartitionVisConfiguration,
-} from '@kbn/visualizations-plugin/common';
+  LensPartitionVisualizationState as PartitionVisConfiguration,
+} from '@kbn/lens-common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 
 export type ConvertPieToLensVisualization = (

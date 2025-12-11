@@ -52,3 +52,7 @@ export const lensItemSchemaV0 = schema.object(
   },
   { unknowns: 'forbid' }
 );
+
+export const lensItemDataSchemaV0 = lensItemSchemaV0.extends({
+  id: undefined,
+});

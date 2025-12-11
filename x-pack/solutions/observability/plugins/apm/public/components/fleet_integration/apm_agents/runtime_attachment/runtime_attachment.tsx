@@ -88,6 +88,7 @@ export function RuntimeAttachment({
       {showUnsavedWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.unsavedRules',
               {

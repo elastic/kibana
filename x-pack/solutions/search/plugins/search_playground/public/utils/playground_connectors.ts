@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { CONNECTOR_ID as GEMINI_CONNECTOR_ID } from '@kbn/connector-schemas/gemini/constants';
+import { CONNECTOR_ID as BEDROCK_CONNECTOR_ID } from '@kbn/connector-schemas/bedrock/constants';
+import { CONNECTOR_ID as INFERENCE_CONNECTOR_ID } from '@kbn/connector-schemas/inference/constants';
 import {
-  OPENAI_CONNECTOR_ID,
+  CONNECTOR_ID as OPENAI_CONNECTOR_ID,
   OpenAiProviderType,
-  BEDROCK_CONNECTOR_ID,
-  GEMINI_CONNECTOR_ID,
-  INFERENCE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/public/common';
+} from '@kbn/connector-schemas/openai/constants';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { isSupportedConnector } from '@kbn/inference-common';

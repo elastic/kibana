@@ -8,4 +8,3 @@
  */
 
 export { BackgroundSearchRestoredCallout } from './background_search_restored_callout';
-export { EuiIconBackgroundTask } from './eui_icon_background_task';

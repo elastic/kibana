@@ -1,0 +1,138 @@
+{
+  "id": "@kbn/global-redirect-app-links",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/global-redirect-app-links",
+        "id": "def-common.GlobalRedirectAppLink",
+        "type": "Function",
+        "tags": [],
+        "label": "GlobalRedirectAppLink",
+        "description": [
+          "\nGlobal click delegator: intercepts safe, same-origin <a> clicks and routes via navigateToUrl.\nOpt out with: <a data-kbn-redirect-app-link-ignore>"
+        ],
+        "signature": [
+          "({ children, navigateToUrl }: ",
+          {
+            "pluginId": "@kbn/global-redirect-app-links",
+            "scope": "common",
+            "docId": "kibKbnGlobalRedirectAppLinksPluginApi",
+            "section": "def-common.GlobalRedirectAppLinkProps",
+            "text": "GlobalRedirectAppLinkProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/private/kbn-global-redirect-app-links/global_redirect_app_links.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/global-redirect-app-links",
+            "id": "def-common.GlobalRedirectAppLink.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, navigateToUrl }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/global-redirect-app-links",
+                "scope": "common",
+                "docId": "kibKbnGlobalRedirectAppLinksPluginApi",
+                "section": "def-common.GlobalRedirectAppLinkProps",
+                "text": "GlobalRedirectAppLinkProps"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-global-redirect-app-links/global_redirect_app_links.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/global-redirect-app-links",
+        "id": "def-common.GlobalRedirectAppLinkProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "GlobalRedirectAppLinkProps",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-global-redirect-app-links/global_redirect_app_links.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/global-redirect-app-links",
+            "id": "def-common.GlobalRedirectAppLinkProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-global-redirect-app-links/global_redirect_app_links.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/global-redirect-app-links",
+            "id": "def-common.GlobalRedirectAppLinkProps.navigateToUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToUrl",
+            "description": [],
+            "signature": [
+              "(url: string) => void | Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-global-redirect-app-links/global_redirect_app_links.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/global-redirect-app-links",
+                "id": "def-common.GlobalRedirectAppLinkProps.navigateToUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-global-redirect-app-links/global_redirect_app_links.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

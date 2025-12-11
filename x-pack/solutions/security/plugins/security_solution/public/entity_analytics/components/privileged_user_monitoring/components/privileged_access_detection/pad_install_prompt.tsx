@@ -95,6 +95,7 @@ export const PrivilegedAccessDetectionInstallPrompt: React.FC<{
             <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
             {installationErrorOccurred && (
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.installErrorStatus',
                   {

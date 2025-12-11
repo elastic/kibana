@@ -6,7 +6,6 @@
  */
 
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { catchAndWrapError } from '../../../utils';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
@@ -46,10 +45,6 @@ export const fetchSpaceIdsWithMaybePendingActions = async (
   endpointService: EndpointAppContextService,
   agentType: ResponseActionAgentType
 ): Promise<string[]> => {
-  if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    return [DEFAULT_SPACE_ID];
-  }
-
   const logger = endpointService.createLogger('fetchSpaceIdsWithMaybePendingActions');
   const esClient = endpointService.getInternalEsClient();
 

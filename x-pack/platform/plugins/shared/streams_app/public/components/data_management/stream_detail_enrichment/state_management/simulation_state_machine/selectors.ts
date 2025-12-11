@@ -42,7 +42,10 @@ export const selectOriginalPreviewRecords = createSelector(
     }
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
     // return the samples where the filterFn matches the documents at the same index
-    return samples.filter((_, index) => filterFn(documents[index]));
+    return samples.filter((_, index) => {
+      const doc = documents[index];
+      return doc ? filterFn(doc) : false;
+    });
   }
 );
 
@@ -50,5 +53,17 @@ export const selectHasSimulatedRecords = createSelector(
   [(context: SimulationContext) => context.simulation?.documents],
   (documents) => {
     return Boolean(documents && documents.length > 0);
+  }
+);
+
+export const selectFieldsInSamples = createSelector(
+  [(context: SimulationContext) => context.samples],
+  (samples) => {
+    const fieldSet = new Set<string>();
+    samples.forEach((sample) => {
+      const flattened = flattenObjectNestedLast(sample.document);
+      Object.keys(flattened).forEach((key) => fieldSet.add(key));
+    });
+    return Array.from(fieldSet).sort();
   }
 );

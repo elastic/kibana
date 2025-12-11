@@ -4,11 +4,13 @@ exports[`should not render fields-editor when there is no layername 1`] = `
 <Fragment>
   <EuiFormRow
     display="columnCompressed"
+    isInvalid={false}
     label="Source layer"
   >
     <EuiFieldText
       compressed={true}
-      isInvalid={true}
+      isInvalid={false}
+      onBlur={[Function]}
       onChange={[Function]}
       value=""
     />
@@ -49,11 +51,13 @@ exports[`should render with fields 1`] = `
 <Fragment>
   <EuiFormRow
     display="columnCompressed"
+    isInvalid={false}
     label="Source layer"
   >
     <EuiFieldText
       compressed={true}
       isInvalid={false}
+      onBlur={[Function]}
       onChange={[Function]}
       value="foobar"
     />
@@ -124,11 +128,13 @@ exports[`should render without fields 1`] = `
 <Fragment>
   <EuiFormRow
     display="columnCompressed"
+    isInvalid={false}
     label="Source layer"
   >
     <EuiFieldText
       compressed={true}
       isInvalid={false}
+      onBlur={[Function]}
       onChange={[Function]}
       value="foobar"
     />

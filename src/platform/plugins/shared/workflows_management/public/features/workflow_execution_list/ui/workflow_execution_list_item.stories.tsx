@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';

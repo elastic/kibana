@@ -13,6 +13,7 @@ export {
   packageToPackagePolicy,
   getStreamsForInputType,
   getRegistryStreamWithDataStreamForInputType,
+  varsReducer,
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
@@ -103,3 +104,5 @@ export {
 } from './check_fleet_server_versions';
 
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
+
+export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';

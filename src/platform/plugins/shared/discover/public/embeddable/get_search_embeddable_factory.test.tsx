@@ -24,7 +24,7 @@ import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
-import type { SolutionId } from '@kbn/core-chrome-browser';
+import { SolutionType } from '../context_awareness';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -122,7 +122,7 @@ describe('saved search embeddable', () => {
       const { search, resolveSearch } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({ searchMock: search });
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -151,7 +151,7 @@ describe('saved search embeddable', () => {
         partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
       });
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -181,7 +181,7 @@ describe('saved search embeddable', () => {
         partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
       });
       const { api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -205,7 +205,7 @@ describe('saved search embeddable', () => {
     beforeAll(() => {
       jest
         .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
-        .mockReturnValue(new BehaviorSubject('test' as unknown as SolutionId));
+        .mockReturnValue(new BehaviorSubject(SolutionType.Search));
     });
 
     afterAll(() => {
@@ -219,14 +219,14 @@ describe('saved search embeddable', () => {
       );
       runtimeState = getInitialRuntimeState();
       await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
       });
       await waitOneTick(); // wait for build to complete
 
-      expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
+      expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: SolutionType.Search });
       resolveRootProfileSpy.mockClear();
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
     });
@@ -243,7 +243,7 @@ describe('saved search embeddable', () => {
         },
       };
       await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -269,7 +269,7 @@ describe('saved search embeddable', () => {
         .mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -297,7 +297,7 @@ describe('saved search embeddable', () => {
         partialState: { columns: ['rootProfile', 'message', 'extension'] },
       });
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,

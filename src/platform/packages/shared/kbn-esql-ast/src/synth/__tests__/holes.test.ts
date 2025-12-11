@@ -23,6 +23,20 @@ describe('number shorthand', () => {
   });
 });
 
+describe('boolean shorthand', () => {
+  test('can insert a TRUE boolean shorthand', () => {
+    const query1 = query`FROM index | WHERE is_active == ${true}`;
+
+    expect(query1 + '').toBe('FROM index | WHERE is_active == TRUE');
+  });
+
+  test('can insert a FALSE boolean shorthand', () => {
+    const query1 = query`FROM index | WHERE is_active == ${false}`;
+
+    expect(query1 + '').toBe('FROM index | WHERE is_active == FALSE');
+  });
+});
+
 describe('column shorthand', () => {
   test('can insert a column shorthand', () => {
     const query1 = query`FROM index | WHERE ${['coordinates', 'lat']} >= ${0.1}`;

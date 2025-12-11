@@ -53,13 +53,6 @@ jest.mock('../../utils/is_attack_discovery_alert', () => ({
     ad?.alertWorkflowStatus !== undefined,
 }));
 
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
 
@@ -107,7 +100,7 @@ describe('TakeAction', () => {
     });
 
     mockUseAssistantAvailability.mockReturnValue({
-      hasSearchAILakeConfigurations: false, // AI for SOC is not configured
+      hasSearchAILakeConfigurations: false, // EASE is not configured
     });
   });
 
@@ -312,7 +305,7 @@ describe('TakeAction', () => {
     });
   });
 
-  describe('when AI for SOC is the configured project', () => {
+  describe('when EASE is the configured project', () => {
     let alert: ReturnType<typeof getMockAttackDiscoveryAlerts>[0];
     let setSelectedAttackDiscoveries: jest.Mock;
 
@@ -326,7 +319,7 @@ describe('TakeAction', () => {
       });
 
       mockUseAssistantAvailability.mockReturnValue({
-        hasSearchAILakeConfigurations: true, // AI for SOC IS configured
+        hasSearchAILakeConfigurations: true, // EASE IS configured
       });
     });
 

@@ -28,7 +28,6 @@ export {
   hasStartEndParams,
   getNamedParams,
   prettifyQuery,
-  isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   isESQLColumnSortable,
@@ -49,6 +48,18 @@ export {
   getRemoteClustersFromESQLQuery,
   getLookupIndicesFromQuery,
   convertTimeseriesCommandToFrom,
+  getESQLStatsQueryMeta,
+  constructCascadeQuery,
+  mutateQueryStatsGrouping,
+  appendFilteringWhereClauseForCascadeLayout,
+  getESQLSources,
+  getEsqlColumns,
+  getEsqlPolicies,
+  getJoinIndices,
+  getTimeseriesIndices,
+  getInferenceEndpoints,
+  getEditorExtensions,
+  hasDateBreakdown,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

@@ -58,13 +58,13 @@ export const ToolForm = ({ mode, formId, saveTool, toolType, setToolType }: Tool
         }
       `}
     >
-      <SystemReferences mode={mode} />
+      <SystemReferences mode={mode} toolType={toolType} setToolType={setToolType} />
       <EuiHorizontalRule />
       <Labels mode={mode} />
       {!isViewMode && (
         <>
           <EuiHorizontalRule />
-          <Configuration toolType={toolType} setToolType={setToolType} mode={mode} />
+          <Configuration />
         </>
       )}
       <EuiHorizontalRule />

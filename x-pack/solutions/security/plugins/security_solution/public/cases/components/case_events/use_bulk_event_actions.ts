@@ -53,6 +53,12 @@ export const useBulkAddEventsToCaseActions = ({
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
     onSuccess,
   });
+  const getObservables = useCallback(
+    (events: TimelineItem[] = []) => {
+      return casesService?.helpers.getObservablesFromEcs(events.map((event) => event.data));
+    },
+    [casesService?.helpers]
+  );
 
   return useMemo(() => {
     return isCasesContextAvailable &&
@@ -70,6 +76,7 @@ export const useBulkAddEventsToCaseActions = ({
             onClick: (events: TimelineItem[] = []) =>
               createCaseFlyout.open({
                 attachments: [timelineItemsToCaseEventAttachment(events)],
+                observables: getObservables(events),
               }),
           },
           {
@@ -83,6 +90,7 @@ export const useBulkAddEventsToCaseActions = ({
                 getAttachments: (): CaseAttachmentWithoutOwner[] => [
                   timelineItemsToCaseEventAttachment(events),
                 ],
+                getObservables: () => getObservables(events),
               }),
           },
         ]
@@ -93,5 +101,6 @@ export const useBulkAddEventsToCaseActions = ({
     selectCaseModal,
     userCasesPermissions?.create,
     userCasesPermissions?.read,
+    getObservables,
   ]);
 };

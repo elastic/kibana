@@ -6,6 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 import type { ExtraOptions, LensAttributes } from '../../types';
 
 export type MyGetLensAttributes = (params: {
@@ -14,11 +15,13 @@ export type MyGetLensAttributes = (params: {
   extraOptions?: ExtraOptions;
   esql?: string;
   minutesPerAlert: number;
+  signalIndexName: string;
 }) => LensAttributes;
 
 export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
   extraOptions,
   minutesPerAlert,
+  signalIndexName,
 }) => {
   return {
     description: '',
@@ -82,7 +85,7 @@ export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
           },
         },
       },
-      filters: extraOptions?.filters ?? [],
+      filters: [getAlertIndexFilter(signalIndexName), ...(extraOptions?.filters ?? [])],
       internalReferences: [],
       query: { language: 'kuery', query: '_id:*' },
       visualization: {

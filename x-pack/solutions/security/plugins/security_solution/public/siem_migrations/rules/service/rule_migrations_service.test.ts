@@ -35,6 +35,7 @@ import { SiemRulesMigrationsService } from './rule_migrations_service';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import { getMissingCapabilitiesChecker } from '../../common/service';
+import { raiseSuccessToast } from './notification/success_notification';
 
 // --- Mocks for external modules ---
 
@@ -51,6 +52,7 @@ jest.mock('../api', () => ({
 }));
 
 jest.mock('../../common/service/capabilities', () => ({
+  ...jest.requireActual('../../common/service/capabilities'),
   getMissingCapabilitiesChecker: jest.fn(() => []),
 }));
 
@@ -67,7 +69,7 @@ jest.mock('../../../common/hooks/use_license', () => ({
 }));
 
 jest.mock('./notification/success_notification', () => ({
-  getSuccessToast: jest.fn().mockReturnValue({ title: 'Success' }),
+  raiseSuccessToast: jest.fn(),
 }));
 
 jest.mock('../../common/service/notifications/no_connector_notification', () => ({
@@ -369,7 +371,7 @@ describe('SiemRulesMigrationsService', () => {
       expect(getStatsMock).toHaveBeenCalledTimes(2);
 
       // Expect that a success toast was added when the migration finished.
-      expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
+      expect(raiseSuccessToast).toHaveBeenCalled();
 
       // Restore real timers.
       jest.useRealTimers();

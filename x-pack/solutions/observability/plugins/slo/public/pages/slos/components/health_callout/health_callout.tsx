@@ -8,19 +8,25 @@
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { uniqBy } from 'lodash';
 import React, { useState } from 'react';
-import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
-import { ExternalLinkDisplayText } from '../../../slo_details/components/external_link_display_text';
 import { paths } from '../../../../../common/locators/paths';
+import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
+import { ContentWithInspectCta } from '../../../slo_details/components/health_callout/content_with_inspect_cta';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
-export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
+export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryResponse[] }) {
   const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
   );
   const [isOpen, setIsOpen] = useState(false);
+
+  const dismiss = () => {
+    setShowCallOut(false);
+    sessionStorage.setItem('slo_health_callout_hidden', 'true');
+  };
 
   if (!showCallOut) {
     return null;
@@ -29,18 +35,17 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
   if (isLoading || isError || results === undefined || results?.length === 0) {
     return null;
   }
-  const unhealthySloList = results.filter((result) => result.health.overall === 'unhealthy');
-  if (unhealthySloList.length === 0) {
+
+  const problematicSloList = results.filter((result) => result.health.isProblematic);
+  if (problematicSloList.length === 0) {
     return null;
   }
 
-  const dismiss = () => {
-    setShowCallOut(false);
-    sessionStorage.setItem('slo_health_callout_hidden', 'true');
-  };
+  const deduplicatedList = uniqBy(problematicSloList, (item) => item.id);
 
   return (
     <EuiCallOut
+      data-test-subj="sloHealthCallout"
       color="danger"
       iconType={isOpen ? 'arrowDown' : 'arrowRight'}
       size="s"
@@ -64,21 +69,22 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
           }}
         >
           <EuiFlexItem>
-            <FormattedMessage
-              id="xpack.slo.sloList.healthCallout.description"
-              defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}}
-          in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
-              values={{
-                count: unhealthySloList.length,
-              }}
-            />
+            <span data-test-subj="sloHealthCalloutDescription">
+              <FormattedMessage
+                id="xpack.slo.sloList.healthCallout.operationalProblemsDescription"
+                defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems. You can inspect {count, plural, one {it} other {each one}} here:"
+                values={{
+                  count: deduplicatedList.length,
+                }}
+              />
+            </span>
             <ul>
-              {unhealthySloList.map((result) => (
-                <li key={result.sloId}>
-                  <ExternalLinkDisplayText
+              {deduplicatedList.map((result) => (
+                <li key={result.id}>
+                  <ContentWithInspectCta
                     textSize="xs"
-                    content={result.sloName}
-                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
+                    content={result.name}
+                    url={paths.sloDetails(result.id, result.instanceId, undefined, 'overview')}
                   />
                 </li>
               ))}

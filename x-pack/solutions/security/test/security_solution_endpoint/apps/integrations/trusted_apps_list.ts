@@ -17,7 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const toasts = getService('toasts');
 
-  describe('When on the Trusted Apps list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/236164
+  describe.skip('When on the Trusted Apps list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;

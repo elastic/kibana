@@ -12,10 +12,10 @@ import { getHighlightColors } from '@kbn/data-grid-in-table-search/src/get_highl
 import React, { useMemo } from 'react';
 
 export const ChartTitle = ({
-  searchTerm,
+  highlight,
   title,
 }: {
-  searchTerm?: string;
+  highlight?: string;
   title: string;
 }): React.ReactNode => {
   const { euiTheme } = useEuiTheme();
@@ -55,7 +55,7 @@ export const ChartTitle = ({
   return (
     <div css={headerStyles} className="metricsExperienceChartTitle">
       <span css={chartTitleCss}>
-        {searchTerm ? (
+        {highlight ? (
           <EuiHighlight
             css={css`
               & mark {
@@ -65,7 +65,7 @@ export const ChartTitle = ({
             `}
             strict={false}
             highlightAll
-            search={searchTerm}
+            search={highlight}
           >
             {title}
           </EuiHighlight>

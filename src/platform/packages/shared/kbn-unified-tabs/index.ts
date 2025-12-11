@@ -16,3 +16,4 @@ export {
 } from './src/components/tabbed_content';
 export { useNewTabProps } from './src/hooks/use_new_tab_props';
 export { getNextTabNumber } from './src/utils/get_next_tab_number';
+export { getTabIdAttribute } from './src/utils/get_tab_attributes';

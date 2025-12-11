@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { useIsExperimentalFeatureEnabled as _useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useHasSecurityCapability as _useHasSecurityCapability } from '../../../helper_hooks';
 import { renderHook as reactRenderHook } from '@testing-library/react';
 import { useEndpointExceptionsCapability } from '.';
 
-jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../helper_hooks');
 
-const useIsExperimentalFeatureEnabledMock = _useIsExperimentalFeatureEnabled as jest.Mock;
 const useHasSecurityCapabilityMock = _useHasSecurityCapability as jest.Mock;
 
 describe('useEndpointExceptionsCapability()', () => {
@@ -30,13 +27,13 @@ describe('useEndpointExceptionsCapability()', () => {
       crudEndpointExceptions: true,
     };
 
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
     useHasSecurityCapabilityMock.mockImplementation((capability) =>
       Boolean(capabilities[capability])
     );
   });
 
   it(`should return 'true' if capability 'crudEndpointExceptions' allowed`, () => {
+    capabilities.writeGlobalArtifacts = true;
     expect(renderHook('crudEndpointExceptions').result.current).toBe(true);
   });
 
@@ -45,22 +42,16 @@ describe('useEndpointExceptionsCapability()', () => {
     expect(renderHook('crudEndpointExceptions').result.current).toBe(false);
   });
 
-  describe('and endpoint space awareness feature is enabled', () => {
-    beforeEach(() => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-    });
+  it(`should return 'false' if capability 'crudEndpointExceptions' is allowed, but user is not allowed to manage global artifacts`, () => {
+    expect(renderHook('crudEndpointExceptions').result.current).toBe(false);
+  });
 
-    it(`should return 'false' if capability 'curdEndpointExceptions' is allowed, but user is not allowed to manage global artifacts`, () => {
-      expect(renderHook('crudEndpointExceptions').result.current).toBe(false);
-    });
+  it(`should return 'true' if capabilities 'crudEndpointExceptions' and manage global artifacts is allowed`, () => {
+    capabilities.writeGlobalArtifacts = true;
+    expect(renderHook('crudEndpointExceptions').result.current).toBe(true);
+  });
 
-    it(`should return 'true' if capabilities 'curdEndpointExceptions' and manage global artifacts is allowed`, () => {
-      capabilities.writeGlobalArtifacts = true;
-      expect(renderHook('crudEndpointExceptions').result.current).toBe(true);
-    });
-
-    it(`should return 'true' if capability 'showEndpointExceptions' is allowed and manage global artifact is not allowed`, () => {
-      expect(renderHook('showEndpointExceptions').result.current).toBe(true);
-    });
+  it(`should return 'true' if capability 'showEndpointExceptions' is allowed and manage global artifact is not allowed`, () => {
+    expect(renderHook('showEndpointExceptions').result.current).toBe(true);
   });
 });

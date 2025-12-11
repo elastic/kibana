@@ -16,16 +16,15 @@ import {
 } from './mocks';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { LensDocument } from '../persistence';
 import type {
+  LensDocument,
   GetStateType,
-  LensApi,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensPublicCallbacks,
   LensRuntimeState,
-} from './types';
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import type {
   HasParentApi,
   PublishesTimeRange,
@@ -38,6 +37,7 @@ import { isObject } from 'lodash';
 import { createMockDatasource, defaultDoc } from '../mocks';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
+import type { LensEmbeddableStartServices } from './types';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
@@ -367,6 +367,66 @@ describe('Data Loader', () => {
           parentApiQuery,
           parentApiFilters,
           parentApiTimeRange
+        ),
+      }
+    );
+  });
+
+  it('should propagate projectRouting from parent API to search context', async () => {
+    const projectRouting = '_alias:_origin';
+
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          projectRouting
+        ),
+      }
+    );
+  });
+
+  it('should handle undefined projectRouting from parent API', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting: undefined,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          undefined
         ),
       }
     );

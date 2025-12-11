@@ -34,14 +34,6 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
   opacity: 1;
 }
 
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
 <div
   class="c0"
   data-test-subj="hoverVisibilityContainer"
@@ -94,15 +86,15 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.geo.city_name"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             New York
                           </span>
@@ -126,15 +118,15 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.geo.region_name"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             New York
                           </span>
@@ -170,15 +162,15 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.as.organization.name"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             Test Org
                           </span>
@@ -206,15 +198,15 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.as.number"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             12345
                           </span>
@@ -302,15 +294,15 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                     >
                       <div>
                         <div
-                          data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_id-b19a781f683541a7a25ee345133aa399"
                           tabindex="-1"
                         >
                           <span
-                            class="c1"
+                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                             data-test-subj="render-content-host.id"
                           >
                             <span
                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              id="generated-id-wrapper"
                             >
                               <button
                                 class="euiLink emotion-euiLink-primary"
@@ -355,15 +347,15 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
               >
                 <div>
                   <div
-                    data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
                     tabindex="-1"
                   >
                     <span
-                      class="c1"
+                      class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                       data-test-subj="render-content-host.name"
                     >
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <button
                           class="euiLink emotion-euiLink-primary"
@@ -399,6 +391,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
         >
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            id="generated-id-wrapper"
           >
             <a
               class="euiLink emotion-euiLink-primary"
@@ -469,14 +462,6 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
   opacity: 1;
 }
 
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
 <div
   class="c0"
   data-test-subj="hoverVisibilityContainer"
@@ -514,15 +499,15 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.geo.city_name"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             New York
                           </span>
@@ -546,15 +531,15 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.geo.region_name"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             New York
                           </span>
@@ -590,15 +575,15 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.as.organization.name"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             Test Org
                           </span>
@@ -626,15 +611,15 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                   >
                     <div>
                       <div
-                        data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
                         tabindex="-1"
                       >
                         <span
-                          class="c1"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-source.as.number"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             12345
                           </span>
@@ -722,15 +707,15 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                     >
                       <div>
                         <div
-                          data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_id-b19a781f683541a7a25ee345133aa399"
                           tabindex="-1"
                         >
                           <span
-                            class="c1"
+                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                             data-test-subj="render-content-host.id"
                           >
                             <span
                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              id="generated-id-wrapper"
                             >
                               <button
                                 class="euiLink emotion-euiLink-primary"
@@ -775,15 +760,15 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
               >
                 <div>
                   <div
-                    data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
                     tabindex="-1"
                   >
                     <span
-                      class="c1"
+                      class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                       data-test-subj="render-content-host.name"
                     >
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <button
                           class="euiLink emotion-euiLink-primary"
@@ -819,6 +804,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
         >
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            id="generated-id-wrapper"
           >
             <a
               class="euiLink emotion-euiLink-primary"
