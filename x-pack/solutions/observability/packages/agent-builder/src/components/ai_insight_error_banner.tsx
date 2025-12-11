@@ -31,7 +31,7 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
         })}
       </p>
       {onRetry && (
-        <EuiButton size="s" onClick={onRetry} data-test-subj={`AiInsightErrorBannerRetryButton`}>
+        <EuiButton size="s" onClick={onRetry} data-test-subj="AiInsightErrorBannerRetryButton">
           {i18n.translate('undefined.aiInsight.retryButton', {
             defaultMessage: 'Try again',
           })}
