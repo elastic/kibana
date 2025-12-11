@@ -147,6 +147,7 @@ export const riskScoreDocFactory =
     const found = modifiers.find((mod) => mod.type === 'asset_criticality') as
       | (Modifier<'asset_criticality'> & { contribution: number })
       | undefined;
+
     const legacyCat2Fields = buildLegacyCriticalityFields(found);
 
     return {

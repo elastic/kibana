@@ -94,7 +94,6 @@ export const buildLegacyCriticalityFields = (
       category_2_count: 0,
     };
   }
-
   return {
     criticality_level: modifier.metadata?.criticality_level,
     criticality_modifier: modifier.modifier_value,
