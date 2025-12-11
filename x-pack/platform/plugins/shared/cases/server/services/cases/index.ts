@@ -178,6 +178,7 @@ export class CasesService {
   }
 
   public async getCaseIdsByAttachmentSearch(
+    namespaces: string[],
     search?: string,
     searchFields?: string[]
   ): Promise<string[]> {
@@ -190,7 +191,7 @@ export class CasesService {
 
     const response = await this.searchCases({
       type: [CASE_COMMENT_SAVED_OBJECT],
-      namespaces: ['*'],
+      namespaces,
       query: {
         bool: {
           should: [
@@ -271,6 +272,7 @@ export class CasesService {
     namespaces: string[];
   }): Promise<CasesMapWithPageInfo> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
+      namespaces,
       caseOptions.search,
       caseOptions.searchFields
     );
@@ -302,7 +304,7 @@ export class CasesService {
       return accMap;
     }, new Map<string, Case>());
 
-    // TODO: imported cases do not have populate stats when importing
+    // TODO: imported cases do not populate stats when importing
     // Remove once https://github.com/elastic/kibana/issues/245939 is fixed
     const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
       caseIds: Array.from(casesMap.keys()),
