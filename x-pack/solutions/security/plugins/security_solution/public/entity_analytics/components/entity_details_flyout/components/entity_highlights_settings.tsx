@@ -24,6 +24,7 @@ import { noop } from 'lodash';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
+import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
@@ -92,12 +93,24 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   });
 
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const entityAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.entity,
+      attachmentData: {
+        identifierType: entityType,
+        identifier: entityIdentifier,
+        attachmentLabel: entityIdentifier,
+      },
+      attachmentPrompt: ENTITY_PROMPT,
+    }),
+    [entityIdentifier, entityType]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
+  const onAgentBuildAttachmentClick = useCallback(() => {
+    openAgentBuilderFlyout();
+    closePopover();
+  }, [closePopover, openAgentBuilderFlyout]);
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.entity,
-    attachmentData: { identifierType: entityType, identifier: entityIdentifier },
-    attachmentPrompt: `Investigate the entity and suggest next steps.`,
-  });
   const items = useMemo(
     () => [
       <EuiPanel color="transparent" paddingSize="none" key={'entity-highlights-settings-menu'}>
@@ -139,15 +152,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
             key={'ask-ai-assistant'}
             disabled={isLoading || !assistantResult}
           >
-            <NewAgentBuilderAttachment
-              onClick={() => {
-                if (assistantResult && !isLoading) {
-                  openAgentBuilderFlyout();
-                  closePopover();
-                }
-              }}
-              size="s"
-            />
+            <NewAgentBuilderAttachment onClick={onAgentBuildAttachmentClick} size="s" />
           </EuiContextMenuItem>
         ) : (
           <EuiContextMenuItem
@@ -192,12 +197,12 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       showAnonymizedValues,
       onChangeShowAnonymizedValues,
       selectedConversationHasAnonymizedValues,
+      onAgentBuildAttachmentClick,
       setConnectorId,
       connectorId,
       showAssistantOverlay,
       closePopover,
       isAgentBuilderEnabled,
-      openAgentBuilderFlyout,
       isLoading,
       assistantResult,
     ]
