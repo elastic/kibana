@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/onechat-server';
-import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../../../common/agent_builder/feature_flag';
+import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '@kbn/observability-agent-builder-plugin/common';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../../types';
 import { getIsObservabilityAgentEnabled } from './get_is_obs_agent_enabled';
