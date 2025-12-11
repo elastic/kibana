@@ -43,9 +43,10 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
-  - '@kbn/inference-common'
   - '@kbn/std'
   - '@kbn/inference-plugin'
+  - '@kbn/logging'
+  - '@kbn/inference-common'
   - '@kbn/management-settings-ids'
 tags:
   - plugin

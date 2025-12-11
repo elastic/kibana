@@ -154,6 +154,8 @@
     "@kbn/onechat-plugin",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/inference-plugin"
+    "@kbn/observability-agent-builder",
+    "@kbn/server-route-repository-client"
   ],
   "exclude": ["target/**/*"]
 }
