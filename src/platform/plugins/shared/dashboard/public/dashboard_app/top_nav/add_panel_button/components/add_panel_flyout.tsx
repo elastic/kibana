@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { i18n as i18nFn } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -28,8 +29,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import type { MenuItem, MenuItemGroup } from '../types';
+import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
-import { useMenuItemGroups } from '../use_menu_item_groups';
 
 export function AddPanelFlyout({
   dashboardApi,
@@ -42,7 +43,14 @@ export function AddPanelFlyout({
 }) {
   const { euiTheme } = useEuiTheme();
 
-  const { groups, loading, error } = useMenuItemGroups(dashboardApi);
+  const {
+    value: groups,
+    loading,
+    error,
+  } = useAsync(async () => {
+    return await getMenuItemGroups(dashboardApi);
+  }, [dashboardApi]);
+
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
   useEffect(() => {

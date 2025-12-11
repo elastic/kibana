@@ -11,8 +11,7 @@ import { getMenuItemGroups } from './get_menu_item_groups';
 
 jest.mock('../../../services/kibana_services', () => ({
   uiActionsService: {
-    getTrigger: jest.fn(),
-    getTriggerActions: async () => [
+    getTriggerCompatibleActions: async () => [
       {
         id: 'mockAddPanelAction',
         type: '',
@@ -58,8 +57,7 @@ describe('getMenuItemGroups', () => {
       openOverlay: () => {},
       clearOverlays: () => {},
     };
-    const { groups$ } = await getMenuItemGroups(api);
-    const groups = groups$.getValue();
+    const groups = await getMenuItemGroups(api);
     expect(groups.length).toBe(2);
 
     expect(groups[0].title).toBe('Visualizations');
