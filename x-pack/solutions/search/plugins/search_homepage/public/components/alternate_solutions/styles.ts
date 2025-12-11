@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { UseEuiTheme } from "@elastic/eui";
+import type { UseEuiTheme } from '@elastic/eui';
 
 export const LogoContainerStyle = ({ euiTheme }: UseEuiTheme) => ({
-    borderRadius: euiTheme.border.radius.medium,
-    padding: euiTheme.size.base,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    width: `${euiTheme.base * 6}px`,
-    height: `${euiTheme.base * 6}px`,
-    justifyContent: 'center',
-    alignItems: 'center',
-  });
+  borderRadius: euiTheme.border.radius.medium,
+  padding: euiTheme.size.base,
+  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+  width: `${euiTheme.base * 6}px`,
+  height: `${euiTheme.base * 6}px`,
+  justifyContent: 'center',
+  alignItems: 'center',
+});
