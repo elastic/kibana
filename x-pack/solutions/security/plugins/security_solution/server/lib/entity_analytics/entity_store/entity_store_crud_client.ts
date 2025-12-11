@@ -311,7 +311,11 @@ function getFieldDescriptions(
   const descriptions: Record<string, FieldDescription & { value: unknown }> = {};
 
   for (const [key, value] of Object.entries(flatProps)) {
-    if (key === ENTITY_ID_FIELD || key === description.identityField) {
+    if (
+      key === ENTITY_ID_FIELD ||
+      key === description.identityField ||
+      (Array.isArray(description.identityField) && description.identityField.includes(key))
+    ) {
       // eslint-disable-next-line no-continue
       continue;
     }

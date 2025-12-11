@@ -1,6 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
+    "jsx": "react",
     "outDir": "target/types"
   },
   "include": [

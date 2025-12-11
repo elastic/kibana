@@ -44,7 +44,7 @@ export const createFieldRetentionEnrichPolicy = async ({
     }),
     match: {
       indices: getEntitiesIndexName(description.entityType, options.namespace),
-      match_field: description.identityField,
+      match_field: 'entity.id',
       enrich_fields: enrichFields,
     },
   });

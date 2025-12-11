@@ -64,17 +64,25 @@ export const getEntityIndexStatus = async ({
 
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
-export const generateIndexMappings = (
-  description: Pick<
-    EntityEngineInstallationDescriptor,
-    'fields' | 'identityField' | 'identityFieldMapping'
-  >
-): MappingTypeMapping => {
-  const identityFieldMappings: MappingProperties = {
-    [description.identityField]: description.identityFieldMapping,
-  };
+export const generateIndexMappings = ({
+  fields,
+  identityField,
+  identityFieldMapping,
+}: Pick<
+  EntityEngineInstallationDescriptor,
+  'fields' | 'identityField' | 'identityFieldMapping'
+>): MappingTypeMapping => {
+  const identityFieldMappings: MappingProperties = {};
 
-  const otherFieldMappings = description.fields
+  if (Array.isArray(identityField)) {
+    identityField.forEach((field) => {
+      identityFieldMappings[field] = identityFieldMapping;
+    });
+  } else {
+    identityFieldMappings[identityField] = identityFieldMapping;
+  }
+
+  const otherFieldMappings = fields
     .filter(({ mapping }) => mapping)
     .reduce((acc, { destination, mapping }) => {
       acc[destination] = mapping;

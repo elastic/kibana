@@ -145,16 +145,15 @@ export function generateLatestProcessors(definition: EntityDefinition): IngestPr
         value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
-    {
+    ...definition.identityFields.map(({ field }) => ({
       set: {
         field: 'entity.id',
-        value: definition.identityFields
-          .map((identityField) => identityField.field)
-          .sort()
-          .map((identityField) => `{{{entity.identity.${identityField}}}}`)
-          .join('-'),
+        override: false,
+        ignore_empty_value: true,
+        copy_from: `entity.identity.${field}`,
       },
-    },
+    })),
+
     ...(definition.staticFields != null
       ? Object.keys(definition.staticFields).map((field) => ({
           set: { field, value: definition.staticFields![field] },

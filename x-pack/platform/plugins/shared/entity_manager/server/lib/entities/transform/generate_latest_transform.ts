@@ -92,7 +92,7 @@ const generateTransformPutRequest = ({
           (acc, id) => ({
             ...acc,
             [`entity.identity.${id.field}`]: {
-              terms: { field: id.field },
+              terms: { field: id.field, missing_bucket: true },
             },
           }),
           {}
@@ -123,11 +123,18 @@ function generateFilters(definition: EntityDefinition) {
     filter.bool.must.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
-  definition.identityFields.forEach(({ field }) => {
-    filter.bool.must.push({ exists: { field } });
-    filter.bool.must_not.push({
-      term: { [field]: '' }, // identity field can't be empty
-    });
+  filter.bool.must.push({
+    bool: {
+      should: definition.identityFields.map(({ field }) => {
+        return {
+          bool: {
+            must: [{ exists: { field } }],
+            must_not: [{ term: { [field]: '' } }],
+          },
+        };
+      }),
+      minimum_should_match: 1,
+    },
   });
 
   filter.bool.must.push({

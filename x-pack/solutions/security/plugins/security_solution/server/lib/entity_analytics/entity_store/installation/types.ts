@@ -20,7 +20,7 @@ export interface EntityEngineInstallationDescriptor {
   id: string;
   version: string;
   entityType: EntityType;
-  identityField: string;
+  identityField: string[] | string;
   identityFieldMapping: MappingProperty;
 
   /**
