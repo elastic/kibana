@@ -51,7 +51,7 @@ const RelatedDashboards = () => {
         })}
         type="question"
         aria-label={i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTooltipAriaLabel', {
-          defaultMessage: 'Why are these dashboards related?',
+          defaultMessage: 'Learn why these dashboards are related',
         })}
       />
     </EuiText>
@@ -70,10 +70,10 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   const hasElasticSchema = schemas.includes('ecs');
   const { isInstalled: hasEcsK8sIntegration } = useInstalledIntegration('kubernetes');
   const hasSemconvSchema = schemas.includes('semconv');
-  const { isInstalled: hasOtelK8sIntegration } = useInstalledIntegration('kubernetes_otel');
+  const { isInstalled: hasSemconvK8sIntegration } = useInstalledIntegration('kubernetes_otel');
 
   const showEcsK8sButton = hasElasticSchema && hasEcsK8sIntegration;
-  const showOtelK8sButton = hasSemconvSchema && hasOtelK8sIntegration;
+  const showSemconvK8sButton = hasSemconvSchema && hasSemconvK8sIntegration;
 
   useEffect(() => {
     if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));
@@ -87,7 +87,7 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
   if (view === 'table') {
-    return nodeType === 'pod' && (showEcsK8sButton || showOtelK8sButton) ? (
+    return nodeType === 'pod' && (showEcsK8sButton || showSemconvK8sButton) ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
         <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
           <RelatedDashboards />
@@ -96,9 +96,9 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
               <KubernetesDashboardLink integrationType="ecs" />
             </EuiFlexItem>
           )}
-          {showOtelK8sButton && (
+          {showSemconvK8sButton && (
             <EuiFlexItem grow={false}>
-              <KubernetesDashboardLink integrationType="otel" />
+              <KubernetesDashboardLink integrationType="semconv" />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -120,7 +120,7 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
               {isOpen ? hideHistory : showHistory}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {nodeType === 'pod' && (showEcsK8sButton || showOtelK8sButton) && (
+          {nodeType === 'pod' && (showEcsK8sButton || showSemconvK8sButton) && (
             <>
               <RelatedDashboards />
               {showEcsK8sButton && (
@@ -128,9 +128,9 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
                   <KubernetesDashboardLink integrationType="ecs" />
                 </EuiFlexItem>
               )}
-              {showOtelK8sButton && (
+              {showSemconvK8sButton && (
                 <EuiFlexItem grow={false}>
-                  <KubernetesDashboardLink integrationType="otel" />
+                  <KubernetesDashboardLink integrationType="semconv" />
                 </EuiFlexItem>
               )}
             </>

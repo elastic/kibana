@@ -18,10 +18,18 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./ecs_light.svg', () => 'ecs-light-mock.svg', { virtual: true });
-jest.mock('./ecs_dark.svg', () => 'ecs-dark-mock.svg', { virtual: true });
-jest.mock('./otel_light.svg', () => 'otel-light-mock.svg', { virtual: true });
-jest.mock('./otel_dark.svg', () => 'otel-dark-mock.svg', { virtual: true });
+jest.mock('../../images/kubernetes_dashboards/ecs_light.svg', () => 'ecs-light-mock.svg', {
+  virtual: true,
+});
+jest.mock('../../images/kubernetes_dashboards/ecs_dark.svg', () => 'ecs-dark-mock.svg', {
+  virtual: true,
+});
+jest.mock('../../images/kubernetes_dashboards/semconv_light.svg', () => 'semconv-light-mock.svg', {
+  virtual: true,
+});
+jest.mock('../../images/kubernetes_dashboards/semconv_dark.svg', () => 'semconv-dark-mock.svg', {
+  virtual: true,
+});
 
 const useEuiThemeMock = useEuiTheme as jest.MockedFunction<typeof useEuiTheme>;
 
@@ -64,20 +72,20 @@ describe('KubernetesAssetImage', () => {
     });
   });
 
-  describe('OTel type', () => {
+  describe('Semconv type', () => {
     it('renders light image when theme is LIGHT', async () => {
       useEuiThemeMock.mockReturnValue({
         colorMode: 'LIGHT',
       } as ReturnType<typeof useEuiTheme>);
 
       await act(async () => {
-        render(<KubernetesAssetImage type="otel" />);
+        render(<KubernetesAssetImage type="semconv" />);
       });
 
       await waitFor(() => {
         const image = screen.getByRole('img');
         expect(image).toBeInTheDocument();
-        expect(image).toHaveAttribute('alt', 'Otel Kubernetes Dashboard image');
+        expect(image).toHaveAttribute('alt', 'OpenTelemetry Kubernetes Dashboard image');
       });
     });
 
@@ -87,13 +95,13 @@ describe('KubernetesAssetImage', () => {
       } as ReturnType<typeof useEuiTheme>);
 
       await act(async () => {
-        render(<KubernetesAssetImage type="otel" />);
+        render(<KubernetesAssetImage type="semconv" />);
       });
 
       await waitFor(() => {
         const image = screen.getByRole('img');
         expect(image).toBeInTheDocument();
-        expect(image).toHaveAttribute('alt', 'Otel Kubernetes Dashboard image');
+        expect(image).toHaveAttribute('alt', 'OpenTelemetry Kubernetes Dashboard image');
       });
     });
   });

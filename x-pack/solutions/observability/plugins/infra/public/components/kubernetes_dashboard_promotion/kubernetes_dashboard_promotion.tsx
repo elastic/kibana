@@ -20,7 +20,7 @@ import {
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { KubernetesAssetImage } from './kubernetes_asset_image';
 
-type IntegrationType = 'ecs' | 'otel';
+type IntegrationType = 'ecs' | 'semconv';
 
 interface IntegrationConfig {
   card: {
@@ -133,30 +133,30 @@ const ECS_CONFIG: IntegrationConfig = {
   },
 };
 
-const OTEL_CONFIG: IntegrationConfig = {
+const SEMCONV_CONFIG: IntegrationConfig = {
   card: {
-    imageType: 'otel',
+    imageType: 'semconv',
     title: {
       installed: i18n.translate(
-        'xpack.infra.kubernetesDashboardPromotion.otel.integrationInstalledTitle',
+        'xpack.infra.kubernetesDashboardPromotion.semconv.integrationInstalledTitle',
         { defaultMessage: 'View Kubernetes OpenTelemetry Dashboards' }
       ),
       notInstalled: i18n.translate(
-        'xpack.infra.kubernetesDashboardPromotion.otel.integrationNotInstalledTitle',
+        'xpack.infra.kubernetesDashboardPromotion.semconv.integrationNotInstalledTitle',
         { defaultMessage: 'Install Kubernetes OpenTelemetry Dashboards' }
       ),
     },
     description: {
       installed: (integrationLink: React.ReactNode) => (
         <FormattedMessage
-          id="xpack.infra.kubernetesDashboardPromotion.otel.integrationInstalledDescription"
+          id="xpack.infra.kubernetesDashboardPromotion.semconv.integrationInstalledDescription"
           defaultMessage="View dashboards available for the Kubernetes clusters which are observed using {integrationLink} which match your query."
           values={{ integrationLink }}
         />
       ),
       notInstalled: (integrationLink: React.ReactNode) => (
         <FormattedMessage
-          id="xpack.infra.kubernetesDashboardPromotion.otel.integrationNotInstalledDescription"
+          id="xpack.infra.kubernetesDashboardPromotion.semconv.integrationNotInstalledDescription"
           defaultMessage="We have dashboards for Kubernetes clusters which are observed using {integrationLink} which match your query."
           values={{ integrationLink }}
         />
@@ -164,47 +164,69 @@ const OTEL_CONFIG: IntegrationConfig = {
       docsLink: {
         url: 'https://www.elastic.co/docs/reference/integrations/kubernetes_otel',
         text: i18n.translate(
-          'xpack.infra.kubernetesDashboardPromotion.otel.integrationDocsLinkText',
+          'xpack.infra.kubernetesDashboardPromotion.semconv.integrationDocsLinkText',
           { defaultMessage: 'OpenTelemetry' }
         ),
-        testSubj: 'infraOtelKubernetesDashboardCardIntegrationDocsLink',
+        testSubj: 'infraSemconvKubernetesDashboardCardIntegrationDocsLink',
       },
     },
     actionButton: {
       installed: {
         dashboardsPath: '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")',
-        label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otel.viewDashboardsLink', {
-          defaultMessage: 'View Dashboards',
-        }),
-        testSubj: 'infraOtelKubernetesDashboardCardLink',
+        label: i18n.translate(
+          'xpack.infra.kubernetesDashboardPromotion.semconv.viewDashboardsLink',
+          {
+            defaultMessage: 'View Dashboards',
+          }
+        ),
+        testSubj: 'infraSemconvKubernetesDashboardCardLink',
       },
       notInstalled: {
         integrationPath: '/detail/kubernetes_otel',
-        label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otel.viewIntegrationLink', {
-          defaultMessage: 'View Integration',
-        }),
-        testSubj: 'infraOtelKubernetesDashboardCardInstallLink',
+        label: i18n.translate(
+          'xpack.infra.kubernetesDashboardPromotion.semconv.viewIntegrationLink',
+          {
+            defaultMessage: 'View Integration',
+          }
+        ),
+        testSubj: 'infraSemconvKubernetesDashboardCardInstallLink',
       },
     },
     hideButton: {
-      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otel.dismiss', {
+      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.semconv.dismiss', {
         defaultMessage: 'Dismiss',
       }),
-      testSubj: 'infraOtelKubernetesDashboardCardHideThisButton',
+      testSubj: 'infraSemconvKubernetesDashboardCardHideThisButton',
     },
   },
   link: {
     dashboardsPath: '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")',
-    label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otel.bottomDrawerLink', {
+    label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.semconv.bottomDrawerLink', {
       defaultMessage: 'Kubernetes OpenTelemetry',
     }),
-    testSubj: 'inventory-otelKubernetesDashboard-link',
+    testSubj: 'inventory-semconvKubernetesDashboard-link',
   },
 };
 
 const INTEGRATION_CONFIGS: Record<IntegrationType, IntegrationConfig> = {
   ecs: ECS_CONFIG,
-  otel: OTEL_CONFIG,
+  semconv: SEMCONV_CONFIG,
+};
+
+const IntegrationLink = ({
+  url,
+  text,
+  testSubj,
+}: {
+  url: string;
+  text: string;
+  testSubj: string;
+}) => {
+  return (
+    <EuiLink data-test-subj={testSubj} href={url} target="_blank">
+      {text}
+    </EuiLink>
+  );
 };
 
 export const KubernetesDashboardCard = ({
@@ -227,16 +249,6 @@ export const KubernetesDashboardCard = ({
   const actionUrl = hasIntegrationInstalled
     ? getUrlForApp('dashboards', { path: card.actionButton.installed.dashboardsPath })
     : getUrlForApp('integrations', { path: card.actionButton.notInstalled.integrationPath });
-
-  const integrationLink = (
-    <EuiLink
-      data-test-subj={card.description.docsLink.testSubj}
-      href={card.description.docsLink.url}
-      target="_blank"
-    >
-      {card.description.docsLink.text}
-    </EuiLink>
-  );
 
   return (
     <EuiPanel
@@ -261,8 +273,20 @@ export const KubernetesDashboardCard = ({
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 {hasIntegrationInstalled
-                  ? card.description.installed(integrationLink)
-                  : card.description.notInstalled(integrationLink)}
+                  ? card.description.installed(
+                      <IntegrationLink
+                        url={card.description.docsLink.url}
+                        text={card.description.docsLink.text}
+                        testSubj={card.description.docsLink.testSubj}
+                      />
+                    )
+                  : card.description.notInstalled(
+                      <IntegrationLink
+                        url={card.description.docsLink.url}
+                        text={card.description.docsLink.text}
+                        testSubj={card.description.docsLink.testSubj}
+                      />
+                    )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

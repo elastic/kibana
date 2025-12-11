@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import type { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -46,6 +47,8 @@ interface LegendControlOptions {
   legend: WaffleLegendOptions;
 }
 
+const DEFAULT_DISMISSED_CARDS = { semconv: false, ecs: false };
+
 export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const [showLoading, setShowLoading] = useState(true);
   const {
@@ -75,15 +78,17 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   );
 
   const hasElasticSchema = schemas.includes('ecs');
-  const hasOtelSchema = schemas.includes('semconv');
+  const hasSemconvSchema = schemas.includes('semconv');
   const { isInstalled: hasEcsK8sIntegration } = useInstalledIntegration('kubernetes');
-  const { isInstalled: hasOtelK8sIntegration } = useInstalledIntegration('kubernetes_otel');
+  const { isInstalled: hasSemconvK8sIntegration } = useInstalledIntegration('kubernetes_otel');
 
-  const [ecsK8sCardDismissed, setEcsK8sCardDismissed] = useState(false);
-  const [otelK8sCardDismissed, setOtelK8sCardDismissed] = useState(false);
+  const [dismissedCards, setDismissedCards] = useLocalStorage(
+    'infra.inventory.k8sCardDismissed',
+    DEFAULT_DISMISSED_CARDS
+  );
 
-  const showEcsK8sDashboardCard = hasElasticSchema && !ecsK8sCardDismissed;
-  const showOtelK8sDashboardCard = hasOtelSchema && !otelK8sCardDismissed;
+  const showEcsK8sDashboardCard = hasElasticSchema && !dismissedCards?.ecs;
+  const showSemconvK8sDashboardCard = hasSemconvSchema && !dismissedCards?.semconv;
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -175,24 +180,34 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
             </EuiFlexGroup>
           </TopActionContainer>
           {nodeType === 'pod' &&
-            (showEcsK8sDashboardCard || showOtelK8sDashboardCard) &&
+            (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) &&
             !loading && (
               <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
                 {showEcsK8sDashboardCard && (
                   <EuiFlexItem>
                     <KubernetesDashboardCard
                       integrationType="ecs"
-                      onClose={() => setEcsK8sCardDismissed(true)}
+                      onClose={() =>
+                        setDismissedCards({
+                          ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
+                          ecs: true,
+                        })
+                      }
                       hasIntegrationInstalled={hasEcsK8sIntegration}
                     />
                   </EuiFlexItem>
                 )}
-                {showOtelK8sDashboardCard && (
+                {showSemconvK8sDashboardCard && (
                   <EuiFlexItem>
                     <KubernetesDashboardCard
-                      integrationType="otel"
-                      onClose={() => setOtelK8sCardDismissed(true)}
-                      hasIntegrationInstalled={hasOtelK8sIntegration}
+                      integrationType="semconv"
+                      onClose={() =>
+                        setDismissedCards({
+                          ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
+                          semconv: true,
+                        })
+                      }
+                      hasIntegrationInstalled={hasSemconvK8sIntegration}
                     />
                   </EuiFlexItem>
                 )}

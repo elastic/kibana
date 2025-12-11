@@ -144,12 +144,12 @@ describe('KubernetesDashboardCard', () => {
     });
   });
 
-  describe('OTel integration', () => {
+  describe('Semconv integration', () => {
     it('renders correctly when integration is installed', () => {
       const onClose = jest.fn();
       renderWithIntl(
         <KubernetesDashboardCard
-          integrationType="otel"
+          integrationType="semconv"
           onClose={onClose}
           hasIntegrationInstalled={true}
         />
@@ -157,15 +157,15 @@ describe('KubernetesDashboardCard', () => {
 
       expect(screen.getByText('View Kubernetes OpenTelemetry Dashboards')).toBeInTheDocument();
       expect(screen.getByText('View Dashboards')).toBeInTheDocument();
-      expect(screen.getByTestId('kubernetes-asset-image-otel')).toBeInTheDocument();
-      expect(screen.getByTestId('infraOtelKubernetesDashboardCardLink')).toBeInTheDocument();
+      expect(screen.getByTestId('kubernetes-asset-image-semconv')).toBeInTheDocument();
+      expect(screen.getByTestId('infraSemconvKubernetesDashboardCardLink')).toBeInTheDocument();
     });
 
     it('renders correctly when integration is not installed', () => {
       const onClose = jest.fn();
       renderWithIntl(
         <KubernetesDashboardCard
-          integrationType="otel"
+          integrationType="semconv"
           onClose={onClose}
           hasIntegrationInstalled={false}
         />
@@ -173,14 +173,16 @@ describe('KubernetesDashboardCard', () => {
 
       expect(screen.getByText('Install Kubernetes OpenTelemetry Dashboards')).toBeInTheDocument();
       expect(screen.getByText('View Integration')).toBeInTheDocument();
-      expect(screen.getByTestId('infraOtelKubernetesDashboardCardInstallLink')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('infraSemconvKubernetesDashboardCardInstallLink')
+      ).toBeInTheDocument();
     });
 
     it('generates correct dashboard URL when installed', () => {
       const onClose = jest.fn();
       renderWithIntl(
         <KubernetesDashboardCard
-          integrationType="otel"
+          integrationType="semconv"
           onClose={onClose}
           hasIntegrationInstalled={true}
         />
@@ -195,7 +197,7 @@ describe('KubernetesDashboardCard', () => {
       const onClose = jest.fn();
       renderWithIntl(
         <KubernetesDashboardCard
-          integrationType="otel"
+          integrationType="semconv"
           onClose={onClose}
           hasIntegrationInstalled={false}
         />
@@ -210,13 +212,13 @@ describe('KubernetesDashboardCard', () => {
       const onClose = jest.fn();
       renderWithIntl(
         <KubernetesDashboardCard
-          integrationType="otel"
+          integrationType="semconv"
           onClose={onClose}
           hasIntegrationInstalled={true}
         />
       );
 
-      const docsLink = screen.getByTestId('infraOtelKubernetesDashboardCardIntegrationDocsLink');
+      const docsLink = screen.getByTestId('infraSemconvKubernetesDashboardCardIntegrationDocsLink');
       expect(docsLink).toHaveAttribute(
         'href',
         'https://www.elastic.co/docs/reference/integrations/kubernetes_otel'
@@ -250,17 +252,17 @@ describe('KubernetesDashboardLink', () => {
     });
   });
 
-  describe('OTel integration', () => {
+  describe('Semconv integration', () => {
     it('renders correctly', () => {
-      renderWithIntl(<KubernetesDashboardLink integrationType="otel" />);
+      renderWithIntl(<KubernetesDashboardLink integrationType="semconv" />);
 
-      const link = screen.getByTestId('inventory-otelKubernetesDashboard-link');
+      const link = screen.getByTestId('inventory-semconvKubernetesDashboard-link');
       expect(link).toBeInTheDocument();
       expect(link).toHaveTextContent('Kubernetes OpenTelemetry');
     });
 
     it('generates correct dashboard URL', () => {
-      renderWithIntl(<KubernetesDashboardLink integrationType="otel" />);
+      renderWithIntl(<KubernetesDashboardLink integrationType="semconv" />);
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith('dashboards', {
         path: '#/list?_g=()&s=tag:("Kubernetes OpenTelemetry Assets")',

@@ -13,23 +13,23 @@ import { useState } from 'react';
 
 const imageSets = {
   ecs: {
-    light: () => import('./ecs_light.svg'),
-    dark: () => import('./ecs_dark.svg'),
+    light: () => import('../../images/kubernetes_dashboards/ecs_light.svg'),
+    dark: () => import('../../images/kubernetes_dashboards/ecs_dark.svg'),
     alt: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecsImageAlt', {
       defaultMessage: 'ECS Kubernetes Dashboard image',
     }),
   },
-  otel: {
-    light: () => import('./otel_light.svg'),
-    dark: () => import('./otel_dark.svg'),
-    alt: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otelImageAlt', {
-      defaultMessage: 'Otel Kubernetes Dashboard image',
+  semconv: {
+    light: () => import('../../images/kubernetes_dashboards/semconv_light.svg'),
+    dark: () => import('../../images/kubernetes_dashboards/semconv_dark.svg'),
+    alt: i18n.translate('xpack.infra.kubernetesDashboardPromotion.semconvImageAlt', {
+      defaultMessage: 'OpenTelemetry Kubernetes Dashboard image',
     }),
   },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt' | 'css'> {
-  type?: 'ecs' | 'otel';
+  type?: 'ecs' | 'semconv';
 }
 
 export function KubernetesAssetImage({ type = 'ecs', ...props }: AssetImageProps) {
