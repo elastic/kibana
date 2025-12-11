@@ -18,11 +18,7 @@ import type { AutomaticImportSamplesIndexService } from '../samples_index/index_
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
 
 export class AgentService {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly samplesIndexService: AutomaticImportSamplesIndexService,
-    private readonly model: InferenceChatModel
-  ) {}
+  constructor(private readonly samplesIndexService: AutomaticImportSamplesIndexService) {}
 
   /**
    * Invokes the deep research agent with samples fetched from the index.
@@ -34,19 +30,26 @@ export class AgentService {
    *
    * @param integration_id - The integration ID
    * @param data_stream_id - The data stream ID
+   * @param esClient - The Elasticsearch client
+   * @param model - The model to use for the agent
    */
-  public async invoke_deep_agent(integrationId: string, dataStreamId: string) {
+  public async invokeAutomaticImportAgent(
+    integrationId: string,
+    dataStreamId: string,
+    esClient: ElasticsearchClient,
+    model: InferenceChatModel
+  ) {
     // Fetch samples from the index (decoupled from agent building)
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
       dataStreamId,
-      this.esClient
+      esClient
     );
 
     // Create tools at the service level
     // Tools capture samples and esClient in their closures
     const fetchSamplesToolInstance = fetchSamplesTool(samples);
-    const validatorTool = ingestPipelineValidatorTool(this.esClient, samples);
+    const validatorTool = ingestPipelineValidatorTool(esClient, samples);
 
     // Create the sub agents with tools
     const logsAnalyzerSubAgent = createLogsAnalyzerAgent({
@@ -70,7 +73,7 @@ export class AgentService {
 
     // Create and invoke the agent
     const automaticImportAgent = createAutomaticImportAgent({
-      model: this.model,
+      model,
       subagents: [logsAnalyzerSubAgent, pipelineGeneratorSubAgent, textToEcsSubAgent],
     });
 

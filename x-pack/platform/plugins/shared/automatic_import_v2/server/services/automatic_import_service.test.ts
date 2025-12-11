@@ -267,6 +267,59 @@ describe('AutomaticImportSetupService', () => {
     });
   });
 
+  describe('deleteDataStream', () => {
+    beforeEach(async () => {
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+    });
+
+    it('should delete data stream via saved object service', async () => {
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('data-stream-456');
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith('data-stream-456', undefined);
+    });
+
+    it('should pass options to saved object service delete', async () => {
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const options = { force: true };
+
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('data-stream-456', options);
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith('data-stream-456', options);
+    });
+
+    it('should throw error if saved object service is not initialized', async () => {
+      (service as any).savedObjectService = null;
+
+      await expect(service.deleteDataStream('data-stream-456')).rejects.toThrow(
+        'Saved Objects service not initialized.'
+      );
+    });
+
+    it('should handle errors from saved object service', async () => {
+      const mockDeleteSavedObject = jest
+        .fn()
+        .mockRejectedValue(new Error('Saved object deletion failed'));
+
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await expect(service.deleteDataStream('data-stream-456')).rejects.toThrow(
+        'Saved object deletion failed'
+      );
+    });
+  });
+
   describe('integration', () => {
     it('should properly initialize and setup the service', async () => {
       const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(

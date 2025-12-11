@@ -6,13 +6,14 @@
  */
 
 import assert from 'assert';
-import type { Logger, LoggerFactory } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 
@@ -21,6 +22,8 @@ export const DATA_STREAM_CREATION_TASK_TYPE = 'autoImport-dataStream-task';
 export interface DataStreamTaskParams {
   integrationId: string;
   dataStreamId: string;
+  esClient: ElasticsearchClient;
+  model: InferenceChatModel;
 }
 
 export class TaskManagerService {
@@ -118,7 +121,9 @@ export class TaskManagerService {
           throw new Error('Task params must include integrationId and dataStreamId');
         }
 
-        await this.taskWorkflow({ integrationId, dataStreamId });
+        // Note: esClient and model are optional as they can't be serialized in task params
+        // They should be provided by the workflow implementation if needed
+        await this.taskWorkflow(params as DataStreamTaskParams);
         this.logger.debug(`Task ${taskId}: Workflow executed successfully`);
       } else {
         this.logger.warn(
