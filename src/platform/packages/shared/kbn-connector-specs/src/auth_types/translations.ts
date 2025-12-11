@@ -116,3 +116,53 @@ export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
     defaultMessage: 'Client secret is required',
   }
 );
+
+export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
+  defaultMessage: 'SSL CRT and Key authentication',
+});
+
+export const CRT_AUTH_CERT_LABEL = i18n.translate('connectorSpecs.crtCert.label', {
+  defaultMessage: 'CRT file',
+});
+
+export const CRT_AUTH_KEY_LABEL = i18n.translate('connectorSpecs.crtKey.label', {
+  defaultMessage: 'KEY file',
+});
+
+export const CRT_AUTH_PASSPHRASE_LABEL = i18n.translate('connectorSpecs.crtPassphrase.label', {
+  defaultMessage: 'Passphrase',
+});
+
+export const CRT_AUTH_CA_LABEL = i18n.translate('connectorSpecs.crtCA.label', {
+  defaultMessage: 'CA file',
+});
+
+export const CRT_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.crtVerificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);
+
+export const PFX_AUTH_LABEL = i18n.translate('connectorSpecs.pfx.label', {
+  defaultMessage: 'SSL PFX authentication',
+});
+
+export const PFX_AUTH_CERT_LABEL = i18n.translate('connectorSpecs.crtCert.label', {
+  defaultMessage: 'PFX file',
+});
+
+export const PFX_AUTH_PASSPHRASE_LABEL = i18n.translate('connectorSpecs.pfxPassphrase.label', {
+  defaultMessage: 'Passphrase',
+});
+
+export const PFX_AUTH_CA_LABEL = i18n.translate('connectorSpecs.pfxCA.label', {
+  defaultMessage: 'CA file',
+});
+
+export const PFX_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.pfxVerificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);

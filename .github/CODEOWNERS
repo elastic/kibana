@@ -16,6 +16,7 @@ examples/embeddable_examples @elastic/kibana-presentation
 examples/error_boundary @elastic/appex-sharedux
 examples/eso_model_version_example @elastic/kibana-security
 examples/esql_ast_inspector @elastic/kibana-esql
+examples/esql_ux_example @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
 examples/expressions_explorer @elastic/kibana-visualizations
 examples/feature_control_examples @elastic/kibana-security
@@ -434,6 +435,7 @@ src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
+src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
@@ -960,6 +962,7 @@ x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kiban
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-streamlang-yaml-editor @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-exploration-team
@@ -1035,6 +1038,7 @@ x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/automatic_import_v2 @elastic/integration-experience
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
+x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_agent @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
@@ -1410,6 +1414,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
+/src/platform/test/examples/esql_ux_example @elastic/kibana-esql
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
 /src/platform/test/functional/page_objects/index_editor.ts @elastic/kibana-esql
 /src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
@@ -1623,8 +1628,12 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/es_query_rule @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/slo/ @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_monitors.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_params_api.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_private_location.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/ @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.index.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
@@ -1632,10 +1641,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.index.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.stateful.config.ts @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/incident_management/ @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/obs-ux-management-team
 /x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/obs-ux-management-team
 
