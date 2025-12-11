@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { createAiInsightAttachmentType } from './ai_insight';
+import { createAlertAttachmentType } from './alert';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -29,7 +30,10 @@ export async function registerAttachments({
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }) {
-  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [createAiInsightAttachmentType()];
+  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
+    createAiInsightAttachmentType(),
+    createAlertAttachmentType({ core, logger }),
+  ];
 
   for (const attachment of attachmentTypes) {
     plugins.onechat.attachments.registerType(attachment);
