@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats, SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
@@ -155,7 +155,7 @@ export async function getDegradedDocCountsForStreams(options: {
     items: allIndices,
     processChunk: async (indicesInChunk) => {
       // Build a filters aggregation keyed by index name so we get per-index counts in a single search.
-      const filters: Record<string, any> = {};
+      const filters: Record<string, QueryDslQueryContainer> = {};
       for (const index of indicesInChunk) {
         filters[index] = {
           term: {
@@ -164,7 +164,7 @@ export async function getDegradedDocCountsForStreams(options: {
         };
       }
 
-      const response = await esClient.search<any>({
+      const response = await esClient.search<SearchRequest>({
         index: indicesInChunk,
         size: 0,
         track_total_hits: false,
