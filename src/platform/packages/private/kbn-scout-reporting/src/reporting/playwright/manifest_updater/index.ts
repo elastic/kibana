@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Configuration options for the Scout Playwright reporter
- */
-export interface ScoutPlaywrightReporterOptions {
-  name?: string;
-  runId?: string;
-  outputPath?: string;
-  captureSteps?: boolean;
-}
+import { ScoutManifestUpdater } from './playwright_reporter';
+// eslint-disable-next-line import/no-default-export
+export default ScoutManifestUpdater;
