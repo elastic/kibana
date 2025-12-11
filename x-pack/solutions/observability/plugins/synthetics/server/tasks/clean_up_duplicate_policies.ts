@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
@@ -92,15 +93,12 @@ export async function cleanUpDuplicatedPackagePolicies(
     performCleanupSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
 
     if (packagePoliciesToDelete.length > 0) {
-      logger.info(
-        ` [PrivateLocationCleanUpTask] Found ${
-          packagePoliciesToDelete.length
-        } duplicate package policies to delete: ${packagePoliciesToDelete.join(', ')}`
+      await deleteDuplicatePackagePolicies(
+        packagePoliciesToDelete,
+        soClient,
+        esClient,
+        serverSetup
       );
-      await fleet.packagePolicyService.delete(soClient, esClient, packagePoliciesToDelete, {
-        force: true,
-        spaceIds: ['*'],
-      });
     }
     taskState.hasAlreadyDoneCleanup = true;
     taskState.maxCleanUpRetries = 3;
@@ -117,5 +115,36 @@ export async function cleanUpDuplicatedPackagePolicies(
       { error: e }
     );
     return { performCleanupSync };
+  }
+}
+
+export async function deleteDuplicatePackagePolicies(
+  packagePoliciesToDelete: string[],
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  serverSetup: SyntheticsServerSetup
+) {
+  const { logger } = serverSetup;
+  const { fleet } = serverSetup.pluginsStart;
+
+  logger.info(
+    `[PrivateLocationCleanUpTask] Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`
+  );
+  // Delete it in batches of 100 to avoid sending too large payloads at once.
+  const BATCH_SIZE = 100;
+  const total = packagePoliciesToDelete.length;
+  const totalBatches = Math.ceil(total / BATCH_SIZE);
+  for (let i = 0; i < total; i += BATCH_SIZE) {
+    const batch = packagePoliciesToDelete.slice(i, i + BATCH_SIZE);
+    const batchIndex = Math.floor(i / BATCH_SIZE) + 1;
+    logger.info(
+      `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${
+        batch.length
+      }), with ids [${batch.join(`, `)}]`
+    );
+    await fleet.packagePolicyService.delete(soClient, esClient, batch, {
+      force: true,
+      spaceIds: ['*'],
+    });
   }
 }
