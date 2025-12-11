@@ -221,7 +221,9 @@ export async function ensureOtelDemo({
       log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
       if (activeScenarios.length > 0) {
         log.write(
-          `  ${chalk.bold('Active Scenarios:')} ${chalk.yellow(activeScenarios.map((s) => s.id).join(', '))}`
+          `  ${chalk.bold('Active Scenarios:')} ${chalk.yellow(
+            activeScenarios.map((s) => s.id).join(', ')
+          )}`
         );
       }
       log.write('');
@@ -327,10 +329,9 @@ export async function patchScenarios({
 
       log.debug(`Resetting ${service}: ${envArgs}`);
       try {
-        await execa.command(
-          `kubectl set env deployment/${service} -n ${NAMESPACE} ${envArgs}`,
-          { stdio: 'pipe' }
-        );
+        await execa.command(`kubectl set env deployment/${service} -n ${NAMESPACE} ${envArgs}`, {
+          stdio: 'pipe',
+        });
         log.info(`  ${chalk.green('✔')} Reset ${service}`);
       } catch (error) {
         log.warning(`  ${chalk.yellow('⚠')} Could not reset ${service} (may not exist)`);
