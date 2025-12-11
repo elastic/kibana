@@ -42,7 +42,10 @@ export class ObservabilityAgentBuilderPlugin
   }
 
   public setup(
-    core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>,
+    core: CoreSetup<
+      ObservabilityAgentBuilderPluginStartDependencies,
+      ObservabilityAgentBuilderPluginStart
+    >,
     plugins: ObservabilityAgentPluginSetupDependencies
   ): ObservabilityAgentPluginSetup {
     registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
