@@ -9,10 +9,13 @@ import { EuiEmptyPrompt, EuiImage, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
-const emptyPromptStyles = css`
+const defaultPromptStyles = css`
   .euiEmptyPrompt__main {
-  width: 740px;
+    width: 740px;
+  }
 `;
+
+export type PromptLayoutVariant = 'default' | 'embeddable';
 
 export interface PromptLayoutProps {
   imageSrc: string;
@@ -20,6 +23,7 @@ export interface PromptLayoutProps {
   subtitle: React.ReactNode;
   primaryButton: React.ReactNode;
   secondaryButton?: React.ReactNode;
+  variant?: PromptLayoutVariant;
 }
 
 export const PromptLayout: React.FC<PromptLayoutProps> = ({
@@ -28,14 +32,17 @@ export const PromptLayout: React.FC<PromptLayoutProps> = ({
   subtitle,
   primaryButton,
   secondaryButton,
+  variant = 'default',
 }) => {
   const actions = [primaryButton, ...(secondaryButton ? [secondaryButton] : [])];
 
+  const isEmbeddable = variant === 'embeddable';
+
   return (
     <EuiEmptyPrompt
-      css={emptyPromptStyles}
-      hasShadow={true}
-      color="plain"
+      css={isEmbeddable ? undefined : defaultPromptStyles}
+      hasShadow={!isEmbeddable}
+      color={isEmbeddable ? 'transparent' : 'plain'}
       icon={<EuiImage src={imageSrc} alt="" size="s" />}
       title={<h2>{title}</h2>}
       body={
