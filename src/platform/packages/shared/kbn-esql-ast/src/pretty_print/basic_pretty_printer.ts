@@ -22,9 +22,9 @@ import {
   binaryExpressionGroup,
   unaryExpressionGroup,
 } from '../ast/grouping';
-import type { ESQLAstExpressionNode } from '../visitor';
-import { Visitor } from '../visitor';
-import { resolveItem } from '../visitor/utils';
+import type { ESQLAstExpressionNode } from '../ast/visitor';
+import { Visitor } from '../ast/visitor';
+import { resolveItem } from '../ast/visitor/utils';
 import {
   commandOptionsWithEqualsSeparator,
   commandsWithNoCommaArgSeparator,

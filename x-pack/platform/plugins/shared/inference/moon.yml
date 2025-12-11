@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-ast'
-  - '@kbn/esql-validation-autocomplete'
   - '@kbn/core'
   - '@kbn/logging'
   - '@kbn/babel-register'

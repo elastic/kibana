@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstBaseItem } from '../types';
-import { Walker, type WalkerAstNode } from '../walker';
+import { Walker, type WalkerAstNode } from '../ast/walker';
 
 export interface QueryPrettyPrintStats {
   /**

@@ -11,3 +11,5 @@ export type * from './types';
 export { esql, e } from './esql';
 export { ComposerQuery } from './composer_query';
 export { ParameterHole } from './parameter_hole';
+
+export * as synth from './synth';
