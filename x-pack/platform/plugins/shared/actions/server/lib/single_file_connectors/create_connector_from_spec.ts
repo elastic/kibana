@@ -25,6 +25,7 @@ export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
+  const configUtils = actions.getActionsConfigurationUtilities();
   const executor = generateExecutorFunction({
     actions: spec.actions,
     getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
@@ -37,7 +38,7 @@ export const createConnectorTypeFromSpec = (
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
       config: generateConfigSchema(spec.schema),
-      secrets: generateSecretsSchema(spec.auth),
+      secrets: generateSecretsSchema(spec.auth, configUtils),
       params: generateParamsSchema(spec.actions),
     },
     executor,
