@@ -9,22 +9,28 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
 
-const STREAM_NAME = 'logs-generic-dataset';
+const WIRED_STREAM_NAME = 'logs.child';
+const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
-test.describe(
-  'Discover integration - Navigate to Stream processing from document flyout',
+test.describe.only(
+  'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
   { tag: ['@ess'] },
   () => {
-    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      // Create a wired stream
+      await apiServices.streams.forkStream('logs', WIRED_STREAM_NAME, {
+        always: {},
+      });
       // Generate logs data for a classic stream
       await generateLogsData(logsSynthtraceEsClient)({
-        index: STREAM_NAME,
-        defaults: { 'stream.name': STREAM_NAME },
+        index: 'logs',
+        startTime: 'now-15m',
+        endTime: 'now',
       });
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.deleteStream(STREAM_NAME);
+      await apiServices.streams.deleteStream(WIRED_STREAM_NAME);
       await logsSynthtraceEsClient.clean();
     });
 
@@ -37,18 +43,15 @@ test.describe(
 
       // Navigate to Discover
       await pageObjects.discover.goto();
-      await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-
       // Select the data view for our test stream
-      await pageObjects.discover.selectDataView('All logs');
+      await pageObjects.discover.selectDataView('logs.child');
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       // Expand the first document row to open the flyout
       const expandButton = page.locator(
         '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
       );
-      await expandButton.scrollIntoViewIfNeeded();
+
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
@@ -65,11 +68,15 @@ test.describe(
       await parseInStreamsLink.click();
 
       // Verify we are on the stream processing page
-      await expect(page).toHaveURL(new RegExp(`streams/${STREAM_NAME}/management/processing`));
+      await expect(page).toHaveURL(
+        new RegExp(`streams/${WIRED_STREAM_NAME}/management/processing`)
+      );
 
       // Verify the data source is correctly configured to show the Discover document
       const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
-      await expect(dataSourcesSelector).toContainText(`Discover document from ${STREAM_NAME}`);
+      await expect(dataSourcesSelector).toContainText(
+        `Discover document from ${WIRED_STREAM_NAME}`
+      );
     });
 
     test('should navigate to Stream processing page from Discover document flyout in ES|QL mode', async ({
@@ -81,7 +88,7 @@ test.describe(
 
       // Navigate to Discover
       await pageObjects.discover.goto();
-      await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+      await pageObjects.discover.selectDataView('logs.child');
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       // Switch to ES|QL mode by clicking the button
@@ -91,7 +98,7 @@ test.describe(
       const expandButton = page.locator(
         '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
       );
-      await expandButton.scrollIntoViewIfNeeded();
+
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
@@ -108,12 +115,129 @@ test.describe(
       await parseInStreamsLink.click();
 
       // Verify we are on the stream processing page
-      await expect(page).toHaveURL(new RegExp(`streams/${STREAM_NAME}/management/processing`));
+      await expect(page).toHaveURL(
+        new RegExp(`streams/${WIRED_STREAM_NAME}/management/processing`)
+      );
 
       // Verify the data source is correctly configured
       // In ES|QL mode, the document doesn't have an _id, so it creates a custom samples data source
       const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
-      await expect(dataSourcesSelector).toContainText(`Discover document from ${STREAM_NAME}`);
+      await expect(dataSourcesSelector).toContainText(
+        `Discover document from ${WIRED_STREAM_NAME}`
+      );
+    });
+  }
+);
+
+test.describe.only(
+  'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
+  { tag: ['@ess'] },
+  () => {
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+      // Generate logs data for a classic stream
+      await generateLogsData(logsSynthtraceEsClient)({
+        index: CLASSIC_STREAM_NAME,
+        startTime: 'now-15m',
+        endTime: 'now',
+        defaults: { 'stream.name': CLASSIC_STREAM_NAME },
+      });
+    });
+
+    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      await apiServices.streams.deleteStream(CLASSIC_STREAM_NAME);
+      await logsSynthtraceEsClient.clean();
+    });
+
+    test('should navigate to Stream processing page from Discover document flyout in Data view mode', async ({
+      browserAuth,
+      pageObjects,
+      page,
+    }) => {
+      await browserAuth.loginAsAdmin();
+
+      // Navigate to Discover
+      await pageObjects.discover.goto();
+      await pageObjects.discover.selectDataView('All logs');
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+
+      // Expand the first document row to open the flyout
+      const expandButton = page.locator(
+        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
+      );
+
+      await expandButton.click();
+
+      // Verify the doc viewer flyout is open
+      await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
+
+      // Click on the Log Overview tab
+      const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
+      await expect(logOverviewTab).toBeVisible();
+      await logOverviewTab.click();
+
+      // Find and click the "Parse content in Streams" link
+      const parseInStreamsLink = page.getByRole('link', { name: /parse content in streams/i });
+      await expect(parseInStreamsLink).toBeVisible();
+      await parseInStreamsLink.click();
+
+      // Verify we are on the stream processing page
+      await expect(page).toHaveURL(
+        new RegExp(`streams/${CLASSIC_STREAM_NAME}/management/processing`)
+      );
+
+      // Verify the data source is correctly configured to show the Discover document
+      const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
+      await expect(dataSourcesSelector).toContainText(
+        `Discover document from ${CLASSIC_STREAM_NAME}`
+      );
+    });
+
+    test('should navigate to Stream processing page from Discover document flyout in ES|QL mode', async ({
+      browserAuth,
+      pageObjects,
+      page,
+    }) => {
+      await browserAuth.loginAsAdmin();
+
+      // Navigate to Discover
+      await pageObjects.discover.goto();
+      await pageObjects.discover.selectDataView('All logs');
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+
+      // Switch to ES|QL mode by clicking the button
+      await pageObjects.discover.selectTextBaseLang();
+
+      // Expand the first document row to open the flyout
+      const expandButton = page.locator(
+        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
+      );
+
+      await expandButton.click();
+
+      // Verify the doc viewer flyout is open
+      await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
+
+      // Click on the Log Overview tab
+      const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
+      await expect(logOverviewTab).toBeVisible();
+      await logOverviewTab.click();
+
+      // Find and click the "Parse content in Streams" link
+      const parseInStreamsLink = page.getByRole('link', { name: /parse content in streams/i });
+      await expect(parseInStreamsLink).toBeVisible();
+      await parseInStreamsLink.click();
+
+      // Verify we are on the stream processing page
+      await expect(page).toHaveURL(
+        new RegExp(`streams/${CLASSIC_STREAM_NAME}/management/processing`)
+      );
+
+      // Verify the data source is correctly configured
+      // In ES|QL mode, the document doesn't have an _id, so it creates a custom samples data source
+      const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
+      await expect(dataSourcesSelector).toContainText(
+        `Discover document from ${CLASSIC_STREAM_NAME}`
+      );
     });
   }
 );

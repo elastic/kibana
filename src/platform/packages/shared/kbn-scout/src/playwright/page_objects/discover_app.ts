@@ -27,7 +27,14 @@ export class DiscoverApp {
     await this.page.testSubj.click('*dataView-switch-link');
     await this.page.testSubj.waitForSelector('indexPattern-switcher');
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    await this.page.testSubj.locator('indexPattern-switcher').locator(`[title="${name}"]`).click();
+    const matchingDataViewLocator = this.page.testSubj
+      .locator('indexPattern-switcher')
+      .locator(`[title="${name}"]`);
+    if (await matchingDataViewLocator.isVisible()) {
+      await matchingDataViewLocator.click();
+    } else {
+      await this.page.testSubj.locator('explore-matching-indices-button').click();
+    }
     await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
     await this.page.waitForLoadingIndicatorHidden();
   }
