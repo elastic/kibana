@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-11T10:19:20.201Z",
-  "sha1": "a92fb513bf08dbc38812c820341ef6565d61f809",
+  "lastModified": "2025-12-11T14:13:04.045Z",
+  "sha1": "e64048245847f4d83d1df69ea4c98c6ae2aadf90",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -2382,6 +2382,32 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/streams_header.spec.ts",
         "line": 60,
         "column": 7
+      }
+    },
+    {
+      "id": "0d9ac5d402d4b0c-e08a9889a10bb65",
+      "title": "Discover integration - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in Data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d9ac5d402d4b0c-3ff5259245f472d",
+      "title": "Discover integration - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration.spec.ts",
+        "line": 75,
+        "column": 9
       }
     },
     {
