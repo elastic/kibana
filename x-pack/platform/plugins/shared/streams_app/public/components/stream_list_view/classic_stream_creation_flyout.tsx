@@ -111,13 +111,36 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       selectedTemplate: TemplateDeserialized,
       validationSignal?: AbortSignal
     ) => {
-      // TODO: Implement validation
-      // eslint-disable-next-line no-console
-      console.log('handleValidate', streamName, selectedTemplate, validationSignal);
+      try {
+        const response = await streamsRepositoryClient.fetch(
+          'POST /internal/streams/_validate_classic_stream',
+          {
+            signal: validationSignal || signal,
+            params: {
+              body: {
+                name: streamName,
+                selectedTemplateName: selectedTemplate.name,
+              },
+            },
+          }
+        );
 
-      return { errorType: null };
+        if (!response.isValid && response.errorType) {
+          return {
+            errorType: response.errorType as 'duplicate' | 'higherPriority',
+            conflictingIndexPattern: response.conflictingIndexPattern,
+          };
+        }
+
+        return { errorType: null };
+      } catch (error) {
+        core.notifications.toasts.addError(error as Error, {
+          title: `Failed to validate classic stream "${streamName}"`,
+        });
+        return { errorType: null };
+      }
     },
-    []
+    [streamsRepositoryClient, signal, core.notifications.toasts]
   );
 
   const handleCreateTemplate = useCallback(() => {
