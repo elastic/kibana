@@ -72,7 +72,7 @@ describe('UserProfilesPopover', () => {
     );
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         button={
           <button>
             Toggle
@@ -80,7 +80,7 @@ describe('UserProfilesPopover', () => {
         }
         closePopover={[MockFunction]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         initialFocus="[id=\\"searchInput_generated-id\\"]"
         isOpen={false}
         ownFocus={true}

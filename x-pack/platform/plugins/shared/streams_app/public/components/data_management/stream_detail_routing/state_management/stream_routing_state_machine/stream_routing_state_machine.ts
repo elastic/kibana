@@ -123,6 +123,8 @@ export const streamRoutingMachine = setup({
       editingSuggestionIndex: null,
       editedSuggestion: null,
     })),
+    setRefreshing: assign(() => ({ isRefreshing: true })),
+    clearRefreshing: assign(() => ({ isRefreshing: false })),
   },
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
@@ -162,6 +164,7 @@ export const streamRoutingMachine = setup({
     suggestedRuleId: null,
     editingSuggestionIndex: null,
     editedSuggestion: null,
+    isRefreshing: false,
   }),
   initial: 'initializing',
   states: {
@@ -177,7 +180,10 @@ export const streamRoutingMachine = setup({
       on: {
         'stream.received': {
           target: '#ready',
-          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+          actions: [
+            { type: 'storeDefinition', params: ({ event }) => event },
+            { type: 'clearRefreshing' },
+          ],
           reenter: true,
         },
         'routingSamples.setDocumentMatchFilter': {
@@ -326,7 +332,7 @@ export const streamRoutingMachine = setup({
                 },
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'refreshDefinition' }],
+                  actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
                 },
                 onError: {
                   target: 'changing',
@@ -399,7 +405,7 @@ export const streamRoutingMachine = setup({
                 }),
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'refreshDefinition' }],
+                  actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
                 },
                 onError: {
                   target: 'changing',
@@ -416,7 +422,11 @@ export const streamRoutingMachine = setup({
                 }),
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'notifyStreamSuccess' }, { type: 'refreshDefinition' }],
+                  actions: [
+                    { type: 'notifyStreamSuccess' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 onError: {
                   target: 'changing',
@@ -461,7 +471,11 @@ export const streamRoutingMachine = setup({
                 }),
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'notifyStreamSuccess' }, { type: 'refreshDefinition' }],
+                  actions: [
+                    { type: 'notifyStreamSuccess' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 onError: {
                   target: 'reordering',
@@ -508,7 +522,11 @@ export const streamRoutingMachine = setup({
                 },
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'refreshDefinition' }, { type: 'resetSuggestedRuleId' }],
+                  actions: [
+                    { type: 'resetSuggestedRuleId' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 onError: {
                   target: 'reviewing',
