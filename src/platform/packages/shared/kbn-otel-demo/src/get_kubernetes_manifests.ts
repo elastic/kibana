@@ -18,6 +18,8 @@ interface K8sManifestOptions {
   password: string;
   logsIndex: string;
   collectorConfigYaml: string;
+  /** Per-service environment variable overrides from failure scenarios */
+  envOverrides?: Record<string, Record<string, string>>;
 }
 
 /**
@@ -425,20 +427,29 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
   // Services that use HTTP for OTLP exports (not gRPC)
   const httpOtlpServices = ['quote', 'email', 'accounting', 'ad', 'fraud-detection'];
 
+  // Extract env overrides from options
+  const envOverrides = options.envOverrides || {};
+
   for (const svc of demoServices) {
     // Use HTTP port (4318) for services that don't support gRPC, gRPC port (4317) for others
     const otlpPort = httpOtlpServices.includes(svc.name) ? '4318' : '4317';
+
+    // Merge service env with scenario overrides (overrides take precedence)
+    const serviceEnvOverrides = envOverrides[svc.name] || {};
+    const finalEnv = {
+      ...(svc.env as unknown as Record<string, string>),
+      OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
+      OTEL_RESOURCE_ATTRIBUTES: 'service.namespace=otel-demo',
+      OTEL_SERVICE_NAME: svc.name,
+      ...serviceEnvOverrides, // Scenario overrides applied last
+    };
+
     manifests.push(
       createDeployment({
         name: svc.name,
         image: svc.image,
         ports: svc.ports,
-        env: {
-          ...(svc.env as unknown as Record<string, string>),
-          OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
-          OTEL_RESOURCE_ATTRIBUTES: 'service.namespace=otel-demo',
-          OTEL_SERVICE_NAME: svc.name,
-        },
+        env: finalEnv,
       })
     );
     manifests.push(createService(svc.name, svc.ports));

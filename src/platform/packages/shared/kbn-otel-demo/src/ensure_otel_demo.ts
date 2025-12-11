@@ -25,6 +25,7 @@ import { getFullOtelCollectorConfig } from './get_otel_collector_config';
 import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
+import { getScenarioById, type FailureScenario } from './failure_scenarios';
 
 const DATA_DIR = Path.join(REPO_ROOT, 'data', 'otel_demo');
 const MANIFESTS_FILE_PATH = Path.join(DATA_DIR, 'otel-demo.yaml');
@@ -83,6 +84,7 @@ function normalizeElasticsearchHost(host: string): string {
  * @param configPath - Optional path to Kibana config file
  * @param logsIndex - Index name for logs (defaults to "logs")
  * @param teardown - If true, stops and removes the deployment
+ * @param scenarioIds - Optional list of failure scenario IDs to apply
  */
 export async function ensureOtelDemo({
   log,
@@ -90,12 +92,14 @@ export async function ensureOtelDemo({
   configPath,
   logsIndex = 'logs',
   teardown = false,
+  scenarioIds = [],
 }: {
   log: ToolingLog;
   signal: AbortSignal;
   configPath?: string | undefined;
   logsIndex?: string;
   teardown?: boolean;
+  scenarioIds?: string[];
 }) {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
@@ -139,6 +143,38 @@ export async function ensureOtelDemo({
   log.debug('Removing existing deployment');
   await down(log);
 
+  // Process failure scenarios
+  const activeScenarios: FailureScenario[] = [];
+  const envOverrides: Record<string, Record<string, string>> = {};
+
+  for (const id of scenarioIds) {
+    const scenario = getScenarioById(id);
+    if (scenario) {
+      activeScenarios.push(scenario);
+      log.info(`Applying failure scenario: ${chalk.yellow(scenario.name)}`);
+      log.info(`  ${chalk.dim(scenario.description.split('\n')[0])}`);
+
+      // Collect env overrides from steps
+      for (const step of scenario.steps) {
+        if (step.type === 'env') {
+          if (!envOverrides[step.service]) {
+            envOverrides[step.service] = {};
+          }
+          envOverrides[step.service][step.variable] = step.value;
+          log.debug(`  ${step.service}: ${step.variable}=${step.value}`);
+        }
+      }
+    }
+  }
+
+  if (activeScenarios.length > 0) {
+    log.write('');
+    log.warning(
+      `${chalk.bold(activeScenarios.length)} failure scenario(s) active - expect degraded behavior!`
+    );
+    log.write('');
+  }
+
   // Generate OTel Collector configuration
   const collectorConfig = getFullOtelCollectorConfig({
     elasticsearchEndpoint: elasticsearchHost,
@@ -147,7 +183,7 @@ export async function ensureOtelDemo({
     logsIndex,
   });
 
-  // Generate Kubernetes manifests
+  // Generate Kubernetes manifests with scenario overrides
   log.info('Generating Kubernetes manifests...');
   const manifests = getKubernetesManifests({
     elasticsearchEndpoint: elasticsearchHost,
@@ -155,6 +191,7 @@ export async function ensureOtelDemo({
     password: elasticsearchPassword,
     logsIndex,
     collectorConfigYaml: collectorConfig,
+    envOverrides,
   });
 
   log.debug(`Writing manifests to ${MANIFESTS_FILE_PATH}`);
@@ -182,6 +219,11 @@ export async function ensureOtelDemo({
       log.write('');
       log.write(`  ${chalk.bold('Web Store:')}        http://${minikubeIp}:30080`);
       log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
+      if (activeScenarios.length > 0) {
+        log.write(
+          `  ${chalk.bold('Active Scenarios:')} ${chalk.yellow(activeScenarios.map((s) => s.id).join(', '))}`
+        );
+      }
       log.write('');
       log.write(chalk.dim('  To access the frontend, run:'));
       log.write(chalk.dim(`    minikube service frontend-external -n ${NAMESPACE}`));
@@ -213,4 +255,142 @@ export async function ensureOtelDemo({
     // User pressed Ctrl+C or signal received
     log.info('Stopped log streaming');
   }
+}
+
+/**
+ * Default environment values for services (used for reset)
+ */
+const SERVICE_DEFAULTS: Record<string, Record<string, string>> = {
+  cart: {
+    VALKEY_ADDR: 'valkey:6379',
+    FLAGD_HOST: 'flagd',
+  },
+  checkout: {
+    GOMEMLIMIT: '16MiB',
+    CURRENCY_SERVICE_ADDR: 'currency:7285',
+    PAYMENT_SERVICE_ADDR: 'payment:50051',
+  },
+  frontend: {
+    CURRENCY_SERVICE_ADDR: 'currency:7285',
+    PRODUCT_CATALOG_SERVICE_ADDR: 'product-catalog:3550',
+    WEB_OTEL_SERVICE_NAME: 'frontend-web',
+    OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317',
+  },
+  'load-generator': {
+    LOCUST_USERS: '10',
+  },
+  recommendation: {
+    OTEL_SERVICE_NAME: 'recommendation',
+    FLAGD_HOST: 'flagd',
+  },
+  payment: {
+    FLAGD_HOST: 'flagd',
+  },
+};
+
+/**
+ * Patches failure scenarios onto a running OTel Demo cluster.
+ * Uses kubectl set env to update deployments without full redeployment.
+ *
+ * @param log - Tooling logger for output
+ * @param scenarioIds - List of scenario IDs to apply (empty = no changes unless reset)
+ * @param reset - If true, resets all services to defaults
+ */
+export async function patchScenarios({
+  log,
+  scenarioIds = [],
+  reset = false,
+}: {
+  log: ToolingLog;
+  scenarioIds?: string[];
+  reset?: boolean;
+}) {
+  await assertKubectlAvailable();
+
+  // Check if namespace exists
+  try {
+    await execa.command(`kubectl get namespace ${NAMESPACE}`);
+  } catch {
+    throw new Error(
+      `Namespace ${NAMESPACE} not found. Run 'node scripts/otel_demo.js' first to deploy.`
+    );
+  }
+
+  if (reset) {
+    log.info('Resetting all scenarios to defaults...');
+
+    // Reset all services to their default values
+    for (const [service, defaults] of Object.entries(SERVICE_DEFAULTS)) {
+      const envArgs = Object.entries(defaults)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(' ');
+
+      log.debug(`Resetting ${service}: ${envArgs}`);
+      try {
+        await execa.command(
+          `kubectl set env deployment/${service} -n ${NAMESPACE} ${envArgs}`,
+          { stdio: 'pipe' }
+        );
+        log.info(`  ${chalk.green('✔')} Reset ${service}`);
+      } catch (error) {
+        log.warning(`  ${chalk.yellow('⚠')} Could not reset ${service} (may not exist)`);
+      }
+    }
+
+    log.success('All scenarios reset to defaults');
+    return;
+  }
+
+  if (scenarioIds.length === 0) {
+    log.warning('No scenarios specified. Use --scenario or --reset');
+    return;
+  }
+
+  // Collect env changes per service
+  const envChanges: Record<string, Record<string, string>> = {};
+
+  for (const id of scenarioIds) {
+    const scenario = getScenarioById(id);
+    if (!scenario) {
+      throw new Error(`Unknown scenario: ${id}`);
+    }
+
+    log.info(`Applying scenario: ${chalk.yellow(scenario.name)}`);
+    log.info(`  ${chalk.dim(scenario.description.split('\n')[0])}`);
+
+    for (const step of scenario.steps) {
+      if (step.type === 'env') {
+        if (!envChanges[step.service]) {
+          envChanges[step.service] = {};
+        }
+        envChanges[step.service][step.variable] = step.value;
+      }
+    }
+  }
+
+  // Apply changes using kubectl set env
+  for (const [service, envs] of Object.entries(envChanges)) {
+    const envArgs = Object.entries(envs)
+      .map(([key, value]) => `${key}=${value}`)
+      .join(' ');
+
+    log.debug(`Patching ${service}: ${envArgs}`);
+    try {
+      await execa.command(`kubectl set env deployment/${service} -n ${NAMESPACE} ${envArgs}`, {
+        stdio: 'pipe',
+      });
+      log.info(`  ${chalk.green('✔')} Patched ${service}`);
+    } catch (error) {
+      log.error(`  ${chalk.red('✗')} Failed to patch ${service}: ${error}`);
+    }
+  }
+
+  log.write('');
+  log.success(`Applied ${scenarioIds.length} scenario(s). Pods will restart with new config.`);
+  log.write('');
+  log.write(chalk.dim('  To watch pod restarts:'));
+  log.write(chalk.dim(`    kubectl get pods -n ${NAMESPACE} -w`));
+  log.write('');
+  log.write(chalk.dim('  To reset to defaults:'));
+  log.write(chalk.dim('    node scripts/otel_demo.js --reset'));
 }

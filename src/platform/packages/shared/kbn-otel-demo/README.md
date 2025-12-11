@@ -74,9 +74,82 @@ Or via environment variables:
 node scripts/otel_demo.js [options]
 
 Options:
-  --config <path>      Path to Kibana config file (default: config/kibana.dev.yml)
-  --logs-index <name>  Index name for logs (default: "logs")
+  --config, -c         Path to Kibana config file (default: config/kibana.dev.yml)
+  --logs-index         Index name for logs (default: "logs")
   --teardown           Stop and remove the OTel Demo from Kubernetes
+  --scenario, -s       Apply a failure scenario (can be repeated)
+  --patch, -p          Patch scenarios onto running cluster (no redeploy)
+  --reset, -r          Reset all scenarios to defaults (no redeploy)
+  --list-scenarios     List all available failure scenarios
+```
+
+## Failure Scenarios
+
+The script supports injecting failure scenarios to simulate real-world issues and test observability.
+
+### Listing Available Scenarios
+
+```bash
+node scripts/otel_demo.js --list-scenarios
+```
+
+### Running with Scenarios (Full Deploy)
+
+```bash
+# Single scenario
+node scripts/otel_demo.js --scenario cart-redis-cutoff
+
+# Multiple scenarios
+node scripts/otel_demo.js -s checkout-memory-pressure -s load-generator-ramp
+```
+
+### Patching Scenarios on Running Cluster
+
+Apply or remove scenarios without redeploying:
+
+```bash
+# Apply a scenario to running cluster (fast!)
+node scripts/otel_demo.js --patch --scenario cart-redis-cutoff
+
+# Apply multiple scenarios
+node scripts/otel_demo.js -p -s checkout-memory-pressure -s load-generator-ramp
+
+# Reset all scenarios to defaults
+node scripts/otel_demo.js --reset
+```
+
+### Available Scenarios
+
+**Dramatic (service-breaking):**
+| Scenario ID | Description |
+|-------------|-------------|
+| `cart-redis-cutoff` | Cart points to invalid Valkey port, all cart operations fail |
+| `checkout-memory-starvation` | Checkout Go runtime clamped to 4MiB, causes GC thrash and crashes |
+| `currency-unreachable` | Currency service unreachable, price conversions fail |
+| `product-catalog-unreachable` | Frontend can't reach product catalog |
+| `payment-unreachable` | Checkout can't reach payment service |
+
+**Subtle (degraded performance/observability):**
+| Scenario ID | Description |
+|-------------|-------------|
+| `checkout-memory-pressure` | Checkout memory halved, increased latency under load |
+| `load-generator-ramp` | Triple Locust users, creates resource pressure |
+| `frontend-telemetry-drift` | Frontend exports with shadow service name |
+| `recommendation-telemetry-alias` | Recommendation exports with different service name |
+| `frontend-telemetry-silence` | Frontend OTLP goes to wrong port, spans vanish |
+| `flagd-unreachable` | Feature flag service unreachable |
+
+### Resetting Scenarios
+
+Quick reset (patches running pods):
+```bash
+node scripts/otel_demo.js --reset
+```
+
+Or full redeploy without scenarios:
+```bash
+node scripts/otel_demo.js --teardown
+node scripts/otel_demo.js
 ```
 
 ## Accessing the Demo

@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ensureOtelDemo } from './src/ensure_otel_demo';
+export { ensureOtelDemo, patchScenarios } from './src/ensure_otel_demo';
+export {
+  FAILURE_SCENARIOS,
+  getScenarioById,
+  getScenariosByCategory,
+  listScenarioIds,
+  type FailureScenario,
+} from './src/failure_scenarios';
 
