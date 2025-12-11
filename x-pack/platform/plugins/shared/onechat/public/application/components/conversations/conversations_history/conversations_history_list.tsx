@@ -29,6 +29,10 @@ import { useConversationList } from '../../../hooks/use_conversation_list';
 
 const EMPTY_CONTAINER_HEIGHT = 300;
 
+const ROW_HEIGHT = 32;
+const MAX_ROWS = 18;
+const MAX_LIST_HEIGHT = ROW_HEIGHT * MAX_ROWS;
+
 const emptyContainerStyles = css`
   height: ${EMPTY_CONTAINER_HEIGHT}px;
   justify-content: center;
@@ -58,7 +62,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     timeSections.forEach(({ label, conversations: sectionConversations }) => {
       // Add group label
       options.push({
-        label: label.toLocaleUpperCase(),
+        label,
         isGroupLabel: true,
       });
 
@@ -111,14 +115,32 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     );
   }
 
+  // remove borders from list items and group labels
+  const listStylesOverride = css`
+    .euiSelectableListItem:not(:last-of-type) {
+      border-block-end: 0;
+    }
+    .euiSelectableList__groupLabel {
+      border-block-end: 0;
+    }
+  `;
+
+  const listItemsHeight = selectableOptions.length * ROW_HEIGHT;
+  // Calculate height based on item count, capped at max rows
+  const listHeight = Math.min(listItemsHeight, MAX_LIST_HEIGHT);
+
   return (
     <EuiSelectable
+      height={listHeight}
       searchable
       searchProps={{
         placeholder: i18n.translate('xpack.onechat.conversationsHistory.searchPlaceholder', {
           defaultMessage: 'Search conversations',
         }),
         compressed: true,
+        inputRef: (node) => {
+          node?.focus();
+        },
       }}
       options={selectableOptions}
       onChange={handleChange}
@@ -127,13 +149,18 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
         defaultMessage: 'Conversations',
       })}
       data-test-subj="agentBuilderConversationList"
+      listProps={{
+        bordered: false,
+        showIcons: false,
+      }}
+      css={listStylesOverride}
     >
       {(list, search) => (
-        <div>
+        <>
           <PopoverHeader />
           <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
           {list}
-        </div>
+        </>
       )}
     </EuiSelectable>
   );
