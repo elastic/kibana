@@ -52,7 +52,6 @@ interface IntegrationConfig {
     };
     hideButton: {
       label: string;
-      ariaLabel: string;
       testSubj: string;
     };
   };
@@ -119,11 +118,8 @@ const ECS_CONFIG: IntegrationConfig = {
       },
     },
     hideButton: {
-      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecs.hideCard', {
-        defaultMessage: 'Hide this',
-      }),
-      ariaLabel: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecs.dismissCard', {
-        defaultMessage: 'Dismiss card',
+      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.ecs.dismiss', {
+        defaultMessage: 'Dismiss',
       }),
       testSubj: 'infraKubernetesDashboardCardHideThisButton',
     },
@@ -191,11 +187,8 @@ const OTEL_CONFIG: IntegrationConfig = {
       },
     },
     hideButton: {
-      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otel.hideCard', {
-        defaultMessage: 'Hide this',
-      }),
-      ariaLabel: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otel.dismissCard', {
-        defaultMessage: 'Dismiss card',
+      label: i18n.translate('xpack.infra.kubernetesDashboardPromotion.otel.dismiss', {
+        defaultMessage: 'Dismiss',
       }),
       testSubj: 'infraOtelKubernetesDashboardCardHideThisButton',
     },
@@ -285,7 +278,7 @@ export const KubernetesDashboardCard = ({
                     color="text"
                     size="s"
                     onClick={onClose}
-                    aria-label={card.hideButton.ariaLabel}
+                    aria-label={card.hideButton.label}
                   >
                     {card.hideButton.label}
                   </EuiButtonEmpty>
