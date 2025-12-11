@@ -35,5 +35,7 @@
     "@kbn/cases-plugin",
     "@kbn/core-http-server",
     "@kbn/spaces-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
   ]
 }
