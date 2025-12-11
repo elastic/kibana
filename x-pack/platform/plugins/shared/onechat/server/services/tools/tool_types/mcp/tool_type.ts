@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { McpToolConfig } from '@kbn/onechat-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -230,7 +230,9 @@ export const getMcpToolType = (): ToolTypeDefinition<
                   {
                     type: ToolResultType.error,
                     data: {
-                      message: `Failed to execute MCP tool: ${error instanceof Error ? error.message : String(error)}`,
+                      message: `Failed to execute MCP tool: ${
+                        error instanceof Error ? error.message : String(error)
+                      }`,
                     },
                   },
                 ],
@@ -291,11 +293,7 @@ export const getMcpToolType = (): ToolTypeDefinition<
       return config;
     },
 
-    validateForUpdate: async ({
-      update,
-      current,
-      context: { request, actions },
-    }) => {
+    validateForUpdate: async ({ update, current, context: { request, actions } }) => {
       const mergedConfig = {
         ...current,
         ...update,

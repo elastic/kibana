@@ -430,9 +430,7 @@ describe('MCP tool_type', () => {
         mockActionsClient.execute.mockResolvedValue({
           status: 'ok',
           data: {
-            tools: [
-              { name: 'other_tool', description: 'Other tool', inputSchema: {} },
-            ],
+            tools: [{ name: 'other_tool', description: 'Other tool', inputSchema: {} }],
           },
         });
 
@@ -543,9 +541,7 @@ describe('MCP tool_type', () => {
       mockActionsClient.execute.mockResolvedValue({
         status: 'ok',
         data: {
-          tools: [
-            { name: 'other_tool', description: 'Other description', inputSchema: {} },
-          ],
+          tools: [{ name: 'other_tool', description: 'Other description', inputSchema: {} }],
         },
       });
 

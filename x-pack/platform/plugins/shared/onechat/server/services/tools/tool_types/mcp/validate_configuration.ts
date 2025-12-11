@@ -65,7 +65,9 @@ export async function validateToolName({
     if (!tool) {
       const availableTools = tools.map((t) => t.name).join(', ');
       throw createBadRequestError(
-        `Tool '${toolName}' not found on MCP connector '${connectorId}'. Available tools: ${availableTools || 'none'}`
+        `Tool '${toolName}' not found on MCP connector '${connectorId}'. Available tools: ${
+          availableTools || 'none'
+        }`
       );
     }
   } catch (error) {
