@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import React, { useMemo } from 'react';
+import React, { useMemo, useLayoutEffect, useState } from 'react';
 import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
@@ -64,10 +64,20 @@ export const AppMenuBar = ({
 }: AppMenuBarProps) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$);
   const { euiTheme } = useEuiTheme();
+  const [hasBetaConfig, setHasBetaConfig] = useState(false);
 
   const styles = useAppMenuBarStyles(euiTheme);
 
-  if (!headerActionMenuMounter.mount) return null;
+  useLayoutEffect(() => {
+    if (appMenuActionsBeta$) {
+      const subscription = appMenuActionsBeta$.subscribe((config) => {
+        setHasBetaConfig(!!config && !!config.items && config.items.length > 0);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [appMenuActionsBeta$]);
+
+  if (!headerActionMenuMounter.mount && !hasBetaConfig) return null;
 
   return (
     <div

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
@@ -17,35 +17,6 @@ import { TabStatus, type TabPreviewData } from '@kbn/unified-tabs';
 import { css } from '@emotion/react';
 import { TopNavMenuBeta } from './top_nav_menu_beta';
 import type { TopNavMenuConfigBeta } from './types';
-
-// Hook to replace the tabs menu button icon with arrowDown for Storybook
-const useTabsMenuButtonIconOverride = () => {
-  useEffect(() => {
-    const arrowDownPath =
-      'M1.146 4.646a.5.5 0 01.708 0L8 10.793l6.146-6.147a.5.5 0 01.708.708l-6.5 6.5a.5.5 0 01-.708 0l-6.5-6.5a.5.5 0 010-.708z';
-
-    const observer = new MutationObserver(() => {
-      const button = document.querySelector(
-        '[data-test-subj="unifiedTabs_tabsBarMenuButton"] svg path'
-      );
-      if (button && button.getAttribute('d') !== arrowDownPath) {
-        button.setAttribute('d', arrowDownPath);
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // Initial check
-    const button = document.querySelector(
-      '[data-test-subj="unifiedTabs_tabsBarMenuButton"] svg path'
-    );
-    if (button) {
-      button.setAttribute('d', arrowDownPath);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-};
 
 interface TopNavMenuBetaWrapperProps extends ComponentProps<typeof TopNavMenuBeta> {
   showTabs?: boolean;
@@ -68,9 +39,6 @@ const VerticalRule = () => {
 const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
-
-  // Replace tabs menu button icon with arrowDown
-  useTabsMenuButtonIconOverride();
 
   const [tabsState, setTabsState] = useState<{
     managedItems: TabItem[];

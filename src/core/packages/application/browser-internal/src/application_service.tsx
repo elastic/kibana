@@ -97,9 +97,7 @@ interface AppUpdaterWrapper {
 interface AppInternalState {
   leaveHandler?: AppLeaveHandler;
   actionMenu?: MountPoint;
-  actionMenuBeta?: {
-    config: TopNavMenuConfigBeta;
-  };
+  actionMenuBeta?: TopNavMenuConfigBeta;
 }
 
 /**
@@ -417,7 +415,7 @@ export class ApplicationService {
   private setAppActionMenuBeta = (appId: string, config: TopNavMenuConfigBeta) => {
     this.appInternalStates.set(appId, {
       ...(this.appInternalStates.get(appId) ?? {}),
-      actionMenuBeta: { config },
+      actionMenuBeta: config,
     });
     this.refreshCurrentActionMenu();
   };
@@ -426,7 +424,7 @@ export class ApplicationService {
     const appId = this.currentAppId$.getValue();
     const currentActionMenu = appId ? this.appInternalStates.get(appId)?.actionMenu : undefined;
     const currentActionMenuBeta = appId
-      ? this.appInternalStates.get(appId)?.actionMenuBeta?.config
+      ? this.appInternalStates.get(appId)?.actionMenuBeta
       : undefined;
     this.currentActionMenu$.next(currentActionMenu);
     this.currentActionMenuBeta$.next(currentActionMenuBeta);

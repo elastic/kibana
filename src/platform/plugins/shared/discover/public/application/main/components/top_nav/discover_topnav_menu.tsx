@@ -14,13 +14,9 @@ import React, {
   useState,
   useLayoutEffect,
 } from 'react';
-import { type TopNavMenuBadgeProps, type TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { type TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import useUnmount from 'react-use/lib/useUnmount';
-import { TopNavMenuBeta } from '@kbn/app-menu';
 import type { useDiscoverTopNav } from './use_discover_topnav';
 
 /**
@@ -32,111 +28,36 @@ import type { useDiscoverTopNav } from './use_discover_topnav';
 
 const createTopNavMenuContext = () => ({
   topNavMenu$: new BehaviorSubject<TopNavMenuData[] | undefined>(undefined),
-  topNavBadges$: new BehaviorSubject<TopNavMenuBadgeProps[] | undefined>(undefined),
-  rightSideContent$: new BehaviorSubject<React.ReactNode | undefined>(undefined),
 });
 
 type DiscoverTopNavMenuContext = ReturnType<typeof createTopNavMenuContext>;
 
-const discoverTopNavMenuContext = createContext<DiscoverTopNavMenuContext>(
+export const discoverTopNavMenuContext = createContext<DiscoverTopNavMenuContext>(
   createTopNavMenuContext()
 );
 
 export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
-  const { euiTheme } = useEuiTheme();
   const [topNavMenuContext] = useState<DiscoverTopNavMenuContext>(() => createTopNavMenuContext());
 
-  const rightSideContent = useObservable(
-    topNavMenuContext.rightSideContent$,
-    topNavMenuContext.rightSideContent$.getValue()
-  );
-
   useUnmount(() => {
-    topNavMenuContext.topNavBadges$.next(undefined);
     topNavMenuContext.topNavMenu$.next(undefined);
-    topNavMenuContext.rightSideContent$.next(undefined);
   });
 
   return (
-    <>
-      <discoverTopNavMenuContext.Provider value={topNavMenuContext}>
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          wrap={false}
-          responsive={false}
-          css={css`
-            width: 100%;
-            background-color: ${euiTheme.colors.lightestShade};
-          `}
-        >
-          {rightSideContent && (
-            <EuiFlexItem
-              grow={true}
-              css={css`
-                min-width: 0;
-                overflow: hidden;
-              `}
-            >
-              {rightSideContent}
-            </EuiFlexItem>
-          )}
-
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              flex-shrink: 0;
-            `}
-          >
-            <TopNavMenuBeta
-              config={{
-                items: [
-                  {
-                    label: 'Test',
-                    run: () => {},
-                    order: 1,
-                    id: 'placeholder',
-                    iconType: 'gear',
-                  },
-                ],
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {children}
-      </discoverTopNavMenuContext.Provider>
-    </>
+    <discoverTopNavMenuContext.Provider value={topNavMenuContext}>
+      {children}
+    </discoverTopNavMenuContext.Provider>
   );
 };
 
 export const DiscoverTopNavMenu = ({
-  topNavBadges,
   topNavMenu,
-}: ReturnType<typeof useDiscoverTopNav>) => {
-  const { topNavBadges$, topNavMenu$ } = useContext(discoverTopNavMenuContext);
-
-  useLayoutEffect(() => {
-    topNavBadges$.next(topNavBadges);
-  }, [topNavBadges, topNavBadges$]);
+}: Pick<ReturnType<typeof useDiscoverTopNav>, 'topNavMenu'>) => {
+  const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
 
   useLayoutEffect(() => {
     topNavMenu$.next(topNavMenu);
   }, [topNavMenu, topNavMenu$]);
 
   return null;
-};
-
-/**
- * Hook to register content that appears next to TopNavMenuBeta.
- * Use this from child components (like TabsView) to add content to the top nav area.
- */
-export const useRegisterTopNavRightSideContent = (content: React.ReactNode) => {
-  const { rightSideContent$ } = useContext(discoverTopNavMenuContext);
-
-  useLayoutEffect(() => {
-    rightSideContent$.next(content);
-    return () => {
-      rightSideContent$.next(undefined);
-    };
-  }, [content, rightSideContent$]);
 };
