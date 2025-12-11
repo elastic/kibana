@@ -9,7 +9,6 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import globby from 'globby';
-import Path from 'path';
 import { CACHE_IGNORE_GLOBS, CACHE_MATCH_GLOBS, CACHE_INVALIDATION_FILES } from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
@@ -51,7 +50,7 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
       files: matches,
       sha: commitSha,
       prNumber,
-      cacheInvalidationFiles: CACHE_INVALIDATION_FILES.map((file) => Path.join(REPO_ROOT, file)),
+      cacheInvalidationFiles: CACHE_INVALIDATION_FILES,
     };
 
     if (isCiEnvironment()) {
