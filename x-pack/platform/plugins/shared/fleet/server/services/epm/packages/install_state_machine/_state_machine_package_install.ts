@@ -61,6 +61,7 @@ import {
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
 import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
+import { stepInstallPrecheck } from './steps/step_install_precheck';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -91,8 +92,13 @@ export interface InstallContext extends StateContext<StateNames> {
  */
 const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
-    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
+    nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onTransition: stepCreateRestartInstallation,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_precheck: {
+    onTransition: stepInstallPrecheck,
+    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
   install_kibana_assets: {
