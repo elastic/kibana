@@ -24,6 +24,7 @@ import { AgentConfigurationsPage } from './page_objects/agent_configurations';
 import { AgentExplorerPage } from './page_objects/agent_explorer';
 import { AgentKeysPage } from './page_objects/agent_keys';
 import { AnomalyDetectionPage } from './page_objects/anomaly_detection';
+import { TransactionsOverviewPage } from './page_objects/transactions_overview';
 import { APM_ROLES } from './constants';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
@@ -45,6 +46,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     agentExplorerPage: AgentExplorerPage;
     agentKeysPage: AgentKeysPage;
     anomalyDetectionPage: AnomalyDetectionPage;
+    transactionsOverviewPage: TransactionsOverviewPage;
   };
   browserAuth: ApmBrowserAuthFixture;
 }
@@ -75,6 +77,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       agentExplorerPage: createLazyPageObject(AgentExplorerPage, page, kbnUrl),
       agentKeysPage: createLazyPageObject(AgentKeysPage, page, kbnUrl),
       anomalyDetectionPage: createLazyPageObject(AnomalyDetectionPage, page, kbnUrl),
+      transactionsOverviewPage: createLazyPageObject(TransactionsOverviewPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
