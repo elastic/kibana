@@ -7,7 +7,7 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import {
@@ -24,7 +24,10 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (services: Services): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'ease_home',
@@ -75,7 +78,7 @@ export const createAiNavigationTree = (services: Services): NavigationTreeDefini
           link: 'discover',
         },
         ...(services.application.capabilities.agentBuilder?.show === true &&
-        services.uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false) === true
+        chatExperience === AIChatExperience.Agent
           ? [
               {
                 // TODO: update icon to 'robot' once it's available in EUI
