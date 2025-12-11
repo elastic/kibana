@@ -6,59 +6,19 @@
  */
 
 import { createSelector } from 'reselect';
-import { isActionBlock } from '@kbn/streamlang';
 import moment from 'moment';
+import type { StreamEnrichmentActorSnapshot } from './stream_enrichment_state_machine';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type { StreamEnrichmentContextType } from './types';
-import { isStepUnderEdit } from '../steps_state_machine';
 import { canDataSourceTypeBeOutdated } from './utils';
 import type { DataSourceContext } from '../data_source_state_machine';
 
 /**
- * Selects the processor marked as the draft processor.
+ * Selects whether the state machine is in interactive mode.
  */
-export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
-  const draft = context.stepRefs.find((stepRef) => {
-    const snapshot = stepRef.getSnapshot();
-    return (
-      isActionBlock(snapshot.context.step) && isStepUnderEdit(snapshot) && snapshot.context.isNew
-    );
-  });
-
-  const snapshot = draft?.getSnapshot();
-
-  return draft && isActionBlock(snapshot?.context.step)
-    ? {
-        processor: snapshot.context.step,
-        resources: snapshot.context.resources,
-      }
-    : {
-        processor: undefined,
-        resources: undefined,
-      };
+export const selectIsInteractiveMode = (state: StreamEnrichmentActorSnapshot) => {
+  return state.matches({ ready: { enrichment: { managingProcessors: 'interactive' } } });
 };
-
-/**
- * Selects whether there are any new processors before the persisted ones.
- */
-export const selectWhetherAnyProcessorBeforePersisted = createSelector(
-  [(context: StreamEnrichmentContextType) => context.stepRefs],
-  (processorsRefs) => {
-    return processorsRefs
-      .map((ref) => ref.getSnapshot())
-      .some((snapshot, id, processorSnapshots) => {
-        // Skip if this processor is already persisted
-        if (!snapshot.context.isNew) return false;
-
-        // Check if there are persisted processors after this position
-        const hasPersistedAfter = processorSnapshots
-          .slice(id + 1)
-          .some(({ context }) => !context.isNew);
-
-        return hasPersistedAfter;
-      });
-  }
-);
 
 /**
  * Selects validation errors for all processors.
@@ -67,6 +27,36 @@ export const selectWhetherAnyProcessorBeforePersisted = createSelector(
  */
 export const selectValidationErrors = (context: StreamEnrichmentContextType) => {
   return context.validationErrors;
+};
+
+/**
+ * Returns true if there are any schema errors or validation errors.
+ * Schema errors come from Zod parsing failures.
+ * Validation errors come from processor validation (namespace, reserved fields, type mismatches).
+ */
+export const selectHasAnyErrors = (context: StreamEnrichmentContextType): boolean => {
+  const hasSchemaErrors = context.schemaErrors.length > 0;
+  const hasValidationErrors = context.validationErrors.size > 0;
+  return hasSchemaErrors || hasValidationErrors;
+};
+
+/**
+ * Checks if there are any errors in a parent snapshot context.
+ * Used by child machines (YAML mode, interactive mode) to check parent state.
+ */
+export const hasErrorsInParentSnapshot = (parentSnapshot: {
+  context: { schemaErrors: string[]; validationErrors: Map<string, unknown> };
+}): boolean => {
+  const hasSchemaErrors = parentSnapshot.context.schemaErrors.length > 0;
+  const hasValidationErrors = parentSnapshot.context.validationErrors.size > 0;
+  return hasSchemaErrors || hasValidationErrors;
+};
+
+/**
+ * Selects schema errors from Zod parsing.
+ */
+export const selectSchemaErrors = (context: StreamEnrichmentContextType) => {
+  return context.schemaErrors;
 };
 
 export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector(

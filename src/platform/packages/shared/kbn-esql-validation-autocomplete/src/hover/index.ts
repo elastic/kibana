@@ -15,7 +15,8 @@ import {
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
-import { correctQuerySyntax, getVariablesHoverContent } from './helpers';
+import { getVariablesHoverContent } from './helpers';
+import { correctQuerySyntax } from '../shared/query_syntax_helpers';
 import { getPolicyHover } from './get_policy_hover';
 import { getFunctionSignatureHover } from './get_function_signature_hover';
 import { getQueryForFields } from '../shared/get_query_for_fields';
