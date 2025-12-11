@@ -45,7 +45,7 @@ import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
-import { isFieldStatsMode } from './utils/should_fetch_documents';
+import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &

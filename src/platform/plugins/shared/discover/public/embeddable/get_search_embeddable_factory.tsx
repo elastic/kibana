@@ -42,7 +42,7 @@ import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
-import { isFieldStatsMode } from './utils/should_fetch_documents';
+import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
