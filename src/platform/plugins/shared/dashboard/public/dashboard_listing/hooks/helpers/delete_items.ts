@@ -22,6 +22,10 @@ interface DeleteDashboardListingItemsParams {
 export async function deleteDashboardListingItems({
   itemsToDelete,
 }: DeleteDashboardListingItemsParams): Promise<void> {
+  if (!itemsToDelete || itemsToDelete.length === 0) {
+    return;
+  }
+
   const dashboardBackupService = getDashboardBackupService();
 
   try {

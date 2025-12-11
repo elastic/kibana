@@ -228,6 +228,15 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    const visualizeLibraryDeepLink = {
+      id: 'visualizations',
+      title: i18n.translate('dashboard.deepLinks.visualizeLibrary.title', {
+        defaultMessage: 'Visualize library',
+      }),
+      path: `#${LANDING_PAGE_PATH}/visualizations`,
+      visibleIn: ['globalSearch'] as const,
+    };
+
     const app: App = {
       id: DASHBOARD_APP_ID,
       title: 'Dashboards',
@@ -236,6 +245,8 @@ export class DashboardPlugin
       defaultPath: `#${LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      // Include deep link by default - will be removed in start() if in classic mode
+      deepLinks: [visualizeLibraryDeepLink],
       mount: async (params: AppMountParameters) => {
         performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
@@ -302,6 +313,18 @@ export class DashboardPlugin
     setKibanaServices(core, plugins);
 
     registerActions(plugins);
+
+    // Hide "Visualize library" deep link in classic mode
+    if (plugins.spaces) {
+      plugins.spaces.getActiveSpace$().subscribe((space) => {
+        if (!space) return;
+        const isClassicView = !space.solution || space.solution === 'classic';
+        if (isClassicView) {
+          // Remove the deep link in classic mode - users access Visualize app directly
+          this.appStateUpdater.next(() => ({ deepLinks: [] }));
+        }
+      });
+    }
 
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
       const { searchAction } = await import('./dashboard_client');

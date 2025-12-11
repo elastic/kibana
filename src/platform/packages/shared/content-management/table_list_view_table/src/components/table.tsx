@@ -389,9 +389,7 @@ export function Table<T extends UserContentCommonSchema>({
           pagination={pagination}
           loading={isFetchingItems}
           noItemsMessage={
-            isFetchingItems ? (
-              <></>
-            ) : emptyPrompt && (items?.length ?? 0) === 0 && !hasQueryOrFilters ? (
+            (items?.length ?? 0) === 0 && !hasQueryOrFilters && emptyPrompt ? (
               emptyPrompt
             ) : tableFilter.favorites ? (
               <FavoritesEmptyState

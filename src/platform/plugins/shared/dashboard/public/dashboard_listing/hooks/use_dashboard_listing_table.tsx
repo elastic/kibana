@@ -200,7 +200,7 @@ export const useDashboardListingTable = ({
 
   const deleteItems = useCallback(
     async (itemsToDelete: Array<{ id: string; type?: string }>) => {
-      await deleteDashboardListingItems(itemsToDelete);
+      await deleteDashboardListingItems({ itemsToDelete });
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
     [dashboardBackupService]
