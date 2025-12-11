@@ -28,6 +28,7 @@ import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
 import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
+import { AccountBadge } from '../components/account_badge';
 
 interface CloudConnectorSelectorProps {
   provider: CloudProviders;
@@ -89,6 +90,9 @@ export const CloudConnectorSelector = ({
               <EuiTextTruncate text={connector.name} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <AccountBadge accountType={connector.accountType} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
                   'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.editConnectorTooltip',
@@ -134,6 +138,9 @@ export const CloudConnectorSelector = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AccountBadge accountType={connector.accountType} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -208,6 +215,7 @@ export const CloudConnectorSelector = ({
           cloudConnectorId={flyoutConnector.id}
           cloudConnectorName={flyoutConnector.name}
           cloudConnectorVars={flyoutConnector.vars}
+          accountType={flyoutConnector.accountType}
           provider={provider}
           onClose={handleCloseFlyout}
         />
