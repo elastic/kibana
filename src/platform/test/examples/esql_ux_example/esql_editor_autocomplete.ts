@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(finalValue).to.contain('T');
     });
 
-    it('should close suggestions when pressing ESC', async () => {
+    it('should close suggestions when loosing focus', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
 
@@ -89,7 +89,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
 
-      await testSubjects.click('ESQLEditor-run-query');
+      await testSubjects.click('ESQLEditor-toggleWordWrap');
+      await waitForSuggestionWidget(false);
+
       await esql.focusEditor();
       await waitForSuggestionWidget(true);
     });
