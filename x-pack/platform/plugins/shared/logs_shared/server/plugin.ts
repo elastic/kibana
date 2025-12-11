@@ -18,7 +18,6 @@ import { initLogsSharedServer } from './logs_shared_server';
 import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
-import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
 import type {
   LogsSharedPluginCoreSetup,
   LogsSharedPluginSetup,
@@ -93,12 +92,6 @@ export class LogsSharedPlugin
     registerDeprecations({ core });
 
     core.uiSettings.register(featureFlagUiSettings);
-
-    registerDataProviders({
-      core,
-      plugins,
-      logger: this.logger!.get('observabilityAgentBuilder'),
-    });
 
     return {
       ...domainLibs,

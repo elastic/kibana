@@ -23,8 +23,7 @@
       "usageCollection",
       "embeddable",
       "savedSearch",
-      "onechat",
-      "observabilityAgentBuilder"
+      "onechat"
     ],
     "optionalPlugins": ["observabilityAIAssistant", "ml"],
     "requiredBundles": ["kibanaUtils", "kibanaReact"],

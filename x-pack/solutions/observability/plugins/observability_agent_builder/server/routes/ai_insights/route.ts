@@ -12,6 +12,7 @@ import { createObservabilityAgentBuilderServerRoute } from '../create_observabil
 import { getLogAiInsights } from './get_log_ai_insights';
 import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
+import { getLogDocumentById } from './get_log_document_by_id';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -111,7 +112,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       };
     },
   });
-        
+
   const logAiInsightsRoute = createObservabilityAgentBuilderServerRoute({
     endpoint: 'POST /internal/observability_agent_builder/ai_insights/log',
     options: {
@@ -124,26 +125,22 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     params: t.type({
       body: t.type({
-        index: t.array(t.string),
-        id: t.array(t.string),
+        index: t.string,
+        id: t.string,
       }),
     }),
-    handler: async (args) => {
-      const { request, core, plugins, dataRegistry, params, logger } = args;
+    handler: async ({ request, core, dataRegistry, params }) => {
       const { index, id } = params.body;
 
-      const [_, pluginsStart] = await core.getStartServices();
+      const [coreStart, startDeps] = await core.getStartServices();
+      const { inference } = startDeps;
 
-      const defaultConnector = await pluginsStart.inference.getDefaultConnector(request);
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const inferenceClient = inference.getClient({ request });
+      const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-      if (!defaultConnector) {
-        throw new Error('No default connector found');
-      }
-
-      const inferenceClient = pluginsStart.inference.getClient({ request });
-
-      const logEntry = await dataRegistry.getData('getLogDocumentById', {
-        request,
+      const logEntry = await getLogDocumentById({
+        esClient: esClient.asCurrentUser,
         index,
         id,
       });
@@ -153,11 +150,11 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       }
 
       const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-      const logTimestamp = new Date(logEntry._source['@timestamp']).getTime();
+      const logTimestamp = new Date(logEntry['@timestamp'] as string).getTime();
       const serviceSummary = await dataRegistry.getData('apmServiceSummary', {
         request,
-        serviceName: logEntry._source.service.name,
-        serviceEnvironment: logEntry._source.service.environment,
+        serviceName: logEntry.service.name,
+        serviceEnvironment: logEntry.service.environment,
         start: new Date(logTimestamp - TWENTY_FOUR_HOURS_MS).toISOString(),
         end: new Date(logTimestamp + TWENTY_FOUR_HOURS_MS).toISOString(),
       });
@@ -165,10 +162,10 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const summary = await getLogAiInsights({
         index,
         id,
-        fields: logEntry.fields,
+        fields: logEntry,
         serviceSummary,
         inferenceClient,
-        connectorId: defaultConnector?.connectorId,
+        connectorId,
       });
 
       return { context: logEntry.fields, summary };

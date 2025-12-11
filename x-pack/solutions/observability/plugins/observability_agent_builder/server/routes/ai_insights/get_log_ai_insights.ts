@@ -12,8 +12,8 @@ import type { ServiceSummary } from '../../data_registry/data_registry_types';
 export interface GetLogAiInsightsParams {
   index: string;
   id: string;
-  fields: Record<string, any>;
-  serviceSummary: ServiceSummary;
+  fields: Record<string, unknown>;
+  serviceSummary?: ServiceSummary;
   inferenceClient: InferenceClient;
   connectorId: string;
 }
@@ -25,7 +25,7 @@ export async function getLogAiInsights({
   serviceSummary,
   inferenceClient,
   connectorId,
-}: GetLogAiInsightsParams): Promise<{ context: string; summary: string }> {
+}: GetLogAiInsightsParams) {
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.

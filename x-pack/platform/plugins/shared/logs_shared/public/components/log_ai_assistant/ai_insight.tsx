@@ -8,7 +8,10 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/common/constants';
+import {
+  OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/common/constants';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LogAIAssistantDocument } from './log_ai_assistant';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
@@ -28,12 +31,16 @@ export function LogEntryAgentBuilderAiInsight({
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
+  const { index, id } = useMemo(() => {
+    return {
+      index: doc?.fields.find((field) => field.field === '_index')?.value[0],
+      id: doc?.fields.find((field) => field.field === '_id')?.value[0],
+    };
+  }, [doc]);
 
   const fetchAiInsights = async () => {
     setIsLoading(true);
     try {
-      const index = doc?.fields.find((field) => field.field === '_index')?.value;
-      const id = doc?.fields.find((field) => field.field === '_id')?.value;
       const response = await http.post<{ summary: string; context: string }>(
         '/internal/observability_agent_builder/ai_insights/log',
         {
@@ -74,8 +81,15 @@ export function LogEntryAgentBuilderAiInsight({
           context,
         },
       },
+      {
+        type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+        data: {
+          index,
+          id,
+        },
+      },
     ];
-  }, [summary, context]);
+  }, [summary, context, index, id]);
 
   return (
     <>

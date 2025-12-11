@@ -61,7 +61,6 @@ import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
-import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -96,7 +95,6 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
-  inference?: InferenceServerSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -126,5 +124,4 @@ export interface APMPluginStartDependencies {
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
-  inference?: InferenceServerStart;
 }

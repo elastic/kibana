@@ -61,8 +61,7 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "share",
-      "onechat",
-      "inference"
+      "onechat"
     ],
     "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }
