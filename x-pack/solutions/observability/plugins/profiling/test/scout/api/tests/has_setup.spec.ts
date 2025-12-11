@@ -98,9 +98,6 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () 
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
-    // if (!(await profilingSetup.checkStatus()).has_setup) {
-    //   await profilingSetup.setupResources();
-    // }
     await profilingSetup.loadData(esArchiversPath);
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
     adminApiCreditials = await requestAuth.getApiKey('admin');
