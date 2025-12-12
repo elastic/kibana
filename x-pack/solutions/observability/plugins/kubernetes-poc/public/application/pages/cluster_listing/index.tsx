@@ -26,6 +26,7 @@ import {
   HealthyClustersCard,
   UnhealthyClustersCard,
   CpuUsageTrendCard,
+  MemoryUsageTrendCard,
 } from '../../components/cluster_overview_cards';
 import { useFetchClusterListing } from '../../../hooks/use_fetch_cluster_listing';
 
@@ -135,24 +136,36 @@ export const ClusterListingPage: React.FC = () => {
 
       {/* Overview Cards with Lens Visualizations */}
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder paddingSize="none">
-            <ClusterCountCard timeRange={appliedTimeRange} />
-          </EuiPanel>
+        {/* Left column: Stacked metric cards */}
+        <EuiFlexItem grow={false} style={{ width: 180 }}>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiPanel hasBorder paddingSize="none">
+                <ClusterCountCard timeRange={appliedTimeRange} />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder paddingSize="none">
+                <HealthyClustersCard timeRange={appliedTimeRange} />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder paddingSize="none">
+                <UnhealthyClustersCard timeRange={appliedTimeRange} />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder paddingSize="none">
-            <HealthyClustersCard timeRange={appliedTimeRange} />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder paddingSize="none">
-            <UnhealthyClustersCard timeRange={appliedTimeRange} />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+
+        {/* Right column: Trend charts */}
+        <EuiFlexItem grow={true}>
           <EuiPanel hasBorder paddingSize="none">
             <CpuUsageTrendCard timeRange={appliedTimeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiPanel hasBorder paddingSize="none">
+            <MemoryUsageTrendCard timeRange={appliedTimeRange} />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

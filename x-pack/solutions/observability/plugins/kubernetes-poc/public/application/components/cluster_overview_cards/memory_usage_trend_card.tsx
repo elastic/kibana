@@ -12,35 +12,35 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
-interface CpuUsageTrendCardProps {
+interface MemoryUsageTrendCardProps {
   timeRange: TimeRange;
   height?: number;
 }
 
 /**
- * ES|QL query for CPU usage by cluster over time
- * Calculates CPU utilization as a ratio of usage to allocatable CPU
+ * ES|QL query for Memory usage by cluster over time
+ * Calculates Memory utilization as a ratio of usage to allocatable memory
  * Uses TS command with TBUCKET for time series aggregation
  *
  * Performance rules applied:
  * - k8s.cluster.name and k8s.node.name are required (BY clause fields)
- * - k8s.node.cpu.usage and k8s.node.allocatable_cpu are metric fields (OR condition)
+ * - k8s.node.memory.usage and k8s.node.allocatable_memory are metric fields (OR condition)
  */
-const CPU_USAGE_BY_CLUSTER_ESQL = `TS remote_cluster:metrics-*
+const MEMORY_USAGE_BY_CLUSTER_ESQL = `TS remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
   AND k8s.node.name IS NOT NULL
-  AND (k8s.node.cpu.usage IS NOT NULL OR k8s.node.allocatable_cpu IS NOT NULL)
+  AND (k8s.node.memory.usage IS NOT NULL OR k8s.node.allocatable_memory IS NOT NULL)
 | STATS 
-    sum_cpu_usage = SUM(k8s.node.cpu.usage),
-    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
+    sum_memory_usage = SUM(k8s.node.memory.usage),
+    sum_allocatable_memory = SUM(k8s.node.allocatable_memory)
   BY timestamp = TBUCKET(1 minute), k8s.cluster.name
-| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
-| KEEP timestamp, k8s.cluster.name, cpu_utilization`;
+| EVAL memory_utilization = sum_memory_usage / TO_DOUBLE(sum_allocatable_memory)
+| KEEP timestamp, k8s.cluster.name, memory_utilization`;
 
 /**
- * Card displaying CPU usage by cluster as a line chart using Lens
+ * Card displaying Memory usage by cluster as a line chart using Lens
  */
-export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
+export const MemoryUsageTrendCard: React.FC<MemoryUsageTrendCardProps> = ({
   timeRange,
   height = 316,
 }) => {
@@ -49,7 +49,7 @@ export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
 
   const attributes: TypedLensByValueInput['attributes'] = useMemo(
     () => ({
-      title: 'CPU Util by Cluster',
+      title: 'Memory Util by Cluster',
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -103,7 +103,7 @@ export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
           curveType: 'LINEAR',
         },
         query: {
-          esql: CPU_USAGE_BY_CLUSTER_ESQL,
+          esql: MEMORY_USAGE_BY_CLUSTER_ESQL,
         },
         filters: [],
         datasourceStates: {
@@ -112,7 +112,7 @@ export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
               layer_0: {
                 index: 'esql-query-index',
                 query: {
-                  esql: CPU_USAGE_BY_CLUSTER_ESQL,
+                  esql: MEMORY_USAGE_BY_CLUSTER_ESQL,
                 },
                 columns: [
                   {
@@ -124,8 +124,8 @@ export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
                   },
                   {
                     columnId: 'metric_0',
-                    fieldName: 'cpu_utilization',
-                    label: 'CPU Utilization',
+                    fieldName: 'memory_utilization',
+                    label: 'Memory Utilization',
                     customLabel: true,
                     meta: {
                       type: 'number',
@@ -158,12 +158,12 @@ export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
   return (
     <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
       <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterOverview.cpuUsageByClusterTitle', {
-          defaultMessage: 'CPU Util by Cluster',
+        {i18n.translate('xpack.kubernetesPoc.clusterOverview.memoryUsageByClusterTitle', {
+          defaultMessage: 'Memory Util by Cluster',
         })}
       </EuiText>
       <LensComponent
-        id="cpuUsageTrendChart"
+        id="memoryUsageTrendChart"
         attributes={attributes}
         timeRange={timeRange}
         style={{ height: `${height - 32}px`, width: '100%' }}

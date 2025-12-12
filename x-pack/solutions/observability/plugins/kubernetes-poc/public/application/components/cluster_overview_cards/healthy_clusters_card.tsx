@@ -42,7 +42,7 @@ const HEALTHY_CLUSTERS_ESQL = `FROM remote_cluster:metrics-*
  */
 export const HealthyClustersCard: React.FC<HealthyClustersCardProps> = ({
   timeRange,
-  height = 150,
+  height = 100,
 }) => {
   const { plugins } = usePluginContext();
   const LensComponent = plugins.lens.EmbeddableComponent;

@@ -32,7 +32,7 @@ const CLUSTER_COUNT_ESQL = `FROM remote_cluster:metrics-*
  * Card displaying total cluster count using a Lens metric visualization
  * with a vertical progress bar where max = cluster_count (always full)
  */
-export const ClusterCountCard: React.FC<ClusterCountCardProps> = ({ timeRange, height = 150 }) => {
+export const ClusterCountCard: React.FC<ClusterCountCardProps> = ({ timeRange, height = 100 }) => {
   const { plugins } = usePluginContext();
   const LensComponent = plugins.lens.EmbeddableComponent;
 
