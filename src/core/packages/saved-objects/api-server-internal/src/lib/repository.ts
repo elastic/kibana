@@ -69,6 +69,7 @@ import {
   SavedObjectsSerializer,
   type IndexMapping,
   type IKibanaMigrator,
+  type ISavedObjectTypeRegistryInternal,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
@@ -144,7 +145,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   public static createRepository(
     migrator: IKibanaMigrator,
-    typeRegistry: ISavedObjectTypeRegistry,
+    typeRegistry: ISavedObjectTypeRegistryInternal,
     indexName: string,
     client: ElasticsearchClient,
     logger: Logger,
