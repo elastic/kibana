@@ -9,7 +9,7 @@ import { expect, spaceTest } from '@kbn/scout-security';
 
 spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPlatformEngineer();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest(

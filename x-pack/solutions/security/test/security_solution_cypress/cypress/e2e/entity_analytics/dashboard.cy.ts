@@ -28,11 +28,11 @@ import {
 describe(
   'Entity analytics dashboard page',
   {
-    tags: ['@ess'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
-      login();
+      login('admin');
       deleteEntityStoreEngines();
       deleteRiskEngineConfiguration();
       visit(ENTITY_ANALYTICS_DASHBOARD_URL);
@@ -44,11 +44,9 @@ describe(
     });
 
     describe('Entity Store enablement', () => {
-      it('renders enablement panel', () => {
-        cy.get(ENTITY_STORE_ENABLEMENT_PANEL).contains('Enable entity store and risk score');
-      });
-
       it('enables risk score followed by the store', () => {
+        cy.get(ENTITY_STORE_ENABLEMENT_PANEL).contains('Enable entity store and risk score');
+
         openEntityStoreEnablementModal();
 
         cy.get(ENABLEMENT_MODAL_RISK_SCORE_SWITCH).should('be.visible');
