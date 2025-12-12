@@ -6,6 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type {
   FindSLODefinitionsParams,
   FindSLODefinitionsResponse,
@@ -13,6 +14,7 @@ import type {
 } from '@kbn/slo-schema';
 import { findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
+import type { SLODefinition } from '../domain/models';
 import { computeHealth } from '../domain/services';
 import { IllegalArgumentError } from '../errors';
 import type { SLORepository } from './slo_repository';
@@ -24,7 +26,8 @@ const DEFAULT_PAGE = 1;
 export class FindSLODefinitions {
   constructor(
     private repository: SLORepository,
-    private scopedClusterClient: IScopedClusterClient
+    private scopedClusterClient: IScopedClusterClient,
+    private logger: Logger
   ) {}
 
   public async execute(params: FindSLODefinitionsParams): Promise<FindSLODefinitionsResponse> {
@@ -37,24 +40,17 @@ export class FindSLODefinitions {
     );
 
     if (params.includeHealth) {
-      const healthResults = await computeHealth(definitions, {
-        scopedClusterClient: this.scopedClusterClient,
-      });
-
-      const healthBySloId = keyBy(healthResults, (health) => health.id);
-      const definitionsWithHealth = definitions.map((definition) => {
-        return {
-          ...definition,
-          health: healthBySloId[definition.id]?.health,
-        };
-      });
-
-      return findSloDefinitionsResponseSchema.encode({
-        page: result.page,
-        perPage: result.perPage,
-        total: result.total,
-        results: definitionsWithHealth,
-      });
+      try {
+        const definitionsWithHealth = await this.mergeWithHealth(definitions);
+        return findSloDefinitionsResponseSchema.encode({
+          page: result.page,
+          perPage: result.perPage,
+          total: result.total,
+          results: definitionsWithHealth,
+        });
+      } catch (e) {
+        this.logger.debug(`Failed to compute SLO health: ${e}`);
+      }
     }
 
     return findSloDefinitionsResponseSchema.encode({
@@ -63,6 +59,22 @@ export class FindSLODefinitions {
       total: result.total,
       results: definitions,
     });
+  }
+
+  private async mergeWithHealth(definitions: SLODefinition[]) {
+    const healthResults = await computeHealth(definitions, {
+      scopedClusterClient: this.scopedClusterClient,
+    });
+
+    const healthBySloId = keyBy(healthResults, (health) => health.id);
+    const definitionsWithHealth = definitions.map((definition) => {
+      return {
+        ...definition,
+        health: healthBySloId[definition.id]?.health,
+      };
+    });
+
+    return definitionsWithHealth;
   }
 }
 

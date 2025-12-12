@@ -12,7 +12,7 @@ import { within } from '@kbn/esql-ast/src/ast/location';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,
-} from '@kbn/esql-ast/src/definitions/utils';
+} from '@kbn/esql-ast/src/commands/definitions/utils';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { findSubquery } from '../shared/subqueries_helpers';

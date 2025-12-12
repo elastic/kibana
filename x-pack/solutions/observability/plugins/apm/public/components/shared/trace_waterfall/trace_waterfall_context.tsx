@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { EuiAccordionProps } from '@elastic/eui';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
@@ -23,6 +24,10 @@ export interface TraceWaterfallContextProps {
   margin: { left: number; right: number };
   traceWaterfallMap: Record<string, TraceWaterfallItem[]>;
   showAccordion: boolean;
+  isAccordionOpen: boolean;
+  accordionStatesMap: Record<string, EuiAccordionProps['forceState']>;
+  toggleAccordionState: (id: string) => void;
+  toggleAllAccordions: () => void;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   highlightedTraceId?: string;
@@ -44,6 +49,10 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   margin: { left: 0, right: 0 },
   traceWaterfallMap: {},
   showAccordion: true,
+  isAccordionOpen: true,
+  accordionStatesMap: {},
+  toggleAccordionState: () => {},
+  toggleAllAccordions: () => {},
   isEmbeddable: false,
   legends: [],
   colorBy: WaterfallLegendType.ServiceName,
@@ -94,6 +103,37 @@ export function TraceWaterfallContextProvider({
       isFiltered,
     });
 
+  const [isAccordionOpen, setAccordionOpen] = useState(true);
+  const [accordionStatesMap, setAccordionStateMap] = useState<
+    Record<string, EuiAccordionProps['forceState']>
+  >(() =>
+    traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
+      acc[item.id] = 'open';
+      return acc;
+    }, {})
+  );
+
+  const toggleAccordionState = useCallback((id: string) => {
+    setAccordionStateMap((prevStates) => ({
+      ...prevStates,
+      [id]: prevStates[id] === 'open' ? 'closed' : 'open',
+    }));
+  }, []);
+
+  const toggleAllAccordions = useCallback(() => {
+    setAccordionStateMap((prevAccordionStates) =>
+      Object.keys(prevAccordionStates).reduce<Record<string, EuiAccordionProps['forceState']>>(
+        (acc, id) => {
+          acc[id] = isAccordionOpen ? 'closed' : 'open';
+          return acc;
+        },
+        {}
+      )
+    );
+
+    setAccordionOpen((prev) => !prev);
+  }, [isAccordionOpen]);
+
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
 
@@ -109,6 +149,10 @@ export function TraceWaterfallContextProvider({
         margin: { left: showAccordion ? Math.max(100, left) : left, right },
         traceWaterfallMap,
         showAccordion,
+        isAccordionOpen,
+        accordionStatesMap,
+        toggleAccordionState,
+        toggleAllAccordions,
         onClick,
         onErrorClick,
         highlightedTraceId,

@@ -23,16 +23,17 @@ import {
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { isToolValidationError } from '@kbn/inference-common';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
 import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
 import {
   CONTEXT_FUNCTION_NAME,
-  createFunctionNotFoundError,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
@@ -111,6 +112,15 @@ export function executeFunctionAndCatchError({
       catchError((error) => {
         span?.recordException(error);
         logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
+
+        if (isToolValidationError(error)) {
+          return of(
+            createFunctionResponseMessage({
+              name,
+              content: { message: error.message, errors: error.meta },
+            })
+          );
+        }
         // We want to catch the error only when a promise occurs
         // if it occurs in the Observable, we cannot easily recover
         // from it because the function may have already emitted
@@ -321,7 +331,10 @@ export function continueConversation({
       return of(
         createServerSideFunctionResponseError({
           name: functionCallName,
-          error: createFunctionNotFoundError(functionCallName),
+          error: createToolNotFoundError({
+            name: functionCallName,
+            args: lastMessage.function_call!.arguments ?? '',
+          }),
         })
       );
     }

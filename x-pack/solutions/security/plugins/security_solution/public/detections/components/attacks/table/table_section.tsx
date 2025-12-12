@@ -16,7 +16,6 @@ import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
-  defaultGroupingOptions,
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
 } from '../../alerts_table/grouping_settings';
@@ -34,6 +33,7 @@ import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { AlertsTable } from '../../alerts_table';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
+import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
@@ -159,7 +159,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         dataView={dataView}
         dataViewSpec={dataViewSpec}
         defaultFilters={defaultFilters}
-        defaultGroupingOptions={defaultGroupingOptions}
+        defaultGroupingOptions={groupingOptions}
         from={from}
         globalFilters={globalFilters}
         globalQuery={query}
@@ -171,6 +171,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         onAggregationsChange={onAggregationsChange}
         additionalToolbarControls={[showAnonymizedSwitch]}
         pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
+        settings={groupingSettings}
       />
     </div>
   );

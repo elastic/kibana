@@ -7,6 +7,7 @@
 
 import type { RootSchema, SchemaArray, SchemaObject } from '@elastic/ebt';
 import type { FeatureType } from '@kbn/streams-schema';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
@@ -14,6 +15,9 @@ import type {
   StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
+  StreamsAttachmentLinkChangedProps,
+  StreamsAttachmentFlyoutOpenedProps,
+  StreamsAttachmentFlyoutActionProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsRetentionChangedProps,
@@ -29,6 +33,30 @@ import type {
   StreamsTabVisitedProps,
 } from './types';
 
+const attachmentTypeCountFields: Record<
+  AttachmentType,
+  { type: 'long'; _meta: { description: string } }
+> = {
+  dashboard: {
+    type: 'long',
+    _meta: {
+      description: 'The count of dashboard attachments',
+    },
+  },
+  slo: {
+    type: 'long',
+    _meta: {
+      description: 'The count of SLO attachments',
+    },
+  },
+  rule: {
+    type: 'long',
+    _meta: {
+      description: 'The count of rule attachments',
+    },
+  },
+};
+
 const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
   name: {
     type: 'keyword',
@@ -36,26 +64,7 @@ const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
       description: 'The name of the Stream',
     },
   },
-  dashboards: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-    },
-  },
-  slos: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-      optional: true,
-    },
-  },
-  rules: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-      optional: true,
-    },
-  },
+  ...attachmentTypeCountFields,
 };
 
 const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventProps> = {
@@ -75,6 +84,78 @@ const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventP
     type: 'keyword',
     _meta: {
       description: 'The id of the attachment',
+    },
+  },
+};
+
+const attachmentCountByTypeSchema: SchemaObject<Record<AttachmentType, number>> = {
+  _meta: {
+    description: 'The count of attachments grouped by type',
+  },
+  properties: attachmentTypeCountFields,
+};
+
+const streamsAttachmentLinkChangedSchema: RootSchema<StreamsAttachmentLinkChangedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of attachments linked or unlinked',
+    },
+  },
+  count_by_type: attachmentCountByTypeSchema,
+};
+
+const streamsAttachmentFlyoutOpenedSchema: RootSchema<StreamsAttachmentFlyoutOpenedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of attachment: dashboard, slo, rule',
+    },
+  },
+  attachment_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the attachment',
+    },
+  },
+};
+
+const streamsAttachmentFlyoutActionSchema: RootSchema<StreamsAttachmentFlyoutActionProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of attachment: dashboard, slo, rule',
+    },
+  },
+  attachment_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the attachment',
+    },
+  },
+  action: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The action taken from the flyout: navigate_to_attachment, unlink, navigate_to_attached_stream',
     },
   },
 };
@@ -595,6 +676,9 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
 export {
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
+  streamsAttachmentLinkChangedSchema,
+  streamsAttachmentFlyoutOpenedSchema,
+  streamsAttachmentFlyoutActionSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
   streamsAIDissectSuggestionLatencySchema,

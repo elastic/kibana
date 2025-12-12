@@ -34,7 +34,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   rawRound,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
-  const { steps, response, input, model_usage: modelUsage } = rawRound;
+  const { steps, response, input } = rawRound;
 
   const { isResponseLoading, error, retry: retrySendMessage } = useSendMessage();
 
@@ -78,9 +78,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       <EuiFlexItem grow={false}>
         <EuiFlexItem>
           <RoundResponse
+            hasError={isErrorCurrentRound}
             response={response}
             steps={steps}
-            modelUsage={modelUsage}
             isLoading={isLoadingCurrentRound}
           />
         </EuiFlexItem>

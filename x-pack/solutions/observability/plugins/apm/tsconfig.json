@@ -152,7 +152,7 @@
     "@kbn/onechat-server",
     "@kbn/onechat-common",
     "@kbn/onechat-plugin",
-    "@kbn/observability-agent-builder",
+    "@kbn/ai-insights",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/server-route-repository-client"
   ],

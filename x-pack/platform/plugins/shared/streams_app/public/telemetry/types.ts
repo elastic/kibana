@@ -6,21 +6,40 @@
  */
 
 import type { FeatureType } from '@kbn/streams-schema';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
-interface StreamsAttachmentCountProps {
+type StreamsAttachmentCountProps = {
   name: string;
-  dashboards: number;
-  slos?: number;
-  rules?: number;
-}
+} & Record<AttachmentType, number>;
 
 interface StreamsAttachmentClickEventProps {
   name: string;
-  attachment_type: 'dashboard' | 'slo' | 'rule';
+  attachment_type: AttachmentType;
   attachment_id: string;
+}
+
+interface StreamsAttachmentLinkChangedProps {
+  stream_name: string;
+  attachment_count: number;
+  count_by_type: Record<AttachmentType, number>;
+}
+
+interface StreamsAttachmentFlyoutOpenedProps {
+  stream_name: string;
+  attachment_type: AttachmentType;
+  attachment_id: string;
+}
+
+type AttachmentFlyoutAction = 'navigate_to_attachment' | 'unlink' | 'navigate_to_attached_stream';
+
+interface StreamsAttachmentFlyoutActionProps {
+  stream_name: string;
+  attachment_type: AttachmentType;
+  attachment_id: string;
+  action: AttachmentFlyoutAction;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
@@ -155,6 +174,10 @@ interface StreamsTabVisitedProps {
 export {
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
+  type StreamsAttachmentLinkChangedProps,
+  type StreamsAttachmentFlyoutOpenedProps,
+  type StreamsAttachmentFlyoutActionProps,
+  type AttachmentFlyoutAction,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
   type StreamsAIDissectSuggestionLatencyProps,

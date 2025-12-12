@@ -122,8 +122,6 @@ export function registerFeatureFlags(
       requiresPageReload: true,
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
-      readonly: true,
-      readonlyMode: 'ui',
     },
   });
 }

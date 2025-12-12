@@ -24,6 +24,17 @@ import {
 jest.mock('../contexts/enabled_features_context');
 const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
 
+// Mock productDocBase
+const mockProductDocBase = {
+  installation: {
+    getStatus: jest.fn().mockResolvedValue({
+      overall: 'uninstalled',
+    }),
+    install: jest.fn().mockResolvedValue({}),
+    uninstall: jest.fn().mockResolvedValue({}),
+  },
+};
+
 describe('GenAiSettingsApp', () => {
   const coreStart = coreMock.createStart();
   const setBreadcrumbs = jest.fn();
@@ -87,9 +98,13 @@ describe('GenAiSettingsApp', () => {
   });
 
   const renderComponent = (props = {}) => {
+    const services = {
+      ...coreStart,
+      productDocBase: mockProductDocBase,
+    };
     return renderWithI18n(
       <QueryClientProvider client={new QueryClient()}>
-        <KibanaContextProvider services={coreStart}>
+        <KibanaContextProvider services={services}>
           <SettingsContextProvider>
             <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
           </SettingsContextProvider>
@@ -280,6 +295,39 @@ describe('GenAiSettingsApp', () => {
           )
         ).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Documentation Section conditional rendering', () => {
+    it('hides Documentation section when chat experience is Classic', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+
+      renderComponent();
+
+      // Documentation section should not be visible in Classic mode
+      expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+    });
+
+    it('shows Documentation section when chat experience is Agent', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(
+        createSettingsMock({
+          [AI_CHAT_EXPERIENCE_TYPE]: {
+            value: AIChatExperience.Classic,
+            userValue: AIChatExperience.Agent, // userValue maps to savedValue
+            type: 'select',
+            options: [AIChatExperience.Classic, AIChatExperience.Agent],
+          },
+        }) as any
+      );
+
+      renderComponent();
+
+      // Documentation section should be visible in Agent mode
+      expect(await screen.findByTestId('documentationSection')).toBeInTheDocument();
     });
   });
 });

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Location } from '../src/commands_registry/types';
+import { Location } from '../src/commands/registry/types';
 
 export const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],

@@ -33,7 +33,7 @@ implementations &mdash; a basic pretty-printer and a wrapping pretty-printer:
 
 The _Commands registry_ allows you to register a new command:
 
-- [`commands_registry` &mdash; Provides a centralized system for managing and interacting with ES|QL commands](./src/commands_registry/README.md).
+- [`commands/registry` &mdash; Provides a centralized system for managing and interacting with ES|QL commands](./src/commands/registry/README.md).
 
 The _Composer API_ provides a high-level, secure, and developer-friendly way to build ES|QL queries:
 

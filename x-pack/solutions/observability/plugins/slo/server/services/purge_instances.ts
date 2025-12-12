@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   Duration,
   DurationUnit,
@@ -13,20 +13,19 @@ import {
   type PurgeInstancesResponse,
 } from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import type { SLOSettings } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
-import { getSloSettings } from './slo_settings';
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
   spaceId: string;
-  soClient: SavedObjectsClientContract;
+  settings: SLOSettings;
 }
 
 export async function purgeInstances(
   params: PurgeInstancesParams,
-  { scopedClusterClient, spaceId, soClient }: Dependencies
+  { scopedClusterClient, spaceId, settings }: Dependencies
 ): Promise<PurgeInstancesResponse> {
-  const settings = await getSloSettings(soClient);
   const defaultStaleDuration = new Duration(settings.staleThresholdInHours, DurationUnit.Hour);
 
   const list = params.list ?? [];

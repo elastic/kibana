@@ -24,6 +24,9 @@ export default createStatefulTestConfig<typeof services>({
           appenders: ['default'],
         },
       ])}`,
+      `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+        integrationKnowledge: false,
+      })}`,
     ],
   },
 });

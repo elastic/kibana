@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
-import { correctQuerySyntax, isMarkerNode } from '@kbn/esql-ast/src/definitions/utils/ast';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/commands/definitions/constants';
+import { correctQuerySyntax, isMarkerNode } from '@kbn/esql-ast/src/commands/definitions/utils/ast';
 import type { ESQLAstItem } from '@kbn/esql-ast';
 import { Parser, Walker } from '@kbn/esql-ast';
 import { getCursorContext } from './get_cursor_context';

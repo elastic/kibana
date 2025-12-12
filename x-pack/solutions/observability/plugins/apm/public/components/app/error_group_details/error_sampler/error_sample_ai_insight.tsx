@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { AiInsight } from '@kbn/observability-agent-builder';
+import { AiInsight } from '@kbn/ai-insights';
 import {
   createRepositoryClient,
   type DefaultClientOptions,

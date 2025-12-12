@@ -9,8 +9,8 @@
 
 import type { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
 import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
-import type { ICommandCallbacks } from '@kbn/esql-ast/src/commands_registry/types';
-import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import type { ICommandCallbacks } from '@kbn/esql-ast/src/commands/registry/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/commands/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';

@@ -15,13 +15,7 @@ export const OSQUERY = 'app/osquery';
 export const NEW_LIVE_QUERY = 'app/osquery/live_queries/new';
 export const OSQUERY_INTEGRATION_PAGE = '/app/fleet/integrations/osquery_manager/add-integration';
 export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) => {
-  cy.visit(page, {
-    ...opts,
-    onBeforeLoad: (win) => {
-      disableNewFeaturesTours(win);
-      opts?.onBeforeLoad?.(win);
-    },
-  });
+  cy.visit(page, opts);
   cy.contains('Loading Elastic').should('exist');
   cy.contains('Loading Elastic').should('not.exist');
 
@@ -69,8 +63,4 @@ export const disableNewFeaturesTours = (window: Window) => {
   tourStorageKeys.forEach((key) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
-
-  // other keys in incompatible format
-  // TODO: remove in https://github.com/elastic/kibana/issues/239313
-  window.localStorage.setItem('solutionNavigationTour:completed', 'true');
 };

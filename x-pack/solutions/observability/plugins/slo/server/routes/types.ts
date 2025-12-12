@@ -17,6 +17,7 @@ import type { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_c
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { SLORepository, TransformManager } from '../services';
 import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
+import type { SLOSettingsRepository } from '../services/slo_settings_repository';
 
 export type GetScopedClients = ({
   request,
@@ -35,6 +36,7 @@ export interface RouteHandlerScopedClients {
   rulesClient: RulesClientApi;
   racClient: AlertsClient;
   repository: SLORepository;
+  settingsRepository: SLOSettingsRepository;
   transformManager: TransformManager;
   summaryTransformManager: TransformManager;
 }

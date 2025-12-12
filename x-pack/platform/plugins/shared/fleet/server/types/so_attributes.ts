@@ -279,6 +279,7 @@ export interface SettingsSOAttributes {
     metrics?: 'success' | null;
     synthetics?: 'success' | null;
   };
+  integration_knowledge_enabled?: boolean;
 }
 
 export interface SpaceSettingsSOAttributes {

@@ -2683,6 +2683,72 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.response_actions.get_file.max_parallel_uploads',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.get_file.max_parallel_uploads',
+      {
+        defaultMessage:
+          'Maximum number of parallel uploads for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.get_file.max_parallel_uploads',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.get_file.max_parallel_uploads',
+      {
+        defaultMessage:
+          'Maximum number of parallel uploads for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.get_file.max_parallel_uploads',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.get_file.max_parallel_uploads',
+      {
+        defaultMessage:
+          'Maximum number of parallel uploads for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.response_actions.get_file.upload_streams_count',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.get_file.upload_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of upload streams for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.get_file.upload_streams_count',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.get_file.upload_streams_count',
+      {
+        defaultMessage:
+          'Number of parallel streams per upload for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.get_file.upload_streams_count',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.get_file.upload_streams_count',
+      {
+        defaultMessage:
+          'Number of parallel streams per upload for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.script_capture',
     first_supported_version: '9.3',
     documentation: i18n.translate(
