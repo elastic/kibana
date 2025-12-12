@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { AbsoluteTimeRange } from '@kbn/es-query';
 import { StreamExistingFeaturesTable } from './stream_existing_features_table';
 
 const getUnderlineOnHoverStyle = (textDecorationValue: 'underline' | 'none') => css`
