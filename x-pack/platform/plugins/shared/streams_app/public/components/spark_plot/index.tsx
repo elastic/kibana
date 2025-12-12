@@ -49,7 +49,7 @@ export function SparkPlot({
   name?: string;
   type: 'line' | 'bar';
   timeseries: Array<{ x: number; y: number | null }>;
-  annotations?: SparkPlotAnnotation[];
+  annotations: SparkPlotAnnotation[];
   compressed?: boolean;
   xFormatter?: TickFormatter;
   hideAxis?: boolean;
@@ -174,7 +174,7 @@ export function SparkPlot({
           curve={CurveType.CURVE_MONOTONE_X}
         />
       )}
-      {annotations?.map((annotation) => {
+      {annotations.map((annotation) => {
         return (
           <LineAnnotation
             key={annotation.id}

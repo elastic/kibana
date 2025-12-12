@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { groupBy } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +20,6 @@ interface Props {
   occurrences: Array<{ x: number; y: number }>;
   changes: FormattedChangePoint[];
   xFormatter: TickFormatter;
-  hideAxis?: boolean;
   height?: number;
   compressed?: boolean;
   maxYValue?: number;
@@ -30,7 +30,6 @@ export function SignificantEventsHistogramChart({
   occurrences,
   changes,
   xFormatter,
-  hideAxis = true,
   compressed = true,
   height,
   maxYValue,
@@ -41,14 +40,14 @@ export function SignificantEventsHistogramChart({
     if (!changes.length) {
       return [];
     }
-    return changes.map((change, index) => {
+
+    return Object.entries(groupBy(changes, 'time')).map(([timestamp, changes]) => {
       const annotation = getAnnotationFromFormattedChangePoint({
-        query: { id },
-        change,
+        changes,
         theme,
         xFormatter,
       });
-      annotation.id = `${annotation.id}_${index}`;
+      annotation.id = `${annotation.id}_${timestamp}`;
       return annotation;
     });
   }, [changes, id, theme, xFormatter]);

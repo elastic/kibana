@@ -270,19 +270,17 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               <SignificantEventsHistogramChart
                 id={'all-events'}
                 occurrences={significantEventsFetchState.value?.all ?? []}
-                changes={
-                  compact(
-                    significantEventsFetchState.value?.significant_events.map((item) =>
-                      formatChangePoint({
-                        change_points: item.change_points,
-                        occurrences: item.occurrences,
-                      })
-                    )
-                  ) ?? []
-                }
+                changes={compact(
+                  (significantEventsFetchState.value?.significant_events ?? []).map((item) =>
+                    formatChangePoint({
+                      query: item.query,
+                      change_points: item.change_points,
+                      occurrences: item.occurrences,
+                    })
+                  )
+                )}
                 xFormatter={xFormatter}
                 compressed={false}
-                hideAxis={false}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
