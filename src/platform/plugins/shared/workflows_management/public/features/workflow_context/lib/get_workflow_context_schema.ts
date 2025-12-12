@@ -76,7 +76,7 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
         (definition.inputs || []).map((input) => [input.name, fieldToSchema(input)])
       ),
     }),
-    outputs: z.object({
+    output: z.object({
       ...Object.fromEntries(
         (definition.outputs || []).map((output) => [output.name, fieldToSchema(output)])
       ),
