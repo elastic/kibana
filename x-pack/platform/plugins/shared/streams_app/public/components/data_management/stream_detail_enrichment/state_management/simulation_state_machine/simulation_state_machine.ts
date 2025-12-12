@@ -26,13 +26,8 @@ import type {
   SimulationInput,
   SimulationMachineDeps,
 } from './types';
-import {
-  getActiveSamples,
-  getActiveSteps,
-  getSchemaFieldsFromSimulation,
-  mapField,
-  unmapField,
-} from './utils';
+import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
+import { selectSamplesForSimulation } from './selectors';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -63,11 +58,9 @@ export const simulationMachine = setup({
     })),
     storeSteps: assign((_, params: StepsEventParams) => ({
       steps: params.steps,
-      selectedConditionId: undefined,
     })),
     storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
-      selectedConditionId: undefined,
     })),
     storeSimulation: assign(({ context }, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
@@ -132,9 +125,9 @@ export const simulationMachine = setup({
     applyConditionFilter: assign((_, params: { conditionId: string }) => ({
       selectedConditionId: params.conditionId,
     })),
-    clearConditionFilter: assign({
+    clearConditionFilter: assign(() => ({
       selectedConditionId: undefined,
-    }),
+    })),
   },
   delays: {
     processorChangeDebounceTime: 300,
@@ -303,10 +296,10 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: getActiveSamples(context)
+          documents: selectSamplesForSimulation(context)
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
-          steps: getValidSteps(getActiveSteps(context)),
+          steps: getValidSteps(context.steps),
           detectedFields: context.detectedSchemaFields,
         }),
         onDone: {

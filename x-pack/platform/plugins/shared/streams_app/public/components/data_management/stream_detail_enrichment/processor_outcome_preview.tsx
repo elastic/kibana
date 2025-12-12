@@ -40,7 +40,6 @@ import {
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
-  getActiveSamples,
   getAllFieldsInOrder,
   getSourceField,
   getTableColumns,
@@ -50,6 +49,7 @@ import {
   selectHasSimulatedRecords,
   selectOriginalPreviewRecords,
   selectPreviewRecords,
+  selectSamplesForSimulation,
 } from './state_management/simulation_state_machine/selectors';
 import { isStepUnderEdit } from './state_management/steps_state_machine';
 import {
@@ -129,7 +129,9 @@ const PreviewDocumentsGroupBy = () => {
   );
   const selectedConditionId = useSimulatorSelector((state) => state.context.selectedConditionId);
   const totalSamples = useSimulatorSelector((state) => state.context.samples.length);
-  const activeSamples = useSimulatorSelector((state) => getActiveSamples(state.context).length);
+  const activeSamples = useSimulatorSelector(
+    (state) => selectSamplesForSimulation(state.context).length
+  );
   const conditionPercentage =
     totalSamples > 0 ? Math.round((activeSamples / totalSamples) * 100) : 0;
 

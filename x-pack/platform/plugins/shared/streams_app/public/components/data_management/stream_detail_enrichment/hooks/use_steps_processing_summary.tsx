@@ -22,6 +22,7 @@ type StepProcessingStatus =
   | 'successful'
   | 'disabled.processorBeforePersisted'
   | 'skipped.followsProcessorBeingEdited'
+  | 'skipped.excludedByFilteringCondition'
   | 'skipped.createdInPreviousSimulation'
   | 'condition';
 
@@ -52,6 +53,10 @@ export const useStepsProcessingSummary = () => {
       selectWhetherAnyProcessorBeforePersisted(snapshot.context)
   );
 
+  const isFilteringByCondition = useSimulatorSelector(
+    (snapshot) => snapshot.context.selectedConditionId !== undefined
+  );
+
   const stepsProcessingSummary = useMemo(() => {
     const summaryMap: StepsProcessingSummaryMap = new Map();
 
@@ -68,7 +73,11 @@ export const useStepsProcessingSummary = () => {
           summaryMap.set(stepId, 'disabled.processorBeforePersisted');
         } else if (!isParticipatingInSimulation) {
           if (stepContext.isNew) {
-            summaryMap.set(stepId, 'skipped.followsProcessorBeingEdited');
+            if (isFilteringByCondition) {
+              summaryMap.set(stepId, 'skipped.excludedByFilteringCondition');
+            } else {
+              summaryMap.set(stepId, 'skipped.followsProcessorBeingEdited');
+            }
           } else {
             summaryMap.set(stepId, 'skipped.createdInPreviousSimulation');
           }
@@ -89,6 +98,7 @@ export const useStepsProcessingSummary = () => {
   }, [
     hasSimulation,
     isAnyProcessorBeforePersisted,
+    isFilteringByCondition,
     isSimulationRunning,
     processorMetrics,
     simulatorSteps,

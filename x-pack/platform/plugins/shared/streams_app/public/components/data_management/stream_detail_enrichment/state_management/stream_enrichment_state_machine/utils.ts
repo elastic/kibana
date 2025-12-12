@@ -18,8 +18,8 @@ import type {
   KqlSamplesDataSource,
   LatestSamplesDataSource,
 } from '../../../../../../common/url_schema';
-import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
 import { dataSourceConverter } from '../../utils';
 import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
@@ -105,13 +105,32 @@ export function getActiveDataSourceSamples(
 export function getStepsForSimulation({
   stepRefs,
   isPartialSimulation,
-}: Pick<StreamEnrichmentContextType, 'stepRefs'> & { isPartialSimulation: boolean }) {
+  selectedConditionId,
+}: Pick<StreamEnrichmentContextType, 'stepRefs'> & {
+  isPartialSimulation: boolean;
+  selectedConditionId?: string;
+}) {
   let newStepSnapshots = stepRefs
     .map((procRef) => procRef.getSnapshot())
     .filter(
       (snapshot) =>
         isWhereBlock(snapshot.context.step) || (isPartialSimulation ? snapshot.context.isNew : true)
     );
+
+  // Truncate to the selected condition subtree (and everything before it)
+  if (selectedConditionId) {
+    const conditionAndDescendants = collectDescendantIds(selectedConditionId, stepRefs);
+
+    conditionAndDescendants.add(selectedConditionId);
+
+    const lastIndex = newStepSnapshots.findLastIndex((snapshot) =>
+      conditionAndDescendants.has(snapshot.context.step.customIdentifier)
+    );
+
+    if (lastIndex !== -1) {
+      newStepSnapshots = newStepSnapshots.slice(0, lastIndex + 1);
+    }
+  }
 
   // Find if any processor is currently being edited
   const editingProcessorIndex = newStepSnapshots.findIndex(
@@ -200,25 +219,41 @@ export const spawnDataSource = <
   });
 };
 
+/**
+ * Recursively finds a place for a new place step for a step with given parent step.
+ * Takes into account nested conditions and their descendants.
+ */
+function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): number {
+  const descendantStepIds = collectDescendantIds(parentId, stepRefs);
+  const lastDescendantId = Array.from(descendantStepIds).at(-1);
+
+  const lastDescendantIndex = stepRefs.findIndex((stepRef) => {
+    return stepRef.getSnapshot().context.step.customIdentifier === lastDescendantId;
+  });
+
+  if (lastDescendantIndex !== -1) {
+    return lastDescendantIndex + 1;
+  }
+
+  return -1;
+}
+
 /* Find insert index based on step hierarchy */
 export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | null): number {
   // Find the index of the parent step
+  // debugger;
   const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;
 
   // Find the last index of any step with the same parentId
-  let lastSiblingIndex = -1;
+  let newSiblingIndex = -1;
 
   if (parentId !== null) {
-    for (let i = 0; i < stepRefs.length; i++) {
-      if (stepRefs[i].getSnapshot().context.step.parentId === parentId) {
-        lastSiblingIndex = i;
-      }
-    }
+    newSiblingIndex = findNewSiblingStepIndex(stepRefs, parentId);
   }
 
-  if (lastSiblingIndex !== -1) {
+  if (newSiblingIndex !== -1) {
     // Insert after the last sibling with the same parentId
-    return lastSiblingIndex + 1;
+    return newSiblingIndex;
   } else if (parentIndex !== -1) {
     // Insert right after the parent if no siblings
     return parentIndex + 1;

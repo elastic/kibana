@@ -350,7 +350,11 @@ export const streamEnrichmentMachine = setup({
         } else {
           enqueue.sendTo('simulator', {
             type: params?.type ?? 'simulation.receive_steps',
-            steps: getStepsForSimulation({ stepRefs: context.stepRefs, isPartialSimulation }),
+            steps: getStepsForSimulation({
+              stepRefs: context.stepRefs,
+              isPartialSimulation,
+              selectedConditionId: context.simulatorRef?.getSnapshot().context.selectedConditionId,
+            }),
           });
         }
       }
@@ -534,6 +538,9 @@ export const streamEnrichmentMachine = setup({
                 {
                   type: 'sendConditionFilterToSimulator',
                   params: ({ event }: { event: SimulationFilterByConditionEvent }) => event,
+                },
+                {
+                  type: 'sendStepsEventToSimulator',
                 },
               ],
             },

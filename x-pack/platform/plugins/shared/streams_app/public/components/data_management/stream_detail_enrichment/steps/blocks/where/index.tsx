@@ -44,9 +44,9 @@ export const WhereBlock = (props: StepConfigurationProps) => {
   const freshBlockRef = useRef<HTMLDivElement>(null);
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
-  const isSelected = useSimulatorSelector(
-    (state) => state.context.selectedConditionId === step.customIdentifier
-  );
+  const isSelected = useSimulatorSelector((state) => {
+    return state.context.selectedConditionId === step.customIdentifier;
+  });
 
   const panelColour = getStepPanelColour(level);
 
