@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { useTabs } from './tabs';
 import type {
   EntityDetailsLeftPanelTab,
@@ -24,7 +24,7 @@ interface ServiceParam {
 export interface ServiceDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   service: ServiceParam;
-  path?: PanelPath;
+  path?: string;
   scopeId: string;
 }
 export interface ServiceDetailsExpandableFlyoutProps extends FlyoutPanelProps {
@@ -63,19 +63,19 @@ const useSelectedTab = (
   isRiskScoreExist: boolean,
   service: ServiceParam,
   tabs: LeftPanelTabsType,
-  path: PanelPath | undefined
+  path: string | undefined
 ) => {
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openChildPanel } = useFlyoutApi();
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs.length > 0 ? tabs[0].id : undefined;
     if (!path) return defaultTab;
 
-    return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;
+    return tabs.find((tab) => tab.id === path)?.id ?? defaultTab;
   }, [path, tabs]);
 
   const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
-    openLeftPanel({
+    openChildPanel({
       id: ServiceDetailsPanelKey,
       params: {
         service,
@@ -83,6 +83,7 @@ const useSelectedTab = (
         path: {
           tab: tabId,
         },
+        isChild: true,
       },
     });
   };

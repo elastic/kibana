@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { EuiFlyout, useEuiTheme } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
@@ -59,7 +59,7 @@ export const TakeActionButton: FC = () => {
     [euiTheme]
   );
 
-  const { closeFlyout } = useExpandableFlyoutApi();
+  const { closeFlyout } = useFlyoutApi();
   const { dataFormattedForFieldBrowser, dataAsNestedObject, refetchFlyoutData, scopeId } =
     useDocumentDetailsContext();
 

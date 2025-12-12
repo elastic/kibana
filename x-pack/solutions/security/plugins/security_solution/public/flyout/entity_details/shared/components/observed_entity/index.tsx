@@ -23,12 +23,14 @@ export const ObservedEntity = <T,>({
   scopeId,
   observedFields,
   queryId,
+  isChild,
 }: {
   observedData: ObservedEntityData<T>;
   contextID: string;
   scopeId: string;
   observedFields: EntityTableRows<ObservedEntityData<T>>;
   queryId: string;
+  isChild: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xxs').fontSize;
@@ -109,6 +111,7 @@ export const ObservedEntity = <T,>({
             scopeId={scopeId}
             data={observedData}
             entityFields={observedFields}
+            isChild={isChild}
           />
         </EuiAccordion>
       </InspectButtonContainer>

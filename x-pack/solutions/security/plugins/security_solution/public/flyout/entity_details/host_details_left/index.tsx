@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { type FlyoutPanelProps } from '@kbn/flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import type {
   CspInsightLeftPanelSubTab,

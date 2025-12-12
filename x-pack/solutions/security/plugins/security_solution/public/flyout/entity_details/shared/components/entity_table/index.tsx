@@ -15,6 +15,7 @@ interface EntityTableProps<T extends BasicEntityData> {
   scopeId: string;
   data: T;
   entityFields: EntityTableRows<T>;
+  isChild: boolean;
 }
 
 export const EntityTable = <T extends BasicEntityData>({
@@ -22,6 +23,7 @@ export const EntityTable = <T extends BasicEntityData>({
   scopeId,
   data,
   entityFields,
+  isChild,
 }: EntityTableProps<T>) => {
   const items = useMemo(
     () => entityFields.filter(({ isVisible }) => (isVisible ? isVisible(data) : true)),
@@ -29,8 +31,8 @@ export const EntityTable = <T extends BasicEntityData>({
   );
 
   const entityTableColumns = useMemo(
-    () => getEntityTableColumns<T>(contextID, scopeId, data),
-    [contextID, scopeId, data]
+    () => getEntityTableColumns<T>(contextID, scopeId, data, isChild),
+    [contextID, scopeId, data, isChild]
   );
   return (
     <BasicTable

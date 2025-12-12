@@ -32,12 +32,19 @@ export interface OverlayFlyoutStart {
  */
 export type OverlayFlyoutOpenOptions = Omit<
   EuiFlyoutProps | EuiFlyoutResizableProps,
-  'onClose' | 'onResize'
+  'onClose' | 'onResize' | 'session'
 > & {
   /**
    * EuiFlyout onClose handler.
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;
    */
   onClose?: (flyout: OverlayRef) => void;
+  /**
+   * Use overlays.openSystemFlyout to create session-based flyouts.
+   */
+  session?: 'never';
+  /**
+   * @deprecated Use `resizable` instead.
+   */
   isResizable?: boolean;
 };

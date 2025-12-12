@@ -8,10 +8,10 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { ServicePanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { EntityType } from '../../../../../../common/search_strategy';
 import { EntityDetailsLink } from '../../../../../common/components/links';
-import { ServicePanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -37,7 +37,7 @@ const ServiceNameComponent: React.FC<Props> = ({
   const eventContext = useContext(StatefulEventContext);
   const serviceName = `${value}`;
   const isInTimelineContext = serviceName && eventContext?.timelineID;
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const isInSecurityApp = useIsInSecurityApp();
 
@@ -56,7 +56,7 @@ const ServiceNameComponent: React.FC<Props> = ({
       const { timelineID } = eventContext;
 
       openFlyout({
-        right: {
+        main: {
           id: ServicePanelKey,
           params: {
             serviceName,

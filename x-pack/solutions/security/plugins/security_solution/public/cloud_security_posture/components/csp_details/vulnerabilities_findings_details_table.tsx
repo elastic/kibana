@@ -242,7 +242,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
                   packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
                   eventId: finding?.event?.id,
                   scopeId,
-                  isPreviewMode: true,
+                  isChild: true,
                   banner: {
                     title: i18n.translate(
                       'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',

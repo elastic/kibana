@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiButtonIcon, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
+import { useFlyoutApi } from '@kbn/flyout';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
@@ -41,7 +41,7 @@ export type EntitiesListColumns = [
 ];
 
 export const useEntitiesListColumns = (): EntitiesListColumns => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openMainPanel } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   return [
@@ -61,7 +61,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           const id = EntityPanelKeyByType[entityType];
 
           if (id) {
-            openRightPanel({
+            openMainPanel({
               id,
               params: {
                 [EntityPanelParamByType[entityType] ?? '']: value,

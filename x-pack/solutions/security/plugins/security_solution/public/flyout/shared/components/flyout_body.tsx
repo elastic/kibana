@@ -27,6 +27,9 @@ export const FlyoutBody: FC<FlyoutBodyProps> = memo(({ children, ...flyoutBodyPr
           // remove when changes in EUI are merged
           transform: translateZ(0);
         }
+        .euiFlyoutBody__overflowContent {
+          padding: 0 !important;
+        }
       `}
     >
       <EuiPanel hasShadow={false} color="transparent">

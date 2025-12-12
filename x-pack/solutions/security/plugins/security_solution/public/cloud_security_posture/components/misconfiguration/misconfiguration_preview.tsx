@@ -107,12 +107,12 @@ const MisconfigurationPreviewScore = ({
 export const MisconfigurationsPreview = ({
   value,
   field,
-  isPreviewMode,
+  isChild,
   openDetailsPanel,
 }: {
   value: string;
   field: CloudPostureEntityIdentifier;
-  isPreviewMode: boolean;
+  isChild: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
@@ -150,7 +150,7 @@ export const MisconfigurationsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
+        iconType: !isChild && hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
           <EuiTitle
             css={css`

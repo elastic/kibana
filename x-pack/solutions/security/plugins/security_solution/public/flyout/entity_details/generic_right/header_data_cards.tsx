@@ -94,7 +94,6 @@ export const HeaderDataCards = ({
       {assignAssetCriticality.isError && (
         <>
           <EuiCallOut
-            announceOnMount
             onDismiss={() => {
               assignAssetCriticality.reset();
             }}

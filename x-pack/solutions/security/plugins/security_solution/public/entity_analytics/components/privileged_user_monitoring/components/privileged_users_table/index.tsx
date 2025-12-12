@@ -6,27 +6,27 @@
  */
 import React, { useState } from 'react';
 import {
-  useEuiTheme,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiText,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiButtonEmpty,
   EuiBasicTable,
-  EuiProgress,
+  EuiButtonEmpty,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { useFlyoutApi } from '@kbn/flyout';
+import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 
 import { buildPrivilegedUsersTableColumns } from './columns';
 import { HeaderSection } from '../../../../../common/components/header_section';
@@ -44,11 +44,11 @@ const TITLE = i18n.translate(
 const PRIVILEGED_USERS_TABLE_ID = 'PrivilegedUsers-table';
 
 const useOpenUserFlyout = () => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   return (userName: string) => {
     openFlyout({
-      right: {
+      main: {
         id: UserPanelKey,
         params: {
           contextID: PRIVILEGED_USERS_TABLE_ID,

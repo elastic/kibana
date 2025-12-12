@@ -4,26 +4,56 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LeftPanelResponseTab } from '../../left';
+import { useFlyoutApi } from '@kbn/flyout';
+import {
+  DocumentDetailsResponsePanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 /**
  * Response button that opens Response section in the left panel
  */
 export const ResponseButton: React.FC = () => {
-  const goToResponseTab = useNavigateToLeftPanel({
-    tab: LeftPanelResponseTab,
-  });
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+
+  const { openFlyout } = useFlyoutApi();
+  const openResponseFlyout = useCallback(
+    () =>
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsResponsePanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: false,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: true,
+            },
+          },
+        },
+        { mainSize: 'm' }
+      ),
+    [eventId, indexName, openFlyout, scopeId]
+  );
 
   return (
     <>
       <EuiButton
-        onClick={goToResponseTab}
+        onClick={openResponseFlyout}
         iconType="documentation"
         data-test-subj={RESPONSE_BUTTON_TEST_ID}
         size="s"

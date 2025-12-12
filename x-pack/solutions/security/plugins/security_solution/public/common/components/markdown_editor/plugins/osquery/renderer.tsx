@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
-import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
+import { BasicAlertDataContext } from '../../../../../flyout/document_details/investigation_guide/components/investigation_guide_view';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';

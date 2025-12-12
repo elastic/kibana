@@ -127,6 +127,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiFlyout.screenReaderModalDialog\\": \\"You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.\\",
     \\"euiFlyout.screenReaderNonModalDialog\\": \\"You are in a non-modal dialog. To close the dialog, press Escape.\\",
     \\"euiFlyout.screenReaderFocusTrapShards\\": \\"You can still continue tabbing through other global page landmarks.\\",
+    \\"euiFlyoutMenu.back\\": \\"Back\\",
+    \\"euiFlyoutMenu.history\\": \\"History\\",
     \\"euiForm.addressFormErrors\\": \\"Please address the highlighted errors.\\",
     \\"euiFormControlLayoutClearButton.label\\": \\"Clear input\\",
     \\"euiFormControlLayoutDelimited.delimiterLabel\\": \\"to\\",

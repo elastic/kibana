@@ -9,14 +9,14 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useFlyoutApi } from '@kbn/flyout';
 import { EasePanelKey } from '../../flyout/ease/constants/panel_keys';
+import { RulePanelKey } from '../../flyout/rule_details/right';
+import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { AlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
-import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
-import { RulePanelKey } from '../../flyout/rule_details/right';
 import { TimelineId } from '../../../common/types/timeline';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import {
@@ -49,7 +49,7 @@ const CaseContainerComponent: React.FC = () => {
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
   const {
     timelinePrivileges: { read: canSeeTimeline },
   } = useUserPrivileges();
@@ -65,7 +65,7 @@ const CaseContainerComponent: React.FC = () => {
       //  For EASE we need to show the AI alert flyout.
       if (EASE) {
         openFlyout({
-          right: {
+          main: {
             id: EasePanelKey,
             params: {
               id: alertId,
@@ -75,7 +75,7 @@ const CaseContainerComponent: React.FC = () => {
         });
       } else {
         openFlyout({
-          right: {
+          main: {
             id: DocumentDetailsRightPanelKey,
             params: {
               id: alertId,
@@ -108,7 +108,7 @@ const CaseContainerComponent: React.FC = () => {
   const onRuleDetailsClick = useCallback(
     (ruleId: string | null | undefined) => {
       if (ruleId) {
-        openFlyout({ right: { id: RulePanelKey, params: { ruleId } } });
+        openFlyout({ main: { id: RulePanelKey, params: { ruleId } } });
       }
     },
     [openFlyout]

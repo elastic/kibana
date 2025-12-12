@@ -6,8 +6,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -57,7 +56,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
   const entity = useEntityInfo(riskEntity);
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
   const { telemetry } = useKibana().services;
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openMainPanel } = useFlyoutApi();
   const entityNameField = EntityTypeToIdentifierField[riskEntity];
 
   const openEntityOnAlertsPage = useCallback(
@@ -79,7 +78,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
       const panelKey = EntityPanelKeyByType[riskEntity];
       const panelParam = EntityPanelParamByType[riskEntity];
       if (panelKey && panelParam) {
-        openRightPanel({
+        openMainPanel({
           id: panelKey,
           params: {
             [panelParam]: entityName,
@@ -89,7 +88,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
         });
       }
     },
-    [openRightPanel, riskEntity]
+    [openMainPanel, riskEntity]
   );
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);

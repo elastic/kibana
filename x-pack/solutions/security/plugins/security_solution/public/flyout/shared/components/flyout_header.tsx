@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutHeader, EuiPanel } from '@elastic/eui';
+import type { EuiFlyoutHeader } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
 interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   children: React.ReactNode;
@@ -18,11 +19,9 @@ interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader>
  */
 export const FlyoutHeader: FC<FlyoutHeaderProps> = memo(({ children, ...flyoutHeaderProps }) => {
   return (
-    <EuiFlyoutHeader hasBorder {...flyoutHeaderProps}>
-      <EuiPanel hasShadow={false} color="transparent">
-        {children}
-      </EuiPanel>
-    </EuiFlyoutHeader>
+    <EuiPanel hasShadow={false} color="transparent">
+      {children}
+    </EuiPanel>
   );
 });
 

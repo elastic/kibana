@@ -9,13 +9,13 @@ import React, { memo, useCallback } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useFlyoutApi } from '@kbn/flyout';
 import { PageScope } from '../../data_view_manager/constants';
+import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
-import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
@@ -58,11 +58,11 @@ export const OpenFlyoutButtonIcon = memo(
       : oldSelectedPatterns;
 
     const { telemetry } = useKibana().services;
-    const { openFlyout } = useExpandableFlyoutApi();
+    const { openFlyout } = useFlyoutApi();
 
     const handleClick = useCallback(() => {
       openFlyout({
-        right: {
+        main: {
           id: DocumentDetailsRightPanelKey,
           params: {
             id: eventId,

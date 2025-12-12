@@ -250,7 +250,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                   resourceId: finding.resource.id,
                   ruleId: finding.rule.id,
                   scopeId,
-                  isPreviewMode: true,
+                  isChild: true,
                   banner: {
                     title: i18n.translate(
                       'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',

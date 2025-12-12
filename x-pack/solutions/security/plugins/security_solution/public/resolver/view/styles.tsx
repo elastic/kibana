@@ -77,10 +77,8 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
 `;
 
 const EUI_HEADER_HEIGHT = '96px';
-const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = '72px';
-const VISUALIZE_WRAPPER_PADDING = '16px';
-const VISUALIZE_BUTTON_GROUP_HEIGHT = '32px';
-const EUI_SPACER_HEIGHT = '16px';
+const EXPANDABLE_FLYOUT_MAIN_SECTION_HEADER_HEIGHT = '42px';
+const WRAPPER_PADDING = '16px';
 
 /**
  * The top level DOM element for Resolver
@@ -107,8 +105,7 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string; windowHe
    */
   min-height: calc(
     ${(props) => props.windowHeight}px - ${EUI_HEADER_HEIGHT} -
-      ${EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT} - 2 * ${VISUALIZE_WRAPPER_PADDING} -
-      ${VISUALIZE_BUTTON_GROUP_HEIGHT} - ${EUI_SPACER_HEIGHT}
+      ${EXPANDABLE_FLYOUT_MAIN_SECTION_HEADER_HEIGHT} - 2 * ${WRAPPER_PADDING}
   );
   /**
    * The placeholder components use absolute positioning.

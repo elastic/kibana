@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import type { EasePanelKey } from './constants/panel_keys';
 
 export interface EaseDetailsProps extends FlyoutPanelProps {

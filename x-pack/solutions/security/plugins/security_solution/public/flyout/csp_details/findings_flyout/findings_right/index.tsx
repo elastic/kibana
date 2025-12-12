@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { i18n } from '@kbn/i18n';
-import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
@@ -20,14 +19,13 @@ import { FlyoutBody } from '../../../shared/components/flyout_body';
 export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
-  isPreviewMode,
+  isChild,
 }: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <CspFlyout.Component ruleId={ruleId} resourceId={resourceId}>
         {({ finding, createRuleFn }) => {
           return (
@@ -59,7 +57,7 @@ export const FindingsMisconfigurationPanel = ({
               <FlyoutBody>
                 <CspFlyout.Body finding={finding} />
               </FlyoutBody>
-              {!isPreviewMode && (
+              {!isChild && (
                 <EuiFlyoutFooter>
                   <CspFlyout.Footer createRuleFn={createRuleFn} />
                 </EuiFlyoutFooter>

@@ -11,7 +11,8 @@ import { isEmpty, isString } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -25,7 +26,6 @@ import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -56,7 +56,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   title,
   value,
 }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
   const eventContext = useContext(StatefulEventContext);
 
   const ruleName = `${value}`;
@@ -81,7 +81,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       }
 
       openFlyout({
-        right: {
+        main: {
           id: RulePanelKey,
           params: {
             ruleId,
@@ -89,7 +89,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         },
       });
     },
-    [navigateToApp, ruleId, search, openInNewTab, openFlyout, eventContext, isInTimelineContext]
+    [eventContext, isInTimelineContext, navigateToApp, ruleId, search, openInNewTab, openFlyout]
   );
 
   const href = useMemo(

@@ -34,19 +34,15 @@ export const GraphPreviewContainer: React.FC = () => {
     indexName,
     scopeId,
     isRulePreview,
-    isPreviewMode,
+    isChild,
     dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
 
-  const allowFlyoutExpansion = useMemo(
-    () => !isPreviewMode && !isRulePreview,
-    [isRulePreview, isPreviewMode]
-  );
+  const allowFlyoutExpansion = useMemo(() => !isChild && !isRulePreview, [isRulePreview, isChild]);
 
   const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
     eventId,
     indexName,
-    isFlyoutOpen: true,
     scopeId,
   });
 

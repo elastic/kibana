@@ -6,12 +6,13 @@
  */
 
 import { get } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useSelector } from 'react-redux';
+import { useFlyoutApi } from '@kbn/flyout';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -25,12 +26,14 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { LeftPanelInsightsTab } from '../../left';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import {
+  DocumentDetailsInsightsPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
+import { LeftPanelCorrelationsTab } from '../../insights';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -38,7 +41,7 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
+  const { dataAsNestedObject, eventId, getFieldsData, indexName, scopeId, isRulePreview, isChild } =
     useDocumentDetailsContext();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -49,10 +52,36 @@ export const CorrelationsOverview: React.FC = () => {
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const goToCorrelationsTab = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: CORRELATIONS_TAB_ID,
-  });
+  const { openFlyout } = useFlyoutApi();
+  const openEntitiesFlyout = useCallback(
+    () =>
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsInsightsPanelKey,
+            path: LeftPanelCorrelationsTab,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: false,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: true,
+              isPreview: false,
+            },
+          },
+        },
+        { mainSize: 'm' }
+      ),
+    [eventId, indexName, openFlyout, scopeId]
+  );
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
@@ -81,7 +110,7 @@ export const CorrelationsOverview: React.FC = () => {
 
   const link = useMemo(
     () => ({
-      callback: goToCorrelationsTab,
+      callback: openEntitiesFlyout,
       tooltip: (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
@@ -89,7 +118,7 @@ export const CorrelationsOverview: React.FC = () => {
         />
       ),
     }),
-    [goToCorrelationsTab]
+    [openEntitiesFlyout]
   );
 
   return (
@@ -102,7 +131,7 @@ export const CorrelationsOverview: React.FC = () => {
           />
         ),
         link,
-        iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        iconType: !isChild ? 'arrowStart' : undefined,
       }}
       data-test-subj={CORRELATIONS_TEST_ID}
     >

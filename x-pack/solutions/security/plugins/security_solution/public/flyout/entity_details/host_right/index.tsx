@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
+
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { HostPreviewBanner } from '../host_preview/preview_banner';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -23,14 +24,12 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHost } from './hooks/use_observed_host';
-import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
@@ -41,7 +40,7 @@ export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
-  isPreviewMode: boolean;
+  isChild?: boolean;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -58,12 +57,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({
-  contextID,
-  scopeId,
-  hostName,
-  isPreviewMode = false,
-}: HostPanelProps) => {
+export const HostPanel = ({ contextID, scopeId, hostName, isChild }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
@@ -124,19 +118,9 @@ export const HostPanel = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    isPreviewMode,
+    isChild,
     contextID,
   });
-
-  const openDefaultPanel = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      }),
-    [isRiskScoreExist, openDetailsPanel]
-  );
 
   const observedHost = useObservedHost(hostName, scopeId);
 
@@ -163,17 +147,7 @@ export const HostPanel = ({
 
         return (
           <>
-            <FlyoutNavigation
-              flyoutIsExpandable={
-                isRiskScoreExist ||
-                hasMisconfigurationFindings ||
-                hasVulnerabilitiesFindings ||
-                hasNonClosedAlerts
-              }
-              expandDetails={openDefaultPanel}
-              isPreviewMode={isPreviewMode}
-              isRulePreview={scopeId === TableId.rulePreview}
-            />
+            {isChild && <HostPreviewBanner />}
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
               hostName={hostName}
@@ -184,12 +158,12 @@ export const HostPanel = ({
               openDetailsPanel={openDetailsPanel}
               recalculatingScore={recalculatingScore}
               onAssetCriticalityChange={calculateEntityRiskScore}
-              isPreviewMode={isPreviewMode}
+              isChild={Boolean(isChild)}
             />
-            {isPreviewMode && (
+            {isChild && (
               <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
             )}
-            {!isPreviewMode && assetInventoryEnabled && <HostPanelFooter hostName={hostName} />}
+            {!isChild && assetInventoryEnabled && <HostPanelFooter hostName={hostName} />}
           </>
         );
       }}

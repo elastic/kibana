@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { UserPanelKey } from '../shared/constants';
 
@@ -23,20 +23,24 @@ export const UserPreviewPanelFooter = ({
   scopeId,
   userName,
 }: UserPreviewPanelFooterProps) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const openUserFlyout = useCallback(() => {
-    openFlyout({
-      right: {
-        id: UserPanelKey,
-        params: {
-          contextID,
-          userName,
-          scopeId,
+    openFlyout(
+      {
+        main: {
+          id: UserPanelKey,
+          params: {
+            contextID,
+            userName,
+            scopeId,
+            isChild: false,
+          },
         },
       },
-    });
-  }, [openFlyout, userName, contextID, scopeId]);
+      { mainSize: 's' }
+    );
+  }, [contextID, userName, scopeId, openFlyout]);
 
   return (
     <FlyoutFooter data-test-subj={'user-preview-footer'}>

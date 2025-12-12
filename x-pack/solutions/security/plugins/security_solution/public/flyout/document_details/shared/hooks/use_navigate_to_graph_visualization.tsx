@@ -6,21 +6,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
-import { LeftPanelVisualizeTab } from '../../left';
-import { useKibana } from '../../../../common/lib/kibana';
-import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { GRAPH_ID } from '../../left/components/graph_visualization';
+import { DocumentDetailsGraphPanelKey } from '../constants/panel_keys';
 
 export interface UseNavigateToGraphVisualizationParams {
-  /**
-   * When flyout is already open, call open left panel only
-   * When flyout is not open, open a new flyout
-   */
-  isFlyoutOpen: boolean;
   /**
    * Id of the document
    */
@@ -46,61 +36,26 @@ export interface UseNavigateToGraphVisualizationResult {
  * Hook that returns a callback to navigate to the graph visualization in the flyout
  */
 export const useNavigateToGraphVisualization = ({
-  isFlyoutOpen,
   eventId,
   indexName,
   scopeId,
 }: UseNavigateToGraphVisualizationParams): UseNavigateToGraphVisualizationResult => {
-  const { telemetry } = useKibana().services;
-  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-
-  const right: FlyoutPanelProps = useMemo(
-    () => ({
-      id: DocumentDetailsRightPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    }),
-    [eventId, indexName, scopeId]
-  );
-
-  const left: FlyoutPanelProps = useMemo(
-    () => ({
-      id: DocumentDetailsLeftPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-      path: {
-        tab: LeftPanelVisualizeTab,
-        subTab: GRAPH_ID,
-      },
-    }),
-    [eventId, indexName, scopeId]
-  );
+  const { openMainPanel } = useFlyoutApi();
 
   const navigateToGraphVisualization = useCallback(() => {
-    if (isFlyoutOpen) {
-      openLeftPanel(left);
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
-        location: scopeId,
-        panel: 'left',
-        tabId: LeftPanelVisualizeTab,
-      });
-    } else {
-      openFlyout({
-        right,
-        left,
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: scopeId,
-        panel: 'left',
-      });
-    }
-  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isFlyoutOpen]);
+    openMainPanel(
+      {
+        id: DocumentDetailsGraphPanelKey,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId,
+          isChild: false,
+        },
+      },
+      'm'
+    );
+  }, [openMainPanel, eventId, indexName, scopeId]);
 
   return useMemo(() => ({ navigateToGraphVisualization }), [navigateToGraphVisualization]);
 };
