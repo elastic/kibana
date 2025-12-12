@@ -31,6 +31,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -70,6 +71,7 @@ export interface StreamsAppStartDependencies {
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
   console: ConsolePluginStart;
+  onechat?: OnechatPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

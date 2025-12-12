@@ -29,6 +29,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -55,6 +56,7 @@ export interface StreamsPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  onechat?: OnechatPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {

@@ -18,6 +18,7 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
     stream: Streams.all.Definition.right,
     condition_schema: z.string(),
     initial_clustering: z.string(),
+    guidance: z.string().optional(),
   }),
 })
   .version({

@@ -6,3 +6,8 @@ Stream description:
 
 Initial clustering:
 {{{initial_clustering}}}
+
+{{#guidance}}
+Additional guidance from the user:
+{{{guidance}}}
+{{/guidance}}

@@ -57,3 +57,17 @@ export const STREAMS_TIERED_FEATURES = [
 export const FAILURE_STORE_SELECTOR = '::failures';
 
 export const MAX_STREAM_NAME_LENGTH = 200;
+
+/**
+ * Agent Builder / Onechat integration constants
+ */
+
+/**
+ * Attachment type ID for stream attachments
+ */
+export const STREAMS_ATTACHMENT_TYPE_ID = 'streams.stream';
+
+/**
+ * Tool ID for the partition suggestions tool
+ */
+export const STREAMS_SUGGEST_PARTITIONS_TOOL_ID = 'streams.suggest_partitions';
