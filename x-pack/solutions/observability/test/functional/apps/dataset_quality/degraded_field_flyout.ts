@@ -1259,7 +1259,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Should not display Change field type accordion processing tab link for dataQuality view
         expect(
-          await testSubjects.exists('datasetQualityDetailsFlyoutChangeFieldTypeAccordion')
+          await testSubjects.exists('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
+        ).to.be(false);
+
+        // Should not display Create Convert Processor accordion processing tab link for dataQuality view
+        expect(
+          await testSubjects.exists('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
         ).to.be(false);
 
         await PageObjects.datasetQuality.closeFlyout();
@@ -1298,7 +1303,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Should display Change field type accordion processing tab link
         expect(
-          await testSubjects.exists('datasetQualityDetailsFlyoutchangeFieldTypeAccordion')
+          await testSubjects.exists('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
+        ).to.be(true);
+
+        // Should display Create Convert Processor accordion processing tab link
+        expect(
+          await testSubjects.exists('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
         ).to.be(true);
 
         await PageObjects.datasetQuality.closeFlyout();
@@ -1330,7 +1340,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Should display Change field type accordion processing tab link
         expect(
-          await testSubjects.exists('datasetQualityDetailsFlyoutchangeFieldTypeAccordion')
+          await testSubjects.exists('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
+        ).to.be(true);
+
+        // Should display Create Convert Processor accordion processing tab link
+        expect(
+          await testSubjects.exists('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
         ).to.be(true);
 
         await PageObjects.datasetQuality.closeFlyout();

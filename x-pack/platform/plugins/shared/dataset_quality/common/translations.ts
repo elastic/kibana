@@ -846,9 +846,16 @@ export const increaseFieldCharacterLimit = i18n.translate(
   }
 );
 
-export const changeFieldType = i18n.translate(
-  'xpack.datasetQuality.details.degradedField.possibleMitigation.changeFieldTypeLink',
+export const changeFieldTypeInSchema = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.changeFieldTypeInSchemaLink',
   {
-    defaultMessage: 'Change field type',
+    defaultMessage: 'Change field type in schema',
+  }
+);
+
+export const createConvertProcessor = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.createConvertProcessorLink',
+  {
+    defaultMessage: 'Create a convert processor',
   }
 );

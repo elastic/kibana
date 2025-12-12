@@ -335,7 +335,10 @@ describe('PossibleDegradedFieldMitigations', () => {
       renderWithI18n(<PossibleDegradedFieldMitigations />);
 
       expect(
-        screen.getByTestId('datasetQualityDetailsFlyoutchangeFieldTypeAccordion')
+        screen.getByTestId('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
       ).toBeInTheDocument();
     });
 
@@ -357,7 +360,10 @@ describe('PossibleDegradedFieldMitigations', () => {
       renderWithI18n(<PossibleDegradedFieldMitigations />);
 
       expect(
-        screen.queryByTestId('datasetQualityDetailsFlyoutchangeFieldTypeAccordion')
+        screen.queryByTestId('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
       ).not.toBeInTheDocument();
     });
 
@@ -370,7 +376,10 @@ describe('PossibleDegradedFieldMitigations', () => {
       renderWithI18n(<PossibleDegradedFieldMitigations />);
 
       expect(
-        screen.queryByTestId('datasetQualityDetailsFlyoutchangeFieldTypeAccordion')
+        screen.queryByTestId('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
       ).not.toBeInTheDocument();
     });
   });
