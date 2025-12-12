@@ -7,20 +7,20 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObjectsCreateOptions } from '@kbn/core/server';
-import type { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../../rules_client/types';
 import type { CreateGapAutoFillSchedulerParams } from './types';
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
 import { createGapAutoFillSchedulerSchema } from './schemas';
 import { transformGapAutoFillSchedulerCreateParamToSavedObject } from './transforms/transform_gap_auto_fill_scheduler_param_to_saved_object';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
-import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
+import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../../authorization';
 import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
-} from '../../../../rules_client/common/audit_events';
-import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../gaps/types/scheduler';
+} from '../../../../../rules_client/common/audit_events';
+import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../types/scheduler';
 
 export async function createGapAutoFillScheduler(
   context: RulesClientContext,

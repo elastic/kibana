@@ -6,7 +6,7 @@
  */
 
 import type { CreateGapAutoFillSchedulerParams } from '../types';
-import type { RawGapAutoFillSchedulerAttributesV1 } from '../../../../../saved_objects/schemas/raw_gap_auto_fill_scheduler';
+import type { RawGapAutoFillSchedulerAttributesV1 } from '../../../../../../saved_objects/schemas/raw_gap_auto_fill_scheduler';
 
 export const transformGapAutoFillSchedulerCreateParamToSavedObject = (
   params: CreateGapAutoFillSchedulerParams,

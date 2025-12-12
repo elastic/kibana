@@ -6,17 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import type { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../../rules_client/types';
 import type { GetGapAutoFillSchedulerParams } from '../types';
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
 import { getGapAutoFillSchedulerSchema } from '../schemas';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
-import { ReadOperations } from '../../../../authorization';
+import { ReadOperations } from '../../../../../authorization';
 import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
-} from '../../../../rules_client/common/audit_events';
-import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+} from '../../../../../rules_client/common/audit_events';
+import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
 import { getGapAutoFillSchedulerSO } from '../utils';
 
 export async function getGapAutoFillScheduler(

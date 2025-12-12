@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { rulesClientContextMock } from '../../../rules_client/rules_client.mock';
-import type { RulesClientContext } from '../../../rules_client/types';
-import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { AlertingAuthorizationEntity, ReadOperations } from '../../../authorization';
-import { GapAutoFillSchedulerAuditAction } from '../../../rules_client/common/audit_events';
-import type { GapAutoFillSchedulerSO } from '../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
+import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
+import { GapAutoFillSchedulerAuditAction } from '../../../../rules_client/common/audit_events';
+import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { getGapAutoFillSchedulerSO } from './utils';
 
 describe('getGapAutoFillSchedulerSO', () => {

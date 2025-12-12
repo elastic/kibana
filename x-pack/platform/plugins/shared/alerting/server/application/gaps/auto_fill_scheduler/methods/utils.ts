@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RulesClientContext } from '../../../rules_client/types';
-import type { GapAutoFillSchedulerSO } from '../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
-import type { ReadOperations, WriteOperations } from '../../../authorization';
-import { AlertingAuthorizationEntity } from '../../../authorization';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
+import type { ReadOperations, WriteOperations } from '../../../../authorization';
+import { AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
-} from '../../../rules_client/common/audit_events';
-import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+} from '../../../../rules_client/common/audit_events';
+import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 /**
  * Fetches the gap auto fill scheduler saved object and performs rule type based authorization.

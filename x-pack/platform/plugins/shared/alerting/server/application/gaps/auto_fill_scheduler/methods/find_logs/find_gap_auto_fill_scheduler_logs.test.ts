@@ -16,16 +16,16 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import type { AlertingAuthorization } from '../../../../../authorization';
+import { alertingAuthorizationMock } from '../../../../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../../rule_type_registry.mock';
 import type { SavedObject } from '@kbn/core/server';
-import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
-import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { RulesClient } from '../../../../rules_client';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { GapAutoFillSchedulerAuditAction } from '../../../../rules_client/common/audit_events';
+import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
+import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
+import { RulesClient } from '../../../../../rules_client';
+import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../authorization';
+import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
+import { GapAutoFillSchedulerAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { FindGapAutoFillSchedulerLogsParams } from './types';
 
 const kibanaVersion = 'v8.0.0';
