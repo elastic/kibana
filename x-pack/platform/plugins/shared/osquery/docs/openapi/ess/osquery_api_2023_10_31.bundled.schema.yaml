@@ -158,36 +158,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetLiveQueryResultsResponse'
           description: OK
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    example: searchAfter parameter exceeds maximum allowed size
-                    type: string
-          description: Bad Request - Invalid pagination parameters
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    example: Action not found
-                    type: string
-          description: Not Found - Action does not exist
-        '500':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    example: Failed to initialize deep pagination. Please try again.
-                    type: string
-          description: Internal Server Error - Failed to initialize pagination
       summary: Get live query results
       tags:
         - Security Osquery API

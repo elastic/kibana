@@ -156,33 +156,3 @@ paths:
             application/json:
               schema:
                 $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsResponse'
-        '400':
-          description: Bad Request - Invalid pagination parameters
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: 'searchAfter parameter exceeds maximum allowed size'
-        '404':
-          description: Not Found - Action does not exist
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: 'Action not found'
-        '500':
-          description: Internal Server Error - Failed to initialize pagination
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: 'Failed to initialize deep pagination. Please try again.'
