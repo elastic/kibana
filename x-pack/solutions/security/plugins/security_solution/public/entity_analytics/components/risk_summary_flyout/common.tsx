@@ -84,8 +84,11 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
   },
 ];
 
-export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
-  return [
+export const getItems: (
+  entityData: EntityData | undefined,
+  isPrivmonEnabled: boolean
+) => TableItem[] = (entityData, isPrivmonEnabled) => {
+  const items = [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
         defaultMessage: 'Alerts',
@@ -105,6 +108,21 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
       count: undefined,
     },
   ];
+
+  if (isPrivmonEnabled) {
+    items.push({
+      category: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.privilegedUserGroupLabel',
+        {
+          defaultMessage: 'Privileged User',
+        }
+      ),
+      score: entityData?.risk.category_3_score ?? 0,
+      count: undefined,
+    });
+  }
+
+  return items;
 };
 
 export const getEntityData = <T extends EntityType>(

@@ -10,7 +10,9 @@
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import { ExecutionError } from '../../utils';
+import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -46,6 +48,7 @@ describe('StepExecutionRuntime', () => {
   });
 
   beforeEach(() => {
+    workflowLogger = createMockWorkflowEventLogger();
     workflowContextManager = {} as unknown as WorkflowContextManager;
     mockDateNow = new Date('2025-07-05T20:00:00.000Z');
     workflowExecution = {
@@ -59,13 +62,6 @@ describe('StepExecutionRuntime', () => {
       createdAt: new Date('2025-08-05T19:00:00.000Z').toISOString(),
       startedAt: new Date('2025-08-05T20:00:00.000Z').toISOString(),
     } as EsWorkflowExecution;
-
-    workflowLogger = {
-      logInfo: jest.fn(),
-      logWarn: jest.fn(),
-      logDebug: jest.fn(),
-      logError: jest.fn(),
-    } as unknown as IWorkflowEventLogger;
 
     workflowExecutionState = {
       getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
@@ -134,7 +130,7 @@ describe('StepExecutionRuntime', () => {
         stepId: 'node1',
         input: {},
         output: { success: true, data: {} },
-        error: 'Fake error',
+        error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
@@ -143,7 +139,7 @@ describe('StepExecutionRuntime', () => {
       expect(stepResult).toEqual({
         input: {},
         output: { success: true, data: {} },
-        error: 'Fake error',
+        error: new ExecutionError({ type: 'Error', message: 'Fake error' }),
       });
     });
   });
@@ -298,14 +294,14 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should correctly calculate step completedAt and executionTimeMs', () => {
-      const expectedCompletedAt = new Date('2025-08-06T00:00:02.000Z');
-      mockDateNow = expectedCompletedAt;
+    it('should correctly calculate step finishedAt and executionTimeMs', () => {
+      const expectedFinishedAt = new Date('2025-08-06T00:00:02.000Z');
+      mockDateNow = expectedFinishedAt;
       underTest.finishStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          completedAt: expectedCompletedAt.toISOString(),
+          finishedAt: expectedFinishedAt.toISOString(),
           executionTimeMs: 2000,
         })
       );
@@ -320,7 +316,7 @@ describe('StepExecutionRuntime', () => {
                 stepId: 'node1',
                 startedAt: '2025-08-05T00:00:00.000Z',
                 output: { success: true, data: {} },
-                error: null,
+                error: undefined,
               } as Partial<EsWorkflowStepExecution>;
             }
           }
@@ -405,17 +401,31 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should mark the step as failed', () => {
-      const error = new Error('Step execution failed');
-      underTest.failStep(error);
+    it.each([
+      {
+        testName: 'JS error',
+        inputError: new Error('Step execution failed'),
+        expectedError: { type: 'Error', message: 'Step execution failed' },
+      },
+      {
+        testName: 'execution error',
+        inputError: new ExecutionError({ type: 'CustomError', message: 'Custom step error' }),
+        expectedError: { type: 'CustomError', message: 'Custom step error' },
+      },
+    ])(
+      'should mark the step as failed and map "$testName" error to execution error',
+      async (testCase) => {
+        const { inputError, expectedError } = testCase;
+        await underTest.failStep(inputError);
 
-      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: ExecutionStatus.FAILED,
-          error: String(error),
-        })
-      );
-    });
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+            error: expectedError,
+          })
+        );
+      }
+    );
 
     it('should log the failure of the step', () => {
       const error = new Error('Step execution failed');

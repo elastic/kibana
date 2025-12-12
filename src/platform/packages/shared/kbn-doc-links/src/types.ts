@@ -54,6 +54,7 @@ export interface DocLinks {
     readonly beatsAndLogstashConfiguration: string;
     readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
+    readonly cloudConnect: string;
   };
   readonly console: {
     readonly guide: string;
@@ -120,6 +121,7 @@ export interface DocLinks {
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
     readonly connectorsGithub: string;
+    readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsGoogleDrive: string;
     readonly connectorsGmail: string;
@@ -502,6 +504,7 @@ export interface DocLinks {
     kibanaPrivileges: string;
     mappingRoles: string;
     mappingRolesFieldRules: string;
+    roles: string;
     runAsPrivilege: string;
     enableElasticSearchSecurityFeatures: string;
   }>;

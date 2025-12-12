@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { useStreamsTour, TAB_TO_TOUR_STEP_ID } from '../../streams_tour';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
@@ -46,9 +48,37 @@ export function Wrapper({
 }) {
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
+  const { services } = useKibana();
   const {
     features: { groupStreams },
   } = useStreamsPrivileges();
+  const { getStepPropsByStepId } = useStreamsTour();
+
+  const lastTrackedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // only track for ingest streams (wired and classic) which have privileges
+    if (!definition || !Streams.ingest.all.GetResponse.is(definition)) {
+      return;
+    }
+
+    // avoid duplicate tracking for the same stream and tab
+    const trackingKey = `${definition.stream.name}-${tab}`;
+    if (lastTrackedRef.current === trackingKey) {
+      return;
+    }
+
+    lastTrackedRef.current = trackingKey;
+
+    const streamType = Streams.WiredStream.GetResponse.is(definition) ? 'wired' : 'classic';
+
+    services.telemetryClient.trackTabVisited({
+      stream_name: definition.stream.name,
+      stream_type: streamType,
+      tab_name: tab,
+      privileges: definition.privileges,
+    });
+  }, [definition, tab, services.telemetryClient]);
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -142,11 +172,24 @@ export function Wrapper({
             <FeedbackButton />
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
-          label,
-          href,
-          isSelected: tab === tabKey,
-        }))}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
+          const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];
+          const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
+
+          const wrappedLabel = stepProps ? (
+            <EuiTourStep {...stepProps}>
+              <span>{label}</span>
+            </EuiTourStep>
+          ) : (
+            label
+          );
+
+          return {
+            label: wrappedLabel,
+            href,
+            isSelected: tab === tabKey,
+          };
+        })}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
         {tabs[tab]?.content}

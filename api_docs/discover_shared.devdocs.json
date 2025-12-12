@@ -505,9 +505,9 @@
           " | ",
           "ObservabilityLogEventsFeature",
           " | ",
-          "ObservabilityTracesSpanLinksFeature",
+          "ObservabilityTracesFeature",
           " | ",
-          "ObservabilityTracesFetchErrorsFeature",
+          "ObservabilityLogsFetchDocumentByIdFeature",
           " | ",
           "SecuritySolutionFeature"
         ],

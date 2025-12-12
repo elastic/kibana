@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
-import { resolve } from 'path';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
-import { createTestEsCluster, esTestConfig, cleanupElasticsearch } from '@kbn/test';
-import type { Config } from '../config';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { resolve } from 'path';
+import Url from 'url';
+import type { Config } from './configs';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -194,6 +194,7 @@ function getESServerlessOptions(
     projectType,
     host: serverlessHost,
     resources: serverlessResources,
+    uiam: config.get('esServerlessOptions.uiam', false),
     kibanaUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
       hostname: config.get('servers.kibana.hostname'),

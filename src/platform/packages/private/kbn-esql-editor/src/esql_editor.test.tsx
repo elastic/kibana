@@ -38,7 +38,7 @@ jest.mock('@kbn/monaco', () => ({
   },
 }));
 
-jest.mock('./custom_commands', () => {
+jest.mock('./lookup_join', () => {
   return {
     useCanCreateLookupIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),
     useLookupIndexCommand: jest.fn().mockReturnValue({

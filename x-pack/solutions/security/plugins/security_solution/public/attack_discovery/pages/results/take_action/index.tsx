@@ -32,6 +32,8 @@ import { UpdateAlertsModal } from './update_alerts_modal';
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
@@ -205,6 +207,16 @@ const TakeActionComponent: React.FC<Props> = ({
     showAssistantOverlay?.();
   }, [closePopover, showAssistantOverlay]);
 
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
+
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+
+  const onViewInAgentBuilder = useCallback(() => {
+    closePopover();
+    openAgentBuilderFlyout();
+  }, [closePopover, openAgentBuilderFlyout]);
+
   // button for the popover:
   const button = useMemo(
     () => (
@@ -243,24 +255,36 @@ const TakeActionComponent: React.FC<Props> = ({
           {i18n.ADD_TO_EXISTING_CASE}
         </EuiContextMenuItem>,
 
-        attackDiscoveries.length === 1 ? (
-          <EuiContextMenuItem
-            data-test-subj="viewInAiAssistant"
-            disabled={viewInAiAssistantDisabled}
-            key="viewInAiAssistant"
-            onClick={onViewInAiAssistant}
-          >
-            {i18n.VIEW_IN_AI_ASSISTANT}
-          </EuiContextMenuItem>
-        ) : (
-          []
-        ),
+        attackDiscoveries.length === 1
+          ? isAgentBuilderEnabled
+            ? [
+                <EuiContextMenuItem
+                  data-test-subj="viewInAgentBuilder"
+                  key="viewInAgentBuilder"
+                  onClick={onViewInAgentBuilder}
+                >
+                  {i18n.ADD_TO_CHAT}
+                </EuiContextMenuItem>,
+              ]
+            : [
+                <EuiContextMenuItem
+                  data-test-subj="viewInAiAssistant"
+                  disabled={viewInAiAssistantDisabled}
+                  key="viewInAiAssistant"
+                  onClick={onViewInAiAssistant}
+                >
+                  {i18n.VIEW_IN_AI_ASSISTANT}
+                </EuiContextMenuItem>,
+              ]
+          : [],
       ].flat(),
     [
       addToCaseDisabled,
       attackDiscoveries.length,
+      isAgentBuilderEnabled,
       onClickAddToExistingCase,
       onClickAddToNewCase,
+      onViewInAgentBuilder,
       onViewInAiAssistant,
       viewInAiAssistantDisabled,
     ]

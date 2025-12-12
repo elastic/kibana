@@ -19,3 +19,20 @@
  * @public
  */
 export type ProjectRouting = string | undefined;
+
+/**
+ * Sanitizes project routing value for Elasticsearch API calls.
+ *
+ * Application-level code may use special values like 'ALL' to represent "all projects"
+ * with explicit state, but Elasticsearch only accepts specific routing values.
+ *
+ * @param value - The project routing value from application state
+ * @returns The sanitized value for Elasticsearch, or undefined to search all projects
+ *
+ * @public
+ */
+export function sanitizeProjectRoutingForES(value: ProjectRouting) {
+  if (value === '_alias:_origin') {
+    return value;
+  }
+}

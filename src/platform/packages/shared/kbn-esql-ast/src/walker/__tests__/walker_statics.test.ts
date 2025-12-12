@@ -225,7 +225,12 @@ describe('Walker static methods', () => {
 
       const getWithString = (cmd: ESQLAstRerankCommand, key: string): string | undefined => {
         const map = cmd.args.find(isWithOption)!.args[0] as ESQLMap;
-        const entry = map.entries.find((e) => e.key.valueUnquoted === key);
+        const entry = map.entries.find(
+          (e) =>
+            e.key.type === 'literal' &&
+            e.key.literalType === 'keyword' &&
+            e.key.valueUnquoted === key
+        );
         const { valueUnquoted } = entry?.value as ESQLStringLiteral;
 
         return valueUnquoted;

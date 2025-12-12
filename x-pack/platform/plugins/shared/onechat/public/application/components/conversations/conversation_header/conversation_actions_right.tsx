@@ -6,24 +6,31 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { MoreActionsButton } from './more_actions_button';
 import { CloseDockedViewButton } from './close_docked_view_button';
+import { TourStep, useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
+
+const labels = {
+  container: i18n.translate('xpack.onechat.conversationActions.container', {
+    defaultMessage: 'Conversation actions',
+  }),
+};
 
 export interface ConversationRightActionsProps {
   onClose?: () => void;
+  onRenameConversation: () => void;
 }
 
-export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
+export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({
+  onClose,
+  onRenameConversation,
+}) => {
   const { isEmbeddedContext } = useConversationContext();
 
-  const labels = {
-    container: i18n.translate('xpack.onechat.conversationActions.container', {
-      defaultMessage: 'Conversation actions',
-    }),
-  };
+  const { getStepProps } = useAgentBuilderTour();
 
   return (
     <EuiFlexGroup
@@ -33,7 +40,9 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <MoreActionsButton />
+      <EuiTourStep {...getStepProps(TourStep.ConversationActions)}>
+        <MoreActionsButton onRenameConversation={onRenameConversation} />
+      </EuiTourStep>
       {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
     </EuiFlexGroup>
   );

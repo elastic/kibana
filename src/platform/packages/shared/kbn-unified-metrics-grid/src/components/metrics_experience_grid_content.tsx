@@ -11,9 +11,6 @@ import React, { useMemo, useCallback } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { useFetch } from '@kbn/unified-histogram';
-import { Subject, shareReplay } from 'rxjs';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
@@ -30,20 +27,14 @@ import { Pagination } from './pagination';
 import { useFilteredMetricFields, usePagination } from '../hooks';
 import { MetricsGridLoadingProgress } from './empty_state/empty_state';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
-    ChartSectionProps,
-    | 'timeRange'
-    | 'services'
-    | 'input$'
-    | 'requestParams'
-    | 'onBrushEnd'
-    | 'onFilter'
-    | 'searchSessionId'
-    | 'abortController'
-    | 'histogramCss'
+    UnifiedMetricsGridProps,
+    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
   > {
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
   isFieldsLoading?: boolean;
   isDiscoverLoading?: boolean;
@@ -51,39 +42,20 @@ export interface MetricsExperienceGridContentProps
 
 export const MetricsExperienceGridContent = ({
   fields: allFields,
-  timeRange,
   services,
-  input$: originalInput$,
-  requestParams,
+  discoverFetch$,
+  fetchParams,
   onBrushEnd,
   onFilter,
-  searchSessionId,
-  abortController,
+  actions,
   histogramCss,
   isFieldsLoading = false,
-  isDiscoverLoading,
+  isDiscoverLoading = false,
 }: MetricsExperienceGridContentProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { updateTimeRange } = requestParams;
-
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
-  );
-
-  const baseFetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
-
-  const discoverFetch$ = useMemo(
-    // Buffer and replay emissions to child components that subscribe in later useEffects
-    // without this, child components would miss emissions that occurred before they subscribed
-    () => baseFetch$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
-    [baseFetch$]
-  );
+  const { timeRange } = fetchParams;
 
   const { searchTerm, currentPage, dimensions, valueFilters, onPageChange } =
     useMetricsExperienceState();
@@ -98,6 +70,7 @@ export const MetricsExperienceGridContent = ({
     isLoading: isFilteredFieldsLoading,
   } = useFilteredMetricFields({
     allFields,
+    isFieldsLoading,
     dimensions,
     searchTerm,
     valueFilters,
@@ -187,19 +160,20 @@ export const MetricsExperienceGridContent = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>
-        {(isDiscoverLoading || isFilteredFieldsLoading) && <MetricsGridLoadingProgress />}
+        {(isDiscoverLoading || isFilteredFieldsLoading || isFieldsLoading) && (
+          <MetricsGridLoadingProgress />
+        )}
         <MetricsGrid
           columns={columns}
           dimensions={dimensions}
           filters={filters}
           services={services}
           fields={currentPageFields}
-          searchSessionId={searchSessionId}
           onBrushEnd={onBrushEnd}
+          actions={actions}
           onFilter={onFilter}
           discoverFetch$={discoverFetch$}
-          requestParams={requestParams}
-          abortController={abortController}
+          fetchParams={fetchParams}
           searchTerm={searchTerm}
         />
       </EuiFlexItem>

@@ -18,6 +18,7 @@ import type {
 } from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
@@ -30,7 +31,13 @@ import {
 export interface ConversationActions {
   removeNewConversationQuery: () => void;
   invalidateConversation: () => void;
-  addOptimisticRound: ({ userMessage }: { userMessage: string }) => void;
+  addOptimisticRound: ({
+    userMessage,
+    attachments,
+  }: {
+    userMessage: string;
+    attachments?: AttachmentInput[];
+  }) => void;
   removeOptimisticRound: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
@@ -106,10 +113,22 @@ const createConversationActions = ({
       queryClient.invalidateQueries({ queryKey });
     },
 
-    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
+    addOptimisticRound: ({
+      userMessage,
+      attachments,
+    }: {
+      userMessage: string;
+      attachments?: AttachmentInput[];
+    }) => {
       setConversation(
         produce((draft) => {
-          const nextRound = createNewRound({ userMessage });
+          const optimisticAttachments: Attachment[] =
+            attachments?.map((attachment, idx) => ({
+              id: `pending-attachment-${idx}`,
+              ...attachment,
+            })) ?? [];
+
+          const nextRound = createNewRound({ userMessage, attachments: optimisticAttachments });
 
           if (!draft) {
             const newConversation = createNewConversation();

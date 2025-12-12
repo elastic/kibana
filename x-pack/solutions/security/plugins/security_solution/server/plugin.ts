@@ -19,6 +19,10 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
+import { registerAgents } from './agent_builder/agents';
+import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerTools } from './agent_builder/tools/register_tools';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -123,6 +127,7 @@ import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks
 import {
   registerEntityStoreFieldRetentionEnrichTask,
   registerEntityStoreSnapshotTask,
+  registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
@@ -146,6 +151,7 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -225,11 +231,35 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
+  private registerOnechatAttachmentsAndTools(
+    onechat: SecuritySolutionPluginSetupDependencies['onechat'],
+    config: ConfigType,
+    core: SecuritySolutionPluginCoreSetupDependencies
+  ): void {
+    if (!onechat || !config.experimentalFeatures.agentBuilderEnabled) {
+      return;
+    }
+
+    registerTools(onechat, core).catch((error) => {
+      this.logger.error(`Error registering security tools: ${error}`);
+    });
+    registerAttachments(onechat).catch((error) => {
+      this.logger.error(`Error registering security attachments: ${error}`);
+    });
+    registerAgents(onechat).catch((error) => {
+      this.logger.error(`Error registering security agent: ${error}`);
+    });
+  }
+
   public setup(
     core: SecuritySolutionPluginCoreSetupDependencies,
     plugins: SecuritySolutionPluginSetupDependencies
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
+
+    if (plugins.share) {
+      plugins.share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
 
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
@@ -296,7 +326,21 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreSnapshotTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
+        telemetry: core.analytics,
         taskManager: plugins.taskManager,
+      });
+
+      registerEntityStoreHealthTask({
+        getStartServices: core.getStartServices,
+        appClientFactory,
+        logger: this.logger,
+        telemetry: core.analytics,
+        taskManager: plugins.taskManager,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        entityStoreConfig: config.entityAnalytics.entityStore,
+        experimentalFeatures,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        isServerless: this.isServerless,
       });
     }
 
@@ -470,6 +514,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
+    registerScriptsLibraryRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
@@ -602,6 +647,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
+
+    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core);
 
     return {
       setProductFeaturesConfigurator:
@@ -860,6 +907,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
+        telemetryConfigProvider: this.telemetryConfigProvider,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {

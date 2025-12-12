@@ -27,8 +27,13 @@ export function getVersions(
   ].reverse() as string[];
 }
 
-export function latestVersion(type: SavedObjectsType<any>): ModelVersionIdentifier {
-  const mvs = typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions;
+export function latestVersionIdentifier(
+  type: SavedObjectsType<any>
+): ModelVersionIdentifier | undefined {
+  const modelVersions =
+    typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions;
+  const ids = Object.keys(modelVersions ?? {});
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-  return Object.keys(mvs!).sort(collator.compare).pop()! as ModelVersionIdentifier;
+  const latest = ids.sort(collator.compare).pop() as ModelVersionIdentifier;
+  return latest;
 }

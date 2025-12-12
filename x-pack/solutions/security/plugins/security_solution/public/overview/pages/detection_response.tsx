@@ -54,7 +54,7 @@ const DetectionResponseComponent = () => {
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const { hasSiemRead: hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;

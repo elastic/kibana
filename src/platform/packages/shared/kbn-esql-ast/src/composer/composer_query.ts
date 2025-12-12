@@ -44,6 +44,7 @@ import {
 } from '../ast/is';
 import { replaceProperties } from '../walker/helpers';
 import { resolveItem } from '../visitor/utils';
+import { printAst } from '../debug';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -1140,6 +1141,12 @@ export class ComposerQuery {
    * ```
    */
   public toString(): string {
+    return this.dump({ ast: false });
+  }
+
+  public dump(options: ComposerQueryDumpOptions = {}): string {
+    const showAst = options.ast ?? true;
+
     return (
       'ComposerQuery' +
       printTree('', [
@@ -1169,7 +1176,19 @@ export class ComposerQuery {
             )
           );
         },
+        showAst ? () => '' : null,
+        showAst
+          ? (tab) =>
+              'ast' + printTree(tab, [(tab2) => printAst(this.ast, { location: false }, tab2)])
+          : null,
       ])
     );
   }
+}
+
+export interface ComposerQueryDumpOptions {
+  /**
+   * Whether to include the AST dump in the output. Default is `true`.
+   */
+  ast?: boolean;
 }

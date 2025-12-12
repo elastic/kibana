@@ -10,7 +10,7 @@
 import type * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
 import type * as ast from '../types';
-import { isCommand } from '../ast/is';
+import { isCommand, isStringLiteral } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition } from './tokens';
 import { nonNullable, unescapeColumn } from './helpers';
@@ -470,7 +470,13 @@ export class CstToAstConverter {
       return this.fromForkCommand(forkCommandCtx);
     }
 
-    // throw new Error(`Unknown processing command: ${this.getSrc(ctx)}`);
+    const promqlCommandCtx = ctx.promqlCommand();
+
+    if (promqlCommandCtx) {
+      return this.fromPromqlCommand(promqlCommandCtx);
+    }
+
+    // throw new Error(`Unknown processing command: ${this.getSrc(ctx)}`;
   }
 
   private createCommand<
@@ -1353,7 +1359,7 @@ export class CstToAstConverter {
       const namedParameters = namedParametersOption.args[0] as ast.ESQLMap | undefined;
 
       const inferenceIdParam = namedParameters?.entries.find(
-        (param) => param.key.valueUnquoted === 'inference_id'
+        (param) => isStringLiteral(param.key) && param.key.valueUnquoted === 'inference_id'
       )?.value as ast.ESQLStringLiteral;
 
       if (inferenceIdParam) {
@@ -1508,7 +1514,10 @@ export class CstToAstConverter {
       );
 
       const inferenceIdParam = namedParameters?.entries.find(
-        (param) => param.key.valueUnquoted === 'inference_id'
+        (param) =>
+          param.key.type === 'literal' &&
+          param.key.literalType === 'keyword' &&
+          param.key.valueUnquoted === 'inference_id'
       )?.value as ast.ESQLStringLiteral;
 
       if (inferenceIdParam) {
@@ -1703,6 +1712,176 @@ export class CstToAstConverter {
     }
 
     return null;
+  }
+
+  // ------------------------------------------------------------------- PROMQL
+
+  /**
+   * Syntax:
+   *
+   * ```
+   * PROMQL key1 value1 key2 value2... ( promql_query_text )
+   * ```
+   */
+  private fromPromqlCommand(ctx: cst.PromqlCommandContext): ast.ESQLAstPromqlCommand {
+    const command = this.createCommand('promql', ctx) as ast.ESQLAstPromqlCommand;
+    const args: ast.ESQLAstExpression[] = command.args;
+
+    // Process promql params (key-value pairs) as a map with "listpairs" representation
+    const paramCtxs = ctx.promqlParam_list();
+    const paramsMap = this.fromPromqlParamsToMap(paramCtxs);
+
+    command.incomplete ||= paramsMap.incomplete;
+    args.push(paramsMap);
+
+    const query = this.toPromqlQuery(ctx);
+
+    if (query) {
+      command.incomplete ||= query.incomplete;
+      args.push(query);
+    } else {
+      command.incomplete = true;
+    }
+
+    return command;
+  }
+
+  private fromPromqlParamsToMap(paramCtxs: cst.PromqlParamContext[]): ast.ESQLMap {
+    const entries: ast.ESQLMapEntry[] = [];
+
+    for (const paramCtx of paramCtxs) {
+      const entry = this.fromPromqlParam(paramCtx);
+
+      if (entry) {
+        entries.push(entry);
+      }
+    }
+
+    const firstParam = paramCtxs[0];
+    const lastParam = paramCtxs[paramCtxs.length - 1];
+    const node = Builder.expression.map(
+      { entries, representation: 'listpairs' },
+      {
+        location: getPosition(firstParam.start, lastParam.stop),
+        incomplete: entries.some((e) => e.incomplete) || !entries.length,
+      }
+    );
+
+    return node;
+  }
+
+  private fromPromqlParam(ctx: cst.PromqlParamContext): ast.ESQLMapEntry | undefined {
+    const nameCtx = ctx._name;
+    const valueCtx = ctx._value;
+
+    if (!nameCtx) {
+      return undefined;
+    }
+
+    const key = this.fromPromqlParamContentToAst(nameCtx);
+    if (!key) {
+      return undefined;
+    }
+
+    const value = valueCtx
+      ? this.fromPromqlParamContentToAst(valueCtx)
+      : Builder.identifier({ name: '' }, { incomplete: true });
+
+    if (!value) {
+      return undefined;
+    }
+
+    const entry = Builder.expression.entry(key, value, {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+    });
+
+    return entry;
+  }
+
+  // TODO: Review this whole method
+  private fromPromqlParamContentToAst(
+    ctx: cst.PromqlParamContentContext
+  ): (ast.ESQLAstExpression & { incomplete: boolean }) | undefined {
+    const parserFields = this.getParserFields(ctx);
+
+    const unquotedId = ctx.PROMQL_UNQUOTED_IDENTIFIER();
+    if (unquotedId) {
+      return Builder.identifier({ name: unquotedId.getText() }, parserFields);
+    }
+
+    const quotedId = ctx.QUOTED_IDENTIFIER();
+    if (quotedId) {
+      const text = quotedId.getText();
+      const name = text.slice(1, -1).replace(/``/g, '`');
+      return Builder.identifier({ name }, parserFields);
+    }
+
+    const quotedString = ctx.QUOTED_STRING();
+    if (quotedString) {
+      const text = quotedString.getText();
+      let valueUnquoted: string;
+      if (text.startsWith('"""') && text.endsWith('"""')) {
+        valueUnquoted = text.slice(3, -3);
+      } else {
+        valueUnquoted = text.slice(1, -1).replace(/\\"/g, '"');
+      }
+      return Builder.expression.literal.string(valueUnquoted, { name: text }, parserFields);
+    }
+
+    const namedParam = ctx.NAMED_OR_POSITIONAL_PARAM();
+    if (namedParam) {
+      const text = namedParam.getText();
+      // Text starts with '?' - parse it as named or positional param
+      const value = text.slice(1); // Remove the leading '?'
+      const valueAsNumber = Number(value);
+      const isPositional = String(valueAsNumber) === value;
+
+      if (isPositional) {
+        return Builder.param.positional({ value: valueAsNumber }, parserFields);
+      } else {
+        return Builder.param.named({ value }, parserFields);
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Parses the `<promql_query_text>` part of the PROMQL command.
+   *
+   * ```
+   * PROMQL map... ( <promql_query_tex> )
+   * ```
+   */
+  private toPromqlQuery(commandCtx: cst.PromqlCommandContext): ast.ESQLParens | undefined {
+    const lp = commandCtx.LP();
+    const rp = commandCtx.RP();
+    const closeParenText = rp?.getText() ?? '';
+    const hasCloseParen = rp && !/<missing /.test(closeParenText);
+    const location = getPosition(
+      lp ? lp.symbol : commandCtx.start,
+      hasCloseParen ? rp.symbol : commandCtx.stop
+    );
+
+    // NOTE: In the future this will not be "unknown" but a proper PromQL AST node.
+    const query = this.fromParserRuleToUnknown(commandCtx.promqlParam(0));
+    const queryMin = location.min + 1;
+    const queryMax = Math.max(queryMin, location.max - 1);
+
+    query.location = {
+      min: queryMin,
+      max: queryMax,
+    };
+    query.text = this.parser.src.slice(query.location.min, query.location.max + 1);
+
+    const node = Builder.expression.parens(query, {
+      location,
+      incomplete: !lp || !hasCloseParen || location.max - location.min <= 1,
+    });
+
+    return node;
   }
 
   // --------------------------------------------------------------------- FORK
@@ -2143,7 +2322,9 @@ export class CstToAstConverter {
       return undefined;
     }
 
-    const right = this.toStringLiteral(ctx.string_());
+    const right =
+      this.fromStringOrParameter(ctx.stringOrParameter()) ??
+      this.fromParserRuleToUnknown(ctx.stringOrParameter());
     const notCtx = ctx.NOT();
     const likeType = ctx instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
     const operator = `${notCtx ? 'not ' : ''}${likeType}` as ast.BinaryExpressionOperator;
@@ -2157,7 +2338,7 @@ export class CstToAstConverter {
       operatorNode.text = `not${operatorNode.text}`;
     }
 
-    const args: [ast.ESQLAstExpression, ast.ESQLStringLiteral] = [
+    const args: [ast.ESQLAstExpression, ast.ESQLAstExpression] = [
       left as ast.ESQLAstExpression,
       right,
     ];
@@ -2190,9 +2371,10 @@ export class CstToAstConverter {
     }
 
     // Convert the list of string patterns into a tuple list AST node
-    const stringCtxs = ctx.string__list();
-    const values: ast.ESQLStringLiteral[] = stringCtxs.map((stringCtx) =>
-      this.toStringLiteral(stringCtx)
+    const stringCtxs = ctx.stringOrParameter_list();
+    const values: ast.ESQLAstExpression[] = stringCtxs.map(
+      (stringCtx) =>
+        this.fromStringOrParameter(stringCtx) ?? this.fromParserRuleToUnknown(stringCtx)
     );
 
     const list = Builder.expression.list.tuple(
@@ -2425,6 +2607,20 @@ export class CstToAstConverter {
     return column;
   }
 
+  private fromQualifiedName(ctx: cst.QualifiedNameContext): ast.ESQLColumn {
+    const node = this.toColumn(ctx);
+    const qualifierToken = ctx._qualifier;
+
+    if (qualifierToken) {
+      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
+
+      node.qualifier = qualifierNode;
+      node.args = [qualifierNode, ...node.args];
+    }
+
+    return node;
+  }
+
   private fromQualifiedNamePattern(
     ctx: cst.QualifiedNamePatternContext
   ): ast.ESQLColumn | ast.ESQLParam | ast.ESQLIdentifier {
@@ -2477,6 +2673,15 @@ export class CstToAstConverter {
         incomplete: Boolean(ctx.exception || text === ''),
       }
     );
+
+    const qualifierToken = ctx._qualifier;
+
+    if (qualifierToken) {
+      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
+
+      column.qualifier = qualifierNode;
+      column.args = [qualifierNode, ...column.args];
+    }
 
     column.name = text;
     column.quoted = hasQuotes;
@@ -2554,8 +2759,9 @@ export class CstToAstConverter {
 
   private fromField(ctx: cst.FieldContext): ast.ESQLAstField | undefined {
     const qualifiedNameCtx = ctx.qualifiedName();
-    if (qualifiedNameCtx) {
-      const left = this.toColumn(qualifiedNameCtx!);
+
+    if (qualifiedNameCtx && ctx.ASSIGN()) {
+      const left = this.fromQualifiedName(qualifiedNameCtx);
       const right = this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
       const args = [
         left,
@@ -2563,6 +2769,7 @@ export class CstToAstConverter {
         //       should be probably fixed in a standalone PR.
         [right],
       ] as ast.ESQLBinaryExpression['args'];
+
       const assignment = this.toFunction(
         '=',
         ctx,
@@ -2870,6 +3077,24 @@ export class CstToAstConverter {
     return this.toNumericLiteral(ctx.decimalValue()!, 'double');
   }
 
+  private fromStringOrParameter(
+    ctx: cst.StringOrParameterContext
+  ): ast.ESQLStringLiteral | ast.ESQLParam | undefined {
+    const stringCtx = ctx.string_();
+
+    if (stringCtx) {
+      return this.toStringLiteral(stringCtx);
+    }
+
+    const paramCtx = ctx.parameter();
+
+    if (paramCtx) {
+      return this.fromParameter(paramCtx);
+    }
+
+    return undefined;
+  }
+
   private toStringLiteral(
     ctx: Pick<cst.StringContext, 'QUOTED_STRING'> & antlr.ParserRuleContext
   ): ast.ESQLStringLiteral {
@@ -2893,6 +3118,10 @@ export class CstToAstConverter {
       },
       this.getParserFields(ctx)
     );
+  }
+
+  private fromParameter(ctx: cst.ParameterContext): ast.ESQLParam | undefined {
+    return this.toParam(ctx);
   }
 
   private fromInputParameter(ctx: cst.InputParameterContext): ast.ESQLLiteral[] {

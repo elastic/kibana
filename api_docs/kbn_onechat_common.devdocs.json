@@ -1984,6 +1984,22 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentAnswerStepConfiguration.replace_default_instructions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replace_default_instructions",
+            "description": [
+              "\nIf set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2042,6 +2058,22 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentConfiguration.replace_default_instructions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replace_default_instructions",
+            "description": [
+              "\nIf set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.\n\nThis will impact both the research and answer prompts. For custom per-step instructions, use the `research` and `answer` configuration fields instead."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
             "deprecated": false,
@@ -2321,6 +2353,22 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentResearchStepConfiguration.replace_default_instructions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replace_default_instructions",
+            "description": [
+              "\nIf set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2346,6 +2394,20 @@
             "label": "message",
             "description": [
               "\nThe text message from the assistant."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AssistantResponse.structured_output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "structured_output",
+            "description": [],
+            "signature": [
+              "object | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
@@ -3045,6 +3107,22 @@
             "label": "message_content",
             "description": [
               "full text content of the message"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.MessageCompleteEventData.structured_output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "structured_output",
+            "description": [
+              "optional structured data"
+            ],
+            "signature": [
+              "object | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
@@ -4016,6 +4094,47 @@
           "24"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.AgentConfigurationOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentConfigurationOverrides",
+        "description": [
+          "\nRuntime configuration overrides for agent execution.\nThese override the stored agent configuration for a single execution instance.\nEach field, if provided, completely replaces the corresponding field in the stored configuration."
+        ],
+        "signature": [
+          "{ instructions?: string | undefined; replace_default_instructions?: boolean | undefined; tools?: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ByIdsToolSelection",
+            "text": "ByIdsToolSelection"
+          },
+          "[] | undefined; research?: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.AgentResearchStepConfiguration",
+            "text": "AgentResearchStepConfiguration"
+          },
+          " | undefined; answer?: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.AgentAnswerStepConfiguration",
+            "text": "AgentAnswerStepConfiguration"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5449,6 +5568,8 @@
           " | ",
           "VisualizationResult",
           " | ",
+          "DashboardResult",
+          " | ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -5573,7 +5694,7 @@
           "\nList of internally used namespaces\nNote: those are not necessarily all protected."
         ],
         "signature": [
-          "{ readonly platformCore: \"platform.core\"; readonly observability: \"observability\"; }"
+          "{ readonly platformCore: \"platform.core\"; readonly observability: \"observability\"; readonly platformDashboard: \"platform.dashboard\"; readonly security: \"security\"; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
@@ -6136,7 +6257,7 @@
           "\nIds of built-in onechat tools"
         ],
         "signature": [
-          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; }"
+          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; readonly getWorkflowExecutionStatus: string; readonly productDocumentation: string; readonly cases: string; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,

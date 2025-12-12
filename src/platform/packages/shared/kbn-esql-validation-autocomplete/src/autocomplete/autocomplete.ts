@@ -9,37 +9,46 @@
 
 import type { ESQLColumn } from '@kbn/esql-ast';
 import {
-  ESQL_VARIABLES_PREFIX,
   EsqlQuery,
   Walker,
   esqlCommandRegistry,
-  getCommandAutocompleteDefinitions,
   parse,
   type ESQLAstItem,
   type ESQLCommandOption,
   type ESQLFunction,
   SuggestionOrderingEngine,
 } from '@kbn/esql-ast';
-import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import { getCommandAutocompleteDefinitions } from '@kbn/esql-ast/src/commands/registry/complete_items';
+import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast/src/commands/registry/constants';
+import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands/registry/options/recommended_queries';
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
   ISuggestionItem,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
-import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
+} from '@kbn/esql-ast/src/commands/registry/types';
+import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { correctQuerySyntax } from '@kbn/esql-ast/src/commands/definitions/utils/ast';
+import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
-import { getAstContext } from '../shared/context';
-import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
+import { getCursorContext } from '../shared/get_cursor_context';
 import { getFromCommandHelper } from '../shared/resources_helpers';
-import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
-import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
-import { getQueryForFields } from './get_query_for_fields';
-import type { GetColumnMapFn } from '../shared/columns';
-import { getColumnsByTypeRetriever } from '../shared/columns';
+import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
+import { getQueryForFields } from '../shared/get_query_for_fields';
+import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
+
+function isSourceCommandSuggestion({ label }: { label: string }) {
+  const sourceCommands = esqlCommandRegistry
+    .getSourceCommandNames()
+    .map((cmd) => cmd.toUpperCase());
+
+  return sourceCommands.includes(label);
+}
+function isHeaderCommandSuggestion({ label }: { label: string }) {
+  return label === 'SET';
+}
 
 const orderingEngine = new SuggestionOrderingEngine();
 
@@ -52,7 +61,7 @@ export async function suggest(
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = parse(correctedQuery, { withFormatting: true });
 
-  const astContext = getAstContext(innerText, root, offset);
+  const astContext = getCursorContext(innerText, root, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -60,7 +69,7 @@ export async function suggest(
 
   // Use the appropriate AST context for field retrieval
   // When in a subquery, use the subquery's AST to get only its fields
-  const astForFields = astContext.isCursorInSubquery ? astContext.astForContext : root;
+  const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
     getQueryForFields(correctedQuery, astForFields),
@@ -159,9 +168,14 @@ export async function suggest(
   const lastCharacterTyped = innerText[innerText.length - 1];
   let controlSuggestions: ISuggestionItem[] = [];
   if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
+    const secondToLastCharacter = innerText[innerText.length - 2];
+    const variableType =
+      secondToLastCharacter === ESQL_VARIABLES_PREFIX
+        ? ESQLVariableType.FIELDS
+        : ESQLVariableType.VALUES;
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
-      ESQLVariableType.VALUES,
+      variableType,
       ControlTriggerSource.QUESTION_MARK,
       getVariables?.(),
       false

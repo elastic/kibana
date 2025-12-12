@@ -34,5 +34,6 @@
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
     "@kbn/react-query",
+    "@kbn/ui-actions-plugin",
   ]
 }

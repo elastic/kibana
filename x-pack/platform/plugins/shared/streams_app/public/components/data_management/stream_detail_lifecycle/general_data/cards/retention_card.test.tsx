@@ -75,9 +75,10 @@ describe('RetentionCard', () => {
         stream: {
           name: 'logs-test.child',
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} }, // child is inheriting -> should show "Inherit from parent"
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             wired: { fields: {}, routing: [] },
             failure_store: { inherit: {} },
@@ -101,7 +102,7 @@ describe('RetentionCard', () => {
           view_index_metadata: true,
         },
         effective_failure_store: {
-          lifecycle: { enabled: {} },
+          lifecycle: { enabled: { is_default_retention: true } },
           from: 'logs-test',
         },
       };
@@ -118,9 +119,10 @@ describe('RetentionCard', () => {
         stream: {
           name: 'logs-test.child',
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { ilm: { policy: 'test-policy' } }, // override -> should show "Override parent"
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             wired: { fields: {}, routing: [] },
             failure_store: { inherit: {} },
@@ -143,7 +145,7 @@ describe('RetentionCard', () => {
           view_index_metadata: true,
         },
         effective_failure_store: {
-          lifecycle: { enabled: {} },
+          lifecycle: { enabled: { is_default_retention: true } },
           from: 'logs-test',
         },
       };
