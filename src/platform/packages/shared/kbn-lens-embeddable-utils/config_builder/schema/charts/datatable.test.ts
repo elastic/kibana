@@ -410,7 +410,6 @@ describe('Datatable Schema', () => {
           {
             operation: 'value',
             column: 'api',
-            label: 'API',
           },
         ],
       };

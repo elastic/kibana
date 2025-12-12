@@ -249,38 +249,21 @@ export const datatableStateSchemaESQL = schema.object({
    * Row configuration, optional operations.
    */
   rows: schema.maybe(
-    schema.arrayOf(
-      schema.allOf([
-        schema.object({
-          ...genericOperationOptionsSchema,
-        }),
-        datatableStateRowsOptionsSchema,
-        esqlColumnSchema,
-      ]),
-      {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'AArray of operations to split the datatable rows by' },
-      }
-    )
+    schema.arrayOf(schema.allOf([datatableStateRowsOptionsSchema, esqlColumnSchema]), {
+      minSize: 1,
+      maxSize: 1000,
+      meta: { description: 'AArray of operations to split the datatable rows by' },
+    })
   ),
   /**
    * Split metrics by configuration, optional operations.
    */
   split_metrics_by: schema.maybe(
-    schema.arrayOf(
-      schema.allOf([
-        schema.object({
-          ...genericOperationOptionsSchema,
-        }),
-        esqlColumnSchema,
-      ]),
-      {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Array of operations to split the metric columns by' },
-      }
-    )
+    schema.arrayOf(esqlColumnSchema, {
+      minSize: 1,
+      maxSize: 1000,
+      meta: { description: 'Array of operations to split the metric columns by' },
+    })
   ),
 });
 
