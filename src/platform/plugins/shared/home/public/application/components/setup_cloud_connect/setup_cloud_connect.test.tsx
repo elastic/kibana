@@ -11,6 +11,12 @@ import React from 'react';
 import { SetupCloudConnect } from './setup_cloud_connect';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    trackUiMetric: jest.fn(),
+  }),
+}));
+
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 const applicationMock = {
   getUrlForApp: jest.fn(() => '/app/cloud_connect'),
