@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import moment from 'moment';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
@@ -149,14 +150,12 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         throw new Error('Log entry not found');
       }
 
-      const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-      const logTimestamp = new Date(logEntry['@timestamp'] as string).getTime();
       const serviceSummary = await dataRegistry.getData('apmServiceSummary', {
         request,
         serviceName: logEntry.service.name,
         serviceEnvironment: logEntry.service.environment,
-        start: new Date(logTimestamp - TWENTY_FOUR_HOURS_MS).toISOString(),
-        end: new Date(logTimestamp + TWENTY_FOUR_HOURS_MS).toISOString(),
+        start: moment(logEntry['@timestamp']).subtract(24, 'hours').toISOString(),
+        end: moment(logEntry['@timestamp']).add(24, 'hours').toISOString(),
       });
 
       const { summary, context } = await getLogAiInsights({
