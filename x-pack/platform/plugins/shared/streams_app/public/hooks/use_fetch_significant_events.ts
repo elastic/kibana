@@ -73,9 +73,9 @@ export const useFetchSignificantEvents = ({
           },
           signal,
         })
-        .then(({ significant_events, all }) => {
+        .then(({ significant_events: events, all }) => {
           return {
-            significant_events: significant_events.map((series) => {
+            significant_events: events.map((series) => {
               const { occurrences, change_points: changePoints, ...query } = series;
               return {
                 title: query.title,

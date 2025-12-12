@@ -35,7 +35,7 @@ export const StreamFeaturesAccordion = ({
     const now = Date.now();
     const start = new Date(now - 24 * 60 * 60 * 1000);
     return { from: start.toISOString(), to: new Date(now).toISOString(), mode: 'absolute' };
-  }, [features]);
+  }, []);
 
   return (
     <EuiAccordion
