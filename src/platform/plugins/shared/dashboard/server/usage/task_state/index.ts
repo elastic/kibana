@@ -8,7 +8,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RecursiveWritable } from '@kbn/utility-types';
 import { versionDefinition as v1 } from './v1';
 import { versionDefinition as v2 } from './v2';
 
@@ -24,7 +23,6 @@ const latest = v2;
  */
 const latestTaskStateSchema = latest.schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
-export type WritableLatestTaskStateSchema = RecursiveWritable<LatestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
   runs: 0,

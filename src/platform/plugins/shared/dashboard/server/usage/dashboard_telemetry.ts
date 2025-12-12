@@ -22,10 +22,10 @@ import type {
   SavedDashboardPanel,
 } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
-import { emptyState, type WritableLatestTaskStateSchema } from './task_state';
-import type { DashboardSavedObjectInfo } from './types';
+import { emptyState } from './task_state';
+import type { DashboardCollectorData, DashboardSavedObjectInfo } from './types';
 
-export const getEmptyDashboardData = (): WritableLatestTaskStateSchema['telemetry'] => ({
+export const getEmptyDashboardData = (): DashboardCollectorData => ({
   panels: {
     total: 0,
     by_reference: 0,
@@ -48,7 +48,7 @@ export const getEmptyPanelTypeData = () => ({
 
 export const collectPanelsByType = (
   panels: SavedDashboardPanel[],
-  collectorData: WritableLatestTaskStateSchema['telemetry'],
+  collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {
   collectorData.panels.total += panels.length;
@@ -81,7 +81,7 @@ export const collectPanelsByType = (
 
 export const collectDashboardInfo = (
   dashboard: DashboardSavedObjectInfo,
-  collectorData: WritableLatestTaskStateSchema['telemetry']
+  collectorData: DashboardCollectorData
 ) => {
   if (dashboard.accessControl?.accessMode) {
     const mode = dashboard.accessControl.accessMode;
@@ -94,10 +94,7 @@ export const collectDashboardInfo = (
 
 export const controlsCollectorFactory =
   (embeddableService: EmbeddablePersistableStateService) =>
-  (
-    attributes: DashboardSavedObjectAttributes,
-    collectorData: WritableLatestTaskStateSchema['telemetry']
-  ) => {
+  (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
     if (!isEmpty(attributes.controlGroupInput)) {
       collectorData.controls = embeddableService.telemetry(
         {
