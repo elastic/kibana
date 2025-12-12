@@ -649,7 +649,7 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows() {
+  async getMaintenanceWindows(spaceId: string) {
     const { savedObjects } = this.server.coreStart;
     const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
 
