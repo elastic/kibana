@@ -875,40 +875,52 @@ export class StreamsApp {
   /**
    * Pipeline Suggestions utility methods
    */
+  getSuggestPipelineButton() {
+    return this.page.getByTestId('streamsAppGenerateSuggestionButton');
+  }
+
   async clickSuggestPipelineButton() {
-    const button = this.page.getByTestId('streamsAppGenerateSuggestionButton');
+    const button = this.getSuggestPipelineButton();
     await expect(button).toBeVisible();
     await button.click();
   }
 
-  async expectSuggestPipelinePanelVisible() {
-    await expect(this.page.getByTestId('streamsAppSuggestPipelinePanel')).toBeVisible();
+  getSuggestPipelinePanel() {
+    return this.page.getByTestId('streamsAppSuggestPipelinePanel');
   }
 
-  async expectPipelineSuggestionCalloutVisible() {
-    await expect(this.page.getByTestId('streamsAppPipelineSuggestionCallout')).toBeVisible();
+  getPipelineSuggestionCallout() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionCallout');
   }
 
-  async expectPipelineSuggestionCalloutHidden() {
-    await expect(this.page.getByTestId('streamsAppPipelineSuggestionCallout')).toBeHidden();
+  getPipelineSuggestionAcceptButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionAcceptButton');
   }
 
   async acceptPipelineSuggestion() {
-    const button = this.page.getByTestId('streamsAppPipelineSuggestionAcceptButton');
+    const button = this.getPipelineSuggestionAcceptButton();
     await expect(button).toBeVisible();
     await button.click();
+  }
+
+  getPipelineSuggestionRejectButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionRejectButton');
   }
 
   async rejectPipelineSuggestion() {
-    const button = this.page.getByTestId('streamsAppPipelineSuggestionRejectButton');
+    const button = this.getPipelineSuggestionRejectButton();
     await expect(button).toBeVisible();
     await button.click();
   }
 
-  async regeneratePipelineSuggestion() {
-    const regenerateButton = this.page
+  getRegeneratePipelineSuggestionButton() {
+    return this.page
       .getByTestId('streamsAppGenerateSuggestionButton')
       .filter({ hasText: 'Regenerate' });
+  }
+
+  async regeneratePipelineSuggestion() {
+    const regenerateButton = this.getRegeneratePipelineSuggestionButton();
     await expect(regenerateButton).toBeVisible();
     await regenerateButton.click();
   }
