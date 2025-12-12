@@ -87,7 +87,7 @@ stack: ga 9.3
 
 
 `xpack.reporting.csv.maxRows`
-:    The maximum number of rows in a CSV report.  Reports longer than maximum will be truncated.  The default is 10,000, the minimum is 1.
+:    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
 
 ### Version 9.2+ [ec_version_9_2]
 ```{applies_to}
