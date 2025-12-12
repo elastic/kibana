@@ -110,11 +110,9 @@ export function createGetAlertsTool({
         includeRecovered,
         query,
       },
-      handlerinfo
+      { request }
     ) => {
       try {
-        const { request } = handlerinfo;
-
         const [coreStart, pluginStart] = await core.getStartServices();
         const { inference, ruleRegistry } = pluginStart;
 
@@ -127,7 +125,7 @@ export function createGetAlertsTool({
           logger,
         });
 
-        const inferenceClient = inference.getClient({
+        const boundInferenceClient = inference.getClient({
           request,
           bindTo: { connectorId },
         });
@@ -136,7 +134,7 @@ export function createGetAlertsTool({
           coreStart,
           pluginStart,
           request,
-          inferenceClient,
+          inferenceClient: boundInferenceClient,
           logger,
           query,
         });
