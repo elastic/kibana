@@ -125,6 +125,7 @@ export class EncryptedSavedObjectsPlugin
       ),
       config,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      getClient: this.savedObjectsSetup,
     });
 
     return {
