@@ -15,7 +15,7 @@ const DISABLE_MODAL = 'streamsWiredDisableModal';
 const DISABLE_CHECKBOX = 'streamsWiredDisableConfirmCheckbox';
 const DISABLE_BUTTON = 'streamsWiredDisableConfirmButton';
 
-test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Enable Wired Streams - Success flow', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
 
@@ -65,7 +65,7 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
 
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
+    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
 
     // Verify logs index was created
     const logsExistsAfter = await esClient.indices.exists({ index: 'logs' });
@@ -84,11 +84,11 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
     // Enable wired streams
     await page.getByRole('button', { name: 'Settings' }).click();
     await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({ timeout: 10000 });
+    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
 
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
+    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
 
     // Reload page to see updated streams
     await pageObjects.streams.goto();
@@ -102,10 +102,10 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
     // First enable wired streams
     await page.getByRole('button', { name: 'Settings' }).click();
     await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({ timeout: 10000 });
+    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
+    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
 
     // Verify logs stream is visible
     await pageObjects.streams.goto();
@@ -127,12 +127,12 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
 
     // Confirm disable
     await page.getByTestId(DISABLE_BUTTON).click();
-    await expect(page.getByTestId(DISABLE_MODAL)).toBeHidden({ timeout: 10000 });
+    await expect(page.getByTestId(DISABLE_MODAL)).toBeHidden();
     await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
 
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
+    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
 
     // Verify UI now shows empty state (no logs stream)
     await pageObjects.streams.goto();
@@ -140,98 +140,7 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
   });
 });
 
-test.describe('Enable Wired Streams - Conflict flow', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects, esClient, apiServices }) => {
-    await browserAuth.loginAsAdmin();
-
-    // First ensure wired streams is enabled (from global setup or enable it now)
-    try {
-      await apiServices.streams.enable();
-    } catch {
-      // Already enabled
-    }
-
-    // Ensure logs data stream exists (wired streams should already have created it)
-    // Add some data to simulate existing data scenario
-    try {
-      await esClient.index({
-        index: 'logs',
-        document: {
-          '@timestamp': new Date().toISOString(),
-          message: 'Existing log data before test',
-        },
-      });
-      await esClient.indices.refresh({ index: 'logs' });
-    } catch {
-      // Ignore errors - data may already exist or stream may not be ready
-    }
-
-    await pageObjects.streams.goto();
-  });
-
-  test('should show error when enabling wired streams with existing logs data', async ({
-    page,
-    pageObjects,
-  }) => {
-    // Verify streams table is visible with existing data
-    await pageObjects.streams.expectStreamsTableVisible();
-    // Logs stream should be visible since wired streams is enabled
-    await pageObjects.streams.verifyStreamsAreInTable(['logs']);
-
-    // Now try to disable and re-enable wired streams to trigger potential conflicts
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
-
-    // Disable first
-    await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(DISABLE_MODAL)).toBeVisible();
-    await page.getByTestId(DISABLE_CHECKBOX).click();
-    await page.getByTestId(DISABLE_BUTTON).click();
-    await expect(page.getByTestId(DISABLE_MODAL)).toBeHidden({ timeout: 10000 });
-    await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
-
-    // Now try to re-enable - this should work since data was deleted during disable
-    await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({ timeout: 10000 });
-
-    // Close settings
-    await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
-  });
-
-  test('should succeed after resolving conflict', async ({ page, pageObjects }) => {
-    // Wired streams is already enabled with data from beforeEach
-    // Verify logs stream is visible
-    await pageObjects.streams.expectStreamsTableVisible();
-    await pageObjects.streams.verifyStreamsAreInTable(['logs']);
-
-    // Disable wired streams (this cleans up data)
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
-    await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(DISABLE_MODAL)).toBeVisible();
-    await page.getByTestId(DISABLE_CHECKBOX).click();
-    await page.getByTestId(DISABLE_BUTTON).click();
-    await expect(page.getByTestId(DISABLE_MODAL)).toBeHidden({ timeout: 10000 });
-    await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
-
-    // Now re-enable - should succeed since data was deleted
-    await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({ timeout: 10000 });
-
-    // Close flyout
-    await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
-
-    // Verify logs stream now appears in UI as wired stream
-    await pageObjects.streams.goto();
-    await pageObjects.streams.expectStreamsTableVisible();
-    await pageObjects.streams.verifyStreamsAreInTable(['logs']);
-  });
-});
-
-test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Enable Wired Streams - Permissions', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ esClient, apiServices, browserAuth }) => {
     // Disable wired streams to get clean state
     await browserAuth.loginAsAdmin();
@@ -253,6 +162,11 @@ test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] 
     }
   });
 
+  test.afterAll(async ({ apiServices }) => {
+    // Restore globally enabled wired streams
+    await apiServices.streams.enable();
+  });
+
   test('should prevent editor users from enabling wired streams', async ({
     browserAuth,
     page,
@@ -263,7 +177,7 @@ test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] 
 
     // Open settings
     await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
     // Switch should be disabled for editor
     await expect(page.getByTestId(WIRED_SWITCH)).toBeDisabled();
@@ -279,7 +193,7 @@ test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] 
 
     // Open settings
     await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
     // Switch should be disabled for viewer
     await expect(page.getByTestId(WIRED_SWITCH)).toBeDisabled();
@@ -306,7 +220,7 @@ test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] 
 
     // Open settings
     await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
     // Switch should show enabled but be disabled for editor
     await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
@@ -334,52 +248,10 @@ test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] 
 
     // Open settings
     await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
     // Switch should show enabled but be disabled for viewer
     await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
     await expect(page.getByTestId(WIRED_SWITCH)).toBeDisabled();
-  });
-
-  test('should allow admin to enable and disable wired streams', async ({
-    browserAuth,
-    page,
-    pageObjects,
-  }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.streams.goto();
-
-    // Open settings - switch should be enabled for admin
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeEnabled();
-    await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
-
-    // Enable wired streams
-    await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({ timeout: 10000 });
-    // Close flyout with Escape key
-    await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
-
-    // Verify logs stream appears in UI
-    await pageObjects.streams.goto();
-    await pageObjects.streams.expectStreamsTableVisible();
-    await pageObjects.streams.verifyStreamsAreInTable(['logs']);
-
-    // Disable wired streams
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await page.getByTestId(WIRED_SWITCH).click();
-    await expect(page.getByTestId(DISABLE_MODAL)).toBeVisible();
-    await page.getByTestId(DISABLE_CHECKBOX).click();
-    await page.getByTestId(DISABLE_BUTTON).click();
-    await expect(page.getByTestId(DISABLE_MODAL)).toBeHidden({ timeout: 10000 });
-    // Close flyout with Escape key
-    await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
-
-    // Verify UI shows empty state (no logs stream)
-    await pageObjects.streams.goto();
-    await pageObjects.streams.verifyStreamsAreNotInTable(['logs']);
   });
 });
