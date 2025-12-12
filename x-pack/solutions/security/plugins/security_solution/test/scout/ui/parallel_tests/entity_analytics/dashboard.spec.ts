@@ -24,8 +24,9 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
 
     await dashboardPage.navigate();
 
-    await expect(dashboardPage.entityStoreEnablementPanel, { timeout: 30000 }).toContainText(
-      'Enable entity store and risk score'
+    await expect(dashboardPage.entityStoreEnablementPanel).toContainText(
+      'Enable entity store and risk score',
+      { timeout: 30000 }
     );
 
     await dashboardPage.openEntityStoreEnablementModal();
@@ -37,9 +38,7 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
     await expect(dashboardPage.enablementEntityStoreSwitch).toBeVisible();
 
     await dashboardPage.confirmEntityStoreEnablement();
-    await dashboardPage.waitForEntitiesListToAppear();
-    await dashboardPage.entitiesListPanel.waitFor({ state: 'visible' });
 
-    await expect(dashboardPage.entitiesListPanel).toContainText('Entities');
+    await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
   });
 });
