@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { firstValueFrom, take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { ProductTier } from '../../common/product';
@@ -29,7 +29,7 @@ export const registerSolutionNavigation = async (
   );
 
   // Get initial chat experience for setting initial navigation tree
-  const initialChatExperience = await firstValueFrom(chatExperience$.pipe(take(1)));
+  const initialChatExperience = await firstValueFrom(chatExperience$);
 
   const navigationTree = shouldUseAINavigation
     ? createAiNavigationTree(initialChatExperience)

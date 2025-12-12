@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import { firstValueFrom, take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
@@ -61,7 +61,7 @@ export const getFilteredLinks = async (
     AI_CHAT_EXPERIENCE_TYPE,
     AIChatExperience.Classic
   );
-  const chatExperience = await firstValueFrom(chatExperience$.pipe(take(1)));
+  const chatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
 
   return Object.freeze([
