@@ -13,7 +13,7 @@ The index pattern in the context \`query\` is a dummy temporary index pattern, p
 
 <context>
   <title>{title}</title>
-  <description>{description}</description>
+  <description>{dashboard_description} Specific panel description: {description}</description>
   <query>{query}</query>
 </context>
 `
