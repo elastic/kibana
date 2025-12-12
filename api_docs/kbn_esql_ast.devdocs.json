@@ -9619,7 +9619,7 @@
         "tags": [],
         "label": "withAutoSuggest",
         "description": [
-          "\nGiven a suggestion item, decorates it with editor.action.triggerSuggest\nthat triggers the autocomplete dialog again after accepting the suggestion.\n\nIf the suggestion item already has a custom command, it will preserve it."
+          "\nGiven a suggestion item, decorates it with editor.action.triggerSuggest\nthat triggers the autocomplete dialog again after accepting the suggestion.\n\nIf the suggestion item already has a custom command, it will preserve it, by attaching\nthe triggerSuggest command as part of a multiCommands execution."
         ],
         "signature": [
           "(suggestionItem: ",
@@ -11997,6 +11997,20 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.FunctionParameter.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false

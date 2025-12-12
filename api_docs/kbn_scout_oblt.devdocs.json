@@ -2395,16 +2395,106 @@
         "type": "Function",
         "tags": [],
         "label": "apiTest",
-        "description": [
-          "\nAPI test type with minimal fixtures.\nThis is used for Scout api tests that do not require browser interaction."
-        ],
+        "description": [],
         "signature": [
           "TestType",
-          "<{}, ",
+          "<",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
+          " & ",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          " & { context: ",
+          "BrowserContext",
+          "; } & { browserAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
+          "; } & { page: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutPage",
+            "text": "ScoutPage"
+          },
+          "; log: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutLogger",
+            "text": "ScoutLogger"
+          },
+          "; } & { pageObjects: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.PageObjects",
+            "text": "PageObjects"
+          },
+          "; } & { validateTags: void; } & { perfTracker: ",
+          "PerformanceTracker",
+          "; }, ",
           "ApiWorkerFixtures",
-          ">"
+          " & ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & ",
+          "CoreWorkerFixtures",
+          " & { esArchiver: ",
+          "EsArchiverFixture",
+          "; } & { uiSettings: ",
+          "UiSettingsFixture",
+          "; } & ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
+          "; } & { kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; } & { config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; } & { profilingSetup: ",
+          "ProfilingSetupFixture",
+          "; }>"
         ],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/api/index.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/single_thread_fixtures.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

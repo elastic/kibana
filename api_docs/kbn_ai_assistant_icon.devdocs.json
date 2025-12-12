@@ -152,6 +152,55 @@
       },
       {
         "parentPluginId": "@kbn/ai-assistant-icon",
+        "id": "def-public.RobotIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "RobotIcon",
+        "description": [
+          "\nRobot icon for AI Agent functionality."
+        ],
+        "signature": [
+          "({ size, ...rest }: ",
+          {
+            "pluginId": "@kbn/ai-assistant-icon",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantIconPluginApi",
+            "section": "def-public.AssistantIconProps",
+            "text": "AssistantIconProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/icon/icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-icon",
+            "id": "def-public.RobotIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 'm', ...rest }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-assistant-icon",
+                "scope": "public",
+                "docId": "kibKbnAiAssistantIconPluginApi",
+                "section": "def-public.AssistantIconProps",
+                "text": "AssistantIconProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/icon/icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-icon",
         "id": "def-public.useBeaconSize",
         "type": "Function",
         "tags": [],
