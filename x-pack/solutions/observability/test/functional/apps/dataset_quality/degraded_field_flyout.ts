@@ -1218,6 +1218,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
         );
 
+        await testSubjects.existOrFail('datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist');
+
         await testSubjects.existOrFail(
           'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
         );
@@ -1279,6 +1281,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
         );
 
+        // Should not display the issue does not exist warning for wired streams
+        await testSubjects.missingOrFail(
+          'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist'
+        );
+
         // Should NOT display Edit/Create Component Template Link option for wired streams
         await testSubjects.missingOrFail(
           'datasetQualityManualMitigationsCustomComponentTemplateLink'
@@ -1313,6 +1320,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await testSubjects.existOrFail(
           'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
         );
+
+        await testSubjects.existOrFail('datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist');
 
         // Should display Edit/Create Ingest Pipeline Link option for classic streams
         expect(await testSubjects.exists('datasetQualityManualMitigationsPipelineAccordion')).to.be(
