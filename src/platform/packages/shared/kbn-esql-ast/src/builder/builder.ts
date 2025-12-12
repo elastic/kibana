@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 
 import { isStringLiteral } from '../ast/is';
-import { TIME_DURATION_UNITS } from '../parser/constants';
+import { TIME_DURATION_UNITS } from '../parser';
 import { LeafPrinter } from '../pretty_print';
 import type {
   ESQLAstComment,

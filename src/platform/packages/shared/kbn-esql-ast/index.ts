@@ -66,5 +66,5 @@ export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/uti
 export * from './src/commands';
 // temporary export to ease migration
 export { getNoValidCallSignatureError } from './src/commands/definitions/utils/validation/utils';
-
+// temporary export to ease migration
 export * from './src/shared';

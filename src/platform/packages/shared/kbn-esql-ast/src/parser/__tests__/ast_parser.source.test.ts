@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '../parser';
+import { parse } from '../core/parser';
 
 describe('source nodes', () => {
   it('cluster vs quoted source', () => {
