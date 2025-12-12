@@ -58,6 +58,7 @@ import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-s
 import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
 import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import type {
+  InitEntityEngineRequestQueryInput,
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
@@ -420,7 +421,8 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
+      .send(props.body as object)
+      .query(props.query);
   },
   initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
     return supertest
@@ -773,6 +775,7 @@ export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
 }
 export interface InitEntityEngineProps {
+  query: InitEntityEngineRequestQueryInput;
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
 }

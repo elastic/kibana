@@ -29,6 +29,10 @@ export const DeleteEntityEngineRequestQuery = z.object({
    * Control flag to also delete the entity data.
    */
   data: BooleanFromString.optional(),
+  /**
+   * delete esql poc instead of regular entity store.
+   */
+  esqlPoc: BooleanFromString.optional(),
 });
 export type DeleteEntityEngineRequestQueryInput = z.input<typeof DeleteEntityEngineRequestQuery>;
 
