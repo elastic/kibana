@@ -76,6 +76,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: true,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -134,6 +135,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: true,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -185,6 +187,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: false,
@@ -231,6 +234,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -262,6 +266,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: true,
