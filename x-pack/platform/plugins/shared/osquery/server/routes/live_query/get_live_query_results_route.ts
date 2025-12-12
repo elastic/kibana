@@ -12,6 +12,7 @@ import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
   GetLiveQueryResultsRequestParamsSchema,
@@ -72,6 +73,30 @@ function isSortResults(value: unknown): value is SortResults {
       item === null || itemType === 'string' || itemType === 'number' || itemType === 'boolean'
     );
   });
+}
+
+function calculateHasMore(params: { total: number; page: number; pageSize: number }): boolean {
+  const { total, page, pageSize } = params;
+  const nextOffset = (page + 1) * pageSize;
+
+  return nextOffset < total;
+}
+
+function buildMinimalSearchResponseBody(params: {
+  hits: ResultsStrategyResponse['edges'];
+  total: number;
+}): SearchResponseBody<unknown> {
+  const { hits, total } = params;
+
+  return {
+    took: 0,
+    timed_out: false,
+    _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+    hits: {
+      hits,
+      total: { value: total, relation: 'eq' },
+    },
+  };
 }
 
 export const getLiveQueryResultsRoute = (
@@ -252,6 +277,7 @@ export const getLiveQueryResultsRoute = (
           // If pitId is provided without searchAfter, ignore it and start fresh
           let pitId = providedPitId && parsedSearchAfter ? providedPitId : undefined;
           let searchAfterValues = parsedSearchAfter;
+          let pitTotal: number | undefined;
 
           if (needsPitPagination && !pitId) {
             const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
@@ -264,10 +290,13 @@ export const getLiveQueryResultsRoute = (
 
             let newlyOpenedPitId: string | undefined;
             try {
-              const pitResponse = await esClient.openPointInTime({
-                index: pitIndex,
-                keep_alive: PIT_KEEP_ALIVE,
-              });
+              const pitResponse = await esClient.openPointInTime(
+                {
+                  index: pitIndex,
+                  keep_alive: PIT_KEEP_ALIVE,
+                },
+                { signal: abortSignal }
+              );
               pitId = pitResponse.id;
               newlyOpenedPitId = pitId;
 
@@ -292,11 +321,16 @@ export const getLiveQueryResultsRoute = (
                     sort: [
                       {
                         field: request.query.sort ?? '@timestamp',
-                        direction: (request.query.sortOrder as Direction) ?? Direction.desc,
+                        direction: request.query.sortOrder ?? Direction.desc,
                       },
                     ],
                     integrationNamespaces: namespacesOrUndefined,
+                    abortSignal,
                   });
+
+                  if (pitTotal === undefined) {
+                    pitTotal = batchRes.total;
+                  }
 
                   if (!batchRes.hits.length) {
                     break;
@@ -317,11 +351,44 @@ export const getLiveQueryResultsRoute = (
 
                 searchAfterValues = currentSearchAfter;
               }
+
+              // If the requested page offset is beyond available results, return an empty page.
+              // This avoids falling back to offset pagination (from/size), which is capped by ES at 10k.
+              if (pitTotal !== undefined && newlyOpenedPitId && offset >= pitTotal) {
+                const total = pitTotal;
+                try {
+                  await esClient.closePointInTime(
+                    { id: newlyOpenedPitId },
+                    { signal: abortSignal }
+                  );
+                } catch (closeErr) {
+                  logger.warn(`Failed to close PIT for out-of-range request: ${closeErr.message}`);
+                }
+
+                return response.ok({
+                  body: {
+                    data: {
+                      rawResponse: buildMinimalSearchResponseBody({ hits: [], total }),
+                      isPartial: false,
+                      isRunning: false,
+                      total,
+                      loaded: 0,
+                      edges: [],
+                      pitId: undefined,
+                      searchAfter: undefined,
+                      hasMore: false,
+                    },
+                  },
+                });
+              }
             } catch (e) {
               // Clean up PIT if we opened one before the error
               if (newlyOpenedPitId) {
                 try {
-                  await esClient.closePointInTime({ id: newlyOpenedPitId });
+                  await esClient.closePointInTime(
+                    { id: newlyOpenedPitId },
+                    { signal: abortSignal }
+                  );
                 } catch (closeErr) {
                   logger.warn(`Failed to close PIT after error: ${closeErr.message}`);
                 }
@@ -332,7 +399,7 @@ export const getLiveQueryResultsRoute = (
               return response.customError({
                 statusCode: 500,
                 body: {
-                  message: `Failed to initialize deep pagination. Please try again. Error: ${e.message}`,
+                  message: 'Failed to initialize deep pagination. Please try again.',
                 },
               });
             }
@@ -354,16 +421,22 @@ export const getLiveQueryResultsRoute = (
               sort: [
                 {
                   field: request.query.sort ?? '@timestamp',
-                  direction: (request.query.sortOrder as Direction) ?? Direction.desc,
+                  direction: request.query.sortOrder ?? Direction.desc,
                 },
               ],
               integrationNamespaces: namespacesOrUndefined,
+              abortSignal,
             });
 
             const responsePitId = pitRes.pitId ?? pitId;
 
+            const computedHasMore = calculateHasMore({ total: pitRes.total, page, pageSize });
+
             res = {
-              rawResponse: { hits: { hits: pitRes.hits, total: pitRes.total } },
+              rawResponse: buildMinimalSearchResponseBody({
+                hits: pitRes.hits,
+                total: pitRes.total,
+              }),
               isPartial: false,
               isRunning: false,
               total: pitRes.total,
@@ -371,8 +444,8 @@ export const getLiveQueryResultsRoute = (
               edges: pitRes.hits,
               pitId: responsePitId,
               searchAfter: pitRes.searchAfter,
-              hasMore: pitRes.hits.length === pageSize,
-            } as ResultsStrategyResponse;
+              hasMore: computedHasMore,
+            };
           } else {
             res = await lastValueFrom(
               search.search<ResultsRequestOptions, ResultsStrategyResponse>(
@@ -395,21 +468,27 @@ export const getLiveQueryResultsRoute = (
             );
           }
 
+          const total = res.total ?? 0;
+          const hasMore = calculateHasMore({ total, page, pageSize });
+
           return response.ok({
             body: {
               data: {
                 ...res,
                 pitId: usePitMode ? res.pitId : undefined,
                 searchAfter: res.searchAfter ? JSON.stringify(res.searchAfter) : undefined,
-                hasMore: res.hasMore,
+                hasMore,
               },
             },
           });
         } catch (e) {
+          const logger = osqueryContext.logFactory.get('get_live_query_results');
+          logger.error(`Unhandled error in get_live_query_results route: ${e.message}`);
+
           return response.customError({
             statusCode: e.statusCode ?? 500,
             body: {
-              message: e.message,
+              message: e.statusCode && e.statusCode < 500 ? e.message : 'Internal server error',
             },
           });
         }

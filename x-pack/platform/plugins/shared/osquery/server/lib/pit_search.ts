@@ -20,10 +20,11 @@ export interface PitSearchParams {
   startDate?: string;
   sort: Array<{ field: string; direction: Direction }>;
   integrationNamespaces?: string[];
+  abortSignal?: AbortSignal;
 }
 
 export interface PitSearchResult {
-  hits: SearchHit[];
+  hits: Array<SearchHit<unknown>>;
   total: number;
   searchAfter?: SortResults;
   pitId?: string;
@@ -40,6 +41,7 @@ export async function executePitSearch(params: PitSearchParams): Promise<PitSear
     startDate,
     sort,
     integrationNamespaces,
+    abortSignal,
   } = params;
 
   const queryParams = buildResultsQuery({
@@ -53,21 +55,18 @@ export async function executePitSearch(params: PitSearchParams): Promise<PitSear
     integrationNamespaces,
   });
 
-  const response = await esClient.search(queryParams);
+  const response = abortSignal
+    ? await esClient.search(queryParams, { signal: abortSignal })
+    : await esClient.search(queryParams);
 
-  // Type assertion needed: ES client returns generic SearchHit<unknown>[], but our query
-  // configuration ensures we always get properly structured SearchHit objects
-  const hits = response.hits.hits as SearchHit[];
+  const hits = response.hits.hits;
 
   // Handle both ES 7.x+ format (object with value) and legacy format (number)
   const total =
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
 
   const lastHit = hits.length > 0 ? hits[hits.length - 1] : undefined;
-
-  // Type assertion needed: sort values from ES are typed as (string | number | null)[] | undefined,
-  // which matches SortResults, but TS doesn't infer this from SearchHit.sort
-  const newSearchAfter = lastHit?.sort as SortResults | undefined;
+  const newSearchAfter = lastHit?.sort;
 
   const refreshedPitId = response.pit_id;
 

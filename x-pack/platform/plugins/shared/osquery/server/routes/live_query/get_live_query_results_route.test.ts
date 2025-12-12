@@ -5,8 +5,21 @@
  * 2.0.
  */
 
+import { httpServerMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { RequestHandler } from '@kbn/core/server';
 import { getLiveQueryResultsRoute } from './get_live_query_results_route';
-import { createMockOsqueryContext, createMockRouter } from './mocks';
+import {
+  createMockActionDetailsResponse,
+  createMockContextWithEsClient,
+  createMockEsClientWithPit,
+  createMockEsSearchResponse,
+  createMockLiveQueryResultsRequest,
+  createMockLiveQuerySearchStrategy,
+  createMockOsqueryContext,
+  createMockRouter,
+  createMockResultsResponse,
+} from './mocks';
+import { OsqueryQueries } from '../../../common/search_strategy';
 import {
   MAX_OFFSET_RESULTS,
   MAX_PIT_OFFSET,
@@ -17,13 +30,27 @@ import {
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 describe('getLiveQueryResultsRoute', () => {
-  let mockOsqueryContext: ReturnType<typeof createMockOsqueryContext>;
+  let mockOsqueryContext: OsqueryAppContext;
   let mockRouter: ReturnType<typeof createMockRouter>;
+  let routeHandler: RequestHandler;
 
   beforeEach(() => {
     mockOsqueryContext = createMockOsqueryContext();
     mockRouter = createMockRouter();
     jest.clearAllMocks();
+
+    getLiveQueryResultsRoute(mockRouter, mockOsqueryContext);
+
+    const route = mockRouter.versioned.getRoute(
+      'get',
+      '/api/osquery/live_queries/{id}/results/{actionId}'
+    );
+    const routeVersion = route.versions['2023-10-31'];
+    if (!routeVersion) {
+      throw new Error('Handler for version [2023-10-31] not found!');
+    }
+
+    routeHandler = routeVersion.handler;
   });
 
   afterEach(() => {
@@ -32,8 +59,6 @@ describe('getLiveQueryResultsRoute', () => {
 
   describe('route registration', () => {
     it('should register the get live query results route', () => {
-      getLiveQueryResultsRoute(mockRouter, mockOsqueryContext as unknown as OsqueryAppContext);
-
       const route = mockRouter.versioned.getRoute(
         'get',
         '/api/osquery/live_queries/{id}/results/{actionId}'
@@ -53,7 +78,7 @@ describe('getLiveQueryResultsRoute', () => {
       // Valid: [1733900000000, 12345]
       const validSearchAfter = JSON.stringify([1733900000000, 12345]);
       expect(() => JSON.parse(validSearchAfter)).not.toThrow();
-      const parsed = JSON.parse(validSearchAfter) as unknown[];
+      const parsed = JSON.parse(validSearchAfter);
       expect(Array.isArray(parsed)).toBe(true);
       expect(parsed.every((item: unknown) => typeof item === 'number')).toBe(true);
     });
@@ -61,7 +86,7 @@ describe('getLiveQueryResultsRoute', () => {
     it('should accept valid searchAfter with strings', () => {
       // Valid: ["value1", "value2"]
       const validSearchAfter = JSON.stringify(['value1', 'value2']);
-      const parsed = JSON.parse(validSearchAfter) as unknown[];
+      const parsed = JSON.parse(validSearchAfter);
       expect(Array.isArray(parsed)).toBe(true);
       expect(parsed.every((item: unknown) => typeof item === 'string')).toBe(true);
     });
@@ -69,7 +94,7 @@ describe('getLiveQueryResultsRoute', () => {
     it('should accept valid searchAfter with mixed primitives', () => {
       // Valid: [1733900000000, "doc-id", null, true]
       const validSearchAfter = JSON.stringify([1733900000000, 'doc-id', null, true]);
-      const parsed = JSON.parse(validSearchAfter) as unknown[];
+      const parsed = JSON.parse(validSearchAfter);
       expect(Array.isArray(parsed)).toBe(true);
       expect(
         parsed.every(
@@ -85,7 +110,7 @@ describe('getLiveQueryResultsRoute', () => {
     it('should detect invalid searchAfter with objects', () => {
       // Invalid: [{ key: "value" }]
       const invalidSearchAfter = JSON.stringify([{ key: 'value' }]);
-      const parsed = JSON.parse(invalidSearchAfter) as unknown[];
+      const parsed = JSON.parse(invalidSearchAfter);
       expect(Array.isArray(parsed)).toBe(true);
       // Objects are NOT valid sort results
       expect(parsed.some((item: unknown) => typeof item === 'object' && item !== null)).toBe(true);
@@ -94,7 +119,7 @@ describe('getLiveQueryResultsRoute', () => {
     it('should detect invalid searchAfter with arrays', () => {
       // Invalid: [[1, 2, 3]]
       const invalidSearchAfter = JSON.stringify([[1, 2, 3]]);
-      const parsed = JSON.parse(invalidSearchAfter) as unknown[];
+      const parsed = JSON.parse(invalidSearchAfter);
       expect(Array.isArray(parsed)).toBe(true);
       // Nested arrays are NOT valid sort results
       expect(parsed.some((item: unknown) => Array.isArray(item))).toBe(true);
@@ -235,6 +260,127 @@ describe('getLiveQueryResultsRoute', () => {
 
       const canUsePitPagination = hasPitId && hasSearchAfter;
       expect(canUsePitPagination).toBe(false);
+    });
+  });
+
+  describe('deep pagination edge cases', () => {
+    it('should not fall back to offset pagination when deep page requested but PIT has no results (total=0)', async () => {
+      const mockEsClient = createMockEsClientWithPit();
+      mockEsClient.search.mockResolvedValueOnce(
+        createMockEsSearchResponse({ hits: [], total: { value: 0, relation: 'eq' } })
+      );
+
+      const mockSearchFn = createMockLiveQuerySearchStrategy({
+        actionDetailsResponse: createMockActionDetailsResponse([
+          { action_id: 'action-123', agents: ['agent-1'] },
+        ]),
+      });
+
+      const mockContext = createMockContextWithEsClient(mockSearchFn, mockEsClient);
+      const mockRequest = createMockLiveQueryResultsRequest({
+        id: 'live-query-id',
+        actionId: 'action-123',
+        query: { page: 150, pageSize: 100 }, // offset 15000 -> PIT mode
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Should open PIT and then immediately close it for out-of-range request.
+      expect(mockEsClient.openPointInTime).toHaveBeenCalled();
+      expect(mockEsClient.closePointInTime).toHaveBeenCalled();
+
+      // Should NOT execute offset-mode results strategy search (would hit 10k cap).
+      const executedQueryTypes = mockSearchFn.mock.calls.map(([req]) => req.factoryQueryType);
+      expect(executedQueryTypes).not.toContain(OsqueryQueries.results);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          data: expect.objectContaining({
+            edges: [],
+            total: 0,
+            hasMore: false,
+            pitId: undefined,
+            searchAfter: undefined,
+          }),
+        },
+      });
+    });
+  });
+
+  describe('hasMore calculation', () => {
+    it('should set hasMore=false when total equals pageSize in offset mode', async () => {
+      const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockSearchFn = createMockLiveQuerySearchStrategy({
+        actionDetailsResponse: createMockActionDetailsResponse([
+          { action_id: 'action-123', agents: ['agent-1'] },
+        ]),
+        resultsResponse: createMockResultsResponse({
+          total: 100,
+          edges: Array.from({ length: 100 }).map((_, i) => ({ _id: `${i}`, _index: 'test' })),
+          hasMore: true, // ensure route overrides previous behavior
+        }),
+      });
+
+      const mockContext = createMockContextWithEsClient(mockSearchFn, mockEsClient);
+      const mockRequest = createMockLiveQueryResultsRequest({
+        id: 'live-query-id',
+        actionId: 'action-123',
+        query: { page: 0, pageSize: 100 },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          data: expect.objectContaining({
+            total: 100,
+            hasMore: false,
+          }),
+        },
+      });
+    });
+
+    it('should set hasMore=false when total equals pageSize in PIT mode', async () => {
+      const mockEsClient = createMockEsClientWithPit();
+      // Seek batch to targetOffset=10000 (page 100 * 100) – return exactly 10k docs and total=10000
+      mockEsClient.search.mockResolvedValueOnce(
+        createMockEsSearchResponse({
+          hits: [],
+          total: { value: 10000, relation: 'eq' },
+          pitId: 'mock-pit-id',
+        })
+      );
+
+      const mockSearchFn = createMockLiveQuerySearchStrategy({
+        actionDetailsResponse: createMockActionDetailsResponse([
+          { action_id: 'action-123', agents: ['agent-1'] },
+        ]),
+      });
+
+      const mockContext = createMockContextWithEsClient(mockSearchFn, mockEsClient);
+      const mockRequest = createMockLiveQueryResultsRequest({
+        id: 'live-query-id',
+        actionId: 'action-123',
+        query: { page: 100, pageSize: 100 }, // offset 10000 -> PIT mode, out-of-range because total=10000
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // out-of-range: page starts at offset==total => empty page, no PIT returned
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          data: expect.objectContaining({
+            total: 10000,
+            edges: [],
+            hasMore: false,
+            pitId: undefined,
+            searchAfter: undefined,
+          }),
+        },
+      });
     });
   });
 });

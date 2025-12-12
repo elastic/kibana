@@ -13,7 +13,14 @@ import {
   loggingSystemMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { OsqueryQueries } from '../../../common/search_strategy';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OsqueryAppContextService } from '../../lib/osquery_app_context_services';
+import { parseExperimentalConfigValue } from '../../../common';
+import { TelemetryEventsSender } from '../../lib/telemetry/sender';
 
 /**
  * Creates a mock Osquery application context for testing.
@@ -41,16 +48,30 @@ export const createMockOsqueryContext = () => {
     },
   };
 
-  return {
+  const experimentalFeatures = parseExperimentalConfigValue([]).features;
+  const service = new OsqueryAppContextService();
+
+  jest.spyOn(service, 'getIntegrationNamespaces').mockResolvedValue({});
+
+  const mockContext: OsqueryAppContext = {
     logFactory: {
       get: jest.fn().mockReturnValue(logger),
     },
-    service: {
-      getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
-      getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
-    },
+    config: () => ({
+      actionEnabled: false,
+      enabled: true,
+      enableExperimental: [],
+      experimentalFeatures,
+    }),
+    experimentalFeatures,
+    security: securityMock.createStart(),
+    service,
     getStartServices: jest.fn().mockResolvedValue([mockCoreStart, {}, {}]),
+    telemetryEventsSender: new TelemetryEventsSender(logger),
+    licensing: licensingMock.createSetup(),
   };
+
+  return mockContext;
 };
 
 /**
@@ -206,22 +227,23 @@ export const createMockContextWithEsClient = (
       extendSession: jest.fn(),
       getSessionStatus: jest.fn(),
     }),
+    resolve: jest.fn(),
   };
 
   return mockContext;
 };
 
 interface MockEsSearchResponseOptions {
-  hits?: unknown[];
+  hits?: Array<SearchHit<unknown>>;
   total?: { value: number; relation: 'eq' | 'gte' };
-  pit_id?: string;
+  pitId?: string;
 }
 
 /**
  * Helper to generate mock ES search response for PIT pagination.
  */
 export const createMockEsSearchResponse = (options: MockEsSearchResponseOptions = {}) => {
-  const { hits = [], total = { value: 0, relation: 'eq' as const }, pit_id } = options;
+  const { hits = [], total = { value: 0, relation: 'eq' as const }, pitId } = options;
 
   return {
     took: 10,
@@ -231,6 +253,6 @@ export const createMockEsSearchResponse = (options: MockEsSearchResponseOptions 
       hits,
       total,
     },
-    ...(pit_id ? { pit_id } : {}),
+    ...(pitId ? { pit_id: pitId } : {}),
   };
 };
