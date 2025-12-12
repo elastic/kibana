@@ -53,6 +53,12 @@ function options(y: yargs.Argv) {
       demandOption: true,
       default: process.env.KIBANA_SOURCE_CLUSTER_PASSWORD,
     })
+    .option('sourceClusterIndex', {
+      describe: 'The source cluster index',
+      string: true,
+      demandOption: true,
+      default: process.env.KIBANA_SOURCE_INDEX,
+    })
     .option('embeddingClusterUrl', {
       describe: 'The embedding cluster url',
       string: true,
@@ -90,6 +96,7 @@ export function runScript() {
         sourceClusterUrl: argv.sourceClusterUrl!,
         sourceClusterUsername: argv.sourceClusterUsername!,
         sourceClusterPassword: argv.sourceClusterPassword!,
+        sourceClusterIndex: argv.sourceClusterIndex!,
         embeddingClusterUrl: argv.embeddingClusterUrl!,
         embeddingClusterUsername: argv.embeddingClusterUsername!,
         embeddingClusterPassword: argv.embeddingClusterPassword!,
