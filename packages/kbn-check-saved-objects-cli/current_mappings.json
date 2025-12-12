@@ -3219,6 +3219,9 @@
       },
       "product_version": {
         "type": "keyword"
+      },
+      "resource_type": {
+        "type": "keyword"
       }
     }
   },
