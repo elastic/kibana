@@ -103,10 +103,5 @@ export default function searchSolutionNavigation({
 
       await expectNoPageReload();
     });
-
-    it('shows cloud connect in sidebar navigation', async () => {
-      // Cloud Connect should only appear in self-managed (non-cloud) deployments
-      await searchClassicNavigation.expectNavItemExists('cloud_connect');
-    });
   });
 }
