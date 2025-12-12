@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cleanUp();
     });
 
-    describe('sidenav & breadcrumbs', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/244347
+    describe.skip('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 

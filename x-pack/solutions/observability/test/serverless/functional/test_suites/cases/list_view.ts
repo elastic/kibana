@@ -66,7 +66,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('severity', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/242130
+      describe.skip('severity', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
@@ -76,7 +77,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('tags', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/245961
+      describe.skip('tags', () => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
@@ -215,7 +217,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAll();
       });
 
-      describe('Status', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/246048
+      describe.skip('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('to in progress', async () => {

@@ -13,6 +13,7 @@ import type {
   LensTagCloudState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { LENS_TAGCLOUD_DEFAULT_STATE, TAGCLOUD_ORIENTATION } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -84,7 +85,7 @@ function getTagcloudDataset(
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
 ): TagcloudState['dataset'] {
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
   if (!dataset || dataset.type == null) {
     throw new Error('Unsupported dataset type');
@@ -184,7 +185,18 @@ function getValueColumns(layer: TagcloudStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: TagcloudState): LensAttributes {
+type TagcloudAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsTagcloud' }
+>;
+
+type TagcloudAttributesWithoutFiltersAndQuery = Omit<TagcloudAttributes, 'state'> & {
+  state: Omit<TagcloudAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(
+  config: TagcloudState
+): TagcloudAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as TagcloudStateNoESQL);
 
@@ -207,8 +219,6 @@ export function fromAPItoLensState(config: TagcloudState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },

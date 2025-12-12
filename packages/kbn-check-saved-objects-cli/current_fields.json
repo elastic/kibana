@@ -260,6 +260,12 @@
     "type"
   ],
   "cloud": [],
+  "cloud-connect-api-key": [
+    "apiKey",
+    "clusterId",
+    "createdAt",
+    "updatedAt"
+  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -1189,6 +1195,7 @@
     "solution"
   ],
   "spaces-usage-stats": [],
+  "stream-prompts": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
