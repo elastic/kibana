@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { createServerlessTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/serverless.config.base';
+import { createServerlessFeatureFlagTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/feature_flag.serverless.config.base';
 import { services } from '../../services';
 
-export default createServerlessTestConfig<typeof services>({
+export default createServerlessFeatureFlagTestConfig<typeof services>({
   services,
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.ai_assistant.index.ts')],
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
   },
-  indexRefreshInterval: '1s',
+  kbnServerArgs: [
+    `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+      integrationKnowledge: false,
+    })}`,
+  ],
 });
