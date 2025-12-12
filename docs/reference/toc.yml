@@ -42,7 +42,6 @@ toc:
         children:
           - file: connectors-kibana/cases-action-type.md
           - file: connectors-kibana/index-action-type.md
-          - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
@@ -70,9 +69,12 @@ toc:
           - file: connectors-kibana/cases-webhook-action-type.md
           - file: connectors-kibana/xmatters-action-type.md
           - file: connectors-kibana/xsoar-action-type.md
+      - file: connectors-kibana/data-context-sources-connectors.md
+        children:
           - file: connectors-kibana/abuseipdb-action-type.md
           - file: connectors-kibana/alienvault-otx-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
+          - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
