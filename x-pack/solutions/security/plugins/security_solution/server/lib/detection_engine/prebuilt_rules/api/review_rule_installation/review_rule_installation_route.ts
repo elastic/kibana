@@ -6,7 +6,9 @@
  */
 
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {
@@ -35,7 +37,11 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(ReviewRuleInstallationRequestBodySchema),
+          },
+        },
       },
       reviewRuleInstallationHandler
     );
