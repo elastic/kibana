@@ -47,9 +47,7 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 ### ✅ Completed
 - [x] Plugin scaffolded with basic structure
 - [x] Server-side route factory using `@kbn/server-route-repository`
-- [x] Hello World API endpoint (`GET /internal/kubernetes_poc/hello_world`)
 - [x] Client-side API client with type-safe route repository integration
-- [x] React UI with Hello World page
 - [x] Security configuration (authz) for routes
 - [x] Plugin manifest configured with required dependencies
 - [x] Removed unused `kibanaReact` bundle
@@ -168,7 +166,6 @@ const attributes: TypedLensByValueInput['attributes'] = {
 
 ### Access Plugin
 - **URL**: http://localhost:5601/app/kubernetesPoc
-- **API Endpoint**: `GET /internal/kubernetes_poc/hello_world`
 
 ### Run Tests
 ```bash
@@ -236,19 +233,6 @@ FROM remote_cluster:metrics-*
 5. **Counter vs Gauge metrics**: Some metrics like `k8s.node.cpu.time` are counters and can't be averaged directly
 
 ## API Endpoints
-
-### Hello World
-> **Note**: This is a temporary endpoint for initial plugin setup and should be removed once actual implementation for the project is added.
-
-- **Endpoint**: `GET /internal/kubernetes_poc/hello_world`
-- **Security**: Requires `kibana_read` privilege
-- **Response**: 
-  ```json
-  {
-    "message": "Hello World from kubernetes-poc plugin!",
-    "timestamp": "2025-12-10T..."
-  }
-  ```
 
 ### Cluster Listing
 

@@ -6,12 +6,10 @@
  */
 
 import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-repository';
-import { helloWorldRouteRepository } from './hello_world/route';
 import { clusterListingRouteRepository } from './cluster_listing/route';
 
 function getTypedKubernetesPocServerRouteRepository() {
   const repository = {
-    ...helloWorldRouteRepository,
     ...clusterListingRouteRepository,
   };
   return repository;

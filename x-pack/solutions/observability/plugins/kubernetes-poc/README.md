@@ -4,9 +4,10 @@ A proof of concept plugin for Kubernetes observability in Kibana.
 
 ## Features
 
-- Basic Hello World UI
+- Kubernetes Cluster Listing with health status, pod counts, and utilization metrics
 - Server-side API using @kbn/server-route-repository
 - Type-safe API client
+- Lens-powered visualizations with ES|QL queries
 
 ## Development
 
@@ -48,23 +49,12 @@ graph TB
     style Server fill:#fff4e1
 ```
 
-## Testing
+## API Endpoints
 
-After bootstrapping, test the Hello World API:
-
-```bash
-# Start Kibana
-yarn start
-
-# In browser, navigate to:
-# http://localhost:5601/app/kubernetesPoc
-
-# Click "Call Hello World API" button
+### Cluster Listing
+```
+GET /internal/kubernetes_poc/cluster_listing
 ```
 
-The API endpoint is available at:
-```
-GET /internal/kubernetes_poc/hello_world
-```
-
+Returns a list of all monitored Kubernetes clusters with health status, node counts, pod statuses, and resource utilization.
 
