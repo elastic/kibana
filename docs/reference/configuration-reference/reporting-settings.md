@@ -298,6 +298,6 @@ Each method has its own unique limitations which are important to understand.
 :   Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.
 
 `xpack.reporting.csv.maxRows` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
-:    The maximum number of rows in a CSV report.  Reports longer than maximum will be truncated.  The default is 10,000, the minimum is 1.
+:    The maximum number of rows in a CSV report. Reports longer than the maximum limit will be truncated. The default is 10,000. The minimum is 1.
 
 
