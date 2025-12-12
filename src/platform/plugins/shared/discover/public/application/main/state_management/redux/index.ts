@@ -17,6 +17,7 @@ export {
   type TabStateGlobalState,
   type DiscoverAppState,
   type InternalStateDataRequestParams,
+  TabInitializationStatus,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
