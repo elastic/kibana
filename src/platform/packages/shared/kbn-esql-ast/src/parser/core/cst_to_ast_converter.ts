@@ -9,15 +9,15 @@
 
 import type * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
-import type * as ast from '../types';
-import { isCommand, isStringLiteral } from '../ast/is';
-import { LeafPrinter } from '../pretty_print';
+import type * as ast from '../../types';
+import { isCommand, isStringLiteral } from '../../ast/is';
+import { LeafPrinter } from '../../pretty_print';
 import { getPosition } from './tokens';
 import { nonNullable, unescapeColumn } from './helpers';
-import { firstItem, lastItem, resolveItem, singleItems } from '../visitor/utils';
-import { type AstNodeParserFields, Builder } from '../builder';
+import { firstItem, lastItem, resolveItem, singleItems } from '../../visitor/utils';
+import { type AstNodeParserFields, Builder } from '../../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
-import type { AstNodeTemplate } from '../builder';
+import type { AstNodeTemplate } from '../../builder';
 import type { Parser } from './parser';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>

@@ -9,7 +9,7 @@
 
 import { SuggestionOrderingEngine } from './suggestion_ordering_engine';
 import { SuggestionCategory } from './types';
-import type { ISuggestionItem } from '../commands/registry/types';
+import type { ISuggestionItem } from '../../commands/registry/types';
 
 describe('SuggestionOrderingEngine', () => {
   const engine = new SuggestionOrderingEngine();

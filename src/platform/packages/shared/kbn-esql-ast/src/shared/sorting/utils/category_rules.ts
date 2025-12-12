@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISuggestionItem } from '../../commands/registry/types';
+import type { ISuggestionItem } from '../../../commands/registry/types';
 import { SuggestionCategory } from '../types';
 
 export function detectCategory(item: ISuggestionItem): SuggestionCategory {
