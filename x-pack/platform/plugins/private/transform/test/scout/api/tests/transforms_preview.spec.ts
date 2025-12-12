@@ -10,7 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import type { PostTransformsPreviewRequestSchema } from '../../../../server/routes/api_schemas/transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
   // passing in an empty string for transform id since we will not use

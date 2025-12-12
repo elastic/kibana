@@ -6,13 +6,13 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { KbnClient, RoleApiCredentials } from '@kbn/scout';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 // use Scout data views API service when available
-const deleteDataViewByTitle = async (title: string) => {
+const deleteDataViewByTitle = async (title: string, kbnClient: KbnClient) => {
   try {
     // Get all data views to find the one with matching title
     const response = await kbnClient.request({
@@ -35,17 +35,23 @@ const deleteDataViewByTitle = async (title: string) => {
 };
 
 apiTest.describe(
-  '/internal/transform/transforms/{transformId}/ create',
+  '/internal/transform/transforms/{transformId} create',
   { tag: tags.ESS_ONLY },
   () => {
     let transformPowerUserApiCredentials: RoleApiCredentials;
+    let dataViewToBeDeletedTitle: string;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
     });
 
-    apiTest.afterAll(async ({ apiServices }) => {
+    apiTest.afterEach(async ({ apiServices, kbnClient }) => {
       await apiServices.transform.cleanTransformIndices();
+
+      if (dataViewToBeDeletedTitle) {
+        await deleteDataViewByTitle(dataViewToBeDeletedTitle, kbnClient);
+        dataViewToBeDeletedTitle = ''; // reset after deletion
+      }
     });
 
     apiTest('should create a transform', async ({ apiClient }) => {
@@ -107,8 +113,8 @@ apiTest.describe(
         },
       ]);
 
-      // Clean up data view
-      await deleteDataViewByTitle(destinationIndex);
+      // clean up data view after test
+      dataViewToBeDeletedTitle = destinationIndex;
     });
 
     apiTest('should create a transform with data view and time field', async ({ apiClient }) => {
@@ -141,8 +147,8 @@ apiTest.describe(
         },
       ]);
 
-      // Clean up data view
-      await deleteDataViewByTitle(destinationIndex);
+      // clean up data view after test
+      dataViewToBeDeletedTitle = destinationIndex;
     });
 
     apiTest(

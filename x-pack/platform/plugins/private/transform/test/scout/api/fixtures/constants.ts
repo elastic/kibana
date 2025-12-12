@@ -7,24 +7,12 @@
 
 import type { KibanaRole } from '@kbn/scout';
 
-/**
- * Common HTTP headers used across Transform API tests
- */
+// versioned API headers common to all Transform API requests
 export const COMMON_API_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
   'elastic-api-version': '1',
 } as const;
-
-/**
- * Helper function to merge common headers with custom headers
- */
-export function getCommonHeaders(additionalHeaders: Record<string, string> = {}) {
-  return {
-    ...COMMON_API_HEADERS,
-    ...additionalHeaders,
-  };
-}
 
 export const TRANSFORM_USERS = {
   transformPowerUser: {
