@@ -21,7 +21,11 @@ describe('getAgentBuilderResourceAvailability', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
-      {} as any,
+      {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(true),
+        },
+      } as any,
       {
         spaces: {
           spacesService: {
@@ -44,7 +48,11 @@ describe('getAgentBuilderResourceAvailability', () => {
 
   it('returns unavailable when space solution is Elasticsearch', async () => {
     (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
-      {} as any,
+      {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(true),
+        },
+      } as any,
       {
         spaces: {
           spacesService: {
@@ -66,7 +74,11 @@ describe('getAgentBuilderResourceAvailability', () => {
 
   it('returns unavailable when space solution is Security', async () => {
     (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
-      {} as any,
+      {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(true),
+        },
+      } as any,
       {
         spaces: {
           spacesService: {
@@ -88,7 +100,11 @@ describe('getAgentBuilderResourceAvailability', () => {
 
   it('returns available when space solution is undefined', async () => {
     (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
-      {} as any,
+      {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(true),
+        },
+      } as any,
       {
         spaces: {
           spacesService: {
@@ -108,7 +124,14 @@ describe('getAgentBuilderResourceAvailability', () => {
   });
 
   it('returns available when spaces plugin is unavailable', async () => {
-    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([{} as any, {} as any]);
+    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
+      {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(true),
+        },
+      } as any,
+      {} as any,
+    ]);
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore as any,
       request,
@@ -116,5 +139,25 @@ describe('getAgentBuilderResourceAvailability', () => {
     });
 
     expect(result.status).toBe('available');
+  });
+
+  it('returns unavailable when AI agents feature flag is disabled', async () => {
+    (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
+      {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
+        },
+      } as any,
+      {} as any,
+    ]);
+
+    const result = await getAgentBuilderResourceAvailability({
+      core: mockCore as any,
+      request,
+      logger: mockLogger,
+    });
+
+    expect(result.status).toBe('unavailable');
+    expect(result.reason).toMatch(/AI agents are disabled/);
   });
 });

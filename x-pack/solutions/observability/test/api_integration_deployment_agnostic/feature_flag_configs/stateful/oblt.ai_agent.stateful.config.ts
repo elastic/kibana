@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/stateful.config.base';
+import { createStatefulFeatureFlagTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/feature_flag.stateful.config.base';
 import { services } from '../../services';
 
-export default createStatefulTestConfig<typeof services>({
+export default createStatefulFeatureFlagTestConfig<typeof services>({
   services,
   testFiles: [require.resolve('./oblt.ai_agent.index.ts')],
+  kbnServerArgs: ['--feature_flags.overrides.aiAssistant.aiAgents.enabled=true'],
   junit: {
     reportName:
-      'Stateful Observability - Deployment-agnostic Observability Agent Builder API Integration Tests',
+      'Stateful Observability - Deployment-agnostic Feature Flag Observability Agent Builder API Integration Tests',
   },
   // @ts-expect-error
   kbnTestServer: {

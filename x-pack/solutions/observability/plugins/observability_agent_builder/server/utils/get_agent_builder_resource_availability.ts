@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/onechat-server';
+import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
 import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
@@ -30,8 +31,22 @@ export async function getAgentBuilderResourceAvailability({
   request: KibanaRequest;
   logger: Logger;
 }): Promise<ToolAvailabilityResult> {
+  const [coreStart, pluginsStart] = await core.getStartServices();
+
+  const isAiAgentsEnabled = await coreStart.featureFlags.getBooleanValue(
+    AI_AGENTS_FEATURE_FLAG,
+    AI_AGENTS_FEATURE_FLAG_DEFAULT
+  );
+
+  if (!isAiAgentsEnabled) {
+    logger.debug(`AI agents are disabled (${AI_AGENTS_FEATURE_FLAG}), skipping registration.`);
+    return {
+      status: 'unavailable',
+      reason: `AI agents are disabled (${AI_AGENTS_FEATURE_FLAG})`,
+    };
+  }
+
   try {
-    const [, pluginsStart] = await core.getStartServices();
     const activeSpace = await pluginsStart.spaces?.spacesService.getActiveSpace(request);
     const solution = activeSpace?.solution;
     const isAllowedSolution = !solution || solution === 'classic' || solution === 'oblt';

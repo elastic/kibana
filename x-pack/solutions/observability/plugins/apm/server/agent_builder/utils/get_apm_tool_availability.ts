@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/onechat-server';
+import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../../types';
 import { buildApmToolResources } from './build_apm_tool_resources';
@@ -24,9 +25,23 @@ export async function getApmToolAvailability({
   logger: Logger;
 }): Promise<ToolAvailabilityResult> {
   try {
+    const [coreStart, pluginsStart] = await core.getStartServices();
+
+    const isAiAgentsEnabled = await coreStart.featureFlags.getBooleanValue(
+      AI_AGENTS_FEATURE_FLAG,
+      AI_AGENTS_FEATURE_FLAG_DEFAULT
+    );
+
+    if (!isAiAgentsEnabled) {
+      logger.debug(`AI agents are disabled (${AI_AGENTS_FEATURE_FLAG}), skipping registration.`);
+      return {
+        status: 'unavailable',
+        reason: `AI agents are disabled (${AI_AGENTS_FEATURE_FLAG})`,
+      };
+    }
+
     // Only register APM Agent Builder tools in Observability or Classic solution spaces
     try {
-      const [, pluginsStart] = await core.getStartServices();
       const activeSpace = await pluginsStart.spaces?.spacesService.getActiveSpace(request);
       const solution = activeSpace?.solution;
       const isAllowedSolution = !solution || solution === 'classic' || solution === 'oblt';
