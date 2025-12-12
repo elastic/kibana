@@ -24,6 +24,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 import {
@@ -45,6 +46,7 @@ import {
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
   streamsProcessingSimulationSamplesFetchLatencySchema,
+  streamsPartitioningSamplesFetchLatencySchema,
   streamsTabVisitedSchema,
 } from './schemas';
 
@@ -138,6 +140,11 @@ const streamsProcessingSimulationSamplesFetchLatencyEventType = {
   schema: streamsProcessingSimulationSamplesFetchLatencySchema,
 };
 
+const streamsPartitioningSamplesFetchLatencyEventType = {
+  eventType: STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  schema: streamsPartitioningSamplesFetchLatencySchema,
+};
+
 const streamsTabVisitedEventType = {
   eventType: STREAMS_TAB_VISITED_EVENT_TYPE,
   schema: streamsTabVisitedSchema,
@@ -162,5 +169,6 @@ export {
   streamsFeatureIdentificationDeletedEventType,
   streamsDescriptionGeneratedEventType,
   streamsProcessingSimulationSamplesFetchLatencyEventType,
+  streamsPartitioningSamplesFetchLatencyEventType,
   streamsTabVisitedEventType,
 };
