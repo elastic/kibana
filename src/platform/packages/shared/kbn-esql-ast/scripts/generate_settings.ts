@@ -12,12 +12,12 @@
 import { camelCase } from 'lodash';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import type { ElasticsearchSettingsDefinition } from '../src/definitions/types';
+import type { ElasticsearchSettingsDefinition } from '../src/commands/definitions/types';
 import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
 
 // We exlude the time_zone setting as we decided that we won't support it in Kibana
 const SETTINGS_TO_EXCLUDE = new Set(['time_zone']);
-const GENERATED_DEFINITIONS_PATH = '../src/definitions/generated';
+const GENERATED_DEFINITIONS_PATH = '../src/commands/definitions/generated';
 const ELASTICSEARCH_SETTINGS_PATH =
   '/docs/reference/query-languages/esql/kibana/definition/settings';
 

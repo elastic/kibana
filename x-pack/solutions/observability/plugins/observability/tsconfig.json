@@ -142,7 +142,8 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/onechat-plugin",
     "@kbn/observability-agent-builder",
-    "@kbn/synthtrace"
+    "@kbn/synthtrace",
+    "@kbn/ai-insights"
   ],
   "exclude": ["target/**/*"]
 }
