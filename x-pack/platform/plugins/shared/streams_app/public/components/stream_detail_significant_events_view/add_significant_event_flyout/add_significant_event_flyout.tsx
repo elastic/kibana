@@ -42,6 +42,7 @@ import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
+import { getFormattedError } from '../../../util/errors';
 
 interface Props {
   onClose: () => void;
@@ -173,14 +174,14 @@ export function AddSignificantEventFlyout({
           if (error.name === 'AbortError') {
             return;
           }
-          notifications.showErrorDialog({
+          notifications.toasts.addError(error, {
             title: i18n.translate(
               'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
               {
                 defaultMessage: `Could not generate significant events queries`,
               }
             ),
-            error,
+            toastMessage: getFormattedError(error).message,
           });
         },
         complete: () => {
