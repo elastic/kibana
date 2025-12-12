@@ -139,7 +139,6 @@ export const installRuleAssetsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
-  const esClient = appContextService.getInternalUserESClient();
   const logger = appContextService.getLogger();
   const spaceId = fleetContext.spaceId;
   const { pkgName, pkgVersion } = request.params;
@@ -175,7 +174,6 @@ export const installRuleAssetsHandler: FleetRequestHandler<
   await stepCreateAlertingRules({
     logger,
     savedObjectsClient,
-    esClient,
     packageInstallContext: {
       packageInfo,
       paths: installedPkgWithAssets.paths,

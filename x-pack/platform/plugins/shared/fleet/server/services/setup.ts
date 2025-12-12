@@ -300,7 +300,6 @@ async function createSetupSideEffects(
     ensureDeferredAlertingRules(
       logger,
       soClient,
-      esClient,
       requestContext.spaceId,
       requestContext.authorizationHeader
     ).catch((error) => {

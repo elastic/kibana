@@ -93,7 +93,6 @@ export async function createAlertingRuleFromTemplate(
         logger.debug(
           `Rule: ${ruleId} failed validation for package ${pkgName}, installation will be deferred`
         );
-
         return {
           id: ruleId,
           type: KibanaSavedObjectType.alert,
@@ -110,7 +109,7 @@ export async function createAlertingRuleFromTemplate(
         enabled: true,
         actions: [],
         consumer: 'alerts',
-      }, // what value for consumer will make sense?
+      },
       options: { id: ruleId },
     });
 
@@ -133,15 +132,22 @@ export async function createAlertingRuleFromTemplate(
 export async function stepCreateAlertingRules(
   context: Pick<
     InstallContext,
-    | 'logger'
-    | 'savedObjectsClient'
-    | 'esClient'
-    | 'packageInstallContext'
-    | 'spaceId'
-    | 'authorizationHeader'
+    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'authorizationHeader'
   >
 ) {
-  const { logger, savedObjectsClient, esClient, packageInstallContext, spaceId } = context;
+  const { logger, savedObjectsClient, packageInstallContext, authorizationHeader, spaceId } =
+    context;
+
+  if (!authorizationHeader) {
+    logger.debug('No authorization header provided, skipping alerting rule creation step');
+    return;
+  }
+
+  // User scoped ES client is required to ensure the ESQL that is validated is authorized to the indexes used
+  // An internal ES client will fail on non managed indexes.
+  const userRequest = createKibanaRequestFromAuth(authorizationHeader);
+  const userEsClient = appContextService.getUserScopedESClient(userRequest);
+
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -155,6 +161,7 @@ export async function stepCreateAlertingRules(
           .getAlertingStart()
           ?.getRulesClientWithRequest(createKibanaRequestFromAuth(context.authorizationHeader))
       : undefined;
+
     const alertTemplateAssets: ArchiveAsset[] = [];
     await packageInstallContext.archiveIterator.traverseEntries(
       async (entry) => {
@@ -173,7 +180,7 @@ export async function stepCreateAlertingRules(
       alertTemplateAssets,
       async (alertTemplate) => {
         const ref = await createAlertingRuleFromTemplate(
-          { rulesClient, esClient, logger },
+          { rulesClient, esClient: userEsClient, logger },
           { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
         );
 

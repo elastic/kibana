@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../../common/constants';
 import { type HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
@@ -15,7 +15,6 @@ import { createArchiveIteratorFromMap } from '../epm/archive/archive_iterator';
 export async function ensureDeferredAlertingRules(
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
   spaceId: string,
   authorizationHeader: HTTPAuthorizationHeader
 ) {
@@ -26,6 +25,7 @@ export async function ensureDeferredAlertingRules(
   });
 
   if (!installedPkgWithAssets) {
+    logger.debug('No installed Elastic Agent package found');
     return;
   }
 
@@ -35,6 +35,7 @@ export async function ensureDeferredAlertingRules(
   });
 
   if (!installation) {
+    logger.debug('No Elastic Agent package installation object found');
     return;
   }
 
@@ -43,6 +44,7 @@ export async function ensureDeferredAlertingRules(
   );
 
   if (deferredRules.length === 0) {
+    logger.debug('No deferred alerting rules to install');
     return;
   }
 
@@ -51,7 +53,6 @@ export async function ensureDeferredAlertingRules(
   await stepCreateAlertingRules({
     logger,
     savedObjectsClient,
-    esClient,
     packageInstallContext: {
       packageInfo,
       paths,
