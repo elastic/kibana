@@ -6,10 +6,9 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import { firstValueFrom } from 'rxjs';
 import type { Streams, Feature, FeatureType } from '@kbn/streams-schema';
-import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/internal/streams/features/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
+import type { IdentifyFeaturesResult } from '@kbn/streams-plugin/server/lib/streams/feature/feature_type_registry';
 import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
@@ -18,8 +17,9 @@ interface StreamFeaturesApi {
   identifyFeatures: (
     connectorId: string,
     to: string,
-    from: string
-  ) => Promise<IdentifiedFeaturesEvent>;
+    from: string,
+    force: boolean
+  ) => Promise<IdentifyFeaturesResult>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (
     features: Pick<Feature, 'type' | 'name'>[]
@@ -40,42 +40,55 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    identifyFeatures: async (connectorId: string, to: string, from: string) => {
-      const events$ = streamsRepositoryClient.stream(
-        'POST /internal/streams/{name}/features/_identify',
-        {
-          signal,
-          params: {
-            path: { name: definition.name },
-            query: {
-              connectorId,
-              to,
-              from,
-            },
-          },
+    identifyFeatures: async (
+      connectorId: string,
+      to: string,
+      from: string,
+      forceInitialCall: boolean
+    ) => {
+      // Timeout after 5 minutes
+      const pollInterval = 5_000;
+      const maxAttempts = 60;
+
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        if (signal.aborted) {
+          throw new Error('Request aborted');
         }
-      );
 
-      const identifiedFeatures = await firstValueFrom(events$);
-
-      telemetryClient.trackFeaturesIdentified({
-        count: identifiedFeatures.features.length,
-        count_by_type: identifiedFeatures.features.reduce<Record<FeatureType, number>>(
-          (acc, feature) => {
-            acc[feature.type] = (acc[feature.type] || 0) + 1;
-            return acc;
-          },
+        const taskResult = await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{name}/features/_identify',
           {
-            system: 0,
+            signal,
+            params: {
+              path: { name: definition.name },
+              query: {
+                connectorId,
+                to,
+                from,
+                force: attempts === 0 ? forceInitialCall : false,
+              },
+            },
           }
-        ),
-        stream_name: definition.name,
-        stream_type: getStreamTypeFromDefinition(definition),
-        input_tokens_used: identifiedFeatures.tokensUsed.prompt,
-        output_tokens_used: identifiedFeatures.tokensUsed.completion,
-      });
+        );
 
-      return identifiedFeatures;
+        // Check if task is complete
+        // Adjust these status checks based on your actual response structure
+        if (taskResult.status === 'completed') {
+          return taskResult;
+        } else if (taskResult.status === 'failed') {
+          throw new Error(`Feature identification failed: ${taskResult.error}`);
+        } else if (taskResult.status === 'stale') {
+          throw new Error('Feature identification task is stale');
+        }
+
+        // Task still in progress, wait before polling again
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      }
+
+      throw new Error('Failed to load identified features within the expected time frame');
     },
     addFeaturesToStream: async (features: Feature[]) => {
       telemetryClient.trackFeaturesSaved({

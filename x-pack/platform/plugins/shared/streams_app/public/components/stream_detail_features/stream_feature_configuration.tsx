@@ -66,10 +66,14 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                       onClick: () => {
                         setIsLoading(true);
                         setIsFlyoutVisible(!isFlyoutVisible);
+
+                        const to = new Date().toISOString();
+                        const from = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
                         identifyFeatures(
                           aiFeatures?.genAiConnectors.selectedConnector!,
-                          'now',
-                          'now-24h'
+                          to,
+                          from,
+                          true
                         )
                           .then((data) => {
                             setFeatures(data.features);
