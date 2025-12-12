@@ -14,6 +14,9 @@ import type {
   StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
+  StreamsAttachmentLinkChangedProps,
+  StreamsAttachmentFlyoutOpenedProps,
+  StreamsAttachmentFlyoutActionProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsSchemaUpdatedProps,
@@ -25,6 +28,7 @@ import type {
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
+  StreamsTabVisitedProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
@@ -33,6 +37,10 @@ import {
   STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
+  STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -45,6 +53,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -56,6 +65,22 @@ export class StreamsTelemetryClient {
 
   public trackAttachmentClick(params: StreamsAttachmentClickEventProps) {
     this.analytics.reportEvent(STREAMS_ATTACHMENT_CLICK_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentLinked(params: StreamsAttachmentLinkChangedProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_LINKED_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentUnlinked(params: StreamsAttachmentLinkChangedProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentFlyoutOpened(params: StreamsAttachmentFlyoutOpenedProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentFlyoutAction(params: StreamsAttachmentFlyoutActionProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE, params);
   }
 
   public startTrackingAIGrokSuggestionLatency(
@@ -158,6 +183,10 @@ export class StreamsTelemetryClient {
         duration_ms: Date.now() - start,
       });
     };
+  }
+
+  public trackTabVisited(params: StreamsTabVisitedProps) {
+    this.analytics.reportEvent(STREAMS_TAB_VISITED_EVENT_TYPE, params);
   }
 
   private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {

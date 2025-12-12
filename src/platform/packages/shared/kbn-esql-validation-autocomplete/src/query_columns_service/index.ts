@@ -8,12 +8,8 @@
  */
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '@kbn/esql-ast';
-import type {
-  ESQLColumnData,
-  ESQLFieldWithMetadata,
-  ESQLPolicy,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLColumnData, ESQLPolicy } from '@kbn/esql-ast/src/commands/registry/types';
+import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];

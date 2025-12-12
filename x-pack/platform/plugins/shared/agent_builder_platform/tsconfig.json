@@ -30,5 +30,12 @@
     "@kbn/esql-validation-autocomplete",
     "@kbn/inference-common",
     "@kbn/llm-tasks-plugin",
+    "@kbn/i18n",
+    "@kbn/onechat-browser",
+    "@kbn/cases-plugin",
+    "@kbn/core-http-server",
+    "@kbn/spaces-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
   ]
 }

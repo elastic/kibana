@@ -7,6 +7,10 @@
 
 import path from 'path';
 
+import type { Logger } from '@kbn/core/server';
+
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+
 import { FleetError } from '../../../../../errors';
 import {
   saveKnowledgeBaseContentToIndex,
@@ -24,7 +28,7 @@ import type { EsAssetReference } from '../../../../../types';
 import { updateEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
-import { appContextService } from '../../../../app_context';
+import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 export const DOCS_PATH_PATTERN = '/docs/';
 export const KNOWLEDGE_BASE_FOLDER = 'knowledge_base/';
@@ -82,17 +86,18 @@ export async function stepSaveKnowledgeBase(
   const { packageInstallContext, esClient, savedObjectsClient, logger } = context;
   const { packageInfo, archiveIterator } = packageInstallContext;
 
-  let esReferences = context.esReferences ?? [];
+  const esReferences = context.esReferences ?? [];
 
   logger.debug(
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
 
-  // Check if knowledge base installation is enabled via experimental feature flag
-  const experimentalFeatures = appContextService.getExperimentalFeatures();
-  if (!experimentalFeatures.installIntegrationsKnowledge) {
+  const integrationKnowledgeEnabled = await getIntegrationKnowledgeSetting(savedObjectsClient);
+
+  // Check if knowledge base installation is enabled via user setting
+  if (!integrationKnowledgeEnabled) {
     logger.debug(
-      `Knowledge base step: Skipping knowledge base save - installIntegrationsKnowledge experimental feature is disabled`
+      `Knowledge base step: Skipping knowledge base save - integration knowledge enabled setting is disabled`
     );
     return { esReferences };
   }
@@ -104,6 +109,25 @@ export async function stepSaveKnowledgeBase(
     return { esReferences };
   }
 
+  return await indexKnowledgeBase(
+    esReferences,
+    savedObjectsClient,
+    esClient,
+    logger,
+    packageInfo,
+    archiveIterator
+  );
+}
+
+export async function indexKnowledgeBase(
+  esReferences: EsAssetReference[],
+  savedObjectsClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  packageInfo: { name: string; version: string },
+  archiveIterator: ArchiveIterator,
+  abortController?: AbortController
+): Promise<{ esReferences: EsAssetReference[] }> {
   // Extract knowledge base content directly from the archive
   const knowledgeBaseItems = await extractKnowledgeBaseFromArchive(
     archiveIterator,
@@ -111,7 +135,9 @@ export async function stepSaveKnowledgeBase(
     packageInfo.version
   );
 
-  logger.debug(`Knowledge base step: Found ${knowledgeBaseItems.length} items to process`);
+  logger.debug(
+    `Knowledge base step: Found ${knowledgeBaseItems.length} items to process for package ${packageInfo.name}@${packageInfo.version}`
+  );
 
   // Save knowledge base content if present
   if (knowledgeBaseItems && knowledgeBaseItems.length > 0) {
@@ -123,9 +149,12 @@ export async function stepSaveKnowledgeBase(
         pkgName: packageInfo.name,
         pkgVersion: packageInfo.version,
         knowledgeBaseContent: knowledgeBaseItems,
+        abortController,
       });
 
-      logger.debug(`Knowledge base step: Saved ${documentIds.length} documents to index`);
+      logger.debug(
+        `Knowledge base step: Saved ${documentIds.length} documents to index for package ${packageInfo.name}@${packageInfo.version}`
+      );
 
       // Add knowledge base asset references using the ES-generated document IDs
       const knowledgeBaseAssetRefs = documentIds.map((docId) => ({

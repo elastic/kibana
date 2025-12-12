@@ -9,31 +9,30 @@
 
 import type { ESQLColumn } from '@kbn/esql-ast';
 import {
-  ESQL_VARIABLES_PREFIX,
   EsqlQuery,
   Walker,
   esqlCommandRegistry,
-  getCommandAutocompleteDefinitions,
   parse,
   type ESQLAstItem,
   type ESQLCommandOption,
   type ESQLFunction,
   SuggestionOrderingEngine,
 } from '@kbn/esql-ast';
-import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import { getCommandAutocompleteDefinitions } from '@kbn/esql-ast/src/commands/registry/complete_items';
+import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast/src/commands/registry/constants';
+import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands/registry/options/recommended_queries';
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
   ISuggestionItem,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
-import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
+} from '@kbn/esql-ast/src/commands/registry/types';
+import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { correctQuerySyntax } from '@kbn/esql-ast/src/commands/definitions/utils/ast';
+import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getCursorContext } from '../shared/get_cursor_context';
 import { getFromCommandHelper } from '../shared/resources_helpers';
-import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
@@ -169,9 +168,14 @@ export async function suggest(
   const lastCharacterTyped = innerText[innerText.length - 1];
   let controlSuggestions: ISuggestionItem[] = [];
   if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
+    const secondToLastCharacter = innerText[innerText.length - 2];
+    const variableType =
+      secondToLastCharacter === ESQL_VARIABLES_PREFIX
+        ? ESQLVariableType.FIELDS
+        : ESQLVariableType.VALUES;
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
-      ESQLVariableType.VALUES,
+      variableType,
       ControlTriggerSource.QUESTION_MARK,
       getVariables?.(),
       false

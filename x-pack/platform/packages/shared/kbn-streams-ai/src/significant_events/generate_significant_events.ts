@@ -14,7 +14,7 @@ import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { fromKueryExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
-import { GenerateSignificantEventsPrompt } from './prompt';
+import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 
@@ -23,6 +23,7 @@ interface Query {
   title: string;
   category: SignificantEventType;
   severity_score: number;
+  evidence?: string[];
 }
 
 /**
@@ -39,6 +40,9 @@ export async function generateSignificantEvents({
   esClient,
   inferenceClient,
   signal,
+  sampleDocsSize,
+  // optional overrides for templates
+  systemPromptOverride,
   logger,
 }: {
   stream: Streams.all.Definition;
@@ -49,6 +53,8 @@ export async function generateSignificantEvents({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  sampleDocsSize?: number;
+  systemPromptOverride?: string;
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
@@ -58,6 +64,7 @@ export async function generateSignificantEvents({
   logger.trace('Describing dataset for significant event generation');
   const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
     describeDataset({
+      sampleDocsSize,
       start,
       end,
       esClient,
@@ -65,6 +72,11 @@ export async function generateSignificantEvents({
       filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
     })
   );
+
+  // create the prompt instance using provided overrides (if any)
+  const prompt = createGenerateSignificantEventsPrompt({
+    systemPromptOverride,
+  });
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -75,7 +87,7 @@ export async function generateSignificantEvents({
         description: feature?.description || stream.description,
       },
       maxSteps: 4,
-      prompt: GenerateSignificantEventsPrompt,
+      prompt,
       inferenceClient,
       toolCallbacks: {
         add_queries: async (toolCall) => {

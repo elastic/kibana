@@ -11,8 +11,8 @@ import { EsqlQuery, type ESQLSource } from '@kbn/esql-ast';
 import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,
-} from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
-import type { ESQLCallbacks } from '../shared/types';
+} from '@kbn/esql-ast/src/commands/registry/options/recommended_queries';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import type { InlineSuggestionItem } from './types';

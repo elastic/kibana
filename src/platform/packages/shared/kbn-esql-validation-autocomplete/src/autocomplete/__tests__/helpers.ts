@@ -7,23 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import type {
-  FieldType,
-  FunctionParameterType,
-  FunctionReturnType,
-  FunctionDefinition,
-} from '@kbn/esql-ast';
-import { withAutoSuggest, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
-import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import type {
-  Location,
-  ESQLFieldWithMetadata,
-  ISuggestionItem,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
-import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
-import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import type { FunctionParameterType, FunctionReturnType, FunctionDefinition } from '@kbn/esql-ast';
+import { withAutoSuggest, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { getSafeInsertText } from '@kbn/esql-ast/src/commands/definitions/utils';
+import type { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/time_series_agg_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/scalar_functions';
 import {
   operatorsDefinitions,
   logicalOperators,
@@ -32,13 +23,18 @@ import {
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
-} from '@kbn/esql-ast/src/definitions/all_operators';
+} from '@kbn/esql-ast/src/commands/definitions/all_operators';
 import type { LicenseType } from '@kbn/licensing-types';
+import {
+  type ESQLCallbacks,
+  type ESQLFieldWithMetadata,
+  type EsqlFieldType,
+  esqlFieldTypes,
+} from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import { getLocationFromCommandOrOptionName } from '@kbn/esql-ast/src/commands_registry/location';
+import { getLocationFromCommandOrOptionName } from '@kbn/esql-ast/src/commands/registry/location';
 import { NOT_SUGGESTED_TYPES } from '../../query_columns_service';
 import * as autocomplete from '../autocomplete';
-import type { ESQLCallbacks } from '../../shared/types';
 import {
   joinIndices,
   timeseriesIndices,
@@ -56,7 +52,7 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
 
 export const fields: TestField[] = [
-  ...fieldTypes.map((type) => ({
+  ...esqlFieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
     userDefined: false as const,
@@ -325,7 +321,7 @@ export function getFunctionSignaturesByReturnType(
 }
 
 export function getFieldNamesByType(
-  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
+  _requestedType: Readonly<EsqlFieldType | 'any' | Array<EsqlFieldType | 'any'>>
 ) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
@@ -473,3 +469,21 @@ export const attachTriggerCommand = (
         text: s,
       } as ISuggestionItem)
     : withAutoSuggest(s as ISuggestionItem);
+
+export const attachParameterHelperCommand = (
+  s: string | PartialSuggestionWithText
+): PartialSuggestionWithText => {
+  const command = {
+    id: 'editor.action.triggerParameterHints',
+    title: '',
+  };
+  return typeof s === 'string'
+    ? {
+        text: s,
+        command,
+      }
+    : {
+        ...s,
+        command,
+      };
+};

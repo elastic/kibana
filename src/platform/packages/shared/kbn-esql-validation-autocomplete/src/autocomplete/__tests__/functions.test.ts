@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { FunctionDefinitionTypes } from '@kbn/esql-ast';
-import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
-import { Location } from '@kbn/esql-ast/src/commands_registry/types';
-import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
+import { Location } from '@kbn/esql-ast/src/commands/registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/commands/definitions/utils/test_functions';
 import { getFunctionSignaturesByReturnType, setup, createCustomCallbackMocks } from './helpers';
 import { uniq } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -20,7 +20,7 @@ import {
   nullCheckOperators,
   inOperators,
   patternMatchOperators,
-} from '@kbn/esql-ast/src/definitions/all_operators';
+} from '@kbn/esql-ast/src/commands/definitions/all_operators';
 
 const arithmeticSymbols = arithmeticOperators.map(({ name }) => name);
 const comparisonSymbols = comparisonFunctions.map(({ name }) => name);
@@ -1974,6 +1974,40 @@ describe('functions arg suggestions', () => {
       );
 
       expect(labels).not.toContain('CASE');
+    });
+  });
+
+  describe('conditional function autocomplete', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          name: 'conditional_mock',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: 'Mock function with isSignatureRepeating',
+          locationsAvailable: [Location.EVAL, Location.STATS],
+          signatures: [
+            {
+              params: [
+                { name: 'condition', type: 'boolean' },
+                { name: 'value', type: 'any' },
+              ],
+              returnType: 'unknown',
+              minParams: 2,
+              isSignatureRepeating: true,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('does not suggest comma after string literal at default position', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, "value", "default" /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain(',');
     });
   });
 });
