@@ -7,7 +7,6 @@
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { getModifiedValue } from '@kbn/alerting-plugin/server/rules_client/common';
 
 export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
 
@@ -37,13 +36,6 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     },
     risk_score: {
       type: 'float',
-    },
-    mapped_params: {
-      properties: {
-        severity: {
-          type: 'keyword',
-        },
-      },
     },
   },
 };
@@ -82,36 +74,6 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
             risk_score: {
               type: 'float',
             },
-          },
-        },
-      ],
-    },
-    '2': {
-      changes: [
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            mapped_params: {
-              properties: {
-                severity: {
-                  type: 'keyword',
-                },
-              },
-            },
-          },
-        },
-        {
-          type: 'data_backfill',
-          backfillFn: (prevAttributes, context) => {
-            // NOTE: Adds a new field field to the doc, which isn't ideal
-            const mappedSeverity = getModifiedValue('severity', prevAttributes.attributes.severity);
-            return {
-              attributes: {
-                mapped_params: {
-                  severity: mappedSeverity,
-                },
-              },
-            };
           },
         },
       ],
