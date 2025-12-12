@@ -297,7 +297,6 @@ describe('Update profile routes', () => {
           darkMode: 'dark',
           contrastMode: 'high',
         },
-        'solutionNavigationTour:completed': true,
       };
 
       await expect(

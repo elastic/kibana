@@ -354,8 +354,6 @@
       "@kbn/core-chrome-layout-utils/*": ["src/core/packages/chrome/layout/core-chrome-layout-utils/*"],
       "@kbn/core-chrome-navigation": ["src/core/packages/chrome/navigation"],
       "@kbn/core-chrome-navigation/*": ["src/core/packages/chrome/navigation/*"],
-      "@kbn/core-chrome-navigation-tour": ["src/core/packages/chrome/navigation-tour"],
-      "@kbn/core-chrome-navigation-tour/*": ["src/core/packages/chrome/navigation-tour/*"],
       "@kbn/core-config-server-internal": ["src/core/packages/config/server-internal"],
       "@kbn/core-config-server-internal/*": ["src/core/packages/config/server-internal/*"],
       "@kbn/core-custom-branding-browser": ["src/core/packages/custom-branding/browser"],

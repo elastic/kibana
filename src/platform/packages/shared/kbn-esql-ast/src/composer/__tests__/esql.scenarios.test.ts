@@ -26,6 +26,13 @@ describe('various dynamic query construction scenarios', () => {
     expect(query.toRequest().params).toEqual([]);
   });
 
+  test('can inline a qualified field name', () => {
+    const field = '[index].[field]';
+    const query = esql`FROM index | WHERE ${field} > 42 | LIMIT 10`;
+
+    expect(query.print()).toBe('FROM index | WHERE [index].[field] > 42 | LIMIT 10');
+  });
+
   test('can inline a list sources', () => {
     const indices = ['index1', 'index2'];
     const nodes = indices.map((index) => esql.src(index));

@@ -15,6 +15,7 @@ import type {
   ESQLDatePeriodLiteral,
   ESQLIdentifier,
   ESQLLiteral,
+  ESQLParam,
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSource,
@@ -60,34 +61,41 @@ export const LeafPrinter = {
   },
 
   column: (node: ESQLColumn) => {
-    const args = node.args;
+    const printColumnFromArgs = (args: (ESQLIdentifier | ESQLParam)[]) => {
+      let formatted = '';
+      for (const arg of args) {
+        switch (arg.type) {
+          case 'identifier': {
+            if (formatted.length > 0) {
+              formatted += '.';
+            }
 
-    let formatted = '';
+            formatted += LeafPrinter.identifier(arg);
 
-    for (const arg of args) {
-      switch (arg.type) {
-        case 'identifier': {
-          if (formatted.length > 0) {
-            formatted += '.';
+            break;
           }
+          case 'literal': {
+            if (formatted.length > 0) {
+              formatted += '.';
+            }
 
-          formatted += LeafPrinter.identifier(arg);
+            formatted += LeafPrinter.literal(arg);
 
-          break;
-        }
-        case 'literal': {
-          if (formatted.length > 0) {
-            formatted += '.';
+            break;
           }
-
-          formatted += LeafPrinter.literal(arg);
-
-          break;
         }
       }
-    }
+      return formatted;
+    };
 
-    return formatted;
+    if (node.qualifier) {
+      return `[${LeafPrinter.identifier(node.qualifier)}].[${printColumnFromArgs(
+        // Removes the first argument which is the already printed qualifier
+        node.args.slice(1)
+      )}]`;
+    } else {
+      return printColumnFromArgs(node.args);
+    }
   },
 
   string: (node: Pick<ESQLStringLiteral, 'valueUnquoted' | 'unquoted'>) => {

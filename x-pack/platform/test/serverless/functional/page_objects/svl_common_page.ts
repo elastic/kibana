@@ -60,9 +60,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     log.debug(`browser: clearing session & local storages`);
     await browser.clearSessionStorage();
     await browser.clearLocalStorage();
-    log.debug(`browser: force hide non-relevant tours and announcements`);
-    // TODO: remove in https://github.com/elastic/kibana/issues/239313
-    await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
 
     await pageObjects.common.sleep(700);
   };
