@@ -11,7 +11,7 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type {
+import {
   MessageChunkEvent,
   MessageCompleteEvent,
   ThinkingCompleteEvent,
@@ -20,6 +20,8 @@ import type {
   ToolResultEvent,
   PromptRequestEvent,
   ReasoningEvent,
+  ConversationRound,
+  isToolCallStep,
 } from '@kbn/onechat-common/chat';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
@@ -65,16 +67,26 @@ export type ConvertedEvents =
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  pendingRound,
   logger,
   startTime,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
+  pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
+
+    if (pendingRound) {
+      const toolCalls = pendingRound.steps.filter(isToolCallStep);
+      toolCalls.forEach((toolCall) => {
+        toolCallIdToIdMap.set(toolCall.tool_call_id, toolCall.tool_id);
+      });
+    }
+
     const messageId = uuidv4();
 
     let isThinkingComplete = false;

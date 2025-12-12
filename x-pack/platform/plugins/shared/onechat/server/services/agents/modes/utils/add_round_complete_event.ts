@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
 import { map, merge, share, toArray } from 'rxjs';
-import type {
+import {
   ChatAgentEvent,
   RoundCompleteEvent,
   RoundInput,
@@ -16,6 +16,11 @@ import type {
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
+  ReasoningStep,
+  ToolCallStep,
+  ToolProgressEvent,
+  ToolResultEvent,
+  isToolCallStep,
 } from '@kbn/onechat-common';
 import {
   ChatEventType,
@@ -42,11 +47,13 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 };
 
 export const addRoundCompleteEvent = ({
+  pendingRound,
   userInput,
   startTime,
   endTime,
   modelProvider,
 }: {
+  pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
   startTime: Date;
   modelProvider: ModelProvider;
@@ -59,18 +66,28 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
-          const round = createRoundFromEvents({
-            events,
-            input: userInput,
-            startTime,
-            endTime,
-            modelProvider,
-          });
+          const round = pendingRound
+            ? resumeRound({
+                pendingRound,
+                events,
+                input: userInput,
+                startTime,
+                endTime,
+                modelProvider,
+              })
+            : createRound({
+                events,
+                input: userInput,
+                startTime,
+                endTime,
+                modelProvider,
+              });
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
               round,
+              resumed: pendingRound !== null,
             },
           };
 
@@ -81,7 +98,82 @@ export const addRoundCompleteEvent = ({
   };
 };
 
-const createRoundFromEvents = ({
+const resumeRound = ({
+  pendingRound,
+  events,
+  input,
+  startTime,
+  endTime = new Date(),
+  modelProvider,
+}: {
+  pendingRound: ConversationRound;
+  events: SourceEvents[];
+  input: RoundInput;
+  startTime: Date;
+  endTime?: Date;
+  modelProvider: ModelProvider;
+}): ConversationRound => {
+  const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
+  // TODO: another way to detect interrupted step?
+  if (isToolCallStep(lastStep) && lastStep.results.length === 0) {
+    const toolCallId = lastStep.tool_call_id;
+
+    const toolResults = events
+      .filter(isToolResultEvent)
+      .filter(({ data }) => data.tool_call_id === toolCallId);
+    const toolProgressions = events
+      .filter(isToolProgressEvent)
+      .filter(({ data }) => data.tool_call_id === toolCallId);
+
+    lastStep.results = toolResults.flatMap(({ data }) => data.results);
+    lastStep.progression = [
+      ...(lastStep.progression ?? []),
+      ...toolProgressions.map(({ data }) => data),
+    ];
+  }
+
+  const followUp = createRound({
+    events,
+    input,
+    startTime,
+    endTime,
+    modelProvider,
+  });
+
+  return mergeRounds(pendingRound, followUp);
+};
+
+const mergeRounds = (previous: ConversationRound, next: ConversationRound): ConversationRound => {
+  let traceId: string[] | undefined;
+  if (previous.trace_id || next.trace_id) {
+    traceId = [
+      ...(previous.trace_id
+        ? Array.isArray(previous.trace_id)
+          ? previous.trace_id
+          : [previous.trace_id]
+        : []),
+      ...(next.trace_id ? (Array.isArray(next.trace_id) ? next.trace_id : [next.trace_id]) : []),
+    ];
+  }
+
+  const mergedRound: ConversationRound = {
+    id: previous.id,
+    status: next.status,
+    pending_prompt: next.pending_prompt,
+    input: previous.input,
+    steps: [...previous.steps, ...next.steps],
+    trace_id: traceId,
+    started_at: previous.started_at,
+    time_to_first_token: previous.time_to_first_token + next.time_to_first_token,
+    time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
+    model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
+    response: next.response,
+  };
+
+  return mergedRound;
+};
+
+const createRound = ({
   events,
   input,
   startTime,
@@ -94,53 +186,30 @@ const createRoundFromEvents = ({
   endTime?: Date;
   modelProvider: ModelProvider;
 }): ConversationRound => {
-  const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
-  const toolProgressions = events.filter(isToolProgressEvent).map((event) => event.data);
+  const toolResults = events.filter(isToolResultEvent);
+  const toolProgressions = events.filter(isToolProgressEvent);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
   const promptRequestEvents = events.filter(isPromptRequestEvent);
 
-  const timeToLastToken = endTime.getTime() - startTime.getTime();
-  const timeToFirstToken = thinkingCompleteEvent
-    ? thinkingCompleteEvent.data.time_to_first_token
-    : 0;
-
   const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
     if (isToolCallEvent(event)) {
       const toolCall = event.data;
-
       const toolResult = toolResults.find(
-        (result) => result.tool_call_id === toolCall.tool_call_id
+        (result) => result.data.tool_call_id === toolCall.tool_call_id
       );
-
-      const toolProgress = toolProgressions
-        .filter((progressEvent) => progressEvent.tool_call_id === toolCall.tool_call_id)
-        .map((progress) => ({
-          message: progress.message,
-        }));
+      const toolProgress = toolProgressions.filter(
+        (progressEvent) => progressEvent.data.tool_call_id === toolCall.tool_call_id
+      );
 
       // TODO: add interrupt event
 
-      return [
-        {
-          type: ConversationRoundStepType.toolCall,
-          tool_call_id: toolCall.tool_call_id,
-          tool_id: toolCall.tool_id,
-          progression: toolProgress,
-          params: toolCall.params,
-          results: toolResult?.results ?? [],
-        },
-      ];
+      return [createToolCallStep({ toolCall: event, toolResult, toolProgress })];
     }
     if (isReasoningEvent(event)) {
       if (event.data.transient !== true) {
-        return [
-          {
-            type: ConversationRoundStepType.reasoning,
-            reasoning: event.data.reasoning,
-          },
-        ];
+        return [createReasoningStep(event)];
       } else {
         return [];
       }
@@ -154,6 +223,11 @@ const createRoundFromEvents = ({
   if (!lastMessage && !promptRequest) {
     throw new Error('No response event found in round events');
   }
+
+  const timeToLastToken = endTime.getTime() - startTime.getTime();
+  const timeToFirstToken = thinkingCompleteEvent
+    ? thinkingCompleteEvent.data.time_to_first_token
+    : timeToLastToken;
 
   const round: ConversationRound = {
     id: uuidv4(),
@@ -179,6 +253,32 @@ const createRoundFromEvents = ({
   return round;
 };
 
+const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
+  return {
+    type: ConversationRoundStepType.reasoning,
+    reasoning: event.data.reasoning,
+  };
+};
+
+const createToolCallStep = ({
+  toolCall,
+  toolResult,
+  toolProgress,
+}: {
+  toolCall: ToolCallEvent;
+  toolProgress: ToolProgressEvent[];
+  toolResult?: ToolResultEvent;
+}): ToolCallStep => {
+  return {
+    type: ConversationRoundStepType.toolCall,
+    tool_id: toolCall.data.tool_id,
+    params: toolCall.data.params,
+    tool_call_id: toolCall.data.tool_call_id,
+    progression: toolProgress.map(({ data: { message } }) => ({ message })),
+    results: toolResult?.data.results ?? [],
+  };
+};
+
 const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
@@ -193,5 +293,17 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+  };
+};
+
+const mergeModelUsage = (
+  a: RoundModelUsageStats,
+  b: RoundModelUsageStats
+): RoundModelUsageStats => {
+  return {
+    connector_id: a.connector_id,
+    llm_calls: a.llm_calls + b.llm_calls,
+    input_tokens: a.input_tokens + b.input_tokens,
+    output_tokens: a.output_tokens + b.output_tokens,
   };
 };

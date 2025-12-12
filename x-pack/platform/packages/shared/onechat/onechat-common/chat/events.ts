@@ -19,7 +19,7 @@ export enum ChatEventType {
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
   thinkingComplete = 'thinking_complete',
-  promptRequest = 'tool_result',
+  promptRequest = 'prompt_request',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -182,6 +182,8 @@ export const isThinkingCompleteEvent = (
 export interface RoundCompleteEventData {
   /** round that was completed */
   round: ConversationRound;
+  /** if true, it means the round was resumed, so we need to replace the last one instead of happening a new round */
+  resumed?: boolean;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;

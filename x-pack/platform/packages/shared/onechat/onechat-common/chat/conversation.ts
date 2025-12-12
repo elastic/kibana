@@ -183,7 +183,7 @@ export interface ConversationRound {
   /** Model Usage statistics for this round */
   model_usage: RoundModelUsageStats;
   /** when tracing is enabled, contains the traceId associated with this round */
-  trace_id?: string;
+  trace_id?: string | string[];
 }
 
 export interface RoundModelUsageStats {

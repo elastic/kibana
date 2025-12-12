@@ -16,11 +16,8 @@ import { ConversationRoundStatus } from '@kbn/onechat-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
 import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
-import {
-  createReasoningEvent,
-  createToolCallMessage,
-  ToolIdMapping,
-} from '@kbn/onechat-genai-utils/langchain';
+import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
+import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
 import { AgentPromptSource } from '@kbn/onechat-common/agents/prompts';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
@@ -81,7 +78,7 @@ export const createAgentGraph = ({
     if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
       const awaitingPrompt = lastRound.pending_prompt!;
       if (awaitingPrompt.source === AgentPromptSource.tool) {
-        // TODO: add tool call action
+        // TODO: should load full history of previous events instead
         const toolName =
           onechatToLangchainIdMap.get(awaitingPrompt.data.toolId) ?? awaitingPrompt.data.toolId;
         const action = toolCallAction([
@@ -104,7 +101,7 @@ export const createAgentGraph = ({
 
   const initializeEdge = async (state: StateType) => {
     if (state.awaitingPrompt) {
-      return steps.resumeToolExecution;
+      return steps.executeTool;
     }
     return steps.researchAgent;
   };
@@ -184,21 +181,6 @@ export const createAgentGraph = ({
     }
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
-    const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
-    const action = processToolNodeResponse(toolNodeResult);
-    return {
-      mainActions: [action],
-    };
-  };
-
-  const resumeToolExecution = async (state: StateType) => {
-    const toolPrompt = state.awaitingPrompt;
-    const toolName = onechatToLangchainIdMap.get(toolPrompt.data.toolId) ?? toolPrompt.data.toolId;
-    const toolCallMessage = createToolCallMessage({
-      toolName,
-      args: toolPrompt.data.toolParams,
-      toolCallId: toolPrompt.data.toolCallId,
-    });
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const action = processToolNodeResponse(toolNodeResult);
     return {
@@ -329,7 +311,6 @@ export const createAgentGraph = ({
     .addNode(steps.initialize, initialize)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
-    .addNode(steps.resumeToolExecution, resumeToolExecution)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.prepareToAnswer, prepareToAnswer)
     .addNode(steps.answerAgent, selectedAnswerAgent)
@@ -338,7 +319,7 @@ export const createAgentGraph = ({
     .addEdge(_START_, steps.initialize)
     .addConditionalEdges(steps.initialize, initializeEdge, {
       [steps.researchAgent]: steps.researchAgent,
-      [steps.resumeToolExecution]: steps.resumeToolExecution,
+      [steps.executeTool]: steps.executeTool,
     })
     .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
@@ -346,10 +327,6 @@ export const createAgentGraph = ({
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
-      [steps.researchAgent]: steps.researchAgent,
-      [steps.handleToolInterrupt]: steps.handleToolInterrupt,
-    })
-    .addConditionalEdges(steps.resumeToolExecution, executeToolEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
     })

@@ -6,18 +6,23 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
+import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
-import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
+import {
+  ChatAgentEvent,
+  ConversationRound,
+  ConversationRoundStatus,
+  RoundInput,
+} from '@kbn/onechat-common';
+import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/onechat-server';
 import type { StructuredTool } from '@langchain/core/tools';
 import {
   addRoundCompleteEvent,
-  extractRound,
-  selectTools,
   conversationToLangchainMessages,
+  extractRound,
   prepareConversation,
+  selectTools,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -57,6 +62,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   },
   { logger, request, modelProvider, toolProvider, promptManager, attachments, events }
 ) => {
+  // TODO: do preflight checks
+
+  let pendingRound: ConversationRound | undefined;
+  if (conversation?.rounds.length) {
+    const lastRound = conversation.rounds[conversation.rounds.length - 1];
+    if (lastRound.status === ConversationRoundStatus.awaitingPrompt) {
+      pendingRound = lastRound;
+    }
+  }
+
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
@@ -149,6 +164,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       toolIdMapping: allToolIdMappings,
       logger,
       startTime,
+      pendingRound,
     }),
     finalize(() => manualEvents$.complete())
   );
@@ -159,7 +175,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput, startTime, modelProvider }),
+    addRoundCompleteEvent({ userInput: processedInput, pendingRound, startTime, modelProvider }),
     shareReplay()
   );
 
@@ -173,7 +189,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const round = await extractRound(events$);
 
   /////
-  // throw new Error('dev mode');
+  // throw new Error('dev mode')
+  throw new Error('dev mode\n' + JSON.stringify(round, undefined, 2));
   /////
 
   return {
