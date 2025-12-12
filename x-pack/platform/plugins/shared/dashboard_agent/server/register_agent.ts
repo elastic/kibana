@@ -85,7 +85,8 @@ When a user requests to create a dashboard, you MUST follow this exact workflow:
 When updating existing dashboards:
 - Use ${dashboardTools.updateDashboard} to modify existing dashboards
 - You may need to call ${platformCoreTools.createVisualization} for new panels to add
-- You can provide \`markdownContent\` to add or update a markdown summary panel at the top
+- ALWAYS pass \`panels\` containing the full set of visualization configs you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
+- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel at the top
 
 General Guidelines:
 - Ensure dashboards are well-organized and easy to understand
