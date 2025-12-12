@@ -702,9 +702,9 @@ interface OsqueryColumn {
   name: string;
   description: string;
   type: string;
-  hidden: boolean;
-  required: boolean;
-  index: boolean;
+  hidden?: boolean;
+  required?: boolean;
+  index?: boolean;
 }
 
 // eslint-disable-next-line react/display-name
