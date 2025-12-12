@@ -14,6 +14,7 @@ import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
 import {
   inferMathExpressionReturnType,
   extractFieldsFromMathExpression,
+  validateMathExpression,
 } from '../transpilers/shared/math';
 
 /**
@@ -27,7 +28,12 @@ export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'unknown';
 export type FieldTypeMap = Map<string, FieldType>;
 
 export interface StreamlangValidationError {
-  type: 'non_namespaced_field' | 'reserved_field' | 'type_mismatch' | 'mixed_type';
+  type:
+    | 'non_namespaced_field'
+    | 'reserved_field'
+    | 'type_mismatch'
+    | 'mixed_type'
+    | 'invalid_value';
   message: string;
   processorId?: string;
   field: string;
@@ -51,6 +57,9 @@ export const validationErrorTypeLabels = {
   }),
   mixed_type: i18n.translate('xpack.streamlang.validation.mixedType', {
     defaultMessage: 'Mixed type',
+  }),
+  invalid_value: i18n.translate('xpack.streamlang.validation.invalidValue', {
+    defaultMessage: 'Invalid value',
   }),
 };
 
@@ -659,6 +668,67 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
 }
 
 /**
+ * Validates processor-specific values such as expressions, patterns, and date formats etc.
+ *
+ * @param step - The processor step to validate
+ * @param processorNumber - 1-based index for error messages
+ * @param processorId - Unique identifier for the processor
+ * @returns Array of validation errors for this processor
+ */
+function validateProcessorValues(
+  step: StreamlangProcessorDefinition,
+  processorNumber: number,
+  processorId: string
+): StreamlangValidationError[] {
+  const errors: StreamlangValidationError[] = [];
+
+  switch (step.action) {
+    case 'math': {
+      const mathValidation = validateMathExpression(step.expression);
+      if (!mathValidation.valid) {
+        for (const syntaxError of mathValidation.errors) {
+          errors.push({
+            type: 'invalid_value',
+            message: i18n.translate('xpack.streamlang.validation.invalidExpressionMessage', {
+              defaultMessage:
+                'Processor #{processorNumber} ({processorAction}) has an invalid expression: {error}',
+              values: {
+                processorNumber,
+                processorAction: step.action,
+                error: syntaxError,
+              },
+            }),
+            processorId,
+            field: 'expression',
+          });
+        }
+      }
+      break;
+    }
+    case 'grok':
+    case 'dissect':
+    case 'date':
+    case 'set':
+    case 'rename':
+    case 'convert':
+    case 'append':
+    case 'replace':
+    case 'remove':
+    case 'remove_by_prefix':
+    case 'drop_document':
+    case 'manual_ingest_pipeline':
+      // No value validation implemented for these processors yet
+      break;
+    default: {
+      const _exhaustiveCheck: never = step;
+      return _exhaustiveCheck;
+    }
+  }
+
+  return errors;
+}
+
+/**
  * Validates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.
  *
  * This validates that:
@@ -666,6 +736,7 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
  * - Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes
  * - Processors don't modify reserved/system fields
  * - Fields are used with compatible types
+ * - Processor-specific values are valid (expressions, patterns, date formats etc.)
  *
  * @param streamlangDSL - The Streamlang DSL to validate
  * @param options - Validation options (reservedFields)
@@ -698,6 +769,10 @@ export function validateStreamlang(
     }
 
     const processorId = step.customIdentifier || `${step.action}_${i}`;
+
+    // Validate processor-specific values (expressions, patterns, formats, etc.)
+    const valueErrors = validateProcessorValues(step, i + 1, processorId);
+    errors.push(...valueErrors);
 
     // Extract fields that this processor modifies
     const modifiedFields = extractModifiedFields(step);
