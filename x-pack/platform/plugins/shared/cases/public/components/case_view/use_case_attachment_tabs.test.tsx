@@ -70,7 +70,7 @@ describe('useCaseAttachmentTabs()', () => {
         "files",
       ]
     `);
-    expect(result.current.totalAttachments).toEqual(3);
+    expect(result.current.totalAttachments).toEqual(4);
   });
 
   it('returns attachment tabs based on enable features an license', async () => {
