@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { ScheduleNowTransformsRequestSchema } from '../../../../server/routes/api_schemas/schedule_now_transforms';
+import type {
+  ScheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/schedule_now_transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -46,10 +49,11 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
         responseType: 'json',
       }
     );
+    const scheduleResponse = body as ScheduleNowTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
-    expect(body[transformId].success).toBe(true);
-    expect(body[transformId].error).toBeUndefined();
+    expect(scheduleResponse[transformId].success).toBe(true);
+    expect(scheduleResponse[transformId].error).toBeUndefined();
   });
 
   apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
@@ -65,10 +69,11 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
         responseType: 'json',
       }
     );
+    const scheduleResponse = body as ScheduleNowTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
-    expect(body[transformId].success).toBe(false);
-    expect(typeof body[transformId].error).toBe('object');
+    expect(scheduleResponse[transformId].success).toBe(false);
+    expect(typeof scheduleResponse[transformId].error).toBe('object');
   });
 
   // single transform schedule with invalid transformId
@@ -87,10 +92,11 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
           responseType: 'json',
         }
       );
+      const scheduleResponse = body as ScheduleNowTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
-      expect(body.invalid_transform_id.success).toBe(false);
-      expect(body.invalid_transform_id.error).toBeDefined();
+      expect(scheduleResponse.invalid_transform_id.success).toBe(false);
+      expect(scheduleResponse.invalid_transform_id.error).toBeDefined();
     }
   );
 });

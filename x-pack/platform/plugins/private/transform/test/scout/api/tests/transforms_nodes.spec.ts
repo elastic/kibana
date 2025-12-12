@@ -7,6 +7,7 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
+import type { GetTransformNodesResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
@@ -43,10 +44,11 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
         },
         responseType: 'json',
       });
+      const nodesResponse = body as GetTransformNodesResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBeGreaterThanOrEqual(1);
+      expect(nodesResponse.count).toBeGreaterThanOrEqual(1);
     }
   );
 
@@ -60,10 +62,11 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
         },
         responseType: 'json',
       });
+      const nodesResponse = body as GetTransformNodesResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBeGreaterThanOrEqual(1);
+      expect(nodesResponse.count).toBeGreaterThanOrEqual(1);
     }
   );
 

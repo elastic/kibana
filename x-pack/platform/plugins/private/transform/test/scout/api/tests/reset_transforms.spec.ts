@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { ResetTransformsRequestSchema } from '../../../../server/routes/api_schemas/reset_transforms';
+import type {
+  ResetTransformsRequestSchema,
+  ResetTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/reset_transforms';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
@@ -54,9 +57,10 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
       body: reqBody,
       responseType: 'json',
     });
+    const resetResponse = body as ResetTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
-    expect(body[transformId].transformReset.success).toBe(true);
+    expect(resetResponse[transformId].transformReset.success).toBe(true);
   });
 
   apiTest('should return 403 for unauthorized user', async ({ apiClient }) => {
@@ -90,10 +94,11 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
         body: reqBody,
         responseType: 'json',
       });
+      const resetResponse = body as ResetTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
-      expect(body.invalid_transform_id.transformReset.success).toBe(false);
-      expect(body.invalid_transform_id.transformReset.error).toBeDefined();
+      expect(resetResponse.invalid_transform_id.transformReset.success).toBe(false);
+      expect(resetResponse.invalid_transform_id.transformReset.error).toBeDefined();
     }
   );
 });

@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { StopTransformsRequestSchema } from '../../../../server/routes/api_schemas/stop_transforms';
+import type {
+  StopTransformsRequestSchema,
+  StopTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/stop_transforms';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
 
@@ -57,11 +60,12 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
       body: reqBody,
       responseType: 'json',
     });
+    const stopResponse = body as StopTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
 
     for (const id of transformIds) {
-      expect(body[id].success).toBe(true);
+      expect(stopResponse[id].success).toBe(true);
     }
   });
 
@@ -82,15 +86,16 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
         body: reqBody,
         responseType: 'json',
       });
+      const stopResponse = body as StopTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
       for (const id of transformIds) {
-        expect(body[id].success).toBe(true);
+        expect(stopResponse[id].success).toBe(true);
       }
 
-      expect(body[invalidTransformId].success).toBe(false);
-      expect(body[invalidTransformId].error).toBeDefined();
+      expect(stopResponse[invalidTransformId].success).toBe(false);
+      expect(stopResponse[invalidTransformId].error).toBeDefined();
     }
   );
 });

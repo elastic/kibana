@@ -7,6 +7,7 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
+import type { GetTransformsStatsResponseSchema } from '../../../../server/routes/api_schemas/transforms_stats';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -44,14 +45,15 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
         },
         responseType: 'json',
       });
+      const statsResponse = body as GetTransformsStatsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBe(2);
-      expect(body.transforms).toHaveLength(2);
+      expect(statsResponse.count).toBe(2);
+      expect(statsResponse.transforms).toHaveLength(2);
 
       // Check transform 1 stats
-      const transform1Stats = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
+      const transform1Stats = statsResponse.transforms.find((t) => t.id === TRANSFORM_1_ID);
       expect(transform1Stats).toBeDefined();
       expect(transform1Stats!.id).toBe(TRANSFORM_1_ID);
       expect(transform1Stats!.state).toBe(TRANSFORM_STATE.STOPPED);
@@ -59,7 +61,7 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
       expect(typeof transform1Stats!.checkpointing).toBe('object');
 
       // Check transform 2 stats
-      const transform2Stats = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
+      const transform2Stats = statsResponse.transforms.find((t) => t.id === TRANSFORM_2_ID);
       expect(transform2Stats).toBeDefined();
       expect(transform2Stats!.id).toBe(TRANSFORM_2_ID);
       expect(transform2Stats!.state).toBe(TRANSFORM_STATE.STOPPED);
@@ -81,13 +83,14 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
           responseType: 'json',
         }
       );
+      const statsResponse = body as GetTransformsStatsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBe(1);
-      expect(body.transforms).toHaveLength(1);
+      expect(statsResponse.count).toBe(1);
+      expect(statsResponse.transforms).toHaveLength(1);
 
-      const transformStats = body.transforms[0];
+      const transformStats = statsResponse.transforms[0];
       expect(transformStats.id).toBe(TRANSFORM_1_ID);
       expect(transformStats.state).toBe(TRANSFORM_STATE.STOPPED);
       expect(typeof transformStats.stats).toBe('object');
@@ -105,15 +108,16 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
         },
         responseType: 'json',
       });
+      const statsResponse = body as GetTransformsStatsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBe(2);
-      expect(body.transforms).toHaveLength(2);
+      expect(statsResponse.count).toBe(2);
+      expect(statsResponse.transforms).toHaveLength(2);
 
       // Verify both transforms are present
-      const transform1Stats = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
-      const transform2Stats = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
+      const transform1Stats = statsResponse.transforms.find((t) => t.id === TRANSFORM_1_ID);
+      const transform2Stats = statsResponse.transforms.find((t) => t.id === TRANSFORM_2_ID);
       expect(transform1Stats).toBeDefined();
       expect(transform2Stats).toBeDefined();
       expect(transform1Stats!.state).toBe(TRANSFORM_STATE.STOPPED);
@@ -134,13 +138,14 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
           responseType: 'json',
         }
       );
+      const statsResponse = body as GetTransformsStatsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBe(1);
-      expect(body.transforms).toHaveLength(1);
+      expect(statsResponse.count).toBe(1);
+      expect(statsResponse.transforms).toHaveLength(1);
 
-      const transformStats = body.transforms[0];
+      const transformStats = statsResponse.transforms[0];
       expect(transformStats.id).toBe(TRANSFORM_2_ID);
       expect(transformStats.state).toBe(TRANSFORM_STATE.STOPPED);
     }

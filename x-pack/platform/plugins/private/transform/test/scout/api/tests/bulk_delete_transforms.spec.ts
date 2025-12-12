@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { DeleteTransformsRequestSchema } from '../../../../server/routes/api_schemas/delete_transforms';
+import type {
+  DeleteTransformsRequestSchema,
+  DeleteTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/delete_transforms';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
@@ -53,12 +56,13 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
       body: reqBody,
       responseType: 'json',
     });
+    const deleteResponse = body as DeleteTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
     for (const id of transformIds) {
-      expect(body[id].transformDeleted.success).toBe(true);
-      expect(body[id].destIndexDeleted.success).toBe(false);
-      expect(body[id].destDataViewDeleted.success).toBe(false);
+      expect(deleteResponse[id].transformDeleted.success).toBe(true);
+      expect(deleteResponse[id].destIndexDeleted.success).toBe(false);
+      expect(deleteResponse[id].destDataViewDeleted.success).toBe(false);
     }
   });
 
@@ -80,13 +84,14 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
         body: reqBody,
         responseType: 'json',
       });
+      const deleteResponse = body as DeleteTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
       for (const id of transformIds) {
-        expect(body[id].transformDeleted.success).toBe(true);
+        expect(deleteResponse[id].transformDeleted.success).toBe(true);
       }
-      expect(body[invalidTransformId].transformDeleted.success).toBe(false);
-      expect(body[invalidTransformId].transformDeleted.error).toBeDefined();
+      expect(deleteResponse[invalidTransformId].transformDeleted.success).toBe(false);
+      expect(deleteResponse[invalidTransformId].transformDeleted.error).toBeDefined();
     }
   );
 });

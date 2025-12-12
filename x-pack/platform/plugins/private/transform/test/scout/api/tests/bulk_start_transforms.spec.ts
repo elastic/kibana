@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { StartTransformsRequestSchema } from '../../../../server/routes/api_schemas/start_transforms';
+import type {
+  StartTransformsRequestSchema,
+  StartTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/start_transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -41,11 +44,12 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
       body: reqBody,
       responseType: 'json',
     });
+    const startResponse = body as StartTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
 
     for (const id of transformIds) {
-      expect(body[id].success).toBe(true);
+      expect(startResponse[id].success).toBe(true);
     }
   });
 
@@ -66,15 +70,16 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
         body: reqBody,
         responseType: 'json',
       });
+      const startResponse = body as StartTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
       for (const id of transformIds) {
-        expect(body[id].success).toBe(true);
+        expect(startResponse[id].success).toBe(true);
       }
 
-      expect(body[invalidTransformId].success).toBe(false);
-      expect(body[invalidTransformId].error).toBeDefined();
+      expect(startResponse[invalidTransformId].success).toBe(false);
+      expect(startResponse[invalidTransformId].error).toBeDefined();
     }
   );
 });

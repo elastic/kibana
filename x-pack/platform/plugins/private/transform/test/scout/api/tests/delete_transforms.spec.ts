@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { DeleteTransformsRequestSchema } from '../../../../server/routes/api_schemas/delete_transforms';
+import type {
+  DeleteTransformsRequestSchema,
+  DeleteTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/delete_transforms';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
@@ -55,11 +58,12 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
       body: reqBody,
       responseType: 'json',
     });
+    const deleteResponse = body as DeleteTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
-    expect(body[transformId].transformDeleted.success).toBe(true);
-    expect(body[transformId].destIndexDeleted.success).toBe(false);
-    expect(body[transformId].destDataViewDeleted.success).toBe(false);
+    expect(deleteResponse[transformId].transformDeleted.success).toBe(true);
+    expect(deleteResponse[transformId].destIndexDeleted.success).toBe(false);
+    expect(deleteResponse[transformId].destDataViewDeleted.success).toBe(false);
   });
 
   apiTest('should return 403 for unauthorized user', async ({ apiClient }) => {
@@ -92,10 +96,11 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
         body: reqBody,
         responseType: 'json',
       });
+      const deleteResponse = body as DeleteTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
-      expect(body.invalid_transform_id.transformDeleted.success).toBe(false);
-      expect(body.invalid_transform_id.transformDeleted.error).toBeDefined();
+      expect(deleteResponse.invalid_transform_id.transformDeleted.success).toBe(false);
+      expect(deleteResponse.invalid_transform_id.transformDeleted.error).toBeDefined();
     }
   );
 
@@ -117,11 +122,12 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
         body: reqBody,
         responseType: 'json',
       });
+      const deleteResponse = body as DeleteTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
-      expect(body[transformId2].transformDeleted.success).toBe(true);
-      expect(body[transformId2].destIndexDeleted.success).toBe(true);
-      expect(body[transformId2].destDataViewDeleted.success).toBe(false);
+      expect(deleteResponse[transformId2].transformDeleted.success).toBe(true);
+      expect(deleteResponse[transformId2].destIndexDeleted.success).toBe(true);
+      expect(deleteResponse[transformId2].destDataViewDeleted.success).toBe(false);
 
       // Ensure destination index is deleted
       const destinationIndexExists = await esClient.indices.exists({ index: destinationIndex2 });

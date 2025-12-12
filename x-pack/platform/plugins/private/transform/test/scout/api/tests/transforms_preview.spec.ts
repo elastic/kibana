@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { PostTransformsPreviewRequestSchema } from '../../../../server/routes/api_schemas/transforms';
+import type {
+  PostTransformsPreviewRequestSchema,
+  PostTransformsPreviewResponseSchema,
+} from '../../../../server/routes/api_schemas/transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -38,11 +41,12 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
       body: getTransformPreviewConfig(),
       responseType: 'json',
     });
+    const previewResponse = body as PostTransformsPreviewResponseSchema;
 
     expect(statusCode).toBe(200);
 
-    expect(body.preview).toHaveLength(19);
-    expect(typeof body.generated_dest_index).toBe('object');
+    expect(previewResponse.preview).toHaveLength(19);
+    expect(typeof previewResponse.generated_dest_index).toBe('object');
   });
 
   apiTest('should return a correct error for transform preview', async ({ apiClient }) => {

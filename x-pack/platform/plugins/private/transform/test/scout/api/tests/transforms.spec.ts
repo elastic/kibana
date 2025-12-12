@@ -7,6 +7,7 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
+import type { GetTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 import { generateTransformConfig } from '../helpers/transform_config';
@@ -41,14 +42,15 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
       },
       responseType: 'json',
     });
+    const transformsResponse = body as GetTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
 
-    expect(body.count).toBe(2);
-    expect(body.transforms).toHaveLength(2);
+    expect(transformsResponse.count).toBe(2);
+    expect(transformsResponse.transforms).toHaveLength(2);
 
     // Check transform 1
-    const transform1 = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
+    const transform1 = transformsResponse.transforms.find((t) => t.id === TRANSFORM_1_ID);
     expect(transform1).toBeDefined();
     expect(transform1!.id).toBe(TRANSFORM_1_ID);
     expect(transform1!.dest.index).toBe('user-transform-test-get-1');
@@ -56,7 +58,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
     expect(typeof transform1!.create_time).toBe('number');
 
     // Check transform 2
-    const transform2 = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
+    const transform2 = transformsResponse.transforms.find((t) => t.id === TRANSFORM_2_ID);
     expect(transform2).toBeDefined();
     expect(transform2!.id).toBe(TRANSFORM_2_ID);
     expect(transform2!.dest.index).toBe('user-transform-test-get-2');
@@ -72,15 +74,16 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
       },
       responseType: 'json',
     });
+    const transformsResponse = body as GetTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
 
-    expect(body.count).toBe(2);
-    expect(body.transforms).toHaveLength(2);
+    expect(transformsResponse.count).toBe(2);
+    expect(transformsResponse.transforms).toHaveLength(2);
 
     // Verify both transforms are present
-    const transform1 = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
-    const transform2 = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
+    const transform1 = transformsResponse.transforms.find((t) => t.id === TRANSFORM_1_ID);
+    const transform2 = transformsResponse.transforms.find((t) => t.id === TRANSFORM_2_ID);
     expect(transform1).toBeDefined();
     expect(transform2).toBeDefined();
   });
@@ -98,13 +101,14 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
           responseType: 'json',
         }
       );
+      const transformsResponse = body as GetTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBe(1);
-      expect(body.transforms).toHaveLength(1);
+      expect(transformsResponse.count).toBe(1);
+      expect(transformsResponse.transforms).toHaveLength(1);
 
-      const transform = body.transforms[0];
+      const transform = transformsResponse.transforms[0];
       expect(transform.id).toBe(TRANSFORM_1_ID);
       expect(transform.dest.index).toBe('user-transform-test-get-1');
       expect(typeof transform.version).toBe('string');
@@ -125,13 +129,14 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
           responseType: 'json',
         }
       );
+      const transformsResponse = body as GetTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.count).toBe(1);
-      expect(body.transforms).toHaveLength(1);
+      expect(transformsResponse.count).toBe(1);
+      expect(transformsResponse.transforms).toHaveLength(1);
 
-      const transform = body.transforms[0];
+      const transform = transformsResponse.transforms[0];
       expect(transform.id).toBe(TRANSFORM_1_ID);
       expect(transform.dest.index).toBe('user-transform-test-get-1');
     }

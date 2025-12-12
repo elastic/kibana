@@ -7,6 +7,7 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { KbnClient, RoleApiCredentials } from '@kbn/scout';
+import type { PutTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -68,10 +69,11 @@ apiTest.describe(
           responseType: 'json',
         }
       );
+      const createResponse = body as PutTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body).toMatchObject({
+      expect(createResponse).toMatchObject({
         dataViewsCreated: [],
         dataViewsErrors: [],
         errors: [],
@@ -98,16 +100,17 @@ apiTest.describe(
           responseType: 'json',
         }
       );
+      const createResponse = body as PutTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
       // The data view id will be returned as a non-deterministic uuid
       // so we cannot assert the actual id returned. We'll just assert
       // that a data view has been created a no errors were returned.
-      expect(body.dataViewsCreated).toHaveLength(1);
-      expect(body.dataViewsErrors).toHaveLength(0);
-      expect(body.errors).toHaveLength(0);
-      expect(body.transformsCreated).toMatchObject([
+      expect(createResponse.dataViewsCreated).toHaveLength(1);
+      expect(createResponse.dataViewsErrors).toHaveLength(0);
+      expect(createResponse.errors).toHaveLength(0);
+      expect(createResponse.transformsCreated).toMatchObject([
         {
           transform: transformId,
         },
@@ -132,16 +135,17 @@ apiTest.describe(
           responseType: 'json',
         }
       );
+      const createResponse = body as PutTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
       // The data view id will be returned as a non-deterministic uuid
       // so we cannot assert the actual id returned. We'll just assert
       // that a data view has been created a no errors were returned.
-      expect(body.dataViewsCreated).toHaveLength(1);
-      expect(body.dataViewsErrors).toHaveLength(0);
-      expect(body.errors).toHaveLength(0);
-      expect(body.transformsCreated).toMatchObject([
+      expect(createResponse.dataViewsCreated).toHaveLength(1);
+      expect(createResponse.dataViewsErrors).toHaveLength(0);
+      expect(createResponse.errors).toHaveLength(0);
+      expect(createResponse.transformsCreated).toMatchObject([
         {
           transform: transformId,
         },

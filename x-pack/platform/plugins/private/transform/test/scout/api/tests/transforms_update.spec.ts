@@ -7,6 +7,8 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
+import type { GetTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
+import type { PostTransformsUpdateResponseSchema } from '../../../../server/routes/api_schemas/update_transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -63,13 +65,14 @@ apiTest.describe(
           responseType: 'json',
         }
       );
+      const originalBody = originalResponse.body as GetTransformsResponseSchema;
 
       expect(originalResponse.statusCode).toBe(200);
 
-      expect(originalResponse.body.count).toBe(1);
-      expect(originalResponse.body.transforms).toHaveLength(1);
+      expect(originalBody.count).toBe(1);
+      expect(originalBody.transforms).toHaveLength(1);
 
-      const originalConfig = originalResponse.body.transforms[0];
+      const originalConfig = originalBody.transforms[0];
       expect(originalConfig.id).toBe(TRANSFORM_ID);
       expect(originalConfig.source).toMatchObject({
         index: ['ft_farequote'],
@@ -90,17 +93,18 @@ apiTest.describe(
           responseType: 'json',
         }
       );
+      const updatedTransform = updateResponse.body as PostTransformsUpdateResponseSchema;
 
       expect(updateResponse.statusCode).toBe(200);
 
       const expectedConfig = getTransformUpdateConfig();
-      expect(updateResponse.body.id).toBe(TRANSFORM_ID);
-      expect(updateResponse.body.source).toMatchObject({
+      expect(updatedTransform.id).toBe(TRANSFORM_ID);
+      expect(updatedTransform.source).toMatchObject({
         ...expectedConfig.source,
         index: ['ft_*'],
       });
-      expect(updateResponse.body.description).toBe(expectedConfig.description);
-      expect(updateResponse.body.settings).toMatchObject({});
+      expect(updatedTransform.description).toBe(expectedConfig.description);
+      expect(updatedTransform.settings).toMatchObject({});
 
       // Verify the update persisted
       const verifyResponse = await apiClient.get(`internal/transform/transforms/${TRANSFORM_ID}`, {
@@ -110,13 +114,14 @@ apiTest.describe(
         },
         responseType: 'json',
       });
+      const verifyBody = verifyResponse.body as GetTransformsResponseSchema;
 
       expect(verifyResponse.statusCode).toBe(200);
 
-      expect(verifyResponse.body.count).toBe(1);
-      expect(verifyResponse.body.transforms).toHaveLength(1);
+      expect(verifyBody.count).toBe(1);
+      expect(verifyBody.transforms).toHaveLength(1);
 
-      const verifiedConfig = verifyResponse.body.transforms[0];
+      const verifiedConfig = verifyBody.transforms[0];
       expect(verifiedConfig.id).toBe(TRANSFORM_ID);
       expect(verifiedConfig.source).toMatchObject({
         ...expectedConfig.source,

@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { StartTransformsRequestSchema } from '../../../../server/routes/api_schemas/start_transforms';
+import type {
+  StartTransformsRequestSchema,
+  StartTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/start_transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -42,11 +45,12 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
       body: reqBody,
       responseType: 'json',
     });
+    const startResponse = body as StartTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
 
-    expect(body[transformId].success).toBe(true);
-    expect(body[transformId].error).toBeUndefined();
+    expect(startResponse[transformId].success).toBe(true);
+    expect(startResponse[transformId].error).toBeUndefined();
   });
 
   apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
@@ -59,11 +63,12 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
       body: reqBody,
       responseType: 'json',
     });
+    const startResponse = body as StartTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
 
-    expect(body[transformId].success).toBe(false);
-    expect(typeof body[transformId].error).toBe('object');
+    expect(startResponse[transformId].success).toBe(false);
+    expect(typeof startResponse[transformId].error).toBe('object');
   });
 
   // single transform start with invalid transformId
@@ -79,11 +84,12 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
         body: reqBody,
         responseType: 'json',
       });
+      const startResponse = body as StartTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
 
-      expect(body.invalid_transform_id.success).toBe(false);
-      expect(body.invalid_transform_id.error).toBeDefined();
+      expect(startResponse.invalid_transform_id.success).toBe(false);
+      expect(startResponse.invalid_transform_id.error).toBeDefined();
     }
   );
 });

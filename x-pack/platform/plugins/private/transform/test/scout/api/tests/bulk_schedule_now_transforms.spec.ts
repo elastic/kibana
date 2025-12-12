@@ -7,7 +7,10 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { ScheduleNowTransformsRequestSchema } from '../../../../server/routes/api_schemas/schedule_now_transforms';
+import type {
+  ScheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsResponseSchema,
+} from '../../../../server/routes/api_schemas/schedule_now_transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
@@ -46,10 +49,11 @@ apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
         responseType: 'json',
       }
     );
+    const scheduleResponse = body as ScheduleNowTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
     for (const id of transformIds) {
-      expect(body[id].success).toBe(true);
+      expect(scheduleResponse[id].success).toBe(true);
     }
   });
 
@@ -73,13 +77,14 @@ apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
           responseType: 'json',
         }
       );
+      const scheduleResponse = body as ScheduleNowTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
       for (const id of transformIds) {
-        expect(body[id].success).toBe(true);
+        expect(scheduleResponse[id].success).toBe(true);
       }
-      expect(body[invalidTransformId].success).toBe(false);
-      expect(body[invalidTransformId].error).toBeDefined();
+      expect(scheduleResponse[invalidTransformId].success).toBe(false);
+      expect(scheduleResponse[invalidTransformId].error).toBeDefined();
     }
   );
 });
