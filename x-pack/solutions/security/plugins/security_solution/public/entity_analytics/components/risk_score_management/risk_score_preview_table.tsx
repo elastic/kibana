@@ -80,12 +80,9 @@ export const RiskScorePreviewTable = ({
       responsiveBreakpoint={false}
       items={items}
       columns={columns}
-      tableCaption={i18n.translate(
-        'xpack.securitySolution.riskScore.previewTable.caption',
-        {
-          defaultMessage: 'Entity risk score preview',
-        }
-      )}
+      tableCaption={i18n.translate('xpack.securitySolution.riskScore.previewTable.caption', {
+        defaultMessage: 'Entity risk score preview',
+      })}
     />
   );
 };
