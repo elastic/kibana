@@ -68,7 +68,9 @@ export const useAllResults = ({
   const resetKey = useMemo(() => {
     const sortKey = sort.map(({ field, direction }) => `${field}:${direction}`).join(',');
 
-    return `${actionId}|${liveQueryActionId ?? ''}|${limit}|${startDate ?? ''}|${kuery ?? ''}|${sortKey}`;
+    return `${actionId}|${liveQueryActionId ?? ''}|${limit}|${startDate ?? ''}|${
+      kuery ?? ''
+    }|${sortKey}`;
   }, [actionId, liveQueryActionId, limit, startDate, kuery, sort]);
 
   const [pitPaginationState, setPitPaginationState] = useState<PitPaginationState>({
