@@ -79,7 +79,7 @@ const ConnectorOption: React.FC<{
       font-weight: ${euiTheme.font.weight.regular};
     }
     .euiSelectableListItem-isFocused & h4 {
-      font-weight: ${euiTheme.font.weight.bold};
+      font-weight: ${euiTheme.font.weight.semiBold};
     }
   `;
   return (
