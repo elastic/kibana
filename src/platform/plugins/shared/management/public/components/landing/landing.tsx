@@ -44,6 +44,7 @@ export const ManagementLandingPage = ({
   const isCloudEnabled = cloud?.isCloudEnabled || false;
   // AutoOps promotion callout should only be shown for self-managed instances with an enterprise license
   const shouldShowAutoOpsPromotion = !isCloudEnabled && hasEnterpriseLicense;
+  const learnMoreLink = coreStart.docLinks.links.cloud.connectToAutoops;
 
   useEffect(() => {
     onAppMounted('');
@@ -78,7 +79,10 @@ export const ManagementLandingPage = ({
                 max-width: 600px;
               `}
             >
-              <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
+              <AutoOpsPromotionCallout
+                learnMoreLink={learnMoreLink}
+                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+              />
             </div>
           )}
           <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />

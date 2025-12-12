@@ -12,12 +12,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
-export type AutoOpsPromotionCalloutProps = EuiCallOutProps;
+export interface AutoOpsPromotionCalloutProps {
+  learnMoreLink: string;
+  overrideCalloutProps?: Partial<Omit<EuiCallOutProps, 'children' | 'title' | 'onDismiss'>>;
+}
 
 const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
 
 export const AutoOpsPromotionCallout = ({
-  ...overrideCalloutProps
+  learnMoreLink,
+  overrideCalloutProps = {},
 }: AutoOpsPromotionCalloutProps) => {
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -54,11 +58,11 @@ export const AutoOpsPromotionCallout = ({
       <p>
         <FormattedMessage
           id="management.autoOpsPromotionCallout.description"
-          defaultMessage="Connect this cluster to Elastic Cloud to get real-time issue detection, resolution paths, and enable Elastic Support to use AutoOps to assist you better. {learnMoreLink}"
+          defaultMessage="Connect this cluster to AutoOps in Elastic Cloud for simplified monitoring, real-time issue detection, and performance recommendations. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <a
-                href="https://www.elastic.co/blog/elasticsearch-autoops-on-prem"
+                href={learnMoreLink}
                 target="_blank"
                 rel="noopener noreferrer"
               >

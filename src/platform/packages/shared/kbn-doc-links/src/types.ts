@@ -55,6 +55,7 @@ export interface DocLinks {
     readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
     readonly cloudConnect: string;
+    readonly connectToAutoops: string;
   };
   readonly console: {
     readonly guide: string;

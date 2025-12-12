@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toggleSetupMode } from '../../lib/setup_mode';
@@ -52,6 +53,8 @@ export function NoData(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [useInternalCollection, setUseInternalCollection] = useState(false);
   const isCloudEnabled = props.isCloudEnabled;
+  const { services } = useKibana();
+  const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
 
   async function startSetup() {
     setIsLoading(true);
@@ -121,7 +124,10 @@ export function NoData(props) {
         <EuiPageBody restrictWidth={600}>
           {Legacy.shims.hasEnterpriseLicense && (
             <>
-              <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
+              <AutoOpsPromotionCallout
+                learnMoreLink={learnMoreLink}
+                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+              />
               <EuiSpacer size="m" />
             </>
           )}
@@ -170,7 +176,10 @@ export function NoData(props) {
       <EuiPageBody restrictWidth={600}>
         {Legacy.shims.hasEnterpriseLicense && (
           <>
-            <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
+            <AutoOpsPromotionCallout
+              learnMoreLink={learnMoreLink}
+              overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+            />
             <EuiSpacer size="m" />
           </>
         )}

@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
@@ -64,6 +65,8 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const { services } = useKibana();
+  const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
 
   const getPageDataResponseHandler = useCallback(
     (result: any) => {
@@ -135,7 +138,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
         )}
         <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
         <EuiSpacer size="m" />
-        {shouldShowAutoOpsPromotion && <AutoOpsPromotionCallout />}
+        {shouldShowAutoOpsPromotion && <AutoOpsPromotionCallout learnMoreLink={learnMoreLink} />}
         <EuiSpacer size="m" />
         {tabs && (
           <EuiTabs size="l">
