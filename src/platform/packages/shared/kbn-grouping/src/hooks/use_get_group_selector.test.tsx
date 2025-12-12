@@ -205,14 +205,14 @@ describe('Group Selector Hooks', () => {
       });
       act(() => result.current.props.onGroupChange('user.name'));
 
-      expect(dispatch).toHaveBeenNthCalledWith(1, {
+      expect(dispatch).toHaveBeenNthCalledWith(2, {
         payload: {
           id: groupingId,
           activeGroups: ['host.name', 'user.name'],
         },
         type: ActionType.updateActiveGroups,
       });
-      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(dispatch).toHaveBeenCalledTimes(2);
     });
 
     it('On group change, sends telemetry', () => {
@@ -326,7 +326,7 @@ describe('Group Selector Hooks', () => {
         },
       });
       act(() => result.current.props.onGroupChange(customField));
-      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(dispatch).toHaveBeenCalledTimes(2);
       rerender({
         ...defaultArgs,
         groupingState: {
@@ -339,8 +339,8 @@ describe('Group Selector Hooks', () => {
           },
         },
       });
-      expect(dispatch).toHaveBeenCalledTimes(2);
-      expect(dispatch).toHaveBeenNthCalledWith(2, {
+      expect(dispatch).toHaveBeenCalledTimes(3);
+      expect(dispatch).toHaveBeenNthCalledWith(3, {
         payload: {
           newOptionList: [...defaultGroupingOptions, { label: customField, key: customField }],
           id: 'test-table',
@@ -365,8 +365,8 @@ describe('Group Selector Hooks', () => {
           },
         },
       });
-      expect(dispatch).toHaveBeenCalledTimes(1);
-      expect(dispatch).toHaveBeenCalledWith({
+      expect(dispatch).toHaveBeenCalledTimes(2);
+      expect(dispatch).toHaveBeenNthCalledWith(1, {
         payload: {
           newOptionList: [
             ...defaultGroupingOptions,
@@ -389,6 +389,26 @@ describe('Group Selector Hooks', () => {
 
       expect(result.result.current.props.title).toEqual('Group custom property by');
     });
+
+    it('Passes through settings', () => {
+      const settings = {
+        hideNoneOption: true,
+        hideCustomFieldOption: true,
+        popoverButtonLabel: 'Custom Button Label',
+        hideOptionsTitle: true,
+      };
+      renderHook(() =>
+        useGetGroupSelector({
+          ...defaultArgs,
+          settings,
+        })
+      );
+
+      expect(dispatch).toHaveBeenCalledWith({
+        payload: { id: groupingId, settings },
+        type: ActionType.updateGroupSettings,
+      });
+    });
   });
 
   describe('useGetGroupSelectorStateless', () => {
@@ -403,6 +423,27 @@ describe('Group Selector Hooks', () => {
       act(() => result.current.props.onGroupChange('host.name'));
 
       expect(onGroupChange).toHaveBeenCalledWith(['host.name']);
+    });
+
+    it('Passes through settings', () => {
+      const { result } = renderHook(() =>
+        useGetGroupSelectorStateless({
+          ...statelessArgs,
+          settings: {
+            hideNoneOption: true,
+            hideCustomFieldOption: true,
+            popoverButtonLabel: 'Custom Button Label',
+            hideOptionsTitle: true,
+          },
+        })
+      );
+
+      expect(result.current.props.settings).toEqual({
+        hideNoneOption: true,
+        hideCustomFieldOption: true,
+        popoverButtonLabel: 'Custom Button Label',
+        hideOptionsTitle: true,
+      });
     });
   });
 });

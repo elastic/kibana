@@ -11,6 +11,7 @@ import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless
 import {
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+  AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
@@ -22,6 +23,7 @@ const READ_ONLY_SETTINGS: string[] = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+  AI_CHAT_EXPERIENCE_TYPE,
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

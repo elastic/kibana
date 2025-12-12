@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/ml-is-populated-object'
   - '@kbn/i18n'
   - '@kbn/licensing-types'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod

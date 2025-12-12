@@ -93,7 +93,6 @@ const createStartContractMock = () => {
       getNavigationTreeUi$: jest.fn(),
       changeActiveSolutionNavigation: jest.fn(),
       updateSolutionNavigations: jest.fn(),
-      navigationTourManager: {} as any,
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),

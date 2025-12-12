@@ -32,6 +32,7 @@ paths-ignore:
   - '**/test_helpers/**'
   - '**/test-helpers/**'
   - '**/test_utils/**'
+  - '.github/codeql/custom-queries/**'
   - api_docs
   - dev_docs
   - docs
@@ -138,3 +139,5 @@ query-filters:
         - codeql/javascript-queries/Electron
 packs:
   - githubsecuritylab/codeql-javascript-queries
+queries:
+  - uses: ./.github/codeql/custom-queries

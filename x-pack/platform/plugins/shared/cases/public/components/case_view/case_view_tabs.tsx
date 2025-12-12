@@ -20,6 +20,10 @@ import {
 } from './use_case_attachment_tabs';
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import {
+  useAttachmentsSubTabClickedEBT,
+  useAttachmentsTabClickedEBT,
+} from '../../analytics/use_attachments_tab_ebt';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -46,6 +50,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     () => !!attachmentTabs.find((attachmentTab) => attachmentTab.id === activeTab),
     [activeTab, attachmentTabs]
   );
+
+  const defaultAttachmentsTabId = attachmentTabs[0].id;
 
   const tabs: CaseViewTab[] = useMemo(
     () => [
@@ -79,17 +85,26 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     [activeTab, euiTheme, isAttachmentsTabActive, similarCasesData?.total, totalAttachments]
   );
 
+  const trackAttachmentsTabClick = useAttachmentsTabClickedEBT();
+  const trackAttachmentsSubTabClick = useAttachmentsSubTabClickedEBT();
+
   const renderTabs = useCallback(() => {
     return tabs.map((tab, index) => (
       <EuiTab
         data-test-subj={`case-view-tab-title-${tab.id}`}
         key={index}
-        onClick={() =>
+        onClick={() => {
+          if (tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS) {
+            trackAttachmentsTabClick();
+            // NOTE: counting default sub-tab click here as it is already picked when navigating to attachments tab
+            trackAttachmentsSubTabClick(defaultAttachmentsTabId);
+          }
+
           navigateToCaseView({
             detailName: caseData.id,
             tabId: tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS ? CASE_VIEW_PAGE_TABS.ALERTS : tab.id,
-          })
-        }
+          });
+        }}
         isSelected={
           tab.id === activeTab ||
           (tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS && isAttachmentsTabActive)
@@ -99,7 +114,16 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         {tab.badge ?? null}
       </EuiTab>
     ));
-  }, [tabs, activeTab, isAttachmentsTabActive, navigateToCaseView, caseData.id]);
+  }, [
+    tabs,
+    activeTab,
+    isAttachmentsTabActive,
+    navigateToCaseView,
+    caseData.id,
+    trackAttachmentsTabClick,
+    trackAttachmentsSubTabClick,
+    defaultAttachmentsTabId,
+  ]);
 
   return <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>;
 });

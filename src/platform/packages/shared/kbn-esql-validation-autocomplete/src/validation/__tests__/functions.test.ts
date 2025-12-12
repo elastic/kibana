@@ -9,10 +9,10 @@
 
 import type { FunctionDefinition } from '@kbn/esql-ast';
 import { FunctionDefinitionTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
-import { Location } from '@kbn/esql-ast/src/commands_registry/types';
-import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
+import { Location } from '@kbn/esql-ast/src/commands/registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/commands/definitions/utils/test_functions';
 import { setup } from './helpers';
-import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/expressions';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/commands/definitions/utils/expressions';
 
 describe('function validation', () => {
   afterEach(() => {

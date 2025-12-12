@@ -10,8 +10,6 @@
 import expect from '@kbn/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 
-import type { TourStepId } from '@kbn/core-chrome-navigation-tour';
-
 type NavigationId = string;
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -24,7 +22,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   const browser = ctx.getService('browser');
   const retry = ctx.getService('retry');
   const log = ctx.getService('log');
-  const kibanaServer = ctx.getService('kibanaServer');
 
   async function expandMoreIfNeeded() {
     log.debug(
@@ -285,51 +282,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
-      },
-      tour: {
-        reset: async () => {
-          log.debug('SolutionNavigation.sidenav.tour.reset');
-          await browser.removeLocalStorageItem('solutionNavigationTour:completed');
-          try {
-            const sidCookie = (await browser.getCookie('sid')).value;
-            await kibanaServer.request({
-              path: `/internal/security/user_profile/_data`,
-              method: 'POST',
-              headers: {
-                Cookie: 'sid=' + sidCookie,
-              },
-              body: { 'solutionNavigationTour:completed': null },
-            });
-          } catch (e) {
-            log.warning(
-              `SolutionNavigation.sidenav.tour.reset - could not reset user profile data`,
-              e.message
-            );
-          }
-
-          await browser.refresh();
-        },
-        ensureHidden: async () => {
-          log.debug('SolutionNavigation.sidenav.tour.ensureHidden');
-          await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
-          await browser.refresh();
-        },
-        isTourStepVisible: async (stepId: TourStepId) => {
-          log.debug('SolutionNavigation.sidenav.tour.isTourStepVisible', stepId);
-          return await testSubjects.exists(`nav-tour-step-${stepId}`, { timeout: TIMEOUT_CHECK });
-        },
-        expectTourStepVisible: async (stepId: TourStepId) => {
-          log.debug('SolutionNavigation.sidenav.tour.expectTourStepVisible', stepId);
-          await testSubjects.existOrFail(`nav-tour-step-${stepId}`);
-        },
-        nextStep: async () => {
-          log.debug('SolutionNavigation.sidenav.tour.nextStep');
-          await testSubjects.click('nav-tour-next-button');
-        },
-        expectHidden: async () => {
-          log.debug('SolutionNavigation.sidenav.tour.expectHidden');
-          await testSubjects.missingOrFail('*nav-tour-step');
-        },
       },
       feedbackCallout: {
         async disable() {

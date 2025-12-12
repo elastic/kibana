@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getBracketsToClose } from '@kbn/esql-ast/src/definitions/utils/ast';
+import { getBracketsToClose } from '@kbn/esql-ast/src/commands/definitions/utils/ast';
 
 /**
  * Corrects the query syntax by closing any unclosed brackets and removing incomplete args.

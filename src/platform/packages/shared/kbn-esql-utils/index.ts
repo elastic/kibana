@@ -19,6 +19,7 @@ export {
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
+  appendLimitToQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -60,6 +61,7 @@ export {
   getInferenceEndpoints,
   getEditorExtensions,
   hasDateBreakdown,
+  getProjectRoutingFromEsqlQuery,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { groupBy, uniq } from 'lodash';
-import type { ModelProvider } from '@kbn/onechat-server';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ObservabilityAgentBuilderPluginStartDependencies } from '../../types';
 import { selectRelevantAlertFields } from './select_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
@@ -22,7 +22,7 @@ export async function getRelevantAlertFields({
   coreStart,
   pluginStart,
   request,
-  modelProvider,
+  inferenceClient,
   logger,
 }: {
   query: string;
@@ -31,7 +31,7 @@ export async function getRelevantAlertFields({
   coreStart: CoreStart;
   pluginStart: ObservabilityAgentBuilderPluginStartDependencies;
   request: KibanaRequest;
-  modelProvider: ModelProvider;
+  inferenceClient: BoundInferenceClient;
   logger: Logger;
 }): Promise<string[]> {
   const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -84,7 +84,7 @@ export async function getRelevantAlertFields({
     query,
     candidateFieldNames: fieldNames,
     logger,
-    modelProvider,
+    inferenceClient,
   });
 
   const selectedFields = selectedFieldNames.map((field) => {

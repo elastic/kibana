@@ -70,9 +70,9 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/field-formats-common'
   - '@kbn/ai-assistant-management-plugin'
-  - '@kbn/core-chrome-navigation-tour'
   - '@kbn/setup-node-env'
   - '@kbn/visualizations-common'
+  - '@kbn/unified-data-table'
 tags:
   - test-helper
   - package

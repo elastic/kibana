@@ -12,6 +12,7 @@ import type {
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
@@ -41,13 +42,8 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const authUser = this.security.authc.getCurrentUser(request);
-    if (!authUser) {
-      throw new Error('No user bound to the provided request');
-    }
-
+    const user = getUserFromRequest(request, this.security);
     const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
-    const user = { id: authUser.profile_uid!, username: authUser.username };
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
 
     return createClient({ user, esClient, logger: this.logger, space });

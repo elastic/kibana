@@ -9,5 +9,22 @@
 
 export * from './constants';
 
-export { ConfigSchema, SecretsSchema, CallToolParamsSchema } from './schemas/latest';
-export type { Config, Secrets, CallToolParams } from './types/latest';
+// Schemas
+export {
+  MCPConnectorConfigSchema,
+  MCPConnectorSecretsSchema,
+  MCPAuthType,
+  // Sub-action schemas
+  TestConnectorRequestSchema,
+  ListToolsRequestSchema,
+  CallToolRequestSchema,
+} from './schemas/latest';
+
+// Types
+export type {
+  MCPConnectorConfig,
+  MCPConnectorSecrets,
+  Config,
+  Secrets,
+  CallToolParams,
+} from './types/latest';

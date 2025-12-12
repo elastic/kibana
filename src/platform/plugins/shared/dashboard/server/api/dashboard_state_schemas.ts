@@ -144,6 +144,15 @@ export const optionsSchema = schema.object({
   ),
 });
 
+export const accessControlSchema = schema.maybe(
+  schema.object({
+    owner: schema.maybe(schema.string()),
+    access_mode: schema.maybe(
+      schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
+    ),
+  })
+);
+
 export function getDashboardStateSchema() {
   return schema.object({
     // unsuppoted "as code" keys
@@ -176,5 +185,6 @@ export function getDashboardStateSchema() {
     ),
     time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+    access_control: accessControlSchema,
   });
 }

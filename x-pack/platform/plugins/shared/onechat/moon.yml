@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows-extensions'
   - '@kbn/spaces-plugin'
   - '@kbn/doc-links'
   - '@kbn/ui-actions-plugin'
@@ -96,7 +97,9 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-notifications-browser'
+  - '@kbn/ai-assistant-common'
   - '@kbn/ui-theme'
+  - '@kbn/ai-assistant-management-plugin'
 tags:
   - plugin
   - prod

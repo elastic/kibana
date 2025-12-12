@@ -152,6 +152,7 @@ const previouslyRegisteredTypes = [
   'slo-settings',
   'space',
   'spaces-usage-stats',
+  'stream-prompts',
   'synthetics-monitor',
   'synthetics-monitor-multi-space',
   'synthetics-param',

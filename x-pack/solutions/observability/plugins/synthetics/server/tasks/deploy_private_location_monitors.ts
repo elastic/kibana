@@ -109,7 +109,7 @@ export class DeployPrivateLocationMonitors {
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows();
+    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows(spaceId);
     const monitorConfigRepository = new MonitorConfigRepository(
       soClient,
       encryptedSavedObjects.getClient()

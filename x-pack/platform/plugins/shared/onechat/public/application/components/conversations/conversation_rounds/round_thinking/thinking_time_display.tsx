@@ -6,29 +6,47 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 export const ThinkingTimeDisplay = ({ timeToFirstToken }: { timeToFirstToken: number }) => {
   if (timeToFirstToken === 0) {
     return null;
   }
   return (
-    <EuiFlexGroup responsive={false} direction="row" gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="clock" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.onechat.conversation.thinking.timeToFirstToken"
-            defaultMessage="{timeToFirstToken} seconds"
-            values={{
-              timeToFirstToken: Math.round(timeToFirstToken / 1000),
-            }}
-          />
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.onechat.thinkingTimeDisplay.totalReasoningTime"
+          defaultMessage="Total reasoning time"
+        />
+      }
+    >
+      <EuiFlexGroup
+        responsive={false}
+        direction="row"
+        gutterSize="s"
+        alignItems="center"
+        css={css`
+          flex-grow: 0;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="clock" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.onechat.conversation.thinking.timeToFirstToken"
+              defaultMessage="{timeToFirstToken} seconds"
+              values={{
+                timeToFirstToken: Math.round(timeToFirstToken / 1000),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 };

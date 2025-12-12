@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
@@ -29,6 +30,7 @@ export const getShareAppMenuItem = ({
   hasUnsavedChanges,
   currentTab,
   persistedDiscoverSession,
+  totalHitsState,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
@@ -37,6 +39,7 @@ export const getShareAppMenuItem = ({
   hasUnsavedChanges: boolean;
   currentTab: TabState;
   persistedDiscoverSession: DiscoverSession | undefined;
+  totalHitsState: DataTotalHitsMsg;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -149,6 +152,7 @@ export const getShareAppMenuItem = ({
           i18n.translate('discover.localMenu.fallbackReportTitle', {
             defaultMessage: 'Untitled Discover session',
           }),
+        totalHits: totalHitsState.result || 0,
       },
       isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
       onClose: () => {

@@ -51,6 +51,7 @@ import { type TracksOverlays } from '@kbn/presentation-util';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
@@ -161,6 +162,11 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+    accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
+    changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+    createdBy?: string;
+    user?: DashboardUser;
+    isAccessControlEnabled?: boolean;
   };
 
 export interface DashboardInternalApi {
@@ -176,4 +182,9 @@ export interface DashboardInternalApi {
     controlGroupInput: ControlsGroupState | undefined;
     controlGroupReferences: Reference[];
   };
+}
+
+export interface DashboardUser {
+  uid: string;
+  hasGlobalAccessControlPrivilege: boolean;
 }

@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { GapAutoFillSchedulerRequestBodyV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import type { CreateGapAutoFillSchedulerParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/create/types';
+import type { CreateGapAutoFillSchedulerParams } from '../../../../../../../application/gaps/auto_fill_scheduler/methods/create/types';
 
 export const transformRequest = (
   request: KibanaRequest<unknown, unknown, unknown, 'post'>
