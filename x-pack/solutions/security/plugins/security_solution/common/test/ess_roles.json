@@ -27,7 +27,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV4": ["read", "read_alerts", "endpoint_exceptions_read"],
+          "siemV5": ["read", "endpoint_exceptions_read"],
+          "securitySolutionRulesV1": ["read"],
           "securitySolutionAssistant": ["none"],
           "securitySolutionAttackDiscovery": ["none"],
           "securitySolutionCasesV2": ["read"],
@@ -78,13 +79,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV4": [
-            "all",
-            "read_alerts",
-            "crud_alerts",
-            "global_artifact_management_all",
-            "endpoint_exceptions_all"
-          ],
+          "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
+          "securitySolutionRulesV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -135,13 +131,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV4": [
-            "all",
-            "read_alerts",
-            "crud_alerts",
-            "global_artifact_management_all",
-            "endpoint_exceptions_all"
-          ],
+          "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
+          "securitySolutionRulesV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -164,7 +155,8 @@
     "kibana": [
       {
         "feature": {
-          "siemV4": ["read", "endpoint_exceptions_read"]
+          "siemV5": ["read", "endpoint_exceptions_read"],
+          "securitySolutionRulesV1": ["read"]
         },
         "spaces": ["*"],
         "base": []
@@ -214,13 +206,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV4": [
-            "all",
-            "read_alerts",
-            "crud_alerts",
-            "global_artifact_management_all",
-            "endpoint_exceptions_all"
-          ],
+          "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
+          "securitySolutionRulesV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -276,13 +263,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV4": [
-            "all",
-            "read_alerts",
-            "crud_alerts",
-            "global_artifact_management_all",
-            "endpoint_exceptions_all"
-          ],
+          "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
+          "securitySolutionRulesV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
