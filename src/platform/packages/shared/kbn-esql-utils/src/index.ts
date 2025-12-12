@@ -61,6 +61,10 @@ export {
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
+export {
+  getAllUserDefinedColumnNames,
+  isUserDefinedColumn,
+} from './utils/get_user_defined_columns';
 
 // Callback functions
 export * from './utils/callbacks';
