@@ -125,6 +125,14 @@ export const CAI_CASES_INDEX_SCRIPT: StoredScript = {
       }
     }
 
+    ctx._source.fields = new HashMap();
+    if (source.cases.fields != null) {
+      for (item in source.cases.fields) {
+          ctx._source.fields[item] = source.cases.fields[item];
+      }
+    }
+
+
     ctx._source.observables = [];
     if (source.cases.observables != null) {
       for (item in source.cases.observables) {

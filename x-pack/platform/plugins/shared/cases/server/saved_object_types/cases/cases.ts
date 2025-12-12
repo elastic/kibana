@@ -26,6 +26,7 @@ import {
   modelVersion6,
   modelVersion7,
   modelVersion8,
+  modelVersion9,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 
@@ -38,6 +39,36 @@ export const createCaseSavedObjectType = (
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
+  dynamic_templates: [
+    {
+      as_keyword: {
+        match_pattern: 'regex',
+        match: '.*_as_keyword',
+        mapping: {
+          type: 'keyword',
+          ignore_above: 256,
+        },
+      },
+    },
+    {
+      as_integer: {
+        match_pattern: 'regex',
+        match: '.*_as_integer',
+        mapping: {
+          type: 'integer',
+        },
+      },
+    },
+    {
+      as_date: {
+        match_pattern: 'regex',
+        match: '.*_as_date',
+        mapping: {
+          type: 'date',
+        },
+      },
+    },
+  ],
   mappings: {
     dynamic: false,
     properties: {
@@ -271,6 +302,11 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      fields: {
+        // @ts-expect-error - only protected by the typescript type
+        dynamic: true,
+        type: 'object',
+      },
     },
   },
   migrations: caseMigrations,
@@ -283,6 +319,7 @@ export const createCaseSavedObjectType = (
     6: modelVersion6,
     7: modelVersion7,
     8: modelVersion8,
+    9: modelVersion9,
   },
   management: {
     importableAndExportable: true,

@@ -603,6 +603,26 @@ export class CasesService {
       transformedAttributes.attributes.total_comments = 0;
       transformedAttributes.attributes.total_events = 0;
 
+      /** Test adding dynamic fields */
+
+      transformedAttributes.attributes.fields = {};
+      transformedAttributes.attributes.fields.status_as_keyword = 'open';
+      transformedAttributes.attributes.fields.duration_as_integer = 300;
+      transformedAttributes.attributes.fields.created_as_date = new Date().toISOString();
+      const typeOptions = ['keyword', 'integer', 'date'];
+      for (let i = 0; i < 200; i++) {
+        const mappingType = typeOptions[i % 3];
+        const value =
+          mappingType === 'date'
+            ? new Date().toISOString()
+            : mappingType === 'integer'
+            ? i * 2
+            : `sample text for keyword field ${i}`;
+        transformedAttributes.attributes.fields[`field_${i}_as_${mappingType}`] = value;
+      }
+
+      /** End test adding dynamic fields */
+
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,

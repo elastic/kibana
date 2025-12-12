@@ -37,6 +37,7 @@ export interface CasePersistedAttributes {
   connector: ConnectorPersisted;
   description: string;
   duration: number | null;
+  fields: Record<string, unknown>;
   external_service: ExternalServicePersisted | null;
   owner: string;
   settings: { syncAlerts: boolean; extractObservables?: boolean };
