@@ -57,11 +57,11 @@ export const getFilteredLinks = async (
 ): Promise<AppLinkItems> => {
   const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
 
-  const chatExperience$ = core.uiSettings.client.get$<AIChatExperience>(
+  const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
     AIChatExperience.Classic
   );
-  const chatExperience = await firstValueFrom(chatExperience$);
+  const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
 
   return Object.freeze([
