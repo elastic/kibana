@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileAnalysis } from '../../../../..';
+import type { FileAnalysis } from '../../../../../file_upload_manager';
 import { Overrides } from './overrides';
 
 interface Props {
