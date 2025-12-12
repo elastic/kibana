@@ -51,7 +51,7 @@ const AdditionalToolbarControlsComponent = ({
   const { dataView: experimentalDataView } = useDataView(pageScope);
 
   const groupId = useMemo(() => groupIdSelector(), []);
-  const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
+  const { options, settings } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
     options: [],
   };
 
@@ -91,6 +91,7 @@ const AdditionalToolbarControlsComponent = ({
     fields,
     defaultGroupingOptions: options,
     maxGroupingLevels: 3,
+    settings,
   });
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
