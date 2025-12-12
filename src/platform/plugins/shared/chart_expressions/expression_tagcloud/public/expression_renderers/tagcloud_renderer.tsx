@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { useSyncParams } from '@kbn/expressions-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createPerformanceTracker,
@@ -102,8 +103,12 @@ export const tagcloudRenderer: (
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    render(
-      <KibanaRenderContextProvider {...core}>
+    // Wrapper component that uses useSyncParams hook for reactive param updates
+    const TagCloudWrapper = () => {
+      const { syncColors } = useSyncParams(handlers);
+      const isDarkMode = useKibanaIsDarkMode();
+
+      return (
         <ClassNames>
           {({ css, cx }) => (
             <VisualizationContainer
@@ -118,13 +123,19 @@ export const tagcloudRenderer: (
                 palettesRegistry={palettesRegistry}
                 renderComplete={renderComplete}
                 fireEvent={handlers.event}
-                syncColors={config.syncColors}
+                syncColors={syncColors}
                 overrides={config.overrides}
-                isDarkMode={useKibanaIsDarkMode()}
+                isDarkMode={isDarkMode}
               />
             </VisualizationContainer>
           )}
         </ClassNames>
+      );
+    };
+
+    render(
+      <KibanaRenderContextProvider {...core}>
+        <TagCloudWrapper />
       </KibanaRenderContextProvider>,
       domNode
     );

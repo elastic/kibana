@@ -16,6 +16,7 @@ import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
+import { useSyncParams } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -90,7 +91,7 @@ export const getPartitionVisRenderer: (
   reuseDomNode: true,
   render: async (
     domNode,
-    { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
+    { visConfig, visData, visType, canNavigateToLens, overrides },
     handlers
   ) => {
     const performanceTracker = createPerformanceTracker({
@@ -145,8 +146,11 @@ export const getPartitionVisRenderer: (
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    render(
-      <KibanaRenderContextProvider {...core}>
+    // Wrapper component that uses useSyncParams hook for reactive param updates
+    const PartitionVisWrapper = () => {
+      const { syncColors } = useSyncParams(handlers);
+
+      return (
         <div css={partitionVisRenderer}>
           <PartitionVisComponent
             chartsThemeService={plugins.charts.theme}
@@ -166,6 +170,12 @@ export const getPartitionVisRenderer: (
             hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
           />
         </div>
+      );
+    };
+
+    render(
+      <KibanaRenderContextProvider {...core}>
+        <PartitionVisWrapper />
       </KibanaRenderContextProvider>,
       domNode
     );

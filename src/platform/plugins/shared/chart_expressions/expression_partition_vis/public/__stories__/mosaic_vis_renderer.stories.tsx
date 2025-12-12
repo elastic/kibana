@@ -26,18 +26,16 @@ const PartitionVisRenderer = () => getPartitionVisRenderer({ getStartDeps });
 
 type Props = {
   visType: PartitionChartProps['visType'];
-  syncColors: PartitionChartProps['syncColors'];
 } & PartitionChartProps['visConfig'];
 
 const PartitionVis: StoryFn<FC<PropsWithChildren<Props>>> = ({
   visType,
-  syncColors,
   children,
   ...visConfig
 }) => (
   <Render
     renderer={PartitionVisRenderer}
-    config={{ visType, syncColors, visConfig, visData: data }}
+    config={{ visType, visConfig, visData: data }}
     {...containerSize}
   />
 );
@@ -49,6 +47,6 @@ export default {
 };
 
 const Default = PartitionVis.bind({});
-Default.args = { ...treemapMosaicConfig, visType: ChartTypes.MOSAIC, syncColors: false };
+Default.args = { ...treemapMosaicConfig, visType: ChartTypes.MOSAIC };
 
 export { Default };

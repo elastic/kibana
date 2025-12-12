@@ -180,6 +180,7 @@ export type {
   IInterpreterRenderHandlers,
   IInterpreterRenderUpdateParams,
   RenderMode,
+  SyncParams,
 } from './expression_renderers';
 export { createExecutorContainer, pureSelectors, pureTransitions, defaultState } from './executor';
 export type {

@@ -58,6 +58,9 @@ export function useExpressionRenderer(
     onRender$,
     reload$,
     abortController,
+    syncColors,
+    syncCursor,
+    syncTooltips,
     ...loaderParams
   }: ExpressionRendererParams
 ): ExpressionRendererState {
@@ -69,9 +72,23 @@ export function useExpressionRenderer(
     error: null,
   });
 
-  const memoizedOptions = useShallowMemo({ expression, params: useShallowMemo(loaderParams) });
-  const [{ expression: debouncedExpression, params: debouncedLoaderParams }, isDebounced] =
-    useDebouncedValue(memoizedOptions, debounce);
+  const memoizedOptions = useShallowMemo({
+    expression,
+    syncColors,
+    syncCursor,
+    syncTooltips,
+    params: useShallowMemo(loaderParams),
+  });
+  const [
+    {
+      expression: debouncedExpression,
+      syncColors: debouncedSyncColors,
+      syncCursor: debouncedSyncCursor,
+      syncTooltips: debouncedSyncTooltips,
+      params: debouncedLoaderParams,
+    },
+    isDebounced,
+  ] = useDebouncedValue(memoizedOptions, debounce);
 
   const expressionLoaderRef = useRef<ExpressionLoader | null>(null);
 
@@ -95,6 +112,9 @@ export function useExpressionRenderer(
       nodeRef.current &&
       new ExpressionLoader(nodeRef.current, debouncedExpression, {
         ...debouncedLoaderParams,
+        syncColors: debouncedSyncColors,
+        syncCursor: debouncedSyncCursor,
+        syncTooltips: debouncedSyncTooltips,
         // react component wrapper provides different
         // error handling api which is easier to work with from react
         // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
@@ -125,9 +145,6 @@ export function useExpressionRenderer(
     debouncedLoaderParams.onRenderError,
     debouncedLoaderParams.interactive,
     debouncedLoaderParams.renderMode,
-    debouncedLoaderParams.syncColors,
-    debouncedLoaderParams.syncTooltips,
-    debouncedLoaderParams.syncCursor,
   ]);
 
   useEffect(() => {
@@ -178,6 +195,15 @@ export function useExpressionRenderer(
   useUpdateEffect(() => {
     expressionLoaderRef.current?.update(debouncedExpression, debouncedLoaderParams);
   }, [debouncedExpression, debouncedLoaderParams]);
+
+  // Handle sync params changes separately without triggering full update
+  useUpdateEffect(() => {
+    expressionLoaderRef.current?.updateSyncParams({
+      syncColors: debouncedSyncColors,
+      syncCursor: debouncedSyncCursor,
+      syncTooltips: debouncedSyncTooltips,
+    });
+  }, [debouncedSyncColors, debouncedSyncCursor, debouncedSyncTooltips]);
 
   // call expression loader's done() handler when finished rendering custom error state
   useLayoutEffect(() => {

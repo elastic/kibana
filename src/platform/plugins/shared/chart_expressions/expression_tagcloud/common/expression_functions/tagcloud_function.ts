@@ -192,7 +192,6 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           visData: input,
           visType: EXPRESSION_NAME,
           visParams,
-          syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         },
       };
     },

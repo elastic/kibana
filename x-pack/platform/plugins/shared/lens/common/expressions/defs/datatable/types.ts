@@ -15,7 +15,6 @@ import type { DatatableArgs } from './datatable';
 
 export interface DatatableProps {
   data: Datatable;
-  syncColors: boolean;
   untransposedData?: Datatable;
   args: DatatableArgs;
 }

@@ -125,7 +125,6 @@ describe('XY categorical formatting', () => {
     data: dataPluginMock.createStartContract(),
     formatFactory,
     timeZone: 'UTC',
-    renderMode: 'view',
     chartsThemeService,
     chartsActiveCursorService,
     paletteService,

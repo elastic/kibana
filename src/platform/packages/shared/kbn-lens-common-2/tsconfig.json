@@ -18,6 +18,7 @@
     "@kbn/presentation-publishing",
     "@kbn/lens-embeddable-utils",
     "@kbn/chart-expressions-common",
-    "@kbn/embeddable-plugin"
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-containers"
   ]
 }

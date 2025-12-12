@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/lens-embeddable-utils'
   - '@kbn/chart-expressions-common'
   - '@kbn/embeddable-plugin'
+  - '@kbn/presentation-containers'
 tags:
   - shared-common
   - package

@@ -27,9 +27,6 @@ describe('layeredXyVis', () => {
       as: XY_VIS,
       value: {
         args: { ...rest, layers: [sampleExtendedLayer] },
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: true,
         canNavigateToLens: false,
       },
     });

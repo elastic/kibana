@@ -63,7 +63,6 @@ const defaultProps: Omit<XYChartRenderProps, 'args'> = {
   data: dataPluginMock.createStartContract(),
   formatFactory: getFormatSpy,
   timeZone: 'UTC',
-  renderMode: 'view',
   chartsThemeService,
   chartsActiveCursorService,
   paletteService,

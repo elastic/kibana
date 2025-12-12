@@ -166,7 +166,6 @@ describe('XYChart component', () => {
       data: dataPluginMock.createStartContract(),
       formatFactory: formatFactorySpy,
       timeZone: 'UTC',
-      renderMode: 'view',
       chartsThemeService,
       chartsActiveCursorService,
       paletteService,

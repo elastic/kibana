@@ -33,6 +33,7 @@ export type DatatableRenderProps = DatatableProps & {
    */
   columnCellValueActions?: LensCellValueAction[][];
   columnFilterable?: boolean[];
+  syncColors: boolean;
 };
 
 export interface DataContextType {

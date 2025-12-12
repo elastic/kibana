@@ -59,7 +59,6 @@ const config: TagcloudRendererConfig = {
     palette: { type: 'palette', name: 'default' },
     isPreview: false,
   },
-  syncColors: false,
 };
 
 const containerSize = {

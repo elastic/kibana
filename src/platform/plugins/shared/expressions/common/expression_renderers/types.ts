@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ExpressionAstExpression } from '../ast';
 
@@ -65,6 +66,15 @@ export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
  */
 export type RenderMode = 'edit' | 'preview' | 'view';
 
+/**
+ * Parameters that can be updated on a rendered expression without re executing the expression
+ */
+export interface SyncParams {
+  syncColors?: boolean;
+  syncCursor?: boolean;
+  syncTooltips?: boolean;
+}
+
 export interface IInterpreterRenderUpdateParams<Params = unknown> {
   newExpression?: string | ExpressionAstExpression;
   newParams: Params;
@@ -98,6 +108,12 @@ export interface IInterpreterRenderHandlers {
   isSyncCursorEnabled(): boolean;
 
   isSyncTooltipsEnabled(): boolean;
+
+  /**
+   * Observable that emits when the sync parameters (syncColors, syncCursor, syncTooltips) change.
+   * Renderers can subscribe to this to update without re-executing the expression.
+   */
+  syncParamsUpdate$?: Observable<SyncParams>;
 
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,

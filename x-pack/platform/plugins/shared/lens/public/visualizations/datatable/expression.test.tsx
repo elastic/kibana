@@ -80,7 +80,7 @@ function sampleArgs(): DatatableProps {
     sortingDirection: 'none',
   };
 
-  return { data, args, syncColors: false };
+  return { data, args };
 }
 
 describe('datatable_expression', () => {

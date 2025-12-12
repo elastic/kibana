@@ -21,9 +21,6 @@ describe('calculateMinInterval', () => {
 
     xyProps = {
       args: { ...restArgs, layers },
-      syncColors: false,
-      syncTooltips: false,
-      syncCursor: true,
     };
     layer = xyProps.args.layers[0] as DataLayerConfig;
     layer.xScaleType = 'time';

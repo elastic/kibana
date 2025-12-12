@@ -25,6 +25,7 @@ import type {
   IInterpreterRenderHandlers,
   IInterpreterRenderUpdateParams,
   RenderMode,
+  SyncParams,
 } from '../common';
 
 import { getRenderersRegistry } from './services';
@@ -49,6 +50,7 @@ export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
   events$: Observable<ExpressionRendererEvent>;
+  syncParamsUpdate$: Observable<SyncParams>;
 
   private element: HTMLElement;
   private destroyFn?: Function;
@@ -56,6 +58,10 @@ export class ExpressionRenderHandler {
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
+  private syncParamsUpdateSubject: Rx.Subject<SyncParams>;
+  private syncColors: boolean;
+  private syncCursor: boolean;
+  private syncTooltips: boolean;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
 
@@ -86,6 +92,13 @@ export class ExpressionRenderHandler {
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
 
+    this.syncParamsUpdateSubject = new Rx.Subject();
+    this.syncParamsUpdate$ = this.syncParamsUpdateSubject.asObservable();
+
+    this.syncColors = syncColors ?? false;
+    this.syncCursor = syncCursor ?? true;
+    this.syncTooltips = syncTooltips ?? false;
+
     this.handlers = {
       onDestroy: (fn: Function) => {
         this.destroyFn = fn;
@@ -110,17 +123,18 @@ export class ExpressionRenderHandler {
         return renderMode || 'view';
       },
       isSyncColorsEnabled: () => {
-        return syncColors || false;
+        return this.syncColors;
       },
       isSyncTooltipsEnabled: () => {
-        return syncTooltips || false;
+        return this.syncTooltips;
       },
       isSyncCursorEnabled: () => {
-        return syncCursor || true;
+        return this.syncCursor;
       },
       isInteractive: () => {
         return interactive ?? true;
       },
+      syncParamsUpdate$: this.syncParamsUpdate$,
       hasCompatibleActions,
       getCompatibleCellValueActions,
     };
@@ -162,8 +176,30 @@ export class ExpressionRenderHandler {
     this.renderSubject.complete();
     this.eventsSubject.complete();
     this.updateSubject.complete();
+    this.syncParamsUpdateSubject.complete();
     if (this.destroyFn) {
       this.destroyFn();
+    }
+  };
+
+  updateSyncParams = (params: SyncParams) => {
+    const changes: SyncParams = {};
+
+    if (params.syncColors !== undefined && this.syncColors !== params.syncColors) {
+      this.syncColors = params.syncColors;
+      changes.syncColors = params.syncColors;
+    }
+    if (params.syncCursor !== undefined && this.syncCursor !== params.syncCursor) {
+      this.syncCursor = params.syncCursor;
+      changes.syncCursor = params.syncCursor;
+    }
+    if (params.syncTooltips !== undefined && this.syncTooltips !== params.syncTooltips) {
+      this.syncTooltips = params.syncTooltips;
+      changes.syncTooltips = params.syncTooltips;
+    }
+
+    if (Object.keys(changes).length > 0) {
+      this.syncParamsUpdateSubject.next(changes);
     }
   };
 

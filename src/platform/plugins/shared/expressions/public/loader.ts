@@ -121,6 +121,33 @@ export class ExpressionLoader {
     return this.execution?.inspect() as Adapters;
   }
 
+  updateSyncParams(params: {
+    syncColors?: boolean;
+    syncCursor?: boolean;
+    syncTooltips?: boolean;
+  }): void {
+    const changedParams: {
+      syncColors?: boolean;
+      syncCursor?: boolean;
+      syncTooltips?: boolean;
+    } = {};
+    if (params.syncColors !== undefined && params.syncColors !== this.params.syncColors) {
+      this.params.syncColors = params.syncColors;
+      changedParams.syncColors = params.syncColors;
+    }
+    if (params.syncCursor !== undefined && params.syncCursor !== this.params.syncCursor) {
+      this.params.syncCursor = params.syncCursor;
+      changedParams.syncCursor = params.syncCursor;
+    }
+    if (params.syncTooltips !== undefined && params.syncTooltips !== this.params.syncTooltips) {
+      this.params.syncTooltips = params.syncTooltips;
+      changedParams.syncTooltips = params.syncTooltips;
+    }
+    if (Object.keys(changedParams).length > 0) {
+      this.renderHandler.updateSyncParams(changedParams);
+    }
+  }
+
   update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
     this.setParams(params);
 
@@ -187,9 +214,6 @@ export class ExpressionLoader {
     if (params.searchSessionId && this.params) {
       this.params.searchSessionId = params.searchSessionId;
     }
-    this.params.syncColors = params.syncColors;
-    this.params.syncCursor = params.syncCursor;
-    this.params.syncTooltips = params.syncTooltips;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);

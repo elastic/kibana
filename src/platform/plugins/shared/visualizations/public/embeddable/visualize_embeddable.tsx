@@ -315,6 +315,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
       getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
       getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
+      settings: apiPublishesSettings(parentApi) ? parentApi.settings : {},
     });
 
     const fetchSubscription = fetch$(api)
@@ -462,8 +463,18 @@ export const getVisualizeEmbeddableFactory: (deps: {
           api.title$,
           api.defaultTitle$
         );
+        const [syncColors, syncCursor, syncTooltips] = useBatchedPublishingSubjects(
+          api.settings.syncColors$,
+          api.settings.syncCursor$,
+          api.settings.syncTooltips$
+        );
         const domNode = useRef<HTMLDivElement>(null);
-        const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const { error, isLoading } = useExpressionRenderer(domNode, {
+          ...expressionParams,
+          syncColors,
+          syncCursor,
+          syncTooltips,
+        });
         const errorTextStyle = useErrorTextStyle();
 
         const dataTitle = useMemo(() => {

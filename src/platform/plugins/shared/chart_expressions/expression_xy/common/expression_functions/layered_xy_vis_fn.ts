@@ -65,9 +65,6 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
           handlers.getExecutionContext?.()?.description,
       },
       canNavigateToLens: Boolean(handlers.variables.canNavigateToLens),
-      syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-      syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
-      syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
       overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
     },
   };

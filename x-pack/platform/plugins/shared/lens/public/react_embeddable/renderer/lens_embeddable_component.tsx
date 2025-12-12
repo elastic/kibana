@@ -33,7 +33,12 @@ export function LensEmbeddableComponent({
     // without replacing the entire panel
     blockingErrors,
     // has the render completed?
-    hasRendered,
+    hasRendered, // viewMode is unused but triggers re-render
+    ,
+    // sync settings from parent API
+    syncColors,
+    syncCursor,
+    syncTooltips,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
@@ -41,7 +46,10 @@ export function LensEmbeddableComponent({
     api.rendered$,
     // listen to view change mode but do not use its actual value
     // just call the Lens API to know whether it's in edit mode
-    api.viewMode$
+    api.viewMode$,
+    api.settings.syncColors$,
+    api.settings.syncCursor$,
+    api.settings.syncTooltips$
   );
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(api) === 'edit');
 
@@ -81,7 +89,12 @@ export function LensEmbeddableComponent({
       ref={rootRef}
     >
       {expressionParams == null || blockingErrors.length ? null : (
-        <ExpressionWrapper {...expressionParams} />
+        <ExpressionWrapper
+          {...expressionParams}
+          syncColors={syncColors}
+          syncCursor={syncCursor}
+          syncTooltips={syncTooltips}
+        />
       )}
       <UserMessages
         blockingErrors={blockingErrors}

@@ -22,6 +22,7 @@ import type {
   PublishesWritableDescription,
   PublishesWritableTitle,
 } from '@kbn/presentation-publishing';
+import type { PublishesSettings } from '@kbn/presentation-containers';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import type {
@@ -94,6 +95,8 @@ export type LensApi = Simplify<
     PublishesViewMode &
     // Let the container know the saved object id
     PublishesSavedObjectId &
+    // Let the container know the sync settings
+    PublishesSettings &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &

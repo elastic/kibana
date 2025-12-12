@@ -41,6 +41,7 @@ export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
+  syncColors: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
   isDarkMode: boolean;
 };

@@ -40,7 +40,6 @@ import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -145,7 +144,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
-  renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
   syncCursor: boolean;

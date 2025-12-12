@@ -97,6 +97,7 @@ export type PartitionVisComponentProps = Omit<
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
+  syncColors: boolean;
   columnCellValueActions: ColumnCellValueActions;
   hasOpenedOnAggBasedEditor: boolean;
 };

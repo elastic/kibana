@@ -101,7 +101,6 @@ export const datatableFn =
       value: {
         data: sortedTable,
         untransposedData,
-        syncColors: context.isSyncColorsEnabled?.() ?? false,
         args: {
           ...args,
           title: (context.variables.embeddableTitle as string) ?? args.title,

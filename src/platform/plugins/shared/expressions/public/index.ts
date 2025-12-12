@@ -31,7 +31,7 @@ export type {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { useExpressionRenderer } from './react_expression_renderer';
+export { useExpressionRenderer, useSyncParams } from './react_expression_renderer';
 export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
