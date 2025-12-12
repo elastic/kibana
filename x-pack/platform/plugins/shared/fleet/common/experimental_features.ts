@@ -18,7 +18,7 @@ const _allowedExperimentalValues = {
   enableOtelIntegrations: true,
   enableAgentStatusAlerting: true,
   enableAgentPrivilegeLevelChange: false,
-  installIntegrationsKnowledge: false,
+  installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
   agentlessPoliciesAPI: true, // When enabled, agentless policies API will be enabled.
   useAgentlessAPIInUI: true, // When enabled, Fleet UI will use agentless policies API to create agentless policies.

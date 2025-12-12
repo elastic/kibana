@@ -83,6 +83,7 @@ describe('useAgentBuilderAttachment', () => {
     expect(mockOpenConversationFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenConversationFlyout).toHaveBeenCalledWith({
       newConversation: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Analyze this alert',
       attachments: [
         {

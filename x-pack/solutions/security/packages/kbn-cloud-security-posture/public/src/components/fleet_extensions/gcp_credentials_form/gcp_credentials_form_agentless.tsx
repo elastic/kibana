@@ -13,7 +13,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
-import { ORGANIZATION_ACCOUNT } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,

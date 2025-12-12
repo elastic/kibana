@@ -32,6 +32,9 @@ export const ASK_AI_ASSISTANT = i18n.translate(
     defaultMessage: 'Ask AI Assistant',
   }
 );
+export const EVENT = i18n.translate('xpack.securitySolution.flyout.right.footer.event', {
+  defaultMessage: 'Security Event',
+});
 
 interface PanelFooterProps {
   /**
@@ -52,16 +55,19 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
   });
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
-  const alertData = useMemo(() => {
+  const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
-    return stringifyEssentialAlertData(rawData);
-  }, [dataFormattedForFieldBrowser]);
+    return {
+      attachmentType: SecurityAgentBuilderAttachments.alert,
+      attachmentData: {
+        alert: stringifyEssentialAlertData(rawData),
+        attachmentLabel: isAlert ? rawData['kibana.alert.rule.name']?.[0] : EVENT,
+      },
+      attachmentPrompt: isAlert ? ALERT_ATTACHMENT_PROMPT : EVENT_ATTACHMENT_PROMPT,
+    };
+  }, [dataFormattedForFieldBrowser, isAlert]);
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.alert,
-    attachmentData: { alert: alertData },
-    attachmentPrompt: isAlert ? ALERT_ATTACHMENT_PROMPT : EVENT_ATTACHMENT_PROMPT,
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
   if (isRulePreview) return null;
 
