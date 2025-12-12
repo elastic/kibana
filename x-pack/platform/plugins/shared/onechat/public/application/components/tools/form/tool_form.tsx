@@ -8,7 +8,6 @@
 import { EuiForm, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import type { ToolType } from '@kbn/onechat-common';
 import { useFormContext } from 'react-hook-form';
 import { Configuration } from './sections/configuration';
 import { Labels } from './sections/labels';
@@ -28,20 +27,16 @@ interface BaseToolFormProps {
 interface EditableToolFormProps extends BaseToolFormProps {
   mode: ToolFormMode.Create | ToolFormMode.Edit;
   saveTool: (data: ToolFormData) => void;
-  toolType: ToolType;
-  setToolType: (toolType: ToolType) => void;
 }
 
 interface ReadonlyToolFormProps extends BaseToolFormProps {
   mode: ToolFormMode.View;
   saveTool?: never;
-  toolType?: never;
-  setToolType?: never;
 }
 
 export type ToolFormProps = EditableToolFormProps | ReadonlyToolFormProps;
 
-export const ToolForm = ({ mode, formId, saveTool, toolType, setToolType }: ToolFormProps) => {
+export const ToolForm = ({ mode, formId, saveTool }: ToolFormProps) => {
   const { euiTheme } = useEuiTheme();
   const { handleSubmit } = useFormContext<ToolFormData>();
   const isViewMode = mode === ToolFormMode.View;
@@ -58,15 +53,15 @@ export const ToolForm = ({ mode, formId, saveTool, toolType, setToolType }: Tool
         }
       `}
     >
+      {!isViewMode && (
+        <>
+          <Configuration mode={mode} />
+          <EuiHorizontalRule />
+        </>
+      )}
       <SystemReferences mode={mode} />
       <EuiHorizontalRule />
       <Labels mode={mode} />
-      {!isViewMode && (
-        <>
-          <EuiHorizontalRule />
-          <Configuration toolType={toolType} setToolType={setToolType} mode={mode} />
-        </>
-      )}
       <EuiHorizontalRule />
     </EuiForm>
   );
