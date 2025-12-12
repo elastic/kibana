@@ -853,14 +853,9 @@ describe('tagKibanaAssets', () => {
       });
 
       // Simulate conflict on first attempt, success on second
-      let createCallCount = 0;
-      savedObjectTagClient.create.mockImplementation(() => {
-        createCallCount++;
-        if (createCallCount === 1) {
-          throw SavedObjectsErrorHelpers.createConflictError('tag', 'foo-tag');
-        }
-        return Promise.resolve({ id: 'foo-tag', name: 'Foo' });
-      });
+      savedObjectTagClient.create
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createConflictError('tag', 'foo-tag'))
+        .mockResolvedValueOnce({ id: 'foo-tag', name: 'Foo' });
 
       const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
       const assetTags = [
