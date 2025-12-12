@@ -8,16 +8,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
-import type { Filter, RangeFilterParams } from '@kbn/es-query';
-import { buildRangeFilter } from '@kbn/es-query';
 import {
   apiPublishesViewMode,
   fetch$,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -34,6 +32,7 @@ import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
+import { buildFilter } from './utils/filter_utils';
 
 export const getRangesliderControlFactory = (): EmbeddableFactory<
   RangeSliderControlState,
@@ -58,6 +57,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         state,
         parentApi,
         willHaveInitialFilter: state.value !== undefined,
+        getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
         editorStateManager,
       });
 
@@ -173,35 +173,28 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         }
       );
 
+      /** Output filters when selections and/or filter meta data changes */
+      const sectionId$ = apiHasSections(parentApi)
+        ? parentApi.getPanelSection$(uuid)
+        : of(undefined);
+
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
         selections.value$,
+        sectionId$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, value]) => {
+        .subscribe(([dataViews, fieldName, value, sectionId]) => {
           const dataView = dataViews?.[0];
           if (!dataView) return;
 
-          const dataViewField =
-            dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-          const gte = parseFloat(value?.[0] ?? '');
-          const lte = parseFloat(value?.[1] ?? '');
-
-          let rangeFilter: Filter | undefined;
-          if (value && dataView && dataViewField && (!isNaN(gte) || !isNaN(lte))) {
-            const params = {
-              gte: !isNaN(gte) ? gte : -Infinity,
-              lte: !isNaN(lte) ? lte : Infinity,
-            } as RangeFilterParams;
-
-            rangeFilter = buildRangeFilter(dataViewField, params, dataView);
-            rangeFilter.meta.key = fieldName;
-            rangeFilter.meta.type = 'range';
-            rangeFilter.meta.params = params;
-            rangeFilter.meta.controlledBy = uuid;
-          }
-          dataControlManager.internalApi.setOutputFilter(rangeFilter);
+          const newFilter = buildFilter(dataView, uuid, {
+            fieldName,
+            value,
+            sectionId,
+          });
+          dataControlManager.internalApi.setOutputFilter(newFilter);
         });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);

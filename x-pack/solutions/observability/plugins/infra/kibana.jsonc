@@ -53,6 +53,13 @@
       "licenseManagement",
       "serverless"
     ],
-    "requiredBundles": ["observability", "licenseManagement", "kibanaUtils", "kibanaReact", "ml"]
+    "requiredBundles": [
+      "observability",
+      "licenseManagement",
+      "kibanaUtils",
+      "kibanaReact",
+      "ml",
+      "fleet"
+    ]
   }
 }
