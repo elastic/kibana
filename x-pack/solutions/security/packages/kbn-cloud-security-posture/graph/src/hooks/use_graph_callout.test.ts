@@ -76,8 +76,7 @@ describe('useGraphCallout', () => {
           sub_type: hasSubType ? 'local' : '',
           name: hasName ? 'entity-name' : '',
           availableInEntityStore,
-          // TODO Remove workaround for missing type in schema when https://github.com/elastic/kibana/pull/243711 is merged
-        } as { type?: string; sub_type?: string; name?: string; availableInEntityStore?: boolean },
+        },
       },
     ],
   });
