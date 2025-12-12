@@ -32,6 +32,7 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   ruleDetailsRoute as commonRuleDetailsRoute,
   getCreateRuleRoute,
+  getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import type {
@@ -1020,6 +1021,13 @@ export const RulesList = ({
             onSelectRuleType={(ruleTypeId) => {
               navigateToApp('management', {
                 path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              });
+            }}
+            onSelectTemplate={(templateId) => {
+              navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
               });
             }}
             http={http}
