@@ -1,13 +1,13 @@
 rules:
   - name: 'ES|QL rule - layer 1'
     id: 'esql-parent-id'
-    rule_type_id: '.esql'
     enabled: true
     tags: ['parent']
     schedule: '1m'
-    # # We previously called this group key or entity key
-    identify_by: ['host.name']
-    params:
+    # We previously called this entity key
+    group_key: ['host.name']
+    # Powered by ESQL variables
+    variables:
       outcome: 'failure'
     # The "active" alert query. Do we want to append the status condition
     # Eg: EVAL status = "active"
@@ -15,7 +15,7 @@ rules:
     esql: |
       FROM kbn-data-forge-fake_stack.message_processor-*
       | STATS 
-          failure = COUNT(*) WHERE processor.outcome == ${outcome},
+          failure = COUNT(*) WHERE processor.outcome == ?outcome,
           total = COUNT(*)
         BY host.name
       | EVAL failure_rate = (failure * 100  / total)
@@ -24,16 +24,18 @@ rules:
     timeField: '@timestamp'
     lookbackWindow: '5m'
     track:
-      # Creates a level 2 rule that tracks recovery events
+      # Creates a recovery rule that tracks recovery events
       # on the level 1 rule when defined
       # Optionally can include a custom ESQL query for recovery events
-      # Automatically adds an `internal` tag/flag so we can hide from the UI
+      # Automatically adds an `internal` and `recovery` (maybe) tag/flag so we can hide from the UI
+      # Or optionally set the rule type as recovery
       recovery:
         enabled: true
         schedule: '1m'
         lookbackWindow: '5m'
-      # Create a level 3 rule that tracks flapping events
-      # Automatically adds an `internal` tag/flag so we can hide from the UI
+      # Create a flapping rule that tracks flapping events
+      # Automatically adds an `internal` and `flapping` (maybe) tag/flag so we can hide from the UI
+      # Or optionally set the rule type as flapping
       flapping:
         enabled: true
         schedule: '30m'

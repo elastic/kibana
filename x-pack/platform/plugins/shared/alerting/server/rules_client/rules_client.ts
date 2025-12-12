@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
@@ -14,7 +13,7 @@ import { parseDuration } from '../../common/parse_duration';
 import type { RulesClientContext } from './types';
 import type { CloneRuleParams } from '../application/rule/methods/clone';
 import { cloneRule } from '../application/rule/methods/clone';
-import type { CreateRuleParams } from '../application/rule/methods/create';
+import type { CreateRuleParams, CreateRuleData } from '../application/rule/methods/create';
 import { createRule } from '../application/rule/methods/create';
 import type { UpdateRuleParams } from '../application/rule/methods/update';
 import { updateRule } from '../application/rule/methods/update';
@@ -100,6 +99,8 @@ import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
+import type { RuleParamsV1 } from '../../common/routes/rule/response';
+import { createESQLRule } from '../application/rule/methods/create_esql_rule';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -258,4 +259,18 @@ export class RulesClient {
 
   public getRuleTypesByQuery = (params: GetRuleTypesByQueryParams) =>
     getRuleTypesByQuery(this.context, params);
+
+  public async createESQLRule(
+    ruleData: CreateRuleData<RuleParamsV1>,
+    track?: {
+      recovery?: {
+        enabled?: boolean;
+        schedule?: string;
+        lookbackWindow?: string;
+        recoveryQuery?: string;
+      };
+    }
+  ): Promise<Array<SanitizedRule<RuleParamsV1>>> {
+    return createESQLRule(this.context, ruleData, track);
+  }
 }

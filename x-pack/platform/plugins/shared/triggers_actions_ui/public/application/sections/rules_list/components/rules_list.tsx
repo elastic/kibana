@@ -11,7 +11,7 @@ import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
 import { EuiButtonIcon, EuiDescriptionList, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder, type KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -186,6 +186,7 @@ export const RulesList = ({
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
+  const [showInternalRules, setShowInternalRules] = useState<boolean>(false);
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
@@ -253,11 +254,20 @@ export const RulesList = ({
   const hasDefaultRuleTypesFiltersOn = isEmpty(filters.types);
 
   const computedFilter = useMemo(() => {
-    return {
+    const filter = {
       ...filters,
       types: rulesTypesFilter,
     };
-  }, [filters, rulesTypesFilter]);
+    if (!showInternalRules) {
+      const internalRulesKueryNode = fromKueryExpression('not alert.attributes.internal:true');
+      if (filter.kueryNode) {
+        filter.kueryNode = nodeBuilder.and([filter.kueryNode, internalRulesKueryNode]);
+      } else {
+        filter.kueryNode = internalRulesKueryNode;
+      }
+    }
+    return filter;
+  }, [filters, rulesTypesFilter, showInternalRules]);
 
   const canLoadRules = isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType;
 
@@ -533,6 +543,10 @@ export const RulesList = ({
       return !prevValue;
     });
   }, [showErrors, rulesState]);
+
+  const toggleShowInternalRules = useCallback(() => {
+    setShowInternalRules((prevValue) => !prevValue);
+  }, [setShowInternalRules]);
 
   const getProducerFeatureName = (producer: string) => {
     return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
@@ -873,6 +887,8 @@ export const RulesList = ({
                   onClearSelection={onClearSelection}
                   onRefreshRules={refreshRules}
                   onToggleRuleErrors={toggleRuleErrors}
+                  showInternalRules={showInternalRules}
+                  onToggleInternalRules={toggleShowInternalRules}
                 />
                 <EuiSpacer size="s" />
               </>

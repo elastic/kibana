@@ -29,19 +29,21 @@ export interface RulePageFooterProps {
 export const RulePageFooter = (props: RulePageFooterProps) => {
   const [showCreateConfirmation, setShowCreateConfirmation] = useState<boolean>(false);
 
-  const { setIsShowRequestScreenVisible } = useRuleFormScreenContext();
+  const { setIsShowRequestScreenVisible, setIsShowYamlFlyoutVisible } = useRuleFormScreenContext();
 
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
   const {
     plugins: { application },
-    formData: { actions },
+    formData: { actions, ruleTypeId },
     connectors,
     baseErrors = {},
     paramsErrors = {},
     actionsErrors = {},
     actionsParamsErrors = {},
   } = useRuleFormState();
+
+  const isEsqlRule = ruleTypeId === '.esql';
 
   const hasErrors = useMemo(() => {
     const hasBrokenConnectors = actions.some((action) => {
@@ -100,6 +102,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
             onClick={onCancel}
             disabled={isSaving}
             isLoading={isSaving}
+            aria-label={RULE_PAGE_FOOTER_CANCEL_TEXT}
           >
             {RULE_PAGE_FOOTER_CANCEL_TEXT}
           </EuiButtonEmpty>
@@ -112,10 +115,24 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
                 onClick={onOpenShowRequestModalClick}
                 disabled={isSaving || hasErrors}
                 isLoading={isSaving}
+                aria-label={RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT}
               >
                 {RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT}
               </EuiButtonEmpty>
             </EuiFlexItem>
+            {isEsqlRule && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="rulePageFooterShowYamlButton"
+                  onClick={() => setIsShowYamlFlyoutVisible(true)}
+                  disabled={isSaving || hasErrors}
+                  isLoading={isSaving}
+                  aria-label="Show YAML"
+                >
+                  Show YAML
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill

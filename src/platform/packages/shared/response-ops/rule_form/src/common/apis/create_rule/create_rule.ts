@@ -15,6 +15,8 @@ import { transformCreateRuleBody } from '.';
 import { BASE_ALERTING_API_PATH } from '../../../constants';
 import { transformRule } from '../../transformations';
 
+import { transformCreateESQLRuleBody } from './transform_create_esql_rule_body';
+
 export async function createRule({
   http,
   rule,
@@ -22,6 +24,12 @@ export async function createRule({
   http: HttpSetup;
   rule: CreateRuleBody;
 }): Promise<Rule> {
+  if (rule.ruleTypeId === '.esql') {
+    const res = await http.post<AsApiContract<Rule>>(`/api/rule/esql`, {
+      body: JSON.stringify(transformCreateESQLRuleBody(rule)),
+    });
+    return transformRule(res);
+  }
   const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule`, {
     body: JSON.stringify(transformCreateRuleBody(rule)),
   });

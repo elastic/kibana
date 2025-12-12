@@ -33,6 +33,7 @@ export const transformRuleDomainToRuleAttributes = ({
     name: rule.name,
     tags: rule.tags,
     enabled: rule.enabled,
+    internal: rule.internal ?? false,
     alertTypeId: rule.alertTypeId,
     consumer: rule.consumer,
     legacyId,
@@ -83,6 +84,7 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
+    ...(rule.internal !== undefined ? { internal: rule.internal } : {}),
     artifacts: artifactsWithRefs,
   } as RawRule;
 };

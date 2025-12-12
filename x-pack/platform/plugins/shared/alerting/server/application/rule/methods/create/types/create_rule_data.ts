@@ -25,5 +25,6 @@ export interface CreateRuleData<Params extends RuleParams = never> {
   notifyWhen?: CreateRuleDataType['notifyWhen'];
   alertDelay?: CreateRuleDataType['alertDelay'];
   flapping?: CreateRuleDataType['flapping'];
+  internal?: CreateRuleDataType['internal'];
   artifacts?: CreateRuleDataType['artifacts'];
 }

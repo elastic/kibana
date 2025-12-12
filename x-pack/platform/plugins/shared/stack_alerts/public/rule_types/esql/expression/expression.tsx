@@ -32,6 +32,7 @@ export const ESQLRuleTypeExpression: React.FunctionComponent<
   const expressionError = !!errorParam && (
     <>
       <EuiCallOut
+        announceOnMount
         color="danger"
         size="s"
         data-test-subj="esqAlertExpressionError"
