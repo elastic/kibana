@@ -156,9 +156,9 @@ export const getReadAuthFieldValue = (
       return Object.keys(rulePatch.rule_source).reduce(
         (acc, ruleSourceField) => ({
           ...acc,
-          [camelCase(ruleSourceField)]: rulePatch.rule_source[ruleSourceField],
+          [camelCase(ruleSourceField)]: rulePatch.rule_source[ruleSourceField as keyof RuleSource],
         }),
-        {}
+        {} as RuleSource
       );
   }
 };
