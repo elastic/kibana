@@ -20,6 +20,7 @@ import type {
 import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
+import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/promps_config_service';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
@@ -315,6 +316,7 @@ export const identifyFeaturesRoute = createServerRoute({
       uiSettingsClient,
       streamsClient,
       inferenceClient,
+      soClient,
     } = await getScopedClients({
       request,
     });
@@ -342,6 +344,12 @@ export const identifyFeaturesRoute = createServerRoute({
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
     const signal = getRequestAbortSignal(request);
     const featureRegistry = getDefaultFeatureRegistry();
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    const { featurePromptOverride } = await promptsConfigService.getPrompt();
 
     return from(
       featureRegistry.identifyFeatures({
@@ -353,6 +361,7 @@ export const identifyFeaturesRoute = createServerRoute({
         stream,
         features: hits,
         signal,
+        systemPromptOverride: featurePromptOverride,
       })
     ).pipe(
       map(({ features, tokensUsed }) => {

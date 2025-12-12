@@ -122,3 +122,10 @@ export const collapseBySchema = schema.oneOf(
 const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 
 export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;
+
+export const axisTitleSchemaProps = {
+  value: schema.maybe(
+    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
+  ),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
+};
