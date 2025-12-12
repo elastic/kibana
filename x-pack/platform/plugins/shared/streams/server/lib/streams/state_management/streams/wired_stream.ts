@@ -45,7 +45,6 @@ import {
   validateSystemFields,
 } from '../../helpers/validate_fields';
 import {
-  validateNoManualIngestPipelineUsage,
   validateRootStreamChanges,
   validateBracketsInFieldNames,
   validateSettings,
@@ -346,11 +345,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     const existsInStartingState = startingState.has(this._definition.name);
-
-    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
-      // recursively go through all steps to make sure it's not using manual_ingest_pipeline
-      validateNoManualIngestPipelineUsage(this._definition.ingest.processing.steps);
-    }
 
     if (!existsInStartingState) {
       // Check for conflicts
