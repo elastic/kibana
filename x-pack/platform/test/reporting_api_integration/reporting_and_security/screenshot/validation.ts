@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('pngV2', () => {
       it('fails if width or height are non-numeric', async () => {
-        const downloadReportPath = await reportingAPI.postJobJSON(
+        await reportingAPI.postJobJSON(
           '/api/reporting/generate/pngV2',
           {
             jobParams: createPngV2Params('cucucachoo'),
