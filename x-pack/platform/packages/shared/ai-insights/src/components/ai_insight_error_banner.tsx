@@ -23,7 +23,7 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
       title={i18n.translate('observabilityAgentBuilder.aiInsight.errorTitle', {
         defaultMessage: 'Failed to generate AI insight',
       })}
-      data-test-subj={'AiInsightErrorBanner'}
+      data-test-subj="AiInsightErrorBanner"
     >
       <p>
         {' '}
@@ -33,7 +33,7 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
         })}
       </p>
       {onRetry && (
-        <EuiButton size="s" onClick={onRetry} data-test-subj={'AiInsightRetryButton'}>
+        <EuiButton size="s" onClick={onRetry} data-test-subj="AiInsightErrorBannerRetryButton">
           {i18n.translate('observabilityAgentBuilder.aiInsight.retryButton', {
             defaultMessage: 'Try again',
           })}
