@@ -77,6 +77,7 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/core-chrome-navigation-tour",
     "@kbn/setup-node-env",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/unified-data-table"
   ]
 }

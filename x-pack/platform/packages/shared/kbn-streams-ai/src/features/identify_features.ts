@@ -17,7 +17,7 @@ import {
 } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
-import { IdentifySystemsPrompt } from './prompt';
+import { createIdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { generateStreamDescription } from '../description/generate_description';
@@ -33,6 +33,7 @@ export interface IdentifyFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   analysis: DocumentAnalysis;
+  systemPromptOverride?: string;
 }
 
 /**
@@ -54,6 +55,7 @@ export async function identifySystemFeatures({
   analysis,
   dropUnmapped = false,
   maxSteps: initialMaxSteps,
+  systemPromptOverride,
 }: IdentifyFeaturesOptions & {
   dropUnmapped?: boolean;
   maxSteps?: number;
@@ -94,7 +96,9 @@ export async function identifySystemFeatures({
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,
       },
-      prompt: IdentifySystemsPrompt,
+      prompt: createIdentifySystemsPrompt({
+        systemPromptOverride,
+      }),
       inferenceClient,
       finalToolChoice: {
         function: 'finalize_systems',
