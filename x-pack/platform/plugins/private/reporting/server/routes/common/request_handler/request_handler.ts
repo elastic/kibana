@@ -122,7 +122,7 @@ export abstract class RequestHandler<
       });
     }
     try {
-      validateJobParams(jobParams);
+      jobParams = validateJobParams(jobParams) as BaseParams;
     } catch (err) {
       this.opts.logger.error(`Job param validation failed: ${err.message}`, {
         error: { stack_trace: err.stack },

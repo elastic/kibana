@@ -32,28 +32,33 @@ const timezoneSchema = z.string().refine((val) => validateTimezone(val) === unde
   message: 'Invalid timezone',
 });
 
-const dimensionsSchema = z.object({
-  height: z.number().positive().max(14400),
-  width: z.number().positive().max(14400),
-});
+const dimensionsSchema = z
+  .object({
+    height: z.number().positive().max(14400),
+    width: z.number().positive().max(14400),
+  })
+  .strict();
 
-const idSchema = z.enum(['preserve_layout', 'print', 'canvas', 'png', 'pdf', 'csv']);
+export const idSchema = z.enum(['preserve_layout', 'print', 'canvas', 'png']); // "png" is used in some tests, could be a legacy value
 
-const layoutSchema = z.object({
-  id: idSchema.optional(),
-  dimensions: dimensionsSchema.optional(),
-  zoom: z.number().positive().max(1000).optional(),
-  selectors: z
-    .object({
-      screenshot: z.string().max(1024).optional(),
-      renderComplete: z.string().max(1024).optional(),
-      renderError: z.string().max(1024).optional(),
-      renderErrorAttribute: z.string().max(1024).optional(),
-      itemsCountAttribute: z.string().max(1024).optional(),
-      timefilterDurationAttribute: z.string().max(1024).optional(),
-    })
-    .optional(),
-});
+const layoutSchema = z
+  .object({
+    id: idSchema.optional(),
+    dimensions: dimensionsSchema.strict().optional(),
+    zoom: z.number().positive().max(1000).optional(),
+    selectors: z
+      .object({
+        screenshot: z.string().max(1024).optional(),
+        renderComplete: z.string().max(1024).optional(),
+        renderError: z.string().max(1024).optional(),
+        renderErrorAttribute: z.string().max(1024).optional(),
+        itemsCountAttribute: z.string().max(1024).optional(),
+        timefilterDurationAttribute: z.string().max(1024).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 const objectTypeSchema = z
   .string()
@@ -71,10 +76,10 @@ const versionSchema = z
 
 const forceNowSchema = z
   .string()
-  .max(64)
+  .max(32)
   .transform((forceNow) => sanitizeString(forceNow));
 
-const pagingStrategySchema = z.enum(['pit', 'scroll']);
+export const pagingStrategySchema = z.enum(['pit', 'scroll']);
 
 const locatorObjectSchema = z.object({
   id: z.string().max(1024).optional(),
@@ -84,17 +89,19 @@ const locatorObjectSchema = z.object({
 
 const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObjectSchema);
 
-const jobParamsSchema = z.object({
-  browserTimezone: timezoneSchema.optional(),
-  objectType: objectTypeSchema.optional(),
-  title: titleSchema.optional(),
-  version: versionSchema.optional(),
-  layout: layoutSchema.optional(),
-  forceNow: forceNowSchema.optional(),
-  pagingStrategy: pagingStrategySchema.optional(), // for CSV reports
-  locatorParams: locatorParamsSchema.nullable().optional(), // this is for CSV v2 compatibility
-  searchSource: z.object({}).optional(), // this is for CSV v1 compatibility
-});
+const jobParamsSchema = z
+  .object({
+    browserTimezone: timezoneSchema,
+    objectType: objectTypeSchema,
+    title: titleSchema,
+    version: versionSchema,
+    layout: layoutSchema.optional(),
+    forceNow: forceNowSchema.optional(),
+    pagingStrategy: pagingStrategySchema.optional(), // for CSV reports
+    locatorParams: locatorParamsSchema.nullable().optional(), // this is for CSV v2 compatibility
+    searchSource: z.object({}).optional(), // this is for CSV v1 compatibility
+  })
+  .strict();
 
 export function validateJobParams(jobParams: BaseParams) {
   return jobParamsSchema.parse(jobParams);
