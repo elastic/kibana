@@ -26,7 +26,6 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
     if (!state.esql_query) {
       return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
     }
-
     const description = `Dashboard description: "${state.dashboard_description}"
 Specific Panel description: "${state.description}"`;
 
