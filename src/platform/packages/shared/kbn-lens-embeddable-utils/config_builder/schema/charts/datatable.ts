@@ -145,12 +145,6 @@ const datatableStateRowsOptionsSchema = schema.object({
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the
    * number of columns specified in the columns parameter.
-   * Possible values:
-   * - 'avg': Collapse by average
-   * - 'sum': Collapse by sum
-   * - 'max': Collapse by max
-   * - 'min': Collapse by min
-   * - 'none': Do not collapse
    */
   collapse_by: schema.maybe(collapseBySchema),
 });
@@ -200,7 +194,11 @@ export const datatableStateSchemaNoESQL = schema.object({
    */
   metrics: schema.arrayOf(
     mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateColumnsOptionsSchema),
-    { minSize: 1, meta: { description: 'Array of metrics to display as columns in the datatable' } }
+    {
+      minSize: 1,
+      maxSize: 1000,
+      meta: { description: 'Array of metrics to display as columns in the datatable' },
+    }
   ),
   /**
    * Row configuration, optional bucket operations.
@@ -208,6 +206,7 @@ export const datatableStateSchemaNoESQL = schema.object({
   rows: schema.maybe(
     schema.arrayOf(mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsSchema), {
       minSize: 1,
+      maxSize: 1000,
       meta: { description: 'Array of operations to split the datatable rows by' },
     })
   ),
@@ -217,6 +216,7 @@ export const datatableStateSchemaNoESQL = schema.object({
   split_metrics_by: schema.maybe(
     schema.arrayOf(bucketOperationDefinitionSchema, {
       minSize: 1,
+      maxSize: 1000,
       meta: { description: 'Array of operations to split the metric columns by' },
     })
   ),
@@ -239,7 +239,11 @@ export const datatableStateSchemaESQL = schema.object({
       datatableStateColumnsOptionsSchema,
       esqlColumnSchema,
     ]),
-    { minSize: 1, meta: { description: 'Array of metrics to display as columns in the datatable' } }
+    {
+      minSize: 1,
+      maxSize: 1000,
+      meta: { description: 'Array of metrics to display as columns in the datatable' },
+    }
   ),
   /**
    * Row configuration, optional operations.
@@ -253,7 +257,11 @@ export const datatableStateSchemaESQL = schema.object({
         datatableStateRowsOptionsSchema,
         esqlColumnSchema,
       ]),
-      { minSize: 1, meta: { description: 'AArray of operations to split the datatable rows by' } }
+      {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'AArray of operations to split the datatable rows by' },
+      }
     )
   ),
   /**
@@ -267,7 +275,11 @@ export const datatableStateSchemaESQL = schema.object({
         }),
         esqlColumnSchema,
       ]),
-      { minSize: 1, meta: { description: 'Array of operations to split the metric columns by' } }
+      {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'Array of operations to split the metric columns by' },
+      }
     )
   ),
 });
