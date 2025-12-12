@@ -6,25 +6,21 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiHighlight, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
+  EuiIconTip,
+  EuiText,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { AgentAvatar } from '../../../../common/agent_avatar';
-import { roundedBorderRadiusStyles } from '../../../conversation.styles';
-
-const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
-  const { euiTheme } = useEuiTheme();
-  const panelStyles = css`
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
-    ${roundedBorderRadiusStyles}
-  `;
-  return (
-    <EuiPanel css={panelStyles} hasShadow={false}>
-      <AgentAvatar size="s" agent={agent} />
-    </EuiPanel>
-  );
-};
+import { lineClampStyles } from '../../../../../../common.styles';
 
 type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
 
@@ -33,19 +29,69 @@ interface AgentOptionProps {
   searchValue: string;
 }
 
+const usePaddingStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const paddingStyles = css`
+    padding-top: ${euiTheme.size.xs};
+  `;
+  return paddingStyles;
+};
+
+const readonlyAgentTooltip = i18n.translate('xpack.onechat.agentSelector.readonlyAgentTooltip', {
+  defaultMessage: 'This agent is read-only.',
+});
+
+const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
+  const prependStyles = usePaddingStyles();
+  return (
+    <EuiFlexGroup direction="column" justifyContent="flexStart" css={prependStyles}>
+      <EuiFlexItem grow={false}>
+        <AgentAvatar agent={agent} size="m" color="subdued" shape="square" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const AgentOption: React.FC<AgentOptionProps> = ({ agent, searchValue }) => {
+  const optionStyles = usePaddingStyles();
   if (!agent) {
     return null;
   }
+
   return (
-    <EuiText size="s" color="subdued">
-      <h4>
-        <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
-      </h4>
-      <p>
-        <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
-      </p>
-    </EuiText>
+    <>
+      <EuiText size="s" css={optionStyles}>
+        <h4>
+          <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem component="span" grow={false}>
+              <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
+            </EuiFlexItem>
+            {agent.readonly && (
+              <EuiFlexItem component="span" grow={false}>
+                <EuiIconTip
+                  type="lock"
+                  size="m"
+                  content={readonlyAgentTooltip}
+                  anchorProps={{
+                    css: css`
+                      display: flex;
+                      justify-content: center;
+                    `,
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </h4>
+      </EuiText>
+      <EuiText size="s" css={lineClampStyles(3)}>
+        <p>
+          <EuiTextColor color="subdued">
+            <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </>
   );
 };
 
@@ -69,6 +115,7 @@ export const useAgentOptions = ({
           searchableLabel: `${agent.name} ${agent.description}`,
           checked,
           prepend: <AgentOptionPrepend agent={agent} />,
+          textWrap: 'wrap',
           data: { agent },
         };
         return option;
