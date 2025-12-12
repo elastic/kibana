@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/inference-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/ai-assistant-common'
 tags:
   - plugin
   - prod
