@@ -68,7 +68,7 @@ const getDeploymentTypeForMki = (serverRunFlag: string): DeploymentType => {
     return 'observability';
   }
   if (serverRunFlag === '--serverless=oblt-logs-essentials') {
-    return 'observability logs-esssentials';
+    return 'observability logs-essentials';
   }
 
   throw new Error(`Unknown serverRunFlag '${serverRunFlag}' for MKI deployment type`);
