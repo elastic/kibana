@@ -159,7 +159,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         end: new Date(logTimestamp + TWENTY_FOUR_HOURS_MS).toISOString(),
       });
 
-      const summary = await getLogAiInsights({
+      const { summary, context } = await getLogAiInsights({
         index,
         id,
         fields: logEntry,
@@ -168,7 +168,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         connectorId,
       });
 
-      return { context: logEntry.fields, summary };
+      return { summary, context };
     },
   });
 
