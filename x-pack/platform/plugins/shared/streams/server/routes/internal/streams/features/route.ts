@@ -110,9 +110,9 @@ export const deleteFeatureRoute = createServerRoute({
 
     const { name, featureName, featureType } = params.path;
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
     }
 
@@ -161,9 +161,9 @@ export const upsertFeatureRoute = createServerRoute({
       throw new StatusError(`Feature type and name must match the path parameters`, 400);
     }
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
@@ -224,7 +224,7 @@ export const bulkFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -268,9 +268,9 @@ export const bulkFeaturesRoute = createServerRoute({
       body: { operations },
     } = params;
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
@@ -329,9 +329,9 @@ export const identifyFeaturesRoute = createServerRoute({
       query: { connectorId, from: start, to: end },
     } = params;
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
