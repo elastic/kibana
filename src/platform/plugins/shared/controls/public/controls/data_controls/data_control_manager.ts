@@ -88,8 +88,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
   }
 
   let resolveInitialDataViewReady: (dataView: DataView) => void;
-  const initialDataViewPromise = new Promise<DataView>((resolve) => {
+  let rejectInitialDataViewReady: (error: Error) => void;
+  const initialDataViewPromise = new Promise<DataView>((resolve, reject) => {
     resolveInitialDataViewReady = resolve;
+    rejectInitialDataViewReady = reject;
   });
 
   const defaultTitle$ = new BehaviorSubject<string | undefined>(state.fieldName);
@@ -121,7 +123,11 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (error) {
         setBlockingError(error);
       }
-      if (dataView) resolveInitialDataViewReady(dataView);
+      if (dataView) {
+        resolveInitialDataViewReady(dataView);
+      } else {
+        rejectInitialDataViewReady(error);
+      }
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
@@ -184,8 +190,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
   // build initial filter
   let initialFilter: Filter | undefined;
   if (willHaveInitialFilter && getInitialFilter) {
-    const initialDataView = await initialDataViewPromise;
-    initialFilter = getInitialFilter(initialDataView);
+    try {
+      const initialDataView = await initialDataViewPromise;
+      initialFilter = getInitialFilter(initialDataView);
+    } catch (e) {
+      setBlockingError(e);
+    }
   }
   const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
     initialFilter ? [initialFilter] : undefined
