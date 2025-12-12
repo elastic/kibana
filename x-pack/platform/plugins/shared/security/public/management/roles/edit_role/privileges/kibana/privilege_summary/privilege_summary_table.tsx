@@ -18,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useMemo, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
