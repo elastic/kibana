@@ -405,9 +405,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Scalability with many streams', function () {
-      // Skip in serverless due to timeout issues with large number of streams
-      this.tags(['skipServerless']);
+    // This test is very slow so we should revisit it: https://github.com/elastic/kibana/issues/246173
+    describe.skip('Scalability with many streams', function () {
       const NUM_STREAMS = 300;
       const createdStreams: string[] = [];
       before(async () => {
