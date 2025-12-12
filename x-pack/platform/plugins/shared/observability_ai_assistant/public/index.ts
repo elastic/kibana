@@ -150,3 +150,4 @@ export {
   type UseAgentBuilderOptInParams,
   type UseAgentBuilderOptInResult,
 } from './hooks/use_agent_builder_opt_in';
+export { useAIAgentTourDismissed, AIAgentTourKey } from './hooks/use_ai_agent_tour_dismissed';

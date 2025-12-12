@@ -26,7 +26,10 @@ import type {
   ConversationAccess,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ApplicationStart } from '@kbn/core/public';
-import { AIAgentTourCallout } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  AIAgentTourCallout,
+  useAIAgentTourDismissed,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -100,6 +103,7 @@ export function ChatHeader({
   const breakpoint = useCurrentEuiBreakpoint();
 
   const [newTitle, setNewTitle] = useState(title);
+  const [aiAgentTourDismissed] = useAIAgentTourDismissed();
 
   useEffect(() => {
     setNewTitle(title);
@@ -114,6 +118,15 @@ export function ChatHeader({
       );
     }
   };
+
+  const actionsMenu = (
+    <ChatActionsMenu
+      connectors={connectors}
+      disabled={licenseInvalid}
+      navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+      isConversationApp={isConversationApp}
+    />
+  );
 
   return (
     <EuiPanel
@@ -276,14 +289,13 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                <AIAgentTourCallout isConversationApp={isConversationApp}>
-                  <ChatActionsMenu
-                    connectors={connectors}
-                    disabled={licenseInvalid}
-                    navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
-                    isConversationApp={isConversationApp}
-                  />
-                </AIAgentTourCallout>
+                {aiAgentTourDismissed || !AIAgentTourCallout ? (
+                  actionsMenu
+                ) : (
+                  <AIAgentTourCallout isConversationApp={isConversationApp}>
+                    {actionsMenu}
+                  </AIAgentTourCallout>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
