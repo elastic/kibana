@@ -85,6 +85,7 @@ export interface IndexManagementPluginSetup {
 }
 
 export interface IndexManagementPluginStart {
+  apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;

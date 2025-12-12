@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-plugin/public';
+import { createIlmApiClient } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
 import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -27,6 +27,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
     dependencies: {
       start: {
         share,
+        indexManagement,
         streams: { streamsRepositoryClient },
       },
     },
@@ -35,10 +36,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   const router = useStreamsAppRouter();
 
   const templatesListFetch = useStreamsAppFetch(async () => {
-    const response = await core.http.get<{
-      templates: TemplateDeserialized[];
-      legacyTemplates: TemplateDeserialized[];
-    }>('/api/index_management/index_templates');
+    const response = await indexManagement.apiService.getIndexTemplates({ signal });
 
     // Filter to only show templates that:
     // 1. Have data_stream enabled
@@ -48,23 +46,18 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       const hasWildcardPattern = template.indexPatterns?.some((pattern) => pattern.includes('*'));
       return hasDataStream && hasWildcardPattern;
     });
-  }, [core.http]);
+  }, [indexManagement.apiService, signal]);
 
   const getIlmPolicy = useCallback(
     async (policyName: string) => {
       try {
-        const policies = await core.http.get<PolicyFromES[]>(
-          '/api/index_lifecycle_management/policies',
-          {
-            signal,
-          }
-        );
+        const policies = await createIlmApiClient(core).getPolicies({ signal });
         return policies.find((policy) => policy.name === policyName) ?? null;
       } catch (error) {
         return null;
       }
     },
-    [core.http, signal]
+    [core, signal]
   );
 
   const handleCreate = useCallback(
