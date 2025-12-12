@@ -217,7 +217,7 @@ export class SyntheticsService {
 
                 if (service.isAllowed && service.config.manifestUrl) {
                   void service.setupIndexTemplates();
-                  await service.pushAllConfigs();
+                  await service.pushConfigs(ALL_SPACES_ID);
                 } else {
                   if (!service.isAllowed) {
                     service.logger.debug('User is not allowed to access Synthetics service.');
@@ -430,7 +430,7 @@ export class SyntheticsService {
     }
   }
 
-  async pushAllConfigs() {
+  async pushConfigs(spaceId: string) {
     const license = await this.getLicense();
     const service = this;
 
@@ -440,7 +440,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
-    const maintenanceWindows = await this.getMaintenanceWindows(ALL_SPACES_ID);
+    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};

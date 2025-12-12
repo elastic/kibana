@@ -44,12 +44,14 @@ export class MaintenanceWindowClientFactory {
   private createMaintenanceWindowClient(
     request: KibanaRequest,
     withAuth: boolean,
-    excludedExtensions?:['spaces']
+    excludedExtensions?: ['spaces']
   ) {
     const { securityService } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
       includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
-      ...(withAuth ? {} : { excludedExtensions: [....excludedExtensions, SECURITY_EXTENSION_ID] }),
+      ...(withAuth
+        ? {}
+        : { excludedExtensions: [...(excludedExtensions ?? []), SECURITY_EXTENSION_ID] }),
     });
 
     const uiSettingClient = this.uiSettings.asScopedToClient(savedObjectsClient);
@@ -69,7 +71,7 @@ export class MaintenanceWindowClientFactory {
     return this.createMaintenanceWindowClient(request, true);
   }
 
-  public create(request: KibanaRequest, excludedExtension?:['spaces']) {
+  public create(request: KibanaRequest, excludedExtension?: ['spaces']) {
     return this.createMaintenanceWindowClient(request, false, excludedExtension);
   }
 }

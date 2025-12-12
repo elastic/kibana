@@ -113,7 +113,7 @@ export class MaintenanceWindowsPlugin
 
     const getMaintenanceWindowClientInternal = (
       request: KibanaRequest,
-      excludedExtension?: string[]
+      excludedExtension?: ['spaces']
     ): MaintenanceWindowClientApi => {
       return maintenanceWindowClientFactory.create(request, excludedExtension);
     };
