@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart } from '@kbn/core/public';
 import { MoveData } from '../move_data';
+import { SetupCloudConnect } from '../setup_cloud_connect';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 
@@ -57,6 +58,9 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     });
 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
+  const hasCloudConnectPermission = Boolean(
+    application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
+  );
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
@@ -93,7 +97,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButton
                   data-test-subj="homeAddData"
-                  fill={true}
+                  fill={!hasCloudConnectPermission}
                   href={addBasePath('/app/integrations/browse')}
                   iconType="plusInCircle"
                   onClick={(event: MouseEvent) => {
@@ -139,7 +143,11 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
           <EuiFlexItem>
             {!isCloudEnabled ? (
-              <MoveData addBasePath={addBasePath} />
+              hasCloudConnectPermission ? (
+                <SetupCloudConnect addBasePath={addBasePath} application={application} />
+              ) : (
+                <MoveData addBasePath={addBasePath} />
+              )
             ) : (
               <EuiImage
                 alt={i18n.translate('home.addData.illustration.alt.text', {
