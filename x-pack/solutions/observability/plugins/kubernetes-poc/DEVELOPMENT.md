@@ -264,6 +264,29 @@ This section catalogs the ES|QL queries used for each visual element in the UI. 
 
 > **Note**: Queries use `?_tstart` and `?_tend` as named parameters for time range filtering, which should be passed from the UI's time picker.
 
+### Performance Optimization: WHERE Clause Rules
+
+To ensure good query performance, all ES|QL queries follow these WHERE clause rules:
+
+1. **BY clause fields MUST exist**: Any field used in a `BY` clause must have `IS NOT NULL` in the WHERE clause, as these fields must exist in every document being aggregated.
+
+2. **Metrics/STATS fields are optional**: Fields used in STATS aggregations (e.g., `SUM`, `AVG`, `COUNT_DISTINCT`) should be combined with `OR` conditions since not all metrics exist in every document.
+
+**Pattern**:
+```esql
+FROM remote_cluster:metrics-*
+| WHERE <by_field_1> IS NOT NULL
+  AND <by_field_2> IS NOT NULL
+  AND (
+    <metric_field_1> IS NOT NULL 
+    OR <metric_field_2> IS NOT NULL 
+    OR <metric_field_3> IS NOT NULL
+  )
+| STATS ... BY <by_field_1>, <by_field_2>
+```
+
+This pattern filters out irrelevant documents early, significantly improving query performance on large datasets.
+
 ### Cluster Listing Page - Overview Cards
 
 #### Total Clusters (Metric Card)
@@ -272,12 +295,17 @@ Total number of monitored clusters displayed as a Lens metric visualization.
 ```esql
 FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
+  AND (
+    k8s.node.name IS NOT NULL
+    OR k8s.pod.uid IS NOT NULL
+  )
 | STATS cluster_count = COUNT_DISTINCT(k8s.cluster.name)
 ```
 
 **Visualization**: `lnsMetric` with vertical progress bar
 **Metrics Used**: None (count of distinct attribute values)
 **Dimensions**: `k8s.cluster.name`
+**Performance Note**: The `OR` condition filters to documents that have either node or pod data, avoiding scanning irrelevant metrics documents.
 
 ---
 
@@ -286,7 +314,9 @@ Counts clusters by health status displayed as Lens metric visualizations with pr
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name IS NOT NULL AND k8s.node.condition_ready IS NOT NULL
+| WHERE k8s.cluster.name IS NOT NULL
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.condition_ready IS NOT NULL
 | STATS 
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0
@@ -300,6 +330,7 @@ FROM remote_cluster:metrics-*
 **Visualization**: `lnsMetric` with vertical progress bar (max = total_count)
 **Metrics Used**: `k8s.node.condition_ready` (from k8sclusterreceiver)
 **Dimensions**: `k8s.cluster.name`, `k8s.node.name`
+**Performance Note**: Both `k8s.cluster.name` and `k8s.node.name` are required in WHERE since they're used in BY clause. The `k8s.node.condition_ready` filter ensures we only scan node condition documents.
 
 ---
 
@@ -308,7 +339,8 @@ Shows average CPU usage over time for each cluster as a multi-series line chart.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name IS NOT NULL AND k8s.node.cpu.usage IS NOT NULL
+| WHERE k8s.cluster.name IS NOT NULL
+  AND k8s.node.cpu.usage IS NOT NULL
 | STATS avg_cpu = AVG(k8s.node.cpu.usage) BY @timestamp = BUCKET(@timestamp, 1 minute), k8s.cluster.name
 ```
 
@@ -316,6 +348,7 @@ FROM remote_cluster:metrics-*
 **Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver)
 **Dimensions**: `k8s.cluster.name`, `@timestamp` (bucketed by 1 minute)
 **Formatting**: Percent formatter on Y-axis
+**Performance Note**: Both `k8s.cluster.name` (BY clause) and `k8s.node.cpu.usage` (metric) are required, so both must be NOT NULL.
 
 ---
 
@@ -327,11 +360,16 @@ Total number of monitored clusters.
 ```esql
 FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
+  AND (
+    k8s.node.name IS NOT NULL
+    OR k8s.pod.uid IS NOT NULL
+  )
 | STATS cluster_count = COUNT_DISTINCT(k8s.cluster.name)
 ```
 
 **Metrics Used**: None (count of distinct attribute values)
 **Dimensions**: `k8s.cluster.name`
+**Performance Note**: The `OR` condition filters to documents that have either node or pod data.
 
 ---
 
@@ -341,6 +379,17 @@ Main data for the cluster listing table view with CPU/memory utilization percent
 ```esql
 FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
+  AND cloud.provider IS NOT NULL
+  AND (
+    k8s.node.name IS NOT NULL 
+    OR k8s.pod.uid IS NOT NULL 
+    OR k8s.pod.phase IS NOT NULL 
+    OR k8s.node.cpu.usage IS NOT NULL
+    OR k8s.node.memory.usage IS NOT NULL 
+    OR k8s.node.allocatable_cpu IS NOT NULL
+    OR k8s.node.allocatable_memory IS NOT NULL
+    OR k8s.node.condition_ready IS NOT NULL
+  )
 | STATS 
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,

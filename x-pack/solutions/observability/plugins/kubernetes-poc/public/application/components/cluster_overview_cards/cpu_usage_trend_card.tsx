@@ -21,6 +21,10 @@ interface CpuUsageTrendCardProps {
  * ES|QL query for CPU usage by cluster over time
  * Uses bucket auto-sizing for the time range with named parameters
  * Splits by k8s.cluster.name to show a series per cluster
+ *
+ * Performance rules applied:
+ * - k8s.cluster.name is required (BY clause field)
+ * - k8s.node.cpu.usage is required (metric being aggregated)
  */
 const CPU_USAGE_BY_CLUSTER_ESQL = `FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL AND k8s.node.cpu.usage IS NOT NULL

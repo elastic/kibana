@@ -11,9 +11,27 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { createKubernetesPocServerRoute } from '../create_kubernetes_poc_server_route';
 import type { ClusterData, ClusterListingResponse } from '../../../common/cluster_listing';
 
+/**
+ * ES|QL query for cluster listing with performance-optimized WHERE clause.
+ *
+ * Performance rules applied:
+ * - BY clause fields (k8s.cluster.name, cloud.provider) MUST exist in every document (AND IS NOT NULL)
+ * - Metric fields are optional and combined with OR since not all metrics exist in every document
+ */
 const CLUSTER_LISTING_ESQL_QUERY = `
 FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
+  AND cloud.provider IS NOT NULL
+  AND (
+    k8s.node.name IS NOT NULL 
+    OR k8s.pod.uid IS NOT NULL 
+    OR k8s.pod.phase IS NOT NULL 
+    OR k8s.node.cpu.usage IS NOT NULL
+    OR k8s.node.memory.usage IS NOT NULL 
+    OR k8s.node.allocatable_cpu IS NOT NULL
+    OR k8s.node.allocatable_memory IS NOT NULL
+    OR k8s.node.condition_ready IS NOT NULL
+  )
 | STATS 
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,

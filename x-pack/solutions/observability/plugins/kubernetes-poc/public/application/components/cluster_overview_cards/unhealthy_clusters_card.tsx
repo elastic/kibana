@@ -17,10 +17,16 @@ interface UnhealthyClustersCardProps {
 
 /**
  * ES|QL query that returns both unhealthy_count and total_count
- * so we can use total as the max value for the progress bar
+ * so we can use total as the max value for the progress bar.
+ *
+ * Performance rules applied:
+ * - k8s.cluster.name and k8s.node.name are required (BY clause fields)
+ * - k8s.node.condition_ready is required for the health calculation
  */
 const UNHEALTHY_CLUSTERS_ESQL = `FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name IS NOT NULL AND k8s.node.condition_ready IS NOT NULL
+| WHERE k8s.cluster.name IS NOT NULL
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.condition_ready IS NOT NULL
 | STATS 
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0

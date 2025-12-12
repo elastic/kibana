@@ -15,8 +15,17 @@ interface ClusterCountCardProps {
   height?: number;
 }
 
+/**
+ * ES|QL query for total cluster count with performance-optimized WHERE clause.
+ * The OR condition filters to documents that have either node or pod data,
+ * avoiding scanning irrelevant metrics documents.
+ */
 const CLUSTER_COUNT_ESQL = `FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
+  AND (
+    k8s.node.name IS NOT NULL
+    OR k8s.pod.uid IS NOT NULL
+  )
 | STATS cluster_count = COUNT_DISTINCT(k8s.cluster.name)`;
 
 /**
@@ -39,6 +48,8 @@ export const ClusterCountCard: React.FC<ClusterCountCardProps> = ({ timeRange, h
           layerId: 'layer_0',
           layerType: 'data',
           metricAccessor: 'metric_0',
+          maxAccessor: 'max_0',
+          showBar: true,
           progressDirection: 'vertical',
         },
         query: {
@@ -59,6 +70,13 @@ export const ClusterCountCard: React.FC<ClusterCountCardProps> = ({ timeRange, h
                     fieldName: 'cluster_count',
                     label: 'Total Clusters',
                     customLabel: true,
+                    meta: {
+                      type: 'number',
+                    },
+                  },
+                  {
+                    columnId: 'max_0',
+                    fieldName: 'cluster_count',
                     meta: {
                       type: 'number',
                     },
