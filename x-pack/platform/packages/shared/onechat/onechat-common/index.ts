@@ -135,3 +135,10 @@ export {
   isConversationUpdatedEvent,
   isToolProgressEvent,
 } from './chat';
+export {
+  type Skill,
+  validateSkillId,
+  skillIdRegexp,
+  skillIdMaxLength,
+  getSkillFilePath,
+} from './skills';

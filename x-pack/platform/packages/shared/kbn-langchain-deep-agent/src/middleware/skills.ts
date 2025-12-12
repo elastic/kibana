@@ -9,25 +9,6 @@ import { createMiddleware, tool } from 'langchain';
 import { z as z3 } from 'zod/v3';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolHandlerContext } from '@kbn/onechat-server';
-import type { Skill, SkillTool } from '@kbn/agent-skills-common';
-
-/**
- * Options for creating the skills middleware
- */
-export interface SkillsMiddlewareOptions {
-  /**
-   * Function to get all registered skills from the agent_skills plugin
-   */
-  getSkills: () => Skill[];
-  /**
-   * Function to get the current request
-   */
-  getRequest: () => KibanaRequest;
-  /**
-   * Function to get the tool handler context
-   */
-  getToolHandlerContext: () => ToolHandlerContext;
-}
 
 /**
  * Helper function to extract all SkillTool objects from Skill objects

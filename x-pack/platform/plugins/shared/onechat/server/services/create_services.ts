@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
+import { SkillsService } from './skills';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
@@ -21,6 +22,7 @@ import { createChatService } from './chat';
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
+  skills: SkillsService;
 }
 
 export class ServiceManager {
@@ -32,11 +34,13 @@ export class ServiceManager {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
+      skills: new SkillsService(),
     };
 
     this.internalSetup = {
       tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
+      skills: this.services.skills.setup({ logger }),
     };
 
     return this.internalSetup;
@@ -80,6 +84,8 @@ export class ServiceManager {
       toolsService: tools,
     });
 
+    const skills = this.services.skills.start();
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -87,6 +93,7 @@ export class ServiceManager {
       inference,
       toolsService: tools,
       agentsService: agents,
+      skillsService: skills,
     });
     runner = runnerFactory.getRunner();
 
@@ -109,6 +116,7 @@ export class ServiceManager {
     this.internalStart = {
       tools,
       agents,
+      skills,
       conversations,
       runnerFactory,
       chat,

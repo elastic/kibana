@@ -12,6 +12,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
+import type { SkillsServiceStart } from '../skills';
 
 export interface RunnerFactoryDeps {
   // core services
@@ -23,6 +24,7 @@ export interface RunnerFactoryDeps {
   // internal service deps
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
+  skillsService: SkillsServiceStart;
 }
 
 export interface RunnerFactory {

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { createDeepAgent, type FileData } from './src/index';
+export { GET_ALERTS_SKILL } from './get_alerts_skill';
+
+

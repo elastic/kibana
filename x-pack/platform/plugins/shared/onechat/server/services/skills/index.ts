@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { createDeepAgent, type FileData } from './src/index';
+export { SkillsService } from './skills_service';
+export type { SkillsServiceSetup, SkillsServiceStart } from './types';
+

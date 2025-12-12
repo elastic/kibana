@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { createDeepAgent, type FileData } from './src/index';
+export { serviceToProvider } from './service_to_provider';
+

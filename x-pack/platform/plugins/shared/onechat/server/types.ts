@@ -15,6 +15,8 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { SkillsServiceSetup } from './services/skills';
+import type { Skill } from '@kbn/onechat-common/skills';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
@@ -63,6 +65,16 @@ export interface AgentsSetup {
 }
 
 /**
+ * Onechat skill service's setup contract
+ */
+export interface SkillsSetup {
+  /**
+   * Register a built-in skill to be available in onechat.
+   */
+  register: SkillsServiceSetup['register'];
+}
+
+/**
  * Setup contract of the onechat plugin.
  */
 export interface OnechatPluginSetup {
@@ -74,6 +86,10 @@ export interface OnechatPluginSetup {
    * Tools setup contract, can be used to register built-in tools.
    */
   tools: ToolsSetup;
+  /**
+   * Skills setup contract, can be used to register built-in skills.
+   */
+  skills: SkillsSetup;
 }
 
 /**

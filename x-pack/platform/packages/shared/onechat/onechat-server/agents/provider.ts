@@ -14,7 +14,7 @@ import {
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ModelProvider, ScopedRunner, ToolProvider, WritableToolResultStore } from '../runner';
+import type { ModelProvider, ScopedRunner, ToolProvider, SkillProvider, WritableToolResultStore } from '../runner';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -55,6 +55,10 @@ export interface AgentHandlerContext {
    * Tool provider that can be used to list or execute tools.
    */
   toolProvider: ToolProvider;
+  /**
+   * Skill provider that can be used to list or get skills.
+   */
+  skillProvider: SkillProvider;
   /**
    * Onechat runner scoped to the current execution.
    */

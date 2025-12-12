@@ -16,17 +16,20 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
+import type { SkillsServiceSetup, SkillsServiceStart } from './skills';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
+  skills: SkillsServiceSetup;
 }
 
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
+  skills: SkillsServiceStart;
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;

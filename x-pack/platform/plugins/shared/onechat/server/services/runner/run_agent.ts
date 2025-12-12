@@ -12,6 +12,7 @@ import type {
 } from '@kbn/onechat-server';
 import { withAgentSpan } from '../../tracing';
 import { registryToProvider } from '../tools/utils';
+import { serviceToProvider as skillsServiceToProvider } from '../skills/utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
 import type { RunnerManager } from './runner';
@@ -30,6 +31,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     elasticsearch,
     modelProviderFactory,
     toolsService,
+    skillsService,
     resultStore,
     logger,
   } = manager.deps;
@@ -42,6 +44,10 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolProvider: registryToProvider({
       registry: await toolsService.getRegistry({ request }),
       getRunner: manager.getRunner,
+      request,
+    }),
+    skillProvider: skillsServiceToProvider({
+      skillsService,
       request,
     }),
     resultStore,

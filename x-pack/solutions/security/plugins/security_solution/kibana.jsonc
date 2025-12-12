@@ -63,6 +63,7 @@
       "elasticAssistantSharedState",
     ],
     "optionalPlugins": [
+      "onechat",
       "encryptedSavedObjects",
       "fleet",
       "ml",

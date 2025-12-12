@@ -5,4 +5,16 @@
  * 2.0.
  */
 
-export { createDeepAgent, type FileData } from './src/index';
+import type { Skill } from '@kbn/onechat-common/skills';
+
+export interface SkillsServiceSetup {
+  register(skill: Skill): void;
+}
+
+export interface SkillsServiceStart {
+  /**
+   * Get all registered skills.
+   */
+  getAllSkills(): Skill[];
+}
+

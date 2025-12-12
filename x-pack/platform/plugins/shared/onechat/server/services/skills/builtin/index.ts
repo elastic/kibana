@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { createDeepAgent, type FileData } from './src/index';
+export { createBuiltinSkillRegistry, type BuiltinSkillRegistry } from './builtin_skill_registry';
+export { registerBuiltinSkills } from './register_skills';
+

@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { createDeepAgent, type FileData } from './src/index';
+export { type Skill } from './types/skill';
+export { validateSkillId, skillIdRegexp, skillIdMaxLength } from './skill_ids';
+export { getSkillFilePath } from './namespace_to_path';
+

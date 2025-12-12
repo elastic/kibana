@@ -19,12 +19,15 @@ import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
 import { createDeepAgent } from '@kbn/langchain-deep-agent';
-import { BaseMessage, HumanMessage, RemoveMessage } from '@langchain/core/messages';
+import { BaseMessage, RemoveMessage } from '@langchain/core/messages';
 import { createResearchMiddleware } from './middlewares/researchAgentMiddleware';
+import type { FileData } from '@kbn/langchain-deep-agent';
+import { createSkillSystemPromptMiddleware } from './middlewares/skillSystemPromptMiddleware';
 
 export const createAgentGraph = ({
   chatModel,
   tools,
+  skills,
   configuration,
   capabilities,
   logger,
@@ -32,6 +35,7 @@ export const createAgentGraph = ({
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
+  skills: Record<string, FileData>;
   capabilities: ResolvedAgentCapabilities;
   configuration: ResolvedConfiguration;
   logger: Logger;
@@ -48,7 +52,8 @@ export const createAgentGraph = ({
     tools: tools,
     systemPrompt: systemPrompt,
     middleware: [
-      createResearchMiddleware(events)
+      createResearchMiddleware(events),
+      createSkillSystemPromptMiddleware(events, skills),
     ],
   });
 
@@ -57,7 +62,7 @@ export const createAgentGraph = ({
 
     const response = await deepAgent.invoke({
       messages: state.messages,
-      files: {}
+      files: skills,
     });
 
     const responseMessages = response.messages as BaseMessage[];
