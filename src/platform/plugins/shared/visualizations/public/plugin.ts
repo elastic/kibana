@@ -12,6 +12,7 @@ import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 
 import {
   createKbnUrlStateStorage,
@@ -76,6 +77,7 @@ import {
 import type { VisEditorsRegistry } from './vis_editors_registry';
 import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
+import { findListItems } from './utils/saved_visualize_utils';
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
@@ -131,6 +133,12 @@ export type VisualizationsSetup = TypesSetup & {
 };
 export interface VisualizationsStart extends TypesStart {
   showNewVisModal: typeof showNewVisModal;
+  findListItems: (
+    search: string,
+    size: number,
+    references?: Reference[],
+    referencesToExclude?: Reference[]
+  ) => ReturnType<typeof findListItems>;
 }
 
 export interface VisualizationsSetupDeps {
@@ -572,6 +580,8 @@ export class VisualizationsPlugin
     return {
       ...types,
       showNewVisModal,
+      findListItems: (search, size, references, referencesToExclude) =>
+        findListItems(types, search, size, references, referencesToExclude),
     };
   }
 

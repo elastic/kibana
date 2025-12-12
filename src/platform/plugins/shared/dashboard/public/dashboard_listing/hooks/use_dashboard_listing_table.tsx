@@ -15,15 +15,14 @@ import { ContentInsightsClient } from '@kbn/content-management-content-insights-
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import {
-  showNewVisModal,
-  getNoItemsMessage,
-  getCustomColumn,
-} from '@kbn/visualizations-plugin/public';
 
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
-import { coreServices, embeddableService } from '../../services/kibana_services';
+import {
+  coreServices,
+  embeddableService,
+  visualizationsService,
+} from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
@@ -49,6 +48,10 @@ import { deleteDashboardListingItems } from './helpers/delete_items';
 import { editDashboardListingItem } from './helpers/edit_item';
 import { navigateToVisualization } from './helpers/navigation';
 import { getEntityNames } from './helpers/entity_names';
+import {
+  getVisualizationListingColumn,
+  getVisualizationListingEmptyPrompt,
+} from '../utils/visualization_listing_helpers';
 
 type GetDetailViewLink = TableListViewTableProps<DashboardListingUserContent>['getDetailViewLink'];
 
@@ -115,7 +118,7 @@ export const useDashboardListingTable = ({
 
       switch (contentType) {
         case TAB_IDS.VISUALIZATIONS:
-          closeNewVisModal.current = showNewVisModal();
+          closeNewVisModal.current = visualizationsService.showNewVisModal();
           return;
 
         case TAB_IDS.ANNOTATIONS:
@@ -307,7 +310,7 @@ export const useDashboardListingTable = ({
       emptyPrompt:
         contentTypeFilter === TAB_IDS.VISUALIZATIONS ||
         contentTypeFilter === TAB_IDS.ANNOTATIONS ? (
-          getNoItemsMessage(createItem)
+          getVisualizationListingEmptyPrompt(createItem)
         ) : (
           <DashboardListingEmptyPrompt
             createItem={createItem}
@@ -335,7 +338,7 @@ export const useDashboardListingTable = ({
       recentlyAccessed: getDashboardRecentlyAccessedService(),
       customTableColumn:
         contentTypeFilter === TAB_IDS.VISUALIZATIONS
-          ? (getCustomColumn() as EuiBasicTableColumn<DashboardListingUserContent>)
+          ? (getVisualizationListingColumn() as EuiBasicTableColumn<DashboardListingUserContent>)
           : undefined,
     };
   }, [

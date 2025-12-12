@@ -158,7 +158,7 @@ export const getDashboardListingTabs = ({
   };
 
   const dashboardsTab: TableListTab<DashboardListingUserContent> = {
-    title: i18n.translate('dashboardListing.tabs.dashboards.title', {
+    title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
       defaultMessage: 'Dashboards',
     }),
     id: TAB_IDS.DASHBOARDS,
@@ -168,7 +168,7 @@ export const getDashboardListingTabs = ({
   };
 
   const visualizationsTab: TableListTab<DashboardListingUserContent> = {
-    title: i18n.translate('dashboardListing.tabs.visualizations.title', {
+    title: i18n.translate('dashboard.listing.tabs.visualizations.title', {
       defaultMessage: 'Visualizations',
     }),
     id: TAB_IDS.VISUALIZATIONS,

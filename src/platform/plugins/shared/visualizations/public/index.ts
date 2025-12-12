@@ -75,7 +75,4 @@ export const getConvertToLensModule = async () => {
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
 
-export { findListItems } from './utils/saved_visualize_utils';
-export { getCustomColumn, getNoItemsMessage } from './visualize_app/utils/get_table_columns';
-export { toTableListViewSavedObject } from './visualize_app/components/visualize_listing';
-export { showNewVisModal } from './wizard';
+export { toTableListViewSavedObject } from './utils/to_table_list_view_saved_object';

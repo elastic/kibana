@@ -9,10 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  findListItems as findVisualizationListItems,
-  toTableListViewSavedObject,
-} from '@kbn/visualizations-plugin/public';
+import { toTableListViewSavedObject } from '@kbn/visualizations-plugin/public';
 
 import { SAVED_OBJECT_LOADED_TIME } from '../../../utils/telemetry_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../../common/constants';
@@ -52,8 +49,7 @@ export async function findDashboardListingItems(
   };
 
   if (tabId === TAB_IDS.VISUALIZATIONS) {
-    const response = await findVisualizationListItems(
-      visualizationsService,
+    const response = await visualizationsService.findListItems(
       searchTerm,
       limit,
       references,
