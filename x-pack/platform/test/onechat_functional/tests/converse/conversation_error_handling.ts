@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { AGENT_BUILDER_TOUR_STORAGE_KEY } from '@kbn/onechat-plugin/public/application/storage_keys';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../../../onechat_api_integration/utils/proxy_scenario';
@@ -19,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const es = getService('es');
+  const browser = getService('browser');
 
   describe('Conversation Error Handling', function () {
     let llmProxy: LlmProxy;
@@ -26,6 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       llmProxy = await createLlmProxy(log);
       await createConnector(llmProxy, supertest);
+      await onechat.navigateToApp('conversations/new');
+      await browser.setLocalStorageItem(AGENT_BUILDER_TOUR_STORAGE_KEY, 'true');
     });
 
     after(async () => {
