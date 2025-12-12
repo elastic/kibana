@@ -144,12 +144,17 @@ describe('saved search embeddable', () => {
       });
     });
 
-    it('should render field stats table in AGGREGATED_LEVEL view mode', async () => {
+    it('should render field stats table in AGGREGATED_LEVEL view mode and not fetch documents', async () => {
       const { search } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
         partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
       });
+
+      discoverServiceMock.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+        if (key === SHOW_FIELD_STATISTICS) return true;
+      });
+
       const { Component, api } = await factory.buildEmbeddable({
         initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
@@ -158,9 +163,6 @@ describe('saved search embeddable', () => {
       });
       await waitOneTick(); // wait for build to complete
 
-      discoverServiceMock.uiSettings.get = jest.fn().mockImplementationOnce((key: string) => {
-        if (key === SHOW_FIELD_STATISTICS) return true;
-      });
       const discoverComponent = render(<Component />);
 
       // Field statistics mode should not trigger document fetching
@@ -196,25 +198,6 @@ describe('saved search embeddable', () => {
       api.setTitle('custom title');
       await waitOneTick();
       expect(search).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not fetch documents when in field statistics view mode', async () => {
-      const { search } = createSearchFnMock(1);
-      runtimeState = getInitialRuntimeState({
-        searchMock: search,
-        partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
-      });
-      const { api } = await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } },
-        finalizeApi: finalizeApiMock,
-        uuid,
-        parentApi: mockedDashboardApi,
-      });
-      await waitOneTick();
-
-      // Field statistics mode should not trigger document fetching
-      expect(search).not.toHaveBeenCalled();
-      expect(api.dataLoading$.getValue()).toBe(false);
     });
   });
 
