@@ -46,6 +46,9 @@ export type IndexManagementLocatorParams = SerializableRecord &
         indexTemplate: string;
       }
     | {
+        page: 'create_template';
+      }
+    | {
         page: 'component_template';
         componentTemplate: string;
       }

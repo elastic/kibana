@@ -8,6 +8,8 @@
 import React, { useCallback } from 'react';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-plugin/public';
 import { useAbortController } from '@kbn/react-hooks';
 import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -24,6 +26,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
     core,
     dependencies: {
       start: {
+        share,
         streams: { streamsRepositoryClient },
       },
     },
@@ -142,11 +145,12 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   );
 
   const handleCreateTemplate = useCallback(() => {
-    // Navigate to index management templates page
-    const path = core.http.basePath.prepend('/app/management/data/index_management/templates');
-    core.application.navigateToUrl(path);
+    const indexManagementLocator = share.url.locators.get<IndexManagementLocatorParams>(
+      INDEX_MANAGEMENT_LOCATOR_ID
+    );
+    indexManagementLocator?.navigate({ page: 'create_template' });
     onClose();
-  }, [core.application, core.http, onClose]);
+  }, [onClose, share.url.locators]);
 
   const handleRetryLoadTemplates = useCallback(() => {
     templatesListFetch.refresh();

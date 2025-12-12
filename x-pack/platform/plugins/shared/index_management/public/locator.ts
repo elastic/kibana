@@ -16,6 +16,7 @@ import {
   getComponentTemplateListLink,
   getDataStreamDetailsLink,
   getIndexListUri,
+  getTemplateCreateLink,
   getTemplateCloneLink,
   getTemplateDetailsLink,
   getTemplateEditLink,
@@ -76,6 +77,12 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getTemplateCloneLink(params.indexTemplate),
+        };
+      }
+      case 'create_template': {
+        return {
+          ...location,
+          path: location.path + getTemplateCreateLink(),
         };
       }
       case 'component_template': {

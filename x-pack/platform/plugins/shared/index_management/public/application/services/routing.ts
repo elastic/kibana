@@ -38,6 +38,8 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(url);
 };
 
+export const getTemplateCreateLink = () => `/create_template`;
+
 export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
   let url = `/${Section.Indices}`;
   const hiddenIndicesParam =
