@@ -1778,7 +1778,7 @@ describe('TaskManagerRunner', () => {
     });
 
     test('updates retryAt on an interval for long running tasks', async () => {
-      const { runner, store, logger } = await readyToRunStageSetup({
+      const { runner, store } = await readyToRunStageSetup({
         instance: {
           status: TaskStatus.Running,
           startedAt: new Date(),
@@ -1790,8 +1790,8 @@ describe('TaskManagerRunner', () => {
             timeout: `365d`,
             createTaskRunner: () => ({
               async run() {
-                const promise = new Promise((r) => setTimeout(r, 20000));
-                jest.advanceTimersByTime(20000);
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
                 await promise;
                 return { state: {} };
               },
@@ -1805,24 +1805,49 @@ describe('TaskManagerRunner', () => {
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
 
       const instance = store.partialUpdate.mock.calls[0][0];
-      expect(instance.retryAt?.getTime()).toBeGreaterThan(minutesFromDate(now, 1).getTime());
-      expect(instance.retryAt?.getTime()).toBeLessThan(minutesFromDate(now, 2).getTime());
+      expect(instance.retryAt?.getTime()).toBeGreaterThan(minutesFromDate(now, 5).getTime());
+      expect(instance.retryAt?.getTime()).toBeLessThan(minutesFromDate(now, 6.5).getTime());
+    });
 
-      expect(logger.info).toHaveBeenCalledTimes(2);
-      expect(logger.info).toHaveBeenNthCalledWith(
-        1,
-        'Starting interval to update retryAt for long running task: foo',
+    test('stops the interval and cancels the task if there is 409 error updating retryAt for long running tasks', async () => {
+      let wasCancelled = false;
+      const { runner, store, logger } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+              async cancel() {
+                wasCancelled = true;
+              },
+            }),
+          },
+        },
+      });
+      store.partialUpdate.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
+      );
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Unable to update retryAt for long running task: foo - Saved object [type/id] conflict',
         {
           tags: ['foo', 'bar'],
         }
       );
-      expect(logger.info).toHaveBeenNthCalledWith(
-        2,
-        'Stopping interval to update retryAt for long running task: foo',
-        {
-          tags: ['foo', 'bar'],
-        }
-      );
+      expect(wasCancelled).toBeTruthy();
     });
 
     describe('TaskEvents', () => {

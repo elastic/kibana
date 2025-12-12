@@ -334,11 +334,11 @@ export class SampleTaskManagerFixturePlugin
       },
       sampleLongRunningRecurringTask: {
         title: 'Sample Long Running Recurring Task',
-        description: 'A sample long running task that hangs for 15s.',
+        description: 'A sample long running task that hangs for 1m 30s.',
         timeout: '365d',
         createTaskRunner: () => ({
           async run() {
-            await new Promise((resolve) => setTimeout(resolve, 15000));
+            await new Promise((resolve) => setTimeout(resolve, 90000));
             return {
               state: {},
             };

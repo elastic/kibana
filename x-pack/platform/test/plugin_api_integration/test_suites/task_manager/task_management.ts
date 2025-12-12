@@ -1722,7 +1722,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should update the retryAt of a long running task to be now + 1m', async () => {
+    it('should update the retryAt of a long running task to be now + 5m', async () => {
       const task = await scheduleTask({
         taskType: 'sampleLongRunningRecurringTask',
         schedule: { interval: `1d` },
@@ -1736,8 +1736,8 @@ export default function ({ getService }: FtrProviderContext) {
         const retryAt = Date.parse(scheduledTask.retryAt!);
         expect(isNaN(retryAt)).to.be(false);
 
-        expect(retryAt).to.be.greaterThan(now + 60 * 1000);
-        expect(retryAt).to.be.lessThan(now + 2 * 60 * 1000);
+        expect(retryAt).to.be.greaterThan(now + 5 * 60 * 1000);
+        expect(retryAt).to.be.lessThan(now + 6.5 * 60 * 1000);
       });
     });
   });

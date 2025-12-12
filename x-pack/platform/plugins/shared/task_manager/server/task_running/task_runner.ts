@@ -77,8 +77,7 @@ export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
 export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
-const UPDATE_RETRY_AT_INTERVAL = 10000; // 10 seconds
-const LONG_RUNNING_TASK_MS = 365 * 86400 * 1000; // 1 year
+const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -392,10 +391,7 @@ export class TaskManagerRunner implements TaskRunner {
     );
 
     // For long running tasks, update retryAt on an interval to allow for quicker task recovery
-    let stopUpdatingLongRunningTasks;
-    if (isLongRunningTask(this.timeout)) {
-      stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
-    }
+    const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
 
     try {
       const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
@@ -958,8 +954,8 @@ export class TaskManagerRunner implements TaskRunner {
     const updateRetryAt = async () => {
       if (!stopped) {
         try {
-          // Set retryAt to now + 1m
-          const updatedRetryAt = new Date(Date.now() + 60 * 1000);
+          // Set retryAt to now + 5m
+          const updatedRetryAt = new Date(Date.now() + 5 * 60 * 1000);
           const taskInstance = this.instance.task;
           this.instance = asReadyToRun(
             (await this.bufferedTaskStore.partialUpdate(
@@ -975,28 +971,22 @@ export class TaskManagerRunner implements TaskRunner {
             `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,
             { tags: [this.id, this.taskType] }
           );
+          // If there is a 409 conflict error, stop the timer and try to cancel the task
+          // as this task may have been picked up by another Kibana node.
           if (SavedObjectsErrorHelpers.isConflictError(error)) {
             stop();
+            await this.cancel();
           }
         }
         timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
       }
     };
 
-    this.logger.info(`Starting interval to update retryAt for long running task: ${this.id}`, {
-      tags: [this.id, this.taskType],
-    });
     let timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
 
     const stop = () => {
-      if (timer) {
-        stopped = true;
-        clearTimeout(timer);
-        timer = null;
-        this.logger.info(`Stopping interval to update retryAt for long running task: ${this.id}`, {
-          tags: [this.id, this.taskType],
-        });
-      }
+      stopped = true;
+      clearTimeout(timer);
     };
     return stop;
   }
@@ -1018,11 +1008,6 @@ function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null)
 // initiated changes to "enabled" while the task was running
 function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
   return omit(task, 'enabled');
-}
-
-function isLongRunningTask(timeout: string) {
-  const timeoutDuration = parseIntervalAsMillisecond(timeout);
-  return timeoutDuration >= LONG_RUNNING_TASK_MS;
 }
 
 // A type that extracts the Instance type out of TaskRunningStage
