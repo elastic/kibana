@@ -19,17 +19,32 @@ import { getFleetApiHelper } from './fleet';
 import type { StreamsApiService } from './streams';
 import { getStreamsApiService } from './streams';
 
-export interface ApiServicesFixture {
+export interface ApiServicesFixture<TCondition = unknown, TStreamlangDSL = unknown> {
   alerting: AlertingApiService;
   cases: CasesApiService;
   fleet: FleetApiService;
-  streams: StreamsApiService;
+  streams: StreamsApiService<TCondition, TStreamlangDSL>;
   core: CoreApiService;
   // add more services here
 }
 
 /**
  * This fixture provides a helper to interact with the Kibana APIs like Alerting, Cases, Fleet, Streams, Spaces, etc.
+ *
+ * The fixture is generic to allow consumers to provide specific types for Streams API.
+ * Consumers can extend this fixture to provide their own types:
+ *
+ * @example
+ * ```typescript
+ * import type { Condition, StreamlangDSL } from '@kbn/streamlang';
+ * import { apiServicesFixture as baseApiServicesFixture } from '@kbn/scout';
+ *
+ * export const apiServicesFixture = baseApiServicesFixture.extend({
+ *   apiServices: async ({ apiServices }, use) => {
+ *     await use(apiServices as ApiServicesFixture<Condition, StreamlangDSL>);
+ *   },
+ * });
+ * ```
  */
 export const apiServicesFixture = coreWorkerFixtures.extend<
   {},
