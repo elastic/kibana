@@ -238,7 +238,6 @@ export const MathExpressionEditor: React.FC = () => {
                 onHelpMenuVisibilityChange={setIsHelpOpen}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow />
             <EuiFlexItem grow={false}>
               <ErrorPopover errors={errors} />
             </EuiFlexItem>
