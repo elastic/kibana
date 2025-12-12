@@ -13,7 +13,6 @@ import { compact, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
-import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
@@ -55,10 +54,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
   const [detectedFeatures, setDetectedFeatures] = useState<Feature[]>([]);
 
+  const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
     start: timeState.start,
     end: timeState.end,
+    query,
   });
 
   const { removeQuery } = useSignificantEventsApi({
@@ -73,12 +74,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
-  const [query, setQuery] = useState<string>('');
-
-  const significantEvents = useFilteredSigEvents(
-    significantEventsFetchState.value ?? { significant_events: [], all: [] },
-    query
-  );
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -141,6 +136,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const noFeatures = features.length === 0;
   const noSignificantEvents =
+    !query &&
+    !significantEventsFetchState.loading &&
     significantEventsFetchState.value &&
     significantEventsFetchState.value.significant_events.length === 0;
 
@@ -218,13 +215,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                     setDateRange(queryN.dateRange);
                   }
                 }}
-                onQueryChange={(queryN) => {
-                  setQuery(String(queryN.query?.query ?? ''));
-                }}
                 query={{
                   query,
                   language: 'text',
                 }}
+                isLoading={significantEventsFetchState.loading}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -290,7 +285,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           <SignificantEventsTable
             loading={significantEventsFetchState.loading}
             definition={definition.stream}
-            items={significantEvents}
+            items={significantEventsFetchState.value?.significant_events ?? []}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
               setQueryToEdit({

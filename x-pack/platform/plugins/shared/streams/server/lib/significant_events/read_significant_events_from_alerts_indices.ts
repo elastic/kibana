@@ -20,16 +20,18 @@ import { SecurityError } from '../streams/errors/security_error';
 import type { QueryLink } from '../../../common/assets';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { name: string; from: Date; to: Date; bucketSize: string },
+  params: { name: string; from: Date; to: Date; bucketSize: string; query?: string },
   dependencies: {
     assetClient: AssetClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
   const { assetClient, scopedClusterClient } = dependencies;
-  const { name, from, to, bucketSize } = params;
+  const { name, from, to, bucketSize, query } = params;
 
-  const { [name]: queryLinks } = await assetClient.getAssetLinks([name], ['query']);
+  const queryLinks = await (query
+    ? assetClient.findQueries(name, query)
+    : assetClient.getAssetLinks([name], ['query']).then(({ [name]: links }) => links));
   if (isEmpty(queryLinks)) {
     return { significant_events: [], all: [] };
   }

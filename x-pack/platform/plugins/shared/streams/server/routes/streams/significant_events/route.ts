@@ -104,6 +104,7 @@ const readSignificantEventsRoute = createServerRoute({
       from: dateFromString,
       to: dateFromString,
       bucketSize: z.string(),
+      query: z.string().optional(),
     }),
   }),
 
@@ -135,7 +136,7 @@ const readSignificantEventsRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize } = params.query;
+    const { from, to, bucketSize, query } = params.query;
 
     return await readSignificantEventsFromAlertsIndices(
       {
@@ -143,6 +144,7 @@ const readSignificantEventsRoute = createServerRoute({
         from,
         to,
         bucketSize,
+        query,
       },
       { assetClient, scopedClusterClient }
     );

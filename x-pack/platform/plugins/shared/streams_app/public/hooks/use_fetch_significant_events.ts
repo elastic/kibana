@@ -21,10 +21,12 @@ export const useFetchSignificantEvents = ({
   name,
   start,
   end,
+  query,
 }: {
   name: string;
   start: number;
   end: number;
+  query: string;
 }) => {
   const {
     dependencies: {
@@ -68,6 +70,7 @@ export const useFetchSignificantEvents = ({
               from: isoFrom,
               to: isoTo,
               bucketSize: intervalString,
+              query: query.trim(),
             },
           },
           signal,
