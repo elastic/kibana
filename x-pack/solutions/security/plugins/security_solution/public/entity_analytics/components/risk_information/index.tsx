@@ -38,7 +38,6 @@ import { AssetCriticalityBadge } from '../asset_criticality';
 import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../../common/constants';
-import { ENTITY_RISK_LEVELS } from './translations';
 
 const SpacedOrderedList = styled.ol`
   li {
