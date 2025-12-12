@@ -16,4 +16,11 @@ export default createServerlessTestConfig<typeof services>({
     reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
   },
   indexRefreshInterval: '1s',
+  kbnTestServer: {
+    serverArgs: [
+      `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+        integrationKnowledge: false,
+      })}`,
+    ],
+  },
 });
