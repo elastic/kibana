@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { wildcardQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AWSIndexName } from '../../../common/aws_firehose';
 import {
   AWS_INDEX_NAME_LIST,
@@ -51,6 +52,7 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
   }): Promise<CreateFirehoseOnboardingFlowRouteResponse> {
     const {
       elasticsearch: { client },
+      savedObjects,
     } = await context.core;
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
 
@@ -60,12 +62,13 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
       );
     }
 
+    const spaceId = savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const [{ encoded: apiKeyEncoded }] = await Promise.all([
       createShipperApiKey(client.asCurrentUser, 'firehose'),
-      packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose' }),
+      packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose', spaceId }),
     ]);
 
     /**

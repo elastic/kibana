@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -47,6 +48,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const { context, request, params, plugins, services, kibanaVersion, config } = resources;
     const {
       elasticsearch: { client },
+      savedObjects,
     } = await context.core;
 
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
@@ -57,6 +59,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       );
     }
 
+    const spaceId = savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asScoped(request);
     const apiKeyPromise =
@@ -72,12 +75,12 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       apiKeyPromise,
       getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       // System package is always required
-      packageClient.ensureInstalledPackage({ pkgName: 'system' }),
+      packageClient.ensureInstalledPackage({ pkgName: 'system', spaceId }),
       // Kubernetes package is required for both classic kubernetes and otel
-      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
+      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes', spaceId }),
       // Kubernetes otel package is required only for otel
       params.body.pkgName === 'kubernetes_otel'
-        ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' })
+        ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel', spaceId })
         : undefined,
     ]);
 
