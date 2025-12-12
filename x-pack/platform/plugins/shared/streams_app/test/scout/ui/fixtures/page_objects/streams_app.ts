@@ -497,6 +497,18 @@ export class StreamsApp {
     return targetCondition.getByRole('button', { name: 'Create nested step' });
   }
 
+  async getConditionContextMenuButton(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+
+    const allButtons = await targetCondition
+      .getByTestId('streamsAppStreamDetailEnrichmentStepContextMenuButton')
+      .all();
+
+    // Return the condition's context menu button, not nested conditions / actions.
+    return allButtons[0];
+  }
+
   // Gets the first level of nested steps under a condition at position 'pos'
   async getConditionNestedStepsList(pos: number) {
     const conditions = await this.getConditionsListItems();
