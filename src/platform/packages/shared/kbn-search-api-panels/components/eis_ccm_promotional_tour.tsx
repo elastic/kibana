@@ -8,25 +8,37 @@
  */
 
 import React from 'react';
-import type { EuiTourStepProps } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep, useEuiTheme } from '@elastic/eui';
-import * as i18n from '../translations';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiText,
+  EuiTourStep,
+  useEuiTheme,
+  type EuiTourStepProps,
+} from '@elastic/eui';
+import {
+  EIS_TOUR_DISMISS,
+  EIS_CLOUD_CONNECT_PROMO_TOUR_CTA,
+  EIS_CLOUD_CONNECT_PROMO_TOUR_DESCRIPTION,
+  EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE,
+} from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 
 /**
- * Props for the EisTokenCostTour component.
+ * Props for the EisCloudConnectPromoTour component.
  *
  * @property {EuiTourStepProps['anchorPosition']} [anchorPosition='downCenter']
  *   Position of the tour step relative to its anchor element.
  *
- * @property {string} [ctaLink]
- *   Optional URL for the call-to-action button in the tour footer.
+ * @property {string} [navigateToApp]
+ *   Callback function invoked when the call-to-action button is clicked.
+ *   Navigates the user to the cloud connect management application.
  *
  * @property {string} promoId
  *   Unique identifier for this promo instance. Used for localStorage and telemetry.
  *
- * @property {boolean} isCloudEnabled
- *   Indicates that the component is running in a cloud-enabled environment.
+ * @property {boolean} isSelfManaged
+ *   Indicates that the component is running in a self-managed environment.
  *   The tour will only be shown if this is true.
  *
  * @property {boolean} [isReady=true]
@@ -37,30 +49,30 @@ import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_
  *   The anchor element for the tour step. The tour wraps this element.
  */
 
-export interface EisTokenCostTourProps {
+export interface EisCloudConnectPromoTourProps {
   anchorPosition?: EuiTourStepProps['anchorPosition'];
-  ctaLink?: string;
+  navigateToApp: () => void;
   promoId: string;
-  isCloudEnabled: boolean;
+  isSelfManaged: boolean;
   isReady?: boolean;
   children: React.ReactElement;
 }
 
-export const EisTokenCostTour = ({
+export const EisCloudConnectPromoTour = ({
   anchorPosition = 'downCenter',
-  ctaLink,
+  navigateToApp,
   promoId,
-  isCloudEnabled,
+  isSelfManaged,
   isReady = true,
   children,
-}: EisTokenCostTourProps) => {
+}: EisCloudConnectPromoTourProps) => {
   const { euiTheme } = useEuiTheme();
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
-    promoId: `${promoId}Tour`,
+    promoId: `${promoId}CloudConnectTour`,
   });
-  const dataId = `${promoId}-eis-costs-tour`;
+  const dataId = `${promoId}-eis-cloud-connect-promo-tour`;
 
-  if (!isPromoVisible || !isReady || !isCloudEnabled) {
+  if (!isPromoVisible || !isReady || !isSelfManaged) {
     return children;
   }
 
@@ -68,42 +80,32 @@ export const EisTokenCostTour = ({
     <EuiTourStep
       data-telemetry-id={dataId}
       data-test-subj={dataId}
-      title={i18n.EIS_COSTS_TOUR_TITLE}
+      title={EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE}
       maxWidth={`${euiTheme.base * 25}px`}
       content={
         <EuiText>
-          <p>{i18n.EIS_COSTS_TOUR_DESCRIPTION}</p>
+          <p>{EIS_CLOUD_CONNECT_PROMO_TOUR_DESCRIPTION}</p>
         </EuiText>
       }
+      display="block"
       isStepOpen={isPromoVisible}
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
       onFinish={onDismissTour}
       footerAction={[
-        <EuiButtonEmpty
-          data-test-subj="tokenConsumptionCostTourCloseBtn"
-          onClick={onDismissTour}
-          aria-label={i18n.EIS_COSTS_TOUR_DISMISS_ARIA}
-        >
-          {i18n.EIS_TOUR_DISMISS}
+        <EuiButtonEmpty data-test-subj="eisCloudConnectPromoTourCloseBtn" onClick={onDismissTour}>
+          {EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,
-        ...(ctaLink
-          ? [
-              <EuiButton
-                fullWidth={false}
-                color="primary"
-                size="s"
-                href={ctaLink}
-                data-test-subj="eisCostsTourCtaBtn"
-                target="_blank"
-                iconSide="right"
-                iconType="popout"
-              >
-                {i18n.EIS_TOUR_CTA}
-              </EuiButton>,
-            ]
-          : []),
+        <EuiButton
+          onClick={navigateToApp}
+          data-test-subj="eisCloudConnectPromoTourCtaBtn"
+          target="_blank"
+          iconSide="right"
+          iconType="popout"
+        >
+          {EIS_CLOUD_CONNECT_PROMO_TOUR_CTA}
+        </EuiButton>,
       ]}
     >
       {children}

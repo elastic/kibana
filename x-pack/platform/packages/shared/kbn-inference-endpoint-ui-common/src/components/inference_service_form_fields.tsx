@@ -25,10 +25,12 @@ import {
   EuiSpacer,
   EuiTitle,
   keys,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { EisCloudConnectPromoTour } from '@kbn/search-api-panels';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { FieldType, isMapWithStringValues } from '../types/types';
@@ -57,6 +59,7 @@ import { AuthenticationFormItems } from './configuration/authentication_form_ite
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
+import { useKibana } from '../hooks/use_kibana';
 
 // Custom trigger button CSS
 export const buttonCss = css`
@@ -119,7 +122,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     reenterSecretsOnEdit,
   },
 }) => {
+  const {
+    services: { application, cloud },
+  } = useKibana();
   const { data: providers, isLoading } = useProviders(http, toasts);
+  const { euiTheme } = useEuiTheme();
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
     undefined
   );
@@ -128,6 +135,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
   const [solutionFilter, setSolutionFilter] = useState<SolutionView | undefined>();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [optionalProviderFormFields, setOptionalProviderFormFields] = useState<ConfigEntryView[]>(
@@ -522,6 +530,17 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
 
+  useEffect(() => {
+    // Trigger once on mount, then clean up
+    const delay = parseInt(euiTheme.animation.normal ?? '0', 10);
+
+    const timeout = window.setTimeout(() => {
+      setIsFlyoutOpen(true);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [euiTheme.animation.normal]);
+
   return !isLoading ? (
     <>
       <UseField path="config.provider" config={providerConfigConfig}>
@@ -529,39 +548,47 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           const selectInput = providerSuperSelect(isInvalid);
           return (
-            <EuiFormRow
-              id="providerSelectBox"
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.inferenceEndpointUICommon.components.serviceLabel"
-                  defaultMessage="Service"
-                />
-              }
-              isInvalid={isInvalid}
-              error={errorMessage}
+            <EisCloudConnectPromoTour
+              promoId="eisInferenceEndpointFlyout"
+              // TODO: Replace with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
+              navigateToApp={() => application.navigateToApp('cloud_connect')}
+              isSelfManaged={!cloud?.isCloudEnabled}
+              isReady={isFlyoutOpen}
             >
-              <>
-                <EuiSpacer size="s" />
-                <EuiInputPopover
-                  id={'providerInputPopoverId'}
-                  fullWidth
-                  input={selectInput}
-                  isOpen={isProviderPopoverOpen}
-                  closePopover={closeProviderPopover}
-                  className="rightArrowIcon"
-                >
-                  <SelectableProvider
-                    currentSolution={currentSolution}
-                    providers={updatedProviders ?? []}
-                    onClosePopover={closeProviderPopover}
-                    onProviderChange={onProviderChange}
-                    onSolutionFilterChange={toggleAndApplyFilter}
-                    solutionFilter={solutionFilter}
+              <EuiFormRow
+                id="providerSelectBox"
+                fullWidth
+                label={
+                  <FormattedMessage
+                    id="xpack.inferenceEndpointUICommon.components.serviceLabel"
+                    defaultMessage="Service"
                   />
-                </EuiInputPopover>
-              </>
-            </EuiFormRow>
+                }
+                isInvalid={isInvalid}
+                error={errorMessage}
+              >
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiInputPopover
+                    id={'providerInputPopoverId'}
+                    fullWidth
+                    input={selectInput}
+                    isOpen={isProviderPopoverOpen}
+                    closePopover={closeProviderPopover}
+                    className="rightArrowIcon"
+                  >
+                    <SelectableProvider
+                      currentSolution={currentSolution}
+                      providers={updatedProviders ?? []}
+                      onClosePopover={closeProviderPopover}
+                      onProviderChange={onProviderChange}
+                      onSolutionFilterChange={toggleAndApplyFilter}
+                      solutionFilter={solutionFilter}
+                    />
+                  </EuiInputPopover>
+                </>
+              </EuiFormRow>
+            </EisCloudConnectPromoTour>
           );
         }}
       </UseField>
