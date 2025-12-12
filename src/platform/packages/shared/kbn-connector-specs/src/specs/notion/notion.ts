@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../connector_spec';
+import type { ConnectorSpec } from '../../connector_spec';
 
 export const NotionConnector: ConnectorSpec = {
   metadata: {

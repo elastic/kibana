@@ -20,13 +20,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const AbuseIPDBConnector: ConnectorSpec = {
   metadata: {
     id: '.abuseipdb',
     displayName: 'AbuseIPDB',
-    description: 'IP reputation checking and abuse reporting',
+    description: i18n.translate('connectorSpecs.abuseipdb.metadata.description', {
+      defaultMessage: 'IP reputation checking and abuse reporting',
+    }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows'],
   },
@@ -171,6 +174,8 @@ export const AbuseIPDBConnector: ConnectorSpec = {
         };
       }
     },
-    description: 'Verifies AbuseIPDB API key',
+    description: i18n.translate('connectorSpecs.abuseipdb.test.description', {
+      defaultMessage: 'Verifies AbuseIPDB API key',
+    }),
   },
 };

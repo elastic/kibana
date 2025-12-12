@@ -4,7 +4,7 @@ A TypeScript-based specification framework for defining Kibana connectors using 
 
 ## Overview
 
-The `@kbn/connector-specs` package provides a simplified, declarative way to define connectors for Kibana's Stack Connectors system. Instead of manually registering connectors across multiple files, you define a connector spec in `src/specs/<connector>/index.ts`, and it will be automatically picked up and registered once exported from `src/all_specs.ts`.
+The `@kbn/connector-specs` package provides a simplified, declarative way to define connectors for Kibana's Stack Connectors system. Instead of manually registering connectors across multiple files, you define a connector spec in `src/specs/<connector>/<connector>.ts`, and it will be automatically picked up and registered once exported from `src/all_specs.ts`.
 
 ### Key Features
 
@@ -24,7 +24,7 @@ node scripts/generate connector my_connector --id ".myConnector" --owner "@elast
 ```
 
 This will:
-- Create `src/specs/my_connector/index.ts` (spec scaffold)
+- Create `src/specs/my_connector/my_connector.ts` (spec scaffold)
 - Create `src/specs/my_connector/icon/index.tsx` (placeholder icon component)
 - Update `src/all_specs.ts`
 - Update `src/connector_icons_map.ts`
@@ -40,10 +40,10 @@ This will:
 
 This package still follows a **1.5 files approach** for defining connectors:
 
-1. **1 folder**: Create a connector folder (e.g., `src/specs/my_connector/`) containing `index.ts`
+1. **1 folder**: Create a connector folder (e.g., `src/specs/my_connector/`) containing `my_connector.ts`
 2. **0.5 file**: Add a single export line to `src/all_specs.ts`:
    ```typescript
-   export * from './specs/my_connector';
+   export * from './specs/my_connector/my_connector';
    ```
 
 That's it! Once exported from `all_specs.ts`, the connector spec is automatically discovered and registered to the actions registry during plugin initialization.
@@ -61,10 +61,10 @@ The `createConnectorTypeFromSpec()` function converts the `SingleFileConnectorDe
 
 ### Creating a New Connector
 
-1. **Create the spec file** in `src/specs/<connector>/index.ts`:
+1. **Create the spec file** in `src/specs/<connector>/<connector>.ts`:
 
 ```typescript
-// src/specs/my_connector/index.ts
+// src/specs/my_connector/my_connector.ts
 import { z } from '@kbn/zod';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -116,7 +116,7 @@ export const MyConnector: ConnectorSpec = {
 
 ```typescript
 // src/all_specs.ts
-export * from './specs/my_connector';
+export * from './specs/my_connector/my_connector';
 ```
 
 3. **Done!** The connector will automatically appear in the Kibana UI.
@@ -510,7 +510,7 @@ import type {
 
 When adding a new connector:
 
-1. Create the connector folder in `src/specs/<connector>/` with `index.ts`
+1. Create the connector folder in `src/specs/<connector>/` with `<connector>.ts`
 2. Export it from `src/all_specs.ts`
 3. (Optional) Add an icon:
    - For simple cases: Use a built-in EUI icon by setting `metadata.icon` to an EUI icon name (e.g., `'globe'`, `'addDataApp'`)
@@ -518,6 +518,8 @@ When adding a new connector:
 4. Follow the existing patterns for consistency
 5. Include proper TypeScript types
 6. Add appropriate UI metadata for better UX
+7. Consider adding a test file (`src/specs/{connector}.test.ts`) to validate your action handlers. See existing connector tests for examples.
+8. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files!
 
 ### Adding a Lazy Icon
 
