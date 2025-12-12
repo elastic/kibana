@@ -19,6 +19,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PanelText } from '../../../../common/components/panel_text';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
@@ -32,6 +33,7 @@ import { useMissingResources } from './steps/hooks/use_missing_resources';
 import type { MigrationStepProps, Step } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
+import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -42,11 +44,7 @@ export interface MigrationDataInputFlyoutProps {
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
 
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({
-    onClose,
-    migrationStats: initialMigrationSats,
-    migrationSource: initialMigrationSource = MigrationSource.SPLUNK,
-  }) => {
+  ({ onClose, migrationStats: initialMigrationStats }) => {
     const modalTitleId = useGeneratedHtmlId({
       prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
@@ -57,10 +55,10 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       migrationSourceDisabled,
       setMigrationSourceDisabled,
       migrationSourceOptions,
-    } = useMigrationSourceStep(initialMigrationSource);
+    } = useMigrationSourceStep(initialMigrationStats?.vendor ?? MigrationSource.SPLUNK);
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
-      initialMigrationSats
+      initialMigrationStats
     );
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
@@ -133,7 +131,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 <MigrationSourceDropdown
                   migrationSource={migrationSource}
                   setMigrationSource={setMigrationSource}
-                  disabled={migrationSourceDisabled}
+                  disabled={!!migrationStats?.id || migrationSourceDisabled}
                   migrationSourceOptions={migrationSourceOptions}
                 />
               </EuiFlexItem>
@@ -152,6 +150,11 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                   </EuiFlexItem>
                 ))}
               </>
+              <EuiFlexItem>
+                <PanelText size="xs" subdued cursive>
+                  <p>{getCopyrightNoticeByVendor(migrationSource)}</p>
+                </PanelText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
