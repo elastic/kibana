@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import type { BaseParams } from '@kbn/reporting-common/types';
+import { columns } from '@kbn/data-plugin/public/search/session/sessions_mgmt/components/table';
 
 const sanitizeString = (input: string) => {
   if (typeof input !== 'string') {
@@ -91,15 +92,16 @@ const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObject
 
 const jobParamsSchema = z
   .object({
-    browserTimezone: timezoneSchema,
-    objectType: objectTypeSchema,
-    title: titleSchema,
-    version: versionSchema,
+    browserTimezone: timezoneSchema.optional(),
+    objectType: objectTypeSchema.optional(),
+    title: titleSchema.optional(),
+    version: versionSchema.optional(),
     layout: layoutSchema.optional(),
     forceNow: forceNowSchema.optional(),
     pagingStrategy: pagingStrategySchema.optional(), // for CSV reports
     locatorParams: locatorParamsSchema.nullable().optional(), // this is for CSV v2 compatibility
     searchSource: z.object({}).optional(), // this is for CSV v1 compatibility
+    columns: z.array(z.string()).optional(), // this is for CSV v1 compatibility
   })
   .strict();
 
