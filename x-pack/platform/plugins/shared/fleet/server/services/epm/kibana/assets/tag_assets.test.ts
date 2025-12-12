@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import { tagKibanaAssets } from './tag_assets';
 
 describe('tagKibanaAssets', () => {
@@ -839,9 +841,6 @@ describe('tagKibanaAssets', () => {
   });
 
   describe('tag creation retry on conflict', () => {
-    // Import SavedObjectsErrorHelpers for creating proper conflict errors
-    const { SavedObjectsErrorHelpers } = jest.requireActual('@kbn/core/server');
-
     it('should retry tag creation on conflict error and succeed', async () => {
       savedObjectTagClient.get.mockImplementation(async (id: string) => {
         // Managed and package tags exist
