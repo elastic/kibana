@@ -280,8 +280,8 @@ describe('AssistantSettingsContextMenu', () => {
     });
   });
 
-  describe('hasAgentBuilderPrivilege', () => {
-    it('enables try-ai-agent button when hasAgentBuilderPrivilege is true', async () => {
+  describe('hasAgentBuilderManagePrivilege', () => {
+    it('enables try-ai-agent button when hasAgentBuilderManagePrivilege is true', async () => {
       render(
         <TestProviders>
           <AssistantSettingsContextMenu {...props} />
@@ -293,12 +293,12 @@ describe('AssistantSettingsContextMenu', () => {
       expect(tryAiAgentButton).not.toBeDisabled();
     });
 
-    it('disables try-ai-agent button when hasAgentBuilderPrivilege is false', async () => {
+    it('disables try-ai-agent button when hasAgentBuilderManagePrivilege is false', async () => {
       render(
         <TestProviders
           assistantAvailability={{
             ...mockAssistantAvailability,
-            hasAgentBuilderPrivilege: false,
+            hasAgentBuilderManagePrivilege: false,
           }}
         >
           <AssistantSettingsContextMenu {...props} />
