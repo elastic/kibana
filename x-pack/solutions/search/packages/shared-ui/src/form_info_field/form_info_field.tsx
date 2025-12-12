@@ -124,9 +124,15 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
                       ? `${copyValueDataTestSubj}-copied`
                       : copyValueDataTestSubj
                   }
-                  aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
-                    defaultMessage: 'Copy to clipboard',
-                  })}
+                  aria-label={
+                    isCopied
+                      ? i18n.translate('xpack.searchSharedUI.formInfoField.copiedAriaLabel', {
+                          defaultMessage: 'Copied',
+                        })
+                      : i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
+                          defaultMessage: 'Copy to clipboard',
+                        })
+                  }
                 />
               )}
             </EuiCopy>
