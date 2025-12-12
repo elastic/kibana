@@ -12,6 +12,7 @@ import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/con
 import type { ListToolsResponse } from '@kbn/mcp-client';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isMcpTool, type McpToolDefinition } from '@kbn/onechat-common/tools';
+import { ToolType, validateToolId } from '@kbn/onechat-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -32,6 +33,8 @@ import type {
   ListMcpToolsHealthResponse,
   McpToolHealthState,
   McpToolHealthStatus,
+  BulkCreateMcpToolsResponse,
+  BulkCreateMcpToolResult,
 } from '../../../common/http_api/tools';
 import { validateConnector } from '../../services/tools/tool_types/mcp/validate_configuration';
 import { apiPrivileges } from '../../../common/features';
