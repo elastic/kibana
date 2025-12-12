@@ -89,6 +89,7 @@ export class DeployPrivateLocationMonitors {
         await this.updateMonitorsForMw({
           ...commonProps,
           mwId,
+          isMissingMw: true,
         });
       }
     });
