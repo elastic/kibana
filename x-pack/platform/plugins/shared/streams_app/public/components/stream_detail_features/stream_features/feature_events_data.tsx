@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FeatureWithFilter, Streams } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
@@ -46,13 +46,15 @@ export const FeatureEventsData = ({
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems='center'>
         <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
-              defaultMessage: 'Identified feature events',
-            })}
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h3>
+                {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
+              defaultMessage: 'Detected feature events',
+              })}
+            </h3>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {discoverLink ? (
