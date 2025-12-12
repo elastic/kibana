@@ -90,7 +90,6 @@ export function DraggableDimensionButton({
     indexPatterns,
   }) || { dropTypes: [], nextLabel: '' };
 
-  console.log({ dropTypes, nextLabel });
   const canDuplicate = !!(
     dropTypes.includes('replace_duplicate_incompatible') ||
     dropTypes.includes('replace_duplicate_compatible')
