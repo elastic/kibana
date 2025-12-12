@@ -324,7 +324,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
-          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (e.g., {example}). Result is written to the target field."
+          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (for example, {example}). The result is written to the target field."
           values={{
             example: (
               <>
