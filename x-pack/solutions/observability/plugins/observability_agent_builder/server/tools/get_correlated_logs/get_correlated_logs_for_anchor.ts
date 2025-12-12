@@ -34,8 +34,7 @@ export async function getCorrelatedLogsForAnchor({
   );
 
   const res = await search<ErrorLogDoc, any>({
-    _source: false,
-    fields,
+    _source: fields,
     track_total_hits: false,
     index: logsIndices,
     size: 100,

@@ -77,7 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'payment-service' },
+            termsFilter: { 'service.name': 'payment-service' },
           },
         });
 
@@ -92,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'payment-service' },
+            termsFilter: { 'service.name': 'payment-service' },
           },
         });
 
@@ -114,7 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'non-existing-service' },
+            termsFilter: { 'service.name': 'non-existing-service' },
           },
         });
 
@@ -148,7 +148,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'checkout-service' },
+            termsFilter: { 'service.name': 'checkout-service' },
           },
         });
 
@@ -162,7 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'checkout-service' },
+            termsFilter: { 'service.name': 'checkout-service' },
           },
         });
 
@@ -217,7 +217,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'multi-service' },
+            termsFilter: { 'service.name': 'multi-service' },
           },
         });
 
@@ -231,7 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'multi-service' },
+            termsFilter: { 'service.name': 'multi-service' },
           },
         });
 
@@ -279,7 +279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'no-correlation-service' },
+            termsFilter: { 'service.name': 'no-correlation-service' },
           },
         });
 
@@ -317,7 +317,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'service-a' },
+            termsFilter: { 'service.name': 'service-a' },
           },
         });
 
@@ -392,7 +392,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              terms: { 'service.name': service },
+              termsFilter: { 'service.name': service },
             },
           });
 
@@ -428,7 +428,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            terms: { 'service.name': 'priority-service' },
+            termsFilter: { 'service.name': 'priority-service' },
           },
         });
 
@@ -487,7 +487,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              terms: { 'service.name': service },
+              termsFilter: { 'service.name': service },
             },
           });
 
@@ -618,7 +618,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              terms: { 'service.name': service },
+              termsFilter: { 'service.name': service },
             },
           });
 
