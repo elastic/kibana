@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -15,7 +15,6 @@ import { css } from '@emotion/react';
 import type { Dimension, MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
-import { ValuesSelector } from '../values_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
@@ -34,20 +33,10 @@ export const useToolbarActions = ({
   hideRightSideActions = false,
   isLoading = false,
 }: UseToolbarActionsProps) => {
-  const {
-    selectedDimensions,
-    selectedDimensionValues,
-    onDimensionsChange,
-    onDimensionValuesChange,
-    isFullscreen,
-    onToggleFullscreen,
-  } = useMetricsExperienceState();
+  const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
+    useMetricsExperienceState();
 
   const { euiTheme } = useEuiTheme();
-
-  const onClearValues = useCallback(() => {
-    onDimensionValuesChange([]);
-  }, [onDimensionValuesChange]);
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
@@ -69,27 +58,13 @@ export const useToolbarActions = ({
           isLoading={isLoading}
         />
       ),
-      selectedDimensions.length > 0 ? (
-        <ValuesSelector
-          selectedDimensions={selectedDimensions}
-          selectedValues={selectedDimensionValues}
-          onChange={onDimensionValuesChange}
-          disabled={selectedDimensions.length === 0}
-          onClear={onClearValues}
-          fullWidth={isSmallScreen}
-          isLoading={isLoading}
-        />
-      ) : null,
     ],
     [
       isSmallScreen,
       selectedDimensions,
       allMetricFields,
       dimensions,
-      onClearValues,
       onDimensionsChange,
-      onDimensionValuesChange,
-      selectedDimensionValues,
       hideDimensionsSelector,
       isLoading,
     ]

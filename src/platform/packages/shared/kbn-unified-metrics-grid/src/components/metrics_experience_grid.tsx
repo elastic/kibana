@@ -10,10 +10,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import {
-  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
-  METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
-} from '../common/constants';
+import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../common/constants';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { EmptyState } from './empty_state/empty_state';
@@ -36,14 +33,8 @@ export const MetricsExperienceGrid = ({
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
 }: UnifiedMetricsGridProps) => {
-  const {
-    searchTerm,
-    isFullscreen,
-    selectedDimensionValues,
-    dimensionFilters,
-    onSearchTermChange,
-    onToggleFullscreen,
-  } = useMetricsExperienceState();
+  const { searchTerm, isFullscreen, onSearchTermChange, onToggleFullscreen } =
+    useMetricsExperienceState();
 
   const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
 
@@ -86,7 +77,7 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (allMetricFields.length === 0 && selectedDimensionValues.length === 0) {
+  if (allMetricFields.length === 0) {
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
@@ -118,7 +109,6 @@ export const MetricsExperienceGrid = ({
       <MetricsExperienceGridContent
         fields={visibleMetricFields}
         services={services}
-        filters={dimensionFilters}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}
@@ -138,12 +128,9 @@ const areSelectorPortalsOpen = () => {
     const hasBreakdownSelector = portal.querySelector(
       `[data-test-subj*=${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}]`
     );
-    const hasValuesSelector = portal.querySelector(
-      `[data-test-subj*=${METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}]`
-    );
     const hasSelectableList = portal.querySelector('[data-test-subj*="Selectable"]');
 
-    if (hasBreakdownSelector || hasValuesSelector || hasSelectableList) {
+    if (hasBreakdownSelector || hasSelectableList) {
       // Check if the portal is visible and has focusable content
       const style = window.getComputedStyle(portal);
       if (style.display !== 'none' && style.visibility !== 'hidden') {

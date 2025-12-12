@@ -19,7 +19,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { DimensionValueFilters, MetricField } from '../types';
+import type { MetricField } from '../types';
 import { PAGE_SIZE } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
@@ -35,13 +35,11 @@ export interface MetricsExperienceGridContentProps
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
-  filters?: DimensionValueFilters;
   isDiscoverLoading?: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
   fields,
-  filters,
   services,
   discoverFetch$,
   fetchParams,
@@ -137,7 +135,6 @@ export const MetricsExperienceGridContent = ({
         <MetricsGrid
           columns={columns}
           dimensions={selectedDimensions}
-          filters={filters}
           services={services}
           fields={currentPageFields}
           onBrushEnd={onBrushEnd}
