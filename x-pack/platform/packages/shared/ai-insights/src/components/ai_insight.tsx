@@ -26,7 +26,7 @@ export interface AiInsightProps {
   description?: string;
   content?: string;
   onStartConversation?: () => void;
-  onOpen?: () => void;
+  onOpen: () => void;
   startButtonLabel?: string;
   isLoading?: boolean;
   error?: string;
@@ -83,7 +83,7 @@ export function AiInsight({
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={(open) => {
           setIsOpen(open);
-          if (open && onOpen && !error && !content && !isLoading) {
+          if (open && !error && !content && !isLoading) {
             onOpen();
           }
         }}
