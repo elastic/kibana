@@ -197,7 +197,7 @@ export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
           },
           toolTipContent: canCreateTimeSlider
             ? undefined
-            : i18n.translate('controls.timeSlider.disabledTooltip', {
+            : i18n.translate('dashboard.timeSlider.disabledTooltip', {
                 defaultMessage: 'Only one time slider control can be added per dashboard.',
               }),
         },
