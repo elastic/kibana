@@ -96,7 +96,7 @@ export class ConsoleUIPlugin
             application,
             ...startServices
           } = core;
-          const { data, licensing } = deps;
+          const { data, licensing, share: shareStart } = deps;
 
           const { renderApp } = await import('./application');
 
@@ -108,6 +108,7 @@ export class ConsoleUIPlugin
             application,
             data,
             licensing,
+            share: shareStart,
             notifications,
             usageCollection,
             element,
