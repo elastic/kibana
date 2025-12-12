@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -22,6 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInServerlessMKI Review installation using mocked prebuilt rule assets', () => {
     beforeEach(async () => {
       await deleteAllPrebuiltRuleAssets(es, log);
+      await deleteAllRules(supertest, log);
     });
 
     describe('Pagination', () => {
