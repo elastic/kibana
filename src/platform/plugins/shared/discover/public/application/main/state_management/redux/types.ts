@@ -20,6 +20,7 @@ import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
@@ -36,7 +37,19 @@ export interface TabStateGlobalState {
   filters?: Filter[];
 }
 
+export enum TabInitializationStatus {
+  NotStarted = 'NotStarted',
+  InProgress = 'InProgress',
+  Complete = 'Complete',
+  NoData = 'NoData',
+  Error = 'Error',
+}
+
 export interface TabState extends TabItem {
+  initializationState:
+    | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
+    | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
