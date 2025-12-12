@@ -52,7 +52,8 @@ export const reviewRuleInstallationHandler = async (
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    // TODO: Optimize if to a single call if there's no filter
+    const hasFilter = Boolean(filter && Object.keys(filter).length);
+
     const installableVersions = await getInstallableRuleVersions(
       ruleAssetsClient,
       mlAuthz,
@@ -60,11 +61,10 @@ export const reviewRuleInstallationHandler = async (
       sort,
       filter
     );
-    const installableVersionsWithoutFilter = await getInstallableRuleVersions(
-      ruleAssetsClient,
-      mlAuthz,
-      currentRuleVersionsMap
-    );
+
+    const installableVersionsWithoutFilter = hasFilter
+      ? await getInstallableRuleVersions(ruleAssetsClient, mlAuthz, currentRuleVersionsMap)
+      : installableVersions;
 
     const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
 
